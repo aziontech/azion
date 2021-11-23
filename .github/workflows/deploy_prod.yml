@@ -1,10 +1,10 @@
-name: Deploy to Stage
+name: Deploy to Production
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - dev
+      - master
 
 jobs:
   build:
@@ -27,9 +27,8 @@ jobs:
         id: tag_ver
         uses: anothrNick/github-tag-action@master
         env:
-          RELEASE_BRANCHES: main
+          RELEASE_BRANCHES: master
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PRERELEASE_SUFFIX: dev
 
       - name: Refresh git
         run: git fetch --tags

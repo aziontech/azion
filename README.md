@@ -2,8 +2,9 @@
 
 ## Azion-CLI - How to Use
 
-Build project
-
 ```
+#build project
+$ make build
+#then run the binary with the flag --version
 $ azion --version
 ```
