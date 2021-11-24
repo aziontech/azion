@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: self-hosted
     container:
-      image: azionedge/centos-go
+      image: golang:1.17
     env:
       CGO_ENABLED: 0 # Statically linked
 

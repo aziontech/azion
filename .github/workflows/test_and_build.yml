@@ -26,6 +26,9 @@ jobs:
       - name: Build
         run: make build
 
+      - name: Cross-build
+        run: make cross-build
+
       - name: Linter
         run: make lint
 
