@@ -14,6 +14,9 @@ BUILD_DEBUG_VERSION ?= false
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 LDFLAGS=-X github.com/aziontech/azion-cli/cmd.BinVersion=$(BIN_VERSION)
+LDFLAGS_STRIP=-s -w
+NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
+
 
 .PHONY : deps
 deps: ## verify projects dependencies
