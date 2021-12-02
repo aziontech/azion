@@ -5,3 +5,7 @@
 #Directories
 bin/
 dist/
+.vscode/
+
+#Files
+.DS_Store
