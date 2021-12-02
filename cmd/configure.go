@@ -16,33 +16,41 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"errors"
+	"net/http"
+	"time"
 
-	"github.com/aziontech/azion-cli/mocks/configure"
 	"github.com/aziontech/azion-cli/token"
 	"github.com/spf13/cobra"
 )
 
 var stoken string
 
-var ttoken token.Token
+var t token.Token
 
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure parameters and credentials",
 	Long:  `This command configures cli parameters and credentials used for connecting to our services.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		ttoken = token.NewToken()
-		ttoken.Client = configure.MockClient{}
-		if stoken != "" {
-			if ttoken.Validation(stoken) {
-				token.Save(stoken)
-			}
-		} else {
-			fmt.Println("Token not provided, loading the saved")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		c := &http.Client{Timeout: 10 * time.Second}
+		t := token.NewToken(c)
+
+		if stoken == "" {
+			return errors.New("Token not provided, loading the saved")
 		}
 
+		valid, err := t.Validate(stoken)
+		if err != nil {
+			return err
+		}
+
+		if !valid {
+			return errors.New("Invalid token")
+		}
+
+		return nil
 	},
 }
 

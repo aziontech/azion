@@ -2,53 +2,94 @@ package token
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
-
-	"github.com/go-resty/resty/v2"
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type Token struct {
-	Client *resty.Client
+	client HTTPClient
+	token  string
+	valid  bool
 }
 
-func NewToken() Token {
-	return Token{resty.New()}
+type tokenResponse struct {
+	Valid bool `json:"valid"`
 }
 
-func (t Token) Validation(token string) bool {
-	client := resty.New()
+func NewToken(c HTTPClient) *Token {
+	return &Token{c, "", false}
+}
 
-	client.SetHeaders(map[string]string{
-		"Content-Type": "application/json",
-		"User-Agent":   "Azion Orchestrator",
-	})
+func (t *Token) Validate(token string) (bool, error) {
+	// client := resty.New()
 
-	resp, err := client.R().
-		SetQueryString("token="+token).
-		SetHeader("Accept", "application/json").
-		Get("http://localhost/apitoken")
+	// client.SetHeaders(map[string]string{
+	// 	"Content-Type": "application/json",
+	// 	"User-Agent":   "Azion Orchestrator",
+	// })
 
+	req, err := http.NewRequest("GET", "api.azion.net", nil)
 	if err != nil {
-		return false
+		return false, err
 	}
+	q := req.URL.Query()
+	q.Add("token", token)
+	req.URL.RawQuery = q.Encode()
+	req.Header.Add("Accept", "application/json")
+
+	resp, err := t.client.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	res := &tokenResponse{}
+	json.Unmarshal(body, res)
+
+	if !res.Valid {
+		return false, nil
+	}
+
+	t.token = token
+	t.valid = true
+
+	return true, nil
+	// resp, err := client.R().
+	// 	SetQueryString("token="+token).
+	// 	SetHeader("Accept", "application/json").
+	// 	Get("http://localhost/apitoken")
+
+	// if err != nil {
+	// 	return false
+	// }
 	// fmt.Println("  Error      :", err)
 	// fmt.Println("  Status Code:", resp.StatusCode())
 	// fmt.Println("  Body       :\n", resp)
 	// fmt.Println()
 
-	if resp.StatusCode() == 200 {
-		fmt.Println("Token valid")
-		return true
-	}
+	// if resp.StatusCode() == 200 {
+	// 	fmt.Println("Token valid")
+	// 	return true
+	// }
 
-	fmt.Println("Token invalid")
-	return false
+	// fmt.Println("Token invalid")
+	// return false
 }
 
-func Save(token string) {
-	fbyte := []byte(token + "\n")
+func (t *Token) Save() {
+	fbyte := []byte(t.token + "\n")
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
