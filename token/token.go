@@ -29,8 +29,7 @@ func NewToken(c HTTPClient) *Token {
 }
 
 func (t *Token) Validate(token *string) (bool, error) {
-	//req, err := http.NewRequest("GET", "api.azion.net", nil)
-	req, err := http.NewRequest("GET", "http://192.168.15.13/api.php", nil)
+	req, err := http.NewRequest("GET", "api.azion.net", nil)
 	if err != nil {
 		return false, err
 	}
