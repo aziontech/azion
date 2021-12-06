@@ -36,7 +36,7 @@ var configureCmd = &cobra.Command{
 		t := token.NewToken(c)
 
 		if ctoken == "" {
-			return errors.New("token not provided, loading the saved")
+			return errors.New("token not provided, loading the saved one")
 		}
 
 		valid, err := t.Validate(&ctoken)
