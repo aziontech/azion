@@ -24,45 +24,7 @@ func (m MockClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func Test_Save(t *testing.T) {
-	t.Run("save token to disk", func(t *testing.T) {
-		client := &MockClient{}
-		token := NewToken(client)
-		token.token = "TeStE"
-		if token.Save() != nil {
-			t.Fatalf("token saved " + token.token)
-		}
-
-	})
-}
-
-func Test_ReadFromDisk(t *testing.T) {
-	t.Run("read token from disk", func(t *testing.T) {
-		client := &MockClient{}
-		token := NewToken(client)
-		token.token = "TeStE"
-		dToken, _ := token.ReadFromDisk()
-		if dToken != token.token {
-			t.Fatalf("token from disk differs from test: " + token.token)
-		}
-
-	})
-}
-
 func Test_Validate(t *testing.T) {
-	t.Run("valid token", func(t *testing.T) {
-		client := &MockClient{}
-
-		token := NewToken(client)
-
-		tokenString := "rightToken"
-		valid, _ := token.Validate(&tokenString)
-
-		if !valid {
-			t.Fatalf("token is not valid; expected to be valid")
-		}
-	})
-
 	t.Run("invalid token", func(t *testing.T) {
 		client := &MockClient{}
 
@@ -72,8 +34,46 @@ func Test_Validate(t *testing.T) {
 		valid, _ := token.Validate(&tokenString)
 
 		if valid {
-			t.Fatalf("token is valid; expected to be invalid")
+			t.Errorf("token is valid; expected to be invalid")
 		}
 	})
 
+	t.Run("valid token", func(t *testing.T) {
+		client := &MockClient{}
+
+		token := NewToken(client)
+
+		tokenString := "rightToken"
+		valid, _ := token.Validate(&tokenString)
+
+		if !valid {
+			t.Errorf("token is not valid; expected to be valid")
+		}
+	})
+
+}
+
+func Test_Save(t *testing.T) {
+	t.Run("save token to disk", func(t *testing.T) {
+		client := &MockClient{}
+		token := NewToken(client)
+		token.token = "TeSt"
+		if token.Save() != nil {
+			t.Errorf("token saved " + token.token)
+		}
+
+	})
+}
+
+func Test_ReadFromDisk(t *testing.T) {
+	t.Run("read token from disk", func(t *testing.T) {
+		client := &MockClient{}
+		token := NewToken(client)
+		token.token = "TeSt"
+		dToken, _ := token.ReadFromDisk()
+		if dToken != token.token {
+			t.Errorf("token from disk differs from test: " + token.token)
+		}
+
+	})
 }

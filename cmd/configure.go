@@ -26,8 +26,6 @@ import (
 
 var ctoken string
 
-//var t token.Token
-
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
 	Use:   "configure",
@@ -50,7 +48,10 @@ var configureCmd = &cobra.Command{
 			return errors.New("invalid token")
 		}
 
-		t.Save()
+		if t.Save() != nil {
+			return err
+		}
+
 		return nil
 	},
 }

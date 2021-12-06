@@ -52,5 +52,4 @@ func Execute() {
 
 func init() {
 	rootCmd.Flags().StringVarP(&rtoken, "token", "t", "", "Use provided token")
-
 }

@@ -29,7 +29,8 @@ func NewToken(c HTTPClient) *Token {
 }
 
 func (t *Token) Validate(token *string) (bool, error) {
-	req, err := http.NewRequest("GET", "api.azion.net", nil)
+	//req, err := http.NewRequest("GET", "api.azion.net", nil)
+	req, err := http.NewRequest("GET", "http://192.168.15.13/api.php", nil)
 	if err != nil {
 		return false, err
 	}
@@ -49,7 +50,10 @@ func (t *Token) Validate(token *string) (bool, error) {
 	}
 
 	res := &tokenResponse{}
-	json.Unmarshal(body, res)
+	err = json.Unmarshal(body, res)
+	if err != nil {
+		return false, err
+	}
 
 	if !res.Valid {
 		return false, nil
@@ -65,21 +69,18 @@ func (t *Token) Save() error {
 	fbyte := []byte(t.token + "\n")
 	dirname, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	dirname = dirname + "/.azion/"
 	err = os.MkdirAll(dirname, os.ModePerm)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 
 	dirname = dirname + "credentials"
 	err = os.WriteFile(dirname, fbyte, 0600)
 	if err != nil {
-		log.Fatal(err)
 		return err
 	}
 	fmt.Println("Token saved in " + dirname)
@@ -89,14 +90,12 @@ func (t *Token) Save() error {
 func (t *Token) ReadFromDisk() (string, error) {
 	dirname, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
 		return "", err
 	}
 
 	dirname = dirname + "/.azion/credentials"
 	file, err := os.Open(dirname)
 	if err != nil {
-		//log.Fatal(err)
 		return "", err
 	}
 	defer file.Close()
