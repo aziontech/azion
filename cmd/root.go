@@ -1,10 +1,16 @@
 package cmd
 
 import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/aziontech/azion-cli/token"
 	"github.com/spf13/cobra"
 )
 
 var BinVersion = "development"
+var rtoken string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -15,6 +21,27 @@ var rootCmd = &cobra.Command{
 		DisableDefaultCmd: true,
 	},
 	Version: BinVersion,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if rtoken == "" {
+			rtoken = tokenLoadFromConf()
+			fmt.Println("Using saved token: " + rtoken)
+		} else {
+			fmt.Println("Using command line token: " + rtoken)
+		}
+		return nil
+	},
+}
+
+func tokenLoadFromConf() string {
+	c := &http.Client{Timeout: 10 * time.Second}
+	t := token.NewToken(c)
+	dToken, _ := t.ReadFromDisk()
+	isTokenValid, _ := t.Validate(&dToken)
+	if isTokenValid {
+		return dToken
+	}
+
+	return ""
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -24,5 +51,6 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.Flags().StringVarP(&rtoken, "token", "t", "", "Use provided token")
 
 }

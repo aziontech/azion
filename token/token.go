@@ -28,20 +28,14 @@ func NewToken(c HTTPClient) *Token {
 	return &Token{c, "", false}
 }
 
-func (t *Token) Validate(token string) (bool, error) {
-	// client := resty.New()
-
-	// client.SetHeaders(map[string]string{
-	// 	"Content-Type": "application/json",
-	// 	"User-Agent":   "Azion Orchestrator",
-	// })
-
-	req, err := http.NewRequest("GET", "api.azion.net", nil)
+func (t *Token) Validate(token *string) (bool, error) {
+	//req, err := http.NewRequest("GET", "api.azion.net", nil)
+	req, err := http.NewRequest("GET", "http://192.168.15.13/api.php", nil)
 	if err != nil {
 		return false, err
 	}
 	q := req.URL.Query()
-	q.Add("token", token)
+	q.Add("token", *token)
 	req.URL.RawQuery = q.Encode()
 	req.Header.Add("Accept", "application/json")
 
@@ -62,65 +56,49 @@ func (t *Token) Validate(token string) (bool, error) {
 		return false, nil
 	}
 
-	t.token = token
+	t.token = *token
 	t.valid = true
 
 	return true, nil
-	// resp, err := client.R().
-	// 	SetQueryString("token="+token).
-	// 	SetHeader("Accept", "application/json").
-	// 	Get("http://localhost/apitoken")
-
-	// if err != nil {
-	// 	return false
-	// }
-	// fmt.Println("  Error      :", err)
-	// fmt.Println("  Status Code:", resp.StatusCode())
-	// fmt.Println("  Body       :\n", resp)
-	// fmt.Println()
-
-	// if resp.StatusCode() == 200 {
-	// 	fmt.Println("Token valid")
-	// 	return true
-	// }
-
-	// fmt.Println("Token invalid")
-	// return false
 }
 
-func (t *Token) Save() {
+func (t *Token) Save() error {
 	fbyte := []byte(t.token + "\n")
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	dirname = dirname + "/.azion/"
 	err = os.MkdirAll(dirname, os.ModePerm)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
 	dirname = dirname + "credentials"
 	err = os.WriteFile(dirname, fbyte, 0600)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 	fmt.Println("Token saved in " + dirname)
+	return nil
 }
 
-func ReadDisk() string {
+func (t *Token) ReadFromDisk() (string, error) {
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
-		return ""
+		return "", err
 	}
 
 	dirname = dirname + "/.azion/credentials"
 	file, err := os.Open(dirname)
 	if err != nil {
-		log.Fatal(err)
-		return ""
+		//log.Fatal(err)
+		return "", err
 	}
 	defer file.Close()
 
@@ -129,8 +107,8 @@ func ReadDisk() string {
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
-		return ""
+		return "", err
 	}
 
-	return scanner.Text()
+	return scanner.Text(), nil
 }

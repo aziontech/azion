@@ -3,17 +3,12 @@ package token
 import (
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
 )
 
-func init() {
-	os.Setenv("SSO_MODE", "development")
-}
-
-const validToken = "certo"
+const validToken = "rightToken"
 
 type MockClient struct {
 }
@@ -29,13 +24,39 @@ func (m MockClient) Do(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
-func Test_Authenticate(t *testing.T) {
+func Test_Save(t *testing.T) {
+	t.Run("save token to disk", func(t *testing.T) {
+		client := &MockClient{}
+		token := NewToken(client)
+		token.token = "TeStE"
+		if token.Save() != nil {
+			t.Fatalf("token saved " + token.token)
+		}
+
+	})
+}
+
+func Test_ReadFromDisk(t *testing.T) {
+	t.Run("read token from disk", func(t *testing.T) {
+		client := &MockClient{}
+		token := NewToken(client)
+		token.token = "TeStE"
+		dToken, _ := token.ReadFromDisk()
+		if dToken != token.token {
+			t.Fatalf("token from disk differs from test: " + token.token)
+		}
+
+	})
+}
+
+func Test_Validate(t *testing.T) {
 	t.Run("valid token", func(t *testing.T) {
 		client := &MockClient{}
 
 		token := NewToken(client)
 
-		valid, _ := token.Validate("certo")
+		tokenString := "rightToken"
+		valid, _ := token.Validate(&tokenString)
 
 		if !valid {
 			t.Fatalf("token is not valid; expected to be valid")
@@ -47,10 +68,12 @@ func Test_Authenticate(t *testing.T) {
 
 		token := NewToken(client)
 
-		valid, _ := token.Validate("elevador")
+		tokenString := "thisIsNotTheValidToken"
+		valid, _ := token.Validate(&tokenString)
 
 		if valid {
 			t.Fatalf("token is valid; expected to be invalid")
 		}
 	})
+
 }

@@ -24,9 +24,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stoken string
+var ctoken string
 
-var t token.Token
+//var t token.Token
 
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
@@ -37,19 +37,20 @@ var configureCmd = &cobra.Command{
 		c := &http.Client{Timeout: 10 * time.Second}
 		t := token.NewToken(c)
 
-		if stoken == "" {
-			return errors.New("Token not provided, loading the saved")
+		if ctoken == "" {
+			return errors.New("token not provided, loading the saved")
 		}
 
-		valid, err := t.Validate(stoken)
+		valid, err := t.Validate(&ctoken)
 		if err != nil {
 			return err
 		}
 
 		if !valid {
-			return errors.New("Invalid token")
+			return errors.New("invalid token")
 		}
 
+		t.Save()
 		return nil
 	},
 }
@@ -57,5 +58,5 @@ var configureCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(configureCmd)
 
-	configureCmd.Flags().StringVarP(&stoken, "token", "t", "", "Validate token and save in $HOME_DIR/.azion/credentials")
+	configureCmd.Flags().StringVarP(&ctoken, "token", "t", "", "Validate token and save it in $HOME_DIR/.azion/credentials")
 }
