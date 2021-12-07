@@ -10,7 +10,7 @@ import (
 )
 
 var BinVersion = "development"
-var rtoken string
+var rootToken string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -22,11 +22,11 @@ var rootCmd = &cobra.Command{
 	},
 	Version: BinVersion,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if rtoken == "" {
-			rtoken = tokenLoadFromConf()
-			fmt.Println("Using saved token: " + rtoken)
+		if rootToken == "" {
+			rootToken = tokenLoadFromConf()
+			fmt.Println("Using saved token: " + rootToken)
 		} else {
-			fmt.Println("Using command line token: " + rtoken)
+			fmt.Println("Using command line token: " + rootToken)
 		}
 		return nil
 	},
@@ -35,13 +35,13 @@ var rootCmd = &cobra.Command{
 func tokenLoadFromConf() string {
 	c := &http.Client{Timeout: 10 * time.Second}
 	t := token.NewToken(c)
-	dToken, _ := t.ReadFromDisk()
-	isTokenValid, err := t.Validate(&dToken)
+	diskToken, _ := t.ReadFromDisk()
+	isTokenValid, err := t.Validate(&diskToken)
 	if err != nil {
 		return ""
 	}
 	if isTokenValid {
-		return dToken
+		return diskToken
 	}
 
 	return ""
@@ -52,5 +52,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&rtoken, "token", "t", "", "Use provided token")
+	rootCmd.Flags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
 }
