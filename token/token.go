@@ -75,8 +75,8 @@ func (t *Token) Save() error {
 		return err
 	}
 
-	dirname = dirname + "credentials"
-	err = os.WriteFile(dirname, fbyte, 0600)
+	filename := dirname + "credentials"
+	err = os.WriteFile(filename, fbyte, 0600)
 	if err != nil {
 		return err
 	}
