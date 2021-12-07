@@ -1,11 +1,9 @@
 package token
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 )
@@ -29,8 +27,7 @@ func NewToken(c HTTPClient) *Token {
 }
 
 func (t *Token) Validate(token *string) (bool, error) {
-	//req, err := http.NewRequest("GET", "api.azion.net", nil)
-	req, err := http.NewRequest("GET", "http://192.168.15.13/api.php", nil)
+	req, err := http.NewRequest("GET", "api.azion.net", nil)
 	if err != nil {
 		return false, err
 	}
@@ -66,7 +63,7 @@ func (t *Token) Validate(token *string) (bool, error) {
 }
 
 func (t *Token) Save() error {
-	fbyte := []byte(t.token + "\n")
+	fbyte := []byte(t.token)
 	dirname, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -83,6 +80,7 @@ func (t *Token) Save() error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Println("Token saved in " + dirname)
 	return nil
 }
@@ -93,20 +91,11 @@ func (t *Token) ReadFromDisk() (string, error) {
 		return "", err
 	}
 
-	dirname = dirname + "/.azion/credentials"
-	file, err := os.Open(dirname)
+	filename := dirname + "/.azion/credentials"
+	filedata, err := os.ReadFile(filename)
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-		return "", err
-	}
-
-	return scanner.Text(), nil
+	return string(filedata[:]), nil
 }

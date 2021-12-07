@@ -36,7 +36,10 @@ func tokenLoadFromConf() string {
 	c := &http.Client{Timeout: 10 * time.Second}
 	t := token.NewToken(c)
 	dToken, _ := t.ReadFromDisk()
-	isTokenValid, _ := t.Validate(&dToken)
+	isTokenValid, err := t.Validate(&dToken)
+	if err != nil {
+		return ""
+	}
 	if isTokenValid {
 		return dToken
 	}
