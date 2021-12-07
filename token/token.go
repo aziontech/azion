@@ -81,7 +81,7 @@ func (t *Token) Save() error {
 		return err
 	}
 
-	fmt.Println("Token saved in " + dirname)
+	fmt.Println("Token saved in " + filename)
 	return nil
 }
 
