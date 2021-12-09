@@ -1,7 +1,7 @@
 PATH := /usr/local/go/bin:$(PATH)
 SHELL := env PATH=$(PATH) /bin/bash
 GO := $(shell which go)
-NAME := azion
+NAME := azioncli
 
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
