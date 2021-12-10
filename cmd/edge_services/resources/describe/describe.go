@@ -3,7 +3,6 @@ package describe
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
@@ -24,13 +23,7 @@ func NewCmdDescribe() *cobra.Command {
 				return utils.ErrorMissingResourceIdArgument
 			}
 
-			service_id_arg := args[0]
-			resource_id_arg := args[1]
-			service_id, err := strconv.Atoi(service_id_arg)
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
-			}
-			resource_id, err := strconv.Atoi(resource_id_arg)
+			ids, err := utils.ConvertIdsToInt(args[0], args[1])
 			if err != nil {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
@@ -39,7 +32,7 @@ func NewCmdDescribe() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := describeResource(client, service_id, resource_id); err != nil {
+			if err := describeResource(client, ids[0], ids[1]); err != nil {
 				return err
 			}
 
@@ -51,11 +44,11 @@ func NewCmdDescribe() *cobra.Command {
 
 }
 
-func describeResource(client *sdk.APIClient, service_id int, resource_id int) error {
+func describeResource(client *sdk.APIClient, service_id int64, resource_id int64) error {
 	c := context.Background()
 	api := client.DefaultApi
 
-	resp, httpResp, err := api.GetResource(c, int64(service_id), int64(resource_id)).Execute()
+	resp, httpResp, err := api.GetResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError

@@ -3,7 +3,6 @@ package list
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
@@ -24,8 +23,7 @@ func NewCmdList() *cobra.Command {
 				return utils.ErrorMissingServiceIdArgument
 			}
 
-			service_id_arg := args[0]
-			service_id, err := strconv.Atoi(service_id_arg)
+			ids, err := utils.ConvertIdsToInt(args[0])
 			if err != nil {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
@@ -34,7 +32,7 @@ func NewCmdList() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := listAllResources(client, service_id); err != nil {
+			if err := listAllResources(client, ids[0]); err != nil {
 				return err
 			}
 			return nil
@@ -43,11 +41,11 @@ func NewCmdList() *cobra.Command {
 	return listCmd
 }
 
-func listAllResources(client *sdk.APIClient, service_id int) error {
+func listAllResources(client *sdk.APIClient, service_id int64) error {
 	c := context.Background()
 	api := client.DefaultApi
 
-	resp, httpResp, err := api.GetResources(c, int64(service_id)).Execute()
+	resp, httpResp, err := api.GetResources(c, service_id).Execute()
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError

@@ -12,18 +12,14 @@ func NewCmdResources() *cobra.Command {
 	// resourcesCmd represents the resources command
 	resourcesCmd := &cobra.Command{
 		Use:   "resources",
-		Short: "A brief description of your command",
-		Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+		Short: "Manages resources in a given edge-service",
+		Long:  `You may create, update, delete, list and describe resources in a given edge-service.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("resources called")
 		},
 	}
 	resourcesCmd.AddCommand(list.NewCmdList())
 	resourcesCmd.AddCommand(describe.NewCmdDescribe())
+	// resourcesCmd.AddCommand(delete.NewCmdDelete())
 	return resourcesCmd
 }
