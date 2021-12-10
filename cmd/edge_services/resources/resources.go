@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aziontech/azion-cli/cmd/edge_services/resources/describe"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/list"
 	"github.com/spf13/cobra"
 )
@@ -23,5 +24,6 @@ to quickly create a Cobra application.`,
 		},
 	}
 	resourcesCmd.AddCommand(list.NewCmdList())
+	resourcesCmd.AddCommand(describe.NewCmdDescribe())
 	return resourcesCmd
 }

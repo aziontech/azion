@@ -1,0 +1,74 @@
+package describe
+
+import (
+	"context"
+	"fmt"
+	"strconv"
+
+	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/edgeservices-go-sdk"
+	"github.com/spf13/cobra"
+)
+
+func NewCmdDescribe() *cobra.Command {
+
+	// describeCmd represents the describe command
+	describeCmd := &cobra.Command{
+		Use:           "describe",
+		Short:         "Describes a resource based on a given resource_id",
+		Long:          `Provides a long desription of a resource based on a given resource_id`,
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 2 {
+				return utils.ErrorMissingResourceIdArgument
+			}
+
+			service_id_arg := args[0]
+			resource_id_arg := args[1]
+			service_id, err := strconv.Atoi(service_id_arg)
+			if err != nil {
+				return utils.ErrorConvertingIdArgumentToInt
+			}
+			resource_id, err := strconv.Atoi(resource_id_arg)
+			if err != nil {
+				return utils.ErrorConvertingIdArgumentToInt
+			}
+
+			client, err := utils.CreateClient()
+			if err != nil {
+				return err
+			}
+			if err := describeResource(client, service_id, resource_id); err != nil {
+				return err
+			}
+
+			return nil
+
+		},
+	}
+	return describeCmd
+
+}
+
+func describeResource(client *sdk.APIClient, service_id int, resource_id int) error {
+	c := context.Background()
+	api := client.DefaultApi
+
+	resp, httpResp, err := api.GetResource(c, int64(service_id), int64(resource_id)).Execute()
+	if err != nil {
+		if httpResp.StatusCode >= 500 {
+			return utils.ErrorInternalServerError
+		}
+		return err
+	}
+
+	fmt.Printf("ID: %d\n", resp.Id)
+	fmt.Printf("Name: %s\n", resp.Name)
+	fmt.Printf("Type: %s\n", resp.Type)
+	fmt.Printf("Content type: %s\n", resp.ContentType)
+	fmt.Printf("Content: \n")
+	fmt.Printf("%s", resp.Content)
+
+	return nil
+}
