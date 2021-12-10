@@ -11,9 +11,17 @@ GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
 BUILD_DEBUG_VERSION ?= false
 
+#Env var 'AUTH_ENDPOINT' defines the authentication endpoint:
+#  	AUTH_ENDPOINT="http://localhost:8080"
+#  	AUTH_ENDPOINT="stage.azion.net"
+#  	AUTH_ENDPOINT="prod.azion.net"
+ifeq ($(strip $(AUTH_ENDPOINT)),)
+	AUTH_ENDPOINT ?= prod.azion.net
+endif
+
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
-LDFLAGS=-X github.com/aziontech/azion-cli/cmd.BinVersion=$(BIN_VERSION)
+LDFLAGS=-X github.com/aziontech/azion-cli/cmd.BinVersion=$(BIN_VERSION) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_ENDPOINT)
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 
