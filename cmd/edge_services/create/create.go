@@ -13,8 +13,8 @@ func NewCmdCreate() *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:   "create",
-		Short: "Creates a new edge-service",
-		Long: `Receives a name as parameter and creates a service with the given name
+		Short: "Creates a new edge service",
+		Long: `Receives a name as parameter and creates an edge service with the given name
 	Usage: azion_cli edge_services create <EDGE_SERVICE_NAME>`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -37,6 +37,8 @@ func NewCmdCreate() *cobra.Command {
 			return nil
 		},
 	}
+	listCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
+	listCmd.MarkFlagRequired("name")
 	return listCmd
 }
 
