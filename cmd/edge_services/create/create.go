@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdCreate() *cobra.Command {
+func NewCmd() *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:   "create",
@@ -39,6 +39,7 @@ func NewCmdCreate() *cobra.Command {
 	}
 	listCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
 	listCmd.MarkFlagRequired("name")
+
 	return listCmd
 }
 
@@ -53,6 +54,7 @@ func createNewService(client *sdk.APIClient, name string) error {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
+
 		return err
 	}
 

@@ -24,7 +24,7 @@ func NewCmdEdgeServices() *cobra.Command {
 	}
 
 	edgeServicesCmd.AddCommand(resources.NewCmdResources())
-	edgeServicesCmd.AddCommand(create.NewCmdCreate())
+	edgeServicesCmd.AddCommand(create.NewCmd())
 
 	return edgeServicesCmd
 }
