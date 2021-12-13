@@ -61,7 +61,7 @@ build-stage: ## build application code for staging environment
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
-.PHONY : build-prod
+.PHONY : build
 build-prod: ## build application code for production environment
 	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_PROD))
 	@ $(GO) version
