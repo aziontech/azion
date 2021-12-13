@@ -1,8 +1,7 @@
-package describe
+package delete
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
@@ -10,12 +9,11 @@ import (
 )
 
 func NewCmd() *cobra.Command {
-
-	// describeCmd represents the describe command
-	describeCmd := &cobra.Command{
-		Use:           "describe",
-		Short:         "Describes a resource based on a given resource_id",
-		Long:          `Provides a long desription of a resource based on a given resource_id`,
+	// deleteCmd represents the delete command
+	deleteCmd := &cobra.Command{
+		Use:           "delete",
+		Short:         "Deletes a resource based on a given resource_id",
+		Long:          `Deletes a resource when given a service_id and a resource_id.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,36 +30,29 @@ func NewCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := describeResource(client, ids[0], ids[1]); err != nil {
+
+			if err := deleteResource(client, ids[0], ids[1]); err != nil {
 				return err
 			}
 
 			return nil
-
 		},
 	}
-	return describeCmd
-
+	return deleteCmd
 }
 
-func describeResource(client *sdk.APIClient, service_id int64, resource_id int64) error {
+func deleteResource(client *sdk.APIClient, service_id int64, resource_id int64) error {
+
 	c := context.Background()
 	api := client.DefaultApi
 
-	resp, httpResp, err := api.GetResource(c, service_id, resource_id).Execute()
+	httpResp, err := api.DeleteResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		return err
 	}
-
-	fmt.Printf("ID: %d\n", resp.Id)
-	fmt.Printf("Name: %s\n", resp.Name)
-	fmt.Printf("Type: %s\n", resp.Type)
-	fmt.Printf("Content type: %s\n", resp.ContentType)
-	fmt.Printf("Content: \n")
-	fmt.Printf("%s", resp.Content)
 
 	return nil
 }

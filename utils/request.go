@@ -10,7 +10,7 @@ import (
 func CreateClient() (*sdk.APIClient, error) {
 
 	conf := sdk.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "token d64b71607c8bf3e897b7c45b0420b88dfde8420b")
+	conf.AddDefaultHeader("Authorization", "token 364d8f40562c20608c671760c447ab08aa91c62b")
 	conf.Servers = sdk.ServerConfigurations{
 		{
 			URL:         "https://stage-api.azion.net",

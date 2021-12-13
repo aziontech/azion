@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdList() *cobra.Command {
+func NewCmd() *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list",
