@@ -11,7 +11,7 @@ GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
 BUILD_DEBUG_VERSION ?= false
 
-# Variables for targets
+# Variables for token endpoints
 AUTH_LOCAL=http://localhost:8080/
 AUTH_STAGE=http://stage.azion.com/?token
 AUTH_PROD=http://api.azion.com/?token
