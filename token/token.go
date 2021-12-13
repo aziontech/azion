@@ -22,12 +22,16 @@ type tokenResponse struct {
 	Valid bool `json:"valid"`
 }
 
+var AUTH_ENDPOINT string
+
 func NewToken(c HTTPClient) *Token {
 	return &Token{c, "", false}
 }
 
 func (t *Token) Validate(token *string) (bool, error) {
-	req, err := http.NewRequest("GET", "api.azion.net", nil)
+	urlAuthentication := AUTH_ENDPOINT
+
+	req, err := http.NewRequest("GET", urlAuthentication, nil)
 	if err != nil {
 		return false, err
 	}

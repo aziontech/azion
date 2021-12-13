@@ -11,6 +11,11 @@ GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
 BUILD_DEBUG_VERSION ?= false
 
+# Variables for token endpoints
+AUTH_LOCAL=http://localhost:8080/
+AUTH_STAGE=http://stage.azion.com/?token
+AUTH_PROD=http://api.azion.com/?token
+
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 LDFLAGS=-X github.com/aziontech/azion-cli/cmd.BinVersion=$(BIN_VERSION)
@@ -44,8 +49,21 @@ get-gosec-deps:
 	@ cd $(GOPATH); \
 		$(GO) get -u github.com/securego/gosec/cmd/gosec
 		
+.PHONY : build-local
+build-local: ## build application code for local environment testing
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_LOCAL))
+	@ $(GO) version
+	 $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
+
+.PHONY : build-stage
+build-stage: ## build application code for staging environment
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_STAGE))
+	@ $(GO) version
+	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
+
 .PHONY : build
-build: ## build application code
+build-prod: ## build application code for production environment
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_PROD))
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 

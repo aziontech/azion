@@ -52,5 +52,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
+	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
 }
