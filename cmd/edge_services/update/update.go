@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
@@ -24,22 +25,12 @@ func NewCmd() *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			name, err := cmd.Flags().GetString("name")
-			if err != nil {
-				return err
-			}
-
-			active, err := cmd.Flags().GetBool("active")
-			if err != nil {
-				return err
-			}
-
 			client, err := utils.CreateClient()
 			if err != nil {
 				return err
 			}
 
-			if err := updateService(client, id[0], name, active); err != nil {
+			if err := updateService(client, id[0], cmd, args); err != nil {
 				return err
 			}
 
@@ -47,18 +38,39 @@ func NewCmd() *cobra.Command {
 		},
 	}
 	updateCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
-	updateCmd.Flags().BoolP("active", "a", false, "<true|false>")
+	updateCmd.Flags().StringP("active", "a", "", "<true|false>")
 
 	return updateCmd
 }
 
-func updateService(client *sdk.APIClient, id int64, name string, active bool) error {
+func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []string) error {
 	c := context.Background()
 	api := client.DefaultApi
+
 	serviceRequest := sdk.UpdateServiceRequest{}
-	serviceRequest.SetActive(active)
-	serviceRequest.SetName(name)
-	//serviceRequest.SetVariables(variables)
+
+	nameHasChanged := cmd.Flags().Changed("name")
+	if nameHasChanged {
+		name, err := cmd.Flags().GetString("name")
+		if err != nil {
+			return err
+		}
+		serviceRequest.SetName(name)
+	}
+
+	activeHasChanged := cmd.Flags().Changed("active")
+	if activeHasChanged {
+		activeStr, err := cmd.Flags().GetString("active")
+		if err != nil {
+			return err
+		}
+
+		active, err := strconv.ParseBool(activeStr)
+		if err != nil {
+			return utils.ErrorConvertingStringToBool
+		}
+		serviceRequest.SetActive(active)
+	}
 
 	resp, httpResp, err := api.PatchService(c, id).UpdateServiceRequest(serviceRequest).Execute()
 	if err != nil {
