@@ -18,9 +18,10 @@ usage() {
 	$program [-p port] [docroot]
 	$program -H
 	
-	-p port : specify listening port number; defaults to 8080
-	-H      : print this help and quit
-	docroot : specify document root directory; defaults to the current directory
+	-p port 	   : specify listening port number; defaults to 8080
+	-H      	   : print this help and quit
+	-r <http code> : specify the return code 
+	docroot 	   : specify document root directory; defaults to the current directory
 EOF
 }
 
@@ -47,6 +48,24 @@ get_content_type() {
 	esac
 }
 
+function returnCodeMessage() {
+	HTTPSTATUSFILE=http_status_codes.txt
+	if [[ ! -e $HTTPSTATUSFILE ]]; then
+		HTTPSTATUSFILE=tests/http_status_codes.txt
+	fi
+	if [[ ! -e $HTTPSTATUSFILE ]]; then
+		HTTPMSG="999 missing file http_status_codes.txt"
+		return
+	fi
+	HTTPCODE=$(grep $1 $HTTPSTATUSFILE)
+	if [[ $HTTPCODE == "" ]]; then
+		HTTPMSG="$HTTPCODE code absent"
+		return
+	fi
+
+	HTTPMSG=$HTTPCODE
+}
+
 respond() {
 	file="$1"
 	length=$(wc -c < $file)
@@ -65,14 +84,21 @@ respond() {
 		#dd if=$file of=$fifo1 2> /dev/null
 		;;
 	esac
-	echo -e "\n-------------------------------------"
-	echo "Sending file: $file"
-	echo "Content:"
-	cat $file
-	echo -e "\n-------------------------------------"
-	printf "HTTP/1.0 200 OK\r\n\n\n\n$(cat $file)\n" >> $fifo1
-	sleep 1; echo "end" > $fifo2
-	printf "Return code:200 Length:$length"
+	if [[ $cReturnCode == "" ]]; then
+		echo -e "\n-------------------------------------"
+		echo "Sending file: $file"
+		echo "Content:"
+		cat $file
+		echo -e "\n-------------------------------------"
+		printf "HTTP/1.0 200 OK\r\n\n\n\n$(cat $file)\n" >> $fifo1
+		sleep 1; echo "end" > $fifo2
+		printf "Return code:200 Length:$length"
+	else
+		returnCodeMessage "$cReturnCode"
+		printf "HTTP/1.0 $HTTPMSG\r\n\n\n\n$(cat $file)\n" >> $fifo1
+		sleep 1; echo "end" > $fifo2
+		printf "$HTTPMSG Length:$length"
+	fi
 }
 
 execute_get() {
@@ -88,7 +114,7 @@ execute_get() {
 	else
 		message="$path not found\r\n"
 		printf "HTTP 404 Not Found\r\n\Content-Length: ${#message}\r\n\r\n$message" > $fifo1
-		printf "404 -"
+		printf "404 - Not Found"
 	fi
 }
 
@@ -103,7 +129,7 @@ execute() {
 		message="$1 unsupported\r\n_"
 		message=${message%_}
 		printf "HTTP 501 Not Implemented\r\n\Content-Length: ${#message}\r\n\r\n$message" > $fifo
-		printf "501 -"
+		printf "501 - Not Implemented"
 		;;
 	esac
 }
@@ -155,7 +181,7 @@ get_source_ip() {
 			fi
 		fi
 	done
-	printf "$source_ip"
+	printf "$myips"
 }
 
 parse() {
@@ -192,8 +218,9 @@ for cmd in nc; do
 	test -z "$(eval echo $"$cmd")" && { echo "$0: \`$cmd\` not found"; exit 2; }
 done
 
-while getopts p:H opt; do
+while getopts r:p:H opt; do
 	case $opt in
+	r) cReturnCode=$OPTARG;;
 	p) port=$OPTARG;;
 	H) usage; exit 255;;
 	*) usage; exit 255;;
@@ -225,11 +252,24 @@ trap interrupt INT
 echo $$ > $pid_file
 
 cat 1>&2 <<EOF
+--------------------------------------------------------------------
 Azion-CLI HTTP Test Server
 
-To reach this server, you must build the binary indicating 
+* This server will parse url to match style:
+	http://localhost:8080/?token=<file>
+
+
+* In order to serve the files it is mandatory to run this script in the
+ root of the executable (./httpserver.sh) OR provide the 'docroot' in the
+ command line (tests/httpserver.sh tests).
+
+
+* To reach this server, you must build the binary indicating 
 this host:
-$ AUTH_ENDPOINT="http://localhost:8080/" make build
+$ AUTH_LOCAL="http://localhost:8080/" make build
+
+
+* You can 'force' http returning codes with flag '-r <code>'
 
 
 Listening at port number $port.
