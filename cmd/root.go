@@ -53,7 +53,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rootCmd.SetIn(f.IOStreams.In)
 	rootCmd.SetOut(f.IOStreams.Out)
-	rootCmd.SetErr(f.IOStreams.Out)
+	rootCmd.SetErr(f.IOStreams.Err)
 
 	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
 
