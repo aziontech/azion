@@ -2,10 +2,12 @@ package create
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
@@ -13,7 +15,7 @@ import (
 
 const SHELL_SCRIPT string = "Shell Script"
 
-func NewCmd() *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
 		Use:           "create",
@@ -51,7 +53,17 @@ func NewCmd() *cobra.Command {
 				}
 			}
 
-			client, err := requests.CreateClient()
+			tok, err := cmd.Flags().GetString("token")
+			if err != nil {
+				return err
+			}
+
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+
+			client, err := requests.CreateClient(httpClient, tok)
 			if err != nil {
 				return err
 			}
@@ -93,9 +105,8 @@ func createNewResource(client *sdk.APIClient, service_id int64, name string, tri
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(body))
 
-		return err
+		return errors.New(string(body))
 	}
 
 	fmt.Println(resp.Name)

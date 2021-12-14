@@ -3,14 +3,16 @@ package list
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list",
@@ -29,11 +31,22 @@ func NewCmd() *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			client, err := requests.CreateClient()
+			tok, err := cmd.Flags().GetString("token")
 			if err != nil {
 				return err
 			}
-			if err := listAllResources(client, ids[0]); err != nil {
+
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+
+			client, err := requests.CreateClient(httpClient, tok)
+			if err != nil {
+				return err
+			}
+
+			if err := listAllResources(client, f.IOStreams.Out, ids[0]); err != nil {
 				return err
 			}
 			return nil
@@ -42,7 +55,7 @@ func NewCmd() *cobra.Command {
 	return listCmd
 }
 
-func listAllResources(client *sdk.APIClient, service_id int64) error {
+func listAllResources(client *sdk.APIClient, out io.Writer, service_id int64) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -57,7 +70,7 @@ func listAllResources(client *sdk.APIClient, service_id int64) error {
 	resources := resp.Resources
 
 	for _, resource := range resources {
-		fmt.Printf("ID: %d     Name: %s \n", resource.Id, resource.Name)
+		fmt.Fprintf(out, "ID: %d     Name: %s \n", resource.Id, resource.Name)
 	}
 	return nil
 }

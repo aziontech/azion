@@ -1,16 +1,19 @@
 package requests
 
 import (
+	"net/http"
+
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 )
 
 //TODO: receives token as an argument
 //TODO: URL is passed during build-time
 
-func CreateClient() (*sdk.APIClient, error) {
+func CreateClient(client *http.Client, token string) (*sdk.APIClient, error) {
 
 	conf := sdk.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "token 364d8f40562c20608c671760c447ab08aa91c62b")
+	conf.HTTPClient = client
+	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.Servers = sdk.ServerConfigurations{
 		{
 			URL:         "https://stage-api.azion.net",

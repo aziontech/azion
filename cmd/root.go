@@ -60,7 +60,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
-	rootCmd.AddCommand(edge_services.NewCmdEdgeServices())
+	rootCmd.AddCommand(edge_services.NewCmdEdgeServices(f))
 
 	return rootCmd
 }

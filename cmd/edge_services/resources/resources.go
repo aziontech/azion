@@ -1,28 +1,27 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/create"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/delete"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/describe"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/list"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
-func NewCmdResources() *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// resourcesCmd represents the resources command
 	resourcesCmd := &cobra.Command{
 		Use:   "resources",
 		Short: "Manages resources in a given edge-service",
 		Long:  `You may create, update, delete, list and describe resources in a given edge-service.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("resources called")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
 		},
 	}
-	resourcesCmd.AddCommand(list.NewCmd())
-	resourcesCmd.AddCommand(describe.NewCmd())
-	resourcesCmd.AddCommand(delete.NewCmd())
-	resourcesCmd.AddCommand(create.NewCmd())
+	resourcesCmd.AddCommand(list.NewCmd(f))
+	resourcesCmd.AddCommand(describe.NewCmd(f))
+	resourcesCmd.AddCommand(delete.NewCmd(f))
+	resourcesCmd.AddCommand(create.NewCmd(f))
 	return resourcesCmd
 }

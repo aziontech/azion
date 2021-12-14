@@ -3,14 +3,16 @@ package describe
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
@@ -29,11 +31,22 @@ func NewCmd() *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			client, err := requests.CreateClient()
+			tok, err := cmd.Flags().GetString("token")
 			if err != nil {
 				return err
 			}
-			if err := describeResource(client, ids[0], ids[1]); err != nil {
+
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+
+			client, err := requests.CreateClient(httpClient, tok)
+			if err != nil {
+				return err
+			}
+
+			if err := describeResource(client, f.IOStreams.Out, ids[0], ids[1]); err != nil {
 				return err
 			}
 
@@ -45,7 +58,7 @@ func NewCmd() *cobra.Command {
 
 }
 
-func describeResource(client *sdk.APIClient, service_id int64, resource_id int64) error {
+func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -57,12 +70,12 @@ func describeResource(client *sdk.APIClient, service_id int64, resource_id int64
 		return err
 	}
 
-	fmt.Printf("ID: %d\n", resp.Id)
-	fmt.Printf("Name: %s\n", resp.Name)
-	fmt.Printf("Type: %s\n", resp.Type)
-	fmt.Printf("Content type: %s\n", resp.ContentType)
-	fmt.Printf("Content: \n")
-	fmt.Printf("%s", resp.Content)
+	fmt.Fprintf(out, "ID: %d\n", resp.Id)
+	fmt.Fprintf(out, "Name: %s\n", resp.Name)
+	fmt.Fprintf(out, "Type: %s\n", resp.Type)
+	fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
+	fmt.Fprintf(out, "Content: \n")
+	fmt.Fprintf(out, "%s", resp.Content)
 
 	return nil
 }

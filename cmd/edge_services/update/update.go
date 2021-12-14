@@ -6,12 +6,13 @@ import (
 	"strconv"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd() *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
 		Use:   "update",
@@ -26,7 +27,17 @@ func NewCmd() *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			client, err := requests.CreateClient()
+			tok, err := cmd.Flags().GetString("token")
+			if err != nil {
+				return err
+			}
+
+			httpClient, err := f.HttpClient()
+			if err != nil {
+				return err
+			}
+
+			client, err := requests.CreateClient(httpClient, tok)
 			if err != nil {
 				return err
 			}
