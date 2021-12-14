@@ -3,6 +3,7 @@ package resources
 import (
 	"fmt"
 
+	"github.com/aziontech/azion-cli/cmd/edge_services/resources/create"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/delete"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/describe"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/list"
@@ -22,5 +23,6 @@ func NewCmdResources() *cobra.Command {
 	resourcesCmd.AddCommand(list.NewCmd())
 	resourcesCmd.AddCommand(describe.NewCmd())
 	resourcesCmd.AddCommand(delete.NewCmd())
+	resourcesCmd.AddCommand(create.NewCmd())
 	return resourcesCmd
 }

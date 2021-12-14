@@ -3,6 +3,7 @@ package delete
 import (
 	"context"
 
+	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ func NewCmd() *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			client, err := utils.CreateClient()
+			client, err := requests.CreateClient()
 			if err != nil {
 				return err
 			}
