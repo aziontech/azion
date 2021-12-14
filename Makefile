@@ -13,7 +13,8 @@ BUILD_DEBUG_VERSION ?= false
 
 # Variables for token endpoints
 AUTH_LOCAL=http://localhost:8080/
-AUTH_STAGE=http://stage.azion.com/?token
+# FIXME: Using a random endpoint since we don't have one to validate whether the token is valid
+AUTH_STAGE=https://stage-api.azion.net/domains?page_size=1
 AUTH_PROD=http://api.azion.com/?token
 
 # Version Info
@@ -39,6 +40,10 @@ get-lint-deps:
 		curl -sfL \
 		https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GOBIN) v1.31.0 ;\
 	fi
+
+.PHONY: test
+test:
+	@$(GO) test -v ./...
 
 .PHONY: sec
 sec: get-gosec-deps ## running GoSec
