@@ -19,7 +19,7 @@ AUTH_PROD=http://api.azion.com/?token
 
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
-LDFLAGS=-X github.com/aziontech/azion-cli/cmd.BinVersion=$(BIN_VERSION)
+LDFLAGS=-X github.com/aziontech/azion-cli/cmd/version.BinVersion=$(BIN_VERSION)
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 

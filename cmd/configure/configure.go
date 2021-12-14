@@ -1,4 +1,4 @@
-package cmd
+package configure
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 
 var configureToken string
 
-func NewConfigureCmd(f *cmdutil.Factory) *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// configureCmd represents the configure command
 	configureCmd := &cobra.Command{
 		Use:   "configure",

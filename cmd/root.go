@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aziontech/azion-cli/cmd/configure"
+	"github.com/aziontech/azion-cli/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/token"
 	"github.com/spf13/cobra"
 )
 
-var BinVersion = "development"
 var rootToken string
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
@@ -22,7 +23,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},
-		Version: BinVersion,
+		Version: version.BinVersion,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("token") {
 				fmt.Fprintln(f.IOStreams.Out, "Using command line token: "+rootToken)
@@ -56,8 +57,8 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
 
-	rootCmd.AddCommand(NewConfigureCmd(f))
-	rootCmd.AddCommand(NewVersionCmd(f))
+	rootCmd.AddCommand(configure.NewCmd(f))
+	rootCmd.AddCommand(version.NewCmd(f))
 
 	return rootCmd
 }

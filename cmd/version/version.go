@@ -1,4 +1,4 @@
-package cmd
+package version
 
 import (
 	"fmt"
@@ -7,8 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var BinVersion = "development"
+
 // versionCmd represents the version command
-func NewVersionCmd(f *cmdutil.Factory) *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Returns bin version",
