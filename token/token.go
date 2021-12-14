@@ -16,10 +16,6 @@ type Token struct {
 	valid  bool
 }
 
-type tokenResponse struct {
-	Valid bool `json:"valid"`
-}
-
 var AUTH_ENDPOINT string
 
 func NewToken(c HTTPClient) *Token {
