@@ -17,9 +17,9 @@ func (m MockClient) Do(req *http.Request) (*http.Response, error) {
 	header := req.Header.Get("Authorization")
 
 	// Authorization: token <token>
-	splitted := strings.Split(header, "token ")
+	split := strings.Split(header, "token ")
 
-	valid := validToken == splitted[1]
+	valid := validToken == split[1]
 
 	var statusCode int
 	if valid {
