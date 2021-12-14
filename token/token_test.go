@@ -3,7 +3,6 @@ package token
 import (
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -14,13 +13,24 @@ type MockClient struct {
 }
 
 func (m MockClient) Do(req *http.Request) (*http.Response, error) {
-	token := req.URL.Query().Get("token")
-	valid := validToken == token
-	body := `{"valid": ` + strconv.FormatBool(valid) + `}`
+
+	header := req.Header.Get("Authorization")
+
+	// Authorization: token <token>
+	split := strings.Split(header, "token ")
+
+	valid := validToken == split[1]
+
+	var statusCode int
+	if valid {
+		statusCode = http.StatusOK
+	} else {
+		statusCode = http.StatusUnauthorized
+	}
 
 	return &http.Response{
-		StatusCode: 200,
-		Body:       io.NopCloser(strings.NewReader(body)),
+		StatusCode: statusCode,
+		Body:       io.NopCloser(nil),
 	}, nil
 }
 

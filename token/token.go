@@ -1,9 +1,7 @@
 package token
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -16,10 +14,6 @@ type Token struct {
 	client HTTPClient
 	token  string
 	valid  bool
-}
-
-type tokenResponse struct {
-	Valid bool `json:"valid"`
 }
 
 var AUTH_ENDPOINT string
@@ -35,28 +29,15 @@ func (t *Token) Validate(token *string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	q := req.URL.Query()
-	q.Add("token", *token)
-	req.URL.RawQuery = q.Encode()
-	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Accept", "application/json; version=3")
+	req.Header.Add("Authorization", "token "+*token)
 
 	resp, err := t.client.Do(req)
 	if err != nil {
 		return false, err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return false, err
-	}
-
-	res := &tokenResponse{}
-	err = json.Unmarshal(body, res)
-	if err != nil {
-		return false, err
-	}
-
-	if !res.Valid {
+	if resp.StatusCode != http.StatusOK {
 		return false, nil
 	}
 
