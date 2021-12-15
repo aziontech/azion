@@ -85,8 +85,13 @@ func (t *Token) Save() error {
 	return nil
 }
 
-func (t *Token) ReadFromDisk() (string, error) {
-	filedata, err := os.ReadFile(t.filepath)
+func ReadFromDisk() (string, error) {
+	dir, err := TokenDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get token dir: %w", err)
+	}
+
+	filedata, err := os.ReadFile(filepath.Join(dir, credentialsFilename))
 	if err != nil {
 		return "", err
 	}

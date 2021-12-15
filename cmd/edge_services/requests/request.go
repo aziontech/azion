@@ -1,26 +1,43 @@
 package requests
 
 import (
-	"net/http"
+	"fmt"
 
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/token"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
+	"github.com/spf13/cobra"
 )
 
-//TODO: receives token as an argument
-//TODO: URL is passed during build-time
+var ApiUrl string
 
-func CreateClient(client *http.Client, token string) (*sdk.APIClient, error) {
+func CreateClient(f *cmdutil.Factory, cmd *cobra.Command) (*sdk.APIClient, error) {
+	var (
+		tok string
+		err error
+	)
+
+	if cmd.Flags().Changed("token") {
+		tok, err = cmd.Flags().GetString("token")
+	} else {
+		tok, err = token.ReadFromDisk()
+	}
 
 	conf := sdk.NewConfiguration()
-	conf.HTTPClient = client
-	conf.AddDefaultHeader("Authorization", "token "+token)
+
+	httpClient, err := f.HttpClient()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get http client: %w", err)
+	}
+
+	conf.HTTPClient = httpClient
+
+	conf.AddDefaultHeader("Authorization", "token "+tok)
 	conf.Servers = sdk.ServerConfigurations{
 		{
-			URL:         "https://stage-api.azion.net",
-			Description: "User supplied",
+			URL: ApiUrl,
 		},
 	}
-	cli := sdk.NewAPIClient(conf)
 
-	return cli, nil
+	return sdk.NewAPIClient(conf), nil
 }

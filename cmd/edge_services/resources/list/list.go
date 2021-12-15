@@ -31,17 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			tok, err := cmd.Flags().GetString("token")
-			if err != nil {
-				return err
-			}
-
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-
-			client, err := requests.CreateClient(httpClient, tok)
+			client, err := requests.CreateClient(f, cmd)
 			if err != nil {
 				return err
 			}

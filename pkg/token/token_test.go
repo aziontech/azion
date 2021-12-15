@@ -71,21 +71,3 @@ func Test_Save(t *testing.T) {
 		}
 	})
 }
-
-func Test_ReadFromDisk(t *testing.T) {
-	t.Run("read token from disk", func(t *testing.T) {
-		token := &Token{
-			out:      os.Stdout,
-			filepath: "/tmp/azion/credentials",
-			token:    "TeST",
-		}
-		if err := token.Save(); err != nil {
-			t.Fatalf("Save() = %v; want nil", err)
-		}
-
-		dToken, _ := token.ReadFromDisk()
-		if dToken != token.token {
-			t.Errorf("ReadFromDisk() = %v; want %v", dToken, token.token)
-		}
-	})
-}
