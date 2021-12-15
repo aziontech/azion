@@ -11,10 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	verbose bool
-)
-
 func NewCmdEdgeServices(f *cmdutil.Factory) *cobra.Command {
 	// edgeServicesCmd represents the edgeServices command
 	edgeServicesCmd := &cobra.Command{

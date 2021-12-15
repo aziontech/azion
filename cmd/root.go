@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/aziontech/azion-cli/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
 
@@ -26,32 +24,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		Version: version.BinVersion,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if cmd.Flags().Changed("token") {
-				fmt.Fprintln(f.IOStreams.Out, "Using command line token: "+rootToken)
-				return nil
-			}
-
-			client, err := f.HttpClient()
-			if err != nil {
-				return err
-			}
-
-			t, err := token.New(&token.Config{
-				Client: client,
-				Out:    f.IOStreams.Out,
-			})
-			if err != nil {
-				return err
-			}
-
-			tok, err := t.ReadFromDisk()
-			if err != nil {
-				return err
-			}
-
-			fmt.Fprintln(f.IOStreams.Out, "Using saved token: "+tok)
-
-			return nil
+			return cmd.Help()
 		},
 	}
 
