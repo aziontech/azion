@@ -8,8 +8,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 )
 
-const validToken = "rightToken"
-
 func Test_Validate(t *testing.T) {
 	t.Run("invalid token", func(t *testing.T) {
 		mock := &httpmock.Registry{}
