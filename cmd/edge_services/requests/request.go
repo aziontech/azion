@@ -23,6 +23,10 @@ func CreateClient(f *cmdutil.Factory, cmd *cobra.Command) (*sdk.APIClient, error
 		tok, err = token.ReadFromDisk()
 	}
 
+	if err != nil {
+		return nil, fmt.Errorf("failed to get api token: %w", err)
+	}
+
 	conf := sdk.NewConfiguration()
 
 	httpClient, err := f.HttpClient()
