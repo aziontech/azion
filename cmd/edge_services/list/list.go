@@ -12,7 +12,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type ListOptions struct {
+	Limit int64
+	Page  int64
+	// FIXME: ENG-17161
+	SortDesc bool
+	Filter   string
+}
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	opts := &ListOptions{}
+
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list",
@@ -26,20 +36,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := listAllServices(client, f.IOStreams.Out); err != nil {
+			if err := listAllServices(client, f.IOStreams.Out, opts); err != nil {
 				return err
 			}
 			return nil
 		},
 	}
+
+	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch (default 10)")
+	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results (default 1)")
+	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
+
 	return listCmd
 }
 
-func listAllServices(client *sdk.APIClient, out io.Writer) error {
+func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) error {
 	c := context.Background()
 	api := client.DefaultApi
 
-	resp, httpResp, err := api.GetServices(c).Execute()
+	resp, httpResp, err := api.GetServices(c).
+		Page(opts.Page).
+		Limit(opts.Limit).
+		Filter(opts.Filter).
+		Execute()
+
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
