@@ -53,6 +53,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
+			contentPath, err := cmd.Flags().GetString("content-file")
+			if err != nil {
+				return utils.ErrorHandlingFile
+			}
+
+			file, err := ioutil.ReadFile(contentPath)
+			if err != nil {
+				return utils.ErrorHandlingFile
+			}
+
+			stringFile := string(file)
+
 			tok, err := cmd.Flags().GetString("token")
 			if err != nil {
 				return err
@@ -68,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewResource(client, ids[0], name, trigger, content_type); err != nil {
+			if err := createNewResource(client, ids[0], name, trigger, content_type, stringFile); err != nil {
 				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
 			}
 
@@ -81,11 +93,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
 	createCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\"")
 	createCmd.MarkFlagRequired("content-type")
+	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
+	createCmd.MarkFlagRequired("content-file")
 
 	return createCmd
 }
 
-func createNewResource(client *sdk.APIClient, service_id int64, name string, trigger string, content_type string) error {
+func createNewResource(client *sdk.APIClient, service_id int64, name string, trigger string, content_type string, file string) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -93,7 +107,7 @@ func createNewResource(client *sdk.APIClient, service_id int64, name string, tri
 		Name:        name,
 		Trigger:     trigger,
 		ContentType: content_type,
-		Content:     "just a placeholder",
+		Content:     file,
 	}
 
 	resp, httpResp, err := api.PostResource(c, service_id).CreateResourceRequest(request).Execute()
