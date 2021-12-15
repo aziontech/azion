@@ -5,6 +5,7 @@ import (
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/delete"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/describe"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources/list"
+	"github.com/aziontech/azion-cli/cmd/edge_services/resources/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -23,5 +24,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	resourcesCmd.AddCommand(describe.NewCmd(f))
 	resourcesCmd.AddCommand(delete.NewCmd(f))
 	resourcesCmd.AddCommand(create.NewCmd(f))
+	resourcesCmd.AddCommand(update.NewCmd(f))
 	return resourcesCmd
 }

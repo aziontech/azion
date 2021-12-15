@@ -11,4 +11,5 @@ var (
 	ErrorHandlingFile              = errors.New("You must provide a valid file name. Use -h or --help for more information")
 	ErrorInternalServerError       = errors.New("Something went wrong, please try again")
 	ErrorInvalidResourceTrigger    = errors.New("You musr provide a velid trigger. Use -h or --help for more information")
+	ErrorUpdateNoFlagsSent         = errors.New("You need to provide at least one value in update. Use -h or --help for more information")
 )
