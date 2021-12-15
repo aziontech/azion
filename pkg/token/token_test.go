@@ -13,7 +13,7 @@ func Test_Validate(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
 			httpmock.REST("GET", "token"),
-			httpmock.StatusStringResponse(401, "{}"),
+			httpmock.StatusStringResponse(http.StatusUnauthorized, "{}"),
 		)
 
 		token, err := New(&Config{
@@ -37,7 +37,7 @@ func Test_Validate(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
 			httpmock.REST("GET", "token"),
-			httpmock.StatusStringResponse(200, "{}"),
+			httpmock.StatusStringResponse(http.StatusOK, "{}"),
 		)
 
 		token, err := New(&Config{
