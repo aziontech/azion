@@ -40,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 	createCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
-	createCmd.MarkFlagRequired("name")
+	_ = createCmd.MarkFlagRequired("name")
 
 	return createCmd
 }

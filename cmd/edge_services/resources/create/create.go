@@ -79,12 +79,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	createCmd.Flags().StringP("name", "n", "", "<PATH>/<RESOURCE_NAME>")
-	createCmd.MarkFlagRequired("name")
+	_ = createCmd.MarkFlagRequired("name")
 	createCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
 	createCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\"")
-	createCmd.MarkFlagRequired("content-type")
+	_ = createCmd.MarkFlagRequired("content-type")
 	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
-	createCmd.MarkFlagRequired("content-file")
+	_ = createCmd.MarkFlagRequired("content-file")
 
 	return createCmd
 }
