@@ -56,19 +56,19 @@ get-gosec-deps:
 		
 .PHONY : build-local
 build-local: ## build application code for local environment testing
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_LOCAL))
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_LOCAL))
 	@ $(GO) version
 	 $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
 .PHONY : build-stage
 build-stage: ## build application code for staging environment
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_STAGE))
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_STAGE))
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
 .PHONY : build
 build-prod: ## build application code for production environment
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_PROD))
+	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_PROD))
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 

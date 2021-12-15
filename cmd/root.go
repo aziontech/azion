@@ -10,7 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/token"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			t := token.NewToken(client)
+			t, err := token.NewToken(&token.Config{
+				Client: client,
+				Out:    f.IOStreams.Out,
+			})
 			if err != nil {
 				return err
 			}

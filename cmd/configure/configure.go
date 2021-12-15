@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/token"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +23,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf("failed to get http client: %w", err)
 			}
 
-			t := token.NewToken(client)
+			t, err := token.NewToken(&token.Config{
+				Client: client,
+				Out:    f.IOStreams.Out,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create token manager: %w", err)
+			}
 
 			if configureToken == "" {
 				return errors.New("token not provided, loading the saved one")
@@ -38,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return errors.New("invalid token")
 			}
 
-			if t.Save() != nil {
+			if err := t.Save(); err != nil {
 				return err
 			}
 
