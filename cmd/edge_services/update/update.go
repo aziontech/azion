@@ -1,9 +1,12 @@
 package update
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"os"
 	"strconv"
+	"strings"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -51,6 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 	updateCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
 	updateCmd.Flags().StringP("active", "a", "", "<true|false>")
+	updateCmd.Flags().StringP("variables-file", "f", "", "<VARIABLES_FILE_PATH>")
 
 	return updateCmd
 }
@@ -82,6 +86,34 @@ func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []s
 			return utils.ErrorConvertingStringToBool
 		}
 		serviceRequest.SetActive(active)
+	}
+
+	variablesHasChanged := cmd.Flags().Changed("variables-file")
+	if variablesHasChanged {
+		variablesPath, err := cmd.Flags().GetString("variables-file")
+		if err != nil {
+			return utils.ErrorHandlingFile
+		}
+
+		file, err := os.Open(variablesPath)
+		if err != nil {
+			return utils.ErrorHandlingFile
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+		v := []sdk.Variable{}
+		for scanner.Scan() {
+			entry := strings.Split(scanner.Text(), "=") //FIXME improve line sanitize
+			variable := sdk.NewVariable(entry[0], entry[1])
+			v = append(v, *variable)
+		}
+		serviceRequest.SetVariables(v)
+
+		if err := scanner.Err(); err != nil {
+			return err
+		}
+
 	}
 
 	resp, httpResp, err := api.PatchService(c, id).UpdateServiceRequest(serviceRequest).Execute()
