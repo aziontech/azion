@@ -1,7 +1,9 @@
-package delete
+package list
 
 import (
 	"context"
+	"fmt"
+	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -11,22 +13,14 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	// deleteCmd represents the delete command
-	deleteCmd := &cobra.Command{
-		Use:           "delete",
-		Short:         "Deletes a service based on a given service_id",
-		Long:          `FIXME with USAGE`,
+	// listCmd represents the list command
+	listCmd := &cobra.Command{
+		Use:           "list",
+		Short:         "Lists services of an Azion account",
+		Long:          `FIXME with usage`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
-			}
 
 			tok, err := cmd.Flags().GetString("token")
 			if err != nil {
@@ -43,22 +37,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := deleteService(client, ids[0]); err != nil {
+			if err := listAllServices(client, f.IOStreams.Out); err != nil {
 				return err
 			}
-
 			return nil
 		},
 	}
-	return deleteCmd
+	return listCmd
 }
 
-func deleteService(client *sdk.APIClient, service_id int64) error {
-
+func listAllServices(client *sdk.APIClient, out io.Writer) error {
 	c := context.Background()
 	api := client.DefaultApi
 
-	httpResp, err := api.DeleteService(c, service_id).Execute()
+	resp, httpResp, err := api.GetServices(c).Execute()
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
@@ -66,5 +58,10 @@ func deleteService(client *sdk.APIClient, service_id int64) error {
 		return err
 	}
 
+	services := resp.Services
+
+	for _, service := range services {
+		fmt.Fprintf(out, "ID: %d     Name: %s \n", service.Id, service.Name)
+	}
 	return nil
 }

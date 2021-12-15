@@ -3,6 +3,7 @@ package edge_services
 import (
 	"github.com/aziontech/azion-cli/cmd/edge_services/create"
 	"github.com/aziontech/azion-cli/cmd/edge_services/delete"
+	"github.com/aziontech/azion-cli/cmd/edge_services/list"
 	"github.com/aziontech/azion-cli/cmd/edge_services/resources"
 	"github.com/aziontech/azion-cli/cmd/edge_services/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -27,6 +28,7 @@ func NewCmdEdgeServices(f *cmdutil.Factory) *cobra.Command {
 	edgeServicesCmd.AddCommand(create.NewCmd(f))
 	edgeServicesCmd.AddCommand(update.NewCmd(f))
 	edgeServicesCmd.AddCommand(delete.NewCmd(f))
+	edgeServicesCmd.AddCommand(list.NewCmd(f))
 	edgeServicesCmd.AddCommand(resources.NewCmd(f))
 
 	return edgeServicesCmd
