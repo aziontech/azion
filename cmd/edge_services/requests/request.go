@@ -17,6 +17,8 @@ func CreateClient(f *cmdutil.Factory, cmd *cobra.Command) (*sdk.APIClient, error
 		err error
 	)
 
+	// This is probably not the best approach, maybe an additional dependency should be injected
+	// but it should work for now
 	if cmd.Flags().Changed("token") {
 		tok, err = cmd.Flags().GetString("token")
 	} else {
