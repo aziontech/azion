@@ -30,7 +30,7 @@ type Config struct {
 	Out    io.Writer
 }
 
-func NewToken(c *Config) (*Token, error) {
+func New(c *Config) (*Token, error) {
 	dir, err := TokenDir()
 	if err != nil {
 		return nil, err

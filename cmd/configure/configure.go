@@ -23,7 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf("failed to get http client: %w", err)
 			}
 
-			t, err := token.NewToken(&token.Config{
+			t, err := token.New(&token.Config{
 				Client: client,
 				Out:    f.IOStreams.Out,
 			})

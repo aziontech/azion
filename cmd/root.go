@@ -36,7 +36,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			t, err := token.NewToken(&token.Config{
+			t, err := token.New(&token.Config{
 				Client: client,
 				Out:    f.IOStreams.Out,
 			})

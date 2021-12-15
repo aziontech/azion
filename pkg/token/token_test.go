@@ -18,7 +18,7 @@ func Test_Validate(t *testing.T) {
 			httpmock.StatusStringResponse(401, "{}"),
 		)
 
-		token, err := NewToken(&Config{
+		token, err := New(&Config{
 			Client: &http.Client{Transport: mock},
 			Out:    os.Stdout,
 		})
@@ -42,7 +42,7 @@ func Test_Validate(t *testing.T) {
 			httpmock.StatusStringResponse(200, "{}"),
 		)
 
-		token, err := NewToken(&Config{
+		token, err := New(&Config{
 			Client: &http.Client{Transport: mock},
 			Out:    os.Stdout,
 		})
