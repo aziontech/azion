@@ -73,6 +73,6 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err, "Not Found")
+		require.Error(t, err)
 	})
 }

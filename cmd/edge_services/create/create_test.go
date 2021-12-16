@@ -32,6 +32,54 @@ var resposeBody = `
 `
 
 func TestCreate(t *testing.T) {
+	t.Run("invalid service", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "edge_services/"),
+			httpmock.StatusStringResponse(http.StatusUnprocessableEntity, "Invalid name"),
+		)
+
+		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+		f := &cmdutil.Factory{
+			HttpClient: func() (*http.Client, error) {
+				return &http.Client{Transport: mock}, nil
+			},
+			IOStreams: &iostreams.IOStreams{
+				Out: stdout,
+				Err: stderr,
+			},
+		}
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--name", ""})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
+
+	t.Run("without passing name", func(t *testing.T) {
+		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+		f := &cmdutil.Factory{
+			IOStreams: &iostreams.IOStreams{
+				Out: stdout,
+				Err: stderr,
+			},
+		}
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.EqualError(t, err, "required flag(s) \"name\" not set")
+	})
+
 	t.Run("create service with name", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
