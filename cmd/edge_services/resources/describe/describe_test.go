@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,7 +69,7 @@ func TestDescribe(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err)
+		require.ErrorIs(t, err, utils.ErrorMissingResourceIdArgument)
 	})
 
 	t.Run("valid resource", func(t *testing.T) {

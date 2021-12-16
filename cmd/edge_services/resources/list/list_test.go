@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -95,13 +96,12 @@ ID: 82611     Name: /tmp/test/assssas
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{""})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err, "Error: You must provide a service_id as an argument. Use -h or --help for more information")
+		require.ErrorIs(t, err, utils.ErrorMissingServiceIdArgument)
 	})
 
 	t.Run("invalid resource_id", func(t *testing.T) {
