@@ -36,7 +36,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := describeService(client, f.IOStreams.Out, ids[0]); err != nil {
+			withVariables, err := cmd.Flags().GetBool("with-variables")
+			if err != nil {
+				return err
+			}
+
+			if err := describeService(client, f.IOStreams.Out, ids[0], withVariables); err != nil {
 				return err
 			}
 
@@ -44,15 +49,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		},
 	}
+	describeCmd.Flags().Bool("with-variables", false, "")
+
 	return describeCmd
 
 }
 
-func describeService(client *sdk.APIClient, out io.Writer, service_id int64) error {
+func describeService(client *sdk.APIClient, out io.Writer, service_id int64, withVariables bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 
-	resp, httpResp, err := api.GetService(c, service_id).Execute()
+	resp, httpResp, err := api.GetService(c, service_id).WithVars(withVariables).Execute()
 	if err != nil {
 		if httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
@@ -62,9 +69,16 @@ func describeService(client *sdk.APIClient, out io.Writer, service_id int64) err
 
 	fmt.Fprintf(out, "ID: %d\n", resp.Id)
 	fmt.Fprintf(out, "Name: %s\n", resp.Name)
-	fmt.Fprintf(out, "Last Editor: %s\n", resp.LastEditor)
 	fmt.Fprintf(out, "Updated at: %s\n", resp.UpdatedAt)
+	fmt.Fprintf(out, "Last Editor: %s\n", resp.LastEditor)
 	fmt.Fprintf(out, "Active: %t\n", resp.Active)
 	fmt.Fprintf(out, "Bound Nodes: %d\n", resp.BoundNodes)
+	fmt.Fprintf(out, "Permissions: %s\n", resp.Permissions)
+	if withVariables {
+		fmt.Fprint(out, "Variables:\n")
+		for _, variable := range *resp.Variables {
+			fmt.Fprintf(out, " Name: %s\tValue: %s\n", variable.Name, variable.Value)
+		}
+	}
 	return nil
 }

@@ -42,9 +42,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	updateCmd.Flags().StringP("name", "n", "", "<EDGE_SERVICE_NAME>")
-	updateCmd.Flags().StringP("active", "a", "", "<true|false>")
-	updateCmd.Flags().StringP("variables-file", "f", "", "<VARIABLES_FILE_PATH>")
+	updateCmd.Flags().String("name", "", "<EDGE_SERVICE_NAME>")
+	updateCmd.Flags().String("active", "", "<true|false>")
+	updateCmd.Flags().String("variables-file", "", "<VARIABLES_FILE_PATH>")
 
 	return updateCmd
 }
