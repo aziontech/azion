@@ -94,9 +94,10 @@ func TestCreate(t *testing.T) {
 		mock.Register(
 			httpmock.REST("POST", "edge_services/1234/resources"),
 			func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusCreated,
-					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
+				return &http.Response{
+					StatusCode: http.StatusCreated,
+					Request:    req,
+					Body:       ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -108,7 +109,7 @@ func TestCreate(t *testing.T) {
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
-		_, _ = contentFile.Write([]byte("#!/bin/sh\nrm -rf /"))
+		_, _ = contentFile.Write([]byte("#!/bin/sh"))
 
 		cmd := NewCmd(f)
 
