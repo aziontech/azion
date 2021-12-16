@@ -83,6 +83,18 @@ func JSONFromString(body string) Responder {
 	}
 }
 
+func JSONFromFile(filename string) Responder {
+	return func(req *http.Request) (*http.Response, error) {
+		f, err := os.Open(filename)
+		if err != nil {
+			return nil, err
+		}
+		resp := httpResponse(200, req, f)
+		resp.Header.Add("Content-Type", "application/json")
+		return resp, nil
+	}
+}
+
 func JSONResponse(body interface{}) Responder {
 	return func(req *http.Request) (*http.Response, error) {
 		b, _ := json.Marshal(body)
