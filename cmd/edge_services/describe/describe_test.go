@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,6 +29,27 @@ func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.B
 }
 
 func TestDescribe(t *testing.T) {
+
+	t.Run("service_id not sent", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_services/1234/resources/666"),
+			httpmock.StringResponse("Error: You must provide a service_id and a resource_id as arguments. Use -h or --help for more information"),
+		)
+
+		f, _, _ := newFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.ErrorIs(t, err, utils.ErrorMissingServiceIdArgument)
+	})
+
 	t.Run("service not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
