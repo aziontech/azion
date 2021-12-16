@@ -14,7 +14,7 @@ import (
 )
 
 func TestList(t *testing.T) {
-	t.Run("limit to one", func(t *testing.T) {
+	t.Run("more than one service", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

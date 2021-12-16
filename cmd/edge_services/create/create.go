@@ -3,6 +3,7 @@ package create
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -32,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewService(client, name); err != nil {
+			if err := createNewService(client, f.IOStreams.Out, name); err != nil {
 				return err
 			}
 
@@ -45,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewService(client *sdk.APIClient, name string) error {
+func createNewService(client *sdk.APIClient, out io.Writer, name string) error {
 	c := context.Background()
 	api := client.DefaultApi
 	serviceRequest := sdk.CreateServiceRequest{}
@@ -60,7 +61,7 @@ func createNewService(client *sdk.APIClient, name string) error {
 		return err
 	}
 
-	fmt.Printf("ID: %d\tName: %s \n", resp.Id, resp.Name)
+	fmt.Fprintf(out, "ID: %d\tName: %s \n", resp.Id, resp.Name)
 
 	return nil
 }
