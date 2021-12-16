@@ -54,8 +54,14 @@ func TestDescribe(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t,
+			`ID: 1209
+Name: ApeService
+Last Editor: azion-alfreds
+Updated at: 2021-12-15T21:03:54Z
+Active: true
+Bound Nodes: 4
+`,
 			stdout.String(),
-			"ID: 1209\nName: ApeService\nLast Editor: azion-alfreds\nUpdated at: 2021-12-15T21:03:54Z\nActive: true\nBound Nodes: 4\n",
 		)
 	})
 
