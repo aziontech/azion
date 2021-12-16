@@ -13,7 +13,64 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
+	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+	f := &cmdutil.Factory{
+		HttpClient: func() (*http.Client, error) {
+			return &http.Client{Transport: mock}, nil
+		},
+		IOStreams: &iostreams.IOStreams{
+			Out: stdout,
+			Err: stderr,
+		},
+	}
+	return f, stdout, stderr
+}
+
 func TestDescribe(t *testing.T) {
+
+	t.Run("resource not found", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_services/1234/resources/666"),
+			httpmock.StatusStringResponse(http.StatusNotFound, "{}"),
+		)
+
+		f, _, _ := newFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"1234", "666"})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
+
+	t.Run("not all arguments were sent", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_services/1234/resources/666"),
+			httpmock.StringResponse("Error: You must provide a service_id and a resource_id as arguments. Use -h or --help for more information"),
+		)
+
+		f, _, _ := newFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"1234"})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
+
 	t.Run("valid resource", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
@@ -30,16 +87,7 @@ func TestDescribe(t *testing.T) {
 			),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, stdout, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 
