@@ -47,9 +47,9 @@ func buildResponseContent(req *http.Request) string {
 	_ = json.Unmarshal(body, request)
 
 	response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
-	response = strings.ReplaceAll(resposeBody, "{type}", request.Trigger)
-	response = strings.ReplaceAll(resposeBody, "{content}", request.Content)
-	response = strings.ReplaceAll(resposeBody, "{content_type}", request.ContentType)
+	response = strings.ReplaceAll(response, "{type}", request.Trigger)
+	response = strings.ReplaceAll(response, "{content}", request.Content)
+	response = strings.ReplaceAll(response, "{content_type}", request.ContentType)
 
 	return response
 }
