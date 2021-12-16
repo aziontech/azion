@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 			func(req *http.Request) (*http.Response, error) {
 				request := &sdk.CreateServiceRequest{}
 				body, _ := ioutil.ReadAll(req.Body)
-				json.Unmarshal(body, request)
+				_ = json.Unmarshal(body, request)
 
 				response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
 

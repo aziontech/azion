@@ -2,7 +2,6 @@ package delete
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
