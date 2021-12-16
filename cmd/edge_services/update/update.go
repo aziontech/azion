@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -93,13 +94,18 @@ func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []s
 		defer file.Close()
 
 		scanner := bufio.NewScanner(file)
+		reName := regexp.MustCompile("^([^= ]+) *= *(.*)")
+		reValue := regexp.MustCompile("^([^= ]+) *= *(.+)")
 		v := []sdk.Variable{}
 		for scanner.Scan() {
-			entry := strings.Split(scanner.Text(), "=") //FIXME improve line sanitize
-			if len(entry) != 2 {
+			line := scanner.Text()
+			entry := strings.Split(line, "=")
+			if len(entry) < 2 {
 				return utils.ErrorInvalidVariablesFileFormat
 			}
-			variable := sdk.NewVariable(entry[0], entry[1])
+			varName := reName.FindStringSubmatch(strings.Trim(line, " "))[1]
+			varValue := reValue.FindStringSubmatch(strings.Trim(line, " "))[2]
+			variable := sdk.NewVariable(varName, varValue)
 			v = append(v, *variable)
 		}
 		serviceRequest.SetVariables(v)
