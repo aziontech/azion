@@ -44,7 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 	updateCmd.Flags().String("name", "", "<EDGE_SERVICE_NAME>")
 	updateCmd.Flags().String("active", "", "<true|false>")
-	updateCmd.Flags().String("variables-file", "", "<VARIABLES_FILE_PATH>")
+	updateCmd.Flags().String("variables-file", "", `<VARIABLES_FILE_PATH>
+The format accepted for variables definition is one <KEY>=<VALUE> per line`)
 
 	return updateCmd
 }
@@ -95,6 +96,9 @@ func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []s
 		v := []sdk.Variable{}
 		for scanner.Scan() {
 			entry := strings.Split(scanner.Text(), "=") //FIXME improve line sanitize
+			if len(entry) != 2 {
+				return utils.ErrorInvalidVariablesFileFormat
+			}
 			variable := sdk.NewVariable(entry[0], entry[1])
 			v = append(v, *variable)
 		}
