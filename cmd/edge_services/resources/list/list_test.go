@@ -13,6 +13,20 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
+	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+	f := &cmdutil.Factory{
+		HttpClient: func() (*http.Client, error) {
+			return &http.Client{Transport: mock}, nil
+		},
+		IOStreams: &iostreams.IOStreams{
+			Out: stdout,
+			Err: stderr,
+		},
+	}
+	return f, stdout, stderr
+}
+
 func TestList(t *testing.T) {
 	t.Run("more than one resource", func(t *testing.T) {
 		mock := &httpmock.Registry{}
@@ -22,16 +36,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/resources.json"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, stdout, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -63,16 +68,7 @@ ID: 82611     Name: /tmp/test/assssas
 			httpmock.JSONFromFile("./fixtures/noresources.json"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, stdout, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -95,16 +91,7 @@ ID: 82611     Name: /tmp/test/assssas
 			httpmock.StringResponse("Error: You must provide a service_id as an argument. Use -h or --help for more information"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, _, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -125,16 +112,7 @@ ID: 82611     Name: /tmp/test/assssas
 			httpmock.StatusStringResponse(http.StatusNotFound, "Error: 404 Not Found"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, _, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 
