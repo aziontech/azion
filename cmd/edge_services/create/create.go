@@ -15,10 +15,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	createCmd := &cobra.Command{
-		Use:   "create",
-		Short: "Creates a new edge service",
-		Long: `Receives a name as parameter and creates an edge service with the given name
-	Usage: azion_cli edge_services create <EDGE_SERVICE_NAME>`,
+		Use:           "create",
+		Short:         "Creates a new edge service",
+		Long:          `Creates a new edge service with the received name`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

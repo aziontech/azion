@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:           "list",
 		Short:         "Lists services of an Azion account",
-		Long:          `FIXME with usage`,
+		Long:          `Lists services of an Azion account`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

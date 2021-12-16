@@ -15,7 +15,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use:           "delete",
 		Short:         "Deletes a resource based on a given resource_id",
-		Long:          `Deletes a resource when given a service_id and a resource_id.`,
+		Long:          `Deletes a resource when given a service_id and a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

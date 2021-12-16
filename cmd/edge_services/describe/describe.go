@@ -18,7 +18,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	describeCmd := &cobra.Command{
 		Use:           "describe",
 		Short:         "Describes a service based on a given service_id",
-		Long:          `FIXME with usage`,
+		Long:          `Describes a service based on a given service_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

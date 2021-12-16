@@ -15,7 +15,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use:           "delete",
 		Short:         "Deletes a service based on a given service_id",
-		Long:          `FIXME with USAGE`,
+		Long:          `Deletes a service based on a given service_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
