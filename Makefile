@@ -15,7 +15,11 @@ BUILD_DEBUG_VERSION ?= false
 AUTH_LOCAL=http://localhost:8080/
 # FIXME: Using a random endpoint since we don't have one to validate whether the token is valid
 AUTH_STAGE=https://stage-api.azion.net/domains?page_size=1
-AUTH_PROD=http://api.azion.com/?token
+AUTH_PROD=https://api.azionapi.net/domains?page_size=1
+
+API_LOCAL=http://localhost:8080
+API_PROD=https://api.azionapi.net
+API_STAGE=https://stage-api.azion.net
 
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
@@ -56,19 +60,28 @@ get-gosec-deps:
 		
 .PHONY : build-local
 build-local: ## build application code for local environment testing
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_LOCAL))
+	$(eval LDFLAGS:=$(LDFLAGS) \
+		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_LOCAL) \
+		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_LOCAL) \
+	)
 	@ $(GO) version
 	 $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
 .PHONY : build-stage
 build-stage: ## build application code for staging environment
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_STAGE))
+	$(eval LDFLAGS:=$(LDFLAGS) \
+		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_STAGE) \
+		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_STAGE) \
+	)
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
 .PHONY : build
 build-prod: ## build application code for production environment
-	$(eval LDFLAGS:=$(LDFLAGS) -X github.com/aziontech/azion-cli/token.AUTH_ENDPOINT=$(AUTH_PROD))
+	$(eval LDFLAGS:=$(LDFLAGS) \
+		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_PROD) \
+		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_PROD) \
+	)
 	@ $(GO) version
 	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
 
