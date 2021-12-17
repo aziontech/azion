@@ -2,6 +2,8 @@ package delete
 
 import (
 	"context"
+	"fmt"
+	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -33,7 +35,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := deleteService(client, ids[0]); err != nil {
+			verbose, err := cmd.Flags().GetBool("verbose")
+			if err != nil {
+				return err
+			}
+
+			if err := deleteService(client, f.IOStreams.Out, ids[0], verbose); err != nil {
 				return err
 			}
 
@@ -43,7 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return deleteCmd
 }
 
-func deleteService(client *sdk.APIClient, service_id int64) error {
+func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbose bool) error {
 
 	c := context.Background()
 	api := client.DefaultApi
@@ -55,6 +62,12 @@ func deleteService(client *sdk.APIClient, service_id int64) error {
 			return utils.ErrorInternalServerError
 		}
 		return err
+	}
+
+	if verbose {
+		if httpResp.StatusCode == 204 {
+			fmt.Fprintf(out, "Service %d was successfully deleted \n", service_id)
+		}
 	}
 
 	return nil

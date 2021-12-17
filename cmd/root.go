@@ -33,6 +33,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.SetErr(f.IOStreams.Err)
 
 	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
