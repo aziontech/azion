@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
@@ -92,7 +93,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := updateResource(client, ids[0], ids[1], updateRequest); err != nil {
+			if err := updateResource(client, f.IOStreams.Out, ids[0], ids[1], updateRequest); err != nil {
 				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
 			}
 
@@ -100,7 +101,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	updateCmd.Flags().StringP("name", "n", "", "<PATH>/<RESOURCE_NAME>")
+	updateCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
 	updateCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
 	updateCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\"")
 	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
@@ -108,7 +109,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return updateCmd
 }
 
-func updateResource(client *sdk.APIClient, service_id int64, resource_id int64, update sdk.UpdateResourceRequest) error {
+func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update sdk.UpdateResourceRequest) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -125,7 +126,7 @@ func updateResource(client *sdk.APIClient, service_id int64, resource_id int64, 
 		return errors.New(string(body))
 	}
 
-	fmt.Println(resp.Name)
+	fmt.Fprintf(out, "Name: %s", resp.Name)
 
 	return nil
 }

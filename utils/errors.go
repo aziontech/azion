@@ -12,5 +12,5 @@ var (
 	ErrorInvalidVariablesFileFormat = errors.New("You must provide a valid variables file content. Use -h or --help for more information")
 	ErrorInternalServerError        = errors.New("Something went wrong, please try again")
 	ErrorInvalidResourceTrigger     = errors.New("You must provide a valid trigger. Use -h or --help for more information")
-	ErrorUpdateNoFlagsSent          = errors.New("You need to provide at least one value in update. Use -h or --help for more information")
+	ErrorUpdateNoFlagsSent          = errors.New("You must provide at least one value in update. Use -h or --help for more information")
 )
