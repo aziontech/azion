@@ -66,7 +66,7 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbo
 
 	if verbose {
 		if httpResp.StatusCode == 204 {
-			fmt.Fprintf(out, "Service %d was successfully deleted \n", service_id)
+			fmt.Fprintf(out, "Service %d was successfully deleted\n", service_id)
 		}
 	}
 

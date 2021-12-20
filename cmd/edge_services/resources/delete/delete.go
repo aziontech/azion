@@ -65,7 +65,7 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 
 	if verbose {
 		if httpResp.StatusCode == 204 {
-			fmt.Fprintf(out, "Resource %d was successfully deleted \n", resource_id)
+			fmt.Fprintf(out, "Resource %d was successfully deleted\n", resource_id)
 		}
 	}
 

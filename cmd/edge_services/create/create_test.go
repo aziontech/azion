@@ -114,8 +114,52 @@ func TestCreate(t *testing.T) {
 		}
 
 		cmd := NewCmd(f)
-
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"--name", "BIRL"})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
+	})
+
+	t.Run("create service with name being verbose", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "edge_services/"),
+			func(req *http.Request) (*http.Response, error) {
+				request := &sdk.CreateServiceRequest{}
+				body, _ := ioutil.ReadAll(req.Body)
+				_ = json.Unmarshal(body, request)
+
+				response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
+
+				return &http.Response{StatusCode: http.StatusCreated,
+					Request: req,
+					Body:    ioutil.NopCloser(strings.NewReader(response)),
+					Header: http.Header{
+						"Content-Type": []string{"application/json"},
+					},
+				}, nil
+			},
+		)
+
+		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+		f := &cmdutil.Factory{
+			HttpClient: func() (*http.Client, error) {
+				return &http.Client{Transport: mock}, nil
+			},
+			IOStreams: &iostreams.IOStreams{
+				Out: stdout,
+				Err: stderr,
+			},
+		}
+
+		cmd := NewCmd(f)
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
+		cmd.SetArgs([]string{"--name", "BIRL", "--verbose"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)

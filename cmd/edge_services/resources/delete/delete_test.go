@@ -34,7 +34,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		cmd := NewCmd(f)
-
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "456"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
@@ -44,6 +44,38 @@ func TestCreate(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, "", stdout.String())
+	})
+
+	t.Run("delete resource by id being verbose", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("DELETE", "edge_services/1234/resources/456"),
+			httpmock.StatusStringResponse(204, ""),
+		)
+
+		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+		f := &cmdutil.Factory{
+			HttpClient: func() (*http.Client, error) {
+				return &http.Client{Transport: mock}, nil
+			},
+			IOStreams: &iostreams.IOStreams{
+				Out: stdout,
+				Err: stderr,
+			},
+		}
+
+		cmd := NewCmd(f)
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
+		cmd.SetArgs([]string{"1234", "456", "-v"})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
+
+		assert.Equal(t, "Resource 456 was successfully deleted\n", stdout.String())
 	})
 
 	t.Run("delete missing resource", func(t *testing.T) {
