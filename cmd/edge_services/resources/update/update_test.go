@@ -14,7 +14,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -129,7 +128,6 @@ func TestUpdate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Name: BIRL", stdout.String())
 	})
 
 	t.Run("update resource with all felds", func(t *testing.T) {
@@ -178,7 +176,5 @@ func TestUpdate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-
-		assert.Equal(t, "Name: BIRL", stdout.String())
 	})
 }

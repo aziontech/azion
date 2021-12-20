@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
@@ -70,7 +71,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewResource(client, ids[0], name, trigger, content_type, stringFile); err != nil {
+			verbose, err := cmd.Flags().GetBool("verbose")
+			if err != nil {
+				return err
+			}
+			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, trigger, content_type, stringFile, verbose); err != nil {
 				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
 			}
 
@@ -89,7 +94,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewResource(client *sdk.APIClient, service_id int64, name string, trigger string, content_type string, file string) error {
+func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, name string, trigger string, content_type string, file string, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -113,7 +118,14 @@ func createNewResource(client *sdk.APIClient, service_id int64, name string, tri
 		return errors.New(string(body))
 	}
 
-	fmt.Println(resp.Name)
+	if verbose {
+		fmt.Fprintf(out, "ID: %d\n", resp.Id)
+		fmt.Fprintf(out, "Name: %s\n", resp.Name)
+		fmt.Fprintf(out, "Type: %s\n", resp.Type)
+		fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
+		fmt.Fprintf(out, "Content: \n")
+		fmt.Fprintf(out, "%s", resp.Content)
+	}
 
 	return nil
 }

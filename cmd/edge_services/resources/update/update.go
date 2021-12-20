@@ -93,7 +93,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := updateResource(client, f.IOStreams.Out, ids[0], ids[1], updateRequest); err != nil {
+			verbose, err := cmd.Flags().GetBool("verbose")
+			if err != nil {
+				return err
+			}
+
+			if err := updateResource(client, f.IOStreams.Out, ids[0], ids[1], updateRequest, verbose); err != nil {
 				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
 			}
 
@@ -109,7 +114,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return updateCmd
 }
 
-func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update sdk.UpdateResourceRequest) error {
+func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update sdk.UpdateResourceRequest, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -126,7 +131,14 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 		return errors.New(string(body))
 	}
 
-	fmt.Fprintf(out, "Name: %s", resp.Name)
+	if verbose {
+		fmt.Fprintf(out, "ID: %d\n", resp.Id)
+		fmt.Fprintf(out, "Name: %s\n", resp.Name)
+		fmt.Fprintf(out, "Type: %s\n", resp.Type)
+		fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
+		fmt.Fprintf(out, "Content: \n")
+		fmt.Fprintf(out, "%s", resp.Content)
+	}
 
 	return nil
 }
