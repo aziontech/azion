@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strconv"
@@ -35,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := updateService(client, id[0], cmd, args); err != nil {
+			if err := updateService(client, f.IOStreams.Out, id[0], cmd, args); err != nil {
 				return err
 			}
 
@@ -50,7 +51,7 @@ The format accepted for variables definition is one <KEY>=<VALUE> per line`)
 	return updateCmd
 }
 
-func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []string) error {
+func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Command, args []string) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -124,7 +125,20 @@ func updateService(client *sdk.APIClient, id int64, cmd *cobra.Command, args []s
 		return err
 	}
 
-	fmt.Printf("ID: %d\tName: %s \n", resp.Id, resp.Name)
+	verbose, err := cmd.Flags().GetBool("verbose")
+	if err != nil {
+		return err
+	}
+
+	if verbose {
+		fmt.Fprintf(out, "ID: %d\n", resp.Id)
+		fmt.Fprintf(out, "Name: %s\n", resp.Name)
+		fmt.Fprintf(out, "Updated at: %s\n", resp.UpdatedAt)
+		fmt.Fprintf(out, "Last Editor: %s\n", resp.LastEditor)
+		fmt.Fprintf(out, "Active: %t\n", resp.Active)
+		fmt.Fprintf(out, "Bound Nodes: %d\n", resp.BoundNodes)
+		fmt.Fprintf(out, "Permissions: %s\n", resp.Permissions)
+	}
 
 	return nil
 }

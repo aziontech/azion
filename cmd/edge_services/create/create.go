@@ -32,7 +32,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewService(client, f.IOStreams.Out, name); err != nil {
+			verbose, err := cmd.Flags().GetBool("verbose")
+			if err != nil {
+				return err
+			}
+
+			if err := createNewService(client, f.IOStreams.Out, name, verbose); err != nil {
 				return err
 			}
 
@@ -45,7 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewService(client *sdk.APIClient, out io.Writer, name string) error {
+func createNewService(client *sdk.APIClient, out io.Writer, name string, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 	serviceRequest := sdk.CreateServiceRequest{}
@@ -59,8 +64,9 @@ func createNewService(client *sdk.APIClient, out io.Writer, name string) error {
 
 		return err
 	}
-
-	fmt.Fprintf(out, "ID: %d\tName: %s \n", resp.Id, resp.Name)
+	if verbose {
+		fmt.Fprintf(out, "ID: %d\tName: %s \n", resp.Id, resp.Name)
+	}
 
 	return nil
 }

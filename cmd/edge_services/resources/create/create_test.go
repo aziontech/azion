@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,6 +72,50 @@ func TestCreate(t *testing.T) {
 			},
 		)
 
+		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
+		f := &cmdutil.Factory{
+			HttpClient: func() (*http.Client, error) {
+				return &http.Client{Transport: mock}, nil
+			},
+			IOStreams: &iostreams.IOStreams{
+				Out: stdout,
+				Err: stderr,
+			},
+		}
+
+		contentFile, _ := os.CreateTemp("", "content.txt")
+
+		_, _ = contentFile.Write([]byte("insert your text here"))
+
+		cmd := NewCmd(f)
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
+		cmd.SetArgs([]string{"-v", "1234", "--name", "/tmp/testando.txt", "--content-type", "Text", "--content-file", contentFile.Name()})
+		cmd.SetIn(&bytes.Buffer{})
+		cmd.SetOut(ioutil.Discard)
+		cmd.SetErr(ioutil.Discard)
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
+		assert.Equal(t, "ID: 82706\nName: /tmp/testando.txt\nType: \nContent type: Text\nContent: \ninsert your text here", stdout.String())
+
+	})
+
+	t.Run("create text resource being verbose", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "edge_services/1234/resources"),
+			func(req *http.Request) (*http.Response, error) {
+				return &http.Response{StatusCode: http.StatusCreated,
+					Request: req,
+					Body:    ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
+					Header: http.Header{
+						"Content-Type": []string{"application/json"},
+					},
+				}, nil
+			},
+		)
+
 		f, _, _ := newFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
@@ -78,7 +123,7 @@ func TestCreate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("insert your text here"))
 
 		cmd := NewCmd(f)
-
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "--name", "/tmp/testando.txt", "--content-type", "Text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
@@ -112,7 +157,7 @@ func TestCreate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("#!/bin/sh"))
 
 		cmd := NewCmd(f)
-
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "Shell Script", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
@@ -171,7 +216,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
-
+		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		_, err := cmd.ExecuteC()
 		require.EqualError(t, err, "Not found. Use -h or --help for more information")
 	})
