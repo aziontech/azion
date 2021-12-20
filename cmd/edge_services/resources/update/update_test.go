@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var resposeBody = `
+var responseBody = `
 {
 	"id": 666,
 	"name": "{name}",
@@ -96,7 +96,7 @@ func TestUpdate(t *testing.T) {
 				body, _ := ioutil.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
-				response := strings.ReplaceAll(resposeBody, "{name}", *request.Name)
+				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
@@ -141,7 +141,7 @@ func TestUpdate(t *testing.T) {
 				body, _ := ioutil.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
-				response := strings.ReplaceAll(resposeBody, "{name}", *request.Name)
+				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
@@ -179,7 +179,7 @@ func TestUpdate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("update resource with all felds", func(t *testing.T) {
+	t.Run("update resource with all fields being verbose", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -189,7 +189,7 @@ func TestUpdate(t *testing.T) {
 				body, _ := ioutil.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
-				response := strings.ReplaceAll(resposeBody, "{name}", *request.Name)
+				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,

@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var resposeBody = `
+var responseBody = `
 {
     "id": 1753,
     "name": "{name}",
@@ -90,7 +90,7 @@ func TestCreate(t *testing.T) {
 				body, _ := ioutil.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
-				response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
+				response := strings.ReplaceAll(responseBody, "{name}", request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
@@ -134,7 +134,7 @@ func TestCreate(t *testing.T) {
 				body, _ := ioutil.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
-				response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
+				response := strings.ReplaceAll(responseBody, "{name}", request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
