@@ -58,7 +58,7 @@ func createNewService(client *sdk.APIClient, out io.Writer, name string, verbose
 
 	resp, httpResp, err := api.NewService(c).CreateServiceRequest(serviceRequest).Execute()
 	if err != nil {
-		if httpResp.StatusCode >= 500 {
+		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 

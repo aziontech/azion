@@ -61,7 +61,7 @@ func describeService(client *sdk.APIClient, out io.Writer, service_id int64, wit
 
 	resp, httpResp, err := api.GetService(c, service_id).WithVars(withVariables).Execute()
 	if err != nil {
-		if httpResp.StatusCode >= 500 {
+		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		return err
