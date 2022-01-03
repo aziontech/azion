@@ -63,7 +63,7 @@ func Execute() {
 	}
 
 	cmd := NewRootCmd(factory)
-	viper.BindPFlag("token", cmd.PersistentFlags().Lookup("token"))
+	_ = viper.BindPFlag("token", cmd.PersistentFlags().Lookup("token"))
 
 	cobra.CheckErr(cmd.Execute())
 }
