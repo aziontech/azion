@@ -15,7 +15,7 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete",
+		Use:           "delete <service_id> [flags]",
 		Short:         "Deletes a service based on a given service_id",
 		Long:          `Deletes a service based on a given service_id`,
 		SilenceUsage:  true,

@@ -19,7 +19,7 @@ const SHELL_SCRIPT string = "Shell Script"
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// updateCmd represents the update command
 	updateCmd := &cobra.Command{
-		Use:           "update",
+		Use:           "update <service_id> <resource_id> [flags]",
 		Short:         "Updates a resource based on a resource_id",
 		Long:          `Updates fields of a resource based on a service_id and resource_id`,
 		SilenceUsage:  true,
@@ -108,7 +108,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	updateCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
 	updateCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	updateCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\"")
+	updateCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\">")
 	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
 
 	return updateCmd

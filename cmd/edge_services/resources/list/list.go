@@ -25,9 +25,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list",
+		Use:           "list <service_id> [flags]",
 		Short:         "Lists resources in a given service",
-		Long:          `Lists all resources found in a service by providing a service_id. Service_id can be found by listing your services`,
+		Long:          `Lists all resources found in a service by providing a service_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {

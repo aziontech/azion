@@ -19,7 +19,7 @@ const SHELL_SCRIPT string = "Shell Script"
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
-		Use:           "create",
+		Use:           "create <service_id> [flags]",
 		Short:         "Creates a new resource",
 		Long:          `Creates a new resource in an Edge Service based on a giver servce_id.`,
 		SilenceUsage:  true,
@@ -83,10 +83,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	createCmd.Flags().StringP("name", "n", "", "<PATH>/<RESOURCE_NAME>")
+	createCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
 	_ = createCmd.MarkFlagRequired("name")
 	createCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\"")
+	createCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\">")
 	_ = createCmd.MarkFlagRequired("content-type")
 	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
 	_ = createCmd.MarkFlagRequired("content-file")

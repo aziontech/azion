@@ -16,7 +16,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
-		Use:           "describe",
+		Use:           "describe <service_id> [flags]",
 		Short:         "Describes a service based on a given service_id",
 		Long:          `Describes a service based on a given service_id`,
 		SilenceUsage:  true,
