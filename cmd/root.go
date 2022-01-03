@@ -9,7 +9,9 @@ import (
 	"github.com/aziontech/azion-cli/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rootToken string
@@ -43,14 +45,25 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func Execute() {
+	streams := iostreams.System()
+	httpClient := &http.Client{
+		Timeout: 10 * time.Second, // TODO: Configure this somewhere
+	}
+
+	// Ignoring errors since the file might not exist
+	tok, _ := token.ReadFromDisk()
+	viper.SetDefault("token", tok)
+
 	factory := &cmdutil.Factory{
 		HttpClient: func() (*http.Client, error) {
-			return &http.Client{
-				Timeout: 10 * time.Second, // TODO: Configure this somewhere
-			}, nil
+			return httpClient, nil
 		},
-		IOStreams: iostreams.System(),
+		IOStreams: streams,
+		Config:    viper.GetViper(),
 	}
+
 	cmd := NewRootCmd(factory)
+	viper.BindPFlag("token", cmd.PersistentFlags().Lookup("token"))
+
 	cobra.CheckErr(cmd.Execute())
 }
