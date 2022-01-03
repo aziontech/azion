@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -24,6 +25,7 @@ func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.B
 			Out: stdout,
 			Err: stderr,
 		},
+		Config: viper.New(),
 	}
 	return f, stdout, stderr
 }

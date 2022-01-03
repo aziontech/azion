@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,6 +32,7 @@ func TestCreate(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)
@@ -63,6 +65,7 @@ func TestCreate(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)
@@ -95,6 +98,7 @@ func TestCreate(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)

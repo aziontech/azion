@@ -50,7 +50,7 @@ func Execute() {
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
 	}
 
-	// Ignoring errors since the file might not exist
+	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
 	tok, _ := token.ReadFromDisk()
 	viper.SetDefault("token", tok)
 
