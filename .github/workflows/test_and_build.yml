@@ -21,12 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # FIXME: Temporary fix while the tests break because the file does not exist
-      - name: Create Config Dir
-        run: |
-          mkdir -p ~/.azion/
-          touch ~/.azion/credentials
-
       - name: Build & Test
         run: make test build
 
