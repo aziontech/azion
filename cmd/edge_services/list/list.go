@@ -25,7 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list",
+		Use:           "list [flags]",
 		Short:         "Lists services of an Azion account",
 		Long:          `Lists services of an Azion account`,
 		SilenceUsage:  true,

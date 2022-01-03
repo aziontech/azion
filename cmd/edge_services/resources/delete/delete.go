@@ -15,8 +15,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete",
-		Short:         "Deletes a resource based on a given resource_id",
+		Use:           "delete <service_id> <resource_id> [flags]",
+		Short:         "Deletes a resource based on a given service_id and a resource_id",
 		Long:          `Deletes a resource when given a service_id and a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,

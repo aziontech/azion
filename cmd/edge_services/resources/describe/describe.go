@@ -16,9 +16,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
-		Use:           "describe",
+		Use:           "describe <service_id> <resource_id> [flags]",
 		Short:         "Describes a resource based on a given resource_id",
-		Long:          `Provides a long desription of a resource based on a given resource_id`,
+		Long:          `Provides a long desription of a resource based on a given service_id and a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
