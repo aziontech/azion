@@ -70,7 +70,7 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 		Execute()
 
 	if err != nil {
-		if httpResp.StatusCode >= 500 {
+		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		return err

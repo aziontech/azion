@@ -58,7 +58,7 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbo
 	httpResp, err := api.DeleteService(c, service_id).Execute()
 
 	if err != nil {
-		if httpResp.StatusCode >= 500 {
+		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		return err
