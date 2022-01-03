@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,6 +39,7 @@ func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.B
 			Out: stdout,
 			Err: stderr,
 		},
+		Config: viper.New(),
 	}
 	return f, stdout, stderr
 }
@@ -108,16 +110,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, _, _ := newFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
@@ -153,16 +146,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, _, _ := newFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -201,16 +185,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-		}
+		f, stdout, _ := newFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 

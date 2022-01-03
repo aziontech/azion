@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			client, err := requests.CreateClient(f, cmd)
+			client, err := requests.CreateClient(f)
 			if err != nil {
 				return err
 			}

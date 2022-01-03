@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := requests.CreateClient(f, cmd)
+			client, err := requests.CreateClient(f)
 			if err != nil {
 				return err
 			}

@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -62,6 +63,7 @@ func TestUpdate(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)
@@ -105,6 +107,7 @@ func TestUpdate(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)

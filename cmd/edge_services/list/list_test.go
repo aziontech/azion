@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,6 +32,7 @@ func TestList(t *testing.T) {
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)
@@ -76,6 +78,7 @@ ID: 1715     Name: tst-flag
 				Out: stdout,
 				Err: stderr,
 			},
+			Config: viper.New(),
 		}
 
 		cmd := NewCmd(f)
