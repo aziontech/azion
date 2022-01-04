@@ -46,16 +46,17 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t,
-			`ID: 1718     Name: batata 
-ID: 1209     Name: ApeService 
-ID: 1752     Name: ApeService 
-ID: 1751     Name: Testando CLI 
-ID: 1750     Name: testing new code cli 
-ID: 26     Name: Service Henrique Teste 
-ID: 1746     Name: jagaimo 
-ID: 1717     Name: potato 
-ID: 1716     Name: tst-flag 
-ID: 1715     Name: tst-flag 
+			`ID      Name
+1718    batata
+1209    ApeService
+1752    ApeService
+1751    Testando CLI
+1750    testing new code cli
+26      Service Henrique Teste
+1746    jagaimo
+1717    potato
+1716    tst-flag
+1715    tst-flag
 `,
 			stdout.String(),
 		)

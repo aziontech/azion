@@ -2,11 +2,11 @@ package list
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
@@ -69,8 +69,12 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 
 	services := resp.Services
 
-	for _, service := range services {
-		fmt.Fprintf(out, "ID: %d     Name: %s \n", service.Id, service.Name)
+	if len(services) == 0 {
+		return nil
 	}
+
+	p := printer.NewTab(out)
+	p.Print([]string{"ID", "Name"}, []string{"Id", "Name"}, services)
+
 	return nil
 }
