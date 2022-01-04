@@ -73,9 +73,6 @@ func run(args []string) error {
 		}
 	default:
 		log.Fatal(errors.New("You must provide a valid file type"))
-		if err := os.Remove(*dir); err != nil {
-			return err
-		}
 	}
 
 	return nil
