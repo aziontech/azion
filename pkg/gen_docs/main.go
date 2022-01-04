@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -25,7 +26,7 @@ func main() {
 func run(args []string) error {
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
 	dir := flags.StringP("doc-path", "", "", "Path directory where you want generate doc files")
-	// filetype := flags.Int("file-type", 0, "File type for generating the documentation. 1 - Yaml; 2 -ReST") // we could create this flag to be able to decide the format in which the docs will be generated
+	filetype := flags.String("file-type", "", "File type for generating the documentation: <yaml|md>") // we could create this flag to be able to decide the format in which the docs will be generated
 	help := flags.BoolP("help", "h", false, "Help about any command")
 
 	if err := flags.Parse(args); err != nil {
@@ -53,13 +54,28 @@ func run(args []string) error {
 	rootCmd := cmd.NewRootCmd(factory)
 	rootCmd.InitDefaultHelpCmd()
 
-	if err := os.MkdirAll(*dir, 0755); err != nil {
-		return err
-	}
-
-	err := doc.GenYamlTree(rootCmd, *dir)
-	if err != nil {
-		log.Fatal(err)
+	switch {
+	case *filetype == "yaml":
+		if err := os.MkdirAll(*dir, 0755); err != nil {
+			return err
+		}
+		err := doc.GenYamlTree(rootCmd, *dir)
+		if err != nil {
+			log.Fatal(err)
+		}
+	case *filetype == "md":
+		if err := os.MkdirAll(*dir, 0755); err != nil {
+			return err
+		}
+		err := doc.GenMarkdownTree(rootCmd, *dir)
+		if err != nil {
+			log.Fatal(err)
+		}
+	default:
+		log.Fatal(errors.New("You must provide a valid file type"))
+		if err := os.Remove(*dir); err != nil {
+			return err
+		}
 	}
 
 	return nil

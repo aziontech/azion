@@ -10,7 +10,7 @@ import (
 func Test_run(t *testing.T) {
 	t.Run("test creating dir and reading file without error", func(t *testing.T) {
 		dir := t.TempDir()
-		args := []string{"--doc-path", dir}
+		args := []string{"--doc-path", dir, "--file-type", "yaml"}
 		err := run(args)
 		if err != nil {
 			t.Fatalf("got error: %v", err)
