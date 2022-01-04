@@ -28,13 +28,7 @@ func NewTab(w io.Writer) *TabPrinter {
 // `headers` and `fields` should be match one to one i.e. for each header there should be a field
 func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, headers []string) {
 	fmt.Fprintf(p.writer, "%s", buildLine(headers))
-
-	rows := buildRows(elems, fields)
-	for _, row := range rows {
-		fmt.Fprintf(p.writer, "%s", buildLine(row))
-	}
-
-	p.writer.Flush()
+	p.Print(elems, fields)
 }
 
 // Print can be used to print a some fields of a struct slice, all tab separated.
