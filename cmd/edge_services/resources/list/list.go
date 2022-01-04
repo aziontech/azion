@@ -83,7 +83,7 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 	}
 
 	tp := printer.NewTab(out)
-	tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "Name"})
+	tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
 
 	return nil
 }

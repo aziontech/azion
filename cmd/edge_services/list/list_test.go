@@ -46,7 +46,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t,
-			`ID      Name
+			`ID      NAME
 1718    batata
 1209    ApeService
 1752    ApeService

@@ -52,7 +52,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t,
-			`ID       Name
+			`ID       NAME
 82587    /tmp/abacatito
 82588    /tmp/abacatito
 82592    /tmp/test/asasa
