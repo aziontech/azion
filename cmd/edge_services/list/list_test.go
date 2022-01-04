@@ -3,13 +3,10 @@ package list
 import (
 	"bytes"
 	"io/ioutil"
-	"net/http"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/spf13/viper"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,17 +20,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/services.json"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-			Config: viper.New(),
-		}
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -70,17 +57,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/noservices.json"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-			Config: viper.New(),
-		}
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 

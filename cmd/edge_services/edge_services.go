@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmdEdgeServices(f *cmdutil.Factory) *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// edgeServicesCmd represents the edgeServices command
 	edgeServicesCmd := &cobra.Command{
 		Use:   "edge_services",

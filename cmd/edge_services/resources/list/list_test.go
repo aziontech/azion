@@ -6,29 +6,12 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
-	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-	f := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return &http.Client{Transport: mock}, nil
-		},
-		IOStreams: &iostreams.IOStreams{
-			Out: stdout,
-			Err: stderr,
-		},
-		Config: viper.New(),
-	}
-	return f, stdout, stderr
-}
 
 func TestList(t *testing.T) {
 	t.Run("more than one resource", func(t *testing.T) {
@@ -39,7 +22,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/resources.json"),
 		)
 
-		f, stdout, _ := newFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -72,7 +55,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/noresources.json"),
 		)
 
-		f, stdout, _ := newFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -95,7 +78,7 @@ func TestList(t *testing.T) {
 			httpmock.StringResponse("Error: You must provide a service_id as an argument. Use -h or --help for more information"),
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -115,7 +98,7 @@ func TestList(t *testing.T) {
 			httpmock.StatusStringResponse(http.StatusNotFound, "Error: 404 Not Found"),
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
