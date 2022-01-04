@@ -38,3 +38,23 @@ jobs:
 
       - name: Cross-build
         run: make cross-build ENVFILE=./env/prod
+
+      - name: Configure AWS Credentials (azion-downloads)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.S3_DOWNLOADS_ID }}
+          aws-secret-access-key: ${{ secrets.S3_DOWNLOADS_SECRET }}
+          aws-region: us-east-1
+
+      - name: Upload to azion-downloads production dir
+        run: |
+          while read spec; \
+          do\
+            distro=$(echo ${spec} | cut -d/ -f1);\
+            goarch=$(echo ${spec} | cut -d/ -f2);\
+            arch=$(echo ${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$/arm32/g;');\
+            cp dist/$distro/$arch/azioncli* dist/$distro/$arch/azioncli; 
+            aws s3 cp --no-progress --recursive \
+              --exclude "*" --include "azioncli*" \
+              dist/$distro/$arch/ s3://azion-downloads/azioncli/prod/$distro/$arch/; \
+          done < BUILD
