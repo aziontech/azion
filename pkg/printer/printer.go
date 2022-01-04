@@ -23,12 +23,25 @@ func NewTab(w io.Writer) *TabPrinter {
 	}
 }
 
-// Print prints a table using tab separation
-// `headers` and `fields` should have the same length, representing each column of the table
-// `elems` should be of a slice type else only the header will be printed.
-func (p *TabPrinter) Print(headers []string, fields []string, elems interface{}) {
+// PrintWitHeaders prints using Print but with an additional header line
+// Each element of the `headers` slice will be used to name a given tab-separated column
+// `headers` and `fields` should be match one to one i.e. for each header there should be a field
+func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, headers []string) {
 	fmt.Fprintf(p.writer, "%s", buildLine(headers))
 
+	rows := buildRows(elems, fields)
+	for _, row := range rows {
+		fmt.Fprintf(p.writer, "%s", buildLine(row))
+	}
+
+	p.writer.Flush()
+}
+
+// Print can be used to print a some fields of a struct slice, all tab separated.
+// The `fields` slice should contain the names of the struct fields that should be printed.
+// If a field does not exist in a given element of `elems`, it will panic
+// If `elems` is not of a slice type, nothing will be printed.
+func (p *TabPrinter) Print(elems interface{}, fields []string) {
 	rows := buildRows(elems, fields)
 	for _, row := range rows {
 		fmt.Fprintf(p.writer, "%s", buildLine(row))

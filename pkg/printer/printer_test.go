@@ -24,7 +24,7 @@ func TestTab(t *testing.T) {
 			{2, "MySuperMock", time.Now()},
 		}
 
-		tp.Print([]string{"ID", "Name"}, []string{"ID", "Name"}, values)
+		tp.PrintWithHeaders(values, []string{"ID", "Name"}, []string{"ID", "Name"})
 
 		assert.Equal(t, `ID    Name
 1     MyMock
@@ -36,7 +36,7 @@ func TestTab(t *testing.T) {
 		out := bytes.NewBuffer(nil)
 		tp := NewTab(out)
 
-		tp.Print([]string{"ID", "Name"}, []string{"ID", "Name"}, "foo")
+		tp.PrintWithHeaders(1, []string{"ID", "Name"}, []string{"ID", "Name"})
 
 		assert.Equal(t, "ID    Name\n", out.String())
 	})
@@ -50,7 +50,7 @@ func TestTab(t *testing.T) {
 			{2, "MySuperMock", time.Date(2006, 01, 02, 23, 59, 32, 0, time.UTC)},
 		}
 
-		tp.Print([]string{"ID", "Name", "Date"}, []string{"ID", "Name", "Date"}, values)
+		tp.PrintWithHeaders(values, []string{"ID", "Name", "Date"}, []string{"ID", "Name", "Date"})
 
 		assert.Equal(t, `ID    Name           Date
 1     MyMock         12 Dec 12 09:30 +0000
@@ -67,7 +67,7 @@ func TestTab(t *testing.T) {
 			{2, "MySuperMock", time.Date(2006, 01, 02, 23, 59, 32, 0, time.UTC)},
 		}
 
-		tp.Print([]string{"ID", "Name", "Date"}, []string{"ID", "Name"}, values)
+		tp.PrintWithHeaders(values, []string{"ID", "Name"}, []string{"ID", "Name", "Date"})
 
 		assert.Equal(t, `ID    Name    Date
 1     MyMock

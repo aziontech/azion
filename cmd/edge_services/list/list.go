@@ -74,7 +74,7 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 	}
 
 	p := printer.NewTab(out)
-	p.Print([]string{"ID", "Name"}, []string{"Id", "Name"}, services)
+	p.PrintWithHeaders(services, []string{"Id", "Name"}, []string{"ID", "Name"})
 
 	return nil
 }
