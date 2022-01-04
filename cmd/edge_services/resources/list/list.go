@@ -2,11 +2,11 @@ package list
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
 	"github.com/spf13/cobra"
@@ -78,8 +78,12 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 
 	resources := resp.Resources
 
-	for _, resource := range resources {
-		fmt.Fprintf(out, "ID: %d     Name: %s \n", resource.Id, resource.Name)
+	if len(resources) == 0 {
+		return nil
 	}
+
+	tp := printer.NewTab(out)
+	tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
+
 	return nil
 }
