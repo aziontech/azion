@@ -1,6 +1,19 @@
 # azion-cli
 
-The developer friendly with to interact with Azion!
+The developer friendly way to interact with Azion!
+
+## Building
+
+```sh
+# Build project, by default it will connect to the Stage APIs
+$ make build
+
+# Building Production version
+$ make build ENVFILE=./env/prod
+
+# Cross-Build for multiple platforms and architectures
+$ make cross-build
+```
 
 ## How to Use
 
@@ -29,9 +42,9 @@ Flags:
 Use "azioncli [command] --help" for more information about a command.
 ```
 
-For each subcommand you can use the `help` subcommand or with the `--help` flag
+For each subcommand you the `-h|--help` flag to learn more about it:
 ```sh
-$ azioncli help edge_services
+$ azioncli edge_services --help
 You may create, update, delete, list and describe services of an Azion account.
 
 Usage:
@@ -54,18 +67,4 @@ Global Flags:
   -v, --verbose        Makes azioncli verbose during the operation
 
 Use "azioncli edge_services [command] --help" for more information about a command.
-
-```
-
-## Building
-
-```sh
-# Build project, by default it will connect to the Stage APIs
-$ make build
-
-# Building Production version
-$ make build ENVFILE=./env/prod
-
-# Cross-Build for multiple platforms and architectures
-$ make cross-build
 ```
