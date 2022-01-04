@@ -9,12 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,21 +26,6 @@ var resposeBody = `
     "content_type": "{content_type}"
 }
 `
-
-func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
-	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-	f := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return &http.Client{Transport: mock}, nil
-		},
-		IOStreams: &iostreams.IOStreams{
-			Out: stdout,
-			Err: stderr,
-		},
-		Config: viper.New(),
-	}
-	return f, stdout, stderr
-}
 
 func buildResponseContent(req *http.Request) string {
 	request := &sdk.CreateResourceRequest{}
@@ -74,7 +57,7 @@ func TestCreate(t *testing.T) {
 			},
 		)
 
-		f, stdout, _ := newFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -109,7 +92,7 @@ func TestCreate(t *testing.T) {
 			},
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -143,7 +126,7 @@ func TestCreate(t *testing.T) {
 			},
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -162,7 +145,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("create script resource without trigger", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -179,7 +162,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("create resource without content file", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -199,7 +182,7 @@ func TestCreate(t *testing.T) {
 			httpmock.REST("POST", "edge_services/1234/resources"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not found"),
 		)
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 

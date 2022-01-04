@@ -9,12 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/edgeservices-go-sdk"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,21 +27,6 @@ var responseBody = `
   }
 `
 
-func newFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
-	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-	f := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return &http.Client{Transport: mock}, nil
-		},
-		IOStreams: &iostreams.IOStreams{
-			Out: stdout,
-			Err: stderr,
-		},
-		Config: viper.New(),
-	}
-	return f, stdout, stderr
-}
-
 func TestUpdate(t *testing.T) {
 
 	t.Run("not all arguments were sent", func(t *testing.T) {
@@ -54,7 +37,7 @@ func TestUpdate(t *testing.T) {
 			httpmock.StringResponse("Error: You must provide a service_id and a resource_id as arguments. Use -h or --help for more information"),
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -75,7 +58,7 @@ func TestUpdate(t *testing.T) {
 			httpmock.StringResponse("Error: You must provide at least one value in update. Use -h or --help for more information"),
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -110,7 +93,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
@@ -146,7 +129,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		f, _, _ := newFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 
@@ -185,7 +168,7 @@ func TestUpdate(t *testing.T) {
 			},
 		)
 
-		f, stdout, _ := newFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		contentFile, _ := os.CreateTemp("", "content.txt")
 

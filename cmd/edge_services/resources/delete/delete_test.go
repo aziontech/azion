@@ -3,13 +3,10 @@ package delete
 import (
 	"bytes"
 	"io/ioutil"
-	"net/http"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/spf13/viper"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,17 +20,7 @@ func TestCreate(t *testing.T) {
 			httpmock.StatusStringResponse(204, ""),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-			Config: viper.New(),
-		}
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
@@ -56,17 +43,7 @@ func TestCreate(t *testing.T) {
 			httpmock.StatusStringResponse(204, ""),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-			Config: viper.New(),
-		}
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
@@ -89,17 +66,7 @@ func TestCreate(t *testing.T) {
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
-		stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
-		f := &cmdutil.Factory{
-			HttpClient: func() (*http.Client, error) {
-				return &http.Client{Transport: mock}, nil
-			},
-			IOStreams: &iostreams.IOStreams{
-				Out: stdout,
-				Err: stderr,
-			},
-			Config: viper.New(),
-		}
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
