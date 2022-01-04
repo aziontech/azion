@@ -80,10 +80,10 @@ func buildRows(elems interface{}, fields []string) [][]string {
 }
 
 func toString(value interface{}) string {
-	switch value.(type) {
+	switch v := value.(type) {
 	case time.Time:
-		return value.(time.Time).Format(time.RFC822Z)
+		return v.Format(time.RFC822Z)
 	default:
-		return fmt.Sprintf("%v", value)
+		return fmt.Sprintf("%v", v)
 	}
 }
