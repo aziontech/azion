@@ -26,7 +26,7 @@ func main() {
 func run(args []string) error {
 	flags := pflag.NewFlagSet("", pflag.ContinueOnError)
 	dir := flags.StringP("doc-path", "", "", "Path directory where you want generate doc files")
-	filetype := flags.String("file-type", "", "File type for generating the documentation: <yaml|md>") // we could create this flag to be able to decide the format in which the docs will be generated
+	filetype := flags.String("file-type", "", "File type for generating the documentation: <yaml|md>")
 	help := flags.BoolP("help", "h", false, "Help about any command")
 
 	if err := flags.Parse(args); err != nil {
