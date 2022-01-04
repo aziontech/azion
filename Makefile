@@ -9,21 +9,16 @@ GOSEC ?= $(GOBIN)/gosec
 GOLINT ?= $(GOBIN)/golint
 GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
-BUILD_DEBUG_VERSION ?= false
 
 # Variables for token endpoints
-AUTH_LOCAL=http://localhost:8080/
-# FIXME: Using a random endpoint since we don't have one to validate whether the token is valid
-AUTH_STAGE=https://stage-api.azion.net/domains?page_size=1
-AUTH_PROD=https://api.azionapi.net/domains?page_size=1
-
-API_LOCAL=http://localhost:8080
-API_PROD=https://api.azionapi.net
-API_STAGE=https://stage-api.azion.net
+ENVFILE ?= ./env/stage
 
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
-LDFLAGS=-X github.com/aziontech/azion-cli/cmd/version.BinVersion=$(BIN_VERSION)
+# The variables with $$ should be sourced from an envfile
+LDFLAGS=-X github.com/aziontech/azion-cli/cmd/version.BinVersion=$(BIN_VERSION) \
+		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$$AUTH_URL \
+		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$$API_URL
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 
@@ -58,45 +53,21 @@ get-gosec-deps:
 	@ cd $(GOPATH); \
 		$(GO) get -u github.com/securego/gosec/cmd/gosec
 		
-.PHONY : build-local
-build-local: ## build application code for local environment testing
-	$(eval LDFLAGS:=$(LDFLAGS) \
-		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_LOCAL) \
-		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_LOCAL) \
-	)
-	@ $(GO) version
-	 $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
-
-.PHONY : build-stage
-build-stage: ## build application code for staging environment
-	$(eval LDFLAGS:=$(LDFLAGS) \
-		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_STAGE) \
-		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_STAGE) \
-	)
-	@ $(GO) version
-	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
-
 .PHONY : build
-build-prod: ## build application code for production environment
-	$(eval LDFLAGS:=$(LDFLAGS) \
-		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$(AUTH_PROD) \
-		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$(API_PROD) \
-	)
+build: ## build application code for production environment
 	@ $(GO) version
-	@ $(GO) build -ldflags '$(LDFLAGS)' -o ./bin/$(NAME)
+	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME)
 
 .PHONY : cross-build
-cross-build: ## cross-compile for all platforms/architectures. Use the env BUILD_DEBUG_VERSION=true for building debug binaries as well
+cross-build: ## cross-compile for all platforms/architectures.
 	@ $(GO) version
-	set -ex;\
+	set -e;\
+	source $(ENVFILE); \
 	while read spec; \
 	do\
 		distro=$$(echo $${spec} | cut -d/ -f1);\
 		goarch=$$(echo $${spec} | cut -d/ -f2);\
 		arch=$$(echo $${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$$/arm32/g;');\
 		mkdir -p dist/$$distro/$$arch;\
-		env CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags '$(LDFLAGS) $(LDFLAGS_STRIP)' -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION); \
-		if [ "$(BUILD_DEBUG_VERSION)" = true ]; then \
-			env CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags '$(LDFLAGS)' -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION).debug; \
-		fi; \
+		CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags "$(LDFLAGS)" -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION); \
 	done < BUILD

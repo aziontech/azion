@@ -1,0 +1,2 @@
+API_URL=https://stage-api.azion.net
+AUTH_URL=https://stage-api.azion.net/domains?page_size1
