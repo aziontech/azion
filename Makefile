@@ -54,7 +54,7 @@ get-gosec-deps:
 		$(GO) get -u github.com/securego/gosec/cmd/gosec
 		
 .PHONY : build
-build: ## build application code for production environment
+build: ## build application
 	@ $(GO) version
 	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME)
 
