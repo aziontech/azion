@@ -57,5 +57,5 @@ jobs:
             cp dist/$distro/$arch/azioncli* dist/$distro/$arch/azioncli; 
             aws s3 cp --no-progress --recursive \
               --exclude "*" --include "azioncli*" \
-              dist/$distro/$arch/ s3://azion-downloads/azioncli/stage/$distro/$arch/; \
+              dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/; \
           done < BUILD
