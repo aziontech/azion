@@ -1,0 +1,11 @@
+# Binaries for programs and plugins
+*.exe
+*.tool-versions
+
+#Directories
+bin/
+dist/
+.vscode/
+
+#Files
+.DS_Store

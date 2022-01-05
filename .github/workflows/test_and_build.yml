@@ -1,0 +1,31 @@
+name: Test and Build
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches-ignore:
+      - master 
+
+jobs:
+  build:
+    runs-on: self-hosted
+    container:
+      image: golang:1.17
+
+    steps:
+      - name: Setting GIT
+        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build & Test
+        run: make test build
+
+      - name: Linter
+        run: make lint
+
+      - name: Gosec
+        run: make sec

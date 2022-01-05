@@ -1,0 +1,66 @@
+name: Deploy to Stage
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: self-hosted
+    container:
+      image: golang:1.17
+    env:
+      CGO_ENABLED: 0 # Statically linked
+
+    steps:
+      - name: Setting GIT
+        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: tag_ver
+        uses: anothrNick/github-tag-action@master
+        env:
+          RELEASE_BRANCHES: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE_SUFFIX: dev
+
+      - name: Refresh git
+        run: git fetch --tags
+
+      - name: Build
+        run: make build
+
+      - name: Cross-build
+        run: make cross-build
+
+      - name: Install AWS CLI
+        run: |
+          apt update
+          apt install -y awscli
+
+      - name: Configure AWS Credentials (azion-downloads)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.S3_DOWNLOADS_ID }}
+          aws-secret-access-key: ${{ secrets.S3_DOWNLOADS_SECRET }}
+          aws-region: us-east-1
+
+      - name: Upload to azion-downloads stage dir
+        run: |
+          while read spec; \
+          do\
+            distro=$(echo ${spec} | cut -d/ -f1);\
+            goarch=$(echo ${spec} | cut -d/ -f2);\
+            arch=$(echo ${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$/arm32/g;');\
+            cp dist/$distro/$arch/azioncli* dist/$distro/$arch/azioncli; 
+            aws s3 cp --no-progress --recursive \
+              --exclude "*" --include "azioncli*" \
+              dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/; \
+          done < BUILD
