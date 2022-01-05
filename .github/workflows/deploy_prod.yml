@@ -39,6 +39,11 @@ jobs:
       - name: Cross-build
         run: make cross-build ENVFILE=./env/prod
 
+      - name: Install AWS CLI
+        run: |
+          apt update
+          apt install -y awscli
+
       - name: Configure AWS Credentials (azion-downloads)
         uses: aws-actions/configure-aws-credentials@v1
         with:
