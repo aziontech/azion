@@ -34,7 +34,7 @@ jobs:
         run: git fetch --tags
 
       - name: Build
-        run: make build
+        run: make build ENVFILE=./env/prod
 
       - name: Cross-build
-        run: make cross-build
+        run: make cross-build ENVFILE=./env/prod
