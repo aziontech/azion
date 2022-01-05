@@ -26,7 +26,9 @@ jobs:
           repository: ${{github.repository}}.wiki
 
       - name: Generate docs
-        run: go run pkg/gen_docs/main.go --file-type "md" --doc-path "./docs"
+        run: |
+          echo $pwd
+          go run pkg/gen_docs/main.go --file-type "md" --doc-path "./docs"
 
       - name: Commit files
         run: |
