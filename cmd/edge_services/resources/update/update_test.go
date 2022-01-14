@@ -137,7 +137,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "Shell Script", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -176,7 +176,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "666", "-v", "--name", "BIRL", "--trigger", "Install", "--content-type", "Shell Script", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "666", "-v", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
