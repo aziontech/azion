@@ -65,7 +65,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"-v", "1234", "--name", "/tmp/testando.txt", "--content-type", "Text", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"-v", "1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -100,7 +100,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/testando.txt", "--content-type", "Text", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -134,7 +134,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "Shell Script", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -151,7 +151,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--content-type", "Shell Script", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -166,7 +166,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "Text"})
+		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "text"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -188,7 +188,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "Text", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
