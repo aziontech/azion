@@ -29,6 +29,10 @@ deps: ## verify projects dependencies
 	@ $(GO) mod verify
 	@ $(GO) mod tidy
 
+.PHONY : clean
+clean: ## delete additional files
+	@ rm -rf cover
+
 .PHONY: lint
 lint: get-lint-deps ## running GoLint
 	@ $(GOBIN)/golangci-lint run ./...
@@ -42,7 +46,12 @@ get-lint-deps:
 
 .PHONY: test
 test:
-	@$(GO) test -v ./...
+	@ echo Running GO tests
+	@ mkdir -p cover
+	@$(GO) test -v -failfast -coverprofile "./cover/$(NAME)coverage.out" -coverpkg=./... ./...
+	@$(GO) tool cover -html="./cover/$(NAME)coverage.out" -o ./cover/$(NAME)coverage.html
+	@$(GO) tool cover -func "./cover/$(NAME)coverage.out"
+	@echo Done
 
 .PHONY: sec
 sec: get-gosec-deps ## running GoSec
