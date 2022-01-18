@@ -18,6 +18,7 @@ type ListOptions struct {
 	// FIXME: ENG-17161
 	SortDesc bool
 	Filter   string
+	Details  bool
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -55,6 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch (default 10)")
 	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results (default 1)")
 	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
+	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show all relevant fields when listing")
 
 	return listCmd
 }
@@ -83,7 +85,11 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 	}
 
 	tp := printer.NewTab(out)
-	tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
+	if opts.Details {
+		tp.PrintWithHeaders(resources, []string{"Id", "Name", "LastEditor", "UpdatedAt", "ContentType", "Type"}, []string{"ID", "NAME", "LAST EDITOR", "LAST MODIFIED", "CONTENT TYPE", "TRIGGER"})
+	} else {
+		tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
+	}
 
 	return nil
 }
