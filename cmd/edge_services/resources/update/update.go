@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -35,6 +36,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
+			replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
+
 			updateRequest := sdk.UpdateResourceRequest{}
 			valueHasChanged := false
 
@@ -52,7 +55,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				updateRequest.SetTrigger(trigger)
+				triggerConverted := replacer.Replace(trigger)
+				updateRequest.SetTrigger(triggerConverted)
 				updateRequest.SetContentType(SHELL_SCRIPT)
 				valueHasChanged = true
 			}
@@ -62,7 +66,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				updateRequest.SetContentType(contentType)
+				contentTypeConverted := replacer.Replace(contentType)
+				updateRequest.SetContentType(contentTypeConverted)
 				valueHasChanged = true
 			}
 
@@ -108,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	updateCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
 	updateCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	updateCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\">")
+	updateCmd.Flags().String("content-type", "", "<shellscript|text>")
 	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
 
 	return updateCmd

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -34,21 +35,25 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
+			replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
+
 			name, err := cmd.Flags().GetString("name")
 			if err != nil {
 				return err
 			}
 
 			trigger, err := cmd.Flags().GetString("trigger")
+			triggerConverted := replacer.Replace(trigger)
 			if err != nil {
 				return err
 			}
 
-			content_type, err := cmd.Flags().GetString("content-type")
+			contentType, err := cmd.Flags().GetString("content-type")
 			if err != nil {
 				return err
 			}
-			if content_type == SHELL_SCRIPT {
+			contentTypeConverted := replacer.Replace(contentType)
+			if contentTypeConverted == SHELL_SCRIPT {
 				if trigger == "" {
 					return utils.ErrorInvalidResourceTrigger
 				}
@@ -75,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, trigger, content_type, stringFile, verbose); err != nil {
+			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, triggerConverted, contentTypeConverted, stringFile, verbose); err != nil {
 				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
 			}
 
@@ -86,7 +91,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
 	_ = createCmd.MarkFlagRequired("name")
 	createCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "<\"Shell Script\"|\"Text\">")
+	createCmd.Flags().String("content-type", "", "<shellscript|text>")
 	_ = createCmd.MarkFlagRequired("content-type")
 	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
 	_ = createCmd.MarkFlagRequired("content-file")
@@ -94,14 +99,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, name string, trigger string, content_type string, file string, verbose bool) error {
+func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, name string, trigger string, contentType string, file string, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 
 	request := sdk.CreateResourceRequest{
 		Name:        name,
 		Trigger:     trigger,
-		ContentType: content_type,
+		ContentType: contentType,
 		Content:     file,
 	}
 
