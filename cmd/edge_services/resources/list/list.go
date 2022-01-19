@@ -65,6 +65,9 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 	c := context.Background()
 	api := client.DefaultApi
 
+	fields := []string{"Id", "Name"}
+	headers := []string{"ID", "NAME"}
+
 	resp, httpResp, err := api.GetResources(c, service_id).
 		Page(opts.Page).
 		Limit(opts.Limit).
@@ -86,10 +89,11 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 
 	tp := printer.NewTab(out)
 	if opts.Details {
-		tp.PrintWithHeaders(resources, []string{"Id", "Name", "LastEditor", "UpdatedAt", "ContentType", "Type"}, []string{"ID", "NAME", "LAST EDITOR", "LAST MODIFIED", "CONTENT TYPE", "TRIGGER"})
-	} else {
-		tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
+		fields = append(fields, "LastEditor", "UpdatedAt", "ContentType", "Type")
+		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "CONTENT TYPE", "TRIGGER")
 	}
+
+	tp.PrintWithHeaders(resources, fields, headers)
 
 	return nil
 }

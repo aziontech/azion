@@ -56,6 +56,9 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 	c := context.Background()
 	api := client.DefaultApi
 
+	fields := []string{"Id", "Name"}
+	headers := []string{"ID", "NAME"}
+
 	resp, httpResp, err := api.GetServices(c).
 		Page(opts.Page).
 		Limit(opts.Limit).
@@ -77,10 +80,11 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 
 	tp := printer.NewTab(out)
 	if opts.Details {
-		tp.PrintWithHeaders(services, []string{"Id", "Name", "LastEditor", "UpdatedAt", "Active", "BoundNodes"}, []string{"ID", "NAME", "LAST EDITOR", "LAST MODIFIED", "ACTIVE", "BOUND NODES"})
-	} else {
-		tp.PrintWithHeaders(services, []string{"Id", "Name"}, []string{"ID", "NAME"})
+		fields = append(fields, "LastEditor", "UpdatedAt", "Active", "BoundNodes")
+		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "ACTIVE", "BOUND NODES")
 	}
+
+	tp.PrintWithHeaders(services, fields, headers)
 
 	return nil
 }
