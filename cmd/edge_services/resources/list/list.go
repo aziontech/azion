@@ -18,6 +18,7 @@ type ListOptions struct {
 	// FIXME: ENG-17161
 	SortDesc bool
 	Filter   string
+	Details  bool
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -55,6 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch (default 10)")
 	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results (default 1)")
 	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
+	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show all relevant fields when listing")
 
 	return listCmd
 }
@@ -62,6 +64,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, service_id int64) error {
 	c := context.Background()
 	api := client.DefaultApi
+
+	fields := []string{"Id", "Name"}
+	headers := []string{"ID", "NAME"}
 
 	resp, httpResp, err := api.GetResources(c, service_id).
 		Page(opts.Page).
@@ -83,7 +88,12 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 	}
 
 	tp := printer.NewTab(out)
-	tp.PrintWithHeaders(resources, []string{"Id", "Name"}, []string{"ID", "NAME"})
+	if opts.Details {
+		fields = append(fields, "LastEditor", "UpdatedAt", "ContentType", "Type")
+		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "CONTENT TYPE", "TRIGGER")
+	}
+
+	tp.PrintWithHeaders(resources, fields, headers)
 
 	return nil
 }
