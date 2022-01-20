@@ -13,7 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/edgeservices-go-sdk"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
 )
 
