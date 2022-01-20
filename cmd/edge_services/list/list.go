@@ -18,6 +18,7 @@ type ListOptions struct {
 	// FIXME: ENG-17161
 	SortDesc bool
 	Filter   string
+	Details  bool
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -46,6 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch (default 10)")
 	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results (default 1)")
 	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
+	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show all relevant fields when listing")
 
 	return listCmd
 }
@@ -53,6 +55,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) error {
 	c := context.Background()
 	api := client.DefaultApi
+
+	fields := []string{"Id", "Name"}
+	headers := []string{"ID", "NAME"}
 
 	resp, httpResp, err := api.GetServices(c).
 		Page(opts.Page).
@@ -73,8 +78,13 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 		return nil
 	}
 
-	p := printer.NewTab(out)
-	p.PrintWithHeaders(services, []string{"Id", "Name"}, []string{"ID", "NAME"})
+	tp := printer.NewTab(out)
+	if opts.Details {
+		fields = append(fields, "LastEditor", "UpdatedAt", "Active", "BoundNodes")
+		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "ACTIVE", "BOUND NODES")
+	}
+
+	tp.PrintWithHeaders(services, fields, headers)
 
 	return nil
 }
