@@ -1,11 +1,11 @@
 package resources
 
 import (
-	"github.com/aziontech/azion-cli/cmd/edge_services/resources/create"
-	"github.com/aziontech/azion-cli/cmd/edge_services/resources/delete"
-	"github.com/aziontech/azion-cli/cmd/edge_services/resources/describe"
-	"github.com/aziontech/azion-cli/cmd/edge_services/resources/list"
-	"github.com/aziontech/azion-cli/cmd/edge_services/resources/update"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/create"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/delete"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/describe"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/list"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )

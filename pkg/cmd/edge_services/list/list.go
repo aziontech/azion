@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/aziontech/azion-cli/cmd/edge_services/requests"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/aziontech/azion-cli/utils"
@@ -26,27 +26,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list <service_id> [flags]",
-		Short:         "Lists resources in a given service",
-		Long:          `Lists all resources found in a service by providing a service_id`,
+		Use:           "list [flags]",
+		Short:         "Lists services of an Azion account",
+		Long:          `Lists services of an Azion account`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
-			}
-
 			client, err := requests.CreateClient(f)
 			if err != nil {
 				return err
 			}
 
-			if err := listAllResources(client, f.IOStreams.Out, opts, ids[0]); err != nil {
+			if err := listAllServices(client, f.IOStreams.Out, opts); err != nil {
 				return err
 			}
 			return nil
@@ -61,14 +52,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return listCmd
 }
 
-func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, service_id int64) error {
+func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) error {
 	c := context.Background()
 	api := client.DefaultApi
 
 	fields := []string{"Id", "Name"}
 	headers := []string{"ID", "NAME"}
 
-	resp, httpResp, err := api.GetResources(c, service_id).
+	resp, httpResp, err := api.GetServices(c).
 		Page(opts.Page).
 		Limit(opts.Limit).
 		Filter(opts.Filter).
@@ -81,19 +72,19 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *ListOptions, s
 		return err
 	}
 
-	resources := resp.Resources
+	services := resp.Services
 
-	if len(resources) == 0 {
+	if len(services) == 0 {
 		return nil
 	}
 
 	tp := printer.NewTab(out)
 	if opts.Details {
-		fields = append(fields, "LastEditor", "UpdatedAt", "ContentType", "Type")
-		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "CONTENT TYPE", "TRIGGER")
+		fields = append(fields, "LastEditor", "UpdatedAt", "Active", "BoundNodes")
+		headers = append(headers, "LAST EDITOR", "LAST MODIFIED", "ACTIVE", "BOUND NODES")
 	}
 
-	tp.PrintWithHeaders(resources, fields, headers)
+	tp.PrintWithHeaders(services, fields, headers)
 
 	return nil
 }
