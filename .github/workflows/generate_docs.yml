@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Generate docs
-        run: go run pkg/gen_docs/main.go --file-type "md" --doc-path "/tmp/docs"
+        run: go run ./cmd/gen_docs/main.go --file-type "md" --doc-path "/tmp/docs"
 
       - name: Checkout code
         uses: actions/checkout@v2
