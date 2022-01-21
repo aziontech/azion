@@ -10,7 +10,7 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "update [flags] <edge_function_id>",
+		Use:           "update <edge_function_id> [flags]",
 		Short:         "Update an Edge Function",
 		Long:          "Update an Edge Function",
 		SilenceUsage:  true,

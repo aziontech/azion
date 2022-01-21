@@ -10,7 +10,7 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           "delete [flags] <edge_function_id>",
+		Use:           "delete <edge_function_id> [flags]",
 		Short:         "Delete an Edge Function",
 		Long:          "Delete an Edge Function",
 		SilenceUsage:  true,
