@@ -4,7 +4,6 @@ go 1.17
 
 require (
 	github.com/aziontech/azionapi-go-sdk v0.3.0
-	github.com/kr/text v0.1.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 )
