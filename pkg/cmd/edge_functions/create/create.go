@@ -16,7 +16,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_function create -–name myfunc -–language javascript –-code ./mycode/function.js  -–state active --initiator-type edge-application
+        $ azioncli edge_functions create -–name myfunc -–language javascript –-code ./mycode/function.js  -–state active --initiator-type edge-application
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return errors.New("IMPLEMENT ME")

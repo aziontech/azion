@@ -12,7 +12,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "describe <edge_function_id> [flags]",
 		Short:         "Describe a given Edge Function",
-		Long:          "Describeb a given Edge Function",
+		Long:          "Describe a given Edge Function",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
