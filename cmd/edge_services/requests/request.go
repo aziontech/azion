@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	sdk "github.com/aziontech/edgeservices-go-sdk"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 )
 
 var ApiUrl string

@@ -10,7 +10,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	sdk "github.com/aziontech/edgeservices-go-sdk"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
