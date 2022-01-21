@@ -81,5 +81,5 @@ cross-build: ## cross-compile for all platforms/architectures.
 		goarch=$$(echo $${spec} | cut -d/ -f2);\
 		arch=$$(echo $${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$$/arm32/g;');\
 		mkdir -p dist/$$distro/$$arch;\
-		CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags "$(LDFLAGS)" -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION); \
+		CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags "$(LDFLAGS)" -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION) ./cmd/$(BIN); \
 	done < BUILD
