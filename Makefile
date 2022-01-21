@@ -13,15 +13,18 @@ RELOAD ?= $(GOBIN)/CompileDaemon
 # Variables for token endpoints
 ENVFILE ?= ./env/stage
 
+BIN := azioncli
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
-LDFLAGS=-X github.com/aziontech/azion-cli/cmd/version.BinVersion=$(BIN_VERSION) \
+LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
 		-X github.com/aziontech/azion-cli/pkg/token.AuthEndpoint=$$AUTH_URL \
-		-X github.com/aziontech/azion-cli/cmd/edge_services/requests.ApiUrl=$$API_URL
+		-X github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests.ApiUrl=$$API_URL
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 
+.PHONY : all
+all: deps build
 
 .PHONY : deps
 deps: ## verify projects dependencies
@@ -65,7 +68,7 @@ get-gosec-deps:
 .PHONY : build
 build: ## build application
 	@ $(GO) version
-	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME)
+	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME) ./cmd/$(BIN)
 
 .PHONY : cross-build
 cross-build: ## cross-compile for all platforms/architectures.

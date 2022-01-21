@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aziontech/azion-cli/cmd/configure"
-	"github.com/aziontech/azion-cli/cmd/edge_services"
-	"github.com/aziontech/azion-cli/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/cmd/configure"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"

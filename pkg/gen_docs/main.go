@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/aziontech/azion-cli/cmd"
+	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/spf13/cobra/doc"

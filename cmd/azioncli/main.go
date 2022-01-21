@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aziontech/azion-cli/cmd"
+	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 )
 
 func main() {
