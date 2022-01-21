@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return cmd.Help()
 		},
 		Annotations: map[string]string{
-			"isAPI": "true",
+			"IsAPI": "true",
 		},
 	}
 
