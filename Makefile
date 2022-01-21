@@ -40,6 +40,15 @@ clean: ## delete additional files
 lint: get-lint-deps ## running GoLint
 	@ $(GOBIN)/golangci-lint run ./...
 
+
+.PHONY: dev
+dev: dev-deps
+	$(RELOAD) -build 'make build'
+
+.PHONY: dev-deps
+dev-deps: 
+	$(GO) install github.com/githubnemo/CompileDaemon@v1.4.0
+
 .PHONY: get-lint-deps
 get-lint-deps:
 	@if [ ! -x $(GOBIN)/golangci-lint ]; then\
