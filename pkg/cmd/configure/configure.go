@@ -17,6 +17,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "configure",
 		Short: "Configure parameters and credentials",
 		Long:  `This command configures cli parameters and credentials used for connecting to our services.`,
+		Annotations: map[string]string{
+			"IsAditional": "true",
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := f.HttpClient()
 			if err != nil {
