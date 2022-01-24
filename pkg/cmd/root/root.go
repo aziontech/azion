@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
@@ -59,6 +60,7 @@ func Execute() {
 	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
 	tok, _ := token.ReadFromDisk()
 	viper.SetDefault("token", tok)
+	viper.SetDefault("api_url", constants.ApiURL)
 
 	factory := &cmdutil.Factory{
 		HttpClient: func() (*http.Client, error) {
