@@ -21,7 +21,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "azioncli",
 		Short: "Azion-CLI",
-		Long:  `This is a placeholder description used while the actual description is still not ready.`,
+		Long:  `Interact easily with Azion services`,
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},
@@ -34,6 +34,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.SetIn(f.IOStreams.In)
 	rootCmd.SetOut(f.IOStreams.Out)
 	rootCmd.SetErr(f.IOStreams.Err)
+
+	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		rootHelpFunc(f, cmd, args)
+	})
 
 	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")

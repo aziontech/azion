@@ -17,6 +17,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "edge_services",
 		Short: "Manages edge services of an Azion account",
 		Long:  `You may create, update, delete, list and describe services of an Azion account.`,
+		Annotations: map[string]string{
+			"IsAPI": "true",
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
