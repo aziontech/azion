@@ -1,8 +1,6 @@
 package delete
 
 import (
-	"errors"
-
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -19,7 +17,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli edge_functions delete 1234
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return errors.New("IMPLEMENT ME")
+			return cmd.Help()
 		},
 	}
 
