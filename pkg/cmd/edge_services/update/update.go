@@ -26,6 +26,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) < 1 {
+				return utils.ErrorMissingServiceIdArgument
+			}
+
 			id, err := utils.ConvertIdsToInt(args[0])
 			if err != nil {
 				return utils.ErrorConvertingIdArgumentToInt
