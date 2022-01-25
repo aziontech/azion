@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
 type HTTPClient interface {
@@ -20,8 +22,6 @@ type Token struct {
 	valid    bool
 	out      io.Writer
 }
-
-var AuthEndpoint string
 
 const credentialsFilename = "credentials"
 
@@ -38,7 +38,7 @@ func New(c *Config) (*Token, error) {
 
 	return &Token{
 		client:   c.Client,
-		endpoint: AuthEndpoint,
+		endpoint: constants.AuthURL,
 		filepath: filepath.Join(dir, credentialsFilename),
 		out:      c.Out,
 	}, nil

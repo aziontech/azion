@@ -7,8 +7,6 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 )
 
-var ApiUrl string
-
 func CreateClient(f *cmdutil.Factory) (*sdk.APIClient, error) {
 	httpClient, err := f.HttpClient()
 	if err != nil {
@@ -20,7 +18,7 @@ func CreateClient(f *cmdutil.Factory) (*sdk.APIClient, error) {
 	conf.AddDefaultHeader("Authorization", "token "+f.Config.GetString("token"))
 	conf.Servers = sdk.ServerConfigurations{
 		{
-			URL: ApiUrl,
+			URL: f.Config.GetString("api_url"),
 		},
 	}
 
