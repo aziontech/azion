@@ -29,7 +29,7 @@ Usage:
 
 Available Commands:
   configure     Configure parameters and credentials
-  edge_services Manages edge services of an Azion account
+  edge_services Manages Edge Services of an Azion account
   help          Help about any command
   version       Returns bin version
 
@@ -52,12 +52,12 @@ Usage:
   azioncli edge_services [command]
 
 Available Commands:
-  create      Creates a new edge service
+  create      Creates a new Edge Service
   delete      Deletes a service based on a given service_id
   describe    Describes a service based on a given service_id
   list        Lists services of an Azion account
-  resources   Manages resources in a given edge-service
-  update      Updates parameters of an edge service
+  resources   Manages resources in a given Edge Service
+  update      Updates parameters of an Edge Service
 
 Flags:
   -h, --help   help for edge_services
