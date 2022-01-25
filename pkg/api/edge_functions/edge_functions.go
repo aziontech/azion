@@ -15,7 +15,7 @@ type EdgeFunction interface {
 	GetId() float32 // Should be uint64
 	GetName() string
 	GetLanguage() string
-	GetReferenceCount() float32 // Should be float32
+	GetReferenceCount() float32 // Should be uint64
 	GetModified() string
 	GetInitiatorType() string
 	GetLastEditor() string
