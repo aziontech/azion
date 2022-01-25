@@ -3,7 +3,7 @@ module github.com/aziontech/azion-cli
 go 1.17
 
 require (
-	github.com/aziontech/azionapi-go-sdk v0.3.0
+	github.com/aziontech/azionapi-go-sdk v0.4.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 )
