@@ -21,8 +21,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
 		Use:           "update <service_id> [flags]",
-		Short:         "Updates parameters of an edge service",
-		Long:          `Updates parameters of an edge service`,
+		Short:         "Updates parameters of an Edge Service",
+		Long:          `Updates parameters of an Edge Service`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
