@@ -3,12 +3,13 @@ module github.com/aziontech/azion-cli
 go 1.17
 
 require (
-	github.com/aziontech/azionapi-go-sdk v0.3.0
+	github.com/aziontech/azionapi-go-sdk v0.4.0
 	github.com/spf13/cobra v1.3.0
 	github.com/spf13/viper v1.10.1
 )
 
 require (
+	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5

@@ -15,6 +15,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   "version",
 		Short: "Returns bin version",
 		Long:  `Returns the version of the binary.`,
+		Annotations: map[string]string{
+			"IsAdditional": "true",
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintln(f.IOStreams.Out, "Azion version: "+BinVersion)
 		},

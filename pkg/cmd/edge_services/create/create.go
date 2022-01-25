@@ -13,7 +13,6 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	// listCmd represents the list command
 	createCmd := &cobra.Command{
 		Use:           "create [flags]",
 		Short:         "Creates a new edge service",
