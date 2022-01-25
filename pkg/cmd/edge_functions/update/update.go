@@ -40,13 +40,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			_, err := utils.ConvertIdsToInt(args[0])
 			if err != nil {
-				return fmt.Errorf("invalid edge function id: %w", err)
+				return fmt.Errorf("invalid edge function id: %q", args[0])
 			}
 
 			if cmd.Flags().Changed("active") {
 				_, err := strconv.ParseBool(fields.Active)
 				if err != nil {
-					return fmt.Errorf("invalid --active flag: %s", fields.Active)
+					return fmt.Errorf("invalid --active flag: %q", fields.Active)
 				}
 			}
 
