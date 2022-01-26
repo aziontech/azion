@@ -15,8 +15,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:           "create [flags]",
-		Short:         "Creates a new edge service",
-		Long:          `Creates a new edge service with the received name`,
+		Short:         "Creates a new Edge Service",
+		Long:          `Creates a new Edge Service with the received name`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
