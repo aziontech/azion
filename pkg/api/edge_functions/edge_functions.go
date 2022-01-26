@@ -58,6 +58,31 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	_, err := req.Execute()
 
+func (c *Client) Create(ctx context.Context, req CreateRequest) (uint64, error) {
+	var body sdk.InlineObject
+
+	body.SetActive(req.Active)
+	body.SetCode(req.Code)
+	body.SetName(req.Name)
+	body.SetLanguage(req.Language)
+
+	if req.Args != "" {
+		args := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(req.Args), &args); err != nil {
+			return 0, fmt.Errorf("failed to encode json args: %w", err)
+		}
+		body.SetJsonArgs(args)
+	}
+
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).InlineObject(body)
+
+	res, err := request.Execute()
+	if err != nil {
+		responseBody, _ := ioutil.ReadAll(res.Body)
+		return 0, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	responseBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
