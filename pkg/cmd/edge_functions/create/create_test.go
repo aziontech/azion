@@ -42,7 +42,6 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 
 		file, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
-		t.TempDir()
 		cmd.SetArgs([]string{"--name", "SUUPA_FUNCTION", "--active", "true", "--initiator-type", "edge_application", "--code", file.Name(), "--language", "javascript"})
 
 		err := cmd.Execute()
