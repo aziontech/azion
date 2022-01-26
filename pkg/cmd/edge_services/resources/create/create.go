@@ -22,7 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:           "create <service_id> [flags]",
 		Short:         "Creates a new resource",
-		Long:          `Creates a new resource in an Edge Service based on a given servce_id.`,
+		Long:          `Creates a new resource in an Edge Service based on a given service_id.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
