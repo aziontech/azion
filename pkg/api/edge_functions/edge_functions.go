@@ -49,3 +49,16 @@ func (c *Client) Get(ctx context.Context, id string) (EdgeFunction, error) {
 
 	return res.Results, nil
 }
+
+func (c *Client) Delete(ctx context.Context, id string) error {
+	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
+
+	_, err := req.Execute()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
