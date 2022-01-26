@@ -2,6 +2,9 @@ package edge_funtions
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
