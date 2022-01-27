@@ -8,6 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +27,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf("missing edge function id argument")
 			}
 
+			ids, err := utils.ConvertIdsToInt(args[0])
+			if err != nil {
+				return err
+			}
+
 			httpClient, err := f.HttpClient()
 			if err != nil {
 				return fmt.Errorf("failed to get http client: %w", err)
@@ -34,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			function, err := client.Get(ctx, args[0])
+			function, err := client.Get(ctx, ids[0])
 			if err != nil {
 				return err
 			}

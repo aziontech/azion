@@ -12,10 +12,10 @@ type Client struct {
 }
 
 type EdgeFunction interface {
-	GetId() float32 // Should be uint64
+	GetId() int64 // Should be uint64
 	GetName() string
 	GetLanguage() string
-	GetReferenceCount() float32 // Should be uint64
+	GetReferenceCount() int64 // Should be uint64
 	GetModified() string
 	GetInitiatorType() string
 	GetLastEditor() string
@@ -38,7 +38,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Get(ctx context.Context, id string) (EdgeFunction, error) {
+func (c *Client) Get(ctx context.Context, id int64) (EdgeFunction, error) {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
 
 	res, _, err := req.Execute()
@@ -50,7 +50,7 @@ func (c *Client) Get(ctx context.Context, id string) (EdgeFunction, error) {
 	return res.Results, nil
 }
 
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id int64) error {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
 
 	_, err := req.Execute()
