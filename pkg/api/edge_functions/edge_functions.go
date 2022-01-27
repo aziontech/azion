@@ -65,24 +65,36 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 }
 
 type CreateRequest struct {
-	Name          string
-	Language      string
-	InitiatorType string
-	Active        bool
-	Code          string
-	JsonArgs      map[string]interface{}
+	sdk.CreateEdgeFunctionRequest
 }
 
-func (c *Client) Create(ctx context.Context, req CreateRequest) (EdgeFunctionResponse, error) {
-	var body sdk.CreateEdgeFunctionRequest
+func NewCreateRequest() *CreateRequest {
+	return &CreateRequest{}
+}
 
-	body.SetActive(req.Active)
-	body.SetCode(req.Code)
-	body.SetName(req.Name)
-	body.SetLanguage(req.Language)
-	body.SetJsonArgs(req.JsonArgs)
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
 
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(body)
+	edgeFuncResponse, httpRes, err := request.Execute()
+	if err != nil {
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	return edgeFuncResponse.Results, nil
+}
+
+type UpdateRequest struct {
+	sdk.PatchEdgeFunctionRequest
+	id int64
+}
+
+func NewUpdateRequest(id int64) *UpdateRequest {
+	return &UpdateRequest{id: id}
+}
+
+func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {
