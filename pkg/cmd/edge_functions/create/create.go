@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strconv"
@@ -49,11 +50,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request.Code = string(code)
 
 			if cmd.Flags().Changed("args") {
-				jsonArgs, err := ioutil.ReadFile(fields.Args)
+				marshalledArgs, err := ioutil.ReadFile(fields.Args)
 				if err != nil {
 					return fmt.Errorf("failed to read args file: %w", err)
 				}
-				request.Args = string(jsonArgs)
+
+				args := make(map[string]interface{})
+				if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+					return fmt.Errorf("failed to parse json args: %w", err)
+				}
+				request.JsonArgs = args
 			}
 
 			request.Name = fields.Name
@@ -68,13 +74,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			id, err := client.Create(ctx, request)
+			response, err := client.Create(ctx, request)
 
 			if err != nil {
 				return fmt.Errorf("failed to create edge function: %w", err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, "Created Edge Function with ID %d\n", id)
+			fmt.Fprintf(f.IOStreams.Out, "Created Edge Function with ID %d\n", response.GetId())
 
 			return nil
 		},

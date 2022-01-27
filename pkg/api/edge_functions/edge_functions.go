@@ -2,7 +2,6 @@ package edge_funtions
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,11 +13,11 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-type EdgeFunction interface {
-	GetId() int64 // Should be uint64
+type EdgeFunctionResponse interface {
+	GetId() int64
 	GetName() string
 	GetLanguage() string
-	GetReferenceCount() int64 // Should be uint64
+	GetReferenceCount() int64
 	GetModified() string
 	GetInitiatorType() string
 	GetLastEditor() string
@@ -41,7 +40,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Get(ctx context.Context, id int64) (EdgeFunction, error) {
+func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
 
 	res, _, err := req.Execute()
@@ -58,35 +57,38 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	_, err := req.Execute()
 
-func (c *Client) Create(ctx context.Context, req CreateRequest) (uint64, error) {
-	var body sdk.InlineObject
-
-	body.SetActive(req.Active)
-	body.SetCode(req.Code)
-	body.SetName(req.Name)
-	body.SetLanguage(req.Language)
-
-	if req.Args != "" {
-		args := make(map[string]interface{})
-		if err := json.Unmarshal([]byte(req.Args), &args); err != nil {
-			return 0, fmt.Errorf("failed to encode json args: %w", err)
-		}
-		body.SetJsonArgs(args)
-	}
-
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).InlineObject(body)
-
-	res, err := request.Execute()
-	if err != nil {
-		responseBody, _ := ioutil.ReadAll(res.Body)
-		return 0, fmt.Errorf("%w: %s", err, responseBody)
-	}
-
-	responseBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
 
+type CreateRequest struct {
+	Name          string
+	Language      string
+	InitiatorType string
+	Active        bool
+	Code          string
+	JsonArgs      map[string]interface{}
+}
+
+func (c *Client) Create(ctx context.Context, req CreateRequest) (EdgeFunctionResponse, error) {
+	var body sdk.CreateEdgeFunctionRequest
+
+	body.SetActive(req.Active)
+	body.SetCode(req.Code)
+	body.SetName(req.Name)
+	body.SetLanguage(req.Language)
+	body.SetJsonArgs(req.JsonArgs)
+
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(body)
+
+	edgeFuncResponse, httpRes, err := request.Execute()
+	if err != nil {
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	return edgeFuncResponse.Results, nil
 }

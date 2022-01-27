@@ -20,7 +20,7 @@ var successResponse string = `
         "json_args":{"a":1,"b":2},"function_to_run":"",
         "initiator_type":"edge_application",
         "active":true,
-        "last_editor":"fsmiamoto@gmail.com",
+        "last_editor":"testando@azion.com",
         "modified":"2022-01-26T12:31:09.865515Z",
         "reference_count":0
     },
