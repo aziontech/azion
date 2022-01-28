@@ -26,6 +26,11 @@ func NewTab(w io.Writer) *TabPrinter {
 // PrintWitHeaders prints using Print but with an additional header line
 // Each element of the `headers` slice will be used to name a given tab-separated column
 // `headers` and `fields` should be match one to one i.e. for each header there should be a field
+// `fields` can be either a direct struct field or a method that takes no arguments and returns a single value
+// If the `field` is a method, it should contain the `()` suffix string
+// Examples:
+// PrintWithHeaders(elems, []string{"Name", "Price"}, []string{"NAME","PRICE"})
+// PrintWithHeaders(elems, []string{"GetName()", "GetPrice()"}, []string{"NAME","PRICE"})
 func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, headers []string) {
 	fmt.Fprintf(p.writer, "%s", buildLine(headers))
 	p.Print(elems, fields)
@@ -76,8 +81,23 @@ func buildRows(elems interface{}, fields []string) [][]string {
 		var columns []string
 
 		for _, name := range fields {
-			value := slice.Index(i).FieldByName(name).Interface()
-			columns = append(columns, toString(value))
+			var value string
+
+			if strings.Contains(name, "()") {
+				// The field is a method, get it and call it
+				methodName := strings.Replace(name, "()", "", -1)
+				method := slice.Index(i).MethodByName(methodName)
+				results := method.Call(nil)
+				if len(results) > 0 {
+					value = toString(results[0])
+				}
+			} else {
+				// Struct field
+				field := slice.Index(i).FieldByName(name).Interface()
+				value = toString(field)
+			}
+
+			columns = append(columns, value)
 		}
 
 		rows = append(rows, columns)

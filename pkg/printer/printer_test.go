@@ -14,6 +14,19 @@ type Dummy struct {
 	Date time.Time
 }
 
+type DummyWithMethod struct {
+	name  string
+	price float64
+}
+
+func (d DummyWithMethod) GetName() string {
+	return d.name
+}
+
+func (d DummyWithMethod) GetPrice() float64 {
+	return d.price
+}
+
 func TestTab(t *testing.T) {
 	t.Run("simple print", func(t *testing.T) {
 		out := bytes.NewBuffer(nil)
@@ -29,6 +42,23 @@ func TestTab(t *testing.T) {
 		assert.Equal(t, `ID    Name
 1     MyMock
 2     MySuperMock
+`, out.String())
+	})
+
+	t.Run("fields that are methods", func(t *testing.T) {
+		out := bytes.NewBuffer(nil)
+		tp := NewTab(out)
+
+		values := []DummyWithMethod{
+			{name: "COSCARQUE H3", price: 59.99},
+			{name: "CALPIS", price: 9.99},
+		}
+
+		tp.PrintWithHeaders(values, []string{"GetName()", "GetPrice()"}, []string{"Name", "Price"})
+
+		assert.Equal(t, `Name            Price
+COSCARQUE H3    59.99
+CALPIS          9.99
 `, out.String())
 	})
 
