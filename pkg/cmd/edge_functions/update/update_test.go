@@ -63,10 +63,10 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 
 		code, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
-		code.WriteString("function elevator() { return 'aufzug';}")
+		_, _ = code.WriteString("function elevator() { return 'aufzug';}")
 
 		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
-		args.WriteString(`{"best_editor": "vim"}`)
+		_, _ = args.WriteString(`{"best_editor": "vim"}`)
 
 		cmd.SetArgs([]string{"1337", "--code", code.Name(), "--args", args.Name()})
 

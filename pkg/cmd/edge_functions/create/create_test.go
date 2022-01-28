@@ -42,10 +42,10 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 
 		code, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
-		code.WriteString("function iiih() { return 'gambeta';}")
+		_, _ = code.WriteString("function iiih() { return 'gambeta';}")
 
 		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
-		args.WriteString(`{"best_sweet": "dorayaki"}`)
+		_, _ = args.WriteString(`{"best_sweet": "dorayaki"}`)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name(), "--language", "javascript"})
 
