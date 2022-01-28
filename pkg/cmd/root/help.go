@@ -54,6 +54,7 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	apiCommands := []string{}
 	additionalCommands := []string{}
 	subcCommands := []string{}
+	examples := []string{}
 	for _, c := range command.Commands() {
 		if c.Short == "" {
 			continue
@@ -81,6 +82,10 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 		Body  string
 	}
 
+	if len(command.Example) > 0 {
+		examples = append(examples, command.Example)
+	}
+
 	longText := command.Long
 	if longText == "" {
 		longText = command.Short
@@ -102,6 +107,10 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	if len(additionalCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{"ADDITIONAL COMMANDS", strings.Join(additionalCommands, "\n")})
+	}
+
+	if len(examples) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"EXAMPLES", strings.Join(examples, "\n")})
 	}
 
 	flagUsages := command.LocalFlags().FlagUsages()

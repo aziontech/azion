@@ -2,6 +2,8 @@ package edge_funtions
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
@@ -11,11 +13,11 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-type EdgeFunction interface {
-	GetId() int64 // Should be uint64
+type EdgeFunctionResponse interface {
+	GetId() int64
 	GetName() string
 	GetLanguage() string
-	GetReferenceCount() int64 // Should be uint64
+	GetReferenceCount() int64
 	GetModified() string
 	GetInitiatorType() string
 	GetLastEditor() string
@@ -38,7 +40,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Get(ctx context.Context, id int64) (EdgeFunction, error) {
+func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
 
 	res, _, err := req.Execute()
@@ -60,5 +62,45 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
 
+type CreateRequest struct {
+	sdk.CreateEdgeFunctionRequest
+}
+
+func NewCreateRequest() *CreateRequest {
+	return &CreateRequest{}
+}
+
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
+
+	edgeFuncResponse, httpRes, err := request.Execute()
+	if err != nil {
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	return edgeFuncResponse.Results, nil
+}
+
+type UpdateRequest struct {
+	sdk.PatchEdgeFunctionRequest
+	id int64
+}
+
+func NewUpdateRequest(id int64) *UpdateRequest {
+	return &UpdateRequest{id: id}
+}
+
+func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+
+	edgeFuncResponse, httpRes, err := request.Execute()
+	if err != nil {
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	return edgeFuncResponse.Results, nil
 }
