@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
 
@@ -16,6 +18,7 @@ type Client struct {
 type EdgeFunctionResponse interface {
 	GetId() int64
 	GetName() string
+	GetActive() bool
 	GetLanguage() string
 	GetReferenceCount() int64
 	GetModified() string
@@ -103,4 +106,29 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 	}
 
 	return edgeFuncResponse.Results, nil
+}
+
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, error) {
+
+	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
+		OrderBy(opts.Order_by).
+		Page(opts.Page).
+		PageSize(opts.Page_size).
+		Sort(opts.Sort).
+		Execute()
+
+	if err != nil {
+		if httpResp != nil && httpResp.StatusCode >= 500 {
+			return nil, utils.ErrorInternalServerError
+		}
+		return nil, err
+	}
+
+	var result []EdgeFunctionResponse
+
+	for i := range resp.GetResults() {
+		result = append(result, &resp.GetResults()[i])
+	}
+
+	return result, nil
 }
