@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
 
@@ -118,10 +117,8 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
-			return nil, utils.ErrorInternalServerError
-		}
-		return nil, err
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
 
 	var result []EdgeFunctionResponse

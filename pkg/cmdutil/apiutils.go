@@ -1,4 +1,4 @@
-package api
+package cmdutil
 
 import (
 	"github.com/aziontech/azion-cli/pkg/contracts"

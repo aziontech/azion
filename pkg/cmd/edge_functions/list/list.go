@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	apiutils "github.com/aziontech/azion-cli/pkg/api"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -54,7 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	apiutils.AddAzionApiFlags(cmd, opts)
+	cmdutil.AddAzionApiFlags(cmd, opts)
 
 	return cmd
 }

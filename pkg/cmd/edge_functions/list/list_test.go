@@ -1,8 +1,6 @@
 package list
 
 import (
-	"bytes"
-	"io/ioutil"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -25,9 +23,6 @@ func TestList(t *testing.T) {
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -54,9 +49,6 @@ func TestList(t *testing.T) {
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
