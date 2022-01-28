@@ -2,6 +2,7 @@ package update
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -33,18 +34,63 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_functions"),
-			httpmock.StatusStringResponse(http.StatusOK, ""),
+			httpmock.REST("PATCH", "edge_functions/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"1337", "--name", "ATUALIZANDO", "--active", "false"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+	})
+
+	t.Run("update code and args", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("PATCH", "edge_functions/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		code, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
+		code.WriteString("function elevator() { return 'aufzug';}")
+
+		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
+		args.WriteString(`{"best_editor": "vim"}`)
+
+		cmd.SetArgs([]string{"1337", "--code", code.Name(), "--args", args.Name()})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+	})
+
+	t.Run("bad request", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		mock.Register(
+			httpmock.REST("PATCH", "edge_functions/1234"),
+			httpmock.StatusStringResponse(http.StatusBadRequest, `{"details": "invalid field active"}`),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "ATUALIZANDO"})
+		cmd.SetArgs([]string{"1234", "--active", "unactive"})
 
 		err := cmd.Execute()
 
-		require.NoError(t, err)
+		require.Error(t, err)
 	})
 }

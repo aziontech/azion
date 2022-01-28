@@ -41,8 +41,13 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		file, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
-		cmd.SetArgs([]string{"--name", "SUUPA_FUNCTION", "--active", "true", "--initiator-type", "edge_application", "--code", file.Name(), "--language", "javascript"})
+		code, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
+		code.WriteString("function iiih() { return 'gambeta';}")
+
+		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
+		args.WriteString(`{"best_sweet": "dorayaki"}`)
+
+		cmd.SetArgs([]string{"--name", "SUUPA_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name(), "--language", "javascript"})
 
 		err := cmd.Execute()
 
