@@ -20,7 +20,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions describe 1337 [--with-code]
+        $ azioncli edge_functions describe 4312
+        $ azioncli edge_functions describe 1337 --with-code
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
