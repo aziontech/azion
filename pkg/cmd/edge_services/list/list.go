@@ -15,7 +15,7 @@ import (
 type ListOptions struct {
 	Limit int64
 	Page  int64
-	// FIXME: ENG-17161
+	// FIXME: ENG-17161 / ENG-19147
 	SortDesc bool
 	Filter   string
 	Details  bool

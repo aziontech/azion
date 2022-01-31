@@ -8,6 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -19,11 +20,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions describe 1337 [--with-code]
+        $ azioncli edge_functions describe 4312
+        $ azioncli edge_functions describe 1337 --with-code
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return fmt.Errorf("missing edge function id argument")
+			}
+
+			ids, err := utils.ConvertIdsToInt(args[0])
+			if err != nil {
+				return err
 			}
 
 			httpClient, err := f.HttpClient()
@@ -34,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			function, err := client.Get(ctx, args[0])
+			function, err := client.Get(ctx, ids[0])
 			if err != nil {
 				return err
 			}
@@ -43,6 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			fmt.Fprintf(out, "ID: %d\n", uint64(function.GetId()))
 			fmt.Fprintf(out, "Name: %s\n", function.GetName())
+			fmt.Fprintf(out, "Active: %t\n", function.GetActive())
 			fmt.Fprintf(out, "Language: %s\n", function.GetLanguage())
 			fmt.Fprintf(out, "Reference Count: %d\n", uint64(function.GetReferenceCount()))
 			fmt.Fprintf(out, "Modified at: %s\n", function.GetModified())
