@@ -50,6 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			fmt.Fprintf(out, "ID: %d\n", uint64(function.GetId()))
 			fmt.Fprintf(out, "Name: %s\n", function.GetName())
+			fmt.Fprintf(out, "Active: %t\n", function.GetActive())
 			fmt.Fprintf(out, "Language: %s\n", function.GetLanguage())
 			fmt.Fprintf(out, "Reference Count: %d\n", uint64(function.GetReferenceCount()))
 			fmt.Fprintf(out, "Modified at: %s\n", function.GetModified())

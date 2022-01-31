@@ -47,6 +47,7 @@ func TestDescribe(t *testing.T) {
 
 		require.Equal(t, `ID: 1337
 Name: SUUPA_FUNCTION
+Active: true
 Language: javascript
 Reference Count: 0
 Modified at: 2022-01-26T12:31:09.865515Z
@@ -77,6 +78,7 @@ JSON Args: {"a":1,"b":2}
 
 		require.Equal(t, `ID: 1337
 Name: SUUPA_FUNCTION
+Active: true
 Language: javascript
 Reference Count: 0
 Modified at: 2022-01-26T12:31:09.865515Z
