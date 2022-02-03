@@ -10,6 +10,8 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
 
+const javascript = "javascript"
+
 type Client struct {
 	apiClient *sdk.APIClient
 }
@@ -75,6 +77,10 @@ func NewCreateRequest() *CreateRequest {
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
+	// Altough there's only one option, the API requires the `language` field.
+	// Hard-coding javascript for now
+	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
+
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
 
 	edgeFuncResponse, httpRes, err := request.Execute()
