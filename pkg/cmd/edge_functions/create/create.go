@@ -32,9 +32,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions create -–name myjsfunc -–language javascript –-code ./mycode/function.js  -–active true
-        $ azioncli edge_functions create -–name withargs -–language javascript –-code ./mycode/function.js  --args ./args.json -–active true
-        $ azioncli edge_functions create -–name myluafunc -–language lua –-code ./mycode/function.lua  --initiator-type edge_firewall -–active false
+        $ azioncli edge_functions create --name myjsfunc --language javascript --code ./mycode/function.js  --active true
+        $ azioncli edge_functions create --name withargs --language javascript --code ./mycode/function.js  --args ./args.json --active true
+        $ azioncli edge_functions create --name myluafunc --language lua --code ./mycode/function.lua  --initiator-type edge_firewall --active false
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()

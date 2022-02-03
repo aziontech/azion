@@ -34,9 +34,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions update 1234 -–name 'Hello'
-        $ azioncli edge_functions update 4185 -–code ./mycode/function.js -–args ./mycode/myargs.json
-        $ azioncli edge_functions update 9123 -–active false
+        $ azioncli edge_functions update 1234 --name 'Hello'
+        $ azioncli edge_functions update 4185 --code ./mycode/function.js --args ./mycode/myargs.json
+        $ azioncli edge_functions update 9123 --active false
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
