@@ -7,3 +7,8 @@ type ListOptions struct {
 	Page      int64
 	Page_size int64
 }
+
+type DescribeOptions struct {
+	OutPath string
+	Format  string
+}

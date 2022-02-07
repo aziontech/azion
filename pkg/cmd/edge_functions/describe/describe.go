@@ -4,15 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
 		Use:           "describe <edge_function_id> [flags]",
 		Short:         "Describe a given Edge Function",
@@ -48,19 +51,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			out := f.IOStreams.Out
 
-			fmt.Fprintf(out, "ID: %d\n", uint64(function.GetId()))
-			fmt.Fprintf(out, "Name: %s\n", function.GetName())
-			fmt.Fprintf(out, "Active: %t\n", function.GetActive())
-			fmt.Fprintf(out, "Language: %s\n", function.GetLanguage())
-			fmt.Fprintf(out, "Reference Count: %d\n", uint64(function.GetReferenceCount()))
-			fmt.Fprintf(out, "Modified at: %s\n", function.GetModified())
-			fmt.Fprintf(out, "Initiator Type: %s\n", function.GetInitiatorType())
-			fmt.Fprintf(out, "Last Editor: %s\n", function.GetLastEditor())
-			fmt.Fprintf(out, "Function to run: %s\n", function.GetFunctionToRun())
-			fmt.Fprintf(out, "JSON Args: %s\n", serializeToJson(function.GetJsonArgs())) // Show serialized JSON
+			if cmd.Flags().Changed("out") {
+				err := cmdutil.WriteToFile(function, opts)
+				if err != nil {
+					return fmt.Errorf("failed to write to file: %w", err)
+				}
+				fmt.Fprintf(out, "File successfuly written to: %s\n", filepath.Clean(opts.OutPath))
+			} else {
+				fmt.Fprintf(out, "ID: %d\n", uint64(function.GetId()))
+				fmt.Fprintf(out, "Name: %s\n", function.GetName())
+				fmt.Fprintf(out, "Active: %t\n", function.GetActive())
+				fmt.Fprintf(out, "Language: %s\n", function.GetLanguage())
+				fmt.Fprintf(out, "Reference Count: %d\n", uint64(function.GetReferenceCount()))
+				fmt.Fprintf(out, "Modified at: %s\n", function.GetModified())
+				fmt.Fprintf(out, "Initiator Type: %s\n", function.GetInitiatorType())
+				fmt.Fprintf(out, "Last Editor: %s\n", function.GetLastEditor())
+				fmt.Fprintf(out, "Function to run: %s\n", function.GetFunctionToRun())
+				fmt.Fprintf(out, "JSON Args: %s\n", serializeToJson(function.GetJsonArgs())) // Show serialized JSON
 
-			if cmd.Flags().Changed("with-code") {
-				fmt.Fprintf(out, "Code:\n%s\n", function.GetCode())
+				if cmd.Flags().Changed("with-code") {
+					fmt.Fprintf(out, "Code:\n%s\n", function.GetCode())
+				}
 			}
 
 			return nil
@@ -68,6 +79,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().Bool("with-code", false, "Display the Edge Function code, disabled dy default")
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", "Path to the file where your result will be exported to")
+	cmd.Flags().StringVar(&opts.Format, "format", "json", "Format used to export your file <json|yaml>")
 
 	return cmd
 }
