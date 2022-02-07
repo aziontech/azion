@@ -129,6 +129,9 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 		cmd.SetArgs([]string{"123", "--out", path})
 
 		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("error executing cmd")
+		}
 
 		_, err = ioutil.ReadFile(path)
 		if err != nil {
