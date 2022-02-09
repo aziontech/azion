@@ -1,6 +1,7 @@
 package describe
 
 import (
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -110,4 +111,38 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 		})
 
 	})
+
+	t.Run("export to a file", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_functions/123"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		path := "./out.json"
+
+		cmd.SetArgs([]string{"123", "--out", path})
+
+		err := cmd.Execute()
+		if err != nil {
+			t.Fatalf("error executing cmd")
+		}
+
+		_, err = ioutil.ReadFile(path)
+		if err != nil {
+			t.Fatalf("error reading `out.json`: %v", err)
+		}
+
+		require.NoError(t, err)
+
+		require.Equal(t, `File successfuly written to: out.json
+`, stdout.String())
+
+	})
+
 }
