@@ -27,6 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli edge_functions describe 4312
         $ azioncli edge_functions describe 1337 --with-code
         $ azioncli edge_functions describe 1337 --out "./tmp/test.json" --format json
+        $ azioncli edge_functions describe 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
