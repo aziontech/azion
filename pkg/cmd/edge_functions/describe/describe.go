@@ -75,7 +75,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().Bool("with-code", false, "Display the Edge Function code, disabled dy default")
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", "Enables exporting result to defined file path")
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
 	cmd.Flags().StringVar(&opts.Format, "format", "", "You can change the format of the results by sending json value to this flag")
 
 	return cmd
