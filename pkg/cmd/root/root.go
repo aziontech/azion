@@ -16,8 +16,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootToken string
-
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "azioncli",
@@ -31,7 +29,6 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 			return cmd.Help()
 		},
 	}
-
 	rootCmd.SetIn(f.IOStreams.In)
 	rootCmd.SetOut(f.IOStreams.Out)
 	rootCmd.SetErr(f.IOStreams.Err)
@@ -40,7 +37,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
+	viper.AutomaticEnv()
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))

@@ -8,6 +8,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
+	"github.com/spf13/viper"
 )
 
 const javascript = "javascript"
@@ -32,6 +33,9 @@ type EdgeFunctionResponse interface {
 
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
+	if token == "" {
+		token = viper.GetString("AZIONCLI_TOKEN")
+	}
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.AddDefaultHeader("Accept", "application/json;version=3")

@@ -5,6 +5,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
+	"github.com/spf13/viper"
 )
 
 func CreateClient(f *cmdutil.Factory) (*sdk.APIClient, error) {
@@ -15,7 +16,12 @@ func CreateClient(f *cmdutil.Factory) (*sdk.APIClient, error) {
 
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = httpClient
-	conf.AddDefaultHeader("Authorization", "token "+f.Config.GetString("token"))
+	token := f.Config.GetString("token")
+	if token == "" {
+		token = viper.GetString("AZIONCLI_TOKEN")
+	}
+	conf.AddDefaultHeader("Authorization", "token "+token)
+
 	conf.Servers = sdk.ServerConfigurations{
 		{
 			URL: f.Config.GetString("api_url"),

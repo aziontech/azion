@@ -80,8 +80,7 @@ func (t *Token) Save() error {
 		return err
 	}
 
-	// TODO: provide a better description after token is saved
-	fmt.Fprintln(t.out, "Token saved in "+t.filepath)
+	fmt.Fprintln(t.out, "This token will be used by default when calling any command.")
 
 	return nil
 }

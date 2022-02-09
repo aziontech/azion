@@ -17,6 +17,16 @@ $ make cross-build
 
 ## How to Use
 
+You will need to provide a valid token for using any network command;
+
+You can provide a token to the application in two ways:
+* Using azion-cli configure command
+$ azioncli configure -t <token>
+
+* Using environment variable
+$ export AZIONCLI_TOKEN="<token>"
+
+
 You can just run `azioncli` and see it's options
 
 ```sh
