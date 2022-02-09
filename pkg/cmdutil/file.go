@@ -1,53 +1,26 @@
 package cmdutil
 
 import (
-	"encoding/json"
-	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	"github.com/aziontech/azion-cli/pkg/contracts"
-	"gopkg.in/yaml.v2"
 )
 
-func WriteToFile(data interface{}, opts *contracts.DescribeOptions) error {
+func WriteDetailsToScreenOrFile(data []byte, out bool, outPath string, writer io.Writer) error {
 
-	switch opts.Format {
-	case "json":
-		file, err := json.MarshalIndent(data, "", " ")
+	if out {
+		err := os.MkdirAll(filepath.Dir(outPath), os.ModePerm)
 		if err != nil {
 			return err
 		}
 
-		err = os.MkdirAll(filepath.Dir(opts.OutPath), os.ModePerm)
+		err = ioutil.WriteFile(outPath, data, 0644)
 		if err != nil {
 			return err
 		}
-
-		err = ioutil.WriteFile(opts.OutPath, file, 0644)
-		if err != nil {
-			return err
-		}
-
-	case "yaml":
-		file, err := yaml.Marshal(data)
-		if err != nil {
-			return err
-		}
-
-		err = os.MkdirAll(filepath.Dir(opts.OutPath), os.ModePerm)
-		if err != nil {
-			return err
-		}
-
-		err = ioutil.WriteFile(opts.OutPath, file, 0644)
-		if err != nil {
-			return err
-		}
-	default:
-		return errors.New("Format not supported. Use --help for more information")
-
+	} else {
+		writer.Write(data[:])
 	}
 	return nil
 }
