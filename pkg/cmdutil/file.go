@@ -20,7 +20,11 @@ func WriteDetailsToScreenOrFile(data []byte, out bool, outPath string, writer io
 			return err
 		}
 	} else {
-		writer.Write(data[:])
+		_, err := writer.Write(data[:])
+		if err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
