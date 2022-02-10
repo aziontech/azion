@@ -81,7 +81,7 @@ func describeService(client *sdk.APIClient, out io.Writer, service_id int64, wit
 	fmt.Fprintf(out, "Permissions: %s\n", resp.Permissions)
 	if withVariables {
 		fmt.Fprint(out, "Variables:\n")
-		for _, variable := range *resp.Variables {
+		for _, variable := range resp.Variables {
 			fmt.Fprintf(out, " Name: %s\tValue: %s\n", variable.Name, variable.Value)
 		}
 	}
