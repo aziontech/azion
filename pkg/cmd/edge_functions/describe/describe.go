@@ -19,8 +19,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
 		Use:           "describe <edge_function_id> [flags]",
-		Short:         "Describe a given Edge Function",
-		Long:          "Describe a given Edge Function",
+		Short:         "Describes an Edge Function",
+		Long:          "Provides a long description of an Edge Function based on a given id",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`

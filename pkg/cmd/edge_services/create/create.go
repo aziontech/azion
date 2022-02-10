@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -19,6 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          `Creates a new Edge Service with the received name`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services create --name "Hello"
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			name, err := cmd.Flags().GetString("name")
@@ -43,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	createCmd.Flags().String("name", "", "<EDGE_SERVICE_NAME>")
+	createCmd.Flags().String("name", "", "Name of your Edge Service (Mandatory)")
 	_ = createCmd.MarkFlagRequired("name")
 
 	return createCmd

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -17,10 +18,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
 		Use:           "describe <service_id> <resource_id> [flags]",
-		Short:         "Describes a resource based on a given resource_id",
-		Long:          `Provides a long desription of a resource based on a given service_id and a resource_id`,
+		Short:         "Describes a Resource",
+		Long:          `Provides a long description of a Resource based on a given service_id and a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services resources describe 80312
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
 				return utils.ErrorMissingResourceIdArgument

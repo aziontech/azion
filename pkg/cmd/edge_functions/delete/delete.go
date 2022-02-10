@@ -14,8 +14,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "delete <edge_function_id> [flags]",
-		Short:         "Delete an Edge Function",
-		Long:          "Delete an Edge Function based on a given id",
+		Short:         "Deletes an Edge Function",
+		Long:          "Deletes an Edge Function based on a given id",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
