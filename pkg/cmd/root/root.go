@@ -40,7 +40,8 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
+	//TODO: Do we really want to remove the option for using token on every command line?
+	//rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token specifically for this single command")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
@@ -59,6 +60,8 @@ func Execute() {
 
 	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
 	tok, _ := token.ReadFromDisk()
+	viper.SetEnvPrefix("AZIONCLI")
+	viper.AutomaticEnv()
 	viper.SetDefault("token", tok)
 	viper.SetDefault("api_url", constants.ApiURL)
 
