@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -16,10 +17,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
 		Use:           "delete <service_id> [flags]",
-		Short:         "Deletes a service based on a given service_id",
-		Long:          `Deletes a service based on a given service_id`,
+		Short:         "Deletes an Edge Service",
+		Long:          `Deletes an Edge Service based on a given service_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services delete 1234
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return utils.ErrorMissingServiceIdArgument

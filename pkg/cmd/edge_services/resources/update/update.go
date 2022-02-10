@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -21,10 +22,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// updateCmd represents the update command
 	updateCmd := &cobra.Command{
 		Use:           "update <service_id> <resource_id> [flags]",
-		Short:         "Updates a resource based on a resource_id",
-		Long:          `Updates fields of a resource based on a service_id and resource_id`,
+		Short:         "Updates a Resource",
+		Long:          `Updates a Resource based on a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services resources update 1234 --name '/tmp/hello.txt'
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if len(args) < 2 {
@@ -111,9 +115,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	updateCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
-	updateCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	updateCmd.Flags().String("content-type", "", "<shellscript|text>")
+	updateCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME>")
+	updateCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
+	updateCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text>")
 	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
 
 	return updateCmd

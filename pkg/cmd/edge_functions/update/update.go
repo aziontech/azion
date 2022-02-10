@@ -29,8 +29,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           "update <edge_function_id> [flags]",
-		Short:         "Update an Edge Function",
-		Long:          "Update an Edge Function",
+		Short:         "Updates an Edge Function",
+		Long:          "Updates an Edge Function",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -103,7 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&fields.Name, "name", "", "Name of your Edge Function.")
+	flags.StringVar(&fields.Name, "name", "", "Name of your Edge Function")
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code.")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
 	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false>")

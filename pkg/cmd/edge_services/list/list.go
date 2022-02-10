@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/printer"
@@ -27,10 +28,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "Lists services of an Azion account",
-		Long:          `Lists services of an Azion account`,
+		Short:         "Lists the Edge Services of your account",
+		Long:          `Lists the Edge Services of your account`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services list [--details]
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := requests.CreateClient(f)
 			if err != nil {
@@ -47,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch")
 	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results")
 	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
-	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show all relevant fields when listing")
+	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show more fields when listing")
 
 	return listCmd
 }

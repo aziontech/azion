@@ -17,8 +17,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "List the Edge Functions of your account",
-		Long:          "List the Edge Functions of your account",
+		Short:         "Lists the Edge Functions of your account",
+		Long:          "Lists the Edge Functions of your account",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`

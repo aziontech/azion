@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -17,10 +18,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
 		Use:           "describe <service_id> [flags]",
-		Short:         "Describes a service based on a given service_id",
-		Long:          `Describes a service based on a given service_id`,
+		Short:         "Describes an Edge Service",
+		Long:          `Provides a long description of an Edge Function based on a given id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services describe 4312
+        $ azioncli edge_functions describe 1337 --with-variables
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return utils.ErrorMissingServiceIdArgument
@@ -49,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		},
 	}
-	describeCmd.Flags().Bool("with-variables", false, "")
+	describeCmd.Flags().Bool("with-variables", false, "Display the Edge Service variables, disabled dy default")
 
 	return describeCmd
 

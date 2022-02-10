@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -21,10 +22,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
 		Use:           "create <service_id> [flags]",
-		Short:         "Creates a new resource",
-		Long:          `Creates a new resource in an Edge Service based on a given service_id.`,
+		Short:         "Creates a new Resource",
+		Long:          `Creates a new Resource in an Edge Service based on a given service_id.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services resources create --name "/tmp/test.txt" --content-type text --content-file "./text.txt"
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return utils.ErrorMissingServiceIdArgument
@@ -88,12 +92,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	createCmd.Flags().String("name", "", "<PATH>/<RESOURCE_NAME>")
+	createCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("name")
-	createCmd.Flags().String("trigger", "", "<Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "<shellscript|text>")
+	createCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
+	createCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-type")
-	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
+	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-file")
 
 	return createCmd

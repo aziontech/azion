@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -21,10 +22,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
 		Use:           "update <service_id> [flags]",
-		Short:         "Updates parameters of an Edge Service",
-		Long:          `Updates parameters of an Edge Service`,
+		Short:         "Updates an Edge Service",
+		Long:          `Updates an Edge Service`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services update 1234 --name 'Hello'
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
 				return utils.ErrorMissingServiceIdArgument
@@ -47,9 +51,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	updateCmd.Flags().String("name", "", "<EDGE_SERVICE_NAME>")
-	updateCmd.Flags().String("active", "", "<true|false>")
-	updateCmd.Flags().String("variables-file", "", `<VARIABLES_FILE_PATH>
+	updateCmd.Flags().String("name", "", "Name of your Edge Service")
+	updateCmd.Flags().String("active", "", "Whether or not your Edge Service should be active: <true|false>")
+	updateCmd.Flags().String("variables-file", "", `Path to the file containing the file with Variables.
 The format accepted for variables definition is one <KEY>=<VALUE> per line`)
 
 	return updateCmd
