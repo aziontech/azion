@@ -59,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	configureCmd.SetOut(f.IOStreams.Out)
 	configureCmd.SetErr(f.IOStreams.Err)
 
-	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", "Validate token and save it in $HOME_DIR/.azion/credentials")
+	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", "Save provided token to use on any command")
 
 	return configureCmd
 }

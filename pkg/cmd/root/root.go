@@ -16,8 +16,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootToken string
-
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "azioncli",
@@ -40,8 +38,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token")
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azion-cli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
@@ -59,6 +56,8 @@ func Execute() {
 
 	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
 	tok, _ := token.ReadFromDisk()
+	viper.SetEnvPrefix("AZIONCLI")
+	viper.AutomaticEnv()
 	viper.SetDefault("token", tok)
 	viper.SetDefault("api_url", constants.ApiURL)
 
@@ -71,7 +70,6 @@ func Execute() {
 	}
 
 	cmd := NewRootCmd(factory)
-	_ = viper.BindPFlag("token", cmd.PersistentFlags().Lookup("token"))
 
 	cobra.CheckErr(cmd.Execute())
 }
