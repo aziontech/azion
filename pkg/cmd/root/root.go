@@ -16,8 +16,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootToken string
-
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "azioncli",
@@ -42,7 +40,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	//TODO: Do we really want to remove the option for using token on every command line?
 	//rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token specifically for this single command")
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azion-cli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
