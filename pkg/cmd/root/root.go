@@ -38,8 +38,6 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	//TODO: Do we really want to remove the option for using token on every command line?
-	//rootCmd.PersistentFlags().StringVarP(&rootToken, "token", "t", "", "Use provided token specifically for this single command")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azion-cli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
@@ -72,7 +70,6 @@ func Execute() {
 	}
 
 	cmd := NewRootCmd(factory)
-	_ = viper.BindPFlag("token", cmd.PersistentFlags().Lookup("token"))
 
 	cobra.CheckErr(cmd.Execute())
 }
