@@ -17,6 +17,18 @@ $ make cross-build
 
 ## How to Use
 
+In order to perform network operations it is *mandatory* to provide an authentication token
+
+You can provide token in two ways.
+* Using azion-cli configure command (this command saves the token in a configuration file for further use):
+$ azioncli configure -t <authentication token>
+
+OR
+
+* Using environment variable (in this way the token will be cleared when the terminal is closed):
+$ export AZIONCLI_TOKEN=<authentication token>
+
+
 You can just run `azioncli` and see it's options
 
 ```sh

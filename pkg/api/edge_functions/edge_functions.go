@@ -116,9 +116,9 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, error) {
 
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
-		OrderBy(opts.Order_by).
+		OrderBy(opts.OrderBy).
 		Page(opts.Page).
-		PageSize(opts.Page_size).
+		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
 

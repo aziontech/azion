@@ -4,33 +4,29 @@ import (
 	"context"
 	"io"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
 )
 
-type ListOptions struct {
-	Limit int64
-	Page  int64
-	// FIXME: ENG-17161 / ENG-19147
-	SortDesc bool
-	Filter   string
-	Details  bool
-}
-
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	opts := &ListOptions{}
+	opts := &contracts.ListOptions{}
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "Lists services of an Azion account",
-		Long:          `Lists services of an Azion account`,
+		Short:         "Lists the Edge Services of your account",
+		Long:          `Lists the Edge Services of your account`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Example: heredoc.Doc(`
+        $ azioncli edge_services list [--details]
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := requests.CreateClient(f)
 			if err != nil {
@@ -44,15 +40,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	listCmd.Flags().Int64Var(&opts.Limit, "limit", 10, "Maximum number of items to fetch")
-	listCmd.Flags().Int64Var(&opts.Page, "page", 1, "Select the page from results")
-	listCmd.Flags().StringVar(&opts.Filter, "filter", "", "Filter results by their name")
-	listCmd.Flags().BoolVar(&opts.Details, "details", false, "Show all relevant fields when listing")
+	cmdutil.AddAzionApiFlags(listCmd, opts)
 
 	return listCmd
 }
 
-func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) error {
+func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListOptions) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -61,7 +54,9 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *ListOptions) er
 
 	resp, httpResp, err := api.GetServices(c).
 		Page(opts.Page).
-		Limit(opts.Limit).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).
+		OrderBy(opts.OrderBy).
 		Filter(opts.Filter).
 		Execute()
 

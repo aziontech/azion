@@ -91,9 +91,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&fields.Name, "name", "", "Name of your Edge Function.")
-	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code.")
-	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false>")
+	flags.StringVar(&fields.Name, "name", "", "Name of your Edge Function (Mandatory)")
+	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code (Mandatory)")
+	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false> (Mandatory)")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
 
 	_ = cmd.MarkFlagRequired("name")
