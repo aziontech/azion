@@ -94,15 +94,15 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 type UpdateRequest struct {
 	sdk.PatchEdgeFunctionRequest
-	id int64
+	Id int64
 }
 
 func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{id: id}
+	return &UpdateRequest{Id: id}
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {

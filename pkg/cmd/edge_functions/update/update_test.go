@@ -93,4 +93,24 @@ func TestUpdate(t *testing.T) {
 
 		require.Error(t, err)
 	})
+
+	t.Run("update with file", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("PATCH", "edge_functions/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--in", "./fixtures/update.json"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+	})
 }

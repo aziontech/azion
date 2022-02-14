@@ -22,6 +22,8 @@ type Fields struct {
 	Active        string
 	InitiatorType string
 	Args          string
+	Format        string
+	InPath        string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -37,49 +39,60 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli edge_functions update 1234 --name 'Hello'
         $ azioncli edge_functions update 4185 --code ./mycode/function.js --args ./mycode/myargs.json
         $ azioncli edge_functions update 9123 --active false
+        $ azioncli edge_functions update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
-				return errors.New("missing edge function id argument")
+			// either id parameter or in path should be passed
+			if len(args) < 1 && !cmd.Flags().Changed("in") {
+				return errors.New("missing edge function id argument or path to import file")
 			}
 
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return fmt.Errorf("invalid edge function id: %q", args[0])
-			}
+			request := api.UpdateRequest{}
 
-			request := api.NewUpdateRequest(ids[0])
-
-			if cmd.Flags().Changed("active") {
-				active, err := strconv.ParseBool(fields.Active)
+			if cmd.Flags().Changed("in") {
+				err := cmdutil.UnmarshallFunctionUpdateIntoFile(fields.InPath, &request)
 				if err != nil {
-					return fmt.Errorf("invalid --active flag: %q", fields.Active)
+					return fmt.Errorf("error while unmarshalling the file %s", fields.InPath)
 				}
-				request.SetActive(active)
-			}
-
-			if cmd.Flags().Changed("code") {
-				code, err := ioutil.ReadFile(fields.Code)
+			} else {
+				ids, err := utils.ConvertIdsToInt(args[0])
 				if err != nil {
-					return fmt.Errorf("failed to read code file: %w", err)
+					return fmt.Errorf("invalid edge function id: %q", args[0])
 				}
-				request.SetCode(string(code))
-			}
 
-			if cmd.Flags().Changed("args") {
-				marshalledArgs, err := ioutil.ReadFile(fields.Args)
-				if err != nil {
-					return fmt.Errorf("failed to read args file: %w", err)
-				}
-				args := make(map[string]interface{})
-				if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-					return fmt.Errorf("failed to parse json args: %w", err)
-				}
-				request.SetJsonArgs(args)
-			}
+				request.Id = ids[0]
 
-			if cmd.Flags().Changed("name") {
-				request.SetName(fields.Name)
+				if cmd.Flags().Changed("active") {
+					active, err := strconv.ParseBool(fields.Active)
+					if err != nil {
+						return fmt.Errorf("invalid --active flag: %q", fields.Active)
+					}
+					request.SetActive(active)
+				}
+
+				if cmd.Flags().Changed("code") {
+					code, err := ioutil.ReadFile(fields.Code)
+					if err != nil {
+						return fmt.Errorf("failed to read code file: %w", err)
+					}
+					request.SetCode(string(code))
+				}
+
+				if cmd.Flags().Changed("args") {
+					marshalledArgs, err := ioutil.ReadFile(fields.Args)
+					if err != nil {
+						return fmt.Errorf("failed to read args file: %w", err)
+					}
+					args := make(map[string]interface{})
+					if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+						return fmt.Errorf("failed to parse json args: %w", err)
+					}
+					request.SetJsonArgs(args)
+				}
+
+				if cmd.Flags().Changed("name") {
+					request.SetName(fields.Name)
+				}
 			}
 
 			httpClient, err := f.HttpClient()
@@ -90,10 +103,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			response, err := client.Update(ctx, request)
+			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf("failed to create edge function: %w", err)
+				return fmt.Errorf("failed to update edge function: %w", err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Edge Function with ID %d\n", response.GetId())
@@ -107,6 +120,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
 	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false>")
+	flags.StringVar(&fields.Format, "format", "", "You can inform the format of the input file by passing json value to this flag")
+	flags.StringVar(&fields.InPath, "in", "", "Use proviced filepath to update the fields")
 
 	return cmd
 }
