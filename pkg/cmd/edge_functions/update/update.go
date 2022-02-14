@@ -22,7 +22,6 @@ type Fields struct {
 	Active        string
 	InitiatorType string
 	Args          string
-	Format        string
 	InPath        string
 }
 
@@ -50,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request := api.UpdateRequest{}
 
 			if cmd.Flags().Changed("in") {
-				err := cmdutil.UnmarshallFunctionUpdateIntoFile(fields.InPath, &request)
+				err := cmdutil.UnmarshallJsonFromFile(fields.InPath, &request)
 				if err != nil {
 					return fmt.Errorf("error while unmarshalling the file %s", fields.InPath)
 				}
