@@ -120,7 +120,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
 	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false>")
-	flags.StringVar(&fields.Format, "format", "", "You can inform the format of the input file by passing json value to this flag")
 	flags.StringVar(&fields.InPath, "in", "", "Use proviced filepath to update the fields")
 
 	return cmd
