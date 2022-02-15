@@ -20,6 +20,7 @@ type Fields struct {
 	Active        string
 	InitiatorType string
 	Args          string
+	InPath        string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -38,35 +39,45 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()
 
-			isActive, err := strconv.ParseBool(fields.Active)
-			if err != nil {
-				return fmt.Errorf("invalid --active flag: %s", fields.Active)
-			}
-			request.SetActive(isActive)
-
-			code, err := ioutil.ReadFile(fields.Code)
-			if err != nil {
-				return fmt.Errorf("failed to read code file: %w", err)
-			}
-			request.SetCode(string(code))
-
-			if cmd.Flags().Changed("args") {
-				marshalledArgs, err := ioutil.ReadFile(fields.Args)
+			if cmd.Flags().Changed("in") {
+				err := cmdutil.UnmarshallJsonFromFile(fields.InPath, &request)
 				if err != nil {
-					return fmt.Errorf("failed to read args file: %w", err)
+					return fmt.Errorf("error while unmarshalling the file %s", fields.InPath)
+				}
+			} else {
+				if !cmd.Flags().Changed("active") || !cmd.Flags().Changed("code") || !cmd.Flags().Changed("name") {
+					return fmt.Errorf("Error: flags --active, --code and --name are mandatory when flag --in is not sent")
+				}
+				isActive, err := strconv.ParseBool(fields.Active)
+				if err != nil {
+					return fmt.Errorf("invalid --active flag: %s", fields.Active)
+				}
+				request.SetActive(isActive)
+
+				code, err := ioutil.ReadFile(fields.Code)
+				if err != nil {
+					return fmt.Errorf("failed to read code file: %w", err)
+				}
+				request.SetCode(string(code))
+
+				if cmd.Flags().Changed("args") {
+					marshalledArgs, err := ioutil.ReadFile(fields.Args)
+					if err != nil {
+						return fmt.Errorf("failed to read args file: %w", err)
+					}
+
+					args := make(map[string]interface{})
+					if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+						return fmt.Errorf("failed to parse json args: %w", err)
+					}
+					request.SetJsonArgs(args)
 				}
 
-				args := make(map[string]interface{})
-				if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-					return fmt.Errorf("failed to parse json args: %w", err)
+				request.SetName(fields.Name)
+
+				if cmd.Flags().Changed("initiator-type") {
+					request.SetInitiatorType(fields.InitiatorType)
 				}
-				request.SetJsonArgs(args)
-			}
-
-			request.SetName(fields.Name)
-
-			if cmd.Flags().Changed("initiator-type") {
-				request.SetInitiatorType(fields.InitiatorType)
 			}
 
 			httpClient, err := f.HttpClient()
@@ -95,10 +106,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code (Mandatory)")
 	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false> (Mandatory)")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
-
-	_ = cmd.MarkFlagRequired("name")
-	_ = cmd.MarkFlagRequired("code")
-	_ = cmd.MarkFlagRequired("active")
+	flags.StringVar(&fields.InPath, "in", "", "Use provided filepath to update the fields")
 
 	return cmd
 }

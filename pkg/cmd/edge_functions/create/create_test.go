@@ -75,4 +75,24 @@ func TestCreate(t *testing.T) {
 
 		require.Error(t, err)
 	})
+
+	t.Run("create with file", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "edge_functions"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--in", "./fixtures/create.json"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, "Created Edge Function with ID 1337\n", stdout.String())
+	})
 }
