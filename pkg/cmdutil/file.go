@@ -1,6 +1,7 @@
 package cmdutil
 
 import (
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"os"
@@ -27,4 +28,20 @@ func WriteDetailsToScreenOrFile(data []byte, out bool, outPath string, writer io
 
 	}
 	return nil
+}
+
+func UnmarshallJsonFromFile(inPath string, object interface{}) error {
+
+	jsonFile, err := ioutil.ReadFile(inPath)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonFile, &object)
+	if err != nil {
+		return err
+	}
+
+	return nil
+
 }
