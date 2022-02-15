@@ -1,0 +1,5 @@
+{
+    "active": true,
+    "code": "async function handleRequest(request) {\n return new Response(\"Não contavam com minha astúcia!\",\n   {\n       status:204\n   })\n}\naddEventListener(\"fetch\", event =\u003e {\n event.respondWith(handleRequest(event.request))\n})",
+    "name": "Testa la da ca"
+   }
