@@ -85,6 +85,9 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpRes.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
@@ -106,6 +109,9 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpRes.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
@@ -114,7 +120,6 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, error) {
-
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -123,6 +128,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
+		if httpResp == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
