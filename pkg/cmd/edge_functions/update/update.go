@@ -64,7 +64,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
-					return fmt.Errorf("error while unmarshalling the file %s", fields.InPath)
+					return fmt.Errorf("error while unmarshalling from reader")
 				}
 			} else {
 				ids, err := utils.ConvertIdsToInt(args[0])
