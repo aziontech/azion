@@ -78,10 +78,6 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 
 	resources := resp.Resources
 
-	if len(resources) == 0 {
-		return nil
-	}
-
 	tp := printer.NewTab(out)
 	if opts.Details {
 		fields = append(fields, "LastEditor", "UpdatedAt", "ContentType", "Type")

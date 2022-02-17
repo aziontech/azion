@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
@@ -35,6 +36,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.AddDefaultHeader("Accept", "application/json;version=3")
+	conf.AddDefaultHeader("User-Agent", "Azion_CLI/"+version.BinVersion)
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
