@@ -67,7 +67,8 @@ func TestList(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, ``, stdout.String())
+		assert.Equal(t, `ID    NAME
+`, stdout.String())
 	})
 
 	t.Run("no resource_id sent", func(t *testing.T) {

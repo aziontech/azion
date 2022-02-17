@@ -69,10 +69,6 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 
 	services := resp.Services
 
-	if len(services) == 0 {
-		return nil
-	}
-
 	tp := printer.NewTab(out)
 	if opts.Details {
 		fields = append(fields, "LastEditor", "UpdatedAt", "Active", "BoundNodes")
