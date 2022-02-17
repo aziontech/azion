@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
@@ -40,9 +41,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request := api.NewCreateRequest()
 
 			if cmd.Flags().Changed("in") {
-				err := cmdutil.UnmarshallJsonFromFile(fields.InPath, &request)
+				var (
+					file *os.File
+					err  error
+				)
+				if fields.InPath == "-" {
+					file = os.Stdin
+				} else {
+					file, err = os.Open(fields.InPath)
+					if err != nil {
+						return fmt.Errorf("error while opening file %s", fields.InPath)
+					}
+				}
+
+				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
-					return fmt.Errorf("error while unmarshalling the file %s", fields.InPath)
+					return fmt.Errorf("error while unmarshalling from reader")
 				}
 			} else {
 				if !cmd.Flags().Changed("active") || !cmd.Flags().Changed("code") || !cmd.Flags().Changed("name") {

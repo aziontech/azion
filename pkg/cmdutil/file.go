@@ -30,9 +30,8 @@ func WriteDetailsToScreenOrFile(data []byte, out bool, outPath string, writer io
 	return nil
 }
 
-func UnmarshallJsonFromFile(inPath string, object interface{}) error {
-
-	jsonFile, err := ioutil.ReadFile(inPath)
+func UnmarshallJsonFromReader(file io.Reader, object interface{}) error {
+	jsonFile, err := ioutil.ReadAll(file)
 	if err != nil {
 		return err
 	}
@@ -43,5 +42,4 @@ func UnmarshallJsonFromFile(inPath string, object interface{}) error {
 	}
 
 	return nil
-
 }
