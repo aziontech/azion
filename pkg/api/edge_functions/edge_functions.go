@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
@@ -35,6 +36,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.AddDefaultHeader("Accept", "application/json;version=3")
+	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
@@ -85,6 +87,9 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpRes.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
@@ -94,18 +99,21 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 type UpdateRequest struct {
 	sdk.PatchEdgeFunctionRequest
-	id int64
+	Id int64
 }
 
 func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{id: id}
+	return &UpdateRequest{Id: id}
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
 	edgeFuncResponse, httpRes, err := request.Execute()
 	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpRes.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
@@ -114,7 +122,6 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, error) {
-
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -123,6 +130,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
+		if httpResp == nil {
+			return nil, err
+		}
 		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}

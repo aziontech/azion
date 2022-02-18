@@ -25,7 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources list [--details]
+        $ azioncli edge_services resources list 1234 [--details]
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
@@ -77,10 +77,6 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 	}
 
 	resources := resp.Resources
-
-	if len(resources) == 0 {
-		return nil
-	}
 
 	tp := printer.NewTab(out)
 	if opts.Details {

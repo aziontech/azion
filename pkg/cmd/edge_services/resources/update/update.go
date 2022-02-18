@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources update 1234 --name '/tmp/hello.txt'
+        $ azioncli edge_services resources update 1234 69420 --name '/tmp/hello.txt'
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
