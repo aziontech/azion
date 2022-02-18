@@ -36,6 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azioncli edge_functions create --name myjsfunc --code ./mycode/function.js --active true
         $ azioncli edge_functions create --name withargs --code ./mycode/function.js --args ./args.json --active true
+        $ azioncli edge_functions create --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()
@@ -120,7 +121,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code (Mandatory  if --in is not sent)")
 	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false> (Mandatory  if --in is not sent)")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
-	flags.StringVar(&fields.InPath, "in", "", "Use provided filepath to create an Edge Function")
+	flags.StringVar(&fields.InPath, "in", "", "Use provided filepath to create an Edge Function. You can use - for reading from stdin")
 
 	return cmd
 }
