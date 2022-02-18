@@ -23,7 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources describe 80312
+        $ azioncli edge_services resources describe 1234 80312
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 2 {
