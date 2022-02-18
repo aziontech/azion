@@ -17,7 +17,7 @@ func CreateClient(f *cmdutil.Factory) (*sdk.APIClient, error) {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = httpClient
 	conf.AddDefaultHeader("Authorization", "token "+f.Config.GetString("token"))
-	conf.AddDefaultHeader("User-Agent", "Azion_CLI/"+version.BinVersion)
+	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{
 			URL: f.Config.GetString("api_url"),
