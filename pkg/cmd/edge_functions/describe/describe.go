@@ -82,7 +82,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func serializeToJson(data map[string]interface{}) string {
+func serializeToJson(data interface{}) string {
 	// ignoring errors on purpose
 	serialized, _ := json.Marshal(data)
 	return string(serialized)
