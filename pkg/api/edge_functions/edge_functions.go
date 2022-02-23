@@ -27,7 +27,7 @@ type EdgeFunctionResponse interface {
 	GetInitiatorType() string
 	GetLastEditor() string
 	GetFunctionToRun() string
-	GetJsonArgs() map[string]interface{}
+	GetJsonArgs() interface{}
 	GetCode() string
 }
 
