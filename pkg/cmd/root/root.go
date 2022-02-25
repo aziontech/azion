@@ -28,6 +28,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
+		SilenceErrors: true,
 	}
 
 	rootCmd.SetIn(f.IOStreams.In)
