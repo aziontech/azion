@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -26,7 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
+				return errmsg.ErrorMissingServiceIdArgument
 			}
 
 			ids, err := utils.ConvertIdsToInt(args[0])
@@ -65,7 +67,12 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbo
 		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
-		return err
+		body, err := ioutil.ReadAll(httpResp.Body)
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteService, string(body))
 	}
 
 	if verbose {

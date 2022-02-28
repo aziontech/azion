@@ -2,13 +2,13 @@ package create
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
+				return errmsg.ErrorMissingResourceIdArgument
 			}
 
 			ids, err := utils.ConvertIdsToInt(args[0])
@@ -59,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			contentTypeConverted := replacer.Replace(contentType)
 			if contentTypeConverted == SHELL_SCRIPT {
 				if trigger == "" {
-					return utils.ErrorInvalidResourceTrigger
+					return errmsg.ErrorInvalidResourceTrigger
 				}
 			}
 
@@ -85,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, triggerConverted, contentTypeConverted, stringFile, verbose); err != nil {
-				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
+				return err
 			}
 
 			return nil
@@ -124,7 +124,7 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, n
 			return err
 		}
 
-		return errors.New(string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, string(body))
 	}
 
 	if verbose {
