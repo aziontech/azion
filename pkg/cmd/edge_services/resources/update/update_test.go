@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -47,7 +48,7 @@ func TestUpdate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.ErrorIs(t, err, utils.ErrorMissingResourceIdArgument)
+		require.ErrorIs(t, err, errmsg.ErrorMissingResourceIdArgument)
 	})
 
 	t.Run("no flag was sent", func(t *testing.T) {

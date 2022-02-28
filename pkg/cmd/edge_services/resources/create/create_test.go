@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -157,7 +157,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.ErrorIs(t, err, utils.ErrorInvalidResourceTrigger)
+		require.ErrorIs(t, err, errmsg.ErrorInvalidResourceTrigger)
 	})
 
 	t.Run("create resource without content file", func(t *testing.T) {

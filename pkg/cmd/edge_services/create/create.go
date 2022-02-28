@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -27,7 +29,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			name, err := cmd.Flags().GetString("name")
 			if err != nil {
-				return err
+				return errmsg.ErrorInvalidNameFlag
 			}
 
 			client, err := requests.CreateClient(f)
@@ -64,8 +66,12 @@ func createNewService(client *sdk.APIClient, out io.Writer, name string, verbose
 		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
+		body, err := ioutil.ReadAll(httpResp.Body)
+		if err != nil {
+			return err
+		}
 
-		return err
+		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, string(body))
 	}
 	if verbose {
 		fmt.Fprintf(out, "ID: %d\tName: %s \n", resp.Id, resp.Name)

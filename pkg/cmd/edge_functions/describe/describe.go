@@ -9,6 +9,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
@@ -31,17 +32,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return fmt.Errorf("missing edge function id argument")
+				return errmsg.ErrorMissingFunctionIdArgument
 			}
 
 			ids, err := utils.ConvertIdsToInt(args[0])
 			if err != nil {
-				return err
+				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			httpClient, err := f.HttpClient()
 			if err != nil {
-				return fmt.Errorf("failed to get http client: %w", err)
+				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
 			}
 
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -49,19 +50,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			function, err := client.Get(ctx, ids[0])
 			if err != nil {
-				return err
+				return fmt.Errorf("%s: %w", errmsg.ErrorGetFunctions, err)
 			}
 
 			out := f.IOStreams.Out
 			formattedFuction, err := format(cmd, function)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w", utils.ErrorFormatOut)
 			}
 
 			if cmd.Flags().Changed("out") {
 				err := cmdutil.WriteDetailsToScreenOrFile(formattedFuction, true, opts.OutPath, out)
 				if err != nil {
-					return fmt.Errorf("failed to write to file: %w", err)
+					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
 				fmt.Fprintf(out, "File successfuly written to: %s\n", filepath.Clean(opts.OutPath))
 			} else {
