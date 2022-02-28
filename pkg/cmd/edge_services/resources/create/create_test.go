@@ -194,6 +194,6 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "Not found. Use -h or --help for more information")
+		require.EqualError(t, err, "Failed to create Resource: Not found")
 	})
 }
