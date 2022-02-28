@@ -16,4 +16,7 @@ var (
 	ErrorGetHttpClient              = errors.New("Failed to get http client")
 	ErrorFormatOut                  = errors.New("Failed to format response")
 	ErrorWriteFile                  = errors.New("Failed to write to file")
+	ErrorTokenManager               = errors.New("Failed to create token manager")
+	ErrorTokenNotProvided           = errors.New("Token not provided, loading the saved one")
+	ErrorInvalidToken               = errors.New("Invalid token")
 )
