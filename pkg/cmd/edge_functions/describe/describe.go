@@ -56,7 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			out := f.IOStreams.Out
 			formattedFuction, err := format(cmd, function)
 			if err != nil {
-				return fmt.Errorf("%w", utils.ErrorFormatOut)
+				return utils.ErrorFormatOut
 			}
 
 			if cmd.Flags().Changed("out") {

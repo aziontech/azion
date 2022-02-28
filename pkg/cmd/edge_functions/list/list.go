@@ -39,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			functions, err := client.List(ctx, opts)
 			if err != nil {
-				return fmt.Errorf("%w", errmsg.ErrorGetFunctions)
+				return errmsg.ErrorGetFunctions
 			}
 
 			out := f.IOStreams.Out
