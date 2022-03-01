@@ -53,10 +53,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	updateCmd.Flags().String("name", "", "Name of your Edge Service")
-	updateCmd.Flags().String("active", "", "Whether or not your Edge Service should be active: <true|false>")
-	updateCmd.Flags().String("variables-file", "", `Path to the file containing the file with Variables.
-The format accepted for variables definition is one <KEY>=<VALUE> per line`)
+	updateCmd.Flags().String("name", "", "Your Edge Service's name")
+	updateCmd.Flags().String("active", "", "Whether your Edge Service should be active or not: <true|false>")
+	updateCmd.Flags().String("variables-file", "", `Path to the file containing your Edge Service's Variables.
+The accepted format for defining variables is one <KEY>=<VALUE> per line`)
 
 	return updateCmd
 }

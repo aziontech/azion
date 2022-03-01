@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "describe <edge_function_id> [flags]",
 		Short:         "Describes an Edge Function",
-		Long:          "Provides a long description of an Edge Function based on a given id",
+		Long:          "Details an Edge Function based on the id given",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -76,9 +76,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Bool("with-code", false, "Display the Edge Function code, disabled dy default")
+	cmd.Flags().Bool("with-code", false, "Displays the Edge Function's code (disabled by default)")
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
-	cmd.Flags().StringVar(&opts.Format, "format", "", "You can change the format of the results by passing json value to this flag")
+	cmd.Flags().StringVar(&opts.Format, "format", "", "You can change the results format by passing json value to this flag")
 
 	return cmd
 }

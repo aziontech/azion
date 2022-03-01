@@ -20,7 +20,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use:           "delete <service_id> [flags]",
 		Short:         "Deletes an Edge Service",
-		Long:          `Deletes an Edge Service based on a given service_id`,
+		Long:          `Deletes an Edge Service based on the id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`

@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	describeCmd := &cobra.Command{
 		Use:           "describe <service_id> [flags]",
 		Short:         "Describes an Edge Service",
-		Long:          `Provides a long description of an Edge Service based on a given id`,
+		Long:          `Details an Edge Service based on the id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -56,7 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		},
 	}
-	describeCmd.Flags().Bool("with-variables", false, "Display the Edge Service variables, disabled dy default")
+	describeCmd.Flags().Bool("with-variables", false, "Displays the Edge Service's variables (disabled by default)")
 
 	return describeCmd
 

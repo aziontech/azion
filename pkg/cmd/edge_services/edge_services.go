@@ -15,8 +15,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// edgeServicesCmd represents the edgeServices command
 	edgeServicesCmd := &cobra.Command{
 		Use:   "edge_services",
-		Short: "Manages Edge Services of an Azion account",
-		Long:  `You may create, update, delete, list and describe services of an Azion account.`,
+		Short: "Manages your Azion account's Edge Services",
+		Long:  `You can create, update, delete, list and describe your Azion account's Edge Services`,
 		Annotations: map[string]string{
 			"IsAPI": "true",
 		},

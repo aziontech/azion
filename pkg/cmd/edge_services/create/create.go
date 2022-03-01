@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:           "create [flags]",
 		Short:         "Creates a new Edge Service",
-		Long:          `Creates a new Edge Service with the received name`,
+		Long:          `Creates a new Edge Service`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -49,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	createCmd.Flags().String("name", "", "Name of your Edge Service (Mandatory)")
+	createCmd.Flags().String("name", "", "Your Edge Service's name (Mandatory)")
 	_ = createCmd.MarkFlagRequired("name")
 
 	return createCmd
