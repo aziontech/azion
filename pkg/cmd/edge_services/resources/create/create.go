@@ -23,7 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:           "create <service_id> [flags]",
 		Short:         "Creates a new Resource",
-		Long:          `Creates a new Resource in an Edge Service based on a given service_id.`,
+		Long:          `Creates a new Resource in an Edge Service based on the service_id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -92,12 +92,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	createCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME> (Mandatory)")
+	createCmd.Flags().String("name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("name")
-	createCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text> (Mandatory)")
+	createCmd.Flags().String("trigger", "", "Your Resource's Trigger: <Install|Reload|Uninstall>")
+	createCmd.Flags().String("content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-type")
-	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at (Mandatory)")
+	createCmd.Flags().String("content-file", "", "Path to the file containing your Resource's content (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-file")
 
 	return createCmd

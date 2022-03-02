@@ -15,7 +15,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	resourcesCmd := &cobra.Command{
 		Use:   "resources",
 		Short: "Manages resources in a given Edge Service",
-		Long:  `You may create, update, delete, list and describe resources in a given Edge Service.`,
+		Long:  `You can create, update, delete, list and describe Resources in a given Edge Service`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

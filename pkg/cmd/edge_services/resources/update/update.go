@@ -115,10 +115,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	updateCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME>")
-	updateCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
-	updateCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text>")
-	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
+	updateCmd.Flags().String("name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME>")
+	updateCmd.Flags().String("trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
+	updateCmd.Flags().String("content-type", "", "Your Resource's content-type: <shellscript|text>")
+	updateCmd.Flags().String("content-file", "", "Path to the file containing your Resource's content")
 
 	return updateCmd
 }

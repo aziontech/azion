@@ -13,8 +13,8 @@ var BinVersion = "development"
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Returns bin version",
-		Long:  `Returns the version of the binary.`,
+		Short: "Returns the binary version",
+		Long:  `Returns the binary version`,
 		Annotations: map[string]string{
 			"IsAdditional": "true",
 		},

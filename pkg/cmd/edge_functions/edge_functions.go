@@ -13,8 +13,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edgeFunctionsCmd := &cobra.Command{
 		Use:   "edge_functions",
-		Short: "Manages Edge Functions of your Azion account",
-		Long:  "You may create, update, delete, list and describe Edge Functions of an Azion account",
+		Short: "Manages your Azion account's Edge Functions",
+		Long:  "You can create, update, delete, list and describe your Azion account's Edge Functions",
 		Annotations: map[string]string{
 			"IsAPI": "true",
 		},

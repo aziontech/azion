@@ -16,7 +16,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	configureCmd := &cobra.Command{
 		Use:   "configure",
 		Short: "Configure parameters and credentials",
-		Long:  `This command configures cli parameters and credentials used for connecting to our services.`,
+		Long:  `This command configures CLI parameters and credentials used for connecting to our services.`,
 		Annotations: map[string]string{
 			"IsAdditional": "true",
 		},
@@ -59,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	configureCmd.SetOut(f.IOStreams.Out)
 	configureCmd.SetErr(f.IOStreams.Err)
 
-	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", "Save provided token to use on any command")
+	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", "Save provided token locally to use on any command")
 
 	return configureCmd
 }

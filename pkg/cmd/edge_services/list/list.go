@@ -23,8 +23,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "Lists the Edge Services of your account",
-		Long:          `Lists the Edge Services of your account`,
+		Short:         "Lists your account's Edge Services",
+		Long:          `Lists your account's Edge Services`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
