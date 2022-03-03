@@ -10,7 +10,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -51,39 +53,39 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				} else {
 					file, err = os.Open(fields.InPath)
 					if err != nil {
-						return fmt.Errorf("error while opening file %s", fields.InPath)
+						return fmt.Errorf("%s %s", utils.ErrorOpeningFile, fields.InPath)
 					}
 				}
 
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
-					return fmt.Errorf("error while unmarshalling from reader")
+					return utils.ErrorUnmarshalReader
 				}
 			} else {
 				if !cmd.Flags().Changed("active") || !cmd.Flags().Changed("code") || !cmd.Flags().Changed("name") {
-					return fmt.Errorf("Error: flags --active, --code and --name are mandatory when flag --in is not sent")
+					return errmsg.ErrorMandatoryCreateFlags
 				}
 				isActive, err := strconv.ParseBool(fields.Active)
 				if err != nil {
-					return fmt.Errorf("invalid --active flag: %s", fields.Active)
+					return fmt.Errorf("%w: %s", errmsg.ErrorActiveFlag, fields.Active)
 				}
 				request.SetActive(isActive)
 
 				code, err := ioutil.ReadFile(fields.Code)
 				if err != nil {
-					return fmt.Errorf("failed to read code file: %w", err)
+					return fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
 				}
 				request.SetCode(string(code))
 
 				if cmd.Flags().Changed("args") {
 					marshalledArgs, err := ioutil.ReadFile(fields.Args)
 					if err != nil {
-						return fmt.Errorf("failed to read args file: %w", err)
+						return fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
 					}
 
 					args := make(map[string]interface{})
 					if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-						return fmt.Errorf("failed to parse json args: %w", err)
+						return fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
 					}
 					request.SetJsonArgs(args)
 				}
@@ -97,7 +99,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			httpClient, err := f.HttpClient()
 			if err != nil {
-				return fmt.Errorf("failed to get http client: %w", err)
+				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
 			}
 
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -106,7 +108,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Create(ctx, request)
 
 			if err != nil {
-				return fmt.Errorf("failed to create edge function: %w", err)
+				return fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Created Edge Function with ID %d\n", response.GetId())
@@ -117,11 +119,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&fields.Name, "name", "", "Name of your Edge Function (Mandatory if --in is not sent)")
-	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function code (Mandatory  if --in is not sent)")
-	flags.StringVar(&fields.Active, "active", "", "Whether or not your Edge Function should be active: <true|false> (Mandatory  if --in is not sent)")
-	flags.StringVar(&fields.Args, "args", "", "Path to the file containing the JSON arguments of your Edge Function")
-	flags.StringVar(&fields.InPath, "in", "", "Use provided filepath to create an Edge Function. You can use - for reading from stdin")
+	flags.StringVar(&fields.Name, "name", "", "Your Edge Function's name (Mandatory if --in is not sent)")
+	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function's code (Mandatory if --in is not sent)")
+	flags.StringVar(&fields.Active, "active", "", "Whether your Edge Function should be active or not: <true|false> (Mandatory if --in is not sent)")
+	flags.StringVar(&fields.Args, "args", "", "Path to the file containing your Edge Function's JSON arguments")
+	flags.StringVar(&fields.InPath, "in", "", "Uses provided file path to create an Edge Function. You can use - for reading from stdin")
 
 	return cmd
 }

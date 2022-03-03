@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -31,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
+				return errmsg.ErrorMissingServiceIdArgument
 			}
 
 			id, err := utils.ConvertIdsToInt(args[0])
@@ -51,10 +53,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	updateCmd.Flags().String("name", "", "Name of your Edge Service")
-	updateCmd.Flags().String("active", "", "Whether or not your Edge Service should be active: <true|false>")
-	updateCmd.Flags().String("variables-file", "", `Path to the file containing the file with Variables.
-The format accepted for variables definition is one <KEY>=<VALUE> per line`)
+	updateCmd.Flags().String("name", "", "Your Edge Service's name")
+	updateCmd.Flags().String("active", "", "Whether your Edge Service should be active or not: <true|false>")
+	updateCmd.Flags().String("variables-file", "", `Path to the file containing your Edge Service's Variables.
+The accepted format for defining variables is one <KEY>=<VALUE> per line`)
 
 	return updateCmd
 }
@@ -129,8 +131,12 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
+		body, err := ioutil.ReadAll(httpResp.Body)
+		if err != nil {
+			return err
+		}
 
-		return err
+		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateService, string(body))
 	}
 
 	verbose, err := cmd.Flags().GetBool("verbose")

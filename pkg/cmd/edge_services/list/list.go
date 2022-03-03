@@ -2,9 +2,12 @@ package list
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"io/ioutil"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,8 +23,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "Lists the Edge Services of your account",
-		Long:          `Lists the Edge Services of your account`,
+		Short:         "Lists your account's Edge Services",
+		Long:          `Lists your account's Edge Services`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -64,7 +67,12 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
-		return err
+		body, err := ioutil.ReadAll(httpResp.Body)
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf("%w: %s", errmsg.ErrorGetServices, string(body))
 	}
 
 	services := resp.Services

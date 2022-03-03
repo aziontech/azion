@@ -2,13 +2,13 @@ package create
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -23,7 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:           "create <service_id> [flags]",
 		Short:         "Creates a new Resource",
-		Long:          `Creates a new Resource in an Edge Service based on a given service_id.`,
+		Long:          `Creates a new Resource in an Edge Service based on the service_id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return utils.ErrorMissingServiceIdArgument
+				return errmsg.ErrorMissingResourceIdArgument
 			}
 
 			ids, err := utils.ConvertIdsToInt(args[0])
@@ -59,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			contentTypeConverted := replacer.Replace(contentType)
 			if contentTypeConverted == SHELL_SCRIPT {
 				if trigger == "" {
-					return utils.ErrorInvalidResourceTrigger
+					return errmsg.ErrorInvalidResourceTrigger
 				}
 			}
 
@@ -85,19 +85,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, triggerConverted, contentTypeConverted, stringFile, verbose); err != nil {
-				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
+				return err
 			}
 
 			return nil
 		},
 	}
 
-	createCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME> (Mandatory)")
+	createCmd.Flags().String("name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("name")
-	createCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text> (Mandatory)")
+	createCmd.Flags().String("trigger", "", "Your Resource's Trigger: <Install|Reload|Uninstall>")
+	createCmd.Flags().String("content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-type")
-	createCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at (Mandatory)")
+	createCmd.Flags().String("content-file", "", "Path to the file containing your Resource's content (Mandatory)")
 	_ = createCmd.MarkFlagRequired("content-file")
 
 	return createCmd
@@ -124,7 +124,7 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, n
 			return err
 		}
 
-		return errors.New(string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, string(body))
 	}
 
 	if verbose {

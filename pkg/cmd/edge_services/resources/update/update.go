@@ -2,13 +2,13 @@ package update
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if len(args) < 2 {
-				return utils.ErrorMissingResourceIdArgument
+				return errmsg.ErrorMissingResourceIdArgument
 			}
 
 			ids, err := utils.ConvertIdsToInt(args[0], args[1])
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if cmd.Flags().Changed("name") {
 				name, err := cmd.Flags().GetString("name")
 				if err != nil {
-					return err
+					return errmsg.ErrorInvalidNameFlag
 				}
 				updateRequest.SetName(name)
 				valueHasChanged = true
@@ -57,7 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if cmd.Flags().Changed("trigger") {
 				trigger, err := cmd.Flags().GetString("trigger")
 				if err != nil {
-					return err
+					return errmsg.ErrorInvalidTriggerFlag
 				}
 				triggerConverted := replacer.Replace(trigger)
 				updateRequest.SetTrigger(triggerConverted)
@@ -68,7 +68,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if cmd.Flags().Changed("content-type") {
 				contentType, err := cmd.Flags().GetString("content-type")
 				if err != nil {
-					return err
+					return errmsg.ErrorInvalidContentTypeFlag
 				}
 				contentTypeConverted := replacer.Replace(contentType)
 				updateRequest.SetContentType(contentTypeConverted)
@@ -108,17 +108,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if err := updateResource(client, f.IOStreams.Out, ids[0], ids[1], updateRequest, verbose); err != nil {
-				return fmt.Errorf("%v. %v", err, utils.GenericUseHelp)
+				return err
 			}
 
 			return nil
 		},
 	}
 
-	updateCmd.Flags().String("name", "", "Name of your Resource: <PATH>/<RESOURCE_NAME>")
-	updateCmd.Flags().String("trigger", "", "Trigger of your Resource: <Install|Reload|Uninstall>")
-	updateCmd.Flags().String("content-type", "", "Content-type of your Resource: <shellscript|text>")
-	updateCmd.Flags().String("content-file", "", "Absolute path to where the file with the content is located at")
+	updateCmd.Flags().String("name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME>")
+	updateCmd.Flags().String("trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
+	updateCmd.Flags().String("content-type", "", "Your Resource's content-type: <shellscript|text>")
+	updateCmd.Flags().String("content-file", "", "Path to the file containing your Resource's content")
 
 	return updateCmd
 }
@@ -137,7 +137,7 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 			return err
 		}
 
-		return errors.New(string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateResource, string(body))
 	}
 
 	if verbose {

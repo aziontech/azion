@@ -6,9 +6,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/printer"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +19,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           "list [flags]",
-		Short:         "Lists the Edge Functions of your account",
-		Long:          "Lists the Edge Functions of your account",
+		Short:         "Lists your account's Edge Functions",
+		Long:          "Lists your account's Edge Functions",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -27,7 +29,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			httpClient, err := f.HttpClient()
 			if err != nil {
-				return fmt.Errorf("failed to get http client: %w", err)
+				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
 			}
 			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
@@ -37,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			functions, err := client.List(ctx, opts)
 			if err != nil {
-				return err
+				return errmsg.ErrorGetFunctions
 			}
 
 			out := f.IOStreams.Out
