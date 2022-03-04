@@ -88,9 +88,9 @@ func TestDescribe(t *testing.T) {
 		assert.Equal(t,
 			`ID: 1209
 Name: ApeService
+Active: true
 Updated at: 2021-12-15T21:03:54Z
 Last Editor: azion-alfreds
-Active: true
 Bound Nodes: 4
 Permissions: [read write]
 `,
@@ -136,9 +136,9 @@ Permissions: [read write]
 		assert.Equal(t,
 			`ID: 1209
 Name: ApeService
+Active: true
 Updated at: 2021-12-15T21:03:54Z
 Last Editor: azion-alfreds
-Active: true
 Bound Nodes: 4
 Permissions: [read write]
 Variables:

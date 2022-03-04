@@ -61,7 +61,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "required flag(s) \"name\" not set")
+		require.EqualError(t, err, "You must provide --name flag when --in flag is not sent")
 	})
 
 	t.Run("create service with name", func(t *testing.T) {

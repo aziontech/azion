@@ -172,7 +172,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "required flag(s) \"content-file\" not set")
+		require.EqualError(t, err, "You must provide --name, --content-type and --content-file flags when --in flag is not sent")
 	})
 
 	t.Run("service not found", func(t *testing.T) {
