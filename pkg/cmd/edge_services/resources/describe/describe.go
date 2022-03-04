@@ -123,8 +123,8 @@ func format(cmd *cobra.Command, resource *sdk.ResourceDetail) ([]byte, error) {
 		b.Write([]byte(fmt.Sprintf("Name: %s\n", resource.GetName())))
 		b.Write([]byte(fmt.Sprintf("Type: %s\n", resource.GetType())))
 		b.Write([]byte(fmt.Sprintf("Content type: %s\n", resource.GetContentType())))
-		b.Write([]byte(fmt.Sprintf("Content: \n")))
-		b.Write([]byte(fmt.Sprintf("%s", resource.GetContent())))
+		b.Write([]byte("Content: \n"))
+		b.Write([]byte(resource.GetContent()))
 		return b.Bytes(), nil
 
 	}

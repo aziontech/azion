@@ -131,7 +131,7 @@ func format(cmd *cobra.Command, service *sdk.ServiceResponse) ([]byte, error) {
 		b.Write([]byte(fmt.Sprintf("Bound Nodes: %d\n", uint64(service.GetBoundNodes()))))
 		b.Write([]byte(fmt.Sprintf("Permissions: %s\n", service.GetPermissions())))
 		if cmd.Flags().Changed("with-variables") {
-			b.Write([]byte(fmt.Sprintf("Variables:\n")))
+			b.Write([]byte("Variables:\n"))
 			for _, variable := range service.Variables {
 				b.Write([]byte(fmt.Sprintf(" Name: %s\tValue: %s\n", variable.Name, variable.Value)))
 			}
