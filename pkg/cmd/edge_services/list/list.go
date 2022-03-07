@@ -64,7 +64,7 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 		Execute()
 
 	if err != nil {
-		if httpResp == nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)

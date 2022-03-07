@@ -164,7 +164,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	updateCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME>")
 	updateCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
 	updateCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text>")
-	updateCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file containing your Resource's content")
+	updateCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file with your Resource's content")
 	updateCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to update the fields. You can use - for reading from stdin")
 
 	return updateCmd
