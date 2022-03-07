@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 
 	"github.com/MakeNowJust/heredoc"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
@@ -15,7 +16,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type Fields struct {
+	Name   string
+	InPath string
+}
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	fields := &Fields{}
+
 	createCmd := &cobra.Command{
 		Use:           "create [flags]",
 		Short:         "Creates a new Edge Service",
@@ -27,9 +35,36 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			name, err := cmd.Flags().GetString("name")
-			if err != nil {
-				return errmsg.ErrorInvalidNameFlag
+			serviceRequest := sdk.CreateServiceRequest{}
+
+			if cmd.Flags().Changed("in") {
+				var (
+					file *os.File
+					err  error
+				)
+				if fields.InPath == "-" {
+					file = os.Stdin
+				} else {
+					file, err = os.Open(fields.InPath)
+					if err != nil {
+						return fmt.Errorf("%s %s", utils.ErrorOpeningFile, fields.InPath)
+					}
+				}
+
+				err = cmdutil.UnmarshallJsonFromReader(file, &serviceRequest)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
+			} else {
+				if !cmd.Flags().Changed("name") {
+					return errmsg.ErrorMandatoryName
+				}
+				name, err := cmd.Flags().GetString("name")
+				if err != nil {
+					return errmsg.ErrorInvalidNameFlag
+				}
+				serviceRequest.SetName(name)
+
 			}
 
 			client, err := requests.CreateClient(f)
@@ -42,26 +77,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewService(client, f.IOStreams.Out, name, verbose); err != nil {
+			if err := createNewService(client, f.IOStreams.Out, serviceRequest, verbose); err != nil {
 				return err
 			}
 
 			return nil
 		},
 	}
-	createCmd.Flags().String("name", "", "Your Edge Service's name (Mandatory)")
-	_ = createCmd.MarkFlagRequired("name")
+	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Edge Service's name (Mandatory)")
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create an Edge Service. You can use - for reading from stdin")
 
 	return createCmd
 }
 
-func createNewService(client *sdk.APIClient, out io.Writer, name string, verbose bool) error {
+func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateServiceRequest, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
-	serviceRequest := sdk.CreateServiceRequest{}
-	serviceRequest.SetName(name)
 
-	resp, httpResp, err := api.NewService(c).CreateServiceRequest(serviceRequest).Execute()
+	resp, httpResp, err := api.NewService(c).CreateServiceRequest(request).Execute()
 	if err != nil {
 		if httpResp != nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError

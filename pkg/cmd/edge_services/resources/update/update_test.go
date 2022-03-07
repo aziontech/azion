@@ -48,7 +48,7 @@ func TestUpdate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.ErrorIs(t, err, errmsg.ErrorMissingResourceIdArgument)
+		require.ErrorIs(t, err, errmsg.ErrorMissingArgumentUpdateResource)
 	})
 
 	t.Run("no flag was sent", func(t *testing.T) {

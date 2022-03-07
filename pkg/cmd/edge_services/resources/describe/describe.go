@@ -1,15 +1,19 @@
 package describe
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
@@ -17,6 +21,7 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
+	opts := &contracts.DescribeOptions{}
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
 		Use:           "describe <service_id> <resource_id> [flags]",
@@ -42,41 +47,85 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := describeResource(client, f.IOStreams.Out, ids[0], ids[1]); err != nil {
+			resource, err := describeResource(client, f.IOStreams.Out, ids[0], ids[1])
+			if err != nil {
 				return err
+			}
+
+			out := f.IOStreams.Out
+			formattedResource, err := format(cmd, resource)
+			if err != nil {
+				return utils.ErrorFormatOut
+			}
+
+			if cmd.Flags().Changed("out") {
+				err := cmdutil.WriteDetailsToFile(formattedResource, opts.OutPath, out)
+				if err != nil {
+					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
+				}
+				fmt.Fprintf(out, "File successfuly written to: %s\n", filepath.Clean(opts.OutPath))
+			} else {
+				_, err := out.Write(formattedResource[:])
+				if err != nil {
+					return err
+				}
 			}
 
 			return nil
 
 		},
 	}
+
+	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
+	describeCmd.Flags().StringVar(&opts.Format, "format", "", "You can change the results format by passing json value to this flag")
+
 	return describeCmd
 
 }
 
-func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64) error {
+func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64) (*sdk.ResourceDetail, error) {
 	c := context.Background()
 	api := client.DefaultApi
 
 	resp, httpResp, err := api.GetResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		if httpResp != nil && httpResp.StatusCode >= 500 {
-			return utils.ErrorInternalServerError
+			return nil, utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorGetResource, string(body))
+		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetResource, string(body))
 	}
 
-	fmt.Fprintf(out, "ID: %d\n", resp.Id)
-	fmt.Fprintf(out, "Name: %s\n", resp.Name)
-	fmt.Fprintf(out, "Type: %s\n", resp.Type)
-	fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
-	fmt.Fprintf(out, "Content: \n")
-	fmt.Fprintf(out, "%s", resp.Content)
+	return resp, nil
+}
 
-	return nil
+func format(cmd *cobra.Command, resource *sdk.ResourceDetail) ([]byte, error) {
+
+	var b bytes.Buffer
+
+	format, err := cmd.Flags().GetString("format")
+	if err != nil {
+		return nil, err
+	}
+
+	if format == "json" || cmd.Flags().Changed("out") {
+		file, err := json.MarshalIndent(resource, "", " ")
+		if err != nil {
+			return nil, err
+		}
+		return file, nil
+	} else {
+		b.Write([]byte(fmt.Sprintf("ID: %d\n", uint64(resource.GetId()))))
+		b.Write([]byte(fmt.Sprintf("Name: %s\n", resource.GetName())))
+		b.Write([]byte(fmt.Sprintf("Type: %s\n", resource.GetType())))
+		b.Write([]byte(fmt.Sprintf("Content type: %s\n", resource.GetContentType())))
+		b.Write([]byte("Content: \n"))
+		b.Write([]byte(resource.GetContent()))
+		return b.Bytes(), nil
+
+	}
 }
