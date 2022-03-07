@@ -15,7 +15,6 @@ import (
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
@@ -26,6 +25,11 @@ type Fields struct {
 	Active    string
 	Variables string
 	InPath    string
+}
+
+type UpdateRequestService struct {
+	sdk.UpdateServiceRequest
+	Id int64
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -46,7 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return errmsg.ErrorMissingArgumentUpdate
 			}
 
-			request := contracts.UpdateRequestService{}
+			request := UpdateRequestService{}
 			var id int64
 
 			if cmd.Flags().Changed("in") {
@@ -155,7 +159,7 @@ The accepted format for defining variables is one <KEY>=<VALUE> per line`)
 	return updateCmd
 }
 
-func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Command, request contracts.UpdateRequestService) error {
+func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Command, request UpdateRequestService) error {
 	c := context.Background()
 	api := client.DefaultApi
 

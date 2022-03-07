@@ -60,13 +60,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToScreenOrFile(formattedFuction, true, opts.OutPath, out)
+				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
 				fmt.Fprintf(out, "File successfuly written to: %s\n", filepath.Clean(opts.OutPath))
 			} else {
-				err := cmdutil.WriteDetailsToScreenOrFile(formattedFuction, false, "", out)
+				_, err := out.Write(formattedFuction[:])
 				if err != nil {
 					return err
 				}

@@ -73,7 +73,7 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 		Execute()
 
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil && httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)

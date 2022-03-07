@@ -12,7 +12,6 @@ import (
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
@@ -26,6 +25,11 @@ type Fields struct {
 	ContentType string
 	ContentFile string
 	InPath      string
+}
+
+type UpdateRequestResource struct {
+	sdk.UpdateResourceRequest
+	Id int64
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -47,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			convertedIds := make([]int64, 2)
-			request := contracts.UpdateRequestResource{}
+			request := UpdateRequestResource{}
 
 			if cmd.Flags().Changed("in") {
 				var (
@@ -166,7 +170,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return updateCmd
 }
 
-func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update contracts.UpdateRequestResource, verbose bool) error {
+func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update UpdateRequestResource, verbose bool) error {
 	c := context.Background()
 	api := client.DefaultApi
 
