@@ -72,12 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-
-			if err := createNewService(client, f.IOStreams.Out, serviceRequest, verbose); err != nil {
+			if err := createNewService(client, f.IOStreams.Out, serviceRequest); err != nil {
 				return err
 			}
 
@@ -90,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateServiceRequest, verbose bool) error {
+func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateServiceRequest) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -106,9 +101,8 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 
 		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, string(body))
 	}
-	if verbose {
-		fmt.Fprintf(out, "ID: %d\tName: %s \n", resp.Id, resp.Name)
-	}
+
+	fmt.Fprintf(out, "Created Edge Service with ID %d\n", resp.Id)
 
 	return nil
 }

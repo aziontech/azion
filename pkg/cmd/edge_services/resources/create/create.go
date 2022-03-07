@@ -42,7 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errmsg.ErrorMissingResourceIdArgument
+				return errmsg.ErrorMissingServiceIdArgument
 			}
 
 			request := sdk.CreateResourceRequest{}
@@ -120,11 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-			if err := createNewResource(client, f.IOStreams.Out, ids[0], request, verbose); err != nil {
+			if err := createNewResource(client, f.IOStreams.Out, ids[0], request); err != nil {
 				return err
 			}
 
@@ -141,7 +137,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, request sdk.CreateResourceRequest, verbose bool) error {
+func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, request sdk.CreateResourceRequest) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -158,14 +154,7 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, r
 		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, string(body))
 	}
 
-	if verbose {
-		fmt.Fprintf(out, "ID: %d\n", resp.Id)
-		fmt.Fprintf(out, "Name: %s\n", resp.Name)
-		fmt.Fprintf(out, "Type: %s\n", resp.Type)
-		fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
-		fmt.Fprintf(out, "Content: \n")
-		fmt.Fprintf(out, "%s", resp.Content)
-	}
+	fmt.Fprintf(out, "Created Resource with ID %d\n", resp.Id)
 
 	return nil
 }
