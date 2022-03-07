@@ -85,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Edge Service's name (Mandatory)")
-	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create an Edge Function. You can use - for reading from stdin")
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create an Edge Service. You can use - for reading from stdin")
 
 	return createCmd
 }
