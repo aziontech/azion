@@ -14,7 +14,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -145,55 +144,6 @@ func TestUpdate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-	})
-
-	t.Run("update resource with all fields being verbose", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("PATCH", "edge_services/1234/resources/666"),
-			func(req *http.Request) (*http.Response, error) {
-				request := &sdk.UpdateResourceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
-				_ = json.Unmarshal(body, request)
-
-				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
-
-				return &http.Response{StatusCode: http.StatusCreated,
-					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
-					Header: http.Header{
-						"Content-Type": []string{"application/json"},
-					},
-				}, nil
-			},
-		)
-
-		f, stdout, _ := testutils.NewFactory(mock)
-
-		contentFile, _ := os.CreateTemp("", "content.txt")
-
-		_, _ = contentFile.Write([]byte("Parangaricutirimírruaro"))
-
-		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "666", "-v", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
-
-		assert.Equal(t,
-			`ID: 666
-Name: BIRL
-Type: Install
-Content type: Shell Script
-Content: 
-Parangaricutirimírruaro`,
-			stdout.String(),
-		)
 	})
 
 }
