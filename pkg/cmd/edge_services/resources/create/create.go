@@ -133,9 +133,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
-	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's Trigger: <Install|Reload|Uninstall>")
+	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
 	createCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")
-	createCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file containing your Resource's content (Mandatory)")
+	createCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file with your Resource's content (Mandatory)")
 	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create a Resource. You can use - for reading from stdin")
 
 	return createCmd
