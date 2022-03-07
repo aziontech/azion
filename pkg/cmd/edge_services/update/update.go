@@ -176,20 +176,7 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateService, string(body))
 	}
 
-	verbose, err := cmd.Flags().GetBool("verbose")
-	if err != nil {
-		return err
-	}
-
-	if verbose {
-		fmt.Fprintf(out, "ID: %d\n", resp.Id)
-		fmt.Fprintf(out, "Name: %s\n", resp.Name)
-		fmt.Fprintf(out, "Updated at: %s\n", resp.UpdatedAt)
-		fmt.Fprintf(out, "Last Editor: %s\n", resp.LastEditor)
-		fmt.Fprintf(out, "Active: %t\n", resp.Active)
-		fmt.Fprintf(out, "Bound Nodes: %d\n", resp.BoundNodes)
-		fmt.Fprintf(out, "Permissions: %s\n", resp.Permissions)
-	}
+	fmt.Fprintf(out, "Updated Edge Service with ID %d\n", resp.Id)
 
 	return nil
 }

@@ -72,41 +72,9 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID: 82706\nName: /tmp/testando.txt\nType: \nContent type: Text\nContent: \ninsert your text here", stdout.String())
+		assert.Equal(t, `Created Resource with ID 82706
+`, stdout.String())
 
-	})
-
-	t.Run("create text resource being verbose", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("POST", "edge_services/1234/resources"),
-			func(req *http.Request) (*http.Response, error) {
-				return &http.Response{StatusCode: http.StatusCreated,
-					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
-					Header: http.Header{
-						"Content-Type": []string{"application/json"},
-					},
-				}, nil
-			},
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		contentFile, _ := os.CreateTemp("", "content.txt")
-
-		_, _ = contentFile.Write([]byte("insert your text here"))
-
-		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
 	})
 
 	t.Run("create script resource", func(t *testing.T) {

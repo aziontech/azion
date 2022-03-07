@@ -11,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -97,42 +96,5 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-	})
-
-	t.Run("create service with name being verbose", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("POST", "edge_services/"),
-			func(req *http.Request) (*http.Response, error) {
-				request := &sdk.CreateServiceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
-				_ = json.Unmarshal(body, request)
-
-				response := strings.ReplaceAll(responseBody, "{name}", request.Name)
-
-				return &http.Response{StatusCode: http.StatusCreated,
-					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
-					Header: http.Header{
-						"Content-Type": []string{"application/json"},
-					},
-				}, nil
-			},
-		)
-
-		f, stdout, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"--name", "BIRL", "--verbose"})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
-
-		assert.Equal(t, "ID: 1753\tName: BIRL \n", stdout.String())
 	})
 }

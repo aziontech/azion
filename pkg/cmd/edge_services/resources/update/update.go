@@ -148,12 +148,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-
-			if err := updateResource(client, f.IOStreams.Out, convertedIds[0], convertedIds[1], request, verbose); err != nil {
+			if err := updateResource(client, f.IOStreams.Out, convertedIds[0], convertedIds[1], request); err != nil {
 				return err
 			}
 
@@ -170,7 +165,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return updateCmd
 }
 
-func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update UpdateRequestResource, verbose bool) error {
+func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, update UpdateRequestResource) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -187,14 +182,7 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateResource, string(body))
 	}
 
-	if verbose {
-		fmt.Fprintf(out, "ID: %d\n", resp.Id)
-		fmt.Fprintf(out, "Name: %s\n", resp.Name)
-		fmt.Fprintf(out, "Type: %s\n", resp.Type)
-		fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
-		fmt.Fprintf(out, "Content: \n")
-		fmt.Fprintf(out, "%s", resp.Content)
-	}
+	fmt.Fprintf(out, "Updated Resource with ID %d\n", resp.Id)
 
 	return nil
 }
