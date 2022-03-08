@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -18,7 +19,17 @@ import (
 
 const SHELL_SCRIPT string = "Shell Script"
 
+type Fields struct {
+	Name        string
+	Trigger     string
+	ContentType string
+	ContentFile string
+	InPath      string
+}
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	fields := &Fields{}
+
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
 		Use:           "create <service_id> [flags]",
@@ -31,60 +42,85 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) < 1 {
-				return errmsg.ErrorMissingResourceIdArgument
+				return errmsg.ErrorMissingServiceIdArgument
 			}
 
+			request := sdk.CreateResourceRequest{}
 			ids, err := utils.ConvertIdsToInt(args[0])
 			if err != nil {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
-
-			name, err := cmd.Flags().GetString("name")
-			if err != nil {
-				return err
-			}
-
-			trigger, err := cmd.Flags().GetString("trigger")
-			triggerConverted := replacer.Replace(trigger)
-			if err != nil {
-				return err
-			}
-
-			contentType, err := cmd.Flags().GetString("content-type")
-			if err != nil {
-				return err
-			}
-			contentTypeConverted := replacer.Replace(contentType)
-			if contentTypeConverted == SHELL_SCRIPT {
-				if trigger == "" {
-					return errmsg.ErrorInvalidResourceTrigger
+			if cmd.Flags().Changed("in") {
+				var (
+					file *os.File
+					err  error
+				)
+				if fields.InPath == "-" {
+					file = os.Stdin
+				} else {
+					file, err = os.Open(fields.InPath)
+					if err != nil {
+						return fmt.Errorf("%s %s", utils.ErrorOpeningFile, fields.InPath)
+					}
 				}
-			}
 
-			contentPath, err := cmd.Flags().GetString("content-file")
-			if err != nil {
-				return utils.ErrorHandlingFile
-			}
+				err = cmdutil.UnmarshallJsonFromReader(file, &request)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
+			} else {
+				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("content-file") || !cmd.Flags().Changed("content-type") {
+					return errmsg.ErrorMandatoryFlagsResource
+				}
 
-			file, err := ioutil.ReadFile(contentPath)
-			if err != nil {
-				return utils.ErrorHandlingFile
-			}
+				replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
 
-			stringFile := string(file)
+				name, err := cmd.Flags().GetString("name")
+				if err != nil {
+					return err
+				}
+				request.SetName(name)
+
+				trigger, err := cmd.Flags().GetString("trigger")
+				triggerConverted := replacer.Replace(trigger)
+				if err != nil {
+					return err
+				}
+				request.SetTrigger(triggerConverted)
+
+				contentType, err := cmd.Flags().GetString("content-type")
+				if err != nil {
+					return err
+				}
+				contentTypeConverted := replacer.Replace(contentType)
+				if contentTypeConverted == SHELL_SCRIPT {
+					if trigger == "" {
+						return errmsg.ErrorInvalidResourceTrigger
+					}
+				}
+				request.SetContentType(contentTypeConverted)
+
+				contentPath, err := cmd.Flags().GetString("content-file")
+				if err != nil {
+					return utils.ErrorHandlingFile
+				}
+
+				file, err := ioutil.ReadFile(contentPath)
+				if err != nil {
+					return utils.ErrorHandlingFile
+				}
+
+				stringFile := string(file)
+				request.SetContent(stringFile)
+			}
 
 			client, err := requests.CreateClient(f)
 			if err != nil {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-			if err := createNewResource(client, f.IOStreams.Out, ids[0], name, triggerConverted, contentTypeConverted, stringFile, verbose); err != nil {
+			if err := createNewResource(client, f.IOStreams.Out, ids[0], request); err != nil {
 				return err
 			}
 
@@ -92,27 +128,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	createCmd.Flags().String("name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
-	_ = createCmd.MarkFlagRequired("name")
-	createCmd.Flags().String("trigger", "", "Your Resource's Trigger: <Install|Reload|Uninstall>")
-	createCmd.Flags().String("content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")
-	_ = createCmd.MarkFlagRequired("content-type")
-	createCmd.Flags().String("content-file", "", "Path to the file containing your Resource's content (Mandatory)")
-	_ = createCmd.MarkFlagRequired("content-file")
+	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
+	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
+	createCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")
+	createCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file with your Resource's content (Mandatory)")
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create a Resource. You can use - for reading from stdin")
 
 	return createCmd
 }
 
-func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, name string, trigger string, contentType string, file string, verbose bool) error {
+func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, request sdk.CreateResourceRequest) error {
 	c := context.Background()
 	api := client.DefaultApi
-
-	request := sdk.CreateResourceRequest{
-		Name:        name,
-		Trigger:     trigger,
-		ContentType: contentType,
-		Content:     file,
-	}
 
 	resp, httpResp, err := api.PostResource(c, service_id).CreateResourceRequest(request).Execute()
 	if err != nil {
@@ -127,14 +154,7 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, n
 		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, string(body))
 	}
 
-	if verbose {
-		fmt.Fprintf(out, "ID: %d\n", resp.Id)
-		fmt.Fprintf(out, "Name: %s\n", resp.Name)
-		fmt.Fprintf(out, "Type: %s\n", resp.Type)
-		fmt.Fprintf(out, "Content type: %s\n", resp.ContentType)
-		fmt.Fprintf(out, "Content: \n")
-		fmt.Fprintf(out, "%s", resp.Content)
-	}
+	fmt.Fprintf(out, "Created Resource with ID %d\n", resp.Id)
 
 	return nil
 }
