@@ -91,7 +91,7 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 
 	resp, httpResp, err := api.NewService(c).CreateServiceRequest(request).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)

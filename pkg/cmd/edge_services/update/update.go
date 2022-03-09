@@ -165,7 +165,7 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 
 	resp, httpResp, err := api.PatchService(c, id).UpdateServiceRequest(request.UpdateServiceRequest).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)
