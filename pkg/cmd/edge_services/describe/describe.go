@@ -94,7 +94,7 @@ func describeService(client *sdk.APIClient, service_id int64, withVariables bool
 
 	resp, httpResp, err := api.GetService(c, service_id).WithVars(withVariables).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
 			return nil, utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)

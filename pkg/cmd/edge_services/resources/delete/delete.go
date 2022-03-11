@@ -63,7 +63,7 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 
 	httpResp, err := api.DeleteResource(c, service_id, resource_id).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode >= 500 {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
 			return utils.ErrorInternalServerError
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)
