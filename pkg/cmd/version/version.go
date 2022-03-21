@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			"IsAdditional": "true",
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintln(f.IOStreams.Out, "Azion version: "+BinVersion)
+			fmt.Fprintln(f.IOStreams.Out, "azioncli version "+BinVersion)
 		},
 	}
 

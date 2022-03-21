@@ -39,7 +39,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azion-cli verbose during the operation")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Makes azioncli verbose during the operation")
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
