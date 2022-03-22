@@ -48,7 +48,6 @@ Available Commands:
 Flags:
   -h, --help           help for azioncli
   -t, --token string   Use provided token
-  -v, --verbose        Makes azioncli verbose during the operation
       --version        version for azioncli
 
 Use "azioncli [command] --help" for more information about a command.
@@ -76,7 +75,6 @@ Flags:
 
 Global Flags:
   -t, --token string   Use provided token
-  -v, --verbose        Makes azioncli verbose during the operation
 
 Use "azioncli edge_services [command] --help" for more information about a command.
 ```

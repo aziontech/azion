@@ -41,12 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-
-			if err := deleteService(client, f.IOStreams.Out, ids[0], verbose); err != nil {
+			if err := deleteService(client, f.IOStreams.Out, ids[0]); err != nil {
 				return err
 			}
 
@@ -56,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return deleteCmd
 }
 
-func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbose bool) error {
+func deleteService(client *sdk.APIClient, out io.Writer, service_id int64) error {
 
 	c := context.Background()
 	api := client.DefaultApi
@@ -75,10 +70,8 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64, verbo
 		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteService, string(body))
 	}
 
-	if verbose {
-		if httpResp.StatusCode == 204 {
-			fmt.Fprintf(out, "Service %d was successfully deleted\n", service_id)
-		}
+	if httpResp.StatusCode == 204 {
+		fmt.Fprintf(out, "Service %d was successfully deleted\n", service_id)
 	}
 
 	return nil
