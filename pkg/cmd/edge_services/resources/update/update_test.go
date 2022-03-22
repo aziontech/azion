@@ -96,7 +96,6 @@ func TestUpdate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
@@ -136,7 +135,6 @@ func TestUpdate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("This content is made for testing purposes"))
 
 		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)

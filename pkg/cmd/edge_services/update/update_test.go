@@ -54,7 +54,6 @@ func TestUpdate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234", "--name", "thunderstruck"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)

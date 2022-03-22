@@ -41,12 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			verbose, err := cmd.Flags().GetBool("verbose")
-			if err != nil {
-				return err
-			}
-
-			if err := deleteResource(client, f.IOStreams.Out, ids[0], ids[1], verbose); err != nil {
+			if err := deleteResource(client, f.IOStreams.Out, ids[0], ids[1]); err != nil {
 				return err
 			}
 
@@ -56,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return deleteCmd
 }
 
-func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64, verbose bool) error {
+func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, resource_id int64) error {
 
 	c := context.Background()
 	api := client.DefaultApi
@@ -74,10 +69,8 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteResource, string(body))
 	}
 
-	if verbose {
-		if httpResp.StatusCode == 204 {
-			fmt.Fprintf(out, "Resource %d was successfully deleted\n", resource_id)
-		}
+	if httpResp.StatusCode == 204 {
+		fmt.Fprintf(out, "Resource %d was successfully deleted\n", resource_id)
 	}
 
 	return nil
