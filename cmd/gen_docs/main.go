@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
@@ -67,7 +68,11 @@ func run(args []string) error {
 		if err := os.MkdirAll(*dir, 0755); err != nil {
 			return err
 		}
-		err := doc.GenMarkdownTree(rootCmd, *dir)
+
+		removeMdSuffix := func(s string) string { return strings.TrimRight(s, ".md") }
+		dontPreprendFile := func(s string) string { return "" }
+
+		err := doc.GenMarkdownTreeCustom(rootCmd, *dir, dontPreprendFile, removeMdSuffix)
 		if err != nil {
 			log.Fatal(err)
 		}

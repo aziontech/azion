@@ -5,6 +5,7 @@
 #Directories
 bin/
 dist/
+docs/
 .vscode/
 
 #Files
