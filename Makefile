@@ -65,6 +65,10 @@ test:
 	@$(GO) tool cover -func "./cover/$(NAME)coverage.out"
 	@echo Done
 
+.PHONY: docs
+docs:
+	$(GO) run ./cmd/gen_docs/main.go --doc-path ./docs --file-type md
+
 .PHONY: sec
 sec: get-gosec-deps ## running GoSec
 	@ -$(GOSEC) ./...
