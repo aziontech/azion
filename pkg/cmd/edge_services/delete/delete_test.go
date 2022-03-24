@@ -23,7 +23,6 @@ func TestCreate(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"1234"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
@@ -32,30 +31,8 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "", stdout.String())
-	})
-
-	t.Run("delete service by id being verbose", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("DELETE", "edge_services/1234"),
-			httpmock.StatusStringResponse(204, ""),
-		)
-
-		f, stdout, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
-		cmd.SetArgs([]string{"1234", "-v"})
-		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
-
-		assert.Equal(t, "Service 1234 was successfully deleted\n", stdout.String())
+		assert.Equal(t, `Service 1234 was successfully deleted
+`, stdout.String())
 	})
 
 	t.Run("delete service that is not found", func(t *testing.T) {

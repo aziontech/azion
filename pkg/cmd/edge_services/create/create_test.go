@@ -88,7 +88,6 @@ func TestCreate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.PersistentFlags().BoolP("verbose", "v", false, "")
 		cmd.SetArgs([]string{"--name", "BIRL"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)

@@ -1,2 +1,2 @@
 API_URL=https://api.azionapi.net
-AUTH_URL=https://api.azionapi.net/domains?page_size1
+AUTH_URL=https://api.azionapi.net/iam/personal_tokens
