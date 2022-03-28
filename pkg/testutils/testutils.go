@@ -13,9 +13,7 @@ import (
 func NewFactory(mock *httpmock.Registry) (factory *cmdutil.Factory, out *bytes.Buffer, err *bytes.Buffer) {
 	stdout, stderr := &bytes.Buffer{}, &bytes.Buffer{}
 	f := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return &http.Client{Transport: mock}, nil
-		},
+		HttpClient: &http.Client{Transport: mock},
 		IOStreams: &iostreams.IOStreams{
 			Out: stdout,
 			Err: stderr,

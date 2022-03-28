@@ -8,7 +8,7 @@ import (
 )
 
 type Factory struct {
-	HttpClient func() (*http.Client, error)
+	HttpClient *http.Client
 	IOStreams  *iostreams.IOStreams
 	Config     config.Config
 }
