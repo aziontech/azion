@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"reflect"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -48,9 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			// if not javascript, we currently do nothing
-			sf1 := reflect.ValueOf(testFunc)
-			sf2 := reflect.ValueOf(noop)
-			if sf1.Pointer() == sf2.Pointer() {
+			if testFunc == nil {
 				return nil
 			}
 
@@ -66,14 +63,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var response string
-			//checks is azion directory exists and is not empty
+			//checks if azion directory exists and is not empty
 			if _, err := os.Stat("./azion"); !errors.Is(err, os.ErrNotExist) {
 				if empty, _ := utils.IsDirEmpty("./azion"); !empty {
-					fmt.Printf("%s: ", msgContentOverridden)
-					fmt.Scanln(&response)
+					fmt.Fprintf(f.IOStreams.Out, "%s: ", msgContentOverridden)
+					fmt.Fscanln(f.IOStreams.In, &response)
 					switch strings.ToLower(response) {
 					case "no":
-						fmt.Printf("%s", msgCmdStopped)
+						fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdStopped)
 						return nil
 
 					case "yes":
@@ -89,36 +86,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				if err := fetchTemplates(info); err != nil {
-					return err
-				}
-
-			} else {
-				if err := fetchTemplates(info); err != nil {
-					return err
-				}
 			}
 
-			file, err := os.ReadFile("./azion/azion.json")
-			if err != nil {
-				return utils.ErrorOpeningAzionFile
-			}
-			err = json.Unmarshal(file, &options)
-			if err != nil {
-				return utils.ErrorUnmarshalAzionFile
-			}
-			options.Name = info.name
-
-			data, err := json.MarshalIndent(options, "", "  ")
-			if err != nil {
-				return utils.ErrorUnmarshalAzionFile
-			}
-			err = ioutil.WriteFile("./azion/azion.json", data, 0644)
-			if err != nil {
+			if err := fetchTemplates(info); err != nil {
 				return err
 			}
 
-			fmt.Printf("%s", msgCmdSuccess)
+			if err := organizeJsonFile(options, info); err != nil {
+				return err
+			}
+
+			fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 
 			return nil
 		},
@@ -148,11 +126,33 @@ func fetchTemplates(info *initInfo) error {
 		return utils.ErrorFetchingTemplates
 	}
 
-	//move contents form temporary directory into final destination
+	//move contents from temporary directory into final destination
 	err = os.Rename(dir+"/webdev/"+info.typeLang, "./azion")
 	if err != nil {
 		return utils.ErrorMovingFiles
 	}
 
+	return nil
+}
+
+func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
+	file, err := os.ReadFile("./azion/azion.json")
+	if err != nil {
+		return ErrorOpeningAzionFile
+	}
+	err = json.Unmarshal(file, &options)
+	if err != nil {
+		return ErrorUnmarshalAzionFile
+	}
+	options.Name = info.name
+
+	data, err := json.MarshalIndent(options, "", "  ")
+	if err != nil {
+		return ErrorUnmarshalAzionFile
+	}
+	err = ioutil.WriteFile("./azion/azion.json", data, 0644)
+	if err != nil {
+		return utils.ErrorInternalServerError
+	}
 	return nil
 }
