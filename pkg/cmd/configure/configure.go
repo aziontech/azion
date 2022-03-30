@@ -21,13 +21,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			"IsAdditional": "true",
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := f.HttpClient()
-			if err != nil {
-				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
-			}
-
 			t, err := token.New(&token.Config{
-				Client: client,
+				Client: f.HttpClient,
 				Out:    f.IOStreams.Out,
 			})
 			if err != nil {

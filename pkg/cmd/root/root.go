@@ -63,11 +63,9 @@ func Execute() {
 	viper.SetDefault("api_url", constants.ApiURL)
 
 	factory := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return httpClient, nil
-		},
-		IOStreams: streams,
-		Config:    viper.GetViper(),
+		HttpClient: httpClient,
+		IOStreams:  streams,
+		Config:     viper.GetViper(),
 	}
 
 	cmd := NewRootCmd(factory)

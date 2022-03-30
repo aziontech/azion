@@ -40,12 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorConvertingIdArgumentToInt
 			}
 
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
-			}
-
-			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 			function, err := client.Get(ctx, ids[0])

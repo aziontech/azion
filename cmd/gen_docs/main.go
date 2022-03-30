@@ -4,10 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"path/filepath"
-	"time"
+	"strings"
 
 	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -42,16 +41,9 @@ func run(args []string) error {
 		return fmt.Errorf("error: --doc-path not set")
 	}
 
-	factory := &cmdutil.Factory{
-		HttpClient: func() (*http.Client, error) {
-			return &http.Client{
-				Timeout: 10 * time.Second,
-			}, nil
-		},
+	rootCmd := cmd.NewRootCmd(&cmdutil.Factory{
 		IOStreams: iostreams.System(),
-	}
-
-	rootCmd := cmd.NewRootCmd(factory)
+	})
 	rootCmd.InitDefaultHelpCmd()
 
 	switch {
@@ -67,7 +59,11 @@ func run(args []string) error {
 		if err := os.MkdirAll(*dir, 0755); err != nil {
 			return err
 		}
-		err := doc.GenMarkdownTree(rootCmd, *dir)
+
+		removeMdSuffix := func(s string) string { return strings.TrimRight(s, ".md") }
+		dontPreprendFile := func(s string) string { return "" }
+
+		err := doc.GenMarkdownTreeCustom(rootCmd, *dir, dontPreprendFile, removeMdSuffix)
 		if err != nil {
 			log.Fatal(err)
 		}
