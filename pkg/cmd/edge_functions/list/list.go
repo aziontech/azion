@@ -2,7 +2,6 @@ package list
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -10,7 +9,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/printer"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -27,11 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli edge_functions list [--details]
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			httpClient, err := f.HttpClient()
-			if err != nil {
-				return fmt.Errorf("%s: %w", utils.ErrorGetHttpClient, err)
-			}
-			client := api.NewClient(httpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
 
 			fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}

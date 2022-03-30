@@ -1,2 +1,2 @@
 API_URL=https://stage-api.azion.net
-AUTH_URL=https://stage-api.azion.net/iam/personal_tokens
+AUTH_URL=https://stage-sso.azion.com/api/user/me
