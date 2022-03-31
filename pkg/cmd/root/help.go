@@ -44,17 +44,20 @@ func isRootCmd(command *cobra.Command) bool {
 }
 
 func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
-
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
 		hasFailed = true
 		return
 	}
 
-	apiCommands := []string{}
-	additionalCommands := []string{}
-	subcCommands := []string{}
-	examples := []string{}
+	var (
+		buildCommands      []string
+		deliverCommands    []string
+		additionalCommands []string
+		subcmdCommands     []string
+		examples           []string
+	)
+
 	for _, c := range command.Commands() {
 		if c.Short == "" {
 			continue
@@ -63,18 +66,27 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 			continue
 		}
 
-		s := rpad(c.Name()+":", c.NamePadding()) + c.Short
-		if _, ok := c.Annotations["IsAPI"]; ok {
-			apiCommands = append(apiCommands, s)
-		} else {
-			additionalCommands = append(additionalCommands, s)
-		}
-	}
+		s := rpad(c.Name(), c.NamePadding()) + c.Short
 
-	// if there are no API commands, then we are listing the help of a subcommand
-	if len(apiCommands) == 0 {
-		subcCommands = additionalCommands
-		additionalCommands = []string{}
+		if !isRootCmd(c.Parent()) {
+			// Help of subcommand
+			subcmdCommands = append(subcmdCommands, s)
+			continue
+		}
+
+		category, ok := c.Annotations["Category"]
+		if !ok {
+			// Command does not have a category
+			additionalCommands = append(additionalCommands, s)
+			continue
+		}
+
+		switch category {
+		case "Build":
+			buildCommands = append(buildCommands, s)
+		case "Deliver":
+			deliverCommands = append(deliverCommands, s)
+		}
 	}
 
 	type helpEntry struct {
@@ -97,12 +109,17 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	}
 
 	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
-	if len(apiCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"API COMMANDS", strings.Join(apiCommands, "\n")})
+
+	if len(buildCommands) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"BUILD", strings.Join(buildCommands, "\n")})
 	}
 
-	if len(subcCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(subcCommands, "\n")})
+	if len(deliverCommands) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"DELIVER", strings.Join(deliverCommands, "\n")})
+	}
+
+	if len(subcmdCommands) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(subcmdCommands, "\n")})
 	}
 
 	if len(additionalCommands) > 0 {

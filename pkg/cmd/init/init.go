@@ -36,6 +36,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          `Use Azion templates along with your JAMstack applications`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Annotations: map[string]string{
+			"Category": "Build",
+		},
 		Example: heredoc.Doc(`
         $ azioncli init --name "thisisatest" --type javascript
         `),
