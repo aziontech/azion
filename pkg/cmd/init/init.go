@@ -114,7 +114,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func fetchTemplates(info *initInfo) error {
 
 	//create temporary directory to clone template into
-	dir, err := ioutil.TempDir("/tmp/", "template")
+	dir, err := ioutil.TempDir("./", ".template")
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
