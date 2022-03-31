@@ -129,7 +129,6 @@ func fetchTemplates(info *initInfo) error {
 	//move contents from temporary directory into final destination
 	err = os.Rename(dir+"/webdev/"+info.typeLang, "./azion")
 	if err != nil {
-		fmt.Println(err)
 		return utils.ErrorMovingFiles
 	}
 
