@@ -32,8 +32,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	info := &initInfo{}
 	initCmd := &cobra.Command{
 		Use:           "init [flags]",
-		Short:         "Use Azion templates along with your JAMstack applications",
-		Long:          `Use Azion templates along with your JAMstack applications`,
+		Short:         "Use Azion templates along with your Web applications",
+		Long:          `Use Azion templates along with your Web applications`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -41,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			testFunc, ok := types[info.typeLang]
+			testFunc, ok := testFuncByType[info.typeLang]
 			if !ok {
 				return utils.ErrorUnsupportedType
 			}
