@@ -102,9 +102,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	initCmd.Flags().StringVar(&info.name, "name", "", "Your JAMstack Application's name")
+	initCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
 	_ = initCmd.MarkFlagRequired("name")
-	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your JAMstack Application's type (javascript | nextjs | flareact)")
+	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type (javascript | nextjs | flareact)")
 	_ = initCmd.MarkFlagRequired("type")
 
 	return initCmd
