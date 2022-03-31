@@ -32,8 +32,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	info := &initInfo{}
 	initCmd := &cobra.Command{
 		Use:           "init [flags]",
-		Short:         "Use Azion templates along with your JAMstack applications",
-		Long:          `Use Azion templates along with your JAMstack applications`,
+		Short:         "Use Azion templates along with your Web applications",
+		Long:          `Use Azion templates along with your Web applications`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Annotations: map[string]string{
@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			testFunc, ok := types[info.typeLang]
+			testFunc, ok := testFuncByType[info.typeLang]
 			if !ok {
 				return utils.ErrorUnsupportedType
 			}
@@ -105,9 +105,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	initCmd.Flags().StringVar(&info.name, "name", "", "Your JAMstack Application's name")
+	initCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
 	_ = initCmd.MarkFlagRequired("name")
-	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your JAMstack Application's type (javascript | nextjs | flareact)")
+	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type (javascript | nextjs | flareact)")
 	_ = initCmd.MarkFlagRequired("type")
 
 	return initCmd
@@ -117,7 +117,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func fetchTemplates(info *initInfo) error {
 
 	//create temporary directory to clone template into
-	dir, err := ioutil.TempDir("/tmp/", "template")
+	dir, err := ioutil.TempDir("./", ".template")
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}

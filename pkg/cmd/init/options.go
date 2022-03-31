@@ -7,7 +7,7 @@ import (
 
 type TestFunc func() error
 
-var types = map[string]TestFunc{
+var testFuncByType = map[string]TestFunc{
 	"javascript": testJs,
 	"nextjs":     nil,
 	"flareact":   nil,
