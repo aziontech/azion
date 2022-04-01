@@ -43,7 +43,7 @@ lint: get-lint-deps ## running GoLint
 
 .PHONY: dev
 dev: dev-deps
-	$(RELOAD) -build 'make build'
+	$(RELOAD) -build 'make build' -exclude-dir '.git'
 
 .PHONY: dev-deps
 dev-deps: 
