@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type TestFunc func() error
+type TestFunc func(path string) error
 
 var testFuncByType = map[string]TestFunc{
 	"javascript": testJs,
@@ -13,8 +13,8 @@ var testFuncByType = map[string]TestFunc{
 	"flareact":   nil,
 }
 
-func testJs() error {
-	if _, err := os.Stat("./package.json"); errors.Is(err, os.ErrNotExist) {
+func testJs(path string) error {
+	if _, err := os.Stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
 		return ErrorPackageJsonNotFound
 	}
 	return nil
