@@ -9,8 +9,6 @@ type TestFunc func(path string) error
 
 var testFuncByType = map[string]TestFunc{
 	"javascript": testJs,
-	"nextjs":     nil,
-	"flareact":   nil,
 }
 
 func testJs(path string) error {

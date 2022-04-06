@@ -40,6 +40,19 @@ func TestCreate(t *testing.T) {
 		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
 	})
 
+	t.Run("Init with -y and -n flags", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor", "-y", "-n"})
+
+		err := cmd.Execute()
+
+		require.ErrorIs(t, err, ErrorYesAndNoOptions)
+	})
+
 	t.Run("Init success with javascript", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
@@ -64,9 +77,29 @@ func TestCreate(t *testing.T) {
 `)
 	})
 
-	t.Run("Init does not overwrite contents", func(t *testing.T) {
+	t.Run("Init success with javascript using flag -y", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+		err := ioutil.WriteFile("package.json", []byte(""), 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove("package.json")
+
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-y"})
+
+		err = cmd.Execute()
+
+		require.NoError(t, err)
+		require.Contains(t, stdout.String(), `Template successfully fetched and configured
+`)
+	})
+
+	t.Run("Init does not overwrite contents", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		err := ioutil.WriteFile("package.json", []byte(""), 0644)
@@ -84,8 +117,24 @@ func TestCreate(t *testing.T) {
 		err = cmd.Execute()
 
 		require.NoError(t, err)
-		require.Contains(t, stdout.String(), `Init command stopped
-`)
+	})
+
+	t.Run("Init does not overwrite contents using flag -n", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+		err := ioutil.WriteFile("package.json", []byte(""), 0644)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer os.Remove("package.json")
+
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-n"})
+
+		err = cmd.Execute()
+
+		require.NoError(t, err)
 	})
 
 	t.Run("Init invalid option", func(t *testing.T) {
@@ -109,24 +158,6 @@ func TestCreate(t *testing.T) {
 		err = cmd.Execute()
 
 		require.ErrorIs(t, err, utils.ErrorInvalidOption)
-	})
-
-	t.Run("Init valid but noop", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove("package.json")
-
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "nextjs"})
-
-		err = cmd.Execute()
-
-		require.NoError(t, err)
 	})
 
 }

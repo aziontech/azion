@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func ConvertIdsToInt(ids ...string) ([]int64, error) {
@@ -54,4 +55,18 @@ func GetWorkingDir() (string, error) {
 		return "", ErrorInternalServerError
 	}
 	return pathWorkingDir, nil
+}
+
+func ResponseToBool(response string) (bool, error) {
+
+	response = strings.TrimSpace(response)
+
+	if strings.ToLower(response) == "yes" {
+		return true, nil
+	}
+	if strings.ToLower(response) == "no" || response == "" {
+		return false, nil
+	}
+
+	return false, ErrorInvalidOption
 }
