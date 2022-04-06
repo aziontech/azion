@@ -178,7 +178,7 @@ func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo
 func yesNoFlagToResponse(info *initInfo) bool {
 
 	if info.yesOption {
-		return true
+		return info.yesOption
 	}
 
 	return false
