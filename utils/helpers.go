@@ -47,3 +47,11 @@ func IsDirEmpty(dir string) (bool, error) {
 	}
 	return false, err
 }
+
+func GetWorkingDir() (string, error) {
+	pathWorkingDir, err := os.Getwd()
+	if err != nil {
+		return "", ErrorInternalServerError
+	}
+	return pathWorkingDir, nil
+}

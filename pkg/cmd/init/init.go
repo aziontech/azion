@@ -17,8 +17,9 @@ import (
 )
 
 type initInfo struct {
-	name     string
-	typeLang string
+	name           string
+	typeLang       string
+	pathWorkingDir string
 }
 
 const (
@@ -54,13 +55,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return nil
 			}
 
+			path, err := utils.GetWorkingDir()
+			if err != nil {
+				return err
+			}
+
+			info.pathWorkingDir = path
+
 			options.Test = testFunc
-			if err := options.Test(); err != nil {
+			if err := options.Test(info.pathWorkingDir); err != nil {
 				return err
 			}
 
 			//checks if user has GIT binary installed
-			_, err := exec.LookPath(GIT)
+			_, err = exec.LookPath(GIT)
 			if err != nil {
 				return utils.ErrorMissingGitBinary
 			}
@@ -117,7 +125,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func fetchTemplates(info *initInfo) error {
 
 	//create temporary directory to clone template into
-	dir, err := ioutil.TempDir("./", ".template")
+	dir, err := ioutil.TempDir(info.pathWorkingDir, ".template")
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
@@ -129,8 +137,10 @@ func fetchTemplates(info *initInfo) error {
 		return utils.ErrorFetchingTemplates
 	}
 
+	azionDir := info.pathWorkingDir + "/azion"
+
 	//move contents from temporary directory into final destination
-	err = os.Rename(dir+"/webdev/"+info.typeLang, "./azion")
+	err = os.Rename(dir+"/webdev/"+info.typeLang, azionDir)
 	if err != nil {
 		return utils.ErrorMovingFiles
 	}
@@ -139,7 +149,7 @@ func fetchTemplates(info *initInfo) error {
 }
 
 func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
-	file, err := os.ReadFile("./azion/azion.json")
+	file, err := os.ReadFile(info.pathWorkingDir + "/azion/azion.json")
 	if err != nil {
 		return ErrorOpeningAzionFile
 	}
@@ -153,7 +163,7 @@ func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo
 	if err != nil {
 		return ErrorUnmarshalAzionFile
 	}
-	err = ioutil.WriteFile("./azion/azion.json", data, 0644)
+	err = ioutil.WriteFile(info.pathWorkingDir+"/azion/azion.json", data, 0644)
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
