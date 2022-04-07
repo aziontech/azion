@@ -15,12 +15,12 @@ type DescribeOptions struct {
 }
 
 type AzionApplicationOptions struct {
-	Test         func() error `json:"-"`
-	Name         string       `json:"name"`
-	Language     string       `json:"language"`
-	Env          string       `json:"env"`
-	FunctionFile string       `json:"function_file"`
-	CacheData    cacheConf    `json:"cache"`
+	Test         func(path string) error `json:"-"`
+	Name         string                  `json:"name"`
+	Language     string                  `json:"language"`
+	Env          string                  `json:"env"`
+	FunctionFile string                  `json:"function_file"`
+	CacheData    cacheConf               `json:"cache"`
 }
 
 type AzionApplicationConfig struct {

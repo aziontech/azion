@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 )
 
 func ConvertIdsToInt(ids ...string) ([]int64, error) {
@@ -88,4 +89,26 @@ func RunCommand(envVars []string, comm string) error {
 	}
 
 	return nil
+}
+
+func GetWorkingDir() (string, error) {
+	pathWorkingDir, err := os.Getwd()
+	if err != nil {
+		return "", ErrorInternalServerError
+	}
+	return pathWorkingDir, nil
+}
+
+func ResponseToBool(response string) (bool, error) {
+
+	response = strings.TrimSpace(response)
+
+	if strings.ToLower(response) == "yes" {
+		return true, nil
+	}
+	if strings.ToLower(response) == "no" || response == "" {
+		return false, nil
+	}
+
+	return false, ErrorInvalidOption
 }
