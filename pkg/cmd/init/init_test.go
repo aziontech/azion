@@ -184,7 +184,10 @@ func TestCreate(t *testing.T) {
 
 		file, err := os.Create(confDir + "config.json")
 		if err == nil {
-			file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
 		}
 		file.Close()
 
@@ -219,13 +222,20 @@ func TestCreate(t *testing.T) {
 		jsonConf := confDir + "config.json"
 		file, err := os.Create(jsonConf)
 		if err == nil {
-			file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
+
 		}
 		file.Close()
 
 		file, err = os.Create(confDir + "init.env")
 		if err == nil {
-			file.WriteString("VAR1=/\nVAR2=/bin\n")
+			_, err = file.WriteString("VAR1=/\nVAR2=/bin\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
 		}
 		file.Close()
 
