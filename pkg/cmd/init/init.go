@@ -75,22 +75,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var response string
-			boolResponse := true
+			shouldFetchTemplates := true
 			//checks if azion directory exists and is not empty
 			if _, err := os.Stat("./azion"); !errors.Is(err, os.ErrNotExist) {
 				if empty, _ := utils.IsDirEmpty("./azion"); !empty {
 					if info.noOption || info.yesOption {
-						boolResponse = yesNoFlagToResponse(info)
+						shouldFetchTemplates = yesNoFlagToResponse(info)
 					} else {
 						fmt.Fprintf(f.IOStreams.Out, "%s: ", msgContentOverridden)
 						fmt.Fscanln(f.IOStreams.In, &response)
-						boolResponse, err = utils.ResponseToBool(response)
+						shouldFetchTemplates, err = utils.ResponseToBool(response)
 						if err != nil {
 							return err
 						}
 					}
 
-					if boolResponse {
+					if shouldFetchTemplates {
 						err = utils.CleanDirectory("./azion")
 						if err != nil {
 							return err
@@ -100,7 +100,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			}
 
-			if boolResponse {
+			if shouldFetchTemplates {
 				if err := fetchTemplates(info); err != nil {
 					return err
 				}
