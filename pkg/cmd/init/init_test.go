@@ -2,11 +2,13 @@ package init
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -158,6 +160,103 @@ func TestCreate(t *testing.T) {
 		err = cmd.Execute()
 
 		require.ErrorIs(t, err, utils.ErrorInvalidOption)
+	})
+
+	t.Run("runInitCmdLine without config.json", func(t *testing.T) {
+		config := &contracts.AzionApplicationConfig{}
+		confDir, _ := os.Getwd()
+		confDir = confDir + "/azion/"
+
+		var err error
+		_ = os.Remove(confDir + "config.json")
+
+		err = runInitCmdLine(config)
+		require.EqualError(t, err, "Failed to open config.json file")
+	})
+
+	t.Run("runInitCmdLine without init.env", func(t *testing.T) {
+		var err error
+		config := &contracts.AzionApplicationConfig{}
+		confDir, _ := os.Getwd()
+		confDir = confDir + "/azion/"
+		_ = os.Remove("/tmp/ls-test.txt")
+		_ = os.MkdirAll(confDir, os.ModePerm)
+
+		file, err := os.Create(confDir + "config.json")
+		if err == nil {
+			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
+		}
+		file.Close()
+
+		err = runInitCmdLine(config)
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		if _, err := os.Stat("/tmp/ls-test.txt"); errors.Is(err, os.ErrNotExist) {
+			require.NoError(t, err)
+		}
+
+		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
+		if err != nil {
+			require.NoError(t, err)
+		}
+		strFromFile := string(fileContent)
+
+		require.NoError(t, err)
+		//Local dir (since $VAR1 and $VAR2 are empty) now has 'azion'
+		require.Contains(t, strFromFile, "azion")
+	})
+
+	t.Run("runInitCmdLine full", func(t *testing.T) {
+		var err error
+		config := &contracts.AzionApplicationConfig{}
+		confDir, _ := os.Getwd()
+		confDir = confDir + "/azion/"
+		_ = os.Remove("/tmp/ls-test.txt")
+		_ = os.MkdirAll(confDir, os.ModePerm)
+		defer os.RemoveAll(confDir)
+		jsonConf := confDir + "config.json"
+		file, err := os.Create(jsonConf)
+		if err == nil {
+			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
+
+		}
+		file.Close()
+
+		file, err = os.Create(confDir + "init.env")
+		if err == nil {
+			_, err = file.WriteString("VAR1=/\nVAR2=/bin\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
+		}
+		file.Close()
+
+		err = runInitCmdLine(config)
+		if err != nil {
+			require.NoError(t, err)
+		}
+
+		if _, err := os.Stat("/tmp/ls-test.txt"); errors.Is(err, os.ErrNotExist) {
+			require.NoError(t, err)
+		}
+
+		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
+		if err != nil {
+			require.NoError(t, err)
+		}
+		strFromFile := string(fileContent)
+
+		require.NoError(t, err)
+		//As stated in VAR2, /bin should have 'bash'
+		require.Contains(t, strFromFile, "bash")
 	})
 
 }
