@@ -30,6 +30,7 @@ const (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	config := &contracts.AzionApplicationConfig{}
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
 	initCmd := &cobra.Command{
@@ -112,6 +113,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 			}
 
+			err = runInitCmdLine(config)
+			if err != nil {
+				return err
+			}
+
 			return nil
 		},
 	}
@@ -148,6 +154,36 @@ func fetchTemplates(info *initInfo) error {
 	err = os.Rename(dir+"/webdev/"+info.typeLang, azionDir)
 	if err != nil {
 		return utils.ErrorMovingFiles
+	}
+
+	return nil
+}
+
+func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return err
+	}
+	jsonConf := path + "/azion/config.json"
+	file, err := os.ReadFile(jsonConf)
+	if err != nil {
+		fmt.Println(jsonConf)
+		return ErrorOpeningConfigFile
+	}
+
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return ErrorUnmarshalConfigFile
+	}
+
+	envs, err := utils.LoadEnvVars(conf.InitData.Env)
+	if err != nil {
+		return utils.ErrorRunningCommand
+	}
+
+	err = utils.RunCommand(envs, conf.InitData.Cmd)
+	if err != nil {
+		return utils.ErrorRunningCommand
 	}
 
 	return nil
