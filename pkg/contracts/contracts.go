@@ -24,16 +24,18 @@ type AzionApplicationOptions struct {
 }
 
 type AzionApplicationConfig struct {
-	InitData  initConf
-	BuildData buildConf
+	InitData  InitConf  `json:"init"`
+	BuildData buildConf `json:"build"`
 }
 
-type initConf struct {
-	Cmd string
+type InitConf struct {
+	Cmd string `json:"cmd"`
+	Env string `json:"env"`
 }
 
 type buildConf struct {
-	Cmd string
+	Cmd string `json:"cmd"`
+	Env string `json:"env"`
 }
 
 type cacheConf struct {

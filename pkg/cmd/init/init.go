@@ -28,6 +28,7 @@ const (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	config := &contracts.AzionApplicationConfig{}
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
 	initCmd := &cobra.Command{
@@ -88,7 +89,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-
 			}
 
 			if err := fetchTemplates(info); err != nil {
@@ -96,6 +96,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if err := organizeJsonFile(options, info); err != nil {
+				return err
+			}
+
+			err = runInitCmdLine(config)
+			if err != nil {
 				return err
 			}
 
@@ -111,7 +116,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	_ = initCmd.MarkFlagRequired("type")
 
 	return initCmd
+}
 
+func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
+	file, err := os.ReadFile("./azion/config.json")
+	if err != nil {
+		return ErrorOpeningConfigFile
+	}
+
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return ErrorUnmarshalConfigFile
+	}
+
+	envs, err := utils.LoadEnvVars(conf.InitData.Env)
+	if err != nil {
+		return utils.ErrorRunningCommand
+	}
+
+	err = utils.RunCommand(envs, conf.InitData.Cmd)
+	if err != nil {
+		return utils.ErrorRunningCommand
+	}
+
+	return nil
 }
 
 func fetchTemplates(info *initInfo) error {
