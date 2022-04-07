@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -20,6 +19,8 @@ type initInfo struct {
 	name           string
 	typeLang       string
 	pathWorkingDir string
+	yesOption      bool
+	noOption       bool
 }
 
 const (
@@ -45,14 +46,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			if info.yesOption && info.noOption {
+				return ErrorYesAndNoOptions
+			}
+
+			//gets the test function (if it could not find it, it means it is currently not supported)
 			testFunc, ok := testFuncByType[info.typeLang]
 			if !ok {
 				return utils.ErrorUnsupportedType
-			}
-
-			// if not javascript, we currently do nothing
-			if testFunc == nil {
-				return nil
 			}
 
 			path, err := utils.GetWorkingDir()
@@ -74,40 +75,42 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var response string
+			shouldFetchTemplates := true
 			//checks if azion directory exists and is not empty
 			if _, err := os.Stat("./azion"); !errors.Is(err, os.ErrNotExist) {
 				if empty, _ := utils.IsDirEmpty("./azion"); !empty {
-					fmt.Fprintf(f.IOStreams.Out, "%s: ", msgContentOverridden)
-					fmt.Fscanln(f.IOStreams.In, &response)
-					switch strings.ToLower(response) {
-					case "no":
-						fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdStopped)
-						return nil
+					if info.noOption || info.yesOption {
+						shouldFetchTemplates = yesNoFlagToResponse(info)
+					} else {
+						fmt.Fprintf(f.IOStreams.Out, "%s: ", msgContentOverridden)
+						fmt.Fscanln(f.IOStreams.In, &response)
+						shouldFetchTemplates, err = utils.ResponseToBool(response)
+						if err != nil {
+							return err
+						}
+					}
 
-					case "yes":
-						break
-
-					default:
-						return utils.ErrorInvalidOption
+					if shouldFetchTemplates {
+						err = utils.CleanDirectory("./azion")
+						if err != nil {
+							return err
+						}
 					}
 				}
 
-				err = utils.CleanDirectory("./azion")
-				if err != nil {
+			}
+
+			if shouldFetchTemplates {
+				if err := fetchTemplates(info); err != nil {
 					return err
 				}
 
-			}
+				if err := organizeJsonFile(options, info); err != nil {
+					return err
+				}
 
-			if err := fetchTemplates(info); err != nil {
-				return err
+				fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 			}
-
-			if err := organizeJsonFile(options, info); err != nil {
-				return err
-			}
-
-			fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 
 			return nil
 		},
@@ -115,8 +118,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	initCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
 	_ = initCmd.MarkFlagRequired("name")
-	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type (javascript | nextjs | flareact)")
+	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript>")
 	_ = initCmd.MarkFlagRequired("type")
+	initCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
+	initCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
 
 	return initCmd
 
@@ -168,4 +173,14 @@ func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo
 		return utils.ErrorInternalServerError
 	}
 	return nil
+}
+
+func yesNoFlagToResponse(info *initInfo) bool {
+
+	if info.yesOption {
+		return info.yesOption
+	}
+
+	return false
+
 }
