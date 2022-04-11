@@ -15,25 +15,27 @@ type DescribeOptions struct {
 }
 
 type AzionApplicationOptions struct {
-	Test         func() error `json:"-"`
-	Name         string       `json:"name"`
-	Language     string       `json:"language"`
-	Env          string       `json:"env"`
-	FunctionFile string       `json:"function_file"`
-	CacheData    cacheConf    `json:"cache"`
+	Test         func(path string) error `json:"-"`
+	Name         string                  `json:"name"`
+	Language     string                  `json:"language"`
+	Env          string                  `json:"env"`
+	FunctionFile string                  `json:"function_file"`
+	CacheData    cacheConf               `json:"cache"`
 }
 
 type AzionApplicationConfig struct {
-	InitData  initConf
-	BuildData buildConf
+	InitData  InitConf  `json:"init"`
+	BuildData buildConf `json:"build"`
 }
 
-type initConf struct {
-	Cmd string
+type InitConf struct {
+	Cmd string `json:"cmd"`
+	Env string `json:"env"`
 }
 
 type buildConf struct {
-	Cmd string
+	Cmd string `json:"cmd"`
+	Env string `json:"env"`
 }
 
 type cacheConf struct {

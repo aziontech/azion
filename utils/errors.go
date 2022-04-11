@@ -24,4 +24,6 @@ var (
 	ErrorUnsupportedType            = errors.New("Unsupported type. Use -h or --help for more information")
 	ErrorInvalidOption              = errors.New("Invalid option")
 	ErrorCleaningDirectory          = errors.New("Failed to clean the directory's contents")
+	ErrorRunningCommand             = errors.New("Failed to run specified command")
+	ErrorLoadingEnvVars             = errors.New("Failed to load environment variables")
 )
