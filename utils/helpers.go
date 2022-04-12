@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const shell = "/bin/sh"
+
 func ConvertIdsToInt(ids ...string) ([]int64, error) {
 	converted_ids := make([]int64, len(ids))
 	for index, id := range ids {
@@ -81,10 +83,10 @@ func LoadEnvVarsFromFile(varsFileName string) ([]string, error) {
 	return fileVars, nil
 }
 
+// RunCommandWithOutput returns the stringified command output, it's exit code and any errors
+// Commands that exit with exit codes > 0 will return a non-nil error
 func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
-	const shell = "/bin/sh"
 	command := exec.Command(shell, "-c", comm)
-	//Load environment variables (if they exist)
 	if len(envVars) > 0 {
 		command.Env = os.Environ()
 		command.Env = append(command.Env, envVars...)
@@ -97,7 +99,6 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 }
 
 func RunCommand(envVars []string, comm string) error {
-	const shell = "/bin/sh"
 	command := exec.Command(shell, "-c", comm)
 	//Load environment variables (if they exist)
 	if len(envVars) > 0 {
@@ -108,8 +109,6 @@ func RunCommand(envVars []string, comm string) error {
 	if err != nil {
 		return ErrorRunningCommand
 	}
-
-	command.ProcessState.ExitCode()
 
 	return nil
 }
