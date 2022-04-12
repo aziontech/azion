@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		configRelativePath: "/azion/config.json",
 		getWorkDir:         utils.GetWorkingDir,
-		envLoader:          utils.LoadEnvVars,
+		envLoader:          utils.LoadEnvVarsFromFile,
 	}
 
 	cmd := &cobra.Command{
@@ -80,7 +80,6 @@ func (b *buildCmd) runCmd() error {
 		return err
 	}
 
-	// TODO: Check this
 	envs, err := b.envLoader(conf.BuildData.Env)
 	if err != nil {
 		return ErrReadEnvFile

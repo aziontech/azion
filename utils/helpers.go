@@ -52,11 +52,15 @@ func IsDirEmpty(dir string) (bool, error) {
 	return false, err
 }
 
-func LoadEnvVars(varsFileName string) ([]string, error) {
-	// If no .env file, ignore and return
+func LoadEnvVarsFromFile(varsFileName string) ([]string, error) {
 	if _, err := os.Stat(varsFileName); errors.Is(err, os.ErrNotExist) {
-		return nil, nil
+		// Ignore error if not specified
+		if varsFileName == "" {
+			return nil, nil
+		}
+		return nil, err
 	}
+
 	f, err := os.Open(varsFileName)
 	if err != nil {
 		return nil, err
