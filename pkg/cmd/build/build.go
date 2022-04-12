@@ -80,18 +80,19 @@ func (b *buildCmd) runCmd() error {
 		return err
 	}
 
+	// TODO: Check this
 	envs, err := b.envLoader(conf.BuildData.Env)
 	if err != nil {
 		return ErrReadEnvFile
 	}
 
 	fmt.Fprintf(b.io.Out, "Running build command\n\n")
-	fmt.Fprintf(b.io.Out, "> %s\n", conf.BuildData.Cmd)
+	fmt.Fprintf(b.io.Out, "$ %s\n", conf.BuildData.Cmd)
 
 	out, exitCode, err := b.commandRunner(conf.BuildData.Cmd, envs)
 
 	fmt.Fprintf(b.io.Out, "%s\n", string(out))
-	fmt.Fprintf(b.io.Out, "\nCommand exited with status code %d\n", exitCode)
+	fmt.Fprintf(b.io.Out, "\nCommand exited with exit code %d\n", exitCode)
 
 	if err != nil {
 		return err

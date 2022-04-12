@@ -47,10 +47,10 @@ func TestBuild(t *testing.T) {
 
 		require.Equal(t, `Running build command
 
-> npm run build
+$ npm run build
 Build completed
 
-Command exited with status code 0
+Command exited with exit code 0
 `, stdout.String())
 	})
 
@@ -74,7 +74,7 @@ Command exited with status code 0
 				return jsonContent.Bytes(), nil
 			},
 			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				return "Build failed", 1, expectedErr
+				return "Command output goes here", 42, expectedErr
 			},
 			configRelativePath: "/azion/config.json",
 			getWorkDir: func() (string, error) {
@@ -90,10 +90,10 @@ Command exited with status code 0
 
 		require.Equal(t, `Running build command
 
-> npm run build
-Build failed
+$ npm run build
+Command output goes here
 
-Command exited with status code 1
+Command exited with exit code 42
 `, stdout.String())
 	})
 

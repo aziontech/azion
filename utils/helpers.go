@@ -88,9 +88,6 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 
 	out, err := command.CombinedOutput()
 	exitCode := command.ProcessState.ExitCode()
-	if err != nil {
-		return "", exitCode, ErrorRunningCommand
-	}
 
 	return string(out), exitCode, err
 }
