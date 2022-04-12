@@ -174,7 +174,7 @@ func TestCreate(t *testing.T) {
 		require.EqualError(t, err, "Failed to open config.json file")
 	})
 
-	t.Run("runInitCmdLine without init.env", func(t *testing.T) {
+	t.Run("runInitCmdLine with init.env not empty", func(t *testing.T) {
 		var err error
 		config := &contracts.AzionApplicationConfig{}
 		confDir, _ := os.Getwd()
@@ -191,9 +191,40 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		// User specified envfile but it cannot be read correctly
+		// User has specified an envfile but it cannot be read correctly
 		err = runInitCmdLine(config)
 		require.Error(t, err)
+	})
+
+	t.Run("runInitCmdLine without specifing init.env", func(t *testing.T) {
+		var err error
+		config := &contracts.AzionApplicationConfig{}
+		confDir, _ := os.Getwd()
+		confDir = confDir + "/azion/"
+		_ = os.Remove("/tmp/ls-test.txt")
+		_ = os.MkdirAll(confDir, os.ModePerm)
+
+		file, err := os.Create(confDir + "config.json")
+		if err == nil {
+			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\"}\n	}\n")
+			if err != nil {
+				require.NoError(t, err)
+			}
+		}
+		file.Close()
+
+		err = runInitCmdLine(config)
+		require.NoError(t, err)
+
+		_, err = os.Stat("/tmp/ls-test.txt")
+		require.NoError(t, err)
+
+		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
+		require.NoError(t, err)
+
+		require.NoError(t, err)
+		//Local dir (since $VAR1 and $VAR2 are empty) now has 'azion'
+		require.Contains(t, string(fileContent), "azion")
 	})
 
 	t.Run("runInitCmdLine full", func(t *testing.T) {
