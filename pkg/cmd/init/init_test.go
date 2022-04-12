@@ -191,24 +191,9 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
+		// User specified envfile but it cannot be read correctly
 		err = runInitCmdLine(config)
-		if err != nil {
-			require.NoError(t, err)
-		}
-
-		if _, err := os.Stat("/tmp/ls-test.txt"); errors.Is(err, os.ErrNotExist) {
-			require.NoError(t, err)
-		}
-
-		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
-		if err != nil {
-			require.NoError(t, err)
-		}
-		strFromFile := string(fileContent)
-
-		require.NoError(t, err)
-		//Local dir (since $VAR1 and $VAR2 are empty) now has 'azion'
-		require.Contains(t, strFromFile, "azion")
+		require.Error(t, err)
 	})
 
 	t.Run("runInitCmdLine full", func(t *testing.T) {

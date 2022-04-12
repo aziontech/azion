@@ -77,6 +77,24 @@ func LoadEnvVars(varsFileName string) ([]string, error) {
 	return fileVars, nil
 }
 
+func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
+	const shell = "/bin/sh"
+	command := exec.Command(shell, "-c", comm)
+	//Load environment variables (if they exist)
+	if len(envVars) > 0 {
+		command.Env = os.Environ()
+		command.Env = append(command.Env, envVars...)
+	}
+
+	out, err := command.CombinedOutput()
+	exitCode := command.ProcessState.ExitCode()
+	if err != nil {
+		return "", exitCode, ErrorRunningCommand
+	}
+
+	return string(out), exitCode, err
+}
+
 func RunCommand(envVars []string, comm string) error {
 	const shell = "/bin/sh"
 	command := exec.Command(shell, "-c", comm)
@@ -89,6 +107,8 @@ func RunCommand(envVars []string, comm string) error {
 	if err != nil {
 		return ErrorRunningCommand
 	}
+
+	command.ProcessState.ExitCode()
 
 	return nil
 }
