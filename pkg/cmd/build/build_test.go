@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -31,6 +32,12 @@ func TestBuild(t *testing.T) {
 				return jsonContent.Bytes(), nil
 			},
 			commandRunner: func(cmd string, envs []string) (string, int, error) {
+				if cmd != "npm run build" {
+					return "", -1, errors.New("unexpected command")
+				}
+				if !reflect.DeepEqual(envs, envVars) {
+					return "", -1, errors.New("unexpected envvars")
+				}
 				return "Build completed", 0, nil
 			},
 			configRelativePath: "/azion/config.json",
