@@ -8,7 +8,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -163,20 +162,21 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("runInitCmdLine without config.json", func(t *testing.T) {
-		config := &contracts.AzionApplicationConfig{}
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
+
+		out := &bytes.Buffer{}
 
 		var err error
 		_ = os.Remove(confDir + "config.json")
 
-		err = runInitCmdLine(config)
+		err = runInitCmdLine(out)
 		require.EqualError(t, err, "Failed to open config.json file")
 	})
 
 	t.Run("runInitCmdLine with init.env not empty", func(t *testing.T) {
 		var err error
-		config := &contracts.AzionApplicationConfig{}
+		out := &bytes.Buffer{}
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
@@ -192,13 +192,12 @@ func TestCreate(t *testing.T) {
 		file.Close()
 
 		// User has specified an envfile but it cannot be read correctly
-		err = runInitCmdLine(config)
+		err = runInitCmdLine(out)
 		require.Error(t, err)
 	})
 
 	t.Run("runInitCmdLine without specifing init.env", func(t *testing.T) {
 		var err error
-		config := &contracts.AzionApplicationConfig{}
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
@@ -213,7 +212,8 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		err = runInitCmdLine(config)
+		out := &bytes.Buffer{}
+		err = runInitCmdLine(out)
 		require.NoError(t, err)
 
 		_, err = os.Stat("/tmp/ls-test.txt")
@@ -229,7 +229,6 @@ func TestCreate(t *testing.T) {
 
 	t.Run("runInitCmdLine full", func(t *testing.T) {
 		var err error
-		config := &contracts.AzionApplicationConfig{}
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
@@ -255,7 +254,8 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		err = runInitCmdLine(config)
+		out := &bytes.Buffer{}
+		err = runInitCmdLine(out)
 		if err != nil {
 			require.NoError(t, err)
 		}
