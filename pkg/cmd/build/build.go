@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type buildCmd struct {
+type command struct {
 	io *iostreams.IOStreams
 	// Return output, exit code and any errors
 	commandRunner      func(cmd string, envvars []string) (string, int, error)
@@ -24,18 +24,8 @@ type buildCmd struct {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	build := &buildCmd{
-		io:         f.IOStreams,
-		fileReader: os.ReadFile,
-		commandRunner: func(cmd string, envs []string) (string, int, error) {
-			return utils.RunCommandWithOutput(envs, cmd)
-		},
-		configRelativePath: "/azion/config.json",
-		getWorkDir:         utils.GetWorkingDir,
-		envLoader:          utils.LoadEnvVarsFromFile,
-	}
-
-	cmd := &cobra.Command{
+	command := newCommand(f)
+	cobraCmd := &cobra.Command{
 		Use:           "build [flags]",
 		Short:         "Build your Web application",
 		Long:          "Build your Web application",
@@ -48,19 +38,32 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli build
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return build.runCmd()
+			return command.run()
 		},
 	}
-	return cmd
+	return cobraCmd
 }
 
-func (b *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
-	path, err := b.getWorkDir()
+func newCommand(f *cmdutil.Factory) *command {
+	return &command{
+		io:         f.IOStreams,
+		fileReader: os.ReadFile,
+		commandRunner: func(cmd string, envs []string) (string, int, error) {
+			return utils.RunCommandWithOutput(envs, cmd)
+		},
+		configRelativePath: "/azion/config.json",
+		getWorkDir:         utils.GetWorkingDir,
+		envLoader:          utils.LoadEnvVarsFromFile,
+	}
+}
+
+func (c *command) readConfig() (*contracts.AzionApplicationConfig, error) {
+	path, err := c.getWorkDir()
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := b.fileReader(path + b.configRelativePath)
+	file, err := c.fileReader(path + c.configRelativePath)
 	if err != nil {
 		return nil, ErrOpeningConfigFile
 	}
@@ -74,24 +77,24 @@ func (b *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	return conf, nil
 }
 
-func (b *buildCmd) runCmd() error {
-	conf, err := b.readConfig()
+func (c *command) run() error {
+	conf, err := c.readConfig()
 	if err != nil {
 		return err
 	}
 
-	envs, err := b.envLoader(conf.BuildData.Env)
+	envs, err := c.envLoader(conf.BuildData.Env)
 	if err != nil {
 		return ErrReadEnvFile
 	}
 
-	fmt.Fprintf(b.io.Out, "Running build command\n\n")
-	fmt.Fprintf(b.io.Out, "$ %s\n", conf.BuildData.Cmd)
+	fmt.Fprintf(c.io.Out, "Running build command\n\n")
+	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
 
-	out, exitCode, err := b.commandRunner(conf.BuildData.Cmd, envs)
+	out, exitCode, err := c.commandRunner(conf.BuildData.Cmd, envs)
 
-	fmt.Fprintf(b.io.Out, "%s\n", out)
-	fmt.Fprintf(b.io.Out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(c.io.Out, "%s\n", out)
+	fmt.Fprintf(c.io.Out, "\nCommand exited with code %d\n", exitCode)
 
 	if err != nil {
 		return err

@@ -26,30 +26,25 @@ func TestBuild(t *testing.T) {
 
 		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
 
-		build := &buildCmd{
-			io: f.IOStreams,
-			fileReader: func(path string) ([]byte, error) {
-				return jsonContent.Bytes(), nil
-			},
-			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				if cmd != "npm run build" {
-					return "", -1, errors.New("unexpected command")
-				}
-				if !reflect.DeepEqual(envs, envVars) {
-					return "", -1, errors.New("unexpected envvars")
-				}
-				return "Build completed", 0, nil
-			},
-			configRelativePath: "/azion/config.json",
-			getWorkDir: func() (string, error) {
-				return "/", nil
-			},
-			envLoader: func(path string) ([]string, error) {
-				return envVars, nil
-			},
+		command := newCommand(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
+		}
+		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if cmd != "npm run build" {
+				return "", -1, errors.New("unexpected command")
+			}
+			if !reflect.DeepEqual(envs, envVars) {
+				return "", -1, errors.New("unexpected envvars")
+			}
+			return "Build completed", 0, nil
+		}
+		command.envLoader = func(path string) ([]string, error) {
+			return envVars, nil
 		}
 
-		err := build.runCmd()
+		err := command.run()
 		require.NoError(t, err)
 
 		require.Equal(t, `Running build command
@@ -75,24 +70,19 @@ Command exited with code 0
 		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
 		expectedErr := errors.New("invalid file")
 
-		build := &buildCmd{
-			io: f.IOStreams,
-			fileReader: func(path string) ([]byte, error) {
-				return jsonContent.Bytes(), nil
-			},
-			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				return "Command output goes here", 42, expectedErr
-			},
-			configRelativePath: "/azion/config.json",
-			getWorkDir: func() (string, error) {
-				return "/", nil
-			},
-			envLoader: func(path string) ([]string, error) {
-				return envVars, nil
-			},
+		command := newCommand(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
+		}
+		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			return "Command output goes here", 42, expectedErr
+		}
+		command.envLoader = func(path string) ([]string, error) {
+			return envVars, nil
 		}
 
-		err := build.runCmd()
+		err := command.run()
 		require.Error(t, err, expectedErr)
 
 		require.Equal(t, `Running build command
@@ -107,24 +97,13 @@ Command exited with code 42
 	t.Run("missing config file", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		build := &buildCmd{
-			io: f.IOStreams,
-			fileReader: func(path string) ([]byte, error) {
-				return nil, os.ErrNotExist
-			},
-			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				return "", 0, nil
-			},
-			configRelativePath: "/azion/config.json",
-			getWorkDir: func() (string, error) {
-				return "/", nil
-			},
-			envLoader: func(path string) ([]string, error) {
-				return nil, nil
-			},
+		command := newCommand(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return nil, os.ErrNotExist
 		}
 
-		err := build.runCmd()
+		err := command.run()
 		require.ErrorIs(t, err, ErrOpeningConfigFile)
 	})
 
@@ -139,24 +118,13 @@ Command exited with code 42
         }
         `)
 
-		build := &buildCmd{
-			io: f.IOStreams,
-			fileReader: func(path string) ([]byte, error) {
-				return jsonContent.Bytes(), nil
-			},
-			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				return "", 0, nil
-			},
-			configRelativePath: "/azion/config.json",
-			getWorkDir: func() (string, error) {
-				return "/", nil
-			},
-			envLoader: func(path string) ([]string, error) {
-				return nil, nil
-			},
+		command := newCommand(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
 		}
 
-		err := build.runCmd()
+		err := command.run()
 		require.ErrorIs(t, err, ErrUnmarshalConfigFile)
 	})
 
@@ -171,24 +139,16 @@ Command exited with code 42
         }
         `)
 
-		build := &buildCmd{
-			io: f.IOStreams,
-			fileReader: func(path string) ([]byte, error) {
-				return jsonContent.Bytes(), nil
-			},
-			commandRunner: func(cmd string, envs []string) (string, int, error) {
-				return "", 0, nil
-			},
-			configRelativePath: "/azion/config.json",
-			getWorkDir: func() (string, error) {
-				return "/", nil
-			},
-			envLoader: func(path string) ([]string, error) {
-				return nil, utils.ErrorLoadingEnvVars
-			},
+		command := newCommand(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
+		}
+		command.envLoader = func(path string) ([]string, error) {
+			return nil, utils.ErrorLoadingEnvVars
 		}
 
-		err := build.runCmd()
+		err := command.run()
 		require.ErrorIs(t, err, ErrReadEnvFile)
 	})
 }
