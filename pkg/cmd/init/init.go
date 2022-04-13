@@ -11,6 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +31,6 @@ const (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	config := &contracts.AzionApplicationConfig{}
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
 	initCmd := &cobra.Command{
@@ -113,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 			}
 
-			err = runInitCmdLine(config)
+			err = runInitCmdLine(f.IOStreams)
 			if err != nil {
 				return err
 			}
@@ -159,7 +159,7 @@ func fetchTemplates(info *initInfo) error {
 	return nil
 }
 
-func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
+func runInitCmdLine(iostream *iostreams.IOStreams) error {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		return err
@@ -171,6 +171,7 @@ func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
 		return ErrorOpeningConfigFile
 	}
 
+	conf := &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
 		return ErrorUnmarshalConfigFile
@@ -181,7 +182,14 @@ func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
 		return utils.ErrorRunningCommand
 	}
 
-	err = utils.RunCommand(envs, conf.InitData.Cmd)
+	fmt.Fprintf(iostream.Out, "Running init command\n\n")
+	fmt.Fprintf(iostream.Out, "$ %s\n", conf.InitData.Cmd)
+
+	output, exitCode, err := utils.RunCommandWithOutput(envs, conf.InitData.Cmd)
+
+	fmt.Fprintf(iostream.Out, "%s\n", output)
+	fmt.Fprintf(iostream.Out, "\nCommand exited with code %d\n", exitCode)
+
 	if err != nil {
 		return utils.ErrorRunningCommand
 	}
@@ -212,11 +220,9 @@ func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo
 }
 
 func yesNoFlagToResponse(info *initInfo) bool {
-
 	if info.yesOption {
 		return info.yesOption
 	}
 
 	return false
-
 }
