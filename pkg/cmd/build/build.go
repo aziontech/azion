@@ -90,8 +90,8 @@ func (b *buildCmd) runCmd() error {
 
 	out, exitCode, err := b.commandRunner(conf.BuildData.Cmd, envs)
 
-	fmt.Fprintf(b.io.Out, "%s\n", string(out))
-	fmt.Fprintf(b.io.Out, "\nCommand exited with exit code %d\n", exitCode)
+	fmt.Fprintf(b.io.Out, "%s\n", out)
+	fmt.Fprintf(b.io.Out, "\nCommand exited with code %d\n", exitCode)
 
 	if err != nil {
 		return err

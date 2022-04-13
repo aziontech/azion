@@ -57,7 +57,7 @@ func TestBuild(t *testing.T) {
 $ npm run build
 Build completed
 
-Command exited with exit code 0
+Command exited with code 0
 `, stdout.String())
 	})
 
@@ -100,7 +100,7 @@ Command exited with exit code 0
 $ npm run build
 Command output goes here
 
-Command exited with exit code 42
+Command exited with code 42
 `, stdout.String())
 	})
 
