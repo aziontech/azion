@@ -16,8 +16,7 @@ import (
 
 func TestCreate(t *testing.T) {
 	t.Run("Init without package.json", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 
@@ -29,8 +28,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Init with unsupported type", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 
@@ -42,8 +40,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Init with -y and -n flags", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 
@@ -79,8 +76,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Init success with javascript using flag -y", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, stdout, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 		err := ioutil.WriteFile("package.json", []byte(""), 0644)
@@ -121,8 +117,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Init does not overwrite contents using flag -n", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 		err := ioutil.WriteFile("package.json", []byte(""), 0644)
@@ -139,8 +134,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("Init invalid option", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewCmd(f)
 		err := ioutil.WriteFile("package.json", []byte(""), 0644)
@@ -165,18 +159,17 @@ func TestCreate(t *testing.T) {
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 
-		out := &bytes.Buffer{}
+		f, _, _ := testutils.NewFactory(nil)
 
 		var err error
 		_ = os.Remove(confDir + "config.json")
 
-		err = runInitCmdLine(out)
+		err = runInitCmdLine(f.IOStreams)
 		require.EqualError(t, err, "Failed to open config.json file")
 	})
 
 	t.Run("runInitCmdLine with init.env not empty", func(t *testing.T) {
-		var err error
-		out := &bytes.Buffer{}
+		f, _, _ := testutils.NewFactory(nil)
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
@@ -192,12 +185,12 @@ func TestCreate(t *testing.T) {
 		file.Close()
 
 		// User has specified an envfile but it cannot be read correctly
-		err = runInitCmdLine(out)
+		err = runInitCmdLine(f.IOStreams)
 		require.Error(t, err)
 	})
 
 	t.Run("runInitCmdLine without specifing init.env", func(t *testing.T) {
-		var err error
+		f, _, _ := testutils.NewFactory(nil)
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
@@ -212,8 +205,7 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		out := &bytes.Buffer{}
-		err = runInitCmdLine(out)
+		err = runInitCmdLine(f.IOStreams)
 		require.NoError(t, err)
 
 		_, err = os.Stat("/tmp/ls-test.txt")
@@ -228,12 +220,14 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("runInitCmdLine full", func(t *testing.T) {
-		var err error
+		f, _, _ := testutils.NewFactory(nil)
+
 		confDir, _ := os.Getwd()
 		confDir = confDir + "/azion/"
 		_ = os.Remove("/tmp/ls-test.txt")
 		_ = os.MkdirAll(confDir, os.ModePerm)
 		defer os.RemoveAll(confDir)
+
 		jsonConf := confDir + "config.json"
 		file, err := os.Create(jsonConf)
 		if err == nil {
@@ -254,8 +248,7 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		out := &bytes.Buffer{}
-		err = runInitCmdLine(out)
+		err = runInitCmdLine(f.IOStreams)
 		if err != nil {
 			require.NoError(t, err)
 		}

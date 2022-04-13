@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,6 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -113,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
 			}
 
-			err = runInitCmdLine(f.IOStreams.Out)
+			err = runInitCmdLine(f.IOStreams)
 			if err != nil {
 				return err
 			}
@@ -159,7 +159,7 @@ func fetchTemplates(info *initInfo) error {
 	return nil
 }
 
-func runInitCmdLine(out io.Writer) error {
+func runInitCmdLine(iostream *iostreams.IOStreams) error {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		return err
@@ -182,13 +182,13 @@ func runInitCmdLine(out io.Writer) error {
 		return utils.ErrorRunningCommand
 	}
 
-	fmt.Fprintf(out, "Running init command\n\n")
-	fmt.Fprintf(out, "$ %s\n", conf.InitData.Cmd)
+	fmt.Fprintf(iostream.Out, "Running init command\n\n")
+	fmt.Fprintf(iostream.Out, "$ %s\n", conf.InitData.Cmd)
 
 	output, exitCode, err := utils.RunCommandWithOutput(envs, conf.InitData.Cmd)
 
-	fmt.Fprintf(out, "%s\n", output)
-	fmt.Fprintf(out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(iostream.Out, "%s\n", output)
+	fmt.Fprintf(iostream.Out, "\nCommand exited with code %d\n", exitCode)
 
 	if err != nil {
 		return utils.ErrorRunningCommand
