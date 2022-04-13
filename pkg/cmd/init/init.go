@@ -176,7 +176,7 @@ func runInitCmdLine(conf *contracts.AzionApplicationConfig) error {
 		return ErrorUnmarshalConfigFile
 	}
 
-	envs, err := utils.LoadEnvVars(conf.InitData.Env)
+	envs, err := utils.LoadEnvVarsFromFile(conf.InitData.Env)
 	if err != nil {
 		return utils.ErrorRunningCommand
 	}

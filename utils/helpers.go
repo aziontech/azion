@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const shell = "/bin/sh"
+
 func ConvertIdsToInt(ids ...string) ([]int64, error) {
 	converted_ids := make([]int64, len(ids))
 	for index, id := range ids {
@@ -52,11 +54,15 @@ func IsDirEmpty(dir string) (bool, error) {
 	return false, err
 }
 
-func LoadEnvVars(varsFileName string) ([]string, error) {
-	// If no .env file, ignore and return
+func LoadEnvVarsFromFile(varsFileName string) ([]string, error) {
 	if _, err := os.Stat(varsFileName); errors.Is(err, os.ErrNotExist) {
-		return nil, nil
+		// Ignore error if not specified
+		if varsFileName == "" {
+			return nil, nil
+		}
+		return nil, err
 	}
+
 	f, err := os.Open(varsFileName)
 	if err != nil {
 		return nil, err
@@ -77,8 +83,22 @@ func LoadEnvVars(varsFileName string) ([]string, error) {
 	return fileVars, nil
 }
 
+// RunCommandWithOutput returns the stringified command output, it's exit code and any errors
+// Commands that exit with exit codes > 0 will return a non-nil error
+func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
+	command := exec.Command(shell, "-c", comm)
+	if len(envVars) > 0 {
+		command.Env = os.Environ()
+		command.Env = append(command.Env, envVars...)
+	}
+
+	out, err := command.CombinedOutput()
+	exitCode := command.ProcessState.ExitCode()
+
+	return string(out), exitCode, err
+}
+
 func RunCommand(envVars []string, comm string) error {
-	const shell = "/bin/sh"
 	command := exec.Command(shell, "-c", comm)
 	//Load environment variables (if they exist)
 	if len(envVars) > 0 {

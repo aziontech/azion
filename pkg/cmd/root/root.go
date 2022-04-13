@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/configure"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
@@ -45,6 +46,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
 	rootCmd.AddCommand(initcmd.NewCmd(f))
+	rootCmd.AddCommand(build.NewCmd(f))
 
 	return rootCmd
 }
