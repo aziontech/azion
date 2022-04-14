@@ -215,7 +215,7 @@ func (cmd *initCmd) runInitCmdLine() error {
 
 	envs, err := cmd.envLoader(conf.InitData.Env)
 	if err != nil {
-		return utils.ErrorRunningCommand
+		return err
 	}
 
 	fmt.Fprintf(cmd.io.Out, "Running init command\n\n")
