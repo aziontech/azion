@@ -40,6 +40,10 @@ func CleanDirectory(dir string) error {
 func IsDirEmpty(dir string) (bool, error) {
 	f, err := os.Open(dir)
 	if err != nil {
+		// Dir does not exist
+		if errors.Is(err, os.ErrNotExist) {
+			return true, nil
+		}
 		return false, err
 	}
 	defer f.Close()

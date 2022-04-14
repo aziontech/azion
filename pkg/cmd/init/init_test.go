@@ -170,6 +170,9 @@ func TestCobraCmd(t *testing.T) {
 			}
 			return nil, nil
 		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
 
@@ -210,6 +213,9 @@ func TestCobraCmd(t *testing.T) {
 			}
 			return nil, nil
 		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
 
@@ -232,6 +238,9 @@ func TestCobraCmd(t *testing.T) {
 				return nil, os.ErrNotExist
 			}
 			return nil, nil
+		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
 		}
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
