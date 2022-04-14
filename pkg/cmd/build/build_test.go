@@ -26,7 +26,7 @@ func TestBuild(t *testing.T) {
 
 		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
 
-		command := newCommand(f)
+		command := newBuildCmd(f)
 
 		command.fileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
@@ -70,7 +70,7 @@ Command exited with code 0
 		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
 		expectedErr := errors.New("invalid file")
 
-		command := newCommand(f)
+		command := newBuildCmd(f)
 
 		command.fileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
@@ -94,10 +94,24 @@ Command exited with code 42
 `, stdout.String())
 	})
 
+	t.Run("no build.cmd to execute", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		command := newBuildCmd(f)
+
+		command.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"build": {}}`), nil
+		}
+
+		err := command.run()
+		require.NoError(t, err)
+		require.NotContains(t, stdout.String(), "Running build command")
+	})
+
 	t.Run("missing config file", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		command := newCommand(f)
+		command := newBuildCmd(f)
 
 		command.fileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
@@ -118,7 +132,7 @@ Command exited with code 42
         }
         `)
 
-		command := newCommand(f)
+		command := newBuildCmd(f)
 
 		command.fileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
@@ -139,7 +153,7 @@ Command exited with code 42
         }
         `)
 
-		command := newCommand(f)
+		command := newBuildCmd(f)
 
 		command.fileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
