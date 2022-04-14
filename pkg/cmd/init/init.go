@@ -2,11 +2,12 @@ package init
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -30,9 +31,44 @@ const (
 	REPO  string = "https://github.com/aziontech/azioncli-template.git"
 )
 
+type command struct {
+	io            *iostreams.IOStreams
+	getWorkDir    func() (string, error)
+	fileReader    func(path string) ([]byte, error)
+	commandRunner func(cmd string, envvars []string) (string, int, error)
+	lookPath      func(bin string) (string, error)
+	isDirEmpty    func(dirpath string) (bool, error)
+	cleanDir      func(dirpath string) error
+	writeFile     func(filename string, data []byte, perm fs.FileMode) error
+	removeAll     func(path string) error
+	rename        func(oldpath string, newpath string) error
+	createTempDir func(dir string, pattern string) (string, error)
+	envLoader     func(path string) ([]string, error)
+}
+
+func newCommand(f *cmdutil.Factory) *command {
+	return &command{
+		io:         f.IOStreams,
+		getWorkDir: utils.GetWorkingDir,
+		fileReader: os.ReadFile,
+		commandRunner: func(cmd string, envvars []string) (string, int, error) {
+			return utils.RunCommandWithOutput(envvars, cmd)
+		},
+		lookPath:      exec.LookPath,
+		isDirEmpty:    utils.IsDirEmpty,
+		cleanDir:      utils.CleanDirectory,
+		writeFile:     os.WriteFile,
+		removeAll:     os.RemoveAll,
+		rename:        os.Rename,
+		createTempDir: ioutil.TempDir,
+		envLoader:     utils.LoadEnvVarsFromFile,
+	}
+}
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
+	command := newCommand(f)
 	initCmd := &cobra.Command{
 		Use:           "init [flags]",
 		Short:         "Use Azion templates along with your Web applications",
@@ -46,79 +82,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli init --name "thisisatest" --type javascript
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			if info.yesOption && info.noOption {
-				return ErrorYesAndNoOptions
-			}
-
-			//gets the test function (if it could not find it, it means it is currently not supported)
-			testFunc, ok := testFuncByType[info.typeLang]
-			if !ok {
-				return utils.ErrorUnsupportedType
-			}
-
-			path, err := utils.GetWorkingDir()
-			if err != nil {
-				return err
-			}
-
-			info.pathWorkingDir = path
-
-			options.Test = testFunc
-			if err := options.Test(info.pathWorkingDir); err != nil {
-				return err
-			}
-
-			//checks if user has GIT binary installed
-			_, err = exec.LookPath(GIT)
-			if err != nil {
-				return utils.ErrorMissingGitBinary
-			}
-
-			var response string
-			shouldFetchTemplates := true
-			//checks if azion directory exists and is not empty
-			if _, err := os.Stat("./azion"); !errors.Is(err, os.ErrNotExist) {
-				if empty, _ := utils.IsDirEmpty("./azion"); !empty {
-					if info.noOption || info.yesOption {
-						shouldFetchTemplates = yesNoFlagToResponse(info)
-					} else {
-						fmt.Fprintf(f.IOStreams.Out, "%s: ", msgContentOverridden)
-						fmt.Fscanln(f.IOStreams.In, &response)
-						shouldFetchTemplates, err = utils.ResponseToBool(response)
-						if err != nil {
-							return err
-						}
-					}
-
-					if shouldFetchTemplates {
-						err = utils.CleanDirectory("./azion")
-						if err != nil {
-							return err
-						}
-					}
-				}
-
-			}
-
-			if shouldFetchTemplates {
-				if err := fetchTemplates(info); err != nil {
-					return err
-				}
-
-				if err := organizeJsonFile(options, info); err != nil {
-					return err
-				}
-
-				fmt.Fprintf(f.IOStreams.Out, "%s\n", msgCmdSuccess)
-			}
-
-			err = runInitCmdLine(f.IOStreams)
-			if err != nil {
-				return err
-			}
-
-			return nil
+			return command.run(info, options)
 		},
 	}
 
@@ -133,17 +97,88 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 }
 
-func fetchTemplates(info *initInfo) error {
+func (cmd *command) run(info *initInfo, options *contracts.AzionApplicationOptions) error {
+	if info.yesOption && info.noOption {
+		return ErrorYesAndNoOptions
+	}
 
+	//gets the test function (if it could not find it, it means it is currently not supported)
+	testFunc, ok := testFuncByType[info.typeLang]
+	if !ok {
+		return utils.ErrorUnsupportedType
+	}
+
+	path, err := cmd.getWorkDir()
+	if err != nil {
+		return err
+	}
+
+	info.pathWorkingDir = path
+
+	options.Test = testFunc
+	if err := options.Test(info.pathWorkingDir); err != nil {
+		return err
+	}
+
+	//checks if user has GIT binary installed
+	_, err = cmd.lookPath(GIT)
+	if err != nil {
+		return utils.ErrorMissingGitBinary
+	}
+
+	var response string
+	shouldFetchTemplates := true
+
+	if empty, _ := cmd.isDirEmpty("./azion"); !empty {
+		if info.noOption || info.yesOption {
+			shouldFetchTemplates = yesNoFlagToResponse(info)
+		} else {
+			fmt.Fprintf(cmd.io.Out, "%s: ", msgContentOverridden)
+			fmt.Fscanln(cmd.io.In, &response)
+			shouldFetchTemplates, err = utils.ResponseToBool(response)
+			if err != nil {
+				return err
+			}
+		}
+
+		if shouldFetchTemplates {
+			err = cmd.cleanDir("./azion")
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if shouldFetchTemplates {
+		if err := cmd.fetchTemplates(info); err != nil {
+			return err
+		}
+
+		if err := cmd.organizeJsonFile(options, info); err != nil {
+			return err
+		}
+
+		fmt.Fprintf(cmd.io.Out, "%s\n", msgCmdSuccess)
+	}
+
+	err = cmd.runInitCmdLine()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cmd *command) fetchTemplates(info *initInfo) error {
 	//create temporary directory to clone template into
-	dir, err := ioutil.TempDir(info.pathWorkingDir, ".template")
+	dir, err := cmd.createTempDir(info.pathWorkingDir, ".template")
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	defer os.RemoveAll(dir)
+	defer func() {
+		_ = cmd.removeAll(dir)
+	}()
 
-	command := exec.Command(GIT, CLONE, REPO, dir)
-	err = command.Run()
+	_, _, err = cmd.commandRunner(strings.Join([]string{GIT, CLONE, REPO, dir}, " "), nil)
 	if err != nil {
 		return utils.ErrorFetchingTemplates
 	}
@@ -151,7 +186,7 @@ func fetchTemplates(info *initInfo) error {
 	azionDir := info.pathWorkingDir + "/azion"
 
 	//move contents from temporary directory into final destination
-	err = os.Rename(dir+"/webdev/"+info.typeLang, azionDir)
+	err = cmd.rename(dir+"/webdev/"+info.typeLang, azionDir)
 	if err != nil {
 		return utils.ErrorMovingFiles
 	}
@@ -159,13 +194,13 @@ func fetchTemplates(info *initInfo) error {
 	return nil
 }
 
-func runInitCmdLine(iostream *iostreams.IOStreams) error {
-	path, err := utils.GetWorkingDir()
+func (cmd *command) runInitCmdLine() error {
+	path, err := cmd.getWorkDir()
 	if err != nil {
 		return err
 	}
 	jsonConf := path + "/azion/config.json"
-	file, err := os.ReadFile(jsonConf)
+	file, err := cmd.fileReader(jsonConf)
 	if err != nil {
 		fmt.Println(jsonConf)
 		return ErrorOpeningConfigFile
@@ -177,18 +212,18 @@ func runInitCmdLine(iostream *iostreams.IOStreams) error {
 		return ErrorUnmarshalConfigFile
 	}
 
-	envs, err := utils.LoadEnvVarsFromFile(conf.InitData.Env)
+	envs, err := cmd.envLoader(conf.InitData.Env)
 	if err != nil {
 		return utils.ErrorRunningCommand
 	}
 
-	fmt.Fprintf(iostream.Out, "Running init command\n\n")
-	fmt.Fprintf(iostream.Out, "$ %s\n", conf.InitData.Cmd)
+	fmt.Fprintf(cmd.io.Out, "Running init command\n\n")
+	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	output, exitCode, err := utils.RunCommandWithOutput(envs, conf.InitData.Cmd)
+	output, exitCode, err := cmd.commandRunner(conf.InitData.Cmd, envs)
 
-	fmt.Fprintf(iostream.Out, "%s\n", output)
-	fmt.Fprintf(iostream.Out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(cmd.io.Out, "%s\n", output)
+	fmt.Fprintf(cmd.io.Out, "\nCommand exited with code %d\n", exitCode)
 
 	if err != nil {
 		return utils.ErrorRunningCommand
@@ -197,8 +232,8 @@ func runInitCmdLine(iostream *iostreams.IOStreams) error {
 	return nil
 }
 
-func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
-	file, err := os.ReadFile(info.pathWorkingDir + "/azion/azion.json")
+func (cmd *command) organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
+	file, err := cmd.fileReader(info.pathWorkingDir + "/azion/azion.json")
 	if err != nil {
 		return ErrorOpeningAzionFile
 	}
@@ -212,7 +247,8 @@ func organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo
 	if err != nil {
 		return ErrorUnmarshalAzionFile
 	}
-	err = ioutil.WriteFile(info.pathWorkingDir+"/azion/azion.json", data, 0644)
+
+	err = cmd.writeFile(info.pathWorkingDir+"/azion/azion.json", data, 0644)
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
