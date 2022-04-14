@@ -2,18 +2,21 @@ package init
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 )
 
 type TestFunc func(path string) error
 
-var testFuncByType = map[string]TestFunc{
-	"javascript": testJs,
-}
+type statFunc func(filename string) (fs.FileInfo, error)
 
-func testJs(path string) error {
-	if _, err := os.Stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
-		return ErrorPackageJsonNotFound
+func makeTestFuncMap(stat statFunc) map[string]TestFunc {
+	return map[string]TestFunc{
+		"javascript": func(path string) error {
+			if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
+				return ErrorPackageJsonNotFound
+			}
+			return nil
+		},
 	}
-	return nil
 }

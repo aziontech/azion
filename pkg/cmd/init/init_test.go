@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strings"
@@ -84,15 +83,14 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.rename = func(oldpath string, newpath string) error {
 			return nil
 		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
-
-		// FIXME Test function reads directly from FS
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove("package.json")
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -100,7 +98,7 @@ func TestCobraCmd(t *testing.T) {
 		in.WriteString("yes\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured
@@ -127,19 +125,18 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.rename = func(oldpath string, newpath string) error {
 			return nil
 		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
 
-		// FIXME:
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove("package.json")
-
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-y"})
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured
@@ -167,15 +164,14 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.rename = func(oldpath string, newpath string) error {
 			return errors.New("unexpected rename")
 		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
-
-		// FIXME:
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove("package.json")
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -183,7 +179,7 @@ func TestCobraCmd(t *testing.T) {
 		in.WriteString("no\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 	})
@@ -208,19 +204,18 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.rename = func(oldpath string, newpath string) error {
 			return errors.New("unexpected rename")
 		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
 
 		cmd := newCobraCmd(initCmd)
 
-		// FIXME
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove("package.json")
-
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-n"})
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 	})
@@ -232,13 +227,12 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := newCobraCmd(initCmd)
 
-		// FIXME
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
 		}
-		defer os.Remove("package.json")
-		defer os.RemoveAll("./azion")
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -246,7 +240,7 @@ func TestCobraCmd(t *testing.T) {
 		in.WriteString("pix\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.ErrorIs(t, err, utils.ErrorInvalidOption)
 	})

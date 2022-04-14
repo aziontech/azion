@@ -44,6 +44,7 @@ type initCmd struct {
 	rename        func(oldpath string, newpath string) error
 	createTempDir func(dir string, pattern string) (string, error)
 	envLoader     func(path string) ([]string, error)
+	stat          func(path string) (fs.FileInfo, error)
 }
 
 func newInitCmd(f *cmdutil.Factory) *initCmd {
@@ -62,6 +63,7 @@ func newInitCmd(f *cmdutil.Factory) *initCmd {
 		rename:        os.Rename,
 		createTempDir: ioutil.TempDir,
 		envLoader:     utils.LoadEnvVarsFromFile,
+		stat:          os.Stat,
 	}
 }
 
@@ -104,7 +106,7 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
-	testFunc, ok := testFuncByType[info.typeLang]
+	testFunc, ok := makeTestFuncMap(cmd.stat)[info.typeLang]
 	if !ok {
 		return utils.ErrorUnsupportedType
 	}
