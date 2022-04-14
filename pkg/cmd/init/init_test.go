@@ -164,7 +164,7 @@ func TestCreate(t *testing.T) {
 		var err error
 		_ = os.Remove(confDir + "config.json")
 
-		cmd := newCommand(f)
+		cmd := newInitCmd(f)
 		err = cmd.runInitCmdLine()
 		require.EqualError(t, err, "Failed to open config.json file")
 	})
@@ -186,7 +186,7 @@ func TestCreate(t *testing.T) {
 		file.Close()
 
 		// User has specified an envfile but it cannot be read correctly
-		cmd := newCommand(f)
+		cmd := newInitCmd(f)
 		err = cmd.runInitCmdLine()
 		require.Error(t, err)
 	})
@@ -207,7 +207,7 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		cmd := newCommand(f)
+		cmd := newInitCmd(f)
 		err = cmd.runInitCmdLine()
 		require.NoError(t, err)
 
@@ -251,7 +251,7 @@ func TestCreate(t *testing.T) {
 		}
 		file.Close()
 
-		cmd := newCommand(f)
+		cmd := newInitCmd(f)
 		err = cmd.runInitCmdLine()
 		if err != nil {
 			require.NoError(t, err)

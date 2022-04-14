@@ -31,7 +31,7 @@ const (
 	REPO  string = "https://github.com/aziontech/azioncli-template.git"
 )
 
-type command struct {
+type initCmd struct {
 	io            *iostreams.IOStreams
 	getWorkDir    func() (string, error)
 	fileReader    func(path string) ([]byte, error)
@@ -46,8 +46,8 @@ type command struct {
 	envLoader     func(path string) ([]string, error)
 }
 
-func newCommand(f *cmdutil.Factory) *command {
-	return &command{
+func newInitCmd(f *cmdutil.Factory) *initCmd {
+	return &initCmd{
 		io:         f.IOStreams,
 		getWorkDir: utils.GetWorkingDir,
 		fileReader: os.ReadFile,
@@ -65,11 +65,10 @@ func newCommand(f *cmdutil.Factory) *command {
 	}
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+func newCobraCmd(init *initCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
-	command := newCommand(f)
-	initCmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           "init [flags]",
 		Short:         "Use Azion templates along with your Web applications",
 		Long:          `Use Azion templates along with your Web applications`,
@@ -82,22 +81,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli init --name "thisisatest" --type javascript
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return command.run(info, options)
+			return init.run(info, options)
 		},
 	}
+	cobraCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
+	_ = cobraCmd.MarkFlagRequired("name")
+	cobraCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript>")
+	_ = cobraCmd.MarkFlagRequired("type")
+	cobraCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
+	cobraCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
 
-	initCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
-	_ = initCmd.MarkFlagRequired("name")
-	initCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript>")
-	_ = initCmd.MarkFlagRequired("type")
-	initCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
-	initCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
-
-	return initCmd
-
+	return cobraCmd
 }
 
-func (cmd *command) run(info *initInfo, options *contracts.AzionApplicationOptions) error {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return newCobraCmd(newInitCmd(f))
+}
+
+func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptions) error {
 	if info.yesOption && info.noOption {
 		return ErrorYesAndNoOptions
 	}
@@ -168,7 +169,7 @@ func (cmd *command) run(info *initInfo, options *contracts.AzionApplicationOptio
 	return nil
 }
 
-func (cmd *command) fetchTemplates(info *initInfo) error {
+func (cmd *initCmd) fetchTemplates(info *initInfo) error {
 	//create temporary directory to clone template into
 	dir, err := cmd.createTempDir(info.pathWorkingDir, ".template")
 	if err != nil {
@@ -194,7 +195,7 @@ func (cmd *command) fetchTemplates(info *initInfo) error {
 	return nil
 }
 
-func (cmd *command) runInitCmdLine() error {
+func (cmd *initCmd) runInitCmdLine() error {
 	path, err := cmd.getWorkDir()
 	if err != nil {
 		return err
@@ -232,7 +233,7 @@ func (cmd *command) runInitCmdLine() error {
 	return nil
 }
 
-func (cmd *command) organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
+func (cmd *initCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
 	file, err := cmd.fileReader(info.pathWorkingDir + "/azion/azion.json")
 	if err != nil {
 		return ErrorOpeningAzionFile
