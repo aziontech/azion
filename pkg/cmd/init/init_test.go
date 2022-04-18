@@ -346,7 +346,7 @@ func TestInitCmd(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), "my command output")
-		require.Contains(t, stdout.String(), "Running init command")
+		require.Contains(t, stdout.String(), "Running init step command")
 
 	})
 }

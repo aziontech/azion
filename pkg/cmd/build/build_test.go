@@ -47,7 +47,7 @@ func TestBuild(t *testing.T) {
 		err := command.run()
 		require.NoError(t, err)
 
-		require.Equal(t, `Running build command
+		require.Equal(t, `Running build step command:
 
 $ npm run build
 Build completed
@@ -85,7 +85,7 @@ Command exited with code 0
 		err := command.run()
 		require.Error(t, err, expectedErr)
 
-		require.Equal(t, `Running build command
+		require.Equal(t, `Running build step command:
 
 $ npm run build
 Command output goes here
@@ -105,7 +105,7 @@ Command exited with code 42
 
 		err := command.run()
 		require.NoError(t, err)
-		require.NotContains(t, stdout.String(), "Running build command")
+		require.NotContains(t, stdout.String(), "Running build step command")
 	})
 
 	t.Run("missing config file", func(t *testing.T) {

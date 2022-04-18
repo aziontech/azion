@@ -89,10 +89,11 @@ func (c *buildCmd) run() error {
 	}
 
 	if conf.BuildData.Cmd == "" {
+		fmt.Fprintf(c.io.Out, "Build step command not specified, no action will be taken\n")
 		return nil
 	}
 
-	fmt.Fprintf(c.io.Out, "Running build command\n\n")
+	fmt.Fprintf(c.io.Out, "Running build step command:\n\n")
 	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
 
 	out, exitCode, err := c.commandRunner(conf.BuildData.Cmd, envs)
@@ -101,7 +102,7 @@ func (c *buildCmd) run() error {
 	fmt.Fprintf(c.io.Out, "\nCommand exited with code %d\n", exitCode)
 
 	if err != nil {
-		return err
+		return ErrFailedToRunCommand
 	}
 
 	return nil

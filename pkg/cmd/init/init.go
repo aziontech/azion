@@ -216,6 +216,7 @@ func (cmd *initCmd) runInitCmdLine() error {
 	}
 
 	if conf.InitData.Cmd == "" {
+		fmt.Fprintf(cmd.io.Out, "Init step command not specified, no action will be taken\n")
 		return nil
 	}
 
@@ -224,7 +225,7 @@ func (cmd *initCmd) runInitCmdLine() error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, "Running init command\n\n")
+	fmt.Fprintf(cmd.io.Out, "Running init step command:\n\n")
 	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.InitData.Cmd)
 
 	output, exitCode, err := cmd.commandRunner(conf.InitData.Cmd, envs)
