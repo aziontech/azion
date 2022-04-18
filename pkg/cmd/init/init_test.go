@@ -310,7 +310,20 @@ func TestInitCmd(t *testing.T) {
 		require.Contains(t, stdout.String(), "my command output")
 	})
 
-	t.Run("runInitCmdLine full", func(t *testing.T) {
+	t.Run("no init.cmd", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		cmd := newInitCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {}}`), nil
+		}
+
+		err := cmd.runInitCmdLine()
+		require.NoError(t, err)
+		require.NotContains(t, stdout.String(), "Running init command")
+	})
+
+	t.Run("full", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
@@ -333,6 +346,7 @@ func TestInitCmd(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), "my command output")
+		require.Contains(t, stdout.String(), "Running init command")
 
 	})
 }

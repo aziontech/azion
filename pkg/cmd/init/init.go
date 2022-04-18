@@ -215,6 +215,10 @@ func (cmd *initCmd) runInitCmdLine() error {
 		return ErrorUnmarshalConfigFile
 	}
 
+	if conf.InitData.Cmd == "" {
+		return nil
+	}
+
 	envs, err := cmd.envLoader(conf.InitData.Env)
 	if err != nil {
 		return err

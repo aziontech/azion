@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type command struct {
+type buildCmd struct {
 	io *iostreams.IOStreams
 	// Return output, exit code and any errors
 	commandRunner      func(cmd string, envvars []string) (string, int, error)
@@ -24,7 +24,7 @@ type command struct {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	command := newCommand(f)
+	command := newBuildCmd(f)
 	cobraCmd := &cobra.Command{
 		Use:           "build [flags]",
 		Short:         "Build your Web application",
@@ -44,8 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cobraCmd
 }
 
-func newCommand(f *cmdutil.Factory) *command {
-	return &command{
+func newBuildCmd(f *cmdutil.Factory) *buildCmd {
+	return &buildCmd{
 		io:         f.IOStreams,
 		fileReader: os.ReadFile,
 		commandRunner: func(cmd string, envs []string) (string, int, error) {
@@ -57,7 +57,7 @@ func newCommand(f *cmdutil.Factory) *command {
 	}
 }
 
-func (c *command) readConfig() (*contracts.AzionApplicationConfig, error) {
+func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	path, err := c.getWorkDir()
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (c *command) readConfig() (*contracts.AzionApplicationConfig, error) {
 	return conf, nil
 }
 
-func (c *command) run() error {
+func (c *buildCmd) run() error {
 	conf, err := c.readConfig()
 	if err != nil {
 		return err
@@ -86,6 +86,10 @@ func (c *command) run() error {
 	envs, err := c.envLoader(conf.BuildData.Env)
 	if err != nil {
 		return ErrReadEnvFile
+	}
+
+	if conf.BuildData.Cmd == "" {
+		return nil
 	}
 
 	fmt.Fprintf(c.io.Out, "Running build command\n\n")
