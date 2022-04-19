@@ -216,7 +216,7 @@ func (cmd *initCmd) runInitCmdLine() error {
 	}
 
 	if conf.InitData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, "Init step command not specified, no action will be taken\n")
+		fmt.Fprintf(cmd.io.Out, "Init step command not specified. No action will be taken\n")
 		return nil
 	}
 

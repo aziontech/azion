@@ -89,7 +89,7 @@ func (c *buildCmd) run() error {
 	}
 
 	if conf.BuildData.Cmd == "" {
-		fmt.Fprintf(c.io.Out, "Build step command not specified, no action will be taken\n")
+		fmt.Fprintf(c.io.Out, "Build step command not specified. No action will be taken\n")
 		return nil
 	}
 
