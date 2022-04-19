@@ -4,23 +4,29 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
+	"reflect"
+	"strings"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate(t *testing.T) {
-	t.Run("Init without package.json", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+func TestCobraCmd(t *testing.T) {
+	t.Run("without package.json", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
+		initCmd := newInitCmd(f)
+
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return nil, os.ErrNotExist
+		}
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -29,11 +35,12 @@ func TestCreate(t *testing.T) {
 		require.ErrorIs(t, err, ErrorPackageJsonNotFound)
 	})
 
-	t.Run("Init with unsupported type", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+	t.Run("with unsupported type", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
+		initCmd := newInitCmd(f)
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor"})
 
@@ -42,11 +49,12 @@ func TestCreate(t *testing.T) {
 		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
 	})
 
-	t.Run("Init with -y and -n flags", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+	t.Run("with -y and -n flags", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
+		initCmd := newInitCmd(f)
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor", "-y", "-n"})
 
@@ -55,16 +63,34 @@ func TestCreate(t *testing.T) {
 		require.ErrorIs(t, err, ErrorYesAndNoOptions)
 	})
 
-	t.Run("Init success with javascript", func(t *testing.T) {
+	t.Run("success with javascript", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
+		initCmd := newInitCmd(f)
 
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
 		}
-		defer os.Remove("package.json")
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -72,43 +98,83 @@ func TestCreate(t *testing.T) {
 		in.WriteString("yes\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured
 `)
 	})
 
-	t.Run("Init success with javascript using flag -y", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, stdout, _ := testutils.NewFactory(mock)
+	t.Run("success with javascript using flag -y", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd := newInitCmd(f)
+
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
 		}
-		defer os.Remove("package.json")
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-y"})
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured
 `)
 	})
 
-	t.Run("Init does not overwrite contents", func(t *testing.T) {
+	t.Run("does not overwrite contents", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, _, _ := testutils.NewFactory(mock)
 
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd := newInitCmd(f)
+
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
 		}
-		defer os.Remove("package.json")
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return errors.New("unexpected rename")
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -116,40 +182,66 @@ func TestCreate(t *testing.T) {
 		in.WriteString("no\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 	})
 
-	t.Run("Init does not overwrite contents using flag -n", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+	t.Run("does not overwrite contents using flag -n", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd := newInitCmd(f)
+
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
 		}
-		defer os.Remove("package.json")
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return errors.New("unexpected write")
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return errors.New("unexpected rename")
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-n"})
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.NoError(t, err)
 	})
 
-	t.Run("Init invalid option", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, _, _ := testutils.NewFactory(mock)
+	t.Run("invalid option", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewCmd(f)
-		err := ioutil.WriteFile("package.json", []byte(""), 0644)
-		if err != nil {
-			t.Fatal(err)
+		initCmd := newInitCmd(f)
+
+		cmd := newCobraCmd(initCmd)
+
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
 		}
-		defer os.Remove("package.json")
-		defer os.RemoveAll("./azion")
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -157,106 +249,104 @@ func TestCreate(t *testing.T) {
 		in.WriteString("pix\n")
 		f.IOStreams.In = io.NopCloser(in)
 
-		err = cmd.Execute()
+		err := cmd.Execute()
 
 		require.ErrorIs(t, err, utils.ErrorInvalidOption)
 	})
 
-	t.Run("runInitCmdLine without config.json", func(t *testing.T) {
-		config := &contracts.AzionApplicationConfig{}
-		confDir, _ := os.Getwd()
-		confDir = confDir + "/azion/"
+}
 
-		var err error
-		_ = os.Remove(confDir + "config.json")
+func TestInitCmd(t *testing.T) {
+	t.Run("without config.json", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		err = runInitCmdLine(config)
+		cmd := newInitCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return nil, os.ErrNotExist
+		}
+
+		err := cmd.runInitCmdLine()
 		require.EqualError(t, err, "Failed to open config.json file")
 	})
 
-	t.Run("runInitCmdLine without init.env", func(t *testing.T) {
-		var err error
-		config := &contracts.AzionApplicationConfig{}
-		confDir, _ := os.Getwd()
-		confDir = confDir + "/azion/"
-		_ = os.Remove("/tmp/ls-test.txt")
-		_ = os.MkdirAll(confDir, os.ModePerm)
+	t.Run("init.env not empty", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
-		file, err := os.Create(confDir + "config.json")
-		if err == nil {
-			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
-			if err != nil {
-				require.NoError(t, err)
-			}
+		cmd := newInitCmd(f)
+
+		// Specified init.env file but it cannot be read correctly
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"}}`), nil
 		}
-		file.Close()
-
-		err = runInitCmdLine(config)
-		if err != nil {
-			require.NoError(t, err)
+		cmd.envLoader = func(path string) ([]string, error) {
+			return nil, os.ErrNotExist
 		}
 
-		if _, err := os.Stat("/tmp/ls-test.txt"); errors.Is(err, os.ErrNotExist) {
-			require.NoError(t, err)
-		}
-
-		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
-		if err != nil {
-			require.NoError(t, err)
-		}
-		strFromFile := string(fileContent)
-
-		require.NoError(t, err)
-		//Local dir (since $VAR1 and $VAR2 are empty) now has 'azion'
-		require.Contains(t, strFromFile, "azion")
+		err := cmd.runInitCmdLine()
+		require.ErrorIs(t, err, os.ErrNotExist)
 	})
 
-	t.Run("runInitCmdLine full", func(t *testing.T) {
-		var err error
-		config := &contracts.AzionApplicationConfig{}
-		confDir, _ := os.Getwd()
-		confDir = confDir + "/azion/"
-		_ = os.Remove("/tmp/ls-test.txt")
-		_ = os.MkdirAll(confDir, os.ModePerm)
-		defer os.RemoveAll(confDir)
-		jsonConf := confDir + "config.json"
-		file, err := os.Create(jsonConf)
-		if err == nil {
-			_, err = file.WriteString("{\n	\"init\": {\n	\"cmd\": \"ls -1 $VAR1 $VAR2 > /tmp/ls-test.txt\",\n		\"env\": \"./azion/init.env\"\n		}\n	}\n")
-			if err != nil {
-				require.NoError(t, err)
+	t.Run("without specifing init.env", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		cmd := newInitCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		cmd.envLoader = func(path string) ([]string, error) {
+			return nil, nil
+		}
+		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
+			if env != nil {
+				return "", -1, errors.New("unexpected env")
 			}
-
-		}
-		file.Close()
-
-		file, err = os.Create(confDir + "init.env")
-		if err == nil {
-			_, err = file.WriteString("VAR1=/\nVAR2=/bin\n")
-			if err != nil {
-				require.NoError(t, err)
-			}
-		}
-		file.Close()
-
-		err = runInitCmdLine(config)
-		if err != nil {
-			require.NoError(t, err)
+			return "my command output", 0, nil
 		}
 
-		if _, err := os.Stat("/tmp/ls-test.txt"); errors.Is(err, os.ErrNotExist) {
-			require.NoError(t, err)
-		}
-
-		fileContent, err := ioutil.ReadFile("/tmp/ls-test.txt")
-		if err != nil {
-			require.NoError(t, err)
-		}
-		strFromFile := string(fileContent)
+		err := cmd.runInitCmdLine()
+		require.NoError(t, err)
 
 		require.NoError(t, err)
-		//As stated in VAR2, /bin should have 'bash'
-		require.Contains(t, strFromFile, "bash")
+		require.Contains(t, stdout.String(), "my command output")
 	})
 
+	t.Run("no init.cmd", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		cmd := newInitCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {}}`), nil
+		}
+
+		err := cmd.runInitCmdLine()
+		require.NoError(t, err)
+		require.NotContains(t, stdout.String(), "Running init command")
+	})
+
+	t.Run("full", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
+		cmd := newInitCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"}}`), nil
+		}
+		cmd.envLoader = func(path string) ([]string, error) {
+			return envs, nil
+		}
+		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
+			if !reflect.DeepEqual(envs, env) {
+				return "", -1, errors.New("unexpected env")
+			}
+			return "my command output", 0, nil
+		}
+
+		err := cmd.runInitCmdLine()
+		require.NoError(t, err)
+
+		require.NoError(t, err)
+		require.Contains(t, stdout.String(), "my command output")
+		require.Contains(t, stdout.String(), "Running init step command")
+
+	})
 }

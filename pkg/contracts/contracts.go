@@ -20,12 +20,12 @@ type AzionApplicationOptions struct {
 	Language     string                  `json:"language"`
 	Env          string                  `json:"env"`
 	FunctionFile string                  `json:"function_file"`
-	CacheData    cacheConf               `json:"cache"`
+	CacheData    CacheConf               `json:"cache"`
 }
 
 type AzionApplicationConfig struct {
 	InitData  InitConf  `json:"init"`
-	BuildData buildConf `json:"build"`
+	BuildData BuildConf `json:"build"`
 }
 
 type InitConf struct {
@@ -33,11 +33,11 @@ type InitConf struct {
 	Env string `json:"env"`
 }
 
-type buildConf struct {
+type BuildConf struct {
 	Cmd string `json:"cmd"`
 	Env string `json:"env"`
 }
 
-type cacheConf struct {
+type CacheConf struct {
 	PurgeOnPublish bool `json:"purge_on_publish"`
 }

@@ -3,6 +3,7 @@ package describe
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -137,6 +138,9 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 		if err != nil {
 			t.Fatalf("error reading `out.json`: %v", err)
 		}
+		defer func() {
+			_ = os.Remove(path)
+		}()
 
 		require.NoError(t, err)
 
