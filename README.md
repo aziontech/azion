@@ -10,7 +10,7 @@ The developer friendly way to interact with Azion!
 ## Quick links
 * [Building](#Building)
 * [How to Use](#How-to-Use)
-* [Reference Commands](/wiki/azioncli)
+* [Commands Reference](/wiki/azioncli)
 * [Contributing](CONTRIBUTING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
 * [License](#License)
