@@ -8,7 +8,7 @@ The Azion CLI (command-line interface) is an open source tool that enables you t
 The developer friendly way to interact with Azion!
 
 ## Quick links
-* [Building](#Building)
+* [Building](#building)
 * [How to Use](#How-to-Use)
 * [Commands Reference](/wiki/azioncli)
 * [Contributing](CONTRIBUTING.md)
