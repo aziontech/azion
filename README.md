@@ -1,6 +1,20 @@
-# azion-cli
+#Azion CLI
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](/wiki/azioncli)
+
+
+The Azion CLI (command-line interface) is an open source tool that enables you to manage any Azion service via command line. Through it, you can manage all Azion products, create automations using CI/CD scripts or pipelines, provision multiple services that make up your application with a few commands, and also manage your Azion configurations as code.
 
 The developer friendly way to interact with Azion!
+
+## Quick links
+* [Building](#Building)
+* [How to Use](#How-to-Use)
+* [Reference Commands](/wiki/azioncli)
+* [Contributing](CONTRIBUTING.md)
+* [Code of Conduct](CODE_OF_CONDUCT.md)
+* [License](#License)
+
 
 ## Building
 
@@ -33,48 +47,55 @@ You can just run `azioncli` and see it's options
 
 ```sh
 $ azioncli
-This is a placeholder description used while the actual description is still not ready.
+Interact easily with Azion services
 
-Usage:
+USAGE
   azioncli [flags]
-  azioncli [command]
 
-Available Commands:
-  configure     Configure parameters and credentials
-  edge_services Manages Edge Services of an Azion account
-  help          Help about any command
-  version       Returns bin version
+API COMMANDS
+  edge_functions: Manages your Azion account's Edge Functions
+  edge_services: Manages your Azion account's Edge Services
 
-Flags:
-  -h, --help           help for azioncli
-  -t, --token string   Use provided token
-      --version        version for azioncli
+ADDITIONAL COMMANDS
+  configure:     Configure parameters and credentials
+  help:          Help about any command
+  version:       Returns the binary version
 
-Use "azioncli [command] --help" for more information about a command.
+FLAGS
+  -h, --help      help for azioncli
+  -v, --verbose   Makes azioncli verbose during the operation
+      --version   version for azioncli
+
+LEARN MORE
+  Use 'azioncli <command> <subcommand> --help' for more information about a command
 ```
 
 For each subcommand you the `-h|--help` flag to learn more about it:
+
 ```sh
-$ azioncli edge_services --help
-You may create, update, delete, list and describe services of an Azion account.
+$ ./bin/azioncli edge_functions --help
+You can create, update, delete, list and describe your Azion account's Edge Functions
 
-Usage:
-  azioncli edge_services [flags]
-  azioncli edge_services [command]
+USAGE
+  azioncli edge_functions [flags]
 
-Available Commands:
-  create      Creates a new Edge Service
-  delete      Deletes a service based on a given service_id
-  describe    Describes a service based on a given service_id
-  list        Lists services of an Azion account
-  resources   Manages resources in a given Edge Service
-  update      Updates parameters of an Edge Service
+COMMANDS
+  create:     Create a new Edge Function
+  delete:     Deletes an Edge Function
+  describe:   Describes an Edge Function
+  list:       Lists your account's Edge Functions
+  update:     Updates an Edge Function
 
-Flags:
-  -h, --help   help for edge_services
+FLAGS
+  -h, --help   help for edge_functions
 
-Global Flags:
-  -t, --token string   Use provided token
+INHERITED FLAGS
+  -v, --verbose   Makes azioncli verbose during the operation
 
-Use "azioncli edge_services [command] --help" for more information about a command.
+LEARN MORE
+  Use 'azioncli <command> <subcommand> --help' for more information about a command
 ```
+
+## License
+
+This project is licensed under the terms of the [MIT](LICENSE) license.
