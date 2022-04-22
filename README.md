@@ -1,4 +1,4 @@
-#Azion CLI
+# Azion CLI
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](/wiki/azioncli)
 
