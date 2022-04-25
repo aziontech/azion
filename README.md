@@ -1,6 +1,6 @@
 # Azion CLI
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](/wiki/azioncli)
+[![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](https://github.com/aziontech/azion-cli/wiki/azioncli)
 
 
 The Azion CLI (command-line interface) is an open source tool that enables you to manage any Azion service via command line. Through it, you can manage all Azion products, create automations using CI/CD scripts or pipelines, provision multiple services that make up your application with a few commands, and also manage your Azion configurations as code.
@@ -10,7 +10,7 @@ The developer friendly way to interact with Azion!
 ## Quick links
 * [Building](#building)
 * [How to Use](#How-to-Use)
-* [Commands Reference](/wiki/azioncli)
+* [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azioncli)
 * [Contributing](CONTRIBUTING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
 * [License](#License)
