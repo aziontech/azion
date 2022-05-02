@@ -11,7 +11,7 @@ GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
 
 # Variables for token endpoints
-ENVFILE ?= ./env/stage
+ENVFILE ?= ./env/prod
 
 BIN := azioncli
 # Version Info
