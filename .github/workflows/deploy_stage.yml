@@ -36,6 +36,9 @@ jobs:
       - name: Refresh git
         run: git fetch --tags
 
+      - name: Export env vars
+        run: export AZION_API; export AZION_SSO
+
       - name: Build
         run: make build ENVFILE=./env/stage
 
