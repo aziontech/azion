@@ -35,12 +35,6 @@ jobs:
       - name: Refresh git
         run: git fetch --tags
 
-      - name: Export env vars
-        env: 
-          AZION_API: ${{ secrets.AZION_API_STAGE }}
-          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-        run: export AZION_API; export AZION_SSO
-
       - name: Build
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
@@ -48,6 +42,9 @@ jobs:
         run: make build ENVFILE=./env/stage
 
       - name: Cross-build
+        env: 
+          AZION_API: ${{ secrets.AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
