@@ -30,19 +30,20 @@ jobs:
           RELEASE_BRANCHES: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRERELEASE_SUFFIX: dev
-          AZION_API: ${{ secrets.AZION_API_STAGE }}
-          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
 
       - name: Refresh git
         run: git fetch --tags
 
-      - name: Export env vars
-        run: export AZION_API; export AZION_SSO
-
       - name: Build
+        env: 
+          AZION_API: ${{ secrets.AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
         run: make build ENVFILE=./env/stage
 
       - name: Cross-build
+        env: 
+          AZION_API: ${{ secrets.AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
