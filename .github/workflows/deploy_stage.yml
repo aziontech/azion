@@ -39,13 +39,13 @@ jobs:
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-        run: make build ENVFILE=./env/stage
+        run: export AZION_API; export AZION_SSO; make build ENVFILE=./env/stage
 
       - name: Cross-build
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-        run: make cross-build ENVFILE=./env/stage
+        run: export AZION_API; export AZION_SSO; make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
         run: |
