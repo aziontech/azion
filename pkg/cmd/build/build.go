@@ -107,3 +107,12 @@ func (c *buildCmd) run() error {
 
 	return nil
 }
+
+func (c *buildCmd) Run() error {
+	err := c.run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
