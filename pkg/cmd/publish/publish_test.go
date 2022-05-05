@@ -98,7 +98,6 @@ func TestPublishCmd(t *testing.T) {
 		err := cmd.runPublishPreCmdLine()
 
 		require.NoError(t, err)
-		//require.Contains(t, stdout.String(), "Publish env not specified")
 	})
 
 	t.Run("no pre_cmd.cmd", func(t *testing.T) {
