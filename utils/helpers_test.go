@@ -24,6 +24,15 @@ func TestCobraCmd(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("is directory empty", func(t *testing.T) {
+		os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
+
+		isEmpty, err := IsDirEmpty("/tmp/ThisIsAzionCliTestDir")
+		require.True(t, isEmpty)
+
+		require.NoError(t, err)
+	})
+
 	t.Run("write json content", func(t *testing.T) {
 		path, _ := GetWorkingDir()
 
