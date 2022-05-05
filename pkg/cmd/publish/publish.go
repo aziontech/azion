@@ -75,7 +75,7 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Annotations: map[string]string{
-			"Category": "Build",
+			"Category": "Publish",
 		},
 		Example: heredoc.Doc(`
         $ azioncli publish --name "thisisatest" --type javascript
@@ -115,7 +115,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 
 	if conf.Function.Id == 0 {
 		//Create New function
-		PublishId, err := fillRequestFromConf(f, client, ctx, true, 0, conf)
+		PublishId, err := cmd.fillRequestFromConf(f, client, ctx, true, 0, conf)
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		conf.Function.Id = PublishId
 	} else {
 		//Update existing function
-		_, err := fillRequestFromConf(f, client, ctx, false, conf.Function.Id, conf)
+		_, err := cmd.fillRequestFromConf(f, client, ctx, false, conf.Function.Id, conf)
 		if err != nil {
 			return err
 		}
@@ -133,40 +133,36 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 	return nil
 }
 
-func fillRequestFromConf(f *cmdutil.Factory, client *api.Client, ctx context.Context, isNew bool, idReq int64, conf *contracts.AzionJsonData) (int64, error) {
+func (cmd *publishCmd) fillRequestFromConf(f *cmdutil.Factory, client *api.Client, ctx context.Context, isNew bool, idReq int64, conf *contracts.AzionJsonData) (int64, error) {
 	reqCre := api.CreateRequest{}
 	reqUpd := api.UpdateRequest{}
 
-	if isNew {
-		if conf.Function.Name == "__DEFAULT__" {
-			reqCre.SetName(conf.Name)
-		} else {
-			reqCre.SetName(conf.Function.Name)
-		}
-		reqCre.SetActive(conf.Function.Active)
-	} else {
-		if conf.Function.Name == "__DEFAULT__" {
-			reqUpd.SetName(conf.Name)
-		} else {
-			reqUpd.SetName(conf.Function.Name)
-		}
-		reqUpd.SetActive(conf.Function.Active)
-	}
-
 	//Read code to upload
-	code, err := ioutil.ReadFile(conf.Function.File)
+	code, err := cmd.fileReader(conf.Function.File)
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
 	}
 
 	if isNew {
 		reqCre.SetCode(string(code))
+		reqCre.SetActive(conf.Function.Active)
+		if conf.Function.Name == "__DEFAULT__" {
+			reqCre.SetName(conf.Name)
+		} else {
+			reqCre.SetName(conf.Function.Name)
+		}
 	} else {
 		reqUpd.SetCode(string(code))
+		reqUpd.SetActive(conf.Function.Active)
+		if conf.Function.Name == "__DEFAULT__" {
+			reqUpd.SetName(conf.Name)
+		} else {
+			reqUpd.SetName(conf.Function.Name)
+		}
 	}
 
 	//Read args
-	marshalledArgs, err := ioutil.ReadFile(conf.Function.Args)
+	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
 	}
@@ -215,7 +211,7 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	}
 
 	if conf.PublishData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, "Publish step command not specified. No action will be taken\n")
+		fmt.Fprintf(cmd.io.Out, "Publish pre command not specified. No action will be taken\n")
 		return nil
 	}
 
@@ -224,7 +220,7 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, "Running publish step command:\n\n")
+	fmt.Fprintf(cmd.io.Out, "Running publish pre command:\n\n")
 	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.PublishData.Cmd)
 
 	output, exitCode, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
@@ -236,28 +232,5 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 		return utils.ErrorRunningCommand
 	}
 
-	return nil
-}
-
-func (cmd *publishCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *publishInfo) error {
-	file, err := cmd.fileReader(info.pathWorkingDir + "/azion/azion.json")
-	if err != nil {
-		return ErrorOpeningAzionFile
-	}
-	err = json.Unmarshal(file, &options)
-	if err != nil {
-		return ErrorUnmarshalAzionFile
-	}
-	options.Name = info.name
-
-	data, err := json.MarshalIndent(options, "", "  ")
-	if err != nil {
-		return ErrorUnmarshalAzionFile
-	}
-
-	err = cmd.writeFile(info.pathWorkingDir+"/azion/azion.json", data, 0644)
-	if err != nil {
-		return utils.ErrorInternalServerError
-	}
 	return nil
 }
