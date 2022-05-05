@@ -33,6 +33,19 @@ func TestCobraCmd(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("load env from file vars", func(t *testing.T) {
+		os.MkdirAll("/tmp/ThisIsAzionCliFileVarTest", os.ModePerm)
+
+		data := []byte("VAR1=test1\nVAR2=test2")
+		os.WriteFile("/tmp/ThisIsAzionCliFileVarTest/vars.txt", data, 0644)
+
+		envs, err := LoadEnvVarsFromFile("/tmp/ThisIsAzionCliFileVarTest/vars.txt")
+		require.Contains(t, envs[0], "test1")
+		require.Contains(t, envs[1], "test2")
+
+		require.NoError(t, err)
+	})
+
 	t.Run("write json content", func(t *testing.T) {
 		path, _ := GetWorkingDir()
 
