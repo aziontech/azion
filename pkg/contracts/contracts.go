@@ -24,13 +24,13 @@ type AzionApplicationOptions struct {
 }
 
 type AzionApplicationConfig struct {
-	InitData    InitConf  `json:"init"`
-	BuildData   BuildConf `json:"build"`
-	PublishData InitConf  `json:"publish"`
+	InitData    InitConf    `json:"init"`
+	BuildData   BuildConf   `json:"build"`
+	PublishData PublishConf `json:"publish"`
 }
 
 type InitConf struct {
-	Cmd string `json:"pre_cmd"`
+	Cmd string `json:"cmd"`
 	Env string `json:"env"`
 }
 
@@ -40,7 +40,7 @@ type BuildConf struct {
 }
 
 type PublishConf struct {
-	Cmd string `json:"cmd"`
+	Cmd string `json:"pre_cmd"`
 	Env string `json:"env"`
 }
 
