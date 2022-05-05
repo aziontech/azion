@@ -10,6 +10,20 @@ import (
 )
 
 func TestCobraCmd(t *testing.T) {
+	t.Run("Convert IDs to Int", func(t *testing.T) {
+		ints, err := ConvertIdsToInt("10", "3")
+		require.Equal(t, 10, int(ints[0]))
+		require.Equal(t, 3, int(ints[1]))
+		require.NoError(t, err)
+	})
+
+	t.Run("clean directory", func(t *testing.T) {
+		os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
+		err := CleanDirectory("/tmp/ThisIsAzionCliTestDir")
+
+		require.NoError(t, err)
+	})
+
 	t.Run("write json content", func(t *testing.T) {
 		path, _ := GetWorkingDir()
 
