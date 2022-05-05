@@ -24,6 +24,18 @@ func TestCobraCmd(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("response to bool yes", func(t *testing.T) {
+		resp, err := ResponseToBool("yes")
+		require.True(t, resp)
+		require.NoError(t, err)
+	})
+
+	t.Run("response to bool no", func(t *testing.T) {
+		resp, err := ResponseToBool("no")
+		require.False(t, resp)
+		require.NoError(t, err)
+	})
+
 	t.Run("is directory empty", func(t *testing.T) {
 		os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
 
