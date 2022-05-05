@@ -18,7 +18,7 @@ func TestCobraCmd(t *testing.T) {
 	})
 
 	t.Run("clean directory", func(t *testing.T) {
-		os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
+		_ = os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
 		err := CleanDirectory("/tmp/ThisIsAzionCliTestDir")
 
 		require.NoError(t, err)
@@ -37,7 +37,7 @@ func TestCobraCmd(t *testing.T) {
 	})
 
 	t.Run("is directory empty", func(t *testing.T) {
-		os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
+		_ = os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
 
 		isEmpty, err := IsDirEmpty("/tmp/ThisIsAzionCliTestDir")
 		require.True(t, isEmpty)
@@ -46,10 +46,10 @@ func TestCobraCmd(t *testing.T) {
 	})
 
 	t.Run("load env from file vars", func(t *testing.T) {
-		os.MkdirAll("/tmp/ThisIsAzionCliFileVarTest", os.ModePerm)
+		_ = os.MkdirAll("/tmp/ThisIsAzionCliFileVarTest", os.ModePerm)
 
 		data := []byte("VAR1=test1\nVAR2=test2")
-		os.WriteFile("/tmp/ThisIsAzionCliFileVarTest/vars.txt", data, 0644)
+		_ = os.WriteFile("/tmp/ThisIsAzionCliFileVarTest/vars.txt", data, 0644)
 
 		envs, err := LoadEnvVarsFromFile("/tmp/ThisIsAzionCliFileVarTest/vars.txt")
 		require.Contains(t, envs[0], "test1")
@@ -73,7 +73,7 @@ func TestCobraCmd(t *testing.T) {
 		azJsonData.Function.Language = "javascript"
 		azJsonData.Function.Id = 476
 
-		WriteAzionJsonContent(&azJsonData)
+		_ = WriteAzionJsonContent(&azJsonData)
 
 		require.NoError(t, err)
 	})
@@ -83,7 +83,7 @@ func TestCobraCmd(t *testing.T) {
 
 		jsonConf := path + "/azion/azion.json"
 
-		os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
+		_ = os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
 
 		azJsonData, err := GetAzionJsonContent()
 

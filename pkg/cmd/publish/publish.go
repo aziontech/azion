@@ -20,11 +20,8 @@ import (
 )
 
 type publishInfo struct {
-	name           string
-	typeLang       string
-	pathWorkingDir string
-	yesOption      bool
-	noOption       bool
+	yesOption bool
+	noOption  bool
 }
 
 type publishCmd struct {
@@ -129,7 +126,11 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
-	utils.WriteAzionJsonContent(conf)
+	err = utils.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
