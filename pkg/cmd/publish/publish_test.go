@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCobraCmd(t *testing.T) {
+func TestPublishCmd(t *testing.T) {
 	t.Run("without package.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
@@ -28,9 +28,7 @@ func TestCobraCmd(t *testing.T) {
 
 		require.ErrorIs(t, err, ErrorOpeningConfigFile)
 	})
-}
 
-func TestPublishCmd(t *testing.T) {
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 

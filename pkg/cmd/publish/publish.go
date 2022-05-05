@@ -112,7 +112,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 
 	if conf.Function.Id == 0 {
 		//Create New function
-		PublishId, err := cmd.fillRequestFromConf(f, client, ctx, true, 0, conf)
+		PublishId, err := cmd.fillCreateRequestFromConf(client, ctx, conf)
 		if err != nil {
 			return err
 		}
@@ -120,7 +120,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		conf.Function.Id = PublishId
 	} else {
 		//Update existing function
-		_, err := cmd.fillRequestFromConf(f, client, ctx, false, conf.Function.Id, conf)
+		_, err := cmd.fillUpdateRequestFromConf(client, ctx, conf.Function.Id, conf)
 		if err != nil {
 			return err
 		}
@@ -134,9 +134,8 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 	return nil
 }
 
-func (cmd *publishCmd) fillRequestFromConf(f *cmdutil.Factory, client *api.Client, ctx context.Context, isNew bool, idReq int64, conf *contracts.AzionJsonData) (int64, error) {
+func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionJsonData) (int64, error) {
 	reqCre := api.CreateRequest{}
-	reqUpd := api.UpdateRequest{}
 
 	//Read code to upload
 	code, err := cmd.fileReader(conf.Function.File)
@@ -144,22 +143,12 @@ func (cmd *publishCmd) fillRequestFromConf(f *cmdutil.Factory, client *api.Clien
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
 	}
 
-	if isNew {
-		reqCre.SetCode(string(code))
-		reqCre.SetActive(conf.Function.Active)
-		if conf.Function.Name == "__DEFAULT__" {
-			reqCre.SetName(conf.Name)
-		} else {
-			reqCre.SetName(conf.Function.Name)
-		}
+	reqCre.SetCode(string(code))
+	reqCre.SetActive(conf.Function.Active)
+	if conf.Function.Name == "__DEFAULT__" {
+		reqCre.SetName(conf.Name)
 	} else {
-		reqUpd.SetCode(string(code))
-		reqUpd.SetActive(conf.Function.Active)
-		if conf.Function.Name == "__DEFAULT__" {
-			reqUpd.SetName(conf.Name)
-		} else {
-			reqUpd.SetName(conf.Function.Name)
-		}
+		reqCre.SetName(conf.Function.Name)
 	}
 
 	//Read args
@@ -172,25 +161,50 @@ func (cmd *publishCmd) fillRequestFromConf(f *cmdutil.Factory, client *api.Clien
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
 	}
 
-	if isNew {
-		reqCre.SetJsonArgs(args)
-		response, err := client.Create(ctx, &reqCre)
-		if err != nil {
-			return 0, fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
-		}
-		fmt.Fprintf(f.IOStreams.Out, "Created Edge Function with ID %d\n", response.GetId())
-		return response.GetId(), nil
-	} else {
-		reqUpd.Id = idReq
-		reqUpd.SetJsonArgs(args)
-		response, err := client.Update(ctx, &reqUpd)
-		if err != nil {
-			return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
-		}
-		fmt.Fprintf(f.IOStreams.Out, "Updated Edge Function with ID %d\n", idReq)
-		return response.GetId(), nil
+	reqCre.SetJsonArgs(args)
+	response, err := client.Create(ctx, &reqCre)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Function with ID %d\n", response.GetId())
+	return response.GetId(), nil
+}
+
+func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionJsonData) (int64, error) {
+	reqUpd := api.UpdateRequest{}
+
+	//Read code to upload
+	code, err := cmd.fileReader(conf.Function.File)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
 	}
 
+	reqUpd.SetCode(string(code))
+	reqUpd.SetActive(conf.Function.Active)
+	if conf.Function.Name == "__DEFAULT__" {
+		reqUpd.SetName(conf.Name)
+	} else {
+		reqUpd.SetName(conf.Function.Name)
+	}
+
+	//Read args
+	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
+	}
+	args := make(map[string]interface{})
+	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
+	}
+
+	reqUpd.Id = idReq
+	reqUpd.SetJsonArgs(args)
+	response, err := client.Update(ctx, &reqUpd)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Function with ID %d\n", idReq)
+	return response.GetId(), nil
 }
 
 func (cmd *publishCmd) runPublishPreCmdLine() error {
