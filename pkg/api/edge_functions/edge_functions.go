@@ -1,4 +1,4 @@
-package edge_funtions
+package edge_functions
 
 import (
 	"context"

@@ -26,4 +26,8 @@ var (
 	ErrorCleaningDirectory          = errors.New("Failed to clean the directory's contents")
 	ErrorRunningCommand             = errors.New("Failed to run specified command")
 	ErrorLoadingEnvVars             = errors.New("Failed to load environment variables")
+	ErrorOpeningAzionJsonFile       = errors.New("Failed to open azion.json")
+	ErrorUnmarshalAzionJsonFile     = errors.New("Failed to parse azion.json. Verify the file format.")
+	ErrorMarshalAzionJsonFile       = errors.New("Failed to encode azion.json. Verify the file format.")
+	ErrorWritingAzionJsonFile       = errors.New("Failed to write azion.json. Verify the file format.")
 )

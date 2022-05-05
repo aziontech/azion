@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
+	publishcmd "github.com/aziontech/azion-cli/pkg/cmd/publish"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
@@ -46,6 +47,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
 	rootCmd.AddCommand(initcmd.NewCmd(f))
+	rootCmd.AddCommand(publishcmd.NewCmd(f))
 	rootCmd.AddCommand(build.NewCmd(f))
 
 	return rootCmd
