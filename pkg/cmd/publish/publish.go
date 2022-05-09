@@ -8,8 +8,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -75,7 +77,7 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 			"Category": "Publish",
 		},
 		Example: heredoc.Doc(`
-        $ azioncli publish --name "thisisatest" --type javascript
+        $ azioncli publish
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f, info, options)
@@ -124,6 +126,54 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		if err != nil {
 			return err
 		}
+	}
+
+	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	applicationName := conf.Name
+	if conf.Application.Name != "__DEFAULT__" {
+		applicationName = conf.Application.Name
+	}
+
+	if conf.Application.Id == 0 {
+		reqApp := apiapp.CreateRequest{}
+		reqApp.SetName(applicationName)
+		reqApp.SetDeliveryProtocol("http,https")
+		application, err := cliapp.Create(ctx, &reqApp)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
+		reqUpApp := apiapp.UpdateRequest{}
+		reqUpApp.SetEdgeFunctions(true)
+		reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
+		application, err = cliapp.Update(ctx, &reqUpApp)
+		if err != nil {
+			return err
+		}
+		reqIns := apiapp.CreateInstanceRequest{}
+		reqIns.SetEdgeFunctionId(conf.Function.Id)
+		reqIns.SetName(conf.Name)
+		reqIns.ApplicationId = application.GetId()
+		_, err = cliapp.CreateInstance(ctx, &reqIns)
+		if err != nil {
+			return err
+		}
+		conf.Application.Id = application.GetId()
+		conf.Application.Name = application.GetName()
+	} else {
+		reqApp := apiapp.UpdateRequest{}
+		reqApp.SetName(applicationName)
+		reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+		application, err := cliapp.Update(ctx, &reqApp)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Application with ID %d\n", application.GetId())
+		reqIns := apiapp.UpdateInstanceRequest{}
+		reqIns.SetName(conf.Name)
+		reqIns.SetEdgeFunctionId(conf.Function.Id)
+		conf.Application.Name = application.GetName()
 	}
 
 	err = utils.WriteAzionJsonContent(conf)

@@ -15,12 +15,13 @@ type DescribeOptions struct {
 }
 
 type AzionApplicationOptions struct {
-	Test         func(path string) error `json:"-"`
-	Name         string                  `json:"name"`
-	Language     string                  `json:"language"`
-	Env          string                  `json:"env"`
-	FunctionFile string                  `json:"function_file"`
-	CacheData    CacheConf               `json:"cache"`
+	Test        func(path string) error  `json:"-"`
+	Name        string                   `json:"name"`
+	Env         string                   `json:"env"`
+	Function    AzionJsonDataFunction    `json:"function"`
+	Application AzionJsonDataApplication `json:"application"`
+	Domain      AzionJsonDataDomain      `json:"domain"`
+	RtPurge     AzionJsonDataPurge       `json:"rt-purge"`
 }
 
 type AzionApplicationConfig struct {
@@ -67,6 +68,7 @@ type AzionJsonDataFunction struct {
 }
 
 type AzionJsonDataApplication struct {
+	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
