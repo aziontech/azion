@@ -63,7 +63,6 @@ type AzionJsonDataFunction struct {
 	Name     string `json:"name"`
 	File     string `json:"file"`
 	Args     string `json:"args"`
-	Active   bool   `json:"active"`
 	Language string `json:"language"`
 }
 

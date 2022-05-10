@@ -136,44 +136,17 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 	}
 
 	if conf.Application.Id == 0 {
-		reqApp := apiapp.CreateRequest{}
-		reqApp.SetName(applicationName)
-		reqApp.SetDeliveryProtocol("http,https")
-		application, err := cliapp.Create(ctx, &reqApp)
+		applicationId, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
-		reqUpApp := apiapp.UpdateRequest{}
-		reqUpApp.SetEdgeFunctions(true)
-		reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
-		application, err = cliapp.Update(ctx, &reqUpApp)
-		if err != nil {
-			return err
-		}
-		reqIns := apiapp.CreateInstanceRequest{}
-		reqIns.SetEdgeFunctionId(conf.Function.Id)
-		reqIns.SetName(conf.Name)
-		reqIns.ApplicationId = application.GetId()
-		_, err = cliapp.CreateInstance(ctx, &reqIns)
-		if err != nil {
-			return err
-		}
-		conf.Application.Id = application.GetId()
-		conf.Application.Name = application.GetName()
+		conf.Application.Id = applicationId
+		conf.Application.Name = applicationName
 	} else {
-		reqApp := apiapp.UpdateRequest{}
-		reqApp.SetName(applicationName)
-		reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
-		application, err := cliapp.Update(ctx, &reqApp)
+		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Application with ID %d\n", application.GetId())
-		reqIns := apiapp.UpdateInstanceRequest{}
-		reqIns.SetName(conf.Name)
-		reqIns.SetEdgeFunctionId(conf.Function.Id)
-		conf.Application.Name = application.GetName()
 	}
 
 	err = utils.WriteAzionJsonContent(conf)
@@ -194,7 +167,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	}
 
 	reqCre.SetCode(string(code))
-	reqCre.SetActive(conf.Function.Active)
+	reqCre.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqCre.SetName(conf.Name)
 	} else {
@@ -230,7 +203,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	}
 
 	reqUpd.SetCode(string(code))
-	reqUpd.SetActive(conf.Function.Active)
+	reqUpd.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqUpd.SetName(conf.Name)
 	} else {
@@ -296,6 +269,50 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	if err != nil {
 		return utils.ErrorRunningCommand
 	}
+
+	return nil
+}
+
+func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) (int64, error) {
+	reqApp := apiapp.CreateRequest{}
+	reqApp.SetName(name)
+	reqApp.SetDeliveryProtocol("http,https")
+	application, err := client.Create(ctx, &reqApp)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorCreateApplication, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
+	reqUpApp := apiapp.UpdateRequest{}
+	reqUpApp.SetEdgeFunctions(true)
+	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
+	application, err = client.Update(ctx, &reqUpApp)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+	}
+	reqIns := apiapp.CreateInstanceRequest{}
+	reqIns.SetEdgeFunctionId(conf.Function.Id)
+	reqIns.SetName(conf.Name)
+	reqIns.ApplicationId = application.GetId()
+	_, err = client.CreateInstance(ctx, &reqIns)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorCreateInstance, err)
+	}
+	return application.GetId(), nil
+}
+
+func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) error {
+	reqApp := apiapp.UpdateRequest{}
+	reqApp.SetName(name)
+	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+	application, err := client.Update(ctx, &reqApp)
+	if err != nil {
+		return fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Application with ID %d\n", application.GetId())
+	reqIns := apiapp.UpdateInstanceRequest{}
+	reqIns.SetName(conf.Name)
+	reqIns.SetEdgeFunctionId(conf.Function.Id)
+	conf.Application.Name = application.GetName()
 
 	return nil
 }
