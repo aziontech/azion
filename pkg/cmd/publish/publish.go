@@ -8,8 +8,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -75,7 +77,7 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 			"Category": "Publish",
 		},
 		Example: heredoc.Doc(`
-        $ azioncli publish --name "thisisatest" --type javascript
+        $ azioncli publish
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f, info, options)
@@ -126,6 +128,27 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
+	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	applicationName := conf.Name
+	if conf.Application.Name != "__DEFAULT__" {
+		applicationName = conf.Application.Name
+	}
+
+	if conf.Application.Id == 0 {
+		applicationId, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+		conf.Application.Id = applicationId
+		conf.Application.Name = applicationName
+	} else {
+		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
@@ -144,7 +167,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	}
 
 	reqCre.SetCode(string(code))
-	reqCre.SetActive(conf.Function.Active)
+	reqCre.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqCre.SetName(conf.Name)
 	} else {
@@ -180,7 +203,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	}
 
 	reqUpd.SetCode(string(code))
-	reqUpd.SetActive(conf.Function.Active)
+	reqUpd.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqUpd.SetName(conf.Name)
 	} else {
@@ -246,6 +269,50 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	if err != nil {
 		return utils.ErrorRunningCommand
 	}
+
+	return nil
+}
+
+func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) (int64, error) {
+	reqApp := apiapp.CreateRequest{}
+	reqApp.SetName(name)
+	reqApp.SetDeliveryProtocol("http,https")
+	application, err := client.Create(ctx, &reqApp)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorCreateApplication, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
+	reqUpApp := apiapp.UpdateRequest{}
+	reqUpApp.SetEdgeFunctions(true)
+	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
+	application, err = client.Update(ctx, &reqUpApp)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+	}
+	reqIns := apiapp.CreateInstanceRequest{}
+	reqIns.SetEdgeFunctionId(conf.Function.Id)
+	reqIns.SetName(conf.Name)
+	reqIns.ApplicationId = application.GetId()
+	_, err = client.CreateInstance(ctx, &reqIns)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", ErrorCreateInstance, err)
+	}
+	return application.GetId(), nil
+}
+
+func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) error {
+	reqApp := apiapp.UpdateRequest{}
+	reqApp.SetName(name)
+	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+	application, err := client.Update(ctx, &reqApp)
+	if err != nil {
+		return fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Application with ID %d\n", application.GetId())
+	reqIns := apiapp.UpdateInstanceRequest{}
+	reqIns.SetName(conf.Name)
+	reqIns.SetEdgeFunctionId(conf.Function.Id)
+	conf.Application.Name = application.GetName()
 
 	return nil
 }

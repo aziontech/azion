@@ -9,4 +9,7 @@ var (
 	ErrorUnmarshalAzionFile  = errors.New("Failed to unmarshal azion.json file")
 	ErrorPackageJsonNotFound = errors.New("Failed to find package.json in current directory. Verify if your are currently in your project's directory")
 	ErrorYesAndNoOptions     = errors.New("You can only use one option at a time. Please use either --yes or --no")
+	ErrorCreateApplication   = errors.New("Failed to create Edge Application")
+	ErrorUpdateApplication   = errors.New("Failed to update Edge Application")
+	ErrorCreateInstance      = errors.New("Failed to create Edge Function Instance")
 )
