@@ -68,7 +68,6 @@ func TestCobraCmd(t *testing.T) {
 		var azJsonData contracts.AzionJsonData
 		azJsonData.Name = "Test01"
 		azJsonData.Function.Name = "MyFunc"
-		azJsonData.Function.Active = true
 		azJsonData.Function.File = "myfile.js"
 		azJsonData.Function.Language = "javascript"
 		azJsonData.Function.Id = 476
