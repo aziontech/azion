@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: golang:1.17
     env:
       CGO_ENABLED: 0 # Statically linked
 
@@ -20,12 +22,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.17'
-          check-latest: true
 
       - name: Generate docs
         run: go run ./cmd/gen_docs/main.go --file-type "md" --doc-path "/tmp/docs"
