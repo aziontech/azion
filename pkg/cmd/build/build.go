@@ -107,3 +107,7 @@ func (c *buildCmd) run() error {
 
 	return nil
 }
+
+func (c *buildCmd) Run() error {
+	return c.run()
+}

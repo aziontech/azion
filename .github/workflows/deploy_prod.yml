@@ -7,9 +7,8 @@ on:
       - master
 
 jobs:
-  build:
-    runs-on: self-hosted
-    container:
+  runs-on: self-hosted
+  container:
       image: golang:1.17
     env:
       CGO_ENABLED: 0 # Statically linked
@@ -19,7 +18,7 @@ jobs:
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 

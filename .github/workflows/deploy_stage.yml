@@ -19,7 +19,7 @@ jobs:
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -35,10 +35,16 @@ jobs:
         run: git fetch --tags
 
       - name: Build
-        run: make build
+        env: 
+          AZION_API: ${{ secrets.AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
+        run: make build ENVFILE=./env/stage
 
       - name: Cross-build
-        run: make cross-build
+        env: 
+          AZION_API: ${{ secrets.AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
+        run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
         run: |

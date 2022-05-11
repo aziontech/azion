@@ -84,11 +84,7 @@ Enhancement suggestions are tracked as [GitHub issues](/issues).
 
 ### Your First Code Contribution
 
-1. Fork the repository.
-1. Create an `upstream` remote.
-```
-$ git remote add upstream git@github.com:aziontech/azion-cli.git
-```
-1. Create a feature branch.
-1. Validate and prepare your change.
-1. Open a pull request against `upstream master`.
+1. Fork the repo
+2. Clone your forked repo
+3. Commit the changes you’ve developed on your fork
+4. If everything looks good, create a pull request on the base repo with your changes.
