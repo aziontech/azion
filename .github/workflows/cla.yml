@@ -7,7 +7,7 @@ on:
 
 jobs:
   CLAssistant:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: ubuntu:18.04
     steps:

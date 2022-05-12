@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container:
       image: golang:1.17
     env:
@@ -42,8 +42,8 @@ jobs:
 
       - name: Cross-build
         env: 
-          AZION_API: ${{ secrets.AZION_API_STAGE }}
-          AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
+          AZION_API: ${{ secrets.CLI_AZION_API_STAGE }}
+          AZION_SSO: ${{ secrets.CLI_AZION_SSO_STAGE }}
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
