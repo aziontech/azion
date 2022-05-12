@@ -7,8 +7,9 @@ on:
       - master
 
 jobs:
-  runs-on: ubuntu-latest
-  container:
+  build:
+    runs-on: ubuntu-latest
+    container:
       image: golang:1.17
     env:
       CGO_ENABLED: 0 # Statically linked
