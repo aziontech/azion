@@ -102,10 +102,12 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 
 	//Run build command
 	build := build.NewBuildCmd(f)
-	build.ReadConfig()
-	build.Run()
+	err := build.Run()
+	if err != nil {
+		return err
+	}
 
-	err := cmd.runPublishPreCmdLine()
+	err = cmd.runPublishPreCmdLine()
 	if err != nil {
 		return err
 	}

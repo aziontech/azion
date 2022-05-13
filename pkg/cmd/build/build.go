@@ -61,10 +61,6 @@ func NewBuildCmd(f *cmdutil.Factory) *buildCmd {
 	return newBuildCmd(f)
 }
 
-func (c *buildCmd) ReadConfig() (*contracts.AzionApplicationConfig, error) {
-	return c.readConfig()
-}
-
 func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	path, err := c.getWorkDir()
 	if err != nil {
