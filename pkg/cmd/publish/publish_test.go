@@ -26,7 +26,7 @@ func TestPublishCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.ErrorIs(t, err, ErrorOpeningConfigFile)
+		require.EqualError(t, err, "Failed to open config.json file")
 	})
 
 	t.Run("without config.json", func(t *testing.T) {
