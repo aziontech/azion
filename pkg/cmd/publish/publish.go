@@ -13,6 +13,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -99,7 +100,14 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		return ErrorYesAndNoOptions
 	}
 
-	err := cmd.runPublishPreCmdLine()
+	//Run build command
+	build := build.NewBuildCmd(f)
+	err := build.Run()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.runPublishPreCmdLine()
 	if err != nil {
 		return err
 	}
