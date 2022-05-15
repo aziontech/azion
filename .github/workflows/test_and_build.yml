@@ -50,8 +50,10 @@ jobs:
           name: coverage_report
       - name: fix code coverage paths
         run: |
-          cat cover/azioncli-coverage.out
-          sed -i 's:/__w/azion-cli/azion-cli/apps:/github/workspace/apps:' cover/azioncli-coverage.out
+          pwd -P
+          ls
+          cat azioncli-coverage.out
+          sed -i 's:/__w/azion-cli/azion-cli/apps:/github/workspace/apps:' azioncli-coverage.out
       - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
