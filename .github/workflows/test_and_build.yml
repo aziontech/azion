@@ -29,3 +29,30 @@ jobs:
 
       - name: Gosec
         run: make sec
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage_report
+          path: |
+              cover/azioncli-coverage.out
+              cover/azioncli-test-report.out
+
+  SonarQube:
+    needs: Unit-tests
+    name: SonarQube
+    runs-on: self-hosted
+    container:
+      image: ubuntu:18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage_report
+      - name: fix code coverage paths
+        run: |
+          cat cover/azioncli-coverage.out
+          sed -i 's:/__w/azion-cli/azion-cli/apps:/github/workspace/apps:' cover/azioncli-coverage.out
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
