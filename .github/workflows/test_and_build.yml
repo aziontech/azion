@@ -38,7 +38,7 @@ jobs:
               cover/azioncli-test-report.out
 
   SonarQube:
-    needs: Unit-tests
+    needs: build
     name: SonarQube
     runs-on: self-hosted
     container:
