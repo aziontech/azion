@@ -152,12 +152,12 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		if err != nil {
 			return err
 		}
+		conf.Application.Id = applicationId
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(cliapp, ctx, conf)
 		if err != nil {
 			return err
 		}
-		conf.Application.Id = applicationId
 	} else {
 		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
