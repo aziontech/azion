@@ -7,13 +7,13 @@
       "args": "./args.json",
       "language": "javascript"
     },
-    "Application": {
+    "application": {
       "name": "__DEFAULT__"
     },
-    "Domain": {
+    "domain": {
       "name": "__DEFAULT__"
     },
-    "RTPurge": {
+    "rt-purge": {
       "purge_on_publish": true
     }
   }
