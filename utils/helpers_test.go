@@ -65,7 +65,7 @@ func TestCobraCmd(t *testing.T) {
 
 		err := os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
 
-		var azJsonData contracts.AzionJsonData
+		var azJsonData contracts.AzionApplicationOptions
 		azJsonData.Name = "Test01"
 		azJsonData.Function.Name = "MyFunc"
 		azJsonData.Function.File = "myfile.js"

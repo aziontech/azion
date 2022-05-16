@@ -11,8 +11,10 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -43,6 +45,8 @@ type publishCmd struct {
 	f             *cmdutil.Factory
 }
 
+var InstanceId int64
+
 func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 	return &publishCmd{
 		io:         f.IOStreams,
@@ -69,12 +73,12 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 	info := &publishInfo{}
 	cobraCmd := &cobra.Command{
 		Use:           "publish [flags]",
-		Short:         "Use Azion templates along with your Web applications",
-		Long:          `Use Azion templates along with your Web applications`,
+		Short:         "Publish your Web Application to Azion",
+		Long:          "Publish your Web Application to Azion",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Annotations: map[string]string{
-			"Category": "Publish",
+			"Category": "Build",
 		},
 		Example: heredoc.Doc(`
         $ azioncli publish
@@ -99,7 +103,14 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		return ErrorYesAndNoOptions
 	}
 
-	err := cmd.runPublishPreCmdLine()
+	//Run build command
+	build := build.NewBuildCmd(f)
+	err := build.Run()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.runPublishPreCmdLine()
 	if err != nil {
 		return err
 	}
@@ -129,6 +140,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 	}
 
 	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 	applicationName := conf.Name
 	if conf.Application.Name != "__DEFAULT__" {
@@ -140,14 +152,40 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		if err != nil {
 			return err
 		}
+		//TODO: Review what to do when user updates Function ID directly in azion.json
+		err = cmd.updateRulesEngine(cliapp, ctx, conf)
+		if err != nil {
+			return err
+		}
 		conf.Application.Id = applicationId
-		conf.Application.Name = applicationName
 	} else {
 		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
 	}
+
+	domaiName := conf.Name
+	if conf.Domain.Name != "__DEFAULT__" {
+		domaiName = conf.Domain.Name
+	}
+
+	var domain apidom.DomainResponse
+
+	if conf.Domain.Id == 0 {
+		domain, err = cmd.createDomain(clidom, ctx, conf, domaiName)
+		if err != nil {
+			return err
+		}
+		conf.Domain.Id = domain.GetId()
+	} else {
+		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
+		if err != nil {
+			return err
+		}
+	}
+
+	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domain.GetDomainName())
 
 	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
@@ -157,7 +195,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 	return nil
 }
 
-func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionJsonData) (int64, error) {
+func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqCre := api.CreateRequest{}
 
 	//Read code to upload
@@ -193,7 +231,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	return response.GetId(), nil
 }
 
-func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionJsonData) (int64, error) {
+func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
 	//Read code to upload
@@ -273,13 +311,13 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	return nil
 }
 
-func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) (int64, error) {
+func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", ErrorCreateApplication, err)
+		return 0, fmt.Errorf("%w: %s", ErrorCreateApplication, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
@@ -293,14 +331,15 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
 	reqIns.SetName(conf.Name)
 	reqIns.ApplicationId = application.GetId()
-	_, err = client.CreateInstance(ctx, &reqIns)
+	instance, err := client.CreateInstance(ctx, &reqIns)
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", ErrorCreateInstance, err)
 	}
+	InstanceId = instance.GetId()
 	return application.GetId(), nil
 }
 
-func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionJsonData, name string) error {
+func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
 	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
@@ -312,7 +351,50 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetName(conf.Name)
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
-	conf.Application.Name = application.GetName()
 
 	return nil
+}
+
+func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
+	reqDom := apidom.CreateRequest{}
+	reqDom.SetName(name)
+	reqDom.SetCnames([]string{})
+	reqDom.SetCnameAccessOnly(false)
+	reqDom.SetIsActive(true)
+	reqDom.SetEdgeApplicationId(conf.Application.Id)
+	domain, err := client.Create(ctx, &reqDom)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Domain with ID %d\n", domain.GetId())
+	return domain, nil
+}
+
+func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
+	reqDom := apidom.UpdateRequest{}
+	reqDom.SetName(name)
+	reqDom.SetEdgeApplicationId(conf.Application.Id)
+	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
+	domain, err := client.Update(ctx, &reqDom)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Domain with ID %d\n", domain.GetId())
+	return domain, nil
+}
+
+func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+
+	reqRules := apiapp.UpdateRulesEngineRequest{}
+	reqRules.IdApplication = conf.Application.Id
+
+	rule, err := client.UpdateRulesEngine(ctx, &reqRules, InstanceId)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Rules Engine with ID %d\n", rule.GetId())
+
+	return nil
+
 }

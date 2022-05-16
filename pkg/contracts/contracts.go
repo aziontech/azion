@@ -49,15 +49,6 @@ type CacheConf struct {
 	PurgeOnPublish bool `json:"purge_on_publish"`
 }
 
-type AzionJsonData struct {
-	Name        string `json:"name"`
-	Env         string `json:"env"`
-	Function    AzionJsonDataFunction
-	Application AzionJsonDataApplication
-	Domain      AzionJsonDataDomain
-	RTPurge     AzionJsonDataPurge
-}
-
 type AzionJsonDataFunction struct {
 	Id       int64  `json:"id"`
 	Name     string `json:"name"`
@@ -72,6 +63,7 @@ type AzionJsonDataApplication struct {
 }
 
 type AzionJsonDataDomain struct {
+	Id   int64  `json:"id"`
 	Name string `json:"name"`
 }
 

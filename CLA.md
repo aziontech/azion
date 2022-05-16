@@ -14,10 +14,9 @@ of the code or documents you contribute to the project itself or its maintainers
 Furthermore you also represent that you have the authority to perform the above waiver
 with respect to the entirety of you contributions.
 
-### Moral Rights.
+### Moral Rights and Intellectual Property Rights.
 
-To the fullest extent permitted under applicable law, you hereby waive, and agree not to
-assert, all of your “moral rights” in or relating to your contributions for the benefit of the project.
+To the fullest extent permitted under applicable law, you hereby waive and agree not to assert, all of your “moral rights”  and "intellectual property rights" in or relating to your contributions for the benefit of the project
 
 ### Third Party Content.
 
