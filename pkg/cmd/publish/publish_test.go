@@ -16,8 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var applicationName string = "Brazilian forest"
-var domainName string = "Traitor"
+var applicationName string = "Brazilian forest Traitor"
 
 var successResponseApp string = `
 {
@@ -172,7 +171,7 @@ func TestPublishCmd(t *testing.T) {
 		options := &contracts.AzionApplicationOptions{}
 
 		dat, _ := os.ReadFile("./fixtures/create_app.json")
-		json.Unmarshal(dat, options)
+		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
 			httpmock.REST("POST", "edge_applications"),
