@@ -360,6 +360,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.SetName(name)
 	reqDom.SetCnames([]string{})
 	reqDom.SetCnameAccessOnly(false)
+	reqDom.SetIsActive(true)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
