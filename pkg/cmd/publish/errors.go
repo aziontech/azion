@@ -12,4 +12,6 @@ var (
 	ErrorCreateApplication   = errors.New("Failed to create Edge Application")
 	ErrorUpdateApplication   = errors.New("Failed to update Edge Application")
 	ErrorCreateInstance      = errors.New("Failed to create Edge Function Instance")
+	ErrorCreateDomain        = errors.New("Failed to create Domain")
+	ErrorUpdateDomain        = errors.New("Failed to update Domain")
 )

@@ -40,6 +40,11 @@ type EdgeApplicationsResponse interface {
 	GetName() string
 }
 
+type UpdateRulesEngineRequest struct {
+	sdk.PatchRulesEngineRequest
+	IdApplication int64
+}
+
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
@@ -121,4 +126,38 @@ func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest)
 	}
 
 	return edgeApplicationsResponse.Results, nil
+}
+
+func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRequest, idFunc int64) (EdgeApplicationsResponse, error) {
+
+	request := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, req.IdApplication, "request")
+
+	edgeApplicationRules, httpRes, err := request.Execute()
+	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	idRule := edgeApplicationRules.Results[0].Id
+
+	b := make([]sdk.RulesEngineBehavior, 1)
+	b[0].SetName("run_function")
+	b[0].SetTarget(idFunc)
+	req.SetBehaviors(b)
+
+	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.IdApplication, "request", idRule).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
+
+	edgeApplicationsResponse, httpRes, err := requestUpdate.Execute()
+	if err != nil {
+		if httpRes == nil {
+			return nil, err
+		}
+		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		return nil, fmt.Errorf("%w: %s", err, responseBody)
+	}
+
+	return &edgeApplicationsResponse.Results, nil
 }

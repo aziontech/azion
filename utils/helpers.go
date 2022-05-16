@@ -142,7 +142,7 @@ func ResponseToBool(response string) (bool, error) {
 	return false, ErrorInvalidOption
 }
 
-func GetAzionJsonContent() (*contracts.AzionJsonData, error) {
+func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	path, err := GetWorkingDir()
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func GetAzionJsonContent() (*contracts.AzionJsonData, error) {
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
-	conf := &contracts.AzionJsonData{}
+	conf := &contracts.AzionApplicationOptions{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
 		return nil, ErrorUnmarshalAzionJsonFile
@@ -163,7 +163,7 @@ func GetAzionJsonContent() (*contracts.AzionJsonData, error) {
 	return conf, nil
 }
 
-func WriteAzionJsonContent(conf *contracts.AzionJsonData) error {
+func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 	path, err := GetWorkingDir()
 	if err != nil {
 		return err
