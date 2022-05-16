@@ -19,9 +19,9 @@ type AzionApplicationOptions struct {
 	Name        string                   `json:"name"`
 	Env         string                   `json:"env"`
 	Function    AzionJsonDataFunction    `json:"function"`
-	Application AzionJsonDataApplication `json:"Application"`
-	Domain      AzionJsonDataDomain      `json:"Domain"`
-	RtPurge     AzionJsonDataPurge       `json:"RTPurge"`
+	Application AzionJsonDataApplication `json:"application"`
+	Domain      AzionJsonDataDomain      `json:"domain"`
+	RtPurge     AzionJsonDataPurge       `json:"rt-purge"`
 }
 
 type AzionApplicationConfig struct {
