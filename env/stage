@@ -1,2 +1,2 @@
-API_URL=https://${AZION_API}
-AUTH_URL=https://${AZION_SSO}/api/user/me
+API_URL=https://stage-api.azion.net
+AUTH_URL=https://stage-sso.azion.com/api/user/me
