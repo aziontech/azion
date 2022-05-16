@@ -73,12 +73,12 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 	info := &publishInfo{}
 	cobraCmd := &cobra.Command{
 		Use:           "publish [flags]",
-		Short:         "Use Azion templates along with your Web applications",
-		Long:          `Use Azion templates along with your Web applications`,
+		Short:         "Publish your Web Application to Azion",
+		Long:          "Publish your Web Application to Azion",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Annotations: map[string]string{
-			"Category": "Publish",
+			"Category": "Build",
 		},
 		Example: heredoc.Doc(`
         $ azioncli publish
