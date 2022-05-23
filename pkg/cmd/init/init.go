@@ -82,6 +82,7 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azioncli init --name "thisisatest" --type javascript
         $ azioncli init --name "thisisatest" --type flareact
+        $ azioncli init --name "thisisatest" --type next
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options)
@@ -89,7 +90,7 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 	}
 	cobraCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
 	_ = cobraCmd.MarkFlagRequired("name")
-	cobraCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript|flareact>")
+	cobraCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript|flareact|next>")
 	_ = cobraCmd.MarkFlagRequired("type")
 	cobraCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
 	cobraCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
