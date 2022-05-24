@@ -15,4 +15,5 @@ var (
 	ErrorGetFunction               = errors.New("Failed to get Edge Function")
 	ErrorGetFunctions              = errors.New("Failed to get Edge Functions")
 	ErrorUpdateFunction            = errors.New("Failed to update Edge Function")
+	ErrorPurgeDomainCache          = errors.New("Could not purge domain cache")
 )

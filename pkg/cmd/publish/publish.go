@@ -14,6 +14,7 @@ import (
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -185,14 +186,40 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
-	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domain.GetDomainName())
+	var domainReturnedName []string
+	domainReturnedName = append(domainReturnedName, domain.GetDomainName())
+
+	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domainReturnedName[0])
 
 	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
 
+	if conf.RtPurge.PurgeOnPublish {
+		err = cmd.purgeDomain(f, domainReturnedName)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (cmd *publishCmd) purgeDomain(f *cmdutil.Factory, domainReturnedName []string) error {
+	ctx := context.Background()
+	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	pg, err := clipurge.Purge(ctx, &domainReturnedName)
+	if err != nil {
+		return err
+	}
+
+	if pg.StatusCode == 201 {
+		fmt.Fprintf(cmd.f.IOStreams.Out, "\nDomain cache was purged\n")
+		return nil
+	} else {
+		return fmt.Errorf("%s: %w", errmsg.ErrorPurgeDomainCache, err)
+	}
 }
 
 func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {

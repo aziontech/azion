@@ -68,5 +68,5 @@ type AzionJsonDataDomain struct {
 }
 
 type AzionJsonDataPurge struct {
-	Name bool `json:"purge_on_publish"`
+	PurgeOnPublish bool `json:"purge_on_publish"`
 }
