@@ -14,11 +14,6 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-type DomainResponse interface {
-	GetId() int64
-	GetDomainName() string
-}
-
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
@@ -34,17 +29,22 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Purge(ctx context.Context, urlToPurge *[]string) (*http.Response, error) {
+func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 	var purg sdk.PurgeUrlRequest
-	purg.SetUrls(*urlToPurge)
+	purg.SetUrls(urlToPurge)
 	purg.SetMethod("delete")
 	request := c.apiClient.RealTimePurgeApi.PurgeUrl(ctx).PurgeUrlRequest(purg)
 
 	httpRes, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
 		responseBody, _ := ioutil.ReadAll(httpRes.Body)
-		return httpRes, fmt.Errorf("%w: %s", err, responseBody)
+		return fmt.Errorf("%w: %s", err, responseBody)
 	}
 
-	return httpRes, nil
+	if httpRes.StatusCode != 201 {
+		return fmt.Errorf("%w: %s", err, httpRes.Status)
+	}
+
+	fmt.Println("\nDomain cache was purged")
+	return nil
 }
