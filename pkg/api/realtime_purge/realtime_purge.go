@@ -45,6 +45,5 @@ func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 		return fmt.Errorf("%w: %s", err, httpRes.Status)
 	}
 
-	fmt.Println("\nDomain cache was purged")
 	return nil
 }

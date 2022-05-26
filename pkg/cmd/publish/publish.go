@@ -213,6 +213,7 @@ func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 		return err
 	}
 
+	fmt.Fprintln(cmd.f.IOStreams.Out, "\nDomain cache was purged")
 	return nil
 }
 
