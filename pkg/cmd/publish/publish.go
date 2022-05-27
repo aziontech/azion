@@ -140,6 +140,11 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
+	err = utils.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
+	}
+
 	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
@@ -154,6 +159,12 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 			return err
 		}
 		conf.Application.Id = applicationId
+
+		err = utils.WriteAzionJsonContent(conf)
+		if err != nil {
+			return err
+		}
+
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(cliapp, ctx, conf)
 		if err != nil {
@@ -164,6 +175,11 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		if err != nil {
 			return err
 		}
+	}
+
+	err = utils.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
 	}
 
 	domaiName := conf.Name
