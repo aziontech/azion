@@ -45,7 +45,7 @@ $ export AZIONCLI_TOKEN=<authentication token>
 
 You can just run `azioncli` and see it's options
 
-```sh
+```text
 $ azioncli
 Interact easily with Azion services
 
@@ -72,7 +72,7 @@ LEARN MORE
 
 For each subcommand you the `-h|--help` flag to learn more about it:
 
-```sh
+```text
 $ ./bin/azioncli edge_functions --help
 You can create, update, delete, list and describe your Azion account's Edge Functions
 

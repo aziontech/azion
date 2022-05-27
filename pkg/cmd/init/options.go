@@ -24,5 +24,11 @@ func makeTestFuncMap(stat statFunc) map[string]TestFunc {
 			}
 			return nil
 		},
+		"next": func(path string) error {
+			if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
+				return ErrorPackageJsonNotFound
+			}
+			return nil
+		},
 	}
 }

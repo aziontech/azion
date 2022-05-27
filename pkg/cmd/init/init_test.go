@@ -349,4 +349,85 @@ func TestInitCmd(t *testing.T) {
 		require.Contains(t, stdout.String(), "Running init step command")
 
 	})
+
+	t.Run("success with NextJS", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, stdout, _ := testutils.NewFactory(mock)
+		initCmd := newInitCmd(f)
+
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
+		}
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
+
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "next"})
+
+		in := bytes.NewBuffer(nil)
+		in.WriteString("yes\n")
+		f.IOStreams.In = io.NopCloser(in)
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Contains(t, stdout.String(), `Template successfully fetched and configured
+`)
+	})
+
+	t.Run("does not overwrite NextJS contents using flag -n", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+
+		initCmd := newInitCmd(f)
+
+		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
+			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+				return "", -1, errors.New("unexpected command")
+			}
+			return "", 0, nil
+		}
+		initCmd.fileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls"}}`), nil
+		}
+		initCmd.writeFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return errors.New("unexpected write")
+		}
+		initCmd.rename = func(oldpath string, newpath string) error {
+			return errors.New("unexpected rename")
+		}
+		initCmd.stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+		initCmd.isDirEmpty = func(dirpath string) (bool, error) {
+			return false, nil
+		}
+
+		cmd := newCobraCmd(initCmd)
+
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "next", "-n"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+	})
 }
