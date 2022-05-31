@@ -29,3 +29,6 @@ jobs:
 
       - name: Gosec
         run: make sec
+
+      - name: Go Report
+        uses: creekorful/goreportcard-action@v1.0
