@@ -202,14 +202,12 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
-	domainReturnedName := []string{domain.GetDomainName()}
-
-	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domainReturnedName[0])
-
 	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
+
+	domainReturnedName := []string{domain.GetDomainName()}
 
 	if conf.RtPurge.PurgeOnPublish {
 		err = cmd.purgeDomains(f, domainReturnedName)
@@ -217,6 +215,8 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 			return err
 		}
 	}
+
+	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domainReturnedName[0])
 
 	return nil
 }
@@ -229,7 +229,7 @@ func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 		return err
 	}
 
-	fmt.Fprintln(cmd.f.IOStreams.Out, "\nDomain cache was purged")
+	fmt.Fprintln(cmd.f.IOStreams.Out, "Domain cache was purged")
 	return nil
 }
 

@@ -79,7 +79,7 @@ func NewCreateRequest() *CreateRequest {
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
-	// Altough there's only one option, the API requires the `language` field.
+	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 

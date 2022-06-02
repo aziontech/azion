@@ -144,7 +144,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 
 		require.NoError(t, err)
 
-		require.Equal(t, `File successfuly written to: out.json
+		require.Equal(t, `File successfully written to: out.json
 `, stdout.String())
 
 	})

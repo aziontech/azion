@@ -108,7 +108,7 @@ func TestPublishCmd(t *testing.T) {
 		require.Contains(t, stdout.String(), "Command exited with code 0")
 	})
 
-	t.Run("without specifing publish.env", func(t *testing.T) {
+	t.Run("without specifying publish.env", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := newPublishCmd(f)
