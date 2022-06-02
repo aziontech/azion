@@ -69,7 +69,6 @@ func TestCobraCmd(t *testing.T) {
 		azJsonData.Name = "Test01"
 		azJsonData.Function.Name = "MyFunc"
 		azJsonData.Function.File = "myfile.js"
-		azJsonData.Function.Language = "javascript"
 		azJsonData.Function.Id = 476
 
 		_ = WriteAzionJsonContent(&azJsonData)
@@ -90,7 +89,6 @@ func TestCobraCmd(t *testing.T) {
 		require.Contains(t, azJsonData.Name, "Test01")
 		require.Contains(t, azJsonData.Function.Name, "MyFunc")
 		require.Contains(t, azJsonData.Function.File, "myfile.js")
-		require.Contains(t, azJsonData.Function.Language, "javascript")
 		require.EqualValues(t, azJsonData.Function.Id, 476)
 	})
 }
