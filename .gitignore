@@ -1,0 +1,17 @@
+# Binaries for programs and plugins
+*.exe
+*.tool-versions
+
+#Directories
+bin/
+dist/
+docs/
+.vscode/
+azion/
+
+#Files
+.DS_Store
+package.json
+
+# Coverage files
+cover
