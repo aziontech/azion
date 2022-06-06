@@ -1,5 +1,5 @@
-#PATH := /usr/local/go/bin:$(PATH)
-#SHELL := env PATH=$(PATH) /bin/bash
+PATH := /usr/local/go/bin:$(PATH)
+SHELL := env PATH=$(PATH) /bin/bash
 GO := $(shell which go)
 NAME := azioncli
 
