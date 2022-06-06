@@ -286,7 +286,7 @@ func TestInitCmd(t *testing.T) {
 		require.ErrorIs(t, err, os.ErrNotExist)
 	})
 
-	t.Run("without specifing init.env", func(t *testing.T) {
+	t.Run("without specifying init.env", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)
 
 		cmd := newInitCmd(f)
@@ -379,7 +379,7 @@ func TestInitCmd(t *testing.T) {
 
 		cmd := newCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "next"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "nextjs"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("yes\n")
@@ -424,7 +424,7 @@ func TestInitCmd(t *testing.T) {
 
 		cmd := newCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "next", "-n"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "nextjs", "-n"})
 
 		err := cmd.Execute()
 

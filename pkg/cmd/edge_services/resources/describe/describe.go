@@ -63,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, "File successfuly written to: %s\n", filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, "File successfully written to: %s\n", filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedResource[:])
 				if err != nil {
