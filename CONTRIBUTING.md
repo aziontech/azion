@@ -23,7 +23,7 @@ By participating, you are expected to uphold this code.
 
 > If you want to ask a question, we assume that you have read the available [Documentation](README.md).
 
-Before you ask a question, it is best to search for existing [Issues](https://github.com/aziontech/azion-cli/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue.
+Before you ask a question, it is better to search for existing [Issues](https://github.com/aziontech/azion-cli/issues) that might help you. In case you have found a suitable issue and still need clarification, you can write your question in this issue.
 
 If you then still feel the need to ask a question and need clarification, we recommend the following:
 
