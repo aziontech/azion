@@ -23,8 +23,9 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "azioncli",
 		Short: "Azion-CLI",
-		Long: `Azion CLI is currently in Beta. We’d love to hear your feedback at https://forms.gle/uBBkyXZCVcrgpvAB8.
-Interact easily with Azion services`,
+		Long: `Interact easily with Azion services.
+
+Azion CLI is currently in Beta. We’d love to hear your feedback at https://forms.gle/uBBkyXZCVcrgpvAB8`,
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},
