@@ -71,7 +71,7 @@ LEARN MORE
   Use 'azioncli <command> <subcommand> --help' for more information about a command
 ```
 
-For each subcommand you the `-h|--help` flag to learn more about it:
+For each subcommand use the `-h|--help` flag to learn more about it:
 
 ```text
 $ ./bin/azioncli edge_functions --help
