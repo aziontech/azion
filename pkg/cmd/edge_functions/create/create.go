@@ -92,9 +92,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				request.SetName(fields.Name)
 
-				if cmd.Flags().Changed("initiator-type") {
-					request.SetInitiatorType(fields.InitiatorType)
-				}
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
