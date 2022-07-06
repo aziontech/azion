@@ -90,7 +90,8 @@ func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, re
 	resp, httpResp, err := api.GetResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		if httpResp == nil || httpResp.StatusCode >= 500 {
-			return nil, utils.ErrorInternalServerError
+			err := utils.CheckStatusCode500Error(err)
+			return nil, err
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)
 		if err != nil {

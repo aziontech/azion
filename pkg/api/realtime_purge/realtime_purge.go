@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	sdk "github.com/aziontech/azionapi-go-sdk/realtimepurge"
@@ -23,6 +24,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
+	conf.HTTPClient.Timeout = 10 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),

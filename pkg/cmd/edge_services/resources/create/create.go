@@ -144,7 +144,8 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, r
 	resp, httpResp, err := api.PostResource(c, service_id).CreateResourceRequest(request).Execute()
 	if err != nil {
 		if httpResp == nil || httpResp.StatusCode >= 500 {
-			return utils.ErrorInternalServerError
+			err := utils.CheckStatusCode500Error(err)
+			return err
 		}
 		body, err := ioutil.ReadAll(httpResp.Body)
 		if err != nil {
