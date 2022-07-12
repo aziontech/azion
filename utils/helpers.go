@@ -182,3 +182,13 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 
 	return nil
 }
+
+// checks varying errors that may occur when status code is 500
+func CheckStatusCode500Error(err error) error {
+
+	if strings.Contains(err.Error(), "Client.Timeout") {
+		return ErrorTimeoutAPICall
+	}
+
+	return ErrorInternalServerError
+}

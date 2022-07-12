@@ -30,4 +30,5 @@ var (
 	ErrorUnmarshalAzionJsonFile     = errors.New("Failed to parse azion.json. Verify the file format.")
 	ErrorMarshalAzionJsonFile       = errors.New("Failed to encode azion.json. Verify the file format.")
 	ErrorWritingAzionJsonFile       = errors.New("Failed to write azion.json. Verify the file format.")
+	ErrorTimeoutAPICall             = errors.New("CLI timed out while carrying out this action. Please verify if it was completed successfully")
 )

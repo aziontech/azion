@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 )
 
@@ -40,6 +42,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
+	conf.HTTPClient.Timeout = 10 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
@@ -49,9 +52,13 @@ func NewClient(c *http.Client, url string, token string) *Client {
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
 
-	res, _, err := req.Execute()
+	res, httpResp, err := req.Execute()
 
 	if err != nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
+			return nil, err
+		}
 		return nil, err
 	}
 
@@ -61,9 +68,13 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
 
-	_, err := req.Execute()
+	httpResp, err := req.Execute()
 
 	if err != nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
+			return err
+		}
 		return err
 	}
 
@@ -85,12 +96,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
 
-	edgeFuncResponse, httpRes, err := request.Execute()
+	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpRes == nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
 			return nil, err
 		}
-		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
 
@@ -109,12 +121,13 @@ func NewUpdateRequest(id int64) *UpdateRequest {
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
-	edgeFuncResponse, httpRes, err := request.Execute()
+	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpRes == nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
 			return nil, err
 		}
-		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
 
@@ -130,7 +143,8 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
-		if httpResp == nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
 			return nil, err
 		}
 		responseBody, _ := ioutil.ReadAll(httpResp.Body)

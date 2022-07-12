@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/realtimepurge"
 )
 
@@ -23,6 +25,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
+	conf.HTTPClient.Timeout = 10 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
@@ -35,14 +38,18 @@ func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 	purg.SetMethod("delete")
 	request := c.apiClient.RealTimePurgeApi.PurgeUrl(ctx).PurgeUrlRequest(purg)
 
-	httpRes, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
+	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
-		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
+			return err
+		}
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return fmt.Errorf("%w: %s", err, responseBody)
 	}
 
-	if httpRes.StatusCode != 201 {
-		return fmt.Errorf("%w: %s", err, httpRes.Status)
+	if httpResp.StatusCode != 201 {
+		return fmt.Errorf("%w: %s", err, httpResp.Status)
 	}
 
 	return nil

@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 )
 
@@ -37,6 +39,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
+	conf.HTTPClient.Timeout = 10 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
@@ -47,12 +50,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 
-	domainsResponse, httpRes, err := request.Execute()
+	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpRes == nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
 			return nil, err
 		}
-		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
 
@@ -63,12 +67,13 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 
 	request := c.apiClient.DomainsApi.UpdateDomain(ctx, req.DomainId).UpdateDomainRequest(req.UpdateDomainRequest)
 
-	domainsResponse, httpRes, err := request.Execute()
+	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpRes == nil {
+		if httpResp == nil || httpResp.StatusCode >= 500 {
+			err := utils.CheckStatusCode500Error(err)
 			return nil, err
 		}
-		responseBody, _ := ioutil.ReadAll(httpRes.Body)
+		responseBody, _ := ioutil.ReadAll(httpResp.Body)
 		return nil, fmt.Errorf("%w: %s", err, responseBody)
 	}
 
