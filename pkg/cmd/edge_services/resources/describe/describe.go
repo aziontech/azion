@@ -101,7 +101,7 @@ func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, re
 		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetResource, string(body))
 	}
 
-	return resp, nil
+	return &resp, nil
 }
 
 func format(cmd *cobra.Command, resource *sdk.ResourceDetail) ([]byte, error) {
@@ -122,7 +122,7 @@ func format(cmd *cobra.Command, resource *sdk.ResourceDetail) ([]byte, error) {
 	} else {
 		b.Write([]byte(fmt.Sprintf("ID: %d\n", uint64(resource.GetId()))))
 		b.Write([]byte(fmt.Sprintf("Name: %s\n", resource.GetName())))
-		b.Write([]byte(fmt.Sprintf("Type: %s\n", resource.GetType())))
+		b.Write([]byte(fmt.Sprintf("Trigger: %s\n", resource.GetTrigger())))
 		b.Write([]byte(fmt.Sprintf("Content type: %s\n", resource.GetContentType())))
 		b.Write([]byte("Content: \n"))
 		b.Write([]byte(resource.GetContent()))
