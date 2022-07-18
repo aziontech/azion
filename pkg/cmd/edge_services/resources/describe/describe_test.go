@@ -67,7 +67,7 @@ func TestDescribe(t *testing.T) {
                     "id": 69420,
                     "name": "Le Teste",
 					"content_type": "Shell Script",
-					"type": "Install",
+					"trigger": "Install",
 					"content": "echo 1"
                 }`,
 			),
@@ -88,7 +88,7 @@ func TestDescribe(t *testing.T) {
 		assert.Equal(t,
 			`ID: 69420
 Name: Le Teste
-Type: Install
+Trigger: Install
 Content type: Shell Script
 Content: 
 echo 1`,
