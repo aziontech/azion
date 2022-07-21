@@ -105,7 +105,7 @@ func describeService(client *sdk.APIClient, service_id int64, withVariables bool
 
 		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetSerivce, string(body))
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 func format(cmd *cobra.Command, service *sdk.ServiceResponse) ([]byte, error) {
@@ -133,7 +133,7 @@ func format(cmd *cobra.Command, service *sdk.ServiceResponse) ([]byte, error) {
 		b.Write([]byte(fmt.Sprintf("Permissions: %s\n", service.GetPermissions())))
 		if cmd.Flags().Changed("with-variables") {
 			b.Write([]byte("Variables:\n"))
-			for _, variable := range service.Variables {
+			for _, variable := range *service.Variables {
 				b.Write([]byte(fmt.Sprintf(" Name: %s\tValue: %s\n", variable.Name, variable.Value)))
 			}
 		}
