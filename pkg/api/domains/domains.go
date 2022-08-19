@@ -39,7 +39,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
-	conf.HTTPClient.Timeout = 10 * time.Second
+	conf.HTTPClient.Timeout = 30 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
