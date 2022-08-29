@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -183,7 +184,7 @@ func (cmd *initCmd) fetchTemplates(info *initInfo) error {
 		_ = cmd.removeAll(dir)
 	}()
 
-	_, _, err = cmd.commandRunner(strings.Join([]string{GIT, CLONE, REPO, dir}, " "), nil)
+	_, _, err = cmd.commandRunner(strings.Join([]string{GIT, CLONE, REPO, strconv.Quote(dir)}, " "), nil)
 	if err != nil {
 		return utils.ErrorFetchingTemplates
 	}
