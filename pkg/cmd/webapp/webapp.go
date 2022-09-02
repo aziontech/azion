@@ -11,8 +11,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	webappCmd := &cobra.Command{
 		Use:   "webapp",
-		Short: "Initialize, Build and Publish your Web Applications",
-		Long:  `You can Initialize, Build and Publish your Web Applications`,
+		Short: "Create Web Applications on Azion's platform",
+		Long:  `Create Web Applications on Azion's platform`,
 		Annotations: map[string]string{
 			"Category": "Build",
 		},
