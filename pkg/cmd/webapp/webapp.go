@@ -9,7 +9,6 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	// edgeServicesCmd represents the edgeServices command
 	webappCmd := &cobra.Command{
 		Use:   "webapp",
 		Short: "Initialize, Build and Publish your Web Applications",
