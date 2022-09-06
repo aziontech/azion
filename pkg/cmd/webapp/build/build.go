@@ -31,9 +31,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          "Build your Web application",
 		SilenceErrors: true,
 		SilenceUsage:  true,
-		Annotations: map[string]string{
-			"Category": "Build",
-		},
 		Example: heredoc.Doc(`
         $ azioncli build
         `),

@@ -77,9 +77,6 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 		Long:          `Use Azion templates along with your Web applications`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Annotations: map[string]string{
-			"Category": "Build",
-		},
 		Example: heredoc.Doc(`
         $ azioncli init --name "thisisatest" --type javascript
         $ azioncli init --name "thisisatest" --type flareact

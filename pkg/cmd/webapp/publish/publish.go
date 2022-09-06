@@ -15,8 +15,8 @@ import (
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
-	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
+	"github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -78,9 +78,6 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 		Long:          "Publish your Web Application to Azion",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Annotations: map[string]string{
-			"Category": "Build",
-		},
 		Example: heredoc.Doc(`
         $ azioncli publish
         `),

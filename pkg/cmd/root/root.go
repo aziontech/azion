@@ -4,13 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/configure"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
-	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
-	publishcmd "github.com/aziontech/azion-cli/pkg/cmd/publish"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/cmd/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -48,9 +46,7 @@ Azion CLI is currently in Beta. We’d love to hear your feedback at https://for
 	rootCmd.AddCommand(version.NewCmd(f))
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
-	rootCmd.AddCommand(initcmd.NewCmd(f))
-	rootCmd.AddCommand(publishcmd.NewCmd(f))
-	rootCmd.AddCommand(build.NewCmd(f))
+	rootCmd.AddCommand(webapp.NewCmd(f))
 
 	return rootCmd
 }
