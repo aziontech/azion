@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
@@ -89,16 +88,9 @@ func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, re
 
 	resp, httpResp, err := api.GetResource(c, service_id, resource_id).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return nil, err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetResource, string(body))
+		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetResource, errMsg)
 	}
 
 	return &resp, nil

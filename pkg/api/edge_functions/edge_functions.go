@@ -2,8 +2,6 @@ package edge_functions
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -55,11 +53,7 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 	res, httpResp, err := req.Execute()
 
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		return nil, err
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return res.Results, nil
@@ -71,11 +65,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	httpResp, err := req.Execute()
 
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		return err
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return nil
@@ -98,12 +88,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return edgeFuncResponse.Results, nil
@@ -123,12 +108,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return edgeFuncResponse.Results, nil
@@ -143,12 +123,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	var result []EdgeFunctionResponse

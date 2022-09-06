@@ -3,7 +3,6 @@ package realtime_purge
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -40,12 +39,7 @@ func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return fmt.Errorf("%w: %s", err, responseBody)
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	if httpResp.StatusCode != 201 {

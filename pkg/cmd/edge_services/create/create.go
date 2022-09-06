@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
@@ -91,16 +90,9 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 
 	resp, httpResp, err := api.NewService(c).CreateServiceRequest(request).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, errMsg)
 	}
 
 	fmt.Fprintf(out, "Created Edge Service with ID %d\n", resp.Id)

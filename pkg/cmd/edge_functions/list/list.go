@@ -2,6 +2,7 @@ package list
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -33,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			functions, err := client.List(ctx, opts)
 			if err != nil {
-				return errmsg.ErrorGetFunctions
+				return fmt.Errorf("%w: %s", errmsg.ErrorGetFunctions, err)
 			}
 
 			out := f.IOStreams.Out

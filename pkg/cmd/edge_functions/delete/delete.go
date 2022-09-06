@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err = client.Delete(ctx, ids[0])
 			if err != nil {
-				return fmt.Errorf("%s: %w", errmsg.ErrorFailToDeleteFunction, err)
+				return fmt.Errorf("%w: %s", errmsg.ErrorFailToDeleteFunction, err)
 			}
 
 			out := f.IOStreams.Out
