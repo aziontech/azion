@@ -187,6 +187,13 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 
 //Returns the correct error message for each HTTP Status code
 func ErrorPerStatusCode(httpResp *http.Response, err error) error {
+
+	// when the CLI times out, probably due to SSO communication, httpResp is null and http status is 500;
+	// that's why we need this verification first
+	if httpResp == nil || httpResp.StatusCode >= 500 {
+		return checkStatusCode500Error(err)
+	}
+
 	statusCode := httpResp.StatusCode
 
 	switch statusCode {
@@ -202,9 +209,6 @@ func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	case 404:
 		return ErrorNotFound404
-
-	case 500:
-		return checkStatusCode500Error(err)
 
 	default:
 		return err
