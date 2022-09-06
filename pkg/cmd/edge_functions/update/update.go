@@ -113,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
+				return fmt.Errorf("%w: %s", errmsg.ErrorUpdateFunction, err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Edge Function with ID %d\n", response.GetId())

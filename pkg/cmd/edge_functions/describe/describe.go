@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			function, err := client.Get(ctx, ids[0])
 			if err != nil {
-				return fmt.Errorf("%s: %w", errmsg.ErrorGetFunctions, err)
+				return fmt.Errorf("%w: %s", errmsg.ErrorGetFunctions, err)
 			}
 
 			out := f.IOStreams.Out
