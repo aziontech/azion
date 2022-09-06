@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/MakeNowJust/heredoc"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
@@ -59,16 +58,9 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64) error
 	httpResp, err := api.DeleteService(c, service_id).Execute()
 
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteService, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteService, errMsg)
 	}
 
 	if httpResp.StatusCode == 204 {

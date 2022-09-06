@@ -2,8 +2,6 @@ package edgeapplications
 
 import (
 	"context"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -69,12 +67,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicatio
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Results, nil
@@ -85,12 +78,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Results, nil
@@ -104,12 +92,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return edgeApplicationsResponse.Results, nil
@@ -124,12 +107,7 @@ func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return edgeApplicationsResponse.Results, nil
@@ -141,12 +119,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	edgeApplicationRules, httpResp, err := request.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	idRule := edgeApplicationRules.Results[0].Id
@@ -160,12 +133,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		responseBody, _ := ioutil.ReadAll(httpResp.Body)
-		return nil, fmt.Errorf("%w: %s", err, responseBody)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Results, nil

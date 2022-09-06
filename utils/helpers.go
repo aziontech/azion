@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"strconv"
@@ -183,12 +185,43 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 	return nil
 }
 
+//Returns the correct error message for each HTTP Status code
+func ErrorPerStatusCode(httpResp *http.Response, err error) error {
+	statusCode := httpResp.StatusCode
+
+	switch statusCode {
+
+	case 400:
+		return checkStatusCode400Error(httpResp)
+
+	case 401:
+		return ErrorToken401
+
+	case 403:
+		return ErrorForbidden403
+
+	case 404:
+		return ErrorNotFound404
+
+	case 500:
+		return checkStatusCode500Error(err)
+	}
+
+	return err
+}
+
 // checks varying errors that may occur when status code is 500
-func CheckStatusCode500Error(err error) error {
+func checkStatusCode500Error(err error) error {
 
 	if strings.Contains(err.Error(), "Client.Timeout") {
 		return ErrorTimeoutAPICall
 	}
 
 	return ErrorInternalServerError
+}
+
+//read the body of the response and returns its content
+func checkStatusCode400Error(httpResp *http.Response) error {
+	responseBody, _ := ioutil.ReadAll(httpResp.Body)
+	return fmt.Errorf("%s", responseBody)
 }
