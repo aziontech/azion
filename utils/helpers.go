@@ -205,9 +205,11 @@ func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	case 500:
 		return checkStatusCode500Error(err)
-	}
 
-	return err
+	default:
+		return err
+
+	}
 }
 
 // checks varying errors that may occur when status code is 500
