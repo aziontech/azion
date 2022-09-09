@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/MakeNowJust/heredoc"
 	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
@@ -73,16 +72,9 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 		Execute()
 
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorGetResources, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorGetResources, errMsg)
 	}
 
 	resources := resp.Resources

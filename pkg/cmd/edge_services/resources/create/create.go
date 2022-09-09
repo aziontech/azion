@@ -143,16 +143,9 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, r
 
 	resp, httpResp, err := api.PostResource(c, service_id).CreateResourceRequest(request).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorCreateResource, errMsg)
 	}
 
 	fmt.Fprintf(out, "Created Resource with ID %d\n", resp.Id)

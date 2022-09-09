@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strconv"
@@ -165,16 +164,9 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 
 	resp, httpResp, err := api.PatchService(c, id).UpdateServiceRequest(request.UpdateServiceRequest).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateService, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateService, errMsg)
 	}
 
 	fmt.Fprintf(out, "Updated Edge Service with ID %d\n", resp.Id)

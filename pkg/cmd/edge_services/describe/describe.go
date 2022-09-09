@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
@@ -94,16 +93,9 @@ func describeService(client *sdk.APIClient, service_id int64, withVariables bool
 
 	resp, httpResp, err := api.GetService(c, service_id).WithVars(withVariables).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return nil, err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return nil, err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetSerivce, string(body))
+		return nil, fmt.Errorf("%w: %s", errmsg.ErrorGetSerivce, errMsg)
 	}
 	return &resp, nil
 }

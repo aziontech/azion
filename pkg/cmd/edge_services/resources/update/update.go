@@ -171,16 +171,9 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 
 	resp, httpResp, err := api.PatchServiceResource(c, service_id, resource_id).UpdateResourceRequest(update.UpdateResourceRequest).Execute()
 	if err != nil {
-		if httpResp == nil || httpResp.StatusCode >= 500 {
-			err := utils.CheckStatusCode500Error(err)
-			return err
-		}
-		body, err := ioutil.ReadAll(httpResp.Body)
-		if err != nil {
-			return err
-		}
+		errMsg := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateResource, string(body))
+		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateResource, errMsg)
 	}
 
 	fmt.Fprintf(out, "Updated Resource with ID %d\n", resp.Id)
