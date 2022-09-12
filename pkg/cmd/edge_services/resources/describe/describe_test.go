@@ -27,7 +27,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "666"})
+		cmd.SetArgs([]string{"--service-id", "1234", "--resource-id", "666"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -41,14 +41,14 @@ func TestDescribe(t *testing.T) {
 
 		mock.Register(
 			httpmock.REST("GET", "edge_services/1234/resources/666"),
-			httpmock.StringResponse("Error: You must provide a service_id and a resource_id as arguments. Use -h or --help for more information"),
+			httpmock.StringResponse("Error: You must provide a service_id and a resource_id. Use -h or --help for more information"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234"})
+		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -77,7 +77,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "69420"})
+		cmd.SetArgs([]string{"-s", "1234", "-r", "69420"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)

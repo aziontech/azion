@@ -10,27 +10,12 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 )
 
 const shell = "/bin/sh"
-
-func ConvertIdsToInt(ids ...string) ([]int64, error) {
-	converted_ids := make([]int64, len(ids))
-	for index, id := range ids {
-		converted_id, err := strconv.Atoi(id)
-		if err != nil {
-			return nil, err
-		}
-		converted_ids[index] = int64(converted_id)
-	}
-
-	return converted_ids, nil
-
-}
 
 func CleanDirectory(dir string) error {
 

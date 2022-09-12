@@ -18,7 +18,7 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-
+	var service_id int64
 	opts := &contracts.DescribeOptions{}
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
@@ -28,17 +28,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services describe 4312
-        $ azioncli edge_services describe 1337 --with-variables
+        $ azioncli edge_services describe --service-id 4312
+        $ azioncli edge_services describe --service-id 1337 --with-variables
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
+			if !cmd.Flags().Changed("service-id") {
 				return errmsg.ErrorMissingServiceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			client, err := requests.CreateClient(f)
@@ -51,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return errmsg.ErrorWithVariablesFlag
 			}
 
-			service, err := describeService(client, ids[0], withVariables)
+			service, err := describeService(client, service_id, withVariables)
 			if err != nil {
 				return err
 			}
@@ -79,6 +74,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		},
 	}
+	describeCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
 	describeCmd.Flags().Bool("with-variables", false, "Displays the Edge Service's variables (disabled by default)")
 	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
 	describeCmd.Flags().StringVar(&opts.Format, "format", "", "You can change the results format by passing json value to this flag")

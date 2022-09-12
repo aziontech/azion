@@ -47,7 +47,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234"})
+		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -77,7 +77,7 @@ func TestDescribe(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234"})
+		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -125,7 +125,7 @@ Permissions: [read write]
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--with-variables", "True"})
+		cmd.SetArgs([]string{"--service-id", "1234", "--with-variables", "True"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
