@@ -17,6 +17,7 @@ import (
 )
 
 type Fields struct {
+	Id            int64
 	Name          string
 	Language      string
 	Code          string
@@ -36,14 +37,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions update 1234 --name 'Hello'
-        $ azioncli edge_functions update 4185 --code ./mycode/function.js --args ./mycode/myargs.json
-        $ azioncli edge_functions update 9123 --active false
+        $ azioncli edge_functions update --function-id 1234 --name 'Hello'
+        $ azioncli edge_functions update -f 4185 --code ./mycode/function.js --args ./mycode/myargs.json
+        $ azioncli edge_functions update -f 9123 --active false
         $ azioncli edge_functions update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// either id parameter or in path should be passed
-			if len(args) < 1 && !cmd.Flags().Changed("in") {
+			// either function-id or in path should be passed
+			if !cmd.Flags().Changed("function-id") && !cmd.Flags().Changed("in") {
 				return errmsg.ErrorMissingArgumentUpdate
 			}
 
@@ -67,12 +68,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				ids, err := utils.ConvertIdsToInt(args[0])
-				if err != nil {
-					return utils.ErrorConvertingIdArgumentToInt
-				}
 
-				request.Id = ids[0]
+				request.Id = fields.Id
 
 				if cmd.Flags().Changed("active") {
 					active, err := strconv.ParseBool(fields.Active)
@@ -123,6 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
+	flags.Int64VarP(&fields.Id, "function-id", "f", 0, "Unique identifier of the Edge Function")
 	flags.StringVar(&fields.Name, "name", "", "Your Edge Function's name")
 	flags.StringVar(&fields.Code, "code", "", "Path to the file containing your Edge Function's code")
 	flags.StringVar(&fields.Args, "args", "", "Path to the file containing your Edge Function's JSON arguments")

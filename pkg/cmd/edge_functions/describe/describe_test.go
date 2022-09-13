@@ -42,7 +42,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"123"})
+		cmd.SetArgs([]string{"-f", "123"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -73,7 +73,7 @@ JSON Args: {"a":1,"b":2}
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"123", "--with-code"})
+		cmd.SetArgs([]string{"--function-id", "123", "--with-code"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -104,7 +104,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 
 			cmd := NewCmd(f)
 
-			cmd.SetArgs([]string{"1234", "--with-code"})
+			cmd.SetArgs([]string{"-f", "1234", "--with-code"})
 
 			err := cmd.Execute()
 
@@ -127,7 +127,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 
 		path := "./out.json"
 
-		cmd.SetArgs([]string{"123", "--out", path})
+		cmd.SetArgs([]string{"--function-id", "123", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {

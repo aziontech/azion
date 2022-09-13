@@ -18,8 +18,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type Fields struct {
+	ServiceId  int64
+	ResourceId int64
+}
 
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	fields := &Fields{}
 	opts := &contracts.DescribeOptions{}
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
@@ -29,16 +34,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources describe 1234 80312
+        $ azioncli edge_services resources describe --service-id 1234 --resource-id 80312
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 2 {
+			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
 				return errmsg.ErrorMissingResourceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0], args[1])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			client, err := requests.CreateClient(f)
@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			resource, err := describeResource(client, f.IOStreams.Out, ids[0], ids[1])
+			resource, err := describeResource(client, f.IOStreams.Out, fields.ServiceId, fields.ResourceId)
 			if err != nil {
 				return err
 			}
@@ -75,6 +75,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
+	describeCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, "Unique identifier of the Edge Service")
+	describeCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, "Unique identifier of the Resource")
 	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
 	describeCmd.Flags().StringVar(&opts.Format, "format", "", "You can change the results format by passing json value to this flag")
 

@@ -42,7 +42,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1337", "--name", "ATUALIZANDO", "--active", "false"})
+		cmd.SetArgs([]string{"--function-id", "1337", "--name", "ATUALIZANDO", "--active", "false"})
 
 		err := cmd.Execute()
 
@@ -68,7 +68,7 @@ func TestUpdate(t *testing.T) {
 		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
 		_, _ = args.WriteString(`{"best_editor": "vim"}`)
 
-		cmd.SetArgs([]string{"1337", "--code", code.Name(), "--args", args.Name()})
+		cmd.SetArgs([]string{"--function-id", "1337", "--code", code.Name(), "--args", args.Name()})
 
 		err := cmd.Execute()
 
@@ -87,7 +87,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--active", "unactive"})
+		cmd.SetArgs([]string{"--function-id", "1234", "--active", "unactive"})
 
 		err := cmd.Execute()
 
