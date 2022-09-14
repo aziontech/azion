@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
-		Use:           "update <service_id> [flags]",
+		Use:           "update --service-id <service_id> [flags]",
 		Short:         "Updates an Edge Service",
 		Long:          `Updates an Edge Service`,
 		SilenceUsage:  true,

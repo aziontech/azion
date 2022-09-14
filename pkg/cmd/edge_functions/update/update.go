@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           "update <edge_function_id> [flags]",
+		Use:           "update --function-id <function_id> [flags]",
 		Short:         "Updates an Edge Function",
 		Long:          "Updates an Edge Function based on the id given",
 		SilenceUsage:  true,

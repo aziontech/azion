@@ -20,7 +20,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           "describe <edge_function_id> [flags]",
+		Use:           "describe --function-id <function_id> [flags]",
 		Short:         "Describes an Edge Function",
 		Long:          "Details an Edge Function based on the id given",
 		SilenceUsage:  true,

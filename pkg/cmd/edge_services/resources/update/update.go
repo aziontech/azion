@@ -38,13 +38,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// updateCmd represents the update command
 	updateCmd := &cobra.Command{
-		Use:           "update <service_id> <resource_id> [flags]",
+		Use:           "update --service-id <service_id> --resource-id <resource_id>[flags]",
 		Short:         "Updates a Resource",
 		Long:          `Updates a Resource based on a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources update 1234 69420 --name '/tmp/hello.txt'
+        $ azioncli edge_services resources update --service-id 1234 --resource-id 69420 --name '/tmp/hello.txt'
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 

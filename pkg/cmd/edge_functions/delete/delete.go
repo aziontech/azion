@@ -14,7 +14,7 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	cmd := &cobra.Command{
-		Use:           "delete <edge_function_id> [flags]",
+		Use:           "delete --function-id <function_id> [flags]",
 		Short:         "Deletes an Edge Function",
 		Long:          "Deletes an Edge Function based on the id given",
 		SilenceUsage:  true,

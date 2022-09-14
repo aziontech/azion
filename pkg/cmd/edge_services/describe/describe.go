@@ -22,7 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
-		Use:           "describe <service_id> [flags]",
+		Use:           "describe --service-id <service_id> [flags]",
 		Short:         "Describes an Edge Service",
 		Long:          `Details an Edge Service based on the id given`,
 		SilenceUsage:  true,
