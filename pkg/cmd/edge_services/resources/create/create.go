@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
-		Use:           "create <service_id> [flags]",
+		Use:           "create --service-id <service_id> [flags]",
 		Short:         "Creates a new Resource",
 		Long:          `Creates a new Resource in an Edge Service based on the service_id given`,
 		SilenceUsage:  true,

@@ -18,7 +18,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var service_id int64
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete <service_id> [flags]",
+		Use:           "delete --service-id <service_id> [flags]",
 		Short:         "Deletes an Edge Service",
 		Long:          `Deletes an Edge Service based on the id given`,
 		SilenceUsage:  true,

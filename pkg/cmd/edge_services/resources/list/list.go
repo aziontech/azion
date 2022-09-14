@@ -22,7 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list <service_id> [flags]",
+		Use:           "list --service-id <service_id> [flags]",
 		Short:         "Lists the Resources in a given Edge Service",
 		Long:          `Lists the Resources in a given Edge Service`,
 		SilenceUsage:  true,
