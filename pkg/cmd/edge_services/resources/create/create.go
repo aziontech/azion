@@ -20,6 +20,7 @@ import (
 const SHELL_SCRIPT string = "Shell Script"
 
 type Fields struct {
+	ServiceId   int64
 	Name        string
 	Trigger     string
 	ContentType string
@@ -32,24 +33,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
-		Use:           "create <service_id> [flags]",
+		Use:           "create --service-id <service_id> [flags]",
 		Short:         "Creates a new Resource",
 		Long:          `Creates a new Resource in an Edge Service based on the service_id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources create 1234 --name "/tmp/test.txt" --content-type text --content-file "./text.txt"
+        $ azioncli edge_services resources create --service-id 1234 --name "/tmp/test.txt" --content-type text --content-file "./text.txt"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
+			if !cmd.Flags().Changed("service-id") {
 				return errmsg.ErrorMissingServiceIdArgument
 			}
 
 			request := sdk.CreateResourceRequest{}
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
-			}
 
 			if cmd.Flags().Changed("in") {
 				var (
@@ -120,7 +117,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewResource(client, f.IOStreams.Out, ids[0], request); err != nil {
+			if err := createNewResource(client, f.IOStreams.Out, fields.ServiceId, request); err != nil {
 				return err
 			}
 
@@ -128,6 +125,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
+	createCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, "Unique identifier of the Edge Service")
 	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME> (Mandatory)")
 	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
 	createCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text> (Mandatory)")

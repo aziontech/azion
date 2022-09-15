@@ -64,7 +64,7 @@ func TestCreate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("insert your text here"))
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -100,7 +100,7 @@ func TestCreate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("#!/bin/sh"))
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -117,7 +117,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/bomb.sh", "--content-type", "shellscript", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"-s", "1234", "--name", "/tmp/bomb.sh", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -132,7 +132,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "text"})
+		cmd.SetArgs([]string{"-s", "1234", "--name", "/tmp/a.txt", "--content-type", "text"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -154,7 +154,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "--name", "/tmp/a.txt", "--content-type", "text", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/a.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)

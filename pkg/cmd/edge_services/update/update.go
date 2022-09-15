@@ -20,6 +20,7 @@ import (
 )
 
 type Fields struct {
+	Id        int64
 	Name      string
 	Active    string
 	Variables string
@@ -35,22 +36,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
-		Use:           "update <service_id> [flags]",
+		Use:           "update --service-id <service_id> [flags]",
 		Short:         "Updates an Edge Service",
 		Long:          `Updates an Edge Service`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services update 1234 --name 'Hello'
+        $ azioncli edge_services update --service-id 1234 --name 'Hello'
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either id parameter or in path should be passed
-			if len(args) < 1 && !cmd.Flags().Changed("in") {
+			if !cmd.Flags().Changed("service-id") && !cmd.Flags().Changed("in") {
 				return errmsg.ErrorMissingArgumentUpdate
 			}
 
 			request := UpdateRequestService{}
-			var id int64
 
 			if cmd.Flags().Changed("in") {
 				var (
@@ -69,13 +69,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-				id = request.Id
+				fields.Id = request.Id
 			} else {
-				ids, err := utils.ConvertIdsToInt(args[0])
-				if err != nil {
-					return utils.ErrorConvertingIdArgumentToInt
-				}
-				id = ids[0]
 
 				nameHasChanged := cmd.Flags().Changed("name")
 				if nameHasChanged {
@@ -142,13 +137,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := updateService(client, f.IOStreams.Out, id, cmd, request); err != nil {
+			if err := updateService(client, f.IOStreams.Out, fields.Id, cmd, request); err != nil {
 				return err
 			}
 
 			return nil
 		},
 	}
+	updateCmd.Flags().Int64VarP(&fields.Id, "service-id", "s", 0, "Unique identifier of the Edge Service")
 	updateCmd.Flags().StringVar(&fields.Name, "name", "", "Your Edge Service's name")
 	updateCmd.Flags().StringVar(&fields.Active, "active", "", "Whether your Edge Service should be active or not: <true|false>")
 	updateCmd.Flags().StringVar(&fields.Variables, "variables-file", "", `Path to the file containing your Edge Service's Variables.

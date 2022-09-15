@@ -15,24 +15,20 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	var service_id int64
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete <service_id> [flags]",
+		Use:           "delete --service-id <service_id> [flags]",
 		Short:         "Deletes an Edge Service",
 		Long:          `Deletes an Edge Service based on the id given`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services delete 1234
+        $ azioncli edge_services delete --service-id 1234
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
+			if !cmd.Flags().Changed("service-id") {
 				return errmsg.ErrorMissingServiceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			client, err := requests.CreateClient(f)
@@ -40,13 +36,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := deleteService(client, f.IOStreams.Out, ids[0]); err != nil {
+			if err := deleteService(client, f.IOStreams.Out, service_id); err != nil {
 				return err
 			}
 
 			return nil
 		},
 	}
+
+	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
+
 	return deleteCmd
 }
 

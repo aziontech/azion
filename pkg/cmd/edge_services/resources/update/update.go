@@ -20,6 +20,8 @@ import (
 const SHELL_SCRIPT string = "Shell Script"
 
 type Fields struct {
+	ServiceId   int64
+	ResourceId  int64
 	Name        string
 	Trigger     string
 	ContentType string
@@ -36,21 +38,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// updateCmd represents the update command
 	updateCmd := &cobra.Command{
-		Use:           "update <service_id> <resource_id> [flags]",
+		Use:           "update --service-id <service_id> --resource-id <resource_id>[flags]",
 		Short:         "Updates a Resource",
 		Long:          `Updates a Resource based on a resource_id`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources update 1234 69420 --name '/tmp/hello.txt'
+        $ azioncli edge_services resources update --service-id 1234 --resource-id 69420 --name '/tmp/hello.txt'
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if len(args) < 2 && !cmd.Flags().Changed("in") {
+			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
 				return errmsg.ErrorMissingArgumentUpdateResource
 			}
 
-			convertedIds := make([]int64, 2)
 			request := UpdateRequestResource{}
 
 			if cmd.Flags().Changed("in") {
@@ -58,10 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					file *os.File
 					err  error
 				)
-				ids, err := utils.ConvertIdsToInt(args[0])
-				if err != nil {
-					return utils.ErrorConvertingIdArgumentToInt
-				}
+
 				if fields.InPath == "-" {
 					file = os.Stdin
 				} else {
@@ -74,17 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-				convertedIds[0] = ids[0]
-				convertedIds[1] = request.Id
 			} else {
-
-				ids, err := utils.ConvertIdsToInt(args[0], args[1])
-				if err != nil {
-					return utils.ErrorConvertingIdArgumentToInt
-				}
-
-				convertedIds[0] = ids[0]
-				convertedIds[1] = ids[1]
 
 				replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
 
@@ -148,7 +136,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := updateResource(client, f.IOStreams.Out, convertedIds[0], convertedIds[1], request); err != nil {
+			if err := updateResource(client, f.IOStreams.Out, fields.ServiceId, fields.ResourceId, request); err != nil {
 				return err
 			}
 
@@ -156,6 +144,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
+	updateCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, "Unique identifier of the Edge Service")
+	updateCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, "Unique identifier of the Resource")
 	updateCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME>")
 	updateCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
 	updateCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text>")

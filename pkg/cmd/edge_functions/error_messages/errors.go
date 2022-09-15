@@ -9,7 +9,7 @@ var (
 	ErrorArgsFlag                  = errors.New("Failed to read args file")
 	ErrorParseArgs                 = errors.New("Failed to parse json args")
 	ErrorCreateFunction            = errors.New("Failed to create edge function")
-	ErrorMissingFunctionIdArgument = errors.New("You must provide a function_id as an argument. Use -h or --help for more information")
+	ErrorMissingFunctionIdArgument = errors.New("You must provide a function_id. Use -h or --help for more information")
 	ErrorMissingArgumentUpdate     = errors.New("You must provide a function_id as an argument or path to import file")
 	ErrorFailToDeleteFunction      = errors.New("Failed to delete Edge Function")
 	ErrorGetFunction               = errors.New("Failed to get Edge Function")

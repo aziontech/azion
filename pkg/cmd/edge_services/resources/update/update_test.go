@@ -41,7 +41,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234"})
+		cmd.SetArgs([]string{"-s", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -62,7 +62,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"1234", "666"})
+		cmd.SetArgs([]string{"-s", "1234", "-r", "666"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -96,7 +96,7 @@ func TestUpdate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL"})
+		cmd.SetArgs([]string{"--service-id", "1234", "--resource-id", "666", "--name", "BIRL"})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
@@ -135,7 +135,7 @@ func TestUpdate(t *testing.T) {
 		_, _ = contentFile.Write([]byte("This content is made for testing purposes"))
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"1234", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
+		cmd.SetArgs([]string{"-s", "1234", "-r", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)

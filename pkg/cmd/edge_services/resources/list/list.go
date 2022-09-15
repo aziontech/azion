@@ -18,25 +18,21 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
+	var service_id int64
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list <service_id> [flags]",
+		Use:           "list --service-id <service_id> [flags]",
 		Short:         "Lists the Resources in a given Edge Service",
 		Long:          `Lists the Resources in a given Edge Service`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources list 1234 [--details]
+        $ azioncli edge_services resources list --service-id 1234 [--details]
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
+			if !cmd.Flags().Changed("service-id") {
 				return errmsg.ErrorMissingServiceIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			client, err := requests.CreateClient(f)
@@ -44,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := listAllResources(client, f.IOStreams.Out, opts, ids[0]); err != nil {
+			if err := listAllResources(client, f.IOStreams.Out, opts, service_id); err != nil {
 				return err
 			}
 			return nil
@@ -52,6 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(listCmd, opts)
+	listCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
 
 	return listCmd
 }

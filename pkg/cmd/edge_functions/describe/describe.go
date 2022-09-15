@@ -17,33 +17,29 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	var function_id int64
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           "describe <edge_function_id> [flags]",
+		Use:           "describe --function-id <function_id> [flags]",
 		Short:         "Describes an Edge Function",
 		Long:          "Details an Edge Function based on the id given",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions describe 4312
-        $ azioncli edge_functions describe 1337 --with-code
-        $ azioncli edge_functions describe 1337 --out "./tmp/test.json" --format json
-        $ azioncli edge_functions describe 1337 --format json
+        $ azioncli edge_functions describe --function-id 4312
+        $ azioncli edge_functions describe --function-id 1337 --with-code
+        $ azioncli edge_functions describe --function-id 1337 --out "./tmp/test.json" --format json
+        $ azioncli edge_functions describe --function-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) < 1 {
+			if !cmd.Flags().Changed("function-id") {
 				return errmsg.ErrorMissingFunctionIdArgument
-			}
-
-			ids, err := utils.ConvertIdsToInt(args[0])
-			if err != nil {
-				return utils.ErrorConvertingIdArgumentToInt
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			function, err := client.Get(ctx, ids[0])
+			function, err := client.Get(ctx, function_id)
 			if err != nil {
 				return fmt.Errorf("%w: %s", errmsg.ErrorGetFunctions, err)
 			}
@@ -71,6 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, "Unique identifier of the Edge Function")
 	cmd.Flags().Bool("with-code", false, "Displays the Edge Function's code (disabled by default)")
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", "Exports the command result to the received file path")
 	cmd.Flags().StringVar(&opts.Format, "format", "", "You can change the results format by passing json value to this flag")
