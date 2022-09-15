@@ -13,6 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/spf13/cobra"
+	"github.com/theckman/yacspin"
 )
 
 type Fields struct {
@@ -35,6 +36,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			serviceRequest := sdk.CreateServiceRequest{}
+
+			spinner, err := utils.NewSpinner(" Running Edge Service Create command", f.IOStreams.Out)
+			spinner.Start()
+			// err = utils.UseSpinner(*spinner)
 
 			if cmd.Flags().Changed("in") {
 				var (
@@ -71,7 +76,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			if err := createNewService(client, f.IOStreams.Out, serviceRequest); err != nil {
+			if err := createNewService(client, f.IOStreams.Out, serviceRequest, spinner); err != nil {
 				return err
 			}
 
@@ -84,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return createCmd
 }
 
-func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateServiceRequest) error {
+func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateServiceRequest, spinner *yacspin.Spinner) error {
 	c := context.Background()
 	api := client.DefaultApi
 
@@ -95,7 +100,13 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, errMsg)
 	}
 
-	fmt.Fprintf(out, "Created Edge Service with ID %d\n", resp.Id)
+	msg := fmt.Sprintf(" Created Edge Service with ID %d\n", resp.Id)
+
+	spinner.Suffix(" Completed")
+	spinner.StopMessage(msg)
+	spinner.Stop()
+
+	// fmt.Fprintf(out, "Created Edge Service with ID %d\n", resp.Id)
 
 	return nil
 }

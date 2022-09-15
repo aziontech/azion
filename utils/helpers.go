@@ -10,9 +10,13 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/theckman/yacspin"
 )
 
 const shell = "/bin/sh"
@@ -215,4 +219,59 @@ func checkStatusCode500Error(err error) error {
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := ioutil.ReadAll(httpResp.Body)
 	return fmt.Errorf("%s", responseBody)
+}
+
+func NewSpinner(suffix string, out io.Writer) (*yacspin.Spinner, error) {
+
+	cfg := yacspin.Config{
+		Frequency:         100 * time.Millisecond,
+		CharSet:           yacspin.CharSets[7],
+		Suffix:            suffix,
+		SuffixAutoColon:   true,
+		Message:           "working",
+		StopCharacter:     "✓",
+		StopFailCharacter: "✗",
+		Writer:            out,
+		StopFailColors:    []string{"fgRed"},
+		StopFailMessage:   "failed",
+		StopColors:        []string{"fgGreen"},
+	}
+
+	spinner, err := yacspin.New(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return spinner, nil
+}
+
+func UseSpinner(spinner yacspin.Spinner) error {
+
+	// handle spinner cleanup on interrupts
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
+	defer signal.Stop(sigCh)
+
+	go func() {
+		<-sigCh
+
+		spinner.StopFailMessage("interrupted")
+
+		_ = spinner.StopFail()
+
+		os.Exit(0)
+	}()
+
+	// start animating the spinner
+	if err := spinner.Start(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateSpinnerMessage(msg string, spinner yacspin.Spinner) {
+
+	spinner.Message(msg)
 }
