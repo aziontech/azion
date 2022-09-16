@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -23,11 +24,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
-
-type publishInfo struct {
-	yesOption bool
-	noOption  bool
-}
 
 type publishCmd struct {
 	io            *iostreams.IOStreams
@@ -71,23 +67,19 @@ func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 
 func newCobraCmd(publish *publishCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
-	info := &publishInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           "publish [flags]",
-		Short:         "Publish your Web Application to Azion",
-		Long:          "Publish your Web Application to Azion",
+		Use:           msg.WebappPublishUsage,
+		Short:         msg.WebappPublishShortDescription,
+		Long:          msg.WebappPublishLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azioncli publish
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.f, info, options)
+			return publish.run(publish.f, options)
 		},
 	}
-
-	cobraCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
-	cobraCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
 
 	return cobraCmd
 }
@@ -96,10 +88,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return newCobraCmd(newPublishCmd(f))
 }
 
-func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contracts.AzionApplicationOptions) error {
-	if info.yesOption && info.noOption {
-		return ErrorYesAndNoOptions
-	}
+func (cmd *publishCmd) run(f *cmdutil.Factory, options *contracts.AzionApplicationOptions) error {
 
 	//Run build command
 	build := build.NewBuildCmd(f)
@@ -213,7 +202,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, info *publishInfo, options *contr
 		}
 	}
 
-	fmt.Fprintf(cmd.f.IOStreams.Out, "\nYour Domain name: %s\n", domainReturnedName[0])
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainSuccess, domainReturnedName[0])
 
 	return nil
 }
@@ -226,7 +215,7 @@ func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 		return err
 	}
 
-	fmt.Fprintln(cmd.f.IOStreams.Out, "Domain cache was purged")
+	fmt.Fprintln(cmd.f.IOStreams.Out, msg.WebappPublishOutputCachePurge)
 	return nil
 }
 
@@ -262,7 +251,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Function with ID %d\n", response.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetId())
 	return response.GetId(), nil
 }
 
@@ -299,7 +288,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Function with ID %d\n", idReq)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, idReq)
 	return response.GetId(), nil
 }
 
@@ -322,7 +311,7 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	}
 
 	if conf.PublishData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, "Publish pre command not specified. No action will be taken\n")
+		fmt.Fprintf(cmd.io.Out, msg.WebappPublishCmdNotSpecified)
 		return nil
 	}
 
@@ -331,13 +320,13 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, "Running publish pre command:\n\n")
+	fmt.Fprintf(cmd.io.Out, msg.WebappPublishRunningCmd)
 	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.PublishData.Cmd)
 
 	output, exitCode, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
 
 	fmt.Fprintf(cmd.io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.io.Out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
 
 	if err != nil {
 		return utils.ErrorRunningCommand
@@ -354,7 +343,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", ErrorCreateApplication, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Edge Application with ID %d\n", application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
 	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
@@ -382,7 +371,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Edge Application with ID %d\n", application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetId())
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetName(conf.Name)
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -401,7 +390,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Created Domain with ID %d\n", domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, domain.GetId())
 	return domain, nil
 }
 
@@ -414,7 +403,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Domain with ID %d\n", domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, domain.GetId())
 	return domain, nil
 }
 
@@ -428,7 +417,7 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 		return err
 	}
 
-	fmt.Fprintf(cmd.f.IOStreams.Out, "Updated Rules Engine with ID %d\n", rule.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputRulesEngineUpdate, rule.GetId())
 
 	return nil
 
