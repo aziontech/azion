@@ -1,6 +1,7 @@
 package edge_functions
 
 import (
+	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/create"
 	del "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/describe"
@@ -12,9 +13,9 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edgeFunctionsCmd := &cobra.Command{
-		Use:   "edge_functions",
-		Short: "Manages your Azion account's Edge Functions",
-		Long:  "You can create, update, delete, list and describe your Azion account's Edge Functions",
+		Use:   msg.EdgeFunctionUsage,
+		Short: msg.EdgeFunctionShortDescription,
+		Long:  msg.EdgeFunctionLongDescription,
 		Annotations: map[string]string{
 			"Category": "Build",
 		},

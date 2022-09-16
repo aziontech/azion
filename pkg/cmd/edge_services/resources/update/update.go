@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -38,9 +38,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// updateCmd represents the update command
 	updateCmd := &cobra.Command{
-		Use:           "update --service-id <service_id> --resource-id <resource_id>[flags]",
-		Short:         "Updates a Resource",
-		Long:          `Updates a Resource based on a resource_id`,
+		Use:           msg.EdgeServiceResourceUpdateUsage,
+		Short:         msg.EdgeServiceResourceUpdateShortDescription,
+		Long:          msg.EdgeServiceResourceUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -49,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
-				return errmsg.ErrorMissingArgumentUpdateResource
+				return msg.ErrorMissingArgumentUpdateResource
 			}
 
 			request := UpdateRequestResource{}
@@ -81,7 +81,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("name") {
 					name, err := cmd.Flags().GetString("name")
 					if err != nil {
-						return errmsg.ErrorInvalidNameFlag
+						return msg.ErrorInvalidNameFlag
 					}
 					request.SetName(name)
 					valueHasChanged = true
@@ -90,7 +90,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("trigger") {
 					trigger, err := cmd.Flags().GetString("trigger")
 					if err != nil {
-						return errmsg.ErrorInvalidTriggerFlag
+						return msg.ErrorInvalidTriggerFlag
 					}
 					triggerConverted := replacer.Replace(trigger)
 					request.SetTrigger(triggerConverted)
@@ -101,7 +101,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("content-type") {
 					contentType, err := cmd.Flags().GetString("content-type")
 					if err != nil {
-						return errmsg.ErrorInvalidContentTypeFlag
+						return msg.ErrorInvalidContentTypeFlag
 					}
 					contentTypeConverted := replacer.Replace(contentType)
 					request.SetContentType(contentTypeConverted)
@@ -144,13 +144,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	updateCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, "Unique identifier of the Edge Service")
-	updateCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, "Unique identifier of the Resource")
-	updateCmd.Flags().StringVar(&fields.Name, "name", "", "Your Resource's name: <PATH>/<RESOURCE_NAME>")
-	updateCmd.Flags().StringVar(&fields.Trigger, "trigger", "", "Your Resource's trigger: <Install|Reload|Uninstall>")
-	updateCmd.Flags().StringVar(&fields.ContentType, "content-type", "", "Your Resource's content-type: <shellscript|text>")
-	updateCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", "Path to the file with your Resource's content")
-	updateCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to update the fields. You can use - for reading from stdin")
+	updateCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, msg.EdgeServiceFlagId)
+	updateCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, msg.EdgeServiceResourceFlagId)
+	updateCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceResourceUpdateFlagName)
+	updateCmd.Flags().StringVar(&fields.Trigger, "trigger", "", msg.EdgeServiceResourceUpdateFlagTrigger)
+	updateCmd.Flags().StringVar(&fields.ContentType, "content-type", "", msg.EdgeServiceResourceUpdateFlagContentType)
+	updateCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", msg.EdgeServiceResourceUpdateFlagContentFile)
+	updateCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceResourceUpdateFlagIn)
 
 	return updateCmd
 }
@@ -161,12 +161,12 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 
 	resp, httpResp, err := api.PatchServiceResource(c, service_id, resource_id).UpdateResourceRequest(update.UpdateResourceRequest).Execute()
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorUpdateResource, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorUpdateResource, message)
 	}
 
-	fmt.Fprintf(out, "Updated Resource with ID %d\n", resp.Id)
+	fmt.Fprintf(out, msg.EdgeServiceResourceUpdateOutputSuccess, resp.Id)
 
 	return nil
 }

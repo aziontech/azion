@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -23,9 +23,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete --service-id <service_id> --resource-id <resource_id> [flags]",
-		Short:         "Deletes a Resource",
-		Long:          `Deletes a Resource based on the service_id and resource_id given`,
+		Use:           msg.EdgeServiceResourceDeleteUsage,
+		Short:         msg.EdgeServiceResourceDeleteShortDescription,
+		Long:          msg.EdgeServiceResourceDeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
-				return errmsg.ErrorMissingResourceIdArgument
+				return msg.ErrorMissingResourceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -49,8 +49,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deleteCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, "Unique identifier of the Edge Service")
-	deleteCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, "Unique identifier of the Resource")
+	deleteCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, msg.EdgeServiceFlagId)
+	deleteCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, msg.EdgeServiceResourceFlagId)
 
 	return deleteCmd
 }
@@ -62,13 +62,13 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 
 	httpResp, err := api.DeleteResource(c, service_id, resource_id).Execute()
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteResource, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorDeleteResource, message)
 	}
 
 	if httpResp.StatusCode == 204 {
-		fmt.Fprintf(out, "Resource %d was successfully deleted\n", resource_id)
+		fmt.Fprintf(out, msg.EdgeServiceResourceDeleteOutputSuccess, resource_id)
 	}
 
 	return nil

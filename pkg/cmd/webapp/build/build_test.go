@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/require"
@@ -118,7 +119,7 @@ Command exited with code 42
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, ErrOpeningConfigFile)
+		require.ErrorIs(t, err, msg.ErrOpeningConfigFile)
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
@@ -139,7 +140,7 @@ Command exited with code 42
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, ErrUnmarshalConfigFile)
+		require.ErrorIs(t, err, msg.ErrUnmarshalConfigFile)
 	})
 
 	t.Run("invalid env", func(t *testing.T) {
@@ -163,6 +164,6 @@ Command exited with code 42
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, ErrReadEnvFile)
+		require.ErrorIs(t, err, msg.ErrReadEnvFile)
 	})
 }

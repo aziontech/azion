@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	msg "github.com/aziontech/azion-cli/messages/configure"
+
 	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
@@ -81,8 +83,8 @@ func (t *Token) Save() error {
 	}
 
 	// TODO: provide a better description after token is saved
-	fmt.Fprintf(t.out, "Token saved in %v\n", t.filepath)
-	fmt.Fprintln(t.out, "This token will be used by default when calling any command")
+	fmt.Fprintf(t.out, msg.TokenSavedIn, t.filepath)
+	fmt.Fprintln(t.out, msg.TokenUsedIn)
 
 	return nil
 }

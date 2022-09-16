@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -22,9 +22,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list --service-id <service_id> [flags]",
-		Short:         "Lists the Resources in a given Edge Service",
-		Long:          `Lists the Resources in a given Edge Service`,
+		Use:           msg.EdgeServiceResourceListUsage,
+		Short:         msg.EdgeServiceResourceListShortDescription,
+		Long:          msg.EdgeServiceResourceListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return errmsg.ErrorMissingServiceIdArgument
+				return msg.ErrorMissingServiceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -69,9 +69,9 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 		Execute()
 
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorGetResources, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorGetResources, message)
 	}
 
 	resources := resp.Resources

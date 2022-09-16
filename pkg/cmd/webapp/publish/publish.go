@@ -11,12 +11,12 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	errmsg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -301,13 +301,13 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	file, err := cmd.fileReader(jsonConf)
 	if err != nil {
 		fmt.Println(jsonConf)
-		return ErrorOpeningConfigFile
+		return msg.ErrorOpeningConfigFile
 	}
 
 	conf := &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
-		return ErrorUnmarshalConfigFile
+		return msg.ErrorUnmarshalConfigFile
 	}
 
 	if conf.PublishData.Cmd == "" {
@@ -341,7 +341,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		return 0, fmt.Errorf("%w: %s", ErrorCreateApplication, err)
+		return 0, fmt.Errorf("%w: %s", msg.ErrorCreateApplication, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
@@ -349,7 +349,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorUpdateApplication, err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -357,7 +357,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstance(ctx, &reqIns)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", ErrorCreateInstance, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCreateInstance, err)
 	}
 	InstanceId = instance.GetId()
 	return application.GetId(), nil
@@ -369,7 +369,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
-		return fmt.Errorf("%s: %w", ErrorUpdateApplication, err)
+		return fmt.Errorf("%s: %w", msg.ErrorUpdateApplication, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetId())
 	reqIns := apiapp.UpdateInstanceRequest{}
@@ -388,7 +388,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
+		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, domain.GetId())
 	return domain, nil
@@ -401,7 +401,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", ErrorCreateDomain, err)
+		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, domain.GetId())
 	return domain, nil

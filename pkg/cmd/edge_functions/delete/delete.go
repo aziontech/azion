@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -14,9 +14,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	cmd := &cobra.Command{
-		Use:           "delete --function-id <function_id> [flags]",
-		Short:         "Deletes an Edge Function",
-		Long:          "Deletes an Edge Function based on the id given",
+		Use:           msg.EdgeFunctionDeleteUsage,
+		Short:         msg.EdgeFunctionDeleteShortDescription,
+		Long:          msg.EdgeFunctionDeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -24,7 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				return errmsg.ErrorMissingFunctionIdArgument
+				return msg.ErrorMissingFunctionIdArgument
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -33,17 +33,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err := client.Delete(ctx, function_id)
 			if err != nil {
-				return fmt.Errorf("%w: %s", errmsg.ErrorFailToDeleteFunction, err)
+				return fmt.Errorf("%w: %s", msg.ErrorFailToDeleteFunction, err)
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, "Edge Function %d was successfully deleted\n", function_id)
+			fmt.Fprintf(out, msg.EdgeFunctionDeleteOutputSuccess, function_id)
 
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, "Unique identifier of the Edge Function")
+	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
 
 	return cmd
 }

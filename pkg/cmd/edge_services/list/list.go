@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -21,9 +21,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           "list [flags]",
-		Short:         "Lists your account's Edge Services",
-		Long:          `Lists your account's Edge Services`,
+		Use:           msg.EdgeServiceListUsage,
+		Short:         msg.EdgeServiceListShortDescription,
+		Long:          msg.EdgeServiceListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -63,9 +63,9 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 		Execute()
 
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorGetServices, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorGetServices, message)
 	}
 
 	services := resp.Services

@@ -1,6 +1,7 @@
 package webapp
 
 import (
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
 	initCmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/init"
 	publishCmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/publish"
@@ -10,9 +11,9 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	webappCmd := &cobra.Command{
-		Use:   "webapp",
-		Short: "Create Web Applications on Azion's platform",
-		Long:  `Create Web Applications on Azion's platform`,
+		Use:   msg.WebappUsage,
+		Short: msg.WebappShortDescription,
+		Long:  msg.WebappLongDescription,
 		Annotations: map[string]string{
 			"Category": "Build",
 		},

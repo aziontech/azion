@@ -1,4 +1,4 @@
-package errormessages
+package edgefunctions
 
 import "errors"
 
