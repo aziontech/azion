@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -26,9 +27,9 @@ type buildCmd struct {
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	command := newBuildCmd(f)
 	cobraCmd := &cobra.Command{
-		Use:           "build [flags]",
-		Short:         "Build your Web application",
-		Long:          "Build your Web application",
+		Use:           msg.WebappBuildUsage,
+		Short:         msg.WebappBuildShortDescription,
+		Long:          msg.WebappBuildLongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
@@ -66,13 +67,13 @@ func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 
 	file, err := c.fileReader(path + c.configRelativePath)
 	if err != nil {
-		return nil, ErrOpeningConfigFile
+		return nil, msg.ErrOpeningConfigFile
 	}
 
 	conf := &contracts.AzionApplicationConfig{}
 
 	if err := json.Unmarshal(file, &conf); err != nil {
-		return nil, ErrUnmarshalConfigFile
+		return nil, msg.ErrUnmarshalConfigFile
 	}
 
 	return conf, nil
@@ -86,24 +87,24 @@ func (c *buildCmd) run() error {
 
 	envs, err := c.envLoader(conf.BuildData.Env)
 	if err != nil {
-		return ErrReadEnvFile
+		return msg.ErrReadEnvFile
 	}
 
 	if conf.BuildData.Cmd == "" {
-		fmt.Fprintf(c.io.Out, "Build step command not specified. No action will be taken\n")
+		fmt.Fprintf(c.io.Out, msg.WebappBuildCmdNotSpecified)
 		return nil
 	}
 
-	fmt.Fprintf(c.io.Out, "Running build step command:\n\n")
+	fmt.Fprintf(c.io.Out, msg.WebappBuildRunningCmd)
 	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
 
 	out, exitCode, err := c.commandRunner(conf.BuildData.Cmd, envs)
 
 	fmt.Fprintf(c.io.Out, "%s\n", out)
-	fmt.Fprintf(c.io.Out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(c.io.Out, msg.WebappOutput, exitCode)
 
 	if err != nil {
-		return ErrFailedToRunCommand
+		return msg.ErrFailedToRunCommand
 	}
 
 	return nil

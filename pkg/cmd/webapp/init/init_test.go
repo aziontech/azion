@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -32,7 +33,7 @@ func TestCobraCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.ErrorIs(t, err, ErrorPackageJsonNotFound)
+		require.ErrorIs(t, err, msg.ErrorPackageJsonNotFound)
 	})
 
 	t.Run("with unsupported type", func(t *testing.T) {
@@ -60,7 +61,7 @@ func TestCobraCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.ErrorIs(t, err, ErrorYesAndNoOptions)
+		require.ErrorIs(t, err, msg.ErrorYesAndNoOptions)
 	})
 
 	t.Run("success with javascript", func(t *testing.T) {

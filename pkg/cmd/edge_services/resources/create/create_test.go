@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	errmsg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
@@ -141,12 +141,12 @@ func TestCreate(t *testing.T) {
 		require.EqualError(t, err, "You must provide --name, --content-type and --content-file flags when --in flag is not sent")
 	})
 
-	t.Run("service not found", func(t *testing.T) {
+	t.Run("content file cannot be empty", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
 			httpmock.REST("POST", "edge_services/1234/resources"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not found"),
+			httpmock.StatusStringResponse(http.StatusBadRequest, "Bad Request"),
 		)
 		f, _, _ := testutils.NewFactory(mock)
 
@@ -159,6 +159,6 @@ func TestCreate(t *testing.T) {
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "Failed to create Resource: Not found")
+		require.EqualError(t, err, "Content file may not be empty")
 	})
 }

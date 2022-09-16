@@ -1,6 +1,7 @@
 package edge_services
 
 import (
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/describe"
@@ -14,9 +15,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// edgeServicesCmd represents the edgeServices command
 	edgeServicesCmd := &cobra.Command{
-		Use:   "edge_services",
-		Short: "Manages your Azion account's Edge Services",
-		Long:  `You can create, update, delete, list and describe your Azion account's Edge Services`,
+		Use:   msg.EdgeServiceUsage,
+		Short: msg.EdgeServiceShortDescription,
+		Long:  msg.EdgeServiceLongDescription,
 		Annotations: map[string]string{
 			"Category": "Deliver",
 		},

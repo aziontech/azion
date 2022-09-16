@@ -1,6 +1,7 @@
 package resources
 
 import (
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/describe"
@@ -13,9 +14,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// resourcesCmd represents the resources command
 	resourcesCmd := &cobra.Command{
-		Use:   "resources",
-		Short: "Manages resources in a given Edge Service",
-		Long:  `You can create, update, delete, list and describe Resources in a given Edge Service`,
+		Use:   msg.EdgeServiceResourceUsage,
+		Short: msg.EdgeServiceResourceShortDescription,
+		Long:  msg.EdgeServiceResourceLongDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

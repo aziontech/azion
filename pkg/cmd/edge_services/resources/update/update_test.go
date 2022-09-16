@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	errmsg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"

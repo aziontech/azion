@@ -3,6 +3,8 @@ package configure
 import (
 	"fmt"
 
+	"github.com/aziontech/azion-cli/messages/configure"
+	msg "github.com/aziontech/azion-cli/messages/configure"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
@@ -14,9 +16,9 @@ var configureToken string
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// configureCmd represents the configure command
 	configureCmd := &cobra.Command{
-		Use:   "configure",
-		Short: "Configure parameters and credentials",
-		Long:  `This command configures CLI parameters and credentials used for connecting to our services.`,
+		Use:   msg.ConfigureUsage,
+		Short: msg.ConfigureShortDescription,
+		Long:  configure.ConfigureLongDescription,
 		Annotations: map[string]string{
 			"IsAdditional": "true",
 		},
@@ -54,7 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	configureCmd.SetOut(f.IOStreams.Out)
 	configureCmd.SetErr(f.IOStreams.Err)
 
-	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", "Save provided token locally to use on any command")
+	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", msg.ConfigureFlagToken)
 
 	return configureCmd
 }

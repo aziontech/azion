@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -72,9 +73,9 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &initInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           "init [flags]",
-		Short:         "Use Azion templates along with your Web applications",
-		Long:          `Use Azion templates along with your Web applications`,
+		Use:           msg.WebappInitUsage,
+		Short:         msg.WebappInitShortDescription,
+		Long:          msg.WebappInitLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -86,12 +87,12 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 			return init.run(info, options)
 		},
 	}
-	cobraCmd.Flags().StringVar(&info.name, "name", "", "Your Web Application's name")
+	cobraCmd.Flags().StringVar(&info.name, "name", "", msg.WebappInitFlagName)
 	_ = cobraCmd.MarkFlagRequired("name")
-	cobraCmd.Flags().StringVar(&info.typeLang, "type", "", "Your Web Application's type <javascript|flareact|nextjs>")
+	cobraCmd.Flags().StringVar(&info.typeLang, "type", "", msg.WebappInitFlagType)
 	_ = cobraCmd.MarkFlagRequired("type")
-	cobraCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, "Force yes to all user input")
-	cobraCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, "Force no to all user input")
+	cobraCmd.Flags().BoolVarP(&info.yesOption, "yes", "y", false, msg.WebappInitFlagYes)
+	cobraCmd.Flags().BoolVarP(&info.noOption, "no", "n", false, msg.WebappInitFlagNo)
 
 	return cobraCmd
 }
@@ -102,7 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptions) error {
 	if info.yesOption && info.noOption {
-		return ErrorYesAndNoOptions
+		return msg.ErrorYesAndNoOptions
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
@@ -136,7 +137,7 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 		if info.noOption || info.yesOption {
 			shouldFetchTemplates = yesNoFlagToResponse(info)
 		} else {
-			fmt.Fprintf(cmd.io.Out, "%s: ", msgContentOverridden)
+			fmt.Fprintf(cmd.io.Out, "%s: ", msg.WebAppInitContentOverridden)
 			fmt.Fscanln(cmd.io.In, &response)
 			shouldFetchTemplates, err = utils.ResponseToBool(response)
 			if err != nil {
@@ -161,7 +162,7 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		fmt.Fprintf(cmd.io.Out, "%s\n", msgCmdSuccess)
+		fmt.Fprintf(cmd.io.Out, "%s\n", msg.WebAppInitCmdSuccess)
 	}
 
 	err = cmd.runInitCmdLine()
@@ -206,17 +207,17 @@ func (cmd *initCmd) runInitCmdLine() error {
 	file, err := cmd.fileReader(jsonConf)
 	if err != nil {
 		fmt.Println(jsonConf)
-		return ErrorOpeningConfigFile
+		return msg.ErrorOpeningConfigFile
 	}
 
 	conf := &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
-		return ErrorUnmarshalConfigFile
+		return msg.ErrorUnmarshalConfigFile
 	}
 
 	if conf.InitData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, "Init step command not specified. No action will be taken\n")
+		fmt.Fprintf(cmd.io.Out, msg.WebappInitCmdNotSpecified)
 		return nil
 	}
 
@@ -225,13 +226,13 @@ func (cmd *initCmd) runInitCmdLine() error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, "Running init step command:\n\n")
+	fmt.Fprintf(cmd.io.Out, msg.WebappInitRunningCmd)
 	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.InitData.Cmd)
 
 	output, exitCode, err := cmd.commandRunner(conf.InitData.Cmd, envs)
 
 	fmt.Fprintf(cmd.io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.io.Out, "\nCommand exited with code %d\n", exitCode)
+	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
 
 	if err != nil {
 		return utils.ErrorRunningCommand
@@ -243,17 +244,17 @@ func (cmd *initCmd) runInitCmdLine() error {
 func (cmd *initCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *initInfo) error {
 	file, err := cmd.fileReader(info.pathWorkingDir + "/azion/azion.json")
 	if err != nil {
-		return ErrorOpeningAzionFile
+		return msg.ErrorOpeningAzionFile
 	}
 	err = json.Unmarshal(file, &options)
 	if err != nil {
-		return ErrorUnmarshalAzionFile
+		return msg.ErrorUnmarshalAzionFile
 	}
 	options.Name = info.name
 
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
-		return ErrorUnmarshalAzionFile
+		return msg.ErrorUnmarshalAzionFile
 	}
 
 	err = cmd.writeFile(info.pathWorkingDir+"/azion/azion.json", data, 0644)

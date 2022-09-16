@@ -8,6 +8,7 @@ var (
 	ErrorConvertingIdArgumentToInt  = errors.New("You must provide a valid id")
 	ErrorConvertingStringToBool     = errors.New("You must provide a valid value. Use -h or --help for more information")
 	ErrorHandlingFile               = errors.New("You must provide a valid file name. Use -h or --help for more information")
+	ErrorEmptyFile                  = errors.New("Content file may not be empty")
 	ErrorOpeningFile                = errors.New("Failed to open file")
 	ErrorInvalidVariablesFileFormat = errors.New("You must provide a valid variables file content. Use -h or --help for more information")
 	ErrorInternalServerError        = errors.New("Something went wrong, please try again")

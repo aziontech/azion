@@ -3,6 +3,7 @@ package version
 import (
 	"fmt"
 
+	msg "github.com/aziontech/azion-cli/messages/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -12,9 +13,9 @@ var BinVersion = "development"
 // versionCmd represents the version command
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	versionCmd := &cobra.Command{
-		Use:   "version",
-		Short: "Returns the binary version",
-		Long:  `Returns the binary version`,
+		Use:   msg.VersionUsage,
+		Short: msg.VersionShortDescription,
+		Long:  msg.VersionLongDescription,
 		Annotations: map[string]string{
 			"IsAdditional": "true",
 		},
