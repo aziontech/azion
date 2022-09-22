@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmd/configure"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
@@ -19,11 +20,9 @@ import (
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "azioncli",
-		Short: "Azion-CLI",
-		Long: `Interact easily with Azion services.
-
-Azion CLI is currently in Beta. We’d love to hear your feedback at https://forms.gle/uBBkyXZCVcrgpvAB8`,
+		Use:   msg.RootUsage,
+		Short: msg.RootShortDescription,
+		Long:  msg.RootLongDescription,
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},

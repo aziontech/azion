@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -24,9 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	createCmd := &cobra.Command{
-		Use:           "create [flags]",
-		Short:         "Creates a new Edge Service",
-		Long:          `Creates a new Edge Service`,
+		Use:           msg.EdgeServiceCreateUsage,
+		Short:         msg.EdgeServiceCreateShortDescription,
+		Long:          msg.EdgeServiceCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -56,11 +56,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("name") {
-					return errmsg.ErrorMandatoryName
+					return msg.ErrorMandatoryName
 				}
 				name, err := cmd.Flags().GetString("name")
 				if err != nil {
-					return errmsg.ErrorInvalidNameFlag
+					return msg.ErrorInvalidNameFlag
 				}
 				serviceRequest.SetName(name)
 
@@ -78,8 +78,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	createCmd.Flags().StringVar(&fields.Name, "name", "", "Your Edge Service's name (Mandatory)")
-	createCmd.Flags().StringVar(&fields.InPath, "in", "", "Uses provided file path to create an Edge Service. You can use - for reading from stdin")
+	createCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceCreateFlagName)
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceCreateFlagIn)
 
 	return createCmd
 }
@@ -90,12 +90,12 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 
 	resp, httpResp, err := api.NewService(c).CreateServiceRequest(request).Execute()
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorCreateService, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorCreateService, message)
 	}
 
-	fmt.Fprintf(out, "Created Edge Service with ID %d\n", resp.Id)
+	fmt.Fprintf(out, msg.EdgeServiceCreateOutputSuccess, resp.Id)
 
 	return nil
 }

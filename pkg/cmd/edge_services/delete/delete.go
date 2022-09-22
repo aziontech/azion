@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -18,9 +18,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var service_id int64
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           "delete --service-id <service_id> [flags]",
-		Short:         "Deletes an Edge Service",
-		Long:          `Deletes an Edge Service based on the id given`,
+		Use:           msg.EdgeServiceDeleteUsage,
+		Short:         msg.EdgeServiceDeleteShortDescription,
+		Long:          msg.EdgeServiceDeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -28,7 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return errmsg.ErrorMissingServiceIdArgument
+				return msg.ErrorMissingServiceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
+	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, msg.EdgeServiceFlagId)
 
 	return deleteCmd
 }
@@ -57,13 +57,13 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64) error
 	httpResp, err := api.DeleteService(c, service_id).Execute()
 
 	if err != nil {
-		errMsg := utils.ErrorPerStatusCode(httpResp, err)
+		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", errmsg.ErrorDeleteService, errMsg)
+		return fmt.Errorf("%w: %s", msg.ErrorDeleteService, message)
 	}
 
 	if httpResp.StatusCode == 204 {
-		fmt.Fprintf(out, "Service %d was successfully deleted\n", service_id)
+		fmt.Fprintf(out, msg.EdgeServiceDeleteOutputSuccess, service_id)
 	}
 
 	return nil

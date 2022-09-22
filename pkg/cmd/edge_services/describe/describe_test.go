@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_services/error_messages"
+	errmsg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -19,8 +19,8 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_services/1234/resources/666"),
-			httpmock.StringResponse("Error: You must provide a service_id and a resource_id as arguments. Use -h or --help for more information"),
+			httpmock.REST("GET", "edge_services/1234"),
+			httpmock.StringResponse("Error: You must provide a service_id. Use -h or --help for more information"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)

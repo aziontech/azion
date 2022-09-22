@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
-	errmsg "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/error_messages"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/printer"
@@ -17,9 +17,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           "list [flags]",
-		Short:         "Lists your account's Edge Functions",
-		Long:          "Lists your account's Edge Functions",
+		Use:           msg.EdgeFunctionListUsage,
+		Short:         msg.EdgeFunctionListShortDescription,
+		Long:          msg.EdgeFunctionListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			functions, err := client.List(ctx, opts)
 			if err != nil {
-				return fmt.Errorf("%w: %s", errmsg.ErrorGetFunctions, err)
+				return fmt.Errorf("%w: %s", msg.ErrorGetFunctions, err)
 			}
 
 			out := f.IOStreams.Out

@@ -1,4 +1,4 @@
-package errormessages
+package edgeservices
 
 import "errors"
 

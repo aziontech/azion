@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -186,7 +187,7 @@ func TestPublishCmd(t *testing.T) {
 		cmd := newPublishCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
-		require.ErrorIs(t, err, ErrorCreateApplication)
+		require.ErrorIs(t, err, msg.ErrorCreateApplication)
 	})
 
 	t.Run("create application success", func(t *testing.T) {
