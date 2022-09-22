@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-        $ azioncli build
+        $ azioncli webapp build
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return command.run()
