@@ -97,5 +97,5 @@ The accepted format for defining variables is one <KEY>=<VALUE> per line`
 	EdgeServiceResourceUpdateFlagContentType  = "Your Resource's content-type: <shellscript|text>"
 	EdgeServiceResourceUpdateFlagContentFile  = "Path to the file with your Resource's content"
 	EdgeServiceResourceUpdateFlagIn           = "Uses provided file path to update a Resource. You can use - for reading from stdin"
-	EdgeServiceResourceUpdateOutputSuccess    = "Updated Edge Service with ID %d\n"
+	EdgeServiceResourceUpdateOutputSuccess    = "Updated Resource with ID %d\n"
 )
