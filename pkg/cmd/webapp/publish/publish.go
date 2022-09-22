@@ -74,7 +74,7 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli publish
+        $ azioncli webapp publish
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f, options)
