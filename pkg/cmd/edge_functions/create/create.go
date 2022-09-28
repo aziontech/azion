@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions create --name myjsfunc --code ./mycode/function.js --active true
+        $ azioncli edge_functions create --name myjsfunc --code ./mycode/function.js --active false
         $ azioncli edge_functions create --name withargs --code ./mycode/function.js --args ./args.json --active true
         $ azioncli edge_functions create --in "create.json"
         `),
@@ -116,6 +116,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionCreateFlagActive)
 	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionCreateFlagArgs)
 	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionCreateFlagIn)
+	flags.BoolP("help", "h", false, msg.EdgeFunctionCreateHelpFlag)
 
 	return cmd
 }

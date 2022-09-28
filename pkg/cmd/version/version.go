@@ -16,9 +16,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.VersionUsage,
 		Short: msg.VersionShortDescription,
 		Long:  msg.VersionLongDescription,
-		Annotations: map[string]string{
-			"IsAdditional": "true",
-		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintln(f.IOStreams.Out, "azioncli version "+BinVersion)
 		},

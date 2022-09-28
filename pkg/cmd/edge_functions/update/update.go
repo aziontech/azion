@@ -39,6 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azioncli edge_functions update --function-id 1234 --name 'Hello'
         $ azioncli edge_functions update -f 4185 --code ./mycode/function.js --args ./mycode/myargs.json
+		$ azioncli edge_functions update -f 9123 --active true
         $ azioncli edge_functions update -f 9123 --active false
         $ azioncli edge_functions update --in "update.json"
         `),
@@ -126,6 +127,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionUpdateFlagArgs)
 	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionUpdateFlagActive)
 	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionUpdateFlagIn)
+	flags.BoolP("help", "h", false, msg.EdgeFunctionUpdateHelpFlag)
 
 	return cmd
 }

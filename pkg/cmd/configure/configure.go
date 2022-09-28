@@ -19,9 +19,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.ConfigureUsage,
 		Short: msg.ConfigureShortDescription,
 		Long:  configure.ConfigureLongDescription,
-		Annotations: map[string]string{
-			"IsAdditional": "true",
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			t, err := token.New(&token.Config{
 				Client: f.HttpClient,
