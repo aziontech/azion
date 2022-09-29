@@ -46,7 +46,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
 	rootCmd.AddCommand(webapp.NewCmd(f))
-
+	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 	return rootCmd
 }
 

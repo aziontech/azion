@@ -51,11 +51,9 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	}
 
 	var (
-		buildCommands      []string
-		deliverCommands    []string
-		additionalCommands []string
-		subcmdCommands     []string
-		examples           []string
+		baseCommands   []string
+		subcmdCommands []string
+		examples       []string
 	)
 
 	for _, c := range command.Commands() {
@@ -72,20 +70,9 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 			// Help of subcommand
 			subcmdCommands = append(subcmdCommands, s)
 			continue
-		}
-
-		category, ok := c.Annotations["Category"]
-		if !ok {
-			// Command does not have a category
-			additionalCommands = append(additionalCommands, s)
+		} else {
+			baseCommands = append(baseCommands, s)
 			continue
-		}
-
-		switch category {
-		case "Build":
-			buildCommands = append(buildCommands, s)
-		case "Deliver":
-			deliverCommands = append(deliverCommands, s)
 		}
 	}
 
@@ -110,20 +97,12 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
 
-	if len(buildCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"BUILD", strings.Join(buildCommands, "\n")})
-	}
-
-	if len(deliverCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"DELIVER", strings.Join(deliverCommands, "\n")})
+	if len(baseCommands) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(baseCommands, "\n")})
 	}
 
 	if len(subcmdCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(subcmdCommands, "\n")})
-	}
-
-	if len(additionalCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"ADDITIONAL COMMANDS", strings.Join(additionalCommands, "\n")})
+		helpEntries = append(helpEntries, helpEntry{"SUBCOMMANDS", strings.Join(subcmdCommands, "\n")})
 	}
 
 	if len(examples) > 0 {

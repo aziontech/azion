@@ -18,9 +18,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.EdgeServiceUsage,
 		Short: msg.EdgeServiceShortDescription,
 		Long:  msg.EdgeServiceLongDescription,
-		Annotations: map[string]string{
-			"Category": "Deliver",
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

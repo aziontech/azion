@@ -16,9 +16,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.EdgeFunctionUsage,
 		Short: msg.EdgeFunctionShortDescription,
 		Long:  msg.EdgeFunctionLongDescription,
-		Annotations: map[string]string{
-			"Category": "Build",
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -29,6 +26,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edgeFunctionsCmd.AddCommand(update.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(describe.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(list.NewCmd(f))
+	edgeFunctionsCmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionHelpFlag)
 
 	return edgeFunctionsCmd
 }
