@@ -9,8 +9,9 @@ var (
 
 	//Edge Functions cmd
 	EdgeFunctionUsage            = "edge_functions <subcommand>"
-	EdgeFunctionShortDescription = "Manages Edge Functions"
+	EdgeFunctionShortDescription = "Manages your Azion account's Edge Functions"
 	EdgeFunctionLongDescription  = "Manages serverless functions on the Edge Functions library"
+	EdgeFunctionHelpFlag         = "Displays more information about the edge_functions command"
 
 	//create cmd
 	EdgeFunctionCreateUsage            = "create [flags]"
@@ -22,12 +23,14 @@ var (
 	EdgeFunctionCreateFlagArgs         = "Path to the Edge Function's arguments JSON file"
 	EdgeFunctionCreateFlagIn           = "Given file path to create an Edge Function; you can use the “-” character for reading from stdin"
 	EdgeFunctionCreateOutputSuccess    = "Created Edge Function with ID %d\n"
+	EdgeFunctionCreateHelpFlag         = "Displays more information about the create subcommand"
 
 	//delete cmd
 	EdgeFunctionDeleteUsage            = "delete --function-id <function_id> [flags]"
 	EdgeFunctionDeleteShortDescription = "Removes an Edge Function"
 	EdgeFunctionDeleteLongDescription  = "Removes an Edge Function from the Edge Functions library based on its given ID"
 	EdgeFunctionDeleteOutputSuccess    = "Edge Function %d was successfully deleted\n"
+	EdgeFunctionDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
 	//describe cmd
 	EdgeFunctionDescribeUsage            = "describe --function-id <function_id> [flags]"
@@ -36,11 +39,13 @@ var (
 	EdgeFunctionDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
 	EdgeFunctionDescribeFlagFormat       = "Changes the output format passing a json value to the flag"
 	EdgeFunctionDescribeFlagWithCode     = "Displays the Edge Function's code; disabled by default"
+	EdgeFunctionDescribeHelpFlag         = "Displays more information about the describe command"
 
 	//list cmd
 	EdgeFunctionListUsage            = "list [flags]"
 	EdgeFunctionListShortDescription = "Displays your account's Edge Functions"
 	EdgeFunctionListLongDescription  = "Displays all functions in the user account’s Edge Functions library"
+	EdgeFunctionListHelpFlag         = "Displays more information about the list subcommand"
 
 	//update cmd
 	EdgeFunctionUpdateUsage            = "update --function-id <function_id> [flags]"
@@ -52,4 +57,5 @@ var (
 	EdgeFunctionUpdateFlagArgs         = "Path and name of the JSON file containing the Edge Function's arguments"
 	EdgeFunctionUpdateFlagIn           = "Given path and JSON file to automatically update the Edge Function attributes; you can use the “-” character for reading from stdin"
 	EdgeFunctionUpdateOutputSuccess    = "Updated Edge Function with ID %d\n"
+	EdgeFunctionUpdateHelpFlag         = "Displays more information about the update subcommand"
 )

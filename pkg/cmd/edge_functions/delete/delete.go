@@ -44,6 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
+	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDeleteHelpFlag)
 
 	return cmd
 }

@@ -14,9 +14,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.WebappUsage,
 		Short: msg.WebappShortDescription,
 		Long:  msg.WebappLongDescription,
-		Annotations: map[string]string{
-			"Category": "Build",
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

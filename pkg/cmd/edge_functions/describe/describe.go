@@ -71,6 +71,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().Bool("with-code", false, msg.EdgeFunctionDescribeFlagWithCode)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeFunctionDescribeFlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeFunctionDescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDescribeHelpFlag)
 
 	return cmd
 }
