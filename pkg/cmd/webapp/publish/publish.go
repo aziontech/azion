@@ -67,21 +67,24 @@ func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 
 func newCobraCmd(publish *publishCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
-	cobraCmd := &cobra.Command{
+	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
 		Long:          msg.WebappPublishLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli webapp publish
-        `),
+		$ azioncli webapp publish --help
+		$ azioncli webapp publish --yes
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f, options)
 		},
 	}
 
-	return cobraCmd
+	publishCmd.Flags().BoolP("help", "h", false, msg.WebappPublishFlagHelp)
+
+	return publishCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {

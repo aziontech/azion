@@ -30,7 +30,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services create --name "Hello"
+		$ azioncli edge_services create --name "Hello"
+		$ azioncli edge_services create --in "<path>/create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -80,6 +81,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 	createCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceCreateFlagName)
 	createCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceCreateFlagIn)
+	createCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceCreateFlagHelp)
 
 	return createCmd
 }

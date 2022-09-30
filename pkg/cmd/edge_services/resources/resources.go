@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/delete"
@@ -17,6 +18,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.EdgeServiceResourceUsage,
 		Short: msg.EdgeServiceResourceShortDescription,
 		Long:  msg.EdgeServiceResourceLongDescription,
+		Example: heredoc.Doc(`
+		$ azioncli edge_services resources --help
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -26,5 +30,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	resourcesCmd.AddCommand(delete.NewCmd(f))
 	resourcesCmd.AddCommand(create.NewCmd(f))
 	resourcesCmd.AddCommand(update.NewCmd(f))
+	resourcesCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceHelpFlag)
 	return resourcesCmd
 }

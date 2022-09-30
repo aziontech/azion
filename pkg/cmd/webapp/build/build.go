@@ -26,7 +26,7 @@ type buildCmd struct {
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	command := newBuildCmd(f)
-	cobraCmd := &cobra.Command{
+	buildCmd := &cobra.Command{
 		Use:           msg.WebappBuildUsage,
 		Short:         msg.WebappBuildShortDescription,
 		Long:          msg.WebappBuildLongDescription,
@@ -39,7 +39,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return command.run()
 		},
 	}
-	return cobraCmd
+
+	buildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
+
+	return buildCmd
 }
 
 func newBuildCmd(f *cmdutil.Factory) *buildCmd {

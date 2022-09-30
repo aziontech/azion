@@ -27,8 +27,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services list [--details]
-        `),
+		$ azioncli edge_services list [--details]
+		$ azioncli edge_services list --order_by "id"
+		$ azioncli edge_services list --page 1  
+		$ azioncli edge_services list --page_size 5
+		$ azioncli edge_services list --sort "asc" 
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := requests.CreateClient(f)
 			if err != nil {
@@ -43,6 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(listCmd, opts)
+	listCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceListFlagHelp)
 
 	return listCmd
 }
