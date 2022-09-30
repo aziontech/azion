@@ -67,7 +67,7 @@ func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 
 func newCobraCmd(publish *publishCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
-	cobraCmd := &cobra.Command{
+	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
 		Long:          msg.WebappPublishLongDescription,
@@ -82,7 +82,9 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 		},
 	}
 
-	return cobraCmd
+	publishCmd.Flags().BoolP("help", "h", false, msg.WebappPublishFlagHelp)
+
+	return publishCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
