@@ -79,6 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	describeCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, msg.EdgeServiceResourceFlagId)
 	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeServiceFlagOut)
 	describeCmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeServiceFlagFormat)
+	describeCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceDescribeFlagHelp)
 
 	return describeCmd
 

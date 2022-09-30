@@ -45,6 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, msg.EdgeServiceFlagId)
+	deleteCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceDeleteFlagHelp)
 
 	return deleteCmd
 }

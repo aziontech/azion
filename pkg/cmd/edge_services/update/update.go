@@ -149,6 +149,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	updateCmd.Flags().StringVar(&fields.Active, "active", "", msg.EdgeServiceUpdateFlagActive)
 	updateCmd.Flags().StringVar(&fields.Variables, "variables-file", "", msg.EdgeServiceUpdateFlagVariables)
 	updateCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceUpdateFlagIn)
+	updateCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceUpdateFlagHelp)
 
 	return updateCmd
 }

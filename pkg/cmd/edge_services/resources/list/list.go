@@ -49,6 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(listCmd, opts)
 	listCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
+	listCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceListFlagHelp)
 
 	return listCmd
 }

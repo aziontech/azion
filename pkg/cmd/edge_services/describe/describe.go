@@ -28,8 +28,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services describe --service-id 4312
-        $ azioncli edge_services describe --service-id 1337 --with-variables
+		$ azioncli edge_services describe --service-id 4312
+		$ azioncli edge_services describe --service-id 1337 --with-variables
+		$ azioncli edge_services describe --service-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
@@ -78,6 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	describeCmd.Flags().Bool("with-variables", false, msg.EdgeServiceDescribeFlagWithVariable)
 	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeServiceFlagOut)
 	describeCmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeServiceFlagFormat)
+	describeCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceDescribeHelpFlag)
 
 	return describeCmd
 
