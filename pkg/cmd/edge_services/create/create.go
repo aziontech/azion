@@ -30,7 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services create --name "Hello"
+		$ azioncli edge_services create --name "Hello"
 		$ azioncli edge_services create --in "<path>/create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {

@@ -97,16 +97,16 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
 
+	if len(examples) > 0 {
+		helpEntries = append(helpEntries, helpEntry{"EXAMPLES", strings.Join(examples, "\n")})
+	}
+
 	if len(baseCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(baseCommands, "\n")})
 	}
 
 	if len(subcmdCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{"SUBCOMMANDS", strings.Join(subcmdCommands, "\n")})
-	}
-
-	if len(examples) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"EXAMPLES", strings.Join(examples, "\n")})
 	}
 
 	flagUsages := command.LocalFlags().FlagUsages()
