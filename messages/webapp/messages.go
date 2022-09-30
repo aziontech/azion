@@ -7,33 +7,36 @@ var (
 
 	//webapp cmd
 	WebappUsage            = "webapp"
-	WebappShortDescription = "Create Web Applications on Azion's platform"
-	WebappLongDescription  = "Create Web Applications on Azion's platform"
+	WebappShortDescription = "Creates Web Applications on Azion's platform"
+	WebappLongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
+	WebappFlagHelp         = "Displays more information about the webapp command"
 
 	//build cmd
 	WebappBuildUsage            = "build [flags]"
-	WebappBuildShortDescription = "Build your Web application"
-	WebappBuildLongDescription  = "Build your Web application"
+	WebappBuildShortDescription = "Builds a Web Application"
+	WebappBuildLongDescription  = "Builds your Web Application to run on Azion’s Edge Computing Platform"
 	WebappBuildCmdNotSpecified  = "Build step command not specified. No action will be taken\n"
 	WebappBuildRunningCmd       = "Running build step command:\n\n"
+	WebappBuildFlagHelp         = "Displays more information about the build subcommand"
 
 	//init cmd
 	WebappInitUsage             = "init [flags]"
-	WebappInitShortDescription  = "Use Azion templates along with your Web applications"
-	WebappInitLongDescription   = "Use Azion templates along with your Web applications"
+	WebappInitShortDescription  = "Initializes a Web Application"
+	WebappInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Web Application on Azion’s platform"
 	WebappInitCmdNotSpecified   = "Init step command not specified. No action will be taken\n"
 	WebappInitRunningCmd        = "Running init step command:\n\n"
-	WebappInitFlagName          = "Your Web Application's name"
-	WebappInitFlagType          = "Your Web Application's type <javascript|flareact|nextjs>"
-	WebappInitFlagYes           = "Force yes to all user input"
-	WebappInitFlagNo            = "Force no to all user input"
+	WebappInitFlagName          = "The Web application's name"
+	WebappInitFlagType          = "The type of  Web application <javascript | flareact | nextjs>"
+	WebappInitFlagYes           = "Forces the automatic response 'yes' to all user input"
+	WebappInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured"
+	WebappInitFlagHelp          = "Displays more information about the init subcommand"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
-	WebappPublishShortDescription            = "Publish your Web Application to Azion"
-	WebappPublishLongDescription             = "Publish your Web Application to Azion"
+	WebappPublishShortDescription            = "Publishes a Web Application on the Azion platform"
+	WebappPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
 	WebappPublishCmdNotSpecified             = "Publish pre command not specified. No action will be taken\n"
 	WebappPublishRunningCmd                  = "Running publish pre command:\n\n"
 	WebappPublishOutputDomainSuccess         = "\nYour Domain name: %s\n"
@@ -45,4 +48,5 @@ var (
 	WebappPublishOutputDomainCreate          = "Created Domain with ID %d\n"
 	WebappPublishOutputDomainUpdate          = "Updated Domain with ID %d\n"
 	WebappPublishOutputRulesEngineUpdate     = "Updated Rules Engine with ID %d\n"
+	WebappPublishFlagHelp                    = "Displays more information about the publish subcommand"
 )

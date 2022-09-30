@@ -3,6 +3,7 @@ package configure
 import (
 	"fmt"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/configure"
 	msg "github.com/aziontech/azion-cli/messages/configure"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -19,6 +20,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.ConfigureUsage,
 		Short: msg.ConfigureShortDescription,
 		Long:  configure.ConfigureLongDescription,
+		Example: heredoc.Doc(`
+		$ azioncli configure --help
+		$ azion configure --token azion123456abcdefg7891011hijklmn
+
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			t, err := token.New(&token.Config{
 				Client: f.HttpClient,
@@ -54,6 +60,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	configureCmd.SetErr(f.IOStreams.Err)
 
 	configureCmd.Flags().StringVarP(&configureToken, "token", "t", "", msg.ConfigureFlagToken)
+	configureCmd.Flags().BoolP("help", "h", false, msg.ConfigureHelpFlag)
 
 	return configureCmd
 }

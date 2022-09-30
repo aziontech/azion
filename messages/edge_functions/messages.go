@@ -21,7 +21,7 @@ var (
 	EdgeFunctionCreateFlagCode         = "Path to the Edge Function's code"
 	EdgeFunctionCreateFlagActive       = "Whether the Edge Function is active or not"
 	EdgeFunctionCreateFlagArgs         = "Path to the Edge Function's arguments JSON file"
-	EdgeFunctionCreateFlagIn           = "Given file path to create an Edge Function; you can use the “-” character for reading from stdin"
+	EdgeFunctionCreateFlagIn           = "Given file path to create an Edge Function; you can use - for reading from stdin"
 	EdgeFunctionCreateOutputSuccess    = "Created Edge Function with ID %d\n"
 	EdgeFunctionCreateHelpFlag         = "Displays more information about the create subcommand"
 
@@ -55,7 +55,7 @@ var (
 	EdgeFunctionUpdateFlagCode         = "Path and name to the file containing the Edge Function's code"
 	EdgeFunctionUpdateFlagActive       = "Whether the Edge Function should be active or not"
 	EdgeFunctionUpdateFlagArgs         = "Path and name of the JSON file containing the Edge Function's arguments"
-	EdgeFunctionUpdateFlagIn           = "Given path and JSON file to automatically update the Edge Function attributes; you can use the “-” character for reading from stdin"
+	EdgeFunctionUpdateFlagIn           = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
 	EdgeFunctionUpdateOutputSuccess    = "Updated Edge Function with ID %d\n"
 	EdgeFunctionUpdateHelpFlag         = "Displays more information about the update subcommand"
 )

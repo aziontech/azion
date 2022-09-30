@@ -7,4 +7,5 @@ var (
 	ConfigureFlagToken        = "Saves a given personal token locally to authorize CLI commands"
 	TokenSavedIn              = "Token saved in %v\n"
 	TokenUsedIn               = "This token will be used by default when calling any command"
+	ConfigureHelpFlag         = "Displays more information about the configure command"
 )

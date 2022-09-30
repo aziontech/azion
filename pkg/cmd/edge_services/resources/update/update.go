@@ -44,8 +44,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services resources update --service-id 1234 --resource-id 69420 --name '/tmp/hello.txt'
-        `),
+		$ azioncli edge_services resources update --service-id 1234 --resource-id 69420 --name '/tmp/hello.txt'
+		$ azioncli edge_services resources update --service-id 1234 --resource-id 69420 --name "/tmp/my_script.sh" --content-type shellscript --content-file "./text.txt"
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
@@ -151,6 +152,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	updateCmd.Flags().StringVar(&fields.ContentType, "content-type", "", msg.EdgeServiceResourceUpdateFlagContentType)
 	updateCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", msg.EdgeServiceResourceUpdateFlagContentFile)
 	updateCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceResourceUpdateFlagIn)
+	updateCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceUpdateFlagHelp)
 
 	return updateCmd
 }
