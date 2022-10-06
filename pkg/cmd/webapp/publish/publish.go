@@ -178,12 +178,14 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, options *contracts.AzionApplicati
 
 	var domain apidom.DomainResponse
 
+	newDomain := false
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
+		newDomain = true
 	} else {
 		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
@@ -198,7 +200,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, options *contracts.AzionApplicati
 
 	domainReturnedName := []string{domain.GetDomainName()}
 
-	if conf.RtPurge.PurgeOnPublish {
+	if conf.RtPurge.PurgeOnPublish && !newDomain {
 		err = cmd.purgeDomains(f, domainReturnedName)
 		if err != nil {
 			return err
@@ -206,6 +208,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory, options *contracts.AzionApplicati
 	}
 
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainSuccess, domainReturnedName[0])
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishPropagation)
 
 	return nil
 }
@@ -254,7 +257,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	return response.GetId(), nil
 }
 
@@ -291,7 +294,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, idReq)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
 	return response.GetId(), nil
 }
 
@@ -346,7 +349,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return 0, fmt.Errorf("%w: %s", msg.ErrorCreateApplication, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
 	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
@@ -374,7 +377,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return fmt.Errorf("%s: %w", msg.ErrorUpdateApplication, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetName(conf.Name)
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -393,7 +396,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, name, domain.GetId())
 	return domain, nil
 }
 
@@ -406,7 +409,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, name, domain.GetId())
 	return domain, nil
 }
 
@@ -415,12 +418,10 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 	reqRules := apiapp.UpdateRulesEngineRequest{}
 	reqRules.IdApplication = conf.Application.Id
 
-	rule, err := client.UpdateRulesEngine(ctx, &reqRules, InstanceId)
+	_, err := client.UpdateRulesEngine(ctx, &reqRules, InstanceId)
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputRulesEngineUpdate, rule.GetId())
 
 	return nil
 

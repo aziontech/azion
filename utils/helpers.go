@@ -216,3 +216,5 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := ioutil.ReadAll(httpResp.Body)
 	return fmt.Errorf("%s", responseBody)
 }
+
+//TODO ADD STATUS CODE
