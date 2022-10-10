@@ -35,8 +35,6 @@ nfpms:
     maintainer: aziontech
     homepage: https://github.com/aziontech/azion-cli
     bindir: /usr/local/bin
-    builds:
-      - azioncli
     formats:
       - apk
       - deb
