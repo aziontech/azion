@@ -9,12 +9,25 @@ The Azion CLI (command-line interface) is an open source tool that enables you t
 The developer friendly way to interact with Azion!
 
 ## Quick links
+* [Downloading] (#downloading)
 * [Building](#building)
 * [How to Use](#How-to-Use)
 * [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azioncli)
 * [Contributing](CONTRIBUTING.md)
 * [Code of Conduct](CODE_OF_CONDUCT.md)
 * [License](#License)
+
+
+## Downloading
+
+There are two ways to download and use `azioncli`
+The first, is the regular way of cloning this repository and [building] (#building) the project manually. 
+However, `azioncli` is also available as `homebrew`, `rpm`, `deb` and `apk` packages. 
+
+To use `rpm`, `deb` and `apk` packages, please visit our [releases] (https://github.com/aziontech/azion-cli/releases) page, and download the desired package. 
+
+To download azioncli through Homebrew, use the following:
+* `brew install aziontech/tap/azioncli`
 
 
 ## Building
