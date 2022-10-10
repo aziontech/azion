@@ -80,9 +80,9 @@ func newCobraCmd(init *initCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azioncli init --help
-		$ azioncli init --name "thisisatest" --type javascript
-		$ azioncli init --name "thisisatest" --type flareact
-		$ azioncli init --name "thisisatest" --type nextjs
+		$ azioncli webapp init --name "thisisatest" --type javascript
+		$ azioncli webapp init --name "thisisatest" --type flareact
+		$ azioncli webapp init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options)

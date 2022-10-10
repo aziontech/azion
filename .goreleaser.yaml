@@ -1,0 +1,55 @@
+builds:
+  - env:
+      - CGO_ENABLED=0
+    binary: azioncli
+    main: ./cmd/azioncli
+    ldflags:
+        - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
+        - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
+        - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
+    goos:
+      - linux
+      - darwin
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      amd64: x86_64
+
+brews:
+- name: azioncli
+  homepage: https://github.com/aziontech/azion-cli
+  description: The developer friendly way to interact with Azion
+  license: "MIT"
+  dependencies:
+      - name: git
+      - name: jq
+  tap:
+    owner: aziontech
+    name: homebrew-tap
+
+nfpms:
+  - id: packages
+    license: MIT
+    package_name: azioncli
+    maintainer: aziontech
+    homepage: https://github.com/aziontech/azion-cli
+    bindir: /usr/local/bin
+    builds:
+      - azioncli
+    formats:
+      - apk
+      - deb
+      - rpm
+
+checksum:
+  name_template: "{{ .ProjectName }}_v{{ .Env.BIN_VERSION }}_checksum"
+snapshot:
+  name_template: "{{ incpatch .Env.BIN_VERSION }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      

@@ -5,7 +5,6 @@ import "errors"
 var (
 	//Generic errors that can be used by any package
 	GenericUseHelp                  = errors.New("Use -h or --help for more information")
-	ErrorConvertingIdArgumentToInt  = errors.New("You must provide a valid id")
 	ErrorConvertingStringToBool     = errors.New("You must provide a valid value. Use -h or --help for more information")
 	ErrorHandlingFile               = errors.New("You must provide a valid file name. Use -h or --help for more information")
 	ErrorEmptyFile                  = errors.New("Content file may not be empty")
