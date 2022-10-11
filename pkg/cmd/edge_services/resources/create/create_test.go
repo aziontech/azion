@@ -159,6 +159,6 @@ func TestCreate(t *testing.T) {
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "Content file may not be empty")
+		require.EqualError(t, err, "The file’s content is empty. Provide a path and file with valid content and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	})
 }
