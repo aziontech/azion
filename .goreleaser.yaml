@@ -1,7 +1,7 @@
+project_name: azioncli
 builds:
   - env:
       - CGO_ENABLED=0
-    binary: azioncli
     main: ./cmd/azioncli
     ldflags:
         - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
