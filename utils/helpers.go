@@ -11,11 +11,17 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/spf13/cobra"
+	"github.com/theckman/yacspin"
 )
 
 const shell = "/bin/sh"
+
+var Spinner *yacspin.Spinner
 
 func CleanDirectory(dir string) error {
 
@@ -215,4 +221,27 @@ func checkStatusCode500Error(err error) error {
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := ioutil.ReadAll(httpResp.Body)
 	return fmt.Errorf("%s", responseBody)
+}
+
+func CreateSpinner(cmd *cobra.Command, f *cmdutil.Factory) (*yacspin.Spinner, error) {
+	cfg := yacspin.Config{
+		Frequency:       100 * time.Millisecond,
+		CharSet:         yacspin.CharSets[7],
+		Suffix:          " Running " + cmd.Name() + " command",
+		SuffixAutoColon: true,
+		StopCharacter:   "✓",
+		StopColors:      []string{"fgGreen"},
+	}
+
+	Spinner, err := yacspin.New(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return Spinner, nil
+
+}
+
+func ReturnSpinner() *yacspin.Spinner {
+	return Spinner
 }

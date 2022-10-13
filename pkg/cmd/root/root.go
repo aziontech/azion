@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,6 +24,14 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.RootUsage,
 		Short: msg.RootShortDescription,
 		Long:  msg.RootLongDescription,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			s := utils.CreateSpinner(cmd, f)
+			s.Start()
+		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			s := utils.ReturnSpinner()
+			s.Stop()
+		},
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
 		},

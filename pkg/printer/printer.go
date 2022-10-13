@@ -32,6 +32,7 @@ func NewTab(w io.Writer) *TabPrinter {
 // PrintWithHeaders(elems, []string{"Name", "Price"}, []string{"NAME","PRICE"})
 // PrintWithHeaders(elems, []string{"GetName()", "GetPrice()"}, []string{"NAME","PRICE"})
 func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, headers []string) {
+	fmt.Fprintf(p.writer, "\n")
 	fmt.Fprintf(p.writer, "%s", buildLine(headers))
 	p.Print(elems, fields)
 }
