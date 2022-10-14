@@ -59,7 +59,7 @@ func TestPublishCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.EqualError(t, err, "Failed to open config.json file")
+		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' again")
 	})
 
 	t.Run("without config.json", func(t *testing.T) {
@@ -71,7 +71,7 @@ func TestPublishCmd(t *testing.T) {
 		}
 
 		err := cmd.runPublishPreCmdLine()
-		require.EqualError(t, err, "Failed to open config.json file")
+		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
 
 	t.Run("publish.env not exist", func(t *testing.T) {

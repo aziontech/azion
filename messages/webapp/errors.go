@@ -3,7 +3,7 @@ package webapp
 import "errors"
 
 var (
-	ErrOpeningConfigFile   = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' again. Run the command 'azioncli webapp init --help' to display more information")
+	ErrOpeningConfigFile   = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' again")
 	ErrUnmarshalConfigFile = errors.New("Failed to parse the config.json file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrReadEnvFile         = errors.New("Failed to read the build.env file. Verify if the file was deleted or changed or run the 'azioncli webapp init' command again")
 	ErrFailedToRunCommand  = errors.New("Failed to run the build step command. Verify if the command is correct and check its output for more details. Try the 'azioncli webapp build' command again or contact Azion's support")
