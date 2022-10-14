@@ -267,7 +267,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		err := cmd.runInitCmdLine()
-		require.EqualError(t, err, "Failed to open config.json file")
+		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
 
 	t.Run("init.env not empty", func(t *testing.T) {

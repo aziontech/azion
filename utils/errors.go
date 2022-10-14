@@ -23,7 +23,7 @@ var (
 	ErrorMissingGitBinary           = errors.New("Git Version Control System (VCS) isn't installed. You must install Git VCS from its official site at https://git-scm.com/ and follow its documentation's instructions at https://git-scm.com/docs")
 	ErrorFetchingTemplates          = errors.New("Failed to fetch templates from the Azion's GitHub remote repository. Verify the connectivity to the repository https://github.com/aziontech/azioncli-template and try again")
 	ErrorMovingFiles                = errors.New("Failed to initialize your project with the Azion template. Please verify if you have write permissions to this directory")
-	ErrorUnsupportedType            = errors.New("The data type isn’t supported. Modify the data to a valid type and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
+	ErrorUnsupportedType            = errors.New("The project type isn’t supported. Modify the project to a valid type <javascript | nextjs | flareact> and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorInvalidOption              = errors.New("You must inform 'yes' or 'no' as input, or force --yes or --no by using the flags")
 	ErrorCleaningDirectory          = errors.New("Failed to clean the directory's contents because the directory is read-only and/or isn't accessible. Change the attributes of the directory to read/write and/or give access to it")
 	ErrorRunningCommand             = errors.New("Failed to run the command specified in the template (config.json)")
