@@ -66,7 +66,6 @@ func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 }
 
 func newCobraCmd(publish *publishCmd) *cobra.Command {
-	options := &contracts.AzionApplicationOptions{}
 	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
@@ -77,7 +76,7 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 		$ azioncli webapp publish --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.f, options)
+			return publish.run(publish.f)
 		},
 	}
 
@@ -90,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return newCobraCmd(newPublishCmd(f))
 }
 
-func (cmd *publishCmd) run(f *cmdutil.Factory, options *contracts.AzionApplicationOptions) error {
+func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
 	//Run build command
 	build := build.NewBuildCmd(f)
