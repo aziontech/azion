@@ -2,7 +2,6 @@ package version
 
 import (
 	"fmt"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
