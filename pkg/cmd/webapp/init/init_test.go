@@ -70,7 +70,7 @@ func TestCobraCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil
@@ -112,7 +112,7 @@ func TestCobraCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil
@@ -151,7 +151,7 @@ func TestCobraCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil
@@ -194,7 +194,7 @@ func TestCobraCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil
@@ -357,7 +357,7 @@ func TestInitCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil
@@ -399,7 +399,7 @@ func TestInitCmd(t *testing.T) {
 		initCmd := newInitCmd(f)
 
 		initCmd.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if !strings.HasPrefix(cmd, GIT) && !strings.HasPrefix(cmd, "ls") {
+			if !strings.HasPrefix(cmd, "git") && !strings.HasPrefix(cmd, "ls") {
 				return "", -1, errors.New("unexpected command")
 			}
 			return "", 0, nil

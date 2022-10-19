@@ -20,7 +20,6 @@ var (
 	ErrorToken401                   = errors.New("The token doesn't exist or has expired. Manage your personal tokens on RTM using the Account Menu > Personal Tokens and configure a valid token with the command 'azioncli configure --token <my_token>'")
 	ErrorForbidden403               = errors.New("You do not have the permissions to access the API. Make sure the feature is enabled in your profile")
 	ErrorNotFound404                = errors.New("The given web page URL or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct. If the error persists, contact Azion's support")
-	ErrorMissingGitBinary           = errors.New("Git Version Control System (VCS) isn't installed. You must install Git VCS from its official site at https://git-scm.com/ and follow its documentation's instructions at https://git-scm.com/docs")
 	ErrorFetchingTemplates          = errors.New("Failed to fetch templates from the Azion's GitHub remote repository. Verify the connectivity to the repository https://github.com/aziontech/azioncli-template and try again")
 	ErrorMovingFiles                = errors.New("Failed to initialize your project with the Azion template. Please verify if you have write permissions to this directory")
 	ErrorUnsupportedType            = errors.New("The project type isn’t supported. Modify the project to a valid type <javascript | nextjs | flareact> and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")

@@ -22,7 +22,6 @@ brews:
   description: The developer friendly way to interact with Azion
   license: "MIT"
   dependencies:
-      - name: git
       - name: jq
   tap:
     owner: aziontech
