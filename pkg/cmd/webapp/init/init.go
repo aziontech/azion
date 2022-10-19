@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"strconv"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -16,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +27,7 @@ type initInfo struct {
 }
 
 const (
-	GIT   string = "git"
-	CLONE string = "clone"
-	REPO  string = "https://github.com/aziontech/azioncli-template.git"
+	REPO string = "https://github.com/aziontech/azioncli-template.git"
 )
 
 type initCmd struct {
@@ -125,12 +122,6 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 
-	//checks if user has GIT binary installed
-	_, err = cmd.lookPath(GIT)
-	if err != nil {
-		return utils.ErrorMissingGitBinary
-	}
-
 	var response string
 	shouldFetchTemplates := true
 
@@ -183,7 +174,9 @@ func (cmd *initCmd) fetchTemplates(info *initInfo) error {
 		_ = cmd.removeAll(dir)
 	}()
 
-	_, _, err = cmd.commandRunner(strings.Join([]string{GIT, CLONE, REPO, strconv.Quote(dir)}, " "), nil)
+	_, err = git.PlainClone(dir, false, &git.CloneOptions{
+		URL: REPO,
+	})
 	if err != nil {
 		return utils.ErrorFetchingTemplates
 	}
