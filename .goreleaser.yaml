@@ -24,7 +24,7 @@ archives:
 
 before:
   hooks:
-    - ./utils/completions.sh
+    - ./scripts/completions.sh
 
 brews:
   - name: azioncli
