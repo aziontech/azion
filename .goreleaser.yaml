@@ -1,7 +1,6 @@
 project_name: azioncli
 
 builds:
-  - id: "azioncli1"
   - env:
       - CGO_ENABLED=0
     main: ./cmd/azioncli
