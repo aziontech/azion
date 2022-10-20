@@ -37,11 +37,11 @@ brews:
     tap:
       owner: aziontech
       name: homebrew-tap
-  - install: |-
-    bin.install "azioncli"
-    bash_completion.install "completions/azioncli.bash" => "azioncli"
-    zsh_completion.install "completions/azioncli.zsh" => "_azioncli"
-    fish_completion.install "completions/azioncli.fish"      
+    install: |
+      bin.install "azioncli"
+      bash_completion.install "completions/azioncli.bash" => "azioncli"
+      zsh_completion.install "completions/azioncli.zsh" => "_azioncli"
+      fish_completion.install "completions/azioncli.fish"      
 
 nfpms:
   - id: packages
@@ -80,15 +80,15 @@ changelog:
       - '^test:'
 
 aurs:
-  - package: |-
-    # bin
-    install -Dm755 "./azioncli" "${pkgdir}/usr/bin/azioncli"
-    # license
-    install -Dm644 "./LICENSE.md" "${pkgdir}/usr/share/licenses/azioncli/LICENSE"
-    # completions
-    mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
-    mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
-    mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
-    install -Dm644 "./completions/azioncli.bash" "${pkgdir}/usr/share/bash-completion/completions/azioncli"
-    install -Dm644 "./completions/azioncli.zsh" "${pkgdir}/usr/share/zsh/site-functions/_azioncli"
-    install -Dm644 "./completions/azioncli.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/azioncli.fish"
+  - package: |
+      # bin
+      install -Dm755 "./azioncli" "${pkgdir}/usr/bin/azioncli"
+      # license
+      install -Dm644 "./LICENSE.md" "${pkgdir}/usr/share/licenses/azioncli/LICENSE"
+      # completions
+      mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
+      mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
+      mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+      install -Dm644 "./completions/azioncli.bash" "${pkgdir}/usr/share/bash-completion/completions/azioncli"
+      install -Dm644 "./completions/azioncli.zsh" "${pkgdir}/usr/share/zsh/site-functions/_azioncli"
+      install -Dm644 "./completions/azioncli.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/azioncli.fish"
