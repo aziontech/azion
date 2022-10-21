@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either function-id or in path should be passed
 			if !cmd.Flags().Changed("function-id") && !cmd.Flags().Changed("in") {
-				return msg.ErrorMissingArgumentUpdate
+				return msg.ErrorMissingFunctionIdArgument
 			}
 
 			request := api.UpdateRequest{}
@@ -111,7 +111,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf("%w: %s", msg.ErrorUpdateFunction, err)
+				return fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Edge Function with ID %d\n", response.GetId())

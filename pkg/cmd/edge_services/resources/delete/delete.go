@@ -64,8 +64,7 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 	httpResp, err := api.DeleteResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
-
-		return fmt.Errorf("%w: %s", msg.ErrorDeleteResource, message)
+		return fmt.Errorf(msg.ErrorDeleteResource.Error(), message)
 	}
 
 	if httpResp.StatusCode == 204 {

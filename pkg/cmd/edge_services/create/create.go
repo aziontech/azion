@@ -94,7 +94,7 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorCreateService, message)
+		return fmt.Errorf(msg.ErrorCreateService.Error(), message)
 	}
 
 	fmt.Fprintf(out, msg.EdgeServiceCreateOutputSuccess, resp.Id)

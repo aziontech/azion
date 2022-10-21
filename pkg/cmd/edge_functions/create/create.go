@@ -100,7 +100,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Create(ctx, request)
 
 			if err != nil {
-				return fmt.Errorf("%w: %s", msg.ErrorCreateFunction, err)
+				return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, msg.EdgeFunctionCreateOutputSuccess, response.GetId())
