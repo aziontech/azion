@@ -60,7 +60,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "You must provide --name flag when --in flag is not sent")
+		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name flag when --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
 	})
 
 	t.Run("create service with name", func(t *testing.T) {
