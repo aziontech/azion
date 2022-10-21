@@ -165,7 +165,7 @@ func updateResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorUpdateResource, message)
+		return fmt.Errorf(msg.ErrorUpdateResource.Error(), message)
 	}
 
 	fmt.Fprintf(out, msg.EdgeServiceResourceUpdateOutputSuccess, resp.Id)

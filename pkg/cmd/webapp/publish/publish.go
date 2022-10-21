@@ -253,7 +253,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCreateFunction, err)
+		return 0, fmt.Errorf("%w: %s", errmsg.ErrorCreateFunction, err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	return response.GetId(), nil
@@ -345,7 +345,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		return 0, fmt.Errorf("%w: %s", msg.ErrorCreateApplication, err)
+		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
@@ -353,7 +353,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", msg.ErrorUpdateApplication, err)
+		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -361,7 +361,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstance(ctx, &reqIns)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", msg.ErrorCreateInstance, err)
+		return 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}
 	InstanceId = instance.GetId()
 	return application.GetId(), nil
@@ -373,7 +373,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
-		return fmt.Errorf("%s: %w", msg.ErrorUpdateApplication, err)
+		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	reqIns := apiapp.UpdateInstanceRequest{}
@@ -392,7 +392,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
+		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, name, domain.GetId())
 	return domain, nil
@@ -405,7 +405,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", msg.ErrorCreateDomain, err)
+		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, name, domain.GetId())
 	return domain, nil

@@ -70,7 +70,7 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorGetServices, message)
+		return fmt.Errorf(msg.ErrorGetServices.Error(), message)
 	}
 
 	services := resp.Services

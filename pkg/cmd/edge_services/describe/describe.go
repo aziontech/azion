@@ -93,7 +93,7 @@ func describeService(client *sdk.APIClient, service_id int64, withVariables bool
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return nil, fmt.Errorf("%w: %s", msg.ErrorGetSerivce, message)
+		return nil, fmt.Errorf(msg.ErrorGetSerivce.Error(), message)
 	}
 	return &resp, nil
 }

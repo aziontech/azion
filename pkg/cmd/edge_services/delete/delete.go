@@ -60,7 +60,7 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64) error
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorDeleteService, message)
+		return fmt.Errorf(msg.ErrorDeleteService.Error(), message)
 	}
 
 	if httpResp.StatusCode == 204 {
