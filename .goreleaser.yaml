@@ -1,31 +1,46 @@
 project_name: azioncli
+
 builds:
   - env:
       - CGO_ENABLED=0
     main: ./cmd/azioncli
     ldflags:
-        - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
-        - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
-        - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
+    binary: azioncli
     goos:
       - linux
       - darwin
+
 archives:
   - replacements:
       darwin: Darwin
       linux: Linux
       amd64: x86_64
+  - files:
+      - completions/*
+
+before:
+  hooks:
+    - chmod +x ./scripts/completions.sh
+    - ./scripts/completions.sh
 
 brews:
-- name: azioncli
-  homepage: https://github.com/aziontech/azion-cli
-  description: The developer friendly way to interact with Azion
-  license: "MIT"
-  dependencies:
+  - name: azioncli
+    homepage: https://github.com/aziontech/azion-cli
+    description: The developer friendly way to interact with Azion
+    license: "MIT"
+    dependencies:
       - name: jq
-  tap:
-    owner: aziontech
-    name: homebrew-tap
+    tap:
+      owner: aziontech
+      name: homebrew-tap
+    install: |
+      bin.install "azioncli"
+      bash_completion.install "completions/azioncli.bash" => "azioncli"
+      zsh_completion.install "completions/azioncli.zsh" => "_azioncli"
+      fish_completion.install "completions/azioncli.fish"      
 
 nfpms:
   - id: packages
@@ -38,6 +53,19 @@ nfpms:
       - apk
       - deb
       - rpm
+  - contents:
+    - src: completions/azioncli.bash
+      dst: /usr/share/bash-completion/completions/azioncli
+      file_info:
+        mode: 0644
+    - src: completions/azioncli.fish
+      dst: /usr/share/fish/vendor_completions.d/azioncli.fish
+      file_info:
+        mode: 0644
+    - src: completions/azioncli.zsh
+      dst: /usr/share/zsh/vendor-completions/_azioncli
+      file_info:
+        mode: 0644
 
 checksum:
   name_template: "{{ .ProjectName }}_v{{ .Env.BIN_VERSION }}_checksum"
@@ -49,4 +77,3 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-      
