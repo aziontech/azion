@@ -43,33 +43,42 @@ $ make build ENVFILE=./env/prod
 $ make cross-build
 ```
 
-## Setup Auto Complete
-> Tip for each step restart the terminal
+## Setup Autocomplete
+
+> Follow these steps **only** if autocomplete does not work after installing azioncli and restarting your terminal
+
+> Tip: for each step, restart your terminal
 
 ### Depedencies zsh
 ```shell
-# you need to install zsh-autosuggestions
+# You need to install zsh-autosuggestions
 # Examples
 apt install zsh-autosuggestions
 # or 
 brew install zsh-autosuggestions
 
 echo "autoload -U compinit; compinit" >> ~/.zshrc # you only need to run this once
+echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc # you only need to run this once
 
 # linux
 azioncli completion zsh > "${fpath[1]}/_azioncli" # after installing azioncli
 
 # macos
 azioncli completion zsh > $(brew --prefix)/share/zsh/site-functions/_azioncli # after installing azioncli
+
+
 ```
+If you uninstall azioncli, please edit your `~/.zshrc` file and remove the line `source <(goreleaser completion zsh); compdef _goreleaser goreleaser`
 
 ### Depedencies bash
 ```shell
-# you need to install bash-completion
+# You need to install bash-completion
 # Examples
 apt install bash-completion
 # or 
 brew install bash-completion
+
+echo "source <(goreleaser completion bash)" >> ~/.bashrc # you only need to run this once
 
 # linux
 azioncli completion bash > /etc/bash_completion.d/azioncli # after installing azioncli
@@ -77,6 +86,15 @@ azioncli completion bash > /etc/bash_completion.d/azioncli # after installing az
 # macos
 azioncli completion bash > $(brew --prefix)/etc/bash_completion.d/azioncli # after installing azioncli
 ```
+If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line `source <(goreleaser completion bash)`
+
+### Depedencies fish
+```shell
+echo "azioncli completion fish | source" >> ~/.config/fish/config.fish # you only need to run this once
+
+azioncli completion fish > ~/.config/fish/completions/azioncli.fish
+```
+If you uninstall azioncli, please edit your `~/.config/fish/config.fish` file and remove the line `azioncli completion fish | source`
 
 ## How to Use
 
