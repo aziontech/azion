@@ -48,8 +48,13 @@ $ make cross-build
 
 ### Depedencies zsh
 ```shell
-apt install zsh-autosuggestions # install
-echo "autoload -U compinit; compinit" >> ~/.zshrc # add
+# you need to install zsh-autosuggestions
+# Examples
+apt install zsh-autosuggestions
+# or 
+brew install zsh-autosuggestions
+
+echo "autoload -U compinit; compinit" >> ~/.zshrc # you only need to run this once
 
 # linux
 azioncli completion zsh > "${fpath[1]}/_azioncli" # after installing azioncli
@@ -60,7 +65,11 @@ azioncli completion zsh > $(brew --prefix)/share/zsh/site-functions/_azioncli # 
 
 ### Depedencies bash
 ```shell
-apt install bash-completion # install
+# you need to install bash-completion
+# Examples
+apt install bash-completion
+# or 
+brew install bash-completion
 
 # linux
 azioncli completion bash > /etc/bash_completion.d/azioncli # after installing azioncli
