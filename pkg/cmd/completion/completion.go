@@ -14,6 +14,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		DisableFlagsInUseLine: true,
 		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
 		Args:                  cobra.ExactValidArgs(1),
+		Annotations: map[string]string{
+			"Category": "skip",
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			switch args[0] {
 			case "bash":

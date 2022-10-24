@@ -51,9 +51,10 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	}
 
 	var (
-		baseCommands   []string
-		subcmdCommands []string
-		examples       []string
+		baseCommands    []string
+		subcmdCommands  []string
+		examples        []string
+		skippedCommands []string
 	)
 
 	for _, c := range command.Commands() {
@@ -66,7 +67,10 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 		s := rpad(c.Name(), c.NamePadding()) + c.Short
 
-		if !isRootCmd(c.Parent()) {
+		category, _ := c.Annotations["Category"]
+		if category == "skip" {
+			skippedCommands = append(skippedCommands, s)
+		} else if !isRootCmd(c.Parent()) {
 			// Help of subcommand
 			subcmdCommands = append(subcmdCommands, s)
 			continue
