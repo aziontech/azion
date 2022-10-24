@@ -58,7 +58,7 @@ apt install zsh-autosuggestions
 brew install zsh-autosuggestions
 
 echo "autoload -U compinit; compinit" >> ~/.zshrc # you only need to run this once
-echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc
+echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc # you only need to run this once
 
 # linux
 azioncli completion zsh > "${fpath[1]}/_azioncli" # after installing azioncli
@@ -78,7 +78,7 @@ apt install bash-completion
 # or 
 brew install bash-completion
 
-echo "source <(goreleaser completion bash)" >> ~/.bashrc
+echo "source <(goreleaser completion bash)" >> ~/.bashrc # you only need to run this once
 
 # linux
 azioncli completion bash > /etc/bash_completion.d/azioncli # after installing azioncli
@@ -90,7 +90,7 @@ If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line
 
 ### Depedencies fish
 ```shell
-echo "azioncli completion fish | source" >> ~/.config/fish/config.fish
+echo "azioncli completion fish | source" >> ~/.config/fish/config.fish # you only need to run this once
 
 azioncli completion fish > ~/.config/fish/completions/azioncli.fish
 ```
