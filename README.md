@@ -43,6 +43,32 @@ $ make build ENVFILE=./env/prod
 $ make cross-build
 ```
 
+## Setup Auto Complete
+> Tip for each step restart the terminal
+
+### Depedencies zsh
+```shell
+apt install zsh-autosuggestions # install
+echo "autoload -U compinit; compinit" >> ~/.zshrc # add
+
+# linux
+azioncli completion zsh > "${fpath[1]}/_azioncli" # after installing azioncli
+
+# macos
+azioncli completion zsh > $(brew --prefix)/share/zsh/site-functions/_azioncli # after installing azioncli
+```
+
+### Depedencies bash
+```shell
+apt install bash-completion # install
+
+# linux
+azioncli completion bash > /etc/bash_completion.d/azioncli # after installing azioncli
+
+# macos
+azioncli completion bash > $(brew --prefix)/etc/bash_completion.d/azioncli # after installing azioncli
+```
+
 ## How to Use
 
 In order to perform network operations it is *mandatory* to provide an authentication token
