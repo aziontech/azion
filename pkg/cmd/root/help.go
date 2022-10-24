@@ -66,7 +66,9 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 		s := rpad(c.Name(), c.NamePadding()) + c.Short
 
-		if !isRootCmd(c.Parent()) {
+		if c.Annotations["Category"] == "skip" {
+			continue
+		} else if !isRootCmd(c.Parent()) {
 			// Help of subcommand
 			subcmdCommands = append(subcmdCommands, s)
 			continue

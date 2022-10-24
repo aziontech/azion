@@ -148,7 +148,7 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, r
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorCreateResource, message)
+		return fmt.Errorf(msg.ErrorCreateResource.Error(), message)
 	}
 
 	fmt.Fprintf(out, msg.EdgeServiceResourceCreateOutputSuccess, resp.Id)

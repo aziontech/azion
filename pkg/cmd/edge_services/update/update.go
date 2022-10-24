@@ -162,7 +162,7 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorUpdateService, message)
+		return fmt.Errorf(msg.ErrorUpdateService.Error(), message)
 	}
 
 	fmt.Fprintf(out, msg.EdgeServiceUpdateOutputSuccess, resp.Id)

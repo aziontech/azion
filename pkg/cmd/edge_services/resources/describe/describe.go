@@ -93,7 +93,7 @@ func describeResource(client *sdk.APIClient, out io.Writer, service_id int64, re
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return nil, fmt.Errorf("%w: %s", msg.ErrorGetResource, message)
+		return nil, fmt.Errorf(msg.ErrorGetResource.Error(), message)
 	}
 
 	return &resp, nil

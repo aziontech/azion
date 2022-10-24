@@ -138,7 +138,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(ioutil.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "You must provide --name, --content-type and --content-file flags when --in flag is not sent")
+		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name, --content-type, and --content-file flags when the --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
 	})
 
 	t.Run("content file cannot be empty", func(t *testing.T) {
@@ -159,6 +159,6 @@ func TestCreate(t *testing.T) {
 		cmd.SetOut(ioutil.Discard)
 		cmd.SetErr(ioutil.Discard)
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "Content file may not be empty")
+		require.EqualError(t, err, "The file’s content is empty. Provide a path and file with valid content and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	})
 }

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"net/http"
 	"time"
 
@@ -42,6 +43,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	})
 
 	rootCmd.AddCommand(configure.NewCmd(f))
+	rootCmd.AddCommand(completion.NewCmd(f))
 	rootCmd.AddCommand(version.NewCmd(f))
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))

@@ -72,7 +72,7 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf("%w: %s", msg.ErrorGetResources, message)
+		return fmt.Errorf(msg.ErrorGetResources.Error(), message)
 	}
 
 	resources := resp.Resources
