@@ -11,6 +11,7 @@ The developer friendly way to interact with Azion!
 ## Quick links
 * [Downloading](#downloading)
 * [Building](#building)
+* [Setup Autocomplete](#setup-autocomplete)
 * [How to Use](#How-to-Use)
 * [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azioncli)
 * [Contributing](CONTRIBUTING.md)
@@ -33,11 +34,8 @@ To download azioncli through Homebrew, use the following:
 ## Building
 
 ```sh
-# Build project, by default it will connect to the Stage APIs
+# Build project, by default it will connect to Production APIs
 $ make build
-
-# Building Production version
-$ make build ENVFILE=./env/prod
 
 # Cross-Build for multiple platforms and architectures
 $ make cross-build
@@ -45,54 +43,86 @@ $ make cross-build
 
 ## Setup Autocomplete
 
-> Follow these steps **only** if autocomplete does not work after installing azioncli and restarting your terminal
+> Please verify if you have autocomplete enabled globally, otherwise the autocomplete for cli will not work
 
-> Tip: for each step, restart your terminal
+## Dependencies zsh
 
-### Depedencies zsh
+### **Installing autocomplete for azioncli only**
+
+You need to install zsh-autosuggestions
 ```shell
-# You need to install zsh-autosuggestions
-# Examples
-apt install zsh-autosuggestions
-# or 
 brew install zsh-autosuggestions
-
-echo "autoload -U compinit; compinit" >> ~/.zshrc # you only need to run this once
-echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc # you only need to run this once
-
-# linux
-azioncli completion zsh > "${fpath[1]}/_azioncli" # after installing azioncli
-
-# macos
-azioncli completion zsh > $(brew --prefix)/share/zsh/site-functions/_azioncli # after installing azioncli
-
-
 ```
-If you uninstall azioncli, please edit your `~/.zshrc` file and remove the line `source <(goreleaser completion zsh); compdef _goreleaser goreleaser`
-
-### Depedencies bash
+Run
 ```shell
-# You need to install bash-completion
-# Examples
+echo "autoload -U compinit; compinit" >> ~/.zshrc 
+```
+Then run
+```shell
+echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc
+```
+
+If you uninstall azioncli, please edit your `~/.zshrc` file and remove the line `source <(azioncli completion zsh); compdef _azioncli azioncli`
+
+
+### **Installing autocomplete globally**
+
+You need to install zsh-autosuggestions
+```shell
+brew install zsh-autosuggestions
+```
+Run
+```shell
+echo "autoload -U compinit; compinit" >> ~/.zshrc 
+```
+
+Then open your `~/.zshrc` file, and add the following content to it
+
+```shell
+if type brew &>/dev/null
+then
+  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+
+  autoload -Uz compinit
+  compinit
+fi
+```
+
+> Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
+
+## Dependencies bash
+
+### **Installing autocomplete for azioncli only**
+You need to install bash-completion
+```shell
+# Example (use your preferred package manager)
 apt install bash-completion
-# or 
-brew install bash-completion
+```
 
-echo "source <(goreleaser completion bash)" >> ~/.bashrc # you only need to run this once
-
-# linux
-azioncli completion bash > /etc/bash_completion.d/azioncli # after installing azioncli
-
-# macos
-azioncli completion bash > $(brew --prefix)/etc/bash_completion.d/azioncli # after installing azioncli
+Run
+```shell
+echo "source <(goreleaser completion bash)" >> ~/.bashrc 
 ```
 If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line `source <(goreleaser completion bash)`
 
-### Depedencies fish
+### **Installing autocomplete globally**
+You need to install bash-completion
 ```shell
-echo "azioncli completion fish | source" >> ~/.config/fish/config.fish # you only need to run this once
+# Example (use your preferred package manager)
+apt install bash-completion
+```
+Open your `~/.bashrc` file, and add the following content to it
+```shell
+BREW_PREFIX=$(brew --prefix)
+[[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]] && . ${BREW_PREFIX}/etc/profile.d/bash_completion.sh
+```
 
-azioncli completion fish > ~/.config/fish/completions/azioncli.fish
+> Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
+
+## Dependencies fish
+Run
+```shell
+echo "azioncli completion fish | source" >> ~/.config/fish/config.fish
 ```
 If you uninstall azioncli, please edit your `~/.config/fish/config.fish` file and remove the line `azioncli completion fish | source`
 
