@@ -47,12 +47,22 @@ $ make cross-build
 
 ## Dependencies zsh
 
-### **Installing autocomplete for azioncli only**
-
 You need to install zsh-autosuggestions
+
+MacOs
 ```shell
 brew install zsh-autosuggestions
 ```
+Linux
+```shell
+git clone https://github.com/zsh-users/zsh-autosuggestions \${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+```
+
+### **Installing autocomplete for azioncli only**
+----
+
+### **MacOs** / **Linux**
+
 Run
 ```shell
 echo "autoload -U compinit; compinit" >> ~/.zshrc 
@@ -66,11 +76,9 @@ If you uninstall azioncli, please edit your `~/.zshrc` file and remove the line 
 
 
 ### **Installing autocomplete globally**
+----
+### MacOs
 
-You need to install zsh-autosuggestions
-```shell
-brew install zsh-autosuggestions
-```
 Run
 ```shell
 echo "autoload -U compinit; compinit" >> ~/.zshrc 
@@ -88,34 +96,74 @@ then
 fi
 ```
 
+### Linux
+
+Open your `~/.zshrc` file and add the following content to it
+
+```shell
+plugins=(zsh-autosuggestions)
+````
+
+If you have other plugins, just add zsh-zutosuggestions to the end.
+
+
 > Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
 
 ## Dependencies bash
 
-### **Installing autocomplete for azioncli only**
 You need to install bash-completion
+
+MacOs
+
 ```shell
-# Example (use your preferred package manager)
-apt install bash-completion
+brew install bash-completion
 ```
+
+Centos/RHEL 7
+
+```shell
+yum install bash-completion bash-completion-extras
+```
+
+Debian/Ubuntu
+
+```shell
+apt-get install bash-completion
+```
+
+Alpine
+
+```shell
+apk add bash-completion
+```
+
+### **Installing autocomplete for azioncli only**
+----
+### **MacOs** / **Linux**
 
 Run
 ```shell
-echo "source <(goreleaser completion bash)" >> ~/.bashrc 
+echo "source <(azioncli completion bash)" >> ~/.bashrc 
 ```
-If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line `source <(goreleaser completion bash)`
+If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line `source <(azioncli completion bash)`
 
 ### **Installing autocomplete globally**
-You need to install bash-completion
-```shell
-# Example (use your preferred package manager)
-apt install bash-completion
-```
+----
+### **MacOS**
+
 Open your `~/.bashrc` file, and add the following content to it
 ```shell
 BREW_PREFIX=$(brew --prefix)
 [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]] && . ${BREW_PREFIX}/etc/profile.d/bash_completion.sh
 ```
+
+### **Linux**
+
+Run
+```shell
+echo "source /etc/profile.d/bash_completion.sh" >> ~/.bashrc
+```
+----
 
 > Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
 
