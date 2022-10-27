@@ -266,7 +266,7 @@ func TestInitCmd(t *testing.T) {
 			return nil, os.ErrNotExist
 		}
 
-		err := cmd.runInitCmdLine()
+		err := cmd.runInitCmdLine("")
 		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
 
@@ -283,7 +283,7 @@ func TestInitCmd(t *testing.T) {
 			return nil, os.ErrNotExist
 		}
 
-		err := cmd.runInitCmdLine()
+		err := cmd.runInitCmdLine("")
 		require.ErrorIs(t, err, os.ErrNotExist)
 	})
 
@@ -304,7 +304,7 @@ func TestInitCmd(t *testing.T) {
 			return "my command output", 0, nil
 		}
 
-		err := cmd.runInitCmdLine()
+		err := cmd.runInitCmdLine("")
 		require.NoError(t, err)
 
 		require.NoError(t, err)
@@ -319,7 +319,7 @@ func TestInitCmd(t *testing.T) {
 			return []byte(`{"init": {}}`), nil
 		}
 
-		err := cmd.runInitCmdLine()
+		err := cmd.runInitCmdLine("")
 		require.NoError(t, err)
 		require.NotContains(t, stdout.String(), "Running init command")
 	})
@@ -342,7 +342,7 @@ func TestInitCmd(t *testing.T) {
 			return "my command output", 0, nil
 		}
 
-		err := cmd.runInitCmdLine()
+		err := cmd.runInitCmdLine("")
 		require.NoError(t, err)
 
 		require.NoError(t, err)

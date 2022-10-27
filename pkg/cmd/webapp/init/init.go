@@ -2,12 +2,8 @@ package init
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/fs"
-	"io/ioutil"
-	"os"
-	"os/exec"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -16,6 +12,10 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
+	"io/fs"
+	"io/ioutil"
+	"os"
+	"os/exec"
 )
 
 type initInfo struct {
@@ -118,7 +118,8 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 	info.pathWorkingDir = path
 
 	options.Test = testFunc
-	if err := options.Test(info.pathWorkingDir); err != nil {
+	workingDir := info.pathWorkingDir
+	if err := options.Test(workingDir); err != nil {
 		return err
 	}
 
@@ -157,7 +158,7 @@ func (cmd *initCmd) run(info *initInfo, options *contracts.AzionApplicationOptio
 		fmt.Fprintf(cmd.io.Out, "%s\n", msg.WebAppInitCmdSuccess)
 	}
 
-	err = cmd.runInitCmdLine()
+	err = cmd.runInitCmdLine(workingDir)
 	if err != nil {
 		return err
 	}
@@ -192,7 +193,9 @@ func (cmd *initCmd) fetchTemplates(info *initInfo) error {
 	return nil
 }
 
-func (cmd *initCmd) runInitCmdLine() error {
+func (cmd *initCmd) runInitCmdLine(workingDir string) error {
+	// start init
+
 	path, err := cmd.getWorkDir()
 	if err != nil {
 		return err
@@ -206,6 +209,7 @@ func (cmd *initCmd) runInitCmdLine() error {
 
 	conf := &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
+	fmt.Println("err :", err)
 	if err != nil {
 		return msg.ErrorUnmarshalConfigFile
 	}
@@ -223,7 +227,30 @@ func (cmd *initCmd) runInitCmdLine() error {
 	fmt.Fprintf(cmd.io.Out, msg.WebappInitRunningCmd)
 	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	output, exitCode, err := cmd.commandRunner(conf.InitData.Cmd, envs)
+	_, err = cmd.lookPath("npm")
+	if err != nil {
+		// TODO: add correct error
+		return errors.New("npm not found")
+	}
+
+	mkdir := fmt.Sprintf("mkdir -p %s/worker", workingDir)
+	npmCleanWebPack := "npm install --yes --save-dev clean-webpack-plugin"
+	npmWebPackCli := "npm install --yes --save-dev webpack-cli@4.9.2"
+	cmdRunner := fmt.Sprintf("%s && %s && %s && %s", conf.InitData.Cmd, mkdir, npmCleanWebPack, npmWebPackCli)
+
+	output, exitCode, err := cmd.commandRunner(cmdRunner, envs)
+
+	// replace build
+	// npm build to "azioncli webapp build"
+	// npm deploy to "azioncli webapp publish"
+
+	packageJsonPath := "/home/dev/Playground/nextjs-blog/package.json"
+	//packageJsonPath := workingDir + "/package.json"
+	_, err = cmd.fileReader(packageJsonPath)
+	if err != nil {
+		// TODO: add correct error
+		return errors.New("failed read file")
+	}
 
 	fmt.Fprintf(cmd.io.Out, "%s\n", output)
 	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)

@@ -98,6 +98,10 @@ func (c *buildCmd) run() error {
 		return nil
 	}
 
+	// Todo: if [ ! -f ./azion/args.json ]; then
+	// 		echo "{}" > ./azion/args.json
+	// fi
+
 	fmt.Fprintf(c.io.Out, msg.WebappBuildRunningCmd)
 	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
 
