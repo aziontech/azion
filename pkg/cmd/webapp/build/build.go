@@ -3,6 +3,7 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
@@ -15,7 +16,8 @@ import (
 )
 
 type buildCmd struct {
-	io *iostreams.IOStreams
+	io        *iostreams.IOStreams
+	writeFile func(filename string, data []byte, perm fs.FileMode) error
 	// Return output, exit code and any errors
 	commandRunner      func(cmd string, envvars []string) (string, int, error)
 	fileReader         func(path string) ([]byte, error)
@@ -55,6 +57,7 @@ func newBuildCmd(f *cmdutil.Factory) *buildCmd {
 		configRelativePath: "/azion/config.json",
 		getWorkDir:         utils.GetWorkingDir,
 		envLoader:          utils.LoadEnvVarsFromFile,
+		writeFile:          os.WriteFile,
 	}
 }
 
@@ -62,13 +65,13 @@ func NewBuildCmd(f *cmdutil.Factory) *buildCmd {
 	return newBuildCmd(f)
 }
 
-func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
-	path, err := c.getWorkDir()
+func (cmd *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
+	path, err := cmd.getWorkDir()
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := c.fileReader(path + c.configRelativePath)
+	file, err := cmd.fileReader(path + cmd.configRelativePath)
 	if err != nil {
 		return nil, msg.ErrOpeningConfigFile
 	}
@@ -82,33 +85,38 @@ func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	return conf, nil
 }
 
-func (c *buildCmd) run() error {
-	conf, err := c.readConfig()
+func (cmd *buildCmd) run() error {
+	conf, err := cmd.readConfig()
 	if err != nil {
 		return err
 	}
 
-	envs, err := c.envLoader(conf.BuildData.Env)
+	envs, err := cmd.envLoader(conf.BuildData.Env)
 	if err != nil {
 		return msg.ErrReadEnvFile
 	}
 
 	if conf.BuildData.Cmd == "" {
-		fmt.Fprintf(c.io.Out, msg.WebappBuildCmdNotSpecified)
+		fmt.Fprintf(cmd.io.Out, msg.WebappBuildCmdNotSpecified)
 		return nil
 	}
 
-	// Todo: if [ ! -f ./azion/args.json ]; then
-	// 		echo "{}" > ./azion/args.json
-	// fi
+	workDirPath, err := cmd.getWorkDir()
 
-	fmt.Fprintf(c.io.Out, msg.WebappBuildRunningCmd)
-	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
+	workDirPath += "/args.json"
+	_, err = cmd.fileReader(workDirPath)
+	if err != nil {
+		cmd.writeFile(workDirPath, []byte("{}"), 0644)
+	}
 
-	out, exitCode, err := c.commandRunner(conf.BuildData.Cmd, envs)
+	cmdRunner := "npx --yes --package=webpack@5.72.0 --package=webpack-cli@4.9.2 -- webpack --config ./azion/webpack.config.js -o ${OUTPUT_DIR} --mode production || exit $? ;;"
+	fmt.Fprintf(cmd.io.Out, msg.WebappBuildRunningCmd)
+	fmt.Fprintf(cmd.io.Out, "$ %s\n", cmdRunner)
 
-	fmt.Fprintf(c.io.Out, "%s\n", out)
-	fmt.Fprintf(c.io.Out, msg.WebappOutput, exitCode)
+	out, exitCode, err := cmd.commandRunner(cmdRunner, envs)
+
+	fmt.Fprintf(cmd.io.Out, "%s\n", out)
+	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
 
 	if err != nil {
 		return msg.ErrFailedToRunCommand
@@ -117,6 +125,6 @@ func (c *buildCmd) run() error {
 	return nil
 }
 
-func (c *buildCmd) Run() error {
-	return c.run()
+func (cmd *buildCmd) Run() error {
+	return cmd.run()
 }
