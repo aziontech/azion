@@ -17,6 +17,7 @@ type DescribeOptions struct {
 type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
+	Type        string                   `json:"type"`
 	Env         string                   `json:"env"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`

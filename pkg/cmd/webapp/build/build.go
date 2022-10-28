@@ -3,9 +3,12 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/cmd/webapp/scripts"
+	"github.com/tidwall/gjson"
 	"io/fs"
 	"os"
 
+	"errors"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -15,20 +18,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type buildCmd struct {
-	io        *iostreams.IOStreams
-	writeFile func(filename string, data []byte, perm fs.FileMode) error
+type BuildCmd struct {
+	Io        *iostreams.IOStreams
+	WriteFile func(filename string, data []byte, perm fs.FileMode) error
 	// Return output, exit code and any errors
-	commandRunner      func(cmd string, envvars []string) (string, int, error)
-	fileReader         func(path string) ([]byte, error)
-	configRelativePath string
-	getWorkDir         func() (string, error)
-	envLoader          func(path string) ([]string, error)
+	CommandRunner      func(cmd string, envvars []string) (string, int, error)
+	FileReader         func(path string) ([]byte, error)
+	ConfigRelativePath string
+	GetWorkDir         func() (string, error)
+	EnvLoader          func(path string) ([]string, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	command := newBuildCmd(f)
-	buildCmd := &cobra.Command{
+	BuildCmd := &cobra.Command{
 		Use:           msg.WebappBuildUsage,
 		Short:         msg.WebappBuildShortDescription,
 		Long:          msg.WebappBuildLongDescription,
@@ -42,36 +45,36 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	buildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
+	BuildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
 
-	return buildCmd
+	return BuildCmd
 }
 
-func newBuildCmd(f *cmdutil.Factory) *buildCmd {
-	return &buildCmd{
-		io:         f.IOStreams,
-		fileReader: os.ReadFile,
-		commandRunner: func(cmd string, envs []string) (string, int, error) {
+func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
+	return &BuildCmd{
+		Io:         f.IOStreams,
+		FileReader: os.ReadFile,
+		CommandRunner: func(cmd string, envs []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envs, cmd)
 		},
-		configRelativePath: "/azion/config.json",
-		getWorkDir:         utils.GetWorkingDir,
-		envLoader:          utils.LoadEnvVarsFromFile,
-		writeFile:          os.WriteFile,
+		ConfigRelativePath: "/azion/config.json",
+		GetWorkDir:         utils.GetWorkingDir,
+		EnvLoader:          utils.LoadEnvVarsFromFile,
+		WriteFile:          os.WriteFile,
 	}
 }
 
-func NewBuildCmd(f *cmdutil.Factory) *buildCmd {
+func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	return newBuildCmd(f)
 }
 
-func (cmd *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
-	path, err := cmd.getWorkDir()
+func (cmd *BuildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
+	path, err := cmd.GetWorkDir()
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := cmd.fileReader(path + cmd.configRelativePath)
+	file, err := cmd.FileReader(path + cmd.ConfigRelativePath)
 	if err != nil {
 		return nil, msg.ErrOpeningConfigFile
 	}
@@ -85,46 +88,65 @@ func (cmd *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	return conf, nil
 }
 
-func (cmd *buildCmd) run() error {
-	conf, err := cmd.readConfig()
+func (cmd *BuildCmd) run() error {
+	path, err := cmd.GetWorkDir()
 	if err != nil {
 		return err
 	}
 
-	envs, err := cmd.envLoader(conf.BuildData.Env)
+	jsonConf := path + "/azion/config.json"
+	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
-		return msg.ErrReadEnvFile
+		return err
 	}
 
-	if conf.BuildData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, msg.WebappBuildCmdNotSpecified)
-		return nil
-	}
+	typeLang := gjson.Get(string(file), "type")
 
-	workDirPath, err := cmd.getWorkDir()
-
-	workDirPath += "/args.json"
-	_, err = cmd.fileReader(workDirPath)
+	err = cmd.runInitCmdLine(typeLang.String())
 	if err != nil {
-		cmd.writeFile(workDirPath, []byte("{}"), 0644)
-	}
-
-	cmdRunner := "npx --yes --package=webpack@5.72.0 --package=webpack-cli@4.9.2 -- webpack --config ./azion/webpack.config.js -o ${OUTPUT_DIR} --mode production || exit $? ;;"
-	fmt.Fprintf(cmd.io.Out, msg.WebappBuildRunningCmd)
-	fmt.Fprintf(cmd.io.Out, "$ %s\n", cmdRunner)
-
-	out, exitCode, err := cmd.commandRunner(cmdRunner, envs)
-
-	fmt.Fprintf(cmd.io.Out, "%s\n", out)
-	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
-
-	if err != nil {
-		return msg.ErrFailedToRunCommand
+		return err
 	}
 
 	return nil
 }
 
-func (cmd *buildCmd) Run() error {
+func (cmd *BuildCmd) runInitCmdLine(typeLang string) error {
+	var output string
+	var exitCode int
+	var err error
+
+	switch typeLang {
+	case "javascript":
+		output, exitCode, err = scripts.BuildJavascript(cmd)
+		if err != nil {
+			return errors.New("failed Building err: " + err.Error())
+		}
+	case "nextjs":
+		output, exitCode, err = scripts.BuildNextjs(cmd)
+		if err != nil {
+			return errors.New("failed Building err: " + err.Error())
+		}
+	case "flareact":
+		output, exitCode, err = scripts.BuildFlareact(cmd)
+		if err != nil {
+			return errors.New("failed Building err: " + err.Error())
+		}
+	default:
+		output = ""
+		exitCode = 0
+		err = errors.New("setp invalid")
+	}
+
+	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cmd *BuildCmd) Run() error {
 	return cmd.run()
 }

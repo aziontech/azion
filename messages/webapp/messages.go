@@ -23,7 +23,6 @@ var (
 	WebappInitUsage             = "init [flags]"
 	WebappInitShortDescription  = "Initializes a Web Application"
 	WebappInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Web Application on Azion’s platform"
-	WebappInitCmdNotSpecified   = "Init step command not specified. No action will be taken\n"
 	WebappInitRunningCmd        = "Running init step command:\n\n"
 	WebappInitFlagName          = "The Web application's name"
 	WebappInitFlagType          = "The type of  Web application <javascript | flareact | nextjs>"
