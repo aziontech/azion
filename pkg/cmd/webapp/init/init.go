@@ -16,6 +16,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+
+	"github.com/tidwall/sjson"
 )
 
 type initInfo struct {
@@ -194,8 +196,6 @@ func (cmd *initCmd) fetchTemplates(info *initInfo) error {
 }
 
 func (cmd *initCmd) runInitCmdLine(workingDir string) error {
-	// start init
-
 	path, err := cmd.getWorkDir()
 	if err != nil {
 		return err
@@ -224,33 +224,37 @@ func (cmd *initCmd) runInitCmdLine(workingDir string) error {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, msg.WebappInitRunningCmd)
-	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.InitData.Cmd)
-
 	_, err = cmd.lookPath("npm")
 	if err != nil {
-		// TODO: add correct error
 		return errors.New("npm not found")
 	}
 
 	mkdir := fmt.Sprintf("mkdir -p %s/worker", workingDir)
 	npmCleanWebPack := "npm install --yes --save-dev clean-webpack-plugin"
 	npmWebPackCli := "npm install --yes --save-dev webpack-cli@4.9.2"
-	cmdRunner := fmt.Sprintf("%s && %s && %s && %s", conf.InitData.Cmd, mkdir, npmCleanWebPack, npmWebPackCli)
+	cmdRunner := fmt.Sprintf("%s && %s && %s", mkdir, npmCleanWebPack, npmWebPackCli)
+	fmt.Fprintf(cmd.io.Out, msg.WebappInitRunningCmd)
+	fmt.Fprintf(cmd.io.Out, "$ %s\n", cmdRunner)
 
 	output, exitCode, err := cmd.commandRunner(cmdRunner, envs)
 
-	// replace build
-	// npm build to "azioncli webapp build"
-	// npm deploy to "azioncli webapp publish"
-
-	packageJsonPath := "/home/dev/Playground/nextjs-blog/package.json"
-	//packageJsonPath := workingDir + "/package.json"
-	_, err = cmd.fileReader(packageJsonPath)
+	packageJsonPath := workingDir + "/package.json"
+	packageJson, err := cmd.fileReader(packageJsonPath)
 	if err != nil {
-		// TODO: add correct error
-		return errors.New("failed read file")
+		return errors.New("failed on read file")
 	}
+
+	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
+	if err != nil {
+		return errors.New("failed replace scripts.build")
+	}
+
+	packJsonReplaceDeploy, err := sjson.Set(string(packJsonReplaceBuild), "scripts.deploy", "azioncli webapp publish")
+	if err != nil {
+		return errors.New("failed replace scripts.deploy")
+	}
+
+	cmd.writeFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
 
 	fmt.Fprintf(cmd.io.Out, "%s\n", output)
 	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
