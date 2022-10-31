@@ -87,6 +87,7 @@ func (cmd *BuildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
 	return conf, nil
 }
 
+// var runBuild = RunBuildCmdLine
 func (cmd *BuildCmd) run() error {
 	path, err := cmd.GetWorkDir()
 	if err != nil {
@@ -96,12 +97,11 @@ func (cmd *BuildCmd) run() error {
 	jsonConf := path + "/azion/azion.json"
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
-		return err
+		return msg.ErrorOpeningAzionFile
 	}
 
 	typeLang := gjson.Get(string(file), "type")
-
-	err = cmd.runInitCmdLine(typeLang.String())
+	err = RunBuildCmdLine(cmd, typeLang.String())
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (cmd *BuildCmd) run() error {
 	return nil
 }
 
-func (cmd *BuildCmd) runInitCmdLine(typeLang string) error {
+func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	var output string
 	var exitCode int
 	var err error
@@ -118,17 +118,17 @@ func (cmd *BuildCmd) runInitCmdLine(typeLang string) error {
 	case "javascript":
 		output, exitCode, err = BuildJavascript(cmd)
 		if err != nil {
-			return errors.New("failed Building err: " + err.Error())
+			return err
 		}
 	case "nextjs":
 		output, exitCode, err = BuildNextjs(cmd)
 		if err != nil {
-			return errors.New("failed Building err: " + err.Error())
+			return err
 		}
 	case "flareact":
 		output, exitCode, err = BuildFlareact(cmd)
 		if err != nil {
-			return errors.New("failed Building err: " + err.Error())
+			return err
 		}
 	default:
 		output = ""
@@ -151,29 +151,27 @@ func (cmd *BuildCmd) Run() error {
 }
 
 func BuildJavascript(cmd *BuildCmd) (string, int, error) {
-	conf, err := getConfig()
+	conf, err := getConfig(cmd)
 	if err != nil {
-		fmt.Println("getConfig :", err.Error())
 		return "", 0, err
 	}
 
 	envs, err := cmd.EnvLoader(conf.InitData.Env)
 	if err != nil {
-		fmt.Println("EnvLoader :", err.Error())
-		return "", 0, errors.New("failed load envs err: " + err.Error())
+		return "", 0, msg.ErrReadEnvFile
 	}
 
 	workDirPath, err := cmd.GetWorkDir()
 	if err != nil {
-		fmt.Println("GetWorkDir :", err.Error())
-		return "", 0, errors.New("failed getworkdir err: " + err.Error())
+		return "", 0, utils.ErrorInternalServerError
 	}
 
 	workDirPath += "/args.json"
 	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
-		fmt.Println("FileReader :", err.Error())
-		cmd.WriteFile(workDirPath, []byte("{}"), 0644)
+		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
+			return "", 0, fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
+		}
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
@@ -182,8 +180,7 @@ func BuildJavascript(cmd *BuildCmd) (string, int, error) {
 	cmdRunner := "npx --yes --package=webpack@5.72.0 --package=webpack-cli@4.9.2 -- webpack --config ./azion/webpack.config.js -o ./worker --mode production || exit $? ;" // conf.BuildData.Cmd
 	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
 	if err != nil {
-		fmt.Println("CommandRunner :", err.Error())
-		return "", exitCode, errors.New("failed commandRunner err: " + err.Error())
+		return "", exitCode, err
 	}
 
 	return output, exitCode, nil
@@ -197,14 +194,14 @@ func BuildFlareact(cmd *BuildCmd) (string, int, error) {
 	return "", 0, nil
 }
 
-func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
+func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		return conf, err
 	}
 
 	jsonConf := path + "/azion/config.json"
-	file, err := os.ReadFile(jsonConf)
+	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
 		return conf, msg.ErrorOpeningConfigFile
 	}

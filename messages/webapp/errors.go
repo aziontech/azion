@@ -23,4 +23,7 @@ var (
 
 	ErrorWebappInitCmdNotSpecified  = errors.New("Init step command not specified. No action will be taken")
 	ErrorWebappBuildCmdNotSpecified = errors.New("Build step command not specified. No action will be taken")
+	ErrorMissingNpm                 = errors.New("missing npm")
+	ErrorUpdateDeployScript         = errors.New("update deploy script")
+	ErrorUpdateBuildScript          = errors.New("update build script")
 )

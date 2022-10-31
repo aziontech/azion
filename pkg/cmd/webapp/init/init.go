@@ -265,7 +265,7 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	_, err := cmd.LookPath("npm")
 	if err != nil {
-		return "", 0, errors.New("npm not found")
+		return "", 0, msg.ErrorMissingNpm
 	}
 
 	conf, err := getConfig()
@@ -276,12 +276,12 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 
 	envs, err := cmd.EnvLoader(conf.InitData.Env)
 	if err != nil {
-		return "", 0, errors.New("failed load envs err: " + err.Error())
+		return "", 0, msg.ErrReadEnvFile
 	}
 
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err = os.MkdirAll(pathWorker, os.ModePerm); err != nil {
-		return "", 0, errors.New("failed in create dir err: " + err.Error())
+		return "", 0, utils.ErrorCreateDir
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
@@ -292,7 +292,7 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	fmt.Println("output: ", output)
 
 	if err := UpdateScript(info, cmd); err != nil {
-		return "", 0, errors.New("failed update script: " + err.Error())
+		return "", 0, err
 	}
 
 	return output, exitCode, err
@@ -331,22 +331,22 @@ func UpdateScript(info *InitInfo, cmd *InitCmd) error {
 	packageJsonPath := info.PathWorkingDir + "/package.json"
 	packageJson, err := cmd.FileReader(packageJsonPath)
 	if err != nil {
-		return errors.New("failed on read file")
+		return msg.ErrorPackageJsonNotFound
 	}
 
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
-		return errors.New("failed replace scripts.build")
+		return msg.ErrorUpdateBuildScript
 	}
 
 	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
 	if err != nil {
-		return errors.New("failed replace scripts.deploy")
+		return msg.ErrorUpdateDeployScript
 	}
 
 	err = cmd.WriteFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
 	if err != nil {
-		return errors.New("failed write file")
+		return fmt.Errorf(utils.ErrorCreateFile.Error(), packageJsonPath)
 	}
 
 	return nil

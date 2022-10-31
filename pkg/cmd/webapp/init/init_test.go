@@ -81,6 +81,7 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
 		}
+
 		initCmd.Rename = func(oldpath string, newpath string) error {
 			return nil
 		}
