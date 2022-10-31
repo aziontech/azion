@@ -3,11 +3,11 @@ package build
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"io/fs"
 	"os"
 
-	"errors"
+	"github.com/tidwall/gjson"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -133,15 +133,15 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	default:
 		output = ""
 		exitCode = 0
-		err = errors.New("setp invalid")
+		err = utils.ErrorUnsupportedType
 	}
-
-	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
 
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
 
 	return nil
 }
@@ -177,8 +177,7 @@ func BuildJavascript(cmd *BuildCmd) (string, int, error) {
 	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
 	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
 
-	cmdRunner := "npx --yes --package=webpack@5.72.0 --package=webpack-cli@4.9.2 -- webpack --config ./azion/webpack.config.js -o ./worker --mode production || exit $? ;" // conf.BuildData.Cmd
-	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
+	output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
 	if err != nil {
 		return "", exitCode, err
 	}

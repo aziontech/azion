@@ -4,6 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
+	"io/ioutil"
+	"os"
+	"os/exec"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -13,10 +18,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
-	"io/fs"
-	"io/ioutil"
-	"os"
-	"os/exec"
 )
 
 type InitInfo struct {
@@ -287,8 +288,7 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
 	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	cmdRunner := "npm install --yes --save-dev clean-webpack-plugin && npm install --yes --save-dev webpack-cli@4.9.2" // conf.InitData.Cmd
-	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
+	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
 	fmt.Println("output: ", output)
 
 	if err := UpdateScript(info, cmd); err != nil {
