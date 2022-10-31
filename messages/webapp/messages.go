@@ -15,7 +15,6 @@ var (
 	WebappBuildUsage            = "build [flags]"
 	WebappBuildShortDescription = "Builds a Web Application"
 	WebappBuildLongDescription  = "Builds your Web Application to run on Azion’s Edge Computing Platform"
-	WebappBuildCmdNotSpecified  = "Build step command not specified. No action will be taken\n"
 	WebappBuildRunningCmd       = "Running build step command:\n\n"
 	WebappBuildFlagHelp         = "Displays more information about the build subcommand"
 

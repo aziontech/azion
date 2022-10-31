@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
-	"github.com/aziontech/azion-cli/pkg/cmd/webapp/scripts"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/sjson"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -200,17 +200,17 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 
 	switch info.TypeLang {
 	case "javascript":
-		output, exitCode, err = scripts.InitJavascript(info, cmd)
+		output, exitCode, err = InitJavascript(info, cmd)
 		if err != nil {
 			return errors.New("failed initialization err: " + err.Error())
 		}
 	case "nextjs":
-		output, exitCode, err = scripts.InitNextjs(info, cmd)
+		output, exitCode, err = InitNextjs(info, cmd)
 		if err != nil {
 			return errors.New("failed initialization err: " + err.Error())
 		}
 	case "flareact":
-		output, exitCode, err = scripts.InitFlareact(info, cmd)
+		output, exitCode, err = InitFlareact(info, cmd)
 		if err != nil {
 			return errors.New("failed initialization err: " + err.Error())
 		}
@@ -260,4 +260,94 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	}
 
 	return false
+}
+
+func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
+	_, err := cmd.LookPath("npm")
+	if err != nil {
+		return "", 0, errors.New("npm not found")
+	}
+
+	conf, err := getConfig()
+	fmt.Println("conf: ", conf)
+	if err != nil {
+		return "", 0, err
+	}
+
+	envs, err := cmd.EnvLoader(conf.InitData.Env)
+	if err != nil {
+		return "", 0, errors.New("failed load envs err: " + err.Error())
+	}
+
+	pathWorker := info.PathWorkingDir + "/worker"
+	if err = os.MkdirAll(pathWorker, os.ModePerm); err != nil {
+		return "", 0, errors.New("failed in create dir err: " + err.Error())
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+
+	cmdRunner := "npm install --yes --save-dev clean-webpack-plugin && npm install --yes --save-dev webpack-cli@4.9.2" // conf.InitData.Cmd
+	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
+	fmt.Println("output: ", output)
+
+	if err := UpdateScript(info, cmd); err != nil {
+		return "", 0, errors.New("failed update script: " + err.Error())
+	}
+
+	return output, exitCode, err
+}
+
+func InitNextjs(info *InitInfo, cmd *InitCmd) (string, int, error) {
+	return "", 0, nil
+}
+
+func InitFlareact(info *InitInfo, cmd *InitCmd) (string, int, error) {
+	return "", 0, nil
+}
+
+func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return conf, err
+	}
+	jsonConf := path + "/azion/config.json"
+	file, err := os.ReadFile(jsonConf)
+	if err != nil {
+		return conf, msg.ErrorOpeningConfigFile
+	}
+	conf = &contracts.AzionApplicationConfig{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return conf, msg.ErrorUnmarshalConfigFile
+	}
+	if conf.InitData.Cmd == "" {
+		return conf, msg.ErrorWebappInitCmdNotSpecified
+	}
+	return conf, nil
+}
+
+func UpdateScript(info *InitInfo, cmd *InitCmd) error {
+	packageJsonPath := info.PathWorkingDir + "/package.json"
+	packageJson, err := cmd.FileReader(packageJsonPath)
+	if err != nil {
+		return errors.New("failed on read file")
+	}
+
+	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
+	if err != nil {
+		return errors.New("failed replace scripts.build")
+	}
+
+	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
+	if err != nil {
+		return errors.New("failed replace scripts.deploy")
+	}
+
+	err = cmd.WriteFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
+	if err != nil {
+		return errors.New("failed write file")
+	}
+
+	return nil
 }

@@ -29,10 +29,10 @@ func TestBuild(t *testing.T) {
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
+		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			if cmd != "npm run build" {
 				return "", -1, errors.New("unexpected command")
 			}
@@ -41,7 +41,7 @@ func TestBuild(t *testing.T) {
 			}
 			return "Build completed", 0, nil
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return envVars, nil
 		}
 
@@ -73,13 +73,13 @@ Command exited with code 0
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
+		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Command output goes here", 42, expectedErr
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return envVars, nil
 		}
 
@@ -100,7 +100,7 @@ Command exited with code 42
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"build": {}}`), nil
 		}
 
@@ -114,7 +114,7 @@ Command exited with code 42
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
@@ -135,7 +135,7 @@ Command exited with code 42
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
 
@@ -156,10 +156,10 @@ Command exited with code 42
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return nil, utils.ErrorLoadingEnvVars
 		}
 

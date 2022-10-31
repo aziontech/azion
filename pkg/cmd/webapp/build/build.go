@@ -3,7 +3,6 @@ package build
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/cmd/webapp/scripts"
 	"github.com/tidwall/gjson"
 	"io/fs"
 	"os"
@@ -31,7 +30,7 @@ type BuildCmd struct {
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	command := newBuildCmd(f)
-	BuildCmd := &cobra.Command{
+	buildCmd := &cobra.Command{
 		Use:           msg.WebappBuildUsage,
 		Short:         msg.WebappBuildShortDescription,
 		Long:          msg.WebappBuildLongDescription,
@@ -45,9 +44,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	BuildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
+	buildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
 
-	return BuildCmd
+	return buildCmd
 }
 
 func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
@@ -94,7 +93,7 @@ func (cmd *BuildCmd) run() error {
 		return err
 	}
 
-	jsonConf := path + "/azion/config.json"
+	jsonConf := path + "/azion/azion.json"
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
 		return err
@@ -117,17 +116,17 @@ func (cmd *BuildCmd) runInitCmdLine(typeLang string) error {
 
 	switch typeLang {
 	case "javascript":
-		output, exitCode, err = scripts.BuildJavascript(cmd)
+		output, exitCode, err = BuildJavascript(cmd)
 		if err != nil {
 			return errors.New("failed Building err: " + err.Error())
 		}
 	case "nextjs":
-		output, exitCode, err = scripts.BuildNextjs(cmd)
+		output, exitCode, err = BuildNextjs(cmd)
 		if err != nil {
 			return errors.New("failed Building err: " + err.Error())
 		}
 	case "flareact":
-		output, exitCode, err = scripts.BuildFlareact(cmd)
+		output, exitCode, err = BuildFlareact(cmd)
 		if err != nil {
 			return errors.New("failed Building err: " + err.Error())
 		}
@@ -149,4 +148,76 @@ func (cmd *BuildCmd) runInitCmdLine(typeLang string) error {
 
 func (cmd *BuildCmd) Run() error {
 	return cmd.run()
+}
+
+func BuildJavascript(cmd *BuildCmd) (string, int, error) {
+	conf, err := getConfig()
+	if err != nil {
+		fmt.Println("getConfig :", err.Error())
+		return "", 0, err
+	}
+
+	envs, err := cmd.EnvLoader(conf.InitData.Env)
+	if err != nil {
+		fmt.Println("EnvLoader :", err.Error())
+		return "", 0, errors.New("failed load envs err: " + err.Error())
+	}
+
+	workDirPath, err := cmd.GetWorkDir()
+	if err != nil {
+		fmt.Println("GetWorkDir :", err.Error())
+		return "", 0, errors.New("failed getworkdir err: " + err.Error())
+	}
+
+	workDirPath += "/args.json"
+	_, err = cmd.FileReader(workDirPath)
+	if err != nil {
+		fmt.Println("FileReader :", err.Error())
+		cmd.WriteFile(workDirPath, []byte("{}"), 0644)
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+
+	cmdRunner := "npx --yes --package=webpack@5.72.0 --package=webpack-cli@4.9.2 -- webpack --config ./azion/webpack.config.js -o ./worker --mode production || exit $? ;" // conf.BuildData.Cmd
+	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
+	if err != nil {
+		fmt.Println("CommandRunner :", err.Error())
+		return "", exitCode, errors.New("failed commandRunner err: " + err.Error())
+	}
+
+	return output, exitCode, nil
+}
+
+func BuildNextjs(cmd *BuildCmd) (string, int, error) {
+	return "", 0, nil
+}
+
+func BuildFlareact(cmd *BuildCmd) (string, int, error) {
+	return "", 0, nil
+}
+
+func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return conf, err
+	}
+
+	jsonConf := path + "/azion/config.json"
+	file, err := os.ReadFile(jsonConf)
+	if err != nil {
+		return conf, msg.ErrorOpeningConfigFile
+	}
+
+	conf = &contracts.AzionApplicationConfig{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return conf, msg.ErrorUnmarshalConfigFile
+	}
+
+	if conf.BuildData.Cmd == "" {
+		return conf, msg.ErrorWebappBuildCmdNotSpecified
+	}
+
+	return conf, nil
 }

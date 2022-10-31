@@ -21,5 +21,6 @@ var (
 	ErrorCreateDomain      = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateDomain      = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 
-	ErrorWebappInitCmdNotSpecified = errors.New("Init step command not specified. No action will be taken")
+	ErrorWebappInitCmdNotSpecified  = errors.New("Init step command not specified. No action will be taken")
+	ErrorWebappBuildCmdNotSpecified = errors.New("Build step command not specified. No action will be taken")
 )
