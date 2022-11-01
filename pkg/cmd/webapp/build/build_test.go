@@ -3,6 +3,9 @@ package build
 import (
 	"bytes"
 	"errors"
+	msg "github.com/aziontech/azion-cli/messages/webapp"
+	"github.com/aziontech/azion-cli/utils"
+	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -85,75 +88,76 @@ $ npm run build
 `, stdout.String())
 	})
 
-	//t.Run("no build.cmd to execute", func(t *testing.T) {
-	//	f, stdout, _ := testutils.NewFactory(nil)
-	//
-	//	command := newBuildCmd(f)
-	//
-	//	command.FileReader = func(path string) ([]byte, error) {
-	//		return []byte(`{"build": {}}`), nil
-	//	}
-	//
-	//	err := command.run()
-	//	require.NoError(t, err)
-	//	require.NotContains(t, stdout.String(), "Running build step command")
-	//})
-	//
-	//t.Run("missing config file", func(t *testing.T) {
-	//	f, _, _ := testutils.NewFactory(nil)
-	//
-	//	command := newBuildCmd(f)
-	//
-	//	command.FileReader = func(path string) ([]byte, error) {
-	//		return nil, os.ErrNotExist
-	//	}
-	//
-	//	err := command.run()
-	//	require.ErrorIs(t, err, msg.ErrOpeningConfigFile)
-	//})
-	//
-	//t.Run("invalid json", func(t *testing.T) {
-	//	f, _, _ := testutils.NewFactory(nil)
-	//
-	//	jsonContent := bytes.NewBufferString(`
-	//    {
-	//        "build": {
-	//            "cmd": rm -rm *
-	//        }
-	//    }
-	//    `)
-	//
-	//	command := newBuildCmd(f)
-	//
-	//	command.FileReader = func(path string) ([]byte, error) {
-	//		return jsonContent.Bytes(), nil
-	//	}
-	//
-	//	err := command.run()
-	//	require.ErrorIs(t, err, msg.ErrUnmarshalConfigFile)
-	//})
-	//
-	//t.Run("invalid env", func(t *testing.T) {
-	//	f, _, _ := testutils.NewFactory(nil)
-	//
-	//	jsonContent := bytes.NewBufferString(`
-	//    {
-	//        "build": {
-	//            "cmd": "npm run build"
-	//        }
-	//    }
-	//    `)
-	//
-	//	command := newBuildCmd(f)
-	//
-	//	command.FileReader = func(path string) ([]byte, error) {
-	//		return jsonContent.Bytes(), nil
-	//	}
-	//	command.EnvLoader = func(path string) ([]string, error) {
-	//		return nil, utils.ErrorLoadingEnvVars
-	//	}
-	//
-	//	err := command.run()
-	//	require.ErrorIs(t, err, msg.ErrReadEnvFile)
-	//})
+	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
+		f, stdout, _ := testutils.NewFactory(nil)
+
+		command := newBuildCmd(f)
+
+		command.FileReader = func(path string) ([]byte, error) {
+			return []byte(`{"build": {}}`), nil
+		}
+
+		err := command.run()
+		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		require.NotContains(t, stdout.String(), "The project type isn’t supported. Modify the project to a valid type <javascript | nextjs | flareact> and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
+	})
+
+	t.Run("missing config file", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+
+		command := newBuildCmd(f)
+
+		command.FileReader = func(path string) ([]byte, error) {
+			return nil, os.ErrNotExist
+		}
+
+		err := command.run()
+		require.ErrorIs(t, err, msg.ErrorOpeningAzionFile)
+	})
+
+	t.Run("invalid json", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+
+		jsonContent := bytes.NewBufferString(`
+	   {
+	       "build": {
+	           "cmd": rm -rm *
+	       }
+	   }
+	   `)
+
+		command := newBuildCmd(f)
+
+		command.FileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
+		}
+
+		err := command.run()
+		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+	})
+
+	t.Run("invalid env", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+
+		jsonContent := bytes.NewBufferString(`
+	   {
+			"build": {
+		   		"cmd": "npm run build"
+	   		},
+			"type": "javascript"
+	   }
+	   `)
+
+		command := newBuildCmd(f)
+
+		command.FileReader = func(path string) ([]byte, error) {
+			return jsonContent.Bytes(), nil
+		}
+		command.EnvLoader = func(path string) ([]string, error) {
+			return nil, utils.ErrorLoadingEnvVars
+		}
+
+		err := command.run()
+		require.ErrorIs(t, err, msg.ErrReadEnvFile)
+	})
 }
