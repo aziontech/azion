@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -62,7 +61,7 @@ func newInitCmd(f *cmdutil.Factory) *InitCmd {
 		WriteFile:     os.WriteFile,
 		RemoveAll:     os.RemoveAll,
 		Rename:        os.Rename,
-		CreateTempDir: ioutil.TempDir,
+		CreateTempDir: os.MkdirTemp,
 		EnvLoader:     utils.LoadEnvVarsFromFile,
 		Stat:          os.Stat,
 	}
@@ -270,7 +269,6 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	}
 
 	conf, err := getConfig()
-	fmt.Println("conf: ", conf)
 	if err != nil {
 		return "", 0, err
 	}

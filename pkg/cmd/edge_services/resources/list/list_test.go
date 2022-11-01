@@ -2,7 +2,7 @@ package list
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -28,8 +28,8 @@ func TestList(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -61,8 +61,8 @@ func TestList(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -84,8 +84,8 @@ func TestList(t *testing.T) {
 		cmd := NewCmd(f)
 
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, errmsg.ErrorMissingServiceIdArgument)
@@ -105,8 +105,8 @@ func TestList(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "666"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err, "Error: 404 Not Found")

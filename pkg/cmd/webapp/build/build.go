@@ -67,26 +67,6 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	return newBuildCmd(f)
 }
 
-func (cmd *BuildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
-	path, err := cmd.GetWorkDir()
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := cmd.FileReader(path + cmd.ConfigRelativePath)
-	if err != nil {
-		return nil, msg.ErrOpeningConfigFile
-	}
-
-	conf := &contracts.AzionApplicationConfig{}
-
-	if err := json.Unmarshal(file, &conf); err != nil {
-		return nil, msg.ErrUnmarshalConfigFile
-	}
-
-	return conf, nil
-}
-
 // var runBuild = RunBuildCmdLine
 func (cmd *BuildCmd) run() error {
 	path, err := cmd.GetWorkDir()

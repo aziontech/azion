@@ -2,7 +2,7 @@ package describe
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -29,8 +29,8 @@ func TestDescribe(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234", "--resource-id", "666"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
@@ -50,8 +50,8 @@ func TestDescribe(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, errmsg.ErrorMissingResourceIdArgument)
@@ -79,8 +79,8 @@ func TestDescribe(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234", "-r", "69420"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)

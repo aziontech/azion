@@ -2,7 +2,7 @@ package describe
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 
@@ -14,7 +14,6 @@ import (
 )
 
 func TestDescribe(t *testing.T) {
-
 	t.Run("service_id not sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
@@ -28,8 +27,8 @@ func TestDescribe(t *testing.T) {
 		cmd := NewCmd(f)
 
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, errmsg.ErrorMissingServiceIdArgument)
@@ -49,8 +48,8 @@ func TestDescribe(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
@@ -79,8 +78,8 @@ func TestDescribe(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -127,8 +126,8 @@ Permissions: [read write]
 
 		cmd.SetArgs([]string{"--service-id", "1234", "--with-variables", "True"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)

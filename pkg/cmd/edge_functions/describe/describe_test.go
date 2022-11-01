@@ -1,7 +1,6 @@
 package describe
 
 import (
-	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
@@ -134,7 +133,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 			t.Fatalf("error executing cmd")
 		}
 
-		_, err = ioutil.ReadFile(path)
+		_, err = os.ReadFile(path)
 		if err != nil {
 			t.Fatalf("error reading `out.json`: %v", err)
 		}

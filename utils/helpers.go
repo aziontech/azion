@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -213,6 +212,6 @@ func checkStatusCode500Error(err error) error {
 
 // read the body of the response and returns its content
 func checkStatusCode400Error(httpResp *http.Response) error {
-	responseBody, _ := ioutil.ReadAll(httpResp.Body)
+	responseBody, _ := io.ReadAll(httpResp.Body)
 	return fmt.Errorf("%s", responseBody)
 }
