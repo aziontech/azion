@@ -67,7 +67,6 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	return newBuildCmd(f)
 }
 
-// var runBuild = RunBuildCmdLine
 func (cmd *BuildCmd) run() error {
 	path, err := cmd.GetWorkDir()
 	if err != nil {
