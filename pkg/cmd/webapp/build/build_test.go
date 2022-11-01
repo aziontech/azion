@@ -89,7 +89,7 @@ $ npm run build
 	})
 
 	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
-		f, stdout, _ := testutils.NewFactory(nil)
+		f, _, _ := testutils.NewFactory(nil)
 
 		command := newBuildCmd(f)
 
@@ -99,7 +99,6 @@ $ npm run build
 
 		err := command.run()
 		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
-		require.NotContains(t, stdout.String(), "The project type isn’t supported. Modify the project to a valid type <javascript | nextjs | flareact> and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	})
 
 	t.Run("missing config file", func(t *testing.T) {
