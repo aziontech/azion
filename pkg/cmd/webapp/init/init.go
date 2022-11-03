@@ -1,12 +1,15 @@
 package init
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -268,8 +271,12 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 		return "", 0, msg.ErrorMissingNpm
 	}
 
-	conf, err := getConfig()
+	conf, err := getConfig(cmd)
 	if err != nil {
+		return "", 0, err
+	}
+
+	if err := addGitignore(cmd); err != nil {
 		return "", 0, err
 	}
 
@@ -286,7 +293,9 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
 	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+	// conf.InitData.Cmd
+	cmdRunner := "npm install --yes --save-dev clean-webpack-plugin && npm install --yes --save-dev webpack-cli@4.9.2"
+	output, exitCode, err := cmd.CommandRunner(cmdRunner, envs)
 	fmt.Println("output: ", output)
 
 	if err := UpdateScript(info, cmd); err != nil {
@@ -294,6 +303,50 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	}
 
 	return output, exitCode, err
+}
+
+func addGitignore(cmd *InitCmd) error {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return err
+	}
+
+	pathGitignore := path + "/.gitignore"
+
+	fileGitignore, err := os.Open(pathGitignore)
+	defer fileGitignore.Close()
+
+	if err != nil {
+		return msg.ErrorOpeningConfigFile
+	}
+
+	var lineExist bool = false
+	webdevEnv := "./azion/webdev.env"
+
+	var lines []string
+	reader := bufio.NewReader(fileGitignore)
+	for {
+		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
+		if line == webdevEnv {
+			lineExist = true
+		}
+		lines = append(lines, line)
+		if err == io.EOF {
+			break
+		}
+	}
+
+	if lineExist == false {
+		lines = append(lines, webdevEnv)
+		linesByte := []byte(strings.Join(lines, "\n"))
+		err := os.WriteFile(pathGitignore, linesByte, 0644)
+		if err != nil {
+			return utils.ErrorInternalServerError
+		}
+	}
+
+	return nil
 }
 
 func InitNextjs(info *InitInfo, cmd *InitCmd) (string, int, error) {
@@ -304,13 +357,13 @@ func InitFlareact(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	return "", 0, nil
 }
 
-func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
+func getConfig(cmd *InitCmd) (conf *contracts.AzionApplicationConfig, err error) {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		return conf, err
 	}
 	jsonConf := path + "/azion/config.json"
-	file, err := os.ReadFile(jsonConf)
+	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
 		return conf, msg.ErrorOpeningConfigFile
 	}
