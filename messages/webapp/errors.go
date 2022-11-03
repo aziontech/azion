@@ -26,4 +26,5 @@ var (
 	ErrorMissingNpm                 = errors.New("missing npm")
 	ErrorUpdateDeployScript         = errors.New("update deploy script")
 	ErrorUpdateBuildScript          = errors.New("update build script")
+	ErrorMandatoryEnvs              = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
 )

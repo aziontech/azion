@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"regexp"
 
 	"github.com/tidwall/gjson"
 
@@ -99,13 +100,8 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 		if err != nil {
 			return err
 		}
-	case "nextjs":
-		output, exitCode, err = BuildNextjs(cmd)
-		if err != nil {
-			return err
-		}
-	case "flareact":
-		output, exitCode, err = BuildFlareact(cmd)
+	case "nextjs", "flareact":
+		output, exitCode, err = BuildFlareactNextjs(cmd)
 		if err != nil {
 			return err
 		}
@@ -140,17 +136,9 @@ func BuildJavascript(cmd *BuildCmd) (string, int, error) {
 		return "", 0, msg.ErrReadEnvFile
 	}
 
-	workDirPath, err := cmd.GetWorkDir()
+	err = checkArgsJson(cmd)
 	if err != nil {
-		return "", 0, utils.ErrorInternalServerError
-	}
-
-	workDirPath += "/args.json"
-	_, err = cmd.FileReader(workDirPath)
-	if err != nil {
-		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
-			return "", 0, fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
-		}
+		return "", 0, err
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
@@ -168,8 +156,39 @@ func BuildNextjs(cmd *BuildCmd) (string, int, error) {
 	return "", 0, nil
 }
 
-func BuildFlareact(cmd *BuildCmd) (string, int, error) {
-	return "", 0, nil
+func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
+	conf, err := getConfig(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	envs, err := cmd.EnvLoader(conf.BuildData.Env)
+	if err != nil {
+		return "", 0, msg.ErrReadEnvFile
+	}
+
+	fmt.Println(envs)
+	err = checkMandatoryEnv(envs)
+	if err != nil {
+		return "", 0, err
+	}
+
+	err = checkArgsJson(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	//TODO: when .sh is fully removed from template we need to review this part for Nextjs type
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+
+	output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+	if err != nil {
+		return "", exitCode, err
+	}
+
+	return output, exitCode, nil
 }
 
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
@@ -195,4 +214,41 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 	}
 
 	return conf, nil
+}
+
+func checkArgsJson(cmd *BuildCmd) error {
+	workDirPath, err := cmd.GetWorkDir()
+	if err != nil {
+		return utils.ErrorInternalServerError
+	}
+
+	workDirPath += "/args.json"
+	_, err = cmd.FileReader(workDirPath)
+	if err != nil {
+		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
+		}
+	}
+
+	return nil
+}
+
+func checkMandatoryEnv(env []string) error {
+	awsSecret := regexp.MustCompile("^AWS_SECRET_ACCESS_KEY=.+")
+	awsAccess := regexp.MustCompile("^AWS_ACCESS_KEY_ID=.+")
+	yesAccess := false
+	yesSecret := false
+	for _, item := range env {
+		access := awsAccess.FindString(item)
+		secret := awsSecret.FindString(item)
+		if access != "" {
+			yesAccess = true
+		} else if secret != "" {
+			yesSecret = true
+		}
+	}
+	if !yesAccess || !yesSecret {
+		return msg.ErrorMandatoryEnvs
+	}
+	return nil
 }
