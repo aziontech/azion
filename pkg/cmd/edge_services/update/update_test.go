@@ -3,7 +3,7 @@ package update
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -37,13 +37,13 @@ func TestUpdate(t *testing.T) {
 			httpmock.REST("PATCH", "edge_services/1234"),
 			func(req *http.Request) (*http.Response, error) {
 				request := &sdk.UpdateServiceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
+				body, _ := io.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
+					Body:    io.NopCloser(strings.NewReader(response)),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -56,8 +56,8 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--service-id", "1234", "--name", "thunderstruck"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)

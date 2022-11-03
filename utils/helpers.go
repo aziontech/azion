@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
@@ -170,7 +169,7 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 	return nil
 }
 
-//Returns the correct error message for each HTTP Status code
+// Returns the correct error message for each HTTP Status code
 func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	// when the CLI times out, probably due to SSO communication, httpResp is null and/or http status is 500;
@@ -211,8 +210,8 @@ func checkStatusCode500Error(err error) error {
 	return ErrorInternalServerError
 }
 
-//read the body of the response and returns its content
+// read the body of the response and returns its content
 func checkStatusCode400Error(httpResp *http.Response) error {
-	responseBody, _ := ioutil.ReadAll(httpResp.Body)
+	responseBody, _ := io.ReadAll(httpResp.Body)
 	return fmt.Errorf("%s", responseBody)
 }

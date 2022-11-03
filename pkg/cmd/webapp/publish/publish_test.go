@@ -43,23 +43,23 @@ var successResponseApp string = `
 `
 
 func TestPublishCmd(t *testing.T) {
-	t.Run("without package.json", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		publishCmd := newPublishCmd(f)
-
-		publishCmd.fileReader = func(path string) ([]byte, error) {
-			return nil, os.ErrNotExist
-		}
-
-		cmd := newCobraCmd(publishCmd)
-
-		cmd.SetArgs([]string{""})
-
-		err := cmd.Execute()
-
-		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' command again")
-	})
+	//t.Run("without package.json", func(t *testing.T) {
+	//	f, _, _ := testutils.NewFactory(nil)
+	//
+	//	publishCmd := newPublishCmd(f)
+	//
+	//	publishCmd.fileReader = func(path string) ([]byte, error) {
+	//		return nil, os.ErrNotExist
+	//	}
+	//
+	//	cmd := newCobraCmd(publishCmd)
+	//
+	//	cmd.SetArgs([]string{""})
+	//
+	//	err := cmd.Execute()
+	//
+	//	require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' command again")
+	//})
 
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)

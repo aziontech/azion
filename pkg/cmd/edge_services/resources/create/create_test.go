@@ -3,7 +3,7 @@ package create
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -29,7 +29,7 @@ var resposeBody = `
 
 func buildResponseContent(req *http.Request) string {
 	request := &sdk.CreateResourceRequest{}
-	body, _ := ioutil.ReadAll(req.Body)
+	body, _ := io.ReadAll(req.Body)
 	_ = json.Unmarshal(body, request)
 
 	response := strings.ReplaceAll(resposeBody, "{name}", request.Name)
@@ -49,7 +49,7 @@ func TestCreate(t *testing.T) {
 			func(req *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
+					Body:    io.NopCloser(strings.NewReader(buildResponseContent(req))),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -66,8 +66,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/testando.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestCreate(t *testing.T) {
 				return &http.Response{
 					StatusCode: http.StatusCreated,
 					Request:    req,
-					Body:       ioutil.NopCloser(strings.NewReader(buildResponseContent(req))),
+					Body:       io.NopCloser(strings.NewReader(buildResponseContent(req))),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -102,8 +102,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/bomb.sh", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -119,8 +119,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234", "--name", "/tmp/bomb.sh", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, errmsg.ErrorInvalidResourceTrigger)
@@ -134,8 +134,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234", "--name", "/tmp/a.txt", "--content-type", "text"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name, --content-type, and --content-file flags when the --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
@@ -156,8 +156,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{"--service-id", "1234", "--name", "/tmp/a.txt", "--content-type", "text", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 		_, err := cmd.ExecuteC()
 		require.EqualError(t, err, "The file’s content is empty. Provide a path and file with valid content and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	})

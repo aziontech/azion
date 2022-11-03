@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 
@@ -81,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 
 				if cmd.Flags().Changed("code") {
-					code, err := ioutil.ReadFile(fields.Code)
+					code, err := os.ReadFile(fields.Code)
 					if err != nil {
 						return fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 					}
@@ -89,7 +88,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 
 				if cmd.Flags().Changed("args") {
-					marshalledArgs, err := ioutil.ReadFile(fields.Args)
+					marshalledArgs, err := os.ReadFile(fields.Args)
 					if err != nil {
 						return fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 					}

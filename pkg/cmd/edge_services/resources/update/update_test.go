@@ -3,7 +3,7 @@ package update
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -43,8 +43,8 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, errmsg.ErrorMissingArgumentUpdateResource)
@@ -64,8 +64,8 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234", "-r", "666"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.ErrorIs(t, err, utils.ErrorUpdateNoFlagsSent)
@@ -78,14 +78,14 @@ func TestUpdate(t *testing.T) {
 			httpmock.REST("PATCH", "edge_services/1234/resources/666"),
 			func(req *http.Request) (*http.Response, error) {
 				request := &sdk.UpdateResourceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
+				body, _ := io.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
 				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
+					Body:    io.NopCloser(strings.NewReader(response)),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -98,8 +98,8 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--service-id", "1234", "--resource-id", "666", "--name", "BIRL"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -113,14 +113,14 @@ func TestUpdate(t *testing.T) {
 			httpmock.REST("PATCH", "edge_services/1234/resources/666"),
 			func(req *http.Request) (*http.Response, error) {
 				request := &sdk.UpdateResourceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
+				body, _ := io.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
 				response := strings.ReplaceAll(responseBody, "{name}", *request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
+					Body:    io.NopCloser(strings.NewReader(response)),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -137,8 +137,8 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"-s", "1234", "-r", "666", "--name", "BIRL", "--trigger", "Install", "--content-type", "shellscript", "--content-file", contentFile.Name()})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
