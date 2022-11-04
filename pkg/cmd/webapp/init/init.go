@@ -384,9 +384,7 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 }
 
 func addGitignore(cmd *InitCmd, path string) error {
-	path = "/home/maxwelm/Playground/azion/azion-cli/bin"
 	pathGitignore := path + "/.gitignore"
-
 	fileGitignore, err := cmd.OpenFile(pathGitignore)
 	if err != nil {
 		return msg.ErrorOpeningGitignoreFile
