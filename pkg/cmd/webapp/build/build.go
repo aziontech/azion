@@ -167,7 +167,6 @@ func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
 		return "", 0, msg.ErrReadEnvFile
 	}
 
-	fmt.Println(envs)
 	err = checkMandatoryEnv(envs)
 	if err != nil {
 		return "", 0, err
@@ -222,7 +221,7 @@ func checkArgsJson(cmd *BuildCmd) error {
 		return utils.ErrorInternalServerError
 	}
 
-	workDirPath += "/args.json"
+	workDirPath += "/azion/args.json"
 	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
