@@ -384,16 +384,19 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 }
 
 func addGitignore(cmd *InitCmd, path string) error {
+	path = "/home/maxwelm/Playground/azion/azion-cli/bin"
 	pathGitignore := path + "/.gitignore"
 
 	fileGitignore, err := cmd.OpenFile(pathGitignore)
 	if err != nil {
-		return msg.ErrorOpeningConfigFile
+		return msg.ErrorOpeningGitignoreFile
 	}
 	defer fileGitignore.Close()
 
-	var lineExist bool
 	webdevEnv := "./azion/webdev.env"
+	cellsSiteTemplate := "./cells-site-template"
+	existWebdevEnv := false
+	existCellsSiteTemplate := false
 
 	var lines []string
 	reader := bufio.NewReader(fileGitignore)
@@ -401,20 +404,30 @@ func addGitignore(cmd *InitCmd, path string) error {
 		line, err := reader.ReadString('\n')
 		line = strings.TrimSpace(line)
 		if line == webdevEnv {
-			lineExist = true
+			existWebdevEnv = true
 		}
+
+		if line == cellsSiteTemplate {
+			existCellsSiteTemplate = true
+		}
+
 		lines = append(lines, line)
 		if err == io.EOF {
 			break
 		}
 	}
 
-	if !lineExist {
-		lines = append(lines, webdevEnv)
+	if !existWebdevEnv || !existCellsSiteTemplate {
+		if !existWebdevEnv {
+			lines = append(lines, webdevEnv)
+		}
+		if !existCellsSiteTemplate {
+			lines = append(lines, cellsSiteTemplate)
+		}
 		linesByte := []byte(strings.Join(lines, "\n"))
 		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
 		if err != nil {
-			return utils.ErrorInternalServerError
+			return msg.ErrorWritingGitignoreFile
 		}
 	}
 
