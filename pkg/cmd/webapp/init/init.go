@@ -320,7 +320,7 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 
 func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
 	pathWorker := info.PathWorkingDir + "/worker"
-	if err := os.MkdirAll(pathWorker, os.ModePerm); err != nil {
+	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
 		return "", 0, utils.ErrorCreateDir
 	}
 
@@ -352,14 +352,14 @@ func showInstru() {
 
 func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (err error) {
 	pathWorker := info.PathWorkingDir + "/worker"
-	if err = os.MkdirAll(pathWorker, os.ModePerm); err != nil {
+	if err = cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
 		return utils.ErrorCreateDir
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
 	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	if err = os.MkdirAll(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
+	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
 		return utils.ErrorCreateDir
 	}
 
