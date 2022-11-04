@@ -387,11 +387,10 @@ func addGitignore(cmd *InitCmd, path string) error {
 	pathGitignore := path + "/.gitignore"
 
 	fileGitignore, err := cmd.OpenFile(pathGitignore)
-	defer fileGitignore.Close()
-
 	if err != nil {
 		return msg.ErrorOpeningConfigFile
 	}
+	defer fileGitignore.Close()
 
 	var lineExist bool
 	webdevEnv := "./azion/webdev.env"
@@ -410,7 +409,7 @@ func addGitignore(cmd *InitCmd, path string) error {
 		}
 	}
 
-	if lineExist == false {
+	if !lineExist {
 		lines = append(lines, webdevEnv)
 		linesByte := []byte(strings.Join(lines, "\n"))
 		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
