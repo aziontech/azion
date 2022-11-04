@@ -68,6 +68,10 @@ func TestCobraCmd(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		initCmd := newInitCmd(f)
 
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "", 0, nil
 		}
@@ -109,6 +113,10 @@ func TestCobraCmd(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		initCmd := newInitCmd(f)
 
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "", 0, nil
 		}
@@ -146,6 +154,10 @@ func TestCobraCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		initCmd := newInitCmd(f)
+
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
 
 		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "", 0, nil
@@ -191,6 +203,10 @@ func TestCobraCmd(t *testing.T) {
 
 		initCmd := newInitCmd(f)
 
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "", 0, nil
 		}
@@ -232,6 +248,10 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := newCobraCmd(initCmd)
 
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
 			if !strings.HasSuffix(path, "package.json") {
 				return nil, os.ErrNotExist
@@ -260,6 +280,11 @@ func TestInitCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := newInitCmd(f)
+
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		cmd.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
@@ -272,6 +297,10 @@ func TestInitCmd(t *testing.T) {
 	t.Run("init.env not empty", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 		cmd := newInitCmd(f)
+
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
 
 		// Specified init.env file but it cannot be read correctly
 		cmd.FileReader = func(path string) ([]byte, error) {
@@ -297,6 +326,11 @@ func TestInitCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := newInitCmd(f)
+
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
 		}
@@ -323,6 +357,10 @@ func TestInitCmd(t *testing.T) {
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
 		cmd := newInitCmd(f)
+
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
 
 		addGitignor = func(cmd *InitCmd, path string) error {
 			return nil
@@ -369,6 +407,10 @@ func TestInitCmd(t *testing.T) {
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
 		cmd := newInitCmd(f)
 
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 		addGitignor = func(cmd *InitCmd, path string) error {
 			return nil
 		}
@@ -413,6 +455,10 @@ func TestInitCmd(t *testing.T) {
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
 		cmd := newInitCmd(f)
+
+		cmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
 
 		addGitignor = func(cmd *InitCmd, path string) error {
 			return nil
