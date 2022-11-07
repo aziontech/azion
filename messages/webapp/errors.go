@@ -26,4 +26,6 @@ var (
 	ErrorMissingNpm                 = errors.New("missing npm")
 	ErrorUpdateDeployScript         = errors.New("update deploy script")
 	ErrorUpdateBuildScript          = errors.New("update build script")
+	ErrorOpeningGitignoreFile       = errors.New("Failed to open the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
+	ErrorWritingGitignoreFile       = errors.New("Failed to write the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
 )
