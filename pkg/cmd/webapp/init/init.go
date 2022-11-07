@@ -158,6 +158,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
+		if err = UpdateScript(info, cmd, path); err != nil {
+			return err
+		}
+
 		if err := cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
@@ -223,10 +227,6 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 	}
 
 	if err = addGitignor(cmd, path); err != nil {
-		return err
-	}
-
-	if err = UpdateScript(info, cmd, path); err != nil {
 		return err
 	}
 
