@@ -304,7 +304,7 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return "", 0, msg.ErrorFailedCreatingWorkerDirectory
+		return "", 0, utils.ErrorCreateDir
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
@@ -392,7 +392,9 @@ func addGitignore(cmd *InitCmd, path string) error {
 	defer fileGitignore.Close()
 
 	webdevEnv := "./azion/webdev.env"
+	cellsSiteTemplate := "./cells-site-template"
 	existWebdevEnv := false
+	existCellsSiteTemplate := false
 
 	var lines []string
 	reader := bufio.NewReader(fileGitignore)
@@ -403,15 +405,22 @@ func addGitignore(cmd *InitCmd, path string) error {
 			existWebdevEnv = true
 		}
 
+		if line == cellsSiteTemplate {
+			existCellsSiteTemplate = true
+		}
+
 		lines = append(lines, line)
 		if err == io.EOF {
 			break
 		}
 	}
 
-	if !existWebdevEnv {
+	if !existWebdevEnv || !existCellsSiteTemplate {
 		if !existWebdevEnv {
 			lines = append(lines, webdevEnv)
+		}
+		if !existCellsSiteTemplate {
+			lines = append(lines, cellsSiteTemplate)
 		}
 		linesByte := []byte(strings.Join(lines, "\n"))
 		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
@@ -432,7 +441,7 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
-		return msg.FailedUpdatingScriptsBuildField
+		return msg.ErrorWebappBuildCmdNotSpecified
 	}
 
 	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
