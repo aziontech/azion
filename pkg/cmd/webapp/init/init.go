@@ -151,6 +151,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
+		if err := UpdateScript(info, cmd); err != nil {
+			return err
+		}
+
 		if err := cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
@@ -288,10 +292,6 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 
 	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
 	fmt.Println("output: ", output)
-
-	if err := UpdateScript(info, cmd); err != nil {
-		return "", 0, err
-	}
 
 	return output, exitCode, err
 }
