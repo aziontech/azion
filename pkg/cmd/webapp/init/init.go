@@ -213,7 +213,7 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 
 	_, err = cmd.LookPath("npm")
 	if err != nil {
-		return msg.ErrorMissingNpm
+		return msg.ErrorNpmNotInstalled
 	}
 
 	path, err := utils.GetWorkingDir()
@@ -304,7 +304,7 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return "", 0, utils.ErrorCreateDir
+		return "", 0, msg.ErrorFailedCreatingWorkerDirectory
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
@@ -332,11 +332,11 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		return "", 0, err
 	}
 
-	showInstru()
+	showInstructions()
 	return output, exitCode, nil
 }
 
-func showInstru() {
+func showInstructions() {
 	fmt.Println(`    [ General Instructions ]
     - Requirements:
         - Tools: npm
@@ -392,9 +392,7 @@ func addGitignore(cmd *InitCmd, path string) error {
 	defer fileGitignore.Close()
 
 	webdevEnv := "./azion/webdev.env"
-	cellsSiteTemplate := "./cells-site-template"
 	existWebdevEnv := false
-	existCellsSiteTemplate := false
 
 	var lines []string
 	reader := bufio.NewReader(fileGitignore)
@@ -405,22 +403,15 @@ func addGitignore(cmd *InitCmd, path string) error {
 			existWebdevEnv = true
 		}
 
-		if line == cellsSiteTemplate {
-			existCellsSiteTemplate = true
-		}
-
 		lines = append(lines, line)
 		if err == io.EOF {
 			break
 		}
 	}
 
-	if !existWebdevEnv || !existCellsSiteTemplate {
+	if !existWebdevEnv {
 		if !existWebdevEnv {
 			lines = append(lines, webdevEnv)
-		}
-		if !existCellsSiteTemplate {
-			lines = append(lines, cellsSiteTemplate)
 		}
 		linesByte := []byte(strings.Join(lines, "\n"))
 		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
@@ -441,12 +432,12 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
-		return msg.ErrorUpdateBuildScript
+		return msg.FailedUpdatingScriptsBuildField
 	}
 
 	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
 	if err != nil {
-		return msg.ErrorUpdateDeployScript
+		return msg.FailedUpdatingScriptsDeployField
 	}
 
 	err = cmd.WriteFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
