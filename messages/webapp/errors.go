@@ -27,4 +27,6 @@ var (
 	ErrorUpdateDeployScript         = errors.New("update deploy script")
 	ErrorUpdateBuildScript          = errors.New("update build script")
 	ErrorMandatoryEnvs              = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
+	ErrorOpeningGitignoreFile       = errors.New("Failed to open the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
+	ErrorWritingGitignoreFile       = errors.New("Failed to write the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
 )

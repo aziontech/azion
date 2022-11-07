@@ -1,12 +1,15 @@
 package init
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -40,11 +43,13 @@ type InitCmd struct {
 	IsDirEmpty    func(dirpath string) (bool, error)
 	CleanDir      func(dirpath string) error
 	WriteFile     func(filename string, data []byte, perm fs.FileMode) error
+	OpenFile      func(name string) (*os.File, error)
 	RemoveAll     func(path string) error
 	Rename        func(oldpath string, newpath string) error
 	CreateTempDir func(dir string, pattern string) (string, error)
 	EnvLoader     func(path string) ([]string, error)
 	Stat          func(path string) (fs.FileInfo, error)
+	Mkdir         func(path string, perm os.FileMode) error
 }
 
 func newInitCmd(f *cmdutil.Factory) *InitCmd {
@@ -59,11 +64,13 @@ func newInitCmd(f *cmdutil.Factory) *InitCmd {
 		IsDirEmpty:    utils.IsDirEmpty,
 		CleanDir:      utils.CleanDirectory,
 		WriteFile:     os.WriteFile,
+		OpenFile:      os.Open,
 		RemoveAll:     os.RemoveAll,
 		Rename:        os.Rename,
 		CreateTempDir: os.MkdirTemp,
 		EnvLoader:     utils.LoadEnvVarsFromFile,
 		Stat:          os.Stat,
+		Mkdir:         os.MkdirAll,
 	}
 }
 
@@ -119,7 +126,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	info.PathWorkingDir = path
 
 	options.Test = testFunc
-	if err := options.Test(info.PathWorkingDir); err != nil {
+	if err = options.Test(info.PathWorkingDir); err != nil {
 		return err
 	}
 
@@ -193,26 +200,58 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
+var addGitignor = addGitignore
+
 func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 	var output string
 	var exitCode int
 	var err error
 
+	_, err = cmd.LookPath("npm")
+	if err != nil {
+		return msg.ErrorMissingNpm
+	}
+
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return err
+	}
+
+	conf, err := getConfig(cmd, path)
+	if err != nil {
+		return err
+	}
+
+	if err = addGitignor(cmd, path); err != nil {
+		return err
+	}
+
+	if err = UpdateScript(info, cmd, path); err != nil {
+		return err
+	}
+
+	envs, err := cmd.EnvLoader(conf.InitData.Env)
+	if err != nil {
+		return msg.ErrReadEnvFile
+	}
+
 	switch info.TypeLang {
 	case "javascript":
-		output, exitCode, err = InitJavascript(info, cmd)
+		output, exitCode, err = InitJavascript(info, cmd, conf, envs)
 		if err != nil {
-			return errors.New("failed initialization err: " + err.Error())
+			return err
 		}
 	case "nextjs":
-		output, exitCode, err = InitNextjs(info, cmd)
+		output, exitCode, err = InitNextjs(info, cmd, conf, envs)
 		if err != nil {
-			return errors.New("failed initialization err: " + err.Error())
+			return err
 		}
 	case "flareact":
-		output, exitCode, err = InitFlareact(info, cmd)
+		err = InitFlareact(info, cmd, conf, envs)
+		output = ""
+		exitCode = 0
 		if err != nil {
-			return errors.New("failed initialization err: " + err.Error())
+			return err
 		}
 	default:
 		output = ""
@@ -262,24 +301,9 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	return false
 }
 
-func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
-	_, err := cmd.LookPath("npm")
-	if err != nil {
-		return "", 0, msg.ErrorMissingNpm
-	}
-
-	conf, err := getConfig()
-	if err != nil {
-		return "", 0, err
-	}
-
-	envs, err := cmd.EnvLoader(conf.InitData.Env)
-	if err != nil {
-		return "", 0, msg.ErrReadEnvFile
-	}
-
+func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
 	pathWorker := info.PathWorkingDir + "/worker"
-	if err = os.MkdirAll(pathWorker, os.ModePerm); err != nil {
+	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
 		return "", 0, utils.ErrorCreateDir
 	}
 
@@ -287,30 +311,64 @@ func InitJavascript(info *InitInfo, cmd *InitCmd) (string, int, error) {
 	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
 	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-	fmt.Println("output: ", output)
-
-	if err := UpdateScript(info, cmd); err != nil {
+	if err != nil {
 		return "", 0, err
 	}
 
 	return output, exitCode, err
 }
 
-func InitNextjs(info *InitInfo, cmd *InitCmd) (string, int, error) {
-	return "", 0, nil
-}
-
-func InitFlareact(info *InitInfo, cmd *InitCmd) (string, int, error) {
-	return "", 0, nil
-}
-
-func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
-	path, err := utils.GetWorkingDir()
-	if err != nil {
-		return conf, err
+func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
+	pathWorker := info.PathWorkingDir + "/worker"
+	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+		return "", 0, utils.ErrorCreateDir
 	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+
+	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+	if err != nil {
+		return "", 0, err
+	}
+
+	showInstru()
+	return output, exitCode, nil
+}
+
+func showInstru() {
+	fmt.Println(`    [ General Instructions ]
+    - Requirements:
+        - Tools: npm
+        - AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+        - Customize the path to static content - AWS S3 storage (.azion/kv.json)
+
+    [ Usage ]
+    - Build Command: npm run build
+    - Publish Command: npm run deploy
+    [ Notes ]
+        - Node 16x or higher`)
+}
+
+func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (err error) {
+	pathWorker := info.PathWorkingDir + "/worker"
+	if err = cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+		return utils.ErrorCreateDir
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+
+	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
+		return utils.ErrorCreateDir
+	}
+
+	return nil
+}
+
+func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
 	jsonConf := path + "/azion/config.json"
-	file, err := os.ReadFile(jsonConf)
+	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
 		return conf, msg.ErrorOpeningConfigFile
 	}
@@ -325,8 +383,57 @@ func getConfig() (conf *contracts.AzionApplicationConfig, err error) {
 	return conf, nil
 }
 
-func UpdateScript(info *InitInfo, cmd *InitCmd) error {
-	packageJsonPath := info.PathWorkingDir + "/package.json"
+func addGitignore(cmd *InitCmd, path string) error {
+	pathGitignore := path + "/.gitignore"
+	fileGitignore, err := cmd.OpenFile(pathGitignore)
+	if err != nil {
+		return msg.ErrorOpeningGitignoreFile
+	}
+	defer fileGitignore.Close()
+
+	webdevEnv := "./azion/webdev.env"
+	cellsSiteTemplate := "./cells-site-template"
+	existWebdevEnv := false
+	existCellsSiteTemplate := false
+
+	var lines []string
+	reader := bufio.NewReader(fileGitignore)
+	for {
+		line, err := reader.ReadString('\n')
+		line = strings.TrimSpace(line)
+		if line == webdevEnv {
+			existWebdevEnv = true
+		}
+
+		if line == cellsSiteTemplate {
+			existCellsSiteTemplate = true
+		}
+
+		lines = append(lines, line)
+		if err == io.EOF {
+			break
+		}
+	}
+
+	if !existWebdevEnv || !existCellsSiteTemplate {
+		if !existWebdevEnv {
+			lines = append(lines, webdevEnv)
+		}
+		if !existCellsSiteTemplate {
+			lines = append(lines, cellsSiteTemplate)
+		}
+		linesByte := []byte(strings.Join(lines, "\n"))
+		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
+		if err != nil {
+			return msg.ErrorWritingGitignoreFile
+		}
+	}
+
+	return nil
+}
+
+func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
+	packageJsonPath := path + "/package.json"
 	packageJson, err := cmd.FileReader(packageJsonPath)
 	if err != nil {
 		return msg.ErrorPackageJsonNotFound
