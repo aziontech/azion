@@ -3,12 +3,13 @@ package init
 import (
 	"bytes"
 	"errors"
-	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"io"
 	"io/fs"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/httpmock"
 
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -78,9 +79,6 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
 		}
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
-		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
 		}
@@ -123,9 +121,6 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
 		}
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
-		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
 		}
@@ -164,9 +159,6 @@ func TestCobraCmd(t *testing.T) {
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
-		}
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -212,9 +204,6 @@ func TestCobraCmd(t *testing.T) {
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
-		}
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -310,9 +299,6 @@ func TestInitCmd(t *testing.T) {
 			return nil, msg.ErrReadEnvFile
 		}
 
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
-		}
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
 		}
@@ -333,9 +319,6 @@ func TestInitCmd(t *testing.T) {
 
 		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
-		}
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
 		}
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -360,10 +343,6 @@ func TestInitCmd(t *testing.T) {
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
-		}
-
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
 		}
 
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
@@ -411,10 +390,6 @@ func TestInitCmd(t *testing.T) {
 			return "", nil
 		}
 
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
-		}
-
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
 		}
@@ -458,10 +433,6 @@ func TestInitCmd(t *testing.T) {
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
-		}
-
-		addGitignor = func(cmd *InitCmd, path string) error {
-			return nil
 		}
 
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
