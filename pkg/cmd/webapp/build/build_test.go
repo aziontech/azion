@@ -3,10 +3,11 @@ package build
 import (
 	"bytes"
 	"errors"
-	msg "github.com/aziontech/azion-cli/messages/webapp"
-	"github.com/aziontech/azion-cli/utils"
 	"os"
 	"testing"
+
+	msg "github.com/aziontech/azion-cli/messages/webapp"
+	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"

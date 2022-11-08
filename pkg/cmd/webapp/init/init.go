@@ -298,15 +298,20 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 		return "", 0, utils.ErrorCreateDir
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+	if conf.InitData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-	if err != nil {
-		return "", 0, err
+		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+		return output, exitCode, nil
 	}
 
-	return output, exitCode, err
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
+
+	return "", 0, nil
 }
 
 func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
@@ -327,6 +332,8 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		showInstructions()
 		return output, exitCode, nil
 	}
+
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
 
 	return "", 0, nil
 
@@ -363,6 +370,8 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 		return nil
 	}
 
+	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
+
 	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
 		return utils.ErrorCreateDir
 	}
@@ -381,9 +390,7 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 	if err != nil {
 		return conf, msg.ErrorUnmarshalConfigFile
 	}
-	if conf.InitData.Cmd == "" {
-		return conf, msg.ErrorWebappInitCmdNotSpecified
-	}
+
 	return conf, nil
 }
 

@@ -141,15 +141,20 @@ func BuildJavascript(cmd *BuildCmd) (string, int, error) {
 		return "", 0, err
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+	if conf.BuildData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
 
-	output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
-	if err != nil {
-		return "", exitCode, err
+		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+		return output, exitCode, nil
 	}
 
-	return output, exitCode, nil
+	fmt.Println(msg.ErrorWebappBuildCmdNotSpecified)
+
+	return "", 0, nil
 }
 
 func BuildNextjs(cmd *BuildCmd) (string, int, error) {
@@ -179,15 +184,20 @@ func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
 
 	//TODO: when .sh is fully removed from template we need to review this part for Nextjs type
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+	if conf.BuildData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
 
-	output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
-	if err != nil {
-		return "", exitCode, err
+		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+		return output, exitCode, nil
 	}
 
-	return output, exitCode, nil
+	fmt.Println(msg.ErrorWebappBuildCmdNotSpecified)
+
+	return "", 0, nil
 }
 
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
@@ -208,11 +218,8 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 		return conf, msg.ErrorUnmarshalConfigFile
 	}
 
-	if conf.BuildData.Cmd == "" {
-		return conf, msg.ErrorWebappBuildCmdNotSpecified
-	}
-
 	return conf, nil
+
 }
 
 func checkArgsJson(cmd *BuildCmd) error {
