@@ -1,15 +1,12 @@
 package init
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -204,8 +201,6 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
-var addGitignor = addGitignore
-
 func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 	var output string
 	var exitCode int
@@ -223,10 +218,6 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 
 	conf, err := getConfig(cmd, path)
 	if err != nil {
-		return err
-	}
-
-	if err = addGitignor(cmd, path); err != nil {
 		return err
 	}
 
@@ -324,16 +315,21 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		return "", 0, utils.ErrorCreateDir
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+	if conf.InitData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
-	output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-	if err != nil {
-		return "", 0, err
+		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+
+		showInstructions()
+		return output, exitCode, nil
 	}
 
-	showInstructions()
-	return output, exitCode, nil
+	return "", 0, nil
+
 }
 
 func showInstructions() {
@@ -356,8 +352,16 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 		return utils.ErrorCreateDir
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+	if conf.InitData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+
+		_, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 
 	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
 		return utils.ErrorCreateDir
@@ -381,55 +385,6 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 		return conf, msg.ErrorWebappInitCmdNotSpecified
 	}
 	return conf, nil
-}
-
-func addGitignore(cmd *InitCmd, path string) error {
-	pathGitignore := path + "/.gitignore"
-	fileGitignore, err := cmd.OpenFile(pathGitignore)
-	if err != nil {
-		return msg.ErrorOpeningGitignoreFile
-	}
-	defer fileGitignore.Close()
-
-	webdevEnv := "./azion/webdev.env"
-	cellsSiteTemplate := "./cells-site-template"
-	existWebdevEnv := false
-	existCellsSiteTemplate := false
-
-	var lines []string
-	reader := bufio.NewReader(fileGitignore)
-	for {
-		line, err := reader.ReadString('\n')
-		line = strings.TrimSpace(line)
-		if line == webdevEnv {
-			existWebdevEnv = true
-		}
-
-		if line == cellsSiteTemplate {
-			existCellsSiteTemplate = true
-		}
-
-		lines = append(lines, line)
-		if err == io.EOF {
-			break
-		}
-	}
-
-	if !existWebdevEnv || !existCellsSiteTemplate {
-		if !existWebdevEnv {
-			lines = append(lines, webdevEnv)
-		}
-		if !existCellsSiteTemplate {
-			lines = append(lines, cellsSiteTemplate)
-		}
-		linesByte := []byte(strings.Join(lines, "\n"))
-		err := cmd.WriteFile(pathGitignore, linesByte, 0643)
-		if err != nil {
-			return msg.ErrorWritingGitignoreFile
-		}
-	}
-
-	return nil
 }
 
 func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {

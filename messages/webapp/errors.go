@@ -27,7 +27,5 @@ var (
 	FailedUpdatingScriptsDeployField   = errors.New("Failed to update scripts.deploy field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
 	FailedUpdatingScriptsBuildField    = errors.New("Failed to update scripts.build field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
 	ErrorMandatoryEnvs                 = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
-	ErrorOpeningGitignoreFile          = errors.New("Failed to open the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
-	ErrorWritingGitignoreFile          = errors.New("Failed to write the .gitigonre file. The file doesn't exist, is corrupted, or you do not have the correct permissions")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 )
