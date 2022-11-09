@@ -309,8 +309,6 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 		return output, exitCode, nil
 	}
 
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
-
 	return "", 0, nil
 }
 
@@ -332,8 +330,6 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		showInstructions()
 		return output, exitCode, nil
 	}
-
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
 
 	return "", 0, nil
 
@@ -370,8 +366,6 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 		return nil
 	}
 
-	fmt.Fprintf(cmd.Io.Out, "$ %s\n", msg.ErrorWebappInitCmdNotSpecified)
-
 	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
 		return utils.ErrorCreateDir
 	}
@@ -403,7 +397,7 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
-		return msg.ErrorWebappBuildCmdNotSpecified
+		return msg.FailedUpdatingScriptsBuildField
 	}
 
 	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")

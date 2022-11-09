@@ -314,7 +314,6 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	}
 
 	if conf.PublishData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, msg.WebappPublishCmdNotSpecified)
 		return nil
 	}
 
