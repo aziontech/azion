@@ -152,8 +152,6 @@ func BuildJavascript(cmd *BuildCmd) (string, int, error) {
 		return output, exitCode, nil
 	}
 
-	fmt.Println(msg.ErrorWebappBuildCmdNotSpecified)
-
 	return "", 0, nil
 }
 
@@ -194,8 +192,6 @@ func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
 		}
 		return output, exitCode, nil
 	}
-
-	fmt.Println(msg.ErrorWebappBuildCmdNotSpecified)
 
 	return "", 0, nil
 }

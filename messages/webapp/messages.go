@@ -35,7 +35,6 @@ var (
 	WebappPublishUsage                       = "publish"
 	WebappPublishShortDescription            = "Publishes a Web Application on the Azion platform"
 	WebappPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
-	WebappPublishCmdNotSpecified             = "Publish pre command not specified. No action will be taken\n"
 	WebappPublishRunningCmd                  = "Running publish pre command:\n\n"
 	WebappPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
 	WebappPublishOutputCachePurge            = "Domain cache was purged"
