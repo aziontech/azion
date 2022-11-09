@@ -2,7 +2,7 @@ package delete
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -25,8 +25,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--service-id", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -49,8 +49,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{"-s", "1234"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)

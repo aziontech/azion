@@ -3,7 +3,6 @@ package cmdutil
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -15,7 +14,7 @@ func WriteDetailsToFile(data []byte, outPath string, writer io.Writer) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(outPath, data, 0644)
+	err = os.WriteFile(outPath, data, 0644)
 	if err != nil {
 		return err
 	}
@@ -23,7 +22,7 @@ func WriteDetailsToFile(data []byte, outPath string, writer io.Writer) error {
 }
 
 func UnmarshallJsonFromReader(file io.Reader, object interface{}) error {
-	jsonFile, err := ioutil.ReadAll(file)
+	jsonFile, err := io.ReadAll(file)
 	if err != nil {
 		return err
 	}

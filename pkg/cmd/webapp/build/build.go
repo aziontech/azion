@@ -3,7 +3,11 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
+	"regexp"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -14,14 +18,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type buildCmd struct {
-	io *iostreams.IOStreams
+type BuildCmd struct {
+	Io        *iostreams.IOStreams
+	WriteFile func(filename string, data []byte, perm fs.FileMode) error
 	// Return output, exit code and any errors
-	commandRunner      func(cmd string, envvars []string) (string, int, error)
-	fileReader         func(path string) ([]byte, error)
-	configRelativePath string
-	getWorkDir         func() (string, error)
-	envLoader          func(path string) ([]string, error)
+	CommandRunner      func(cmd string, envvars []string) (string, int, error)
+	FileReader         func(path string) ([]byte, error)
+	ConfigRelativePath string
+	GetWorkDir         func() (string, error)
+	EnvLoader          func(path string) ([]string, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -45,74 +50,207 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return buildCmd
 }
 
-func newBuildCmd(f *cmdutil.Factory) *buildCmd {
-	return &buildCmd{
-		io:         f.IOStreams,
-		fileReader: os.ReadFile,
-		commandRunner: func(cmd string, envs []string) (string, int, error) {
+func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
+	return &BuildCmd{
+		Io:         f.IOStreams,
+		FileReader: os.ReadFile,
+		CommandRunner: func(cmd string, envs []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envs, cmd)
 		},
-		configRelativePath: "/azion/config.json",
-		getWorkDir:         utils.GetWorkingDir,
-		envLoader:          utils.LoadEnvVarsFromFile,
+		ConfigRelativePath: "/azion/config.json",
+		GetWorkDir:         utils.GetWorkingDir,
+		EnvLoader:          utils.LoadEnvVarsFromFile,
+		WriteFile:          os.WriteFile,
 	}
 }
 
-func NewBuildCmd(f *cmdutil.Factory) *buildCmd {
+func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	return newBuildCmd(f)
 }
 
-func (c *buildCmd) readConfig() (*contracts.AzionApplicationConfig, error) {
-	path, err := c.getWorkDir()
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := c.fileReader(path + c.configRelativePath)
-	if err != nil {
-		return nil, msg.ErrOpeningConfigFile
-	}
-
-	conf := &contracts.AzionApplicationConfig{}
-
-	if err := json.Unmarshal(file, &conf); err != nil {
-		return nil, msg.ErrUnmarshalConfigFile
-	}
-
-	return conf, nil
-}
-
-func (c *buildCmd) run() error {
-	conf, err := c.readConfig()
+func (cmd *BuildCmd) run() error {
+	path, err := cmd.GetWorkDir()
 	if err != nil {
 		return err
 	}
 
-	envs, err := c.envLoader(conf.BuildData.Env)
+	jsonConf := path + "/azion/azion.json"
+	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
-		return msg.ErrReadEnvFile
+		return msg.ErrorOpeningAzionFile
 	}
 
-	if conf.BuildData.Cmd == "" {
-		fmt.Fprintf(c.io.Out, msg.WebappBuildCmdNotSpecified)
-		return nil
-	}
-
-	fmt.Fprintf(c.io.Out, msg.WebappBuildRunningCmd)
-	fmt.Fprintf(c.io.Out, "$ %s\n", conf.BuildData.Cmd)
-
-	out, exitCode, err := c.commandRunner(conf.BuildData.Cmd, envs)
-
-	fmt.Fprintf(c.io.Out, "%s\n", out)
-	fmt.Fprintf(c.io.Out, msg.WebappOutput, exitCode)
-
+	typeLang := gjson.Get(string(file), "type")
+	err = RunBuildCmdLine(cmd, typeLang.String())
 	if err != nil {
-		return msg.ErrFailedToRunCommand
+		return err
 	}
 
 	return nil
 }
 
-func (c *buildCmd) Run() error {
-	return c.run()
+func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
+	var output string
+	var exitCode int
+	var err error
+
+	switch typeLang {
+	case "javascript":
+		output, exitCode, err = BuildJavascript(cmd)
+		if err != nil {
+			return err
+		}
+	case "nextjs", "flareact":
+		output, exitCode, err = BuildFlareactNextjs(cmd)
+		if err != nil {
+			return err
+		}
+	default:
+		output = ""
+		exitCode = 0
+		err = utils.ErrorUnsupportedType
+	}
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
+
+	return nil
+}
+
+func (cmd *BuildCmd) Run() error {
+	return cmd.run()
+}
+
+func BuildJavascript(cmd *BuildCmd) (string, int, error) {
+	conf, err := getConfig(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	envs, err := cmd.EnvLoader(conf.InitData.Env)
+	if err != nil {
+		return "", 0, msg.ErrReadEnvFile
+	}
+
+	err = checkArgsJson(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	if conf.BuildData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+
+		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+		return output, exitCode, nil
+	}
+
+	return "", 0, nil
+}
+
+func BuildNextjs(cmd *BuildCmd) (string, int, error) {
+	return "", 0, nil
+}
+
+func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
+	conf, err := getConfig(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	envs, err := cmd.EnvLoader(conf.BuildData.Env)
+	if err != nil {
+		return "", 0, msg.ErrReadEnvFile
+	}
+
+	err = checkMandatoryEnv(envs)
+	if err != nil {
+		return "", 0, err
+	}
+
+	err = checkArgsJson(cmd)
+	if err != nil {
+		return "", 0, err
+	}
+
+	//TODO: when .sh is fully removed from template we need to review this part for Nextjs type
+
+	if conf.BuildData.Cmd != "" {
+		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+
+		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if err != nil {
+			return "", 0, err
+		}
+		return output, exitCode, nil
+	}
+
+	return "", 0, nil
+}
+
+func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return conf, err
+	}
+
+	jsonConf := path + "/azion/config.json"
+	file, err := cmd.FileReader(jsonConf)
+	if err != nil {
+		return conf, msg.ErrorOpeningConfigFile
+	}
+
+	conf = &contracts.AzionApplicationConfig{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return conf, msg.ErrorUnmarshalConfigFile
+	}
+
+	return conf, nil
+
+}
+
+func checkArgsJson(cmd *BuildCmd) error {
+	workDirPath, err := cmd.GetWorkDir()
+	if err != nil {
+		return utils.ErrorInternalServerError
+	}
+
+	workDirPath += "/azion/args.json"
+	_, err = cmd.FileReader(workDirPath)
+	if err != nil {
+		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
+		}
+	}
+
+	return nil
+}
+
+func checkMandatoryEnv(env []string) error {
+	awsSecret := regexp.MustCompile("^AWS_SECRET_ACCESS_KEY=.+")
+	awsAccess := regexp.MustCompile("^AWS_ACCESS_KEY_ID=.+")
+	yesAccess := false
+	yesSecret := false
+	for _, item := range env {
+		access := awsAccess.FindString(item)
+		secret := awsSecret.FindString(item)
+		if access != "" {
+			yesAccess = true
+		} else if secret != "" {
+			yesSecret = true
+		}
+	}
+	if !yesAccess || !yesSecret {
+		return msg.ErrorMandatoryEnvs
+	}
+	return nil
 }

@@ -20,4 +20,10 @@ var (
 	ErrorCreateInstance    = errors.New("Failed to create the Edge Function Instance: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorCreateDomain      = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateDomain      = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
+
+	ErrorNpmNotInstalled               = errors.New("Failed to open the NPM package Manager. Visit the website 'https://nodejs.org/en/download/' and follow the instructions to install the Node.js JavaScript runtime environment in your operating system. Node.js installation includes the NPM package manager")
+	FailedUpdatingScriptsDeployField   = errors.New("Failed to update scripts.deploy field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
+	FailedUpdatingScriptsBuildField    = errors.New("Failed to update scripts.build field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
+	ErrorMandatoryEnvs                 = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
+	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 )

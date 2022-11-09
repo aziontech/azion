@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"os"
-	"reflect"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/webapp"
-	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
+
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,8 @@ func TestBuild(t *testing.T) {
         {
             "build": {
                 "cmd": "npm run build"
-            }
+            },
+			"type": "javascript"
         }
         `)
 
@@ -29,19 +30,14 @@ func TestBuild(t *testing.T) {
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
-			if cmd != "npm run build" {
-				return "", -1, errors.New("unexpected command")
-			}
-			if !reflect.DeepEqual(envs, envVars) {
-				return "", -1, errors.New("unexpected envvars")
-			}
+
+		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Build completed", 0, nil
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return envVars, nil
 		}
 
@@ -64,7 +60,8 @@ Command exited with code 0
         {
             "build": {
                 "cmd": "npm run build"
-            }
+            },
+			"type": "javascript"
         }
         `)
 
@@ -73,13 +70,13 @@ Command exited with code 0
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.commandRunner = func(cmd string, envs []string) (string, int, error) {
+		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Command output goes here", 42, expectedErr
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return envVars, nil
 		}
 
@@ -89,24 +86,20 @@ Command exited with code 0
 		require.Equal(t, `Running build step command:
 
 $ npm run build
-Command output goes here
-
-Command exited with code 42
 `, stdout.String())
 	})
 
-	t.Run("no build.cmd to execute", func(t *testing.T) {
-		f, stdout, _ := testutils.NewFactory(nil)
+	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"build": {}}`), nil
 		}
 
 		err := command.run()
-		require.NoError(t, err)
-		require.NotContains(t, stdout.String(), "Running build step command")
+		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
 	})
 
 	t.Run("missing config file", func(t *testing.T) {
@@ -114,52 +107,53 @@ Command exited with code 42
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, msg.ErrOpeningConfigFile)
+		require.ErrorIs(t, err, msg.ErrorOpeningAzionFile)
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		jsonContent := bytes.NewBufferString(`
-        {
-            "build": {
-                "cmd": rm -rm *
-            }
-        }
-        `)
+	   {
+	       "build": {
+	           "cmd": rm -rm *
+	       }
+	   }
+	   `)
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, msg.ErrUnmarshalConfigFile)
+		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
 	})
 
 	t.Run("invalid env", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		jsonContent := bytes.NewBufferString(`
-        {
-            "build": {
-                "cmd": "npm run build"
-            }
-        }
-        `)
+	   {
+			"build": {
+		   		"cmd": "npm run build"
+	   		},
+			"type": "javascript"
+	   }
+	   `)
 
 		command := newBuildCmd(f)
 
-		command.fileReader = func(path string) ([]byte, error) {
+		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.envLoader = func(path string) ([]string, error) {
+		command.EnvLoader = func(path string) ([]string, error) {
 			return nil, utils.ErrorLoadingEnvVars
 		}
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strconv"
@@ -58,7 +57,7 @@ func newPublishCmd(f *cmdutil.Factory) *publishCmd {
 		writeFile:     os.WriteFile,
 		removeAll:     os.RemoveAll,
 		rename:        os.Rename,
-		createTempDir: ioutil.TempDir,
+		createTempDir: os.MkdirTemp,
 		envLoader:     utils.LoadEnvVarsFromFile,
 		stat:          os.Stat,
 		f:             f,
@@ -315,7 +314,6 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	}
 
 	if conf.PublishData.Cmd == "" {
-		fmt.Fprintf(cmd.io.Out, msg.WebappPublishCmdNotSpecified)
 		return nil
 	}
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -116,7 +115,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorHandlingFile
 					}
 
-					file, err := ioutil.ReadFile(contentPath)
+					file, err := os.ReadFile(contentPath)
 					if err != nil {
 						return utils.ErrorHandlingFile
 					}

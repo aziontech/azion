@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,7 +16,7 @@ func Test_run(t *testing.T) {
 			t.Fatalf("got error: %v", err)
 		}
 
-		_, err = ioutil.ReadFile(dir + "/azioncli.yaml")
+		_, err = os.ReadFile(dir + "/azioncli.yaml")
 		if err != nil {
 			t.Fatalf("error reading `azioncli.yaml`: %v", err)
 		}

@@ -15,7 +15,6 @@ var (
 	WebappBuildUsage            = "build [flags]"
 	WebappBuildShortDescription = "Builds a Web Application"
 	WebappBuildLongDescription  = "Builds your Web Application to run on Azion’s Edge Computing Platform"
-	WebappBuildCmdNotSpecified  = "Build step command not specified. No action will be taken\n"
 	WebappBuildRunningCmd       = "Running build step command:\n\n"
 	WebappBuildFlagHelp         = "Displays more information about the build subcommand"
 
@@ -23,7 +22,6 @@ var (
 	WebappInitUsage             = "init [flags]"
 	WebappInitShortDescription  = "Initializes a Web Application"
 	WebappInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Web Application on Azion’s platform"
-	WebappInitCmdNotSpecified   = "Init step command not specified. No action will be taken\n"
 	WebappInitRunningCmd        = "Running init step command:\n\n"
 	WebappInitFlagName          = "The Web application's name"
 	WebappInitFlagType          = "The type of  Web application <javascript | flareact | nextjs>"
@@ -37,7 +35,6 @@ var (
 	WebappPublishUsage                       = "publish"
 	WebappPublishShortDescription            = "Publishes a Web Application on the Azion platform"
 	WebappPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
-	WebappPublishCmdNotSpecified             = "Publish pre command not specified. No action will be taken\n"
 	WebappPublishRunningCmd                  = "Running publish pre command:\n\n"
 	WebappPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
 	WebappPublishOutputCachePurge            = "Domain cache was purged"

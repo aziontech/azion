@@ -3,7 +3,7 @@ package create
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -43,8 +43,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{"--name", ""})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
@@ -56,8 +56,8 @@ func TestCreate(t *testing.T) {
 
 		cmd.SetArgs([]string{})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name flag when --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
@@ -70,14 +70,14 @@ func TestCreate(t *testing.T) {
 			httpmock.REST("POST", "edge_services/"),
 			func(req *http.Request) (*http.Response, error) {
 				request := &sdk.CreateServiceRequest{}
-				body, _ := ioutil.ReadAll(req.Body)
+				body, _ := io.ReadAll(req.Body)
 				_ = json.Unmarshal(body, request)
 
 				response := strings.ReplaceAll(responseBody, "{name}", request.Name)
 
 				return &http.Response{StatusCode: http.StatusCreated,
 					Request: req,
-					Body:    ioutil.NopCloser(strings.NewReader(response)),
+					Body:    io.NopCloser(strings.NewReader(response)),
 					Header: http.Header{
 						"Content-Type": []string{"application/json"},
 					},
@@ -90,8 +90,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--name", "BIRL"})
 		cmd.SetIn(&bytes.Buffer{})
-		cmd.SetOut(ioutil.Discard)
-		cmd.SetErr(ioutil.Discard)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
