@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -228,7 +227,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.fileReader(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
 	reqCre.SetCode(string(code))
@@ -242,17 +241,17 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		return 0, fmt.Errorf("%w: %s", errmsg.ErrorCreateFunction, err)
+		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	return response.GetId(), nil
@@ -264,7 +263,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.fileReader(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
 	reqUpd.SetCode(string(code))
@@ -278,18 +277,18 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqUpd.Id = idReq
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
+		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
 	return response.GetId(), nil
