@@ -26,4 +26,10 @@ var (
 	FailedUpdatingScriptsBuildField    = errors.New("Failed to update scripts.build field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
 	ErrorMandatoryEnvs                 = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
+
+	ErrorCreateFunction = errors.New("Failed to create edge function: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorUpdateFunction = errors.New("Failed to update the Edge Function: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorCodeFlag       = errors.New("Failed to read the code file. Verify if the file name and its path are correct and the file content has a valid code format")
+	ErrorArgsFlag       = errors.New("Failed to read the args file. Verify if the file name and its path are correct and the file's content has a valid JSON format")
+	ErrorParseArgs      = errors.New("Failed to parse JSON args. Verify if the file's content has a valid JSON format")
 )
