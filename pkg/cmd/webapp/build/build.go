@@ -94,6 +94,11 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	var exitCode int
 	var err error
 
+	err = checkArgsJson(cmd)
+	if err != nil {
+		return err
+	}
+
 	switch typeLang {
 	case "javascript":
 		output, exitCode, err = BuildJavascript(cmd)
@@ -171,11 +176,6 @@ func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
 	}
 
 	err = checkMandatoryEnv(envs)
-	if err != nil {
-		return "", 0, err
-	}
-
-	err = checkArgsJson(cmd)
 	if err != nil {
 		return "", 0, err
 	}
