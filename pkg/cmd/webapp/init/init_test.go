@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/httpmock"
-
 	msg "github.com/aziontech/azion-cli/messages/webapp"
+	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/go-git/go-git/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -85,6 +85,9 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.Rename = func(oldpath string, newpath string) error {
 			return nil
 		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
 			if !strings.HasSuffix(path, "package.json") {
 				return nil, os.ErrNotExist
@@ -101,6 +104,7 @@ func TestCobraCmd(t *testing.T) {
 		f.IOStreams.In = io.NopCloser(in)
 
 		err := cmd.Execute()
+		// fmt.Println(err.Error())
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured`)
@@ -126,6 +130,9 @@ func TestCobraCmd(t *testing.T) {
 		}
 		initCmd.Rename = func(oldpath string, newpath string) error {
 			return nil
+		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
 		}
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
 			if !strings.HasSuffix(path, "package.json") {
@@ -165,6 +172,9 @@ func TestCobraCmd(t *testing.T) {
 		}
 		initCmd.Rename = func(oldpath string, newpath string) error {
 			return errors.New("unexpected rename")
+		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
 		}
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
 			if !strings.HasSuffix(path, "package.json") {
@@ -211,6 +221,9 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.Rename = func(oldpath string, newpath string) error {
 			return errors.New("unexpected rename")
 		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
 			if !strings.HasSuffix(path, "package.json") {
 				return nil, os.ErrNotExist
@@ -239,6 +252,9 @@ func TestCobraCmd(t *testing.T) {
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
+		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
 		}
 
 		initCmd.Stat = func(path string) (fs.FileInfo, error) {
@@ -277,6 +293,9 @@ func TestInitCmd(t *testing.T) {
 		cmd.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
 
 		i := InitInfo{}
 		err := cmd.runInitCmdLine(&i)
@@ -301,6 +320,9 @@ func TestInitCmd(t *testing.T) {
 
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
+		}
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
 		}
 
 		i := InitInfo{}
@@ -369,6 +391,10 @@ func TestInitCmd(t *testing.T) {
 			return "my command output", 0, nil
 		}
 
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
+
 		cmd.Mkdir = func(path string, perm os.FileMode) error {
 			return nil
 		}
@@ -418,6 +444,10 @@ func TestInitCmd(t *testing.T) {
 			return nil
 		}
 
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
+
 		i := InitInfo{
 			TypeLang: "nextjs",
 		}
@@ -457,6 +487,10 @@ func TestInitCmd(t *testing.T) {
 
 		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
 			return "my command output", 0, nil
+		}
+
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
 		}
 
 		cmd.Mkdir = func(path string, perm os.FileMode) error {

@@ -19,7 +19,8 @@ BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
 LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
-		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL
+		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
+		-X github.com/aziontech/azion-cli/pkg/cmd/webapp/init.TemplateBranch=$$TEMPLATE_BRANCH
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 
