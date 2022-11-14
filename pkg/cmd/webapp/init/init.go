@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -26,6 +27,8 @@ type InitInfo struct {
 	YesOption      bool
 	NoOption       bool
 }
+
+var TemplateBranch = "dev"
 
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
@@ -47,6 +50,7 @@ type InitCmd struct {
 	EnvLoader     func(path string) ([]string, error)
 	Stat          func(path string) (fs.FileInfo, error)
 	Mkdir         func(path string, perm os.FileMode) error
+	GitPlainClone func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 }
 
 func newInitCmd(f *cmdutil.Factory) *InitCmd {
@@ -68,6 +72,7 @@ func newInitCmd(f *cmdutil.Factory) *InitCmd {
 		EnvLoader:     utils.LoadEnvVarsFromFile,
 		Stat:          os.Stat,
 		Mkdir:         os.MkdirAll,
+		GitPlainClone: git.PlainClone,
 	}
 }
 
@@ -183,8 +188,9 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 		_ = cmd.RemoveAll(dir)
 	}()
 
-	_, err = git.PlainClone(dir, false, &git.CloneOptions{
-		URL: REPO,
+	_, err = cmd.GitPlainClone(dir, false, &git.CloneOptions{
+		URL:           REPO,
+		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", TemplateBranch)),
 	})
 	if err != nil {
 		return utils.ErrorFetchingTemplates
