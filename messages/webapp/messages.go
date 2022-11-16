@@ -1,10 +1,6 @@
 package webapp
 
 var (
-
-	//used by more than one cmd
-	WebappOutput = "\nCommand exited with code %d\n"
-
 	//webapp cmd
 	WebappUsage            = "webapp"
 	WebappShortDescription = "Creates Web Applications on Azion's platform"
@@ -16,6 +12,8 @@ var (
 	WebappBuildShortDescription = "Builds a Web Application"
 	WebappBuildLongDescription  = "Builds your Web Application to run on Azion’s Edge Computing Platform"
 	WebappBuildRunningCmd       = "Running build step command:\n\n"
+	WebappBuildStart            = "Building your Web Application\n"
+	WebappBuildSuccessful       = "Your Web Application was built successfully\n"
 	WebappBuildFlagHelp         = "Displays more information about the build subcommand"
 
 	//init cmd
@@ -35,9 +33,10 @@ var (
 	WebappPublishUsage                       = "publish"
 	WebappPublishShortDescription            = "Publishes a Web Application on the Azion platform"
 	WebappPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
-	WebappPublishRunningCmd                  = "Running publish pre command:\n\n"
+	WebappPublishRunningCmd                  = "Running pre publish command:\n\n"
+	WebappPublishSuccessful                  = "Your Web Application was published successfully\n"
 	WebappPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
-	WebappPublishOutputCachePurge            = "Domain cache was purged"
+	WebappPublishOutputCachePurge            = "Domain cache was purged\n"
 	WebappPublishOutputEdgeFunctionCreate    = "Created Edge Function %s with ID %d\n"
 	WebappPublishOutputEdgeFunctionUpdate    = "Updated Edge Function %s with ID %d\n"
 	WebappPublishOutputEdgeApplicationCreate = "Created Edge Application %s with ID %d\n"
