@@ -91,21 +91,6 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
-func RunCommand(envVars []string, comm string) error {
-	command := exec.Command(shell, "-c", comm)
-	//Load environment variables (if they exist)
-	if len(envVars) > 0 {
-		command.Env = os.Environ()
-		command.Env = append(command.Env, envVars...)
-	}
-	err := command.Run()
-	if err != nil {
-		return ErrorRunningCommand
-	}
-
-	return nil
-}
-
 func GetWorkingDir() (string, error) {
 	pathWorkingDir, err := os.Getwd()
 	if err != nil {

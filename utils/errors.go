@@ -33,5 +33,4 @@ var (
 	ErrorWritingAzionJsonFile       = errors.New("Failed to write in the given 'azion.json' file. Verify if the file is writable and/or you have access to it, if the data format is JSON, or fix the content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorTimeoutAPICall             = errors.New("CLI's request has timed out during communication with Azion. Verify if it has completed successfully or wait some time and try the command again")
 	ErrorCreateFile                 = errors.New("Failed to create %s file")
-	ErrorCreateDir                  = errors.New("create directory")
 )

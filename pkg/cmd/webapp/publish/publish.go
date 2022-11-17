@@ -203,6 +203,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishSuccessful)
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainSuccess, domainReturnedName[0])
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishPropagation)
 
@@ -295,42 +296,19 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 }
 
 func (cmd *publishCmd) runPublishPreCmdLine() error {
-	path, err := cmd.getWorkDir()
+	conf, err := getConfig(cmd)
 	if err != nil {
 		return err
-	}
-	jsonConf := path + "/azion/config.json"
-	file, err := cmd.fileReader(jsonConf)
-	if err != nil {
-		fmt.Println(jsonConf)
-		return msg.ErrorOpeningConfigFile
-	}
-
-	conf := &contracts.AzionApplicationConfig{}
-	err = json.Unmarshal(file, &conf)
-	if err != nil {
-		return msg.ErrorUnmarshalConfigFile
-	}
-
-	if conf.PublishData.Cmd == "" {
-		return nil
 	}
 
 	envs, err := cmd.envLoader(conf.PublishData.Env)
 	if err != nil {
-		return err
+		return msg.ErrReadEnvFile
 	}
 
-	fmt.Fprintf(cmd.io.Out, msg.WebappPublishRunningCmd)
-	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.PublishData.Cmd)
-
-	output, exitCode, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
-
-	fmt.Fprintf(cmd.io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
-
+	err = runCommand(cmd, conf, envs)
 	if err != nil {
-		return utils.ErrorRunningCommand
+		return err
 	}
 
 	return nil
@@ -419,5 +397,63 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 	}
 
 	return nil
+
+}
+
+func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+	//if no cmd is specified, we just return nil (no error)
+	if conf.PublishData.Cmd == "" {
+		return nil
+	}
+
+	switch conf.PublishData.OutputCtrl {
+	case "disable":
+		fmt.Fprintf(cmd.io.Out, msg.WebappPublishRunningCmd)
+		fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.PublishData.Cmd)
+
+		output, _, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
+		if err != nil {
+			fmt.Fprintf(cmd.io.Out, "%s\n", output)
+			return msg.ErrFailedToRunPublishCommand
+		}
+
+		fmt.Fprintf(cmd.io.Out, "%s\n", output)
+
+	case "on-error":
+		output, exitCode, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
+		if exitCode != 0 {
+			fmt.Fprintf(cmd.io.Out, "%s\n", output)
+			return msg.ErrFailedToRunPublishCommand
+		}
+		if err != nil {
+			return err
+		}
+
+	default:
+		return msg.WebappOutputErr
+	}
+
+	return nil
+}
+
+func getConfig(cmd *publishCmd) (conf *contracts.AzionApplicationConfig, err error) {
+	path, err := utils.GetWorkingDir()
+	if err != nil {
+		return conf, err
+	}
+
+	jsonConf := path + "/azion/config.json"
+	file, err := cmd.fileReader(jsonConf)
+	if err != nil {
+		return conf, msg.ErrorOpeningConfigFile
+	}
+
+	conf = &contracts.AzionApplicationConfig{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return conf, msg.ErrorUnmarshalConfigFile
+	}
+
+	return conf, nil
 
 }

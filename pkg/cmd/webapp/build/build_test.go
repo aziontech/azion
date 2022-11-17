@@ -20,7 +20,8 @@ func TestBuild(t *testing.T) {
 		jsonContent := bytes.NewBufferString(`
         {
             "build": {
-                "cmd": "npm run build"
+                "cmd": "npm run build",
+				"output-ctrl": "on-error"
             },
 			"type": "javascript"
         }
@@ -44,13 +45,7 @@ func TestBuild(t *testing.T) {
 		err := command.run()
 		require.NoError(t, err)
 
-		require.Equal(t, `Running build step command:
-
-$ npm run build
-Build completed
-
-Command exited with code 0
-`, stdout.String())
+		require.Contains(t, stdout.String(), `Your Web Application was built successfully`)
 	})
 
 	t.Run("cmd failed", func(t *testing.T) {
@@ -59,7 +54,8 @@ Command exited with code 0
 		jsonContent := bytes.NewBufferString(`
         {
             "build": {
-                "cmd": "npm run build"
+                "cmd": "npm run build",
+				"output-ctrl": "disable"
             },
 			"type": "javascript"
         }
@@ -83,10 +79,7 @@ Command exited with code 0
 		err := command.run()
 		require.Error(t, err, expectedErr)
 
-		require.Equal(t, `Running build step command:
-
-$ npm run build
-`, stdout.String())
+		require.Contains(t, stdout.String(), `Running build step command`)
 	})
 
 	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
@@ -121,7 +114,8 @@ $ npm run build
 		jsonContent := bytes.NewBufferString(`
 	   {
 	       "build": {
-	           "cmd": rm -rm *
+	           "cmd": "rm -rm *",
+			   "output-ctrl": "on-error"
 	       }
 	   }
 	   `)

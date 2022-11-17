@@ -77,7 +77,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"javascript"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -123,7 +123,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -165,7 +165,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -213,7 +213,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -312,7 +312,7 @@ func TestInitCmd(t *testing.T) {
 
 		// Specified init.env file but it cannot be read correctly
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"},"type":"javascript"}`), nil
 		}
 		cmd.EnvLoader = func(path string) ([]string, error) {
 			return nil, msg.ErrReadEnvFile
@@ -340,7 +340,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "notacmd", "output-ctrl": "disable"},"type":"javascript"}`), nil
 		}
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -349,61 +349,12 @@ func TestInitCmd(t *testing.T) {
 			return nil, nil
 		}
 		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
-			return "my command output", 0, nil
+			return "cmd", 0, errors.New("Failed to run the command specified in the template (config.json)")
 		}
 
-		i := InitInfo{}
+		i := InitInfo{TypeLang: "javascript", PathWorkingDir: "."}
 		err := cmd.runInitCmdLine(&i)
-		require.ErrorIs(t, err, utils.ErrorRunningCommand)
-	})
-
-	t.Run("Success with Javacript", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := newInitCmd(f)
-
-		cmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-
-		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-
-		cmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-
-		cmd.Stat = func(path string) (fs.FileInfo, error) {
-			return nil, nil
-		}
-
-		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"}, "type": "javascript"}`), nil
-		}
-
-		cmd.EnvLoader = func(path string) ([]string, error) {
-			return envs, nil
-		}
-
-		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
-			return "my command output", 0, nil
-		}
-
-		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-
-		cmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-
-		i := InitInfo{
-			TypeLang: "javascript",
-		}
-		err := cmd.runInitCmdLine(&i)
-		require.NoError(t, err)
+		require.ErrorIs(t, err, msg.ErrFailedToRunInitCommand)
 	})
 
 	t.Run("success with NextJS", func(t *testing.T) {
@@ -429,7 +380,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"}, "type": "nextjs"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
 		}
 
 		cmd.EnvLoader = func(path string) ([]string, error) {
@@ -478,7 +429,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env"}, "type": "flareact"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
 		}
 
 		cmd.EnvLoader = func(path string) ([]string, error) {

@@ -90,9 +90,17 @@ func (cmd *BuildCmd) run() error {
 }
 
 func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
-	var output string
-	var exitCode int
 	var err error
+
+	conf, err := getConfig(cmd)
+	if err != nil {
+		return err
+	}
+
+	envs, err := cmd.EnvLoader(conf.BuildData.Env)
+	if err != nil {
+		return msg.ErrReadEnvFile
+	}
 
 	err = checkArgsJson(cmd)
 	if err != nil {
@@ -101,27 +109,18 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 
 	switch typeLang {
 	case "javascript":
-		output, exitCode, err = BuildJavascript(cmd)
+		err = BuildJavascript(cmd, conf, envs)
 		if err != nil {
 			return err
 		}
 	case "nextjs", "flareact":
-		output, exitCode, err = BuildFlareactNextjs(cmd)
+		err = BuildFlareactNextjs(cmd, conf, envs)
 		if err != nil {
 			return err
 		}
 	default:
-		output = ""
-		exitCode = 0
-		err = utils.ErrorUnsupportedType
+		return utils.ErrorUnsupportedType
 	}
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
 
 	return nil
 }
@@ -130,70 +129,28 @@ func (cmd *BuildCmd) Run() error {
 	return cmd.run()
 }
 
-func BuildJavascript(cmd *BuildCmd) (string, int, error) {
-	conf, err := getConfig(cmd)
+func BuildJavascript(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+
+	err := runCommand(cmd, conf, envs)
 	if err != nil {
-		return "", 0, err
+		return err
 	}
-
-	envs, err := cmd.EnvLoader(conf.InitData.Env)
-	if err != nil {
-		return "", 0, msg.ErrReadEnvFile
-	}
-
-	err = checkArgsJson(cmd)
-	if err != nil {
-		return "", 0, err
-	}
-
-	if conf.BuildData.Cmd != "" {
-		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
-
-		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
-		if err != nil {
-			return "", 0, err
-		}
-		return output, exitCode, nil
-	}
-
-	return "", 0, nil
+	return nil
 }
 
-func BuildNextjs(cmd *BuildCmd) (string, int, error) {
-	return "", 0, nil
-}
+func BuildFlareactNextjs(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 
-func BuildFlareactNextjs(cmd *BuildCmd) (string, int, error) {
-	conf, err := getConfig(cmd)
+	err := checkMandatoryEnv(envs)
 	if err != nil {
-		return "", 0, err
+		return err
 	}
 
-	envs, err := cmd.EnvLoader(conf.BuildData.Env)
+	err = runCommand(cmd, conf, envs)
 	if err != nil {
-		return "", 0, msg.ErrReadEnvFile
+		return err
 	}
 
-	err = checkMandatoryEnv(envs)
-	if err != nil {
-		return "", 0, err
-	}
-
-	//TODO: when .sh is fully removed from template we need to review this part for Nextjs type
-
-	if conf.BuildData.Cmd != "" {
-		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
-
-		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
-		if err != nil {
-			return "", 0, err
-		}
-		return output, exitCode, nil
-	}
-
-	return "", 0, nil
+	return nil
 }
 
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
@@ -252,5 +209,46 @@ func checkMandatoryEnv(env []string) error {
 	if !yesAccess || !yesSecret {
 		return msg.ErrorMandatoryEnvs
 	}
+	return nil
+}
+
+func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+
+	//if no cmd is specified, we just return nil (no error)
+	if conf.BuildData.Cmd == "" {
+		return nil
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildStart)
+
+	switch conf.BuildData.OutputCtrl {
+	case "disable":
+		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+
+		output, _, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if err != nil {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunBuildCommand
+		}
+
+		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+
+	case "on-error":
+		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		if exitCode != 0 {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunBuildCommand
+		}
+		if err != nil {
+			return err
+		}
+
+	default:
+		return msg.WebappOutputErr
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildSuccessful)
+
 	return nil
 }
