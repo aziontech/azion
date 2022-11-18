@@ -107,7 +107,7 @@ plugins=(zsh-autosuggestions)
 If you have other plugins, just add zsh-zutosuggestions to the end.
 
 
-> Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
+> Whether you chose to activate autocomplete globally or for azioncli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
 
 ## Dependencies bash
 
@@ -165,10 +165,10 @@ echo "source /etc/profile.d/bash_completion.sh" >> ~/.bashrc
 ```
 ----
 
-> Whether you chose to activate autocomplete globally or for aziobncli only, the steps of each section should only be run once. After that, autocomplete will work everytime you open a new terminal.
+> Whether you chose to activate autocomplete globally or for azioncli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
 
 ## Dependencies fish
-Run
+Run the command below once
 ```shell
 echo "azioncli completion fish | source" >> ~/.config/fish/config.fish
 ```
