@@ -26,8 +26,9 @@ var (
 	WebappInitFlagYes           = "Forces the automatic response 'yes' to all user input"
 	WebappInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
-	WebAppInitCmdSuccess        = "Template successfully fetched and configured"
+	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
+	WebappInitSuccessful        = "Your Web Application was initialized successfully"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
