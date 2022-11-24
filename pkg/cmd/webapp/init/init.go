@@ -174,6 +174,9 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitSuccessful)
+
 	return nil
 }
 
@@ -214,12 +217,7 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrorNpmNotInstalled
 	}
 
-	path, err := utils.GetWorkingDir()
-	if err != nil {
-		return err
-	}
-
-	conf, err := getConfig(cmd, path)
+	conf, err := getConfig(cmd, info.PathWorkingDir)
 	if err != nil {
 		return err
 	}
