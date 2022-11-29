@@ -457,20 +457,24 @@ func TestInitCmd(t *testing.T) {
 	})
 }
 
-func TestFetchTemplates(t *testing.T) {
-	t.Run("tests without mock", func(t *testing.T) {
+func Test_fetchTemplates(t *testing.T) {
+	t.Run("tests flow full template", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 		cmd := newInitCmd(f)
-		path, _ := cmd.GetWorkDir()
-		path += "/testing"
 
-		cmd.RemoveAll(path)
-		cmd.Mkdir(path, os.ModePerm)
-
-		i := InitInfo{
-			PathWorkingDir: path,
+		cmd.CreateTempDir = func(dir string, pattern string) (string, error) {
+			return "", nil
 		}
-		err := cmd.fetchTemplates(&i)
+
+		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return nil, nil
+		}
+
+		cmd.Rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+
+		err := cmd.fetchTemplates(&InitInfo{})
 		require.NoError(t, err)
 	})
 }
@@ -579,16 +583,6 @@ func Test_sortTag(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "branch dev",
-			args: args{
-				tags:   tags,
-				major:  "0",
-				branch: "dev",
-			},
-			wantTag: "refs/tags/v0.4.0-beta.2",
-			wantErr: false,
-		},
-		{
 			name: "branch main with major 0",
 			args: args{
 				tags:   tags,
@@ -598,39 +592,17 @@ func Test_sortTag(t *testing.T) {
 			wantTag: "refs/tags/v0.5.0",
 			wantErr: false,
 		},
-		{
-			name: "branch main with major 1",
-			args: args{
-				tags:   tags,
-				major:  "1",
-				branch: "main",
-			},
-			wantTag: "refs/tags/v0.5.0",
-			wantErr: false,
-		},
-		{
-			name: "branch dev with major 1",
-			args: args{
-				tags:   tags,
-				major:  "1",
-				branch: "dev",
-			},
-			wantTag: "refs/tags/v0.4.0-dev.2",
-			wantErr: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			go func() {
-				gotTag, err := sortTag(tt.args.tags, tt.args.major, tt.args.branch)
-				if (err != nil) != tt.wantErr {
-					t.Errorf("sortTag() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-				if gotTag != tt.wantTag {
-					t.Errorf("sortTag() gotTag = %v, want %v", gotTag, tt.wantTag)
-				}
-			}()
+			gotTag, err := sortTag(tt.args.tags, tt.args.major, tt.args.branch)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("sortTag() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotTag != tt.wantTag {
+				t.Errorf("sortTag() gotTag = %v, want %v", gotTag, tt.wantTag)
+			}
 		})
 	}
 }
