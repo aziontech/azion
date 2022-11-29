@@ -3,18 +3,19 @@ package init
 import (
 	"bytes"
 	"errors"
-	"io"
-	"io/fs"
-	"os"
-	"strings"
-	"testing"
-
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/stretchr/testify/require"
+	"io"
+	"io/fs"
+	"os"
+	"strings"
+	"testing"
 )
 
 func TestCobraCmd(t *testing.T) {
@@ -454,5 +455,182 @@ func TestInitCmd(t *testing.T) {
 		err := cmd.runInitCmdLine(&i)
 		require.NoError(t, err)
 	})
+}
 
+func TestFetchTemplates(t *testing.T) {
+	t.Run("tests without mock", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+		cmd := newInitCmd(f)
+		path, _ := cmd.GetWorkDir()
+		path += "/testing"
+
+		cmd.RemoveAll(path)
+		cmd.Mkdir(path, os.ModePerm)
+
+		i := InitInfo{
+			PathWorkingDir: path,
+		}
+		err := cmd.fetchTemplates(&i)
+		require.NoError(t, err)
+	})
+}
+
+func Test_formatTag(t *testing.T) {
+	type args struct {
+		tag   string
+		major string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "case branch dev",
+			args: args{
+				tag:   "refs/tags/v0.1.0-dev.2",
+				major: "0",
+			},
+			want: "0102",
+		},
+		{
+			name: "case branch main",
+			args: args{
+				tag:   "refs/tags/v0.1.0",
+				major: "0",
+			},
+			want: "010",
+		},
+		{
+			name: "case major not exist",
+			args: args{
+				tag:   "refs/tags/v0.1.0",
+				major: "1",
+			},
+			want: "010",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := formatTag(tt.args.tag, tt.args.major); got != tt.want {
+				t.Errorf("formatTag() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_checkBranch(t *testing.T) {
+	type args struct {
+		num    string
+		branch string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "branch dev, with tag dev",
+			args: args{
+				num:    "1234",
+				branch: "dev",
+			},
+			want: "1234",
+		},
+		{
+			name: "branch any, with tag dev",
+			args: args{
+				num:    "1234",
+				branch: "any",
+			},
+			want: "",
+		},
+		{
+			name: "branch any, with tag any",
+			args: args{
+				num:    "123",
+				branch: "any",
+			},
+			want: "123",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := checkBranch(tt.args.num, tt.args.branch); got != tt.want {
+				t.Errorf("checkBranch() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_sortTag(t *testing.T) {
+	r, _ := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{URL: "https://github.com/MaxwelMazur/action-testing.git"})
+	tags, _ := r.Tags()
+
+	type args struct {
+		tags   storer.ReferenceIter
+		major  string
+		branch string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantTag string
+		wantErr bool
+	}{
+		{
+			name: "branch dev",
+			args: args{
+				tags:   tags,
+				major:  "0",
+				branch: "dev",
+			},
+			wantTag: "refs/tags/v0.4.0-beta.2",
+			wantErr: false,
+		},
+		{
+			name: "branch main with major 0",
+			args: args{
+				tags:   tags,
+				major:  "0",
+				branch: "main",
+			},
+			wantTag: "refs/tags/v0.5.0",
+			wantErr: false,
+		},
+		{
+			name: "branch main with major 1",
+			args: args{
+				tags:   tags,
+				major:  "1",
+				branch: "main",
+			},
+			wantTag: "refs/tags/v0.5.0",
+			wantErr: false,
+		},
+		{
+			name: "branch dev with major 1",
+			args: args{
+				tags:   tags,
+				major:  "1",
+				branch: "dev",
+			},
+			wantTag: "refs/tags/v0.4.0-dev.2",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			go func() {
+				gotTag, err := sortTag(tt.args.tags, tt.args.major, tt.args.branch)
+				if (err != nil) != tt.wantErr {
+					t.Errorf("sortTag() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
+				if gotTag != tt.wantTag {
+					t.Errorf("sortTag() gotTag = %v, want %v", gotTag, tt.wantTag)
+				}
+			}()
+		})
+	}
 }
