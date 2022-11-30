@@ -236,13 +236,14 @@ func sortTag(tags storer.ReferenceIter, major, branch string) (tag string, err e
 	var tagCurrent int = 0
 	err = tags.ForEach(func(t *plumbing.Reference) error {
 		if tagFormat := checkBranch(formatTag(string(t.Name()), major), branch); tagFormat != "" {
-			numberTag, _ := strconv.Atoi(tagFormat)
+			var numberTag int
+			numberTag, err = strconv.Atoi(tagFormat)
 			if numberTag > tagCurrent {
 				tagCurrent = numberTag
 				tag = string(t.Name())
 			}
 		}
-		return nil
+		return err
 	})
 	return tag, err
 }
