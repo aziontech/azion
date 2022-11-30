@@ -3,7 +3,14 @@ package init
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
+	"github.com/aziontech/azion-cli/messages/webapp"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -15,11 +22,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
-	"io/fs"
-	"os"
-	"os/exec"
-	"strconv"
-	"strings"
 )
 
 type InitInfo struct {
@@ -203,12 +205,12 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 
 	tags, err := r.Tags()
 	if err != nil {
-		return utils.ErrorFetchingTemplates
+		return webapp.ErrorGetAllTags
 	}
 
 	tag, err := sortTag(tags, TemplateMajor, TemplateBranch)
 	if err != nil {
-		return utils.ErrorFetchingTemplates
+		return webapp.ErrorIterateOverGit
 	}
 
 	_, err = cmd.GitPlainClone(dir, false, &git.CloneOptions{

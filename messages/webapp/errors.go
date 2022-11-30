@@ -36,4 +36,7 @@ var (
 	ErrorCodeFlag       = errors.New("Failed to read the code file. Verify if the file name and its path are correct and the file content has a valid code format")
 	ErrorArgsFlag       = errors.New("Failed to read the args file. Verify if the file name and its path are correct and the file's content has a valid JSON format")
 	ErrorParseArgs      = errors.New("Failed to parse JSON args. Verify if the file's content has a valid JSON format")
+
+	ErrorGetAllTags     = errors.New("Failed tags returns all the tag References in a repository")
+	ErrorIterateOverGit = errors.New("failed to iterate over git reference")
 )
