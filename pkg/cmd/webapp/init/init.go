@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -15,6 +17,8 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -27,7 +31,10 @@ type InitInfo struct {
 	NoOption       bool
 }
 
-var TemplateBranch = "dev"
+var (
+	TemplateBranch = "dev"
+	TemplateMajor  = "0"
+)
 
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
@@ -190,9 +197,24 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 		_ = cmd.RemoveAll(dir)
 	}()
 
+	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{URL: REPO})
+	if err != nil {
+		return utils.ErrorFetchingTemplates
+	}
+
+	tags, err := r.Tags()
+	if err != nil {
+		return msg.ErrorGetAllTags
+	}
+
+	tag, err := sortTag(tags, TemplateMajor, TemplateBranch)
+	if err != nil {
+		return msg.ErrorIterateOverGit
+	}
+
 	_, err = cmd.GitPlainClone(dir, false, &git.CloneOptions{
 		URL:           REPO,
-		ReferenceName: plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", TemplateBranch)),
+		ReferenceName: plumbing.ReferenceName(tag),
 	})
 	if err != nil {
 		return utils.ErrorFetchingTemplates
@@ -207,6 +229,59 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	}
 
 	return nil
+}
+
+func sortTag(tags storer.ReferenceIter, major, branch string) (tag string, err error) {
+	var tagCurrent int = 0
+	err = tags.ForEach(func(t *plumbing.Reference) error {
+		if tagFormat := checkBranch(formatTag(string(t.Name()), major), branch); tagFormat != "" {
+			var numberTag int
+			numberTag, err = strconv.Atoi(tagFormat)
+			if numberTag > tagCurrent {
+				tagCurrent = numberTag
+				tag = string(t.Name())
+			}
+		}
+		return err
+	})
+	return tag, err
+}
+
+// formatTag slice tag by '/' taking index 2 where the version is, transforming it into a list taking only the numbers
+func formatTag(tag, major string) string {
+	var majorTag string
+	var higherVersionTag string
+	var majorOk bool = false
+
+	for i, v := range strings.Split(strings.Split(tag, "/")[2], "") {
+		if i == 1 && v == major {
+			majorOk = true
+		}
+		if _, err := strconv.Atoi(v); err == nil {
+			if majorOk {
+				majorTag += v
+			} else {
+				higherVersionTag += v
+			}
+		}
+	}
+
+	if !majorOk {
+		return higherVersionTag
+	}
+
+	return majorTag
+}
+
+func checkBranch(num, branch string) string {
+	if branch == "dev" {
+		if len(num) == 4 {
+			return num
+		}
+	} else if len(num) == 3 {
+		return num
+	}
+	return ""
 }
 
 func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
