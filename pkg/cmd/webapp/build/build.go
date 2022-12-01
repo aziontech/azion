@@ -30,10 +30,7 @@ type BuildCmd struct {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(newBuildCmd(f))
-}
-
-func NewCobraCmd(build *BuildCmd) *cobra.Command {
+	command := newBuildCmd(f)
 	buildCmd := &cobra.Command{
 		Use:           msg.WebappBuildUsage,
 		Short:         msg.WebappBuildShortDescription,
@@ -44,7 +41,7 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
         $ azioncli webapp build
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return build.run()
+			return command.run()
 		},
 	}
 

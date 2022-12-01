@@ -21,13 +21,13 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("without package.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
 		initCmd.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -39,9 +39,9 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("with unsupported type", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor"})
 
@@ -53,9 +53,9 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("with -y and -n flags", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor", "-y", "-n"})
 
@@ -67,7 +67,7 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("success with javascript", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -95,7 +95,7 @@ func TestCobraCmd(t *testing.T) {
 			return nil, nil
 		}
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -113,7 +113,7 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("success with javascript using flag -y", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -141,7 +141,7 @@ func TestCobraCmd(t *testing.T) {
 			return nil, nil
 		}
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-y"})
 
@@ -155,7 +155,7 @@ func TestCobraCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, _, _ := testutils.NewFactory(mock)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -186,7 +186,7 @@ func TestCobraCmd(t *testing.T) {
 			return false, nil
 		}
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
 
@@ -203,7 +203,7 @@ func TestCobraCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, _, _ := testutils.NewFactory(mock)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -234,7 +234,7 @@ func TestCobraCmd(t *testing.T) {
 			return false, nil
 		}
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-n"})
 
@@ -246,9 +246,9 @@ func TestCobraCmd(t *testing.T) {
 	t.Run("invalid option", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		initCmd := NewInitCmd(f)
+		initCmd := newInitCmd(f)
 
-		cmd := NewCobraCmd(initCmd)
+		cmd := newCobraCmd(initCmd)
 
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -284,7 +284,7 @@ func TestInitCmd(t *testing.T) {
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewInitCmd(f)
+		cmd := newInitCmd(f)
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -304,7 +304,7 @@ func TestInitCmd(t *testing.T) {
 
 	t.Run("init.env not empty", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
-		cmd := NewInitCmd(f)
+		cmd := newInitCmd(f)
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -333,7 +333,7 @@ func TestInitCmd(t *testing.T) {
 	t.Run("Failed to run the command specified", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewInitCmd(f)
+		cmd := newInitCmd(f)
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -361,7 +361,7 @@ func TestInitCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := NewInitCmd(f)
+		cmd := newInitCmd(f)
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil
@@ -410,7 +410,7 @@ func TestInitCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := NewInitCmd(f)
+		cmd := newInitCmd(f)
 
 		cmd.LookPath = func(bin string) (string, error) {
 			return "", nil

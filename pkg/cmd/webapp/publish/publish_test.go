@@ -47,13 +47,13 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("without azion.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		publishCmd := NewPublishCmd(f)
+		publishCmd := newPublishCmd(f)
 
-		publishCmd.FileReader = func(path string) ([]byte, error) {
+		publishCmd.fileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
-		cmd := NewCobraCmd(publishCmd)
+		cmd := newCobraCmd(publishCmd)
 
 		cmd.SetArgs([]string{""})
 
@@ -65,8 +65,8 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewPublishCmd(f)
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd := newPublishCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
@@ -77,13 +77,13 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("publish.env not exist", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewPublishCmd(f)
+		cmd := newPublishCmd(f)
 
 		// Specified publish.env file but it cannot be read correctly
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env"}}`), nil
 		}
-		cmd.EnvLoader = func(path string) ([]string, error) {
+		cmd.envLoader = func(path string) ([]string, error) {
 			return nil, os.ErrNotExist
 		}
 
@@ -94,13 +94,13 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("publish.env is ok", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewPublishCmd(f)
+		cmd := newPublishCmd(f)
 
 		// Specified publish.env file but it cannot be read correctly
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error"}}`), nil
 		}
-		cmd.EnvLoader = func(path string) ([]string, error) {
+		cmd.envLoader = func(path string) ([]string, error) {
 			return []string{"UEBA=OBA", "FAZER=UM_PENSO"}, nil
 		}
 
@@ -111,14 +111,14 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("without specifying publish.env", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := NewPublishCmd(f)
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd := newPublishCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"cmd": "ls"}}`), nil
 		}
-		cmd.EnvLoader = func(path string) ([]string, error) {
+		cmd.envLoader = func(path string) ([]string, error) {
 			return nil, nil
 		}
-		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
+		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
 			if env != nil {
 				return "", -1, errors.New("unexpected env")
 			}
@@ -133,8 +133,8 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("no pre_cmd.cmd", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)
 
-		cmd := NewPublishCmd(f)
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd := newPublishCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {}}`), nil
 		}
 
@@ -147,14 +147,14 @@ func TestPublishCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := NewPublishCmd(f)
-		cmd.FileReader = func(path string) ([]byte, error) {
+		cmd := newPublishCmd(f)
+		cmd.fileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"cmd": "ls", "env": "./azion/publish.env"}}`), nil
 		}
-		cmd.EnvLoader = func(path string) ([]string, error) {
+		cmd.envLoader = func(path string) ([]string, error) {
 			return envs, nil
 		}
-		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
+		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
 			if !reflect.DeepEqual(envs, env) {
 				return "", -1, errors.New("unexpected env")
 			}
@@ -183,7 +183,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-		cmd := NewPublishCmd(f)
+		cmd := newPublishCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.EqualError(t, err, "Failed to create the Edge Application: Invalid. Check your settings and try again. If the error persists, contact Azion support")
@@ -217,7 +217,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-		cmd := NewPublishCmd(f)
+		cmd := newPublishCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.NoError(t, err)
