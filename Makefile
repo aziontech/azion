@@ -65,7 +65,7 @@ get-lint-deps:
 test:
 	@ echo Running GO tests
 	@ mkdir -p cover
-	@$(GO) test -v -failfast -coverprofile "./cover/$(NAME)coverage.out" -coverpkg=./... ./...
+	@$(GO) test -vvv -failfast -coverprofile "./cover/$(NAME)coverage.out" -coverpkg=./... ./...
 	@$(GO) tool cover -html="./cover/$(NAME)coverage.out" -o ./cover/$(NAME)coverage.html
 	@$(GO) tool cover -func "./cover/$(NAME)coverage.out"
 	@echo Done

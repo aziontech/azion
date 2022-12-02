@@ -21,8 +21,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: ls
+        run: ls
+
       - name: Build & Test
         run: make test build
+
+      - name: ls
+        run: ls
+
 
       - name: Linter
         run: make lint
