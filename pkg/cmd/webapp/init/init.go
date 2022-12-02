@@ -161,12 +161,24 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 	}
 
+	var projectName, projectSettings string
 	if shouldFetchTemplates {
-		if err := cmd.fetchTemplates(info); err != nil {
+		if err = cmd.fetchTemplates(info); err != nil {
 			return err
 		}
 
-		if err = UpdateScript(info, cmd, path); err != nil {
+		bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
+		if err != nil {
+			return err
+		}
+
+		projectName, projectSettings, err = DetectedProjectJS(bytePackageJson)
+		fmt.Fprintf(cmd.Io.Out, "Auto-detected Project Settings (%s)\n", projectSettings)
+		if err != nil {
+			return err
+		}
+
+		if err = UpdateScript(info, cmd, bytePackageJson, pathPackageJson); err != nil {
 			return err
 		}
 
@@ -181,10 +193,47 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
-
-	fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitSuccessful)
+	fmt.Fprintf(cmd.Io.Out, fmt.Sprintf("\n\n"+msg.WebappInitSuccessful, projectName))
 
 	return nil
+}
+
+type PackageJson struct {
+	Name         string `json:"name"`
+	Dependencies struct {
+		Next     string `json:"next"`
+		Flareact string `json:"flareact"`
+	} `json:"dependencies"`
+}
+
+func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
+	pathPackageJson := path + "/package.json"
+	bytePackageJson, err := cmd.FileReader(pathPackageJson)
+	if err != nil {
+		return []byte(""), "", msg.ErrorPackageJsonNotFound
+	}
+	return bytePackageJson, pathPackageJson, nil
+}
+
+func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSettings string, err error) {
+	var packageJson PackageJson
+	err = json.Unmarshal(bytePackageJson, &packageJson)
+	if err != nil {
+		return "", "", utils.ErrorUnmarshalReader
+	}
+
+	if len(packageJson.Dependencies.Next) > 0 {
+		projectName = packageJson.Name
+		projectSettings = "Nextjs"
+	} else if len(packageJson.Dependencies.Flareact) > 0 {
+		projectName = packageJson.Name
+		projectSettings = "Flareact"
+	} else {
+		projectName = packageJson.Name
+		projectSettings = "Javascript"
+	}
+
+	return projectName, projectSettings, nil
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
@@ -363,10 +412,27 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
+	//err :=
+	runCommand(cmd, conf, envs)
+	//if err != nil {
+	//	return err
+	//}
+
+	showInstructions(cmd, `$ azioncli webapp init --name nextjs-blog
+
+	Auto-detected Project Settings (Next.js)
+
+	Fetched Azion template settings
+
+	Project [PROJECT NAME] initialized*
+
+	*There is a message that appears at the end of the execution of initcmd. Maybe we can edit that message to include the project name.
+
+	General Instructions:
+
+	- Install Command: 'yarn install', or 'npm install'
+	- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
+	- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
 
 	return nil
 }
@@ -377,16 +443,14 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-	showInstructions(cmd)
-	return nil
-}
+	// err :=
+	runCommand(cmd, conf, envs)
+	//if err != nil {
+	//	fmt.Println("err: ", err.Error())
+	//	//return err
+	//}
 
-func showInstructions(cmd *InitCmd) {
-	fmt.Fprintf(cmd.Io.Out, `    [ General Instructions ]
+	showInstructions(cmd, `    [ General Instructions ]
     - Requirements:
         - Tools: npm
         - AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
@@ -397,6 +461,7 @@ func showInstructions(cmd *InitCmd) {
     - Publish Command: npm run deploy
     [ Notes ]
         - Node 16x or higher`)
+	return nil
 }
 
 func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
@@ -414,7 +479,27 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 		return msg.ErrorFailedCreatingPublicDirectory
 	}
 
+	showInstructions(cmd, `$ azioncli webapp init --name nextjs-blog
+
+	Auto-detected Project Settings (Next.js)
+
+	Fetched Azion template settings
+
+	Project [PROJECT NAME] initialized*
+
+	*There is a message that appears at the end of the execution of initcmd. Maybe we can edit that message to include the project name.
+
+	General Instructions:
+
+	- Install Command: 'yarn install', or 'npm install'
+	- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
+	- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
+
 	return nil
+}
+
+func showInstructions(cmd *InitCmd, instructions string) {
+	fmt.Fprintf(cmd.Io.Out, instructions)
 }
 
 func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
@@ -432,13 +517,7 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 	return conf, nil
 }
 
-func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
-	packageJsonPath := path + "/package.json"
-	packageJson, err := cmd.FileReader(packageJsonPath)
-	if err != nil {
-		return msg.ErrorPackageJsonNotFound
-	}
-
+func UpdateScript(info *InitInfo, cmd *InitCmd, packageJson []byte, path string) error {
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
 		return msg.FailedUpdatingScriptsBuildField
@@ -449,16 +528,15 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 		return msg.FailedUpdatingScriptsDeployField
 	}
 
-	err = cmd.WriteFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
+	err = cmd.WriteFile(path, []byte(packJsonReplaceDeploy), 0644)
 	if err != nil {
-		return fmt.Errorf(utils.ErrorCreateFile.Error(), packageJsonPath)
+		return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
 	}
 
 	return nil
 }
 
 func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-
 	//if no cmd is specified, we just return nil (no error)
 	if conf.InitData.Cmd == "" {
 		return nil

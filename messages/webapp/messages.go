@@ -28,7 +28,7 @@ var (
 	WebAppInitContentOverridden = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
-	WebappInitSuccessful        = "Your Web Application was initialized successfully"
+	WebappInitSuccessful        = "Your project %s initialized successfully"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
