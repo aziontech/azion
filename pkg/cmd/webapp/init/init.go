@@ -231,46 +231,51 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
-func sortTag(tags storer.ReferenceIter, major, branch string) (tag string, err error) {
+func sortTag(tags storer.ReferenceIter, major, branch string) (string, error) {
 	var tagCurrent int = 0
+	var tagCurrentStr string
+	var tagWithMajorOk int = 0
+	var tagWithMajorOKStr string
+	var err error
 	err = tags.ForEach(func(t *plumbing.Reference) error {
-		if tagFormat := checkBranch(formatTag(string(t.Name()), major), branch); tagFormat != "" {
-			var numberTag int
-			numberTag, err = strconv.Atoi(tagFormat)
-			if numberTag > tagCurrent {
-				tagCurrent = numberTag
-				tag = string(t.Name())
+		tagFormat := formatTag(string(t.Name()))
+		tagFormat = checkBranch(tagFormat, branch)
+		if tagFormat != "" {
+			if strings.Split(tagFormat, "")[0] == major {
+				var numberTag int
+				numberTag, err = strconv.Atoi(tagFormat)
+				if numberTag > tagWithMajorOk {
+					tagWithMajorOk = numberTag
+					tagWithMajorOKStr = string(t.Name())
+				}
+			} else {
+				var numberTag int
+				numberTag, err = strconv.Atoi(tagFormat)
+				if numberTag > tagCurrent {
+					tagCurrent = numberTag
+					tagCurrentStr = string(t.Name())
+				}
 			}
 		}
 		return err
 	})
-	return tag, err
+
+	if tagWithMajorOKStr != "" {
+		return tagWithMajorOKStr, err
+	}
+
+	return tagCurrentStr, err
 }
 
 // formatTag slice tag by '/' taking index 2 where the version is, transforming it into a list taking only the numbers
-func formatTag(tag, major string) string {
-	var majorTag string
-	var higherVersionTag string
-	var majorOk bool = false
-
-	for i, v := range strings.Split(strings.Split(tag, "/")[2], "") {
-		if i == 1 && v == major {
-			majorOk = true
-		}
+func formatTag(tag string) string {
+	var t string
+	for _, v := range strings.Split(strings.Split(tag, "/")[2], "") {
 		if _, err := strconv.Atoi(v); err == nil {
-			if majorOk {
-				majorTag += v
-			} else {
-				higherVersionTag += v
-			}
+			t += v
 		}
 	}
-
-	if !majorOk {
-		return higherVersionTag
-	}
-
-	return majorTag
+	return t
 }
 
 func checkBranch(num, branch string) string {

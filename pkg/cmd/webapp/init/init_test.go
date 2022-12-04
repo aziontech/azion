@@ -3,6 +3,12 @@ package init
 import (
 	"bytes"
 	"errors"
+	"io"
+	"io/fs"
+	"os"
+	"strings"
+	"testing"
+
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -11,11 +17,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/stretchr/testify/require"
-	"io"
-	"io/fs"
-	"os"
-	"strings"
-	"testing"
 )
 
 func TestCobraCmd(t *testing.T) {
@@ -481,8 +482,7 @@ func Test_fetchTemplates(t *testing.T) {
 
 func Test_formatTag(t *testing.T) {
 	type args struct {
-		tag   string
-		major string
+		tag string
 	}
 	tests := []struct {
 		name string
@@ -492,31 +492,28 @@ func Test_formatTag(t *testing.T) {
 		{
 			name: "case branch dev",
 			args: args{
-				tag:   "refs/tags/v0.1.0-dev.2",
-				major: "0",
+				tag: "refs/tags/v0.1.0-dev.2",
 			},
 			want: "0102",
 		},
 		{
 			name: "case branch main",
 			args: args{
-				tag:   "refs/tags/v0.1.0",
-				major: "0",
+				tag: "refs/tags/v0.1.0",
 			},
 			want: "010",
 		},
 		{
 			name: "case major not exist",
 			args: args{
-				tag:   "refs/tags/v0.1.0",
-				major: "1",
+				tag: "refs/tags/v0.1.0",
 			},
 			want: "010",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := formatTag(tt.args.tag, tt.args.major); got != tt.want {
+			if got := formatTag(tt.args.tag); got != tt.want {
 				t.Errorf("formatTag() = %v, want %v", got, tt.want)
 			}
 		})
