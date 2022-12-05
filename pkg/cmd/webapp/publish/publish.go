@@ -92,7 +92,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf, err := cmd.GetAzionJsonContent()
+	conf, err := utils.GetAzionJsonContent()
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = cmd.WriteAzionJsonContent(conf)
+	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		conf.Application.Id = applicationId
 
-		err = cmd.WriteAzionJsonContent(conf)
+		err = utils.WriteAzionJsonContent(conf)
 		if err != nil {
 			return err
 		}
@@ -153,7 +153,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = cmd.WriteAzionJsonContent(conf)
+	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = cmd.WriteAzionJsonContent(conf)
+	err = utils.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
