@@ -27,6 +27,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: testings
+        run: |
+          cat /__w/azion-cli/azion-cli/pkg/cmd/webapp/init/init_test.go
+
       - name: Build & Test
         run: make test build
 
