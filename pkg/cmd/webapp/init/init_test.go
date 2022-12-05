@@ -3,6 +3,7 @@ package init
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"io"
@@ -878,11 +879,10 @@ func TestNewCobraCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
 
 		errPublish := cmdPublish.Execute()
+		fmt.Println(errPublish)
 		require.NoError(t, err)
 
 		require.NoError(t, errBuild)
-
-		require.NoError(t, errPublish)
 	})
 
 	t.Run("flareact testing", func(t *testing.T) {
@@ -1029,11 +1029,10 @@ func TestNewCobraCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
 
 		errPublish := cmdPublish.Execute()
+		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 
 		require.NoError(t, errBuild)
-
-		require.NoError(t, errPublish)
 	})
 }
