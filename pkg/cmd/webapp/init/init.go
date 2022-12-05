@@ -187,13 +187,13 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf("\n\n"+msg.WebappInitSuccessful, projectName))
 	}
 
 	err = cmd.runInitCmdLine(info)
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.Io.Out, fmt.Sprintf("\n\n"+msg.WebappInitSuccessful, projectName))
 
 	return nil
 }
@@ -258,7 +258,7 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 
 	tag, err := sortTag(tags, TemplateMajor, TemplateBranch)
 	if err != nil {
-		return msg.ErrorIterateOverGit
+		return msg.ErrorIterateAllTags
 	}
 
 	_, err = cmd.GitPlainClone(dir, false, &git.CloneOptions{
@@ -412,27 +412,16 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	//err :=
-	runCommand(cmd, conf, envs)
-	//if err != nil {
-	//	return err
-	//}
+	err := runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
+	}
 
-	showInstructions(cmd, `$ azioncli webapp init --name nextjs-blog
+	showInstructions(cmd, `
+General Instructions:
 
-	Auto-detected Project Settings (Next.js)
-
-	Fetched Azion template settings
-
-	Project [PROJECT NAME] initialized*
-
-	*There is a message that appears at the end of the execution of initcmd. Maybe we can edit that message to include the project name.
-
-	General Instructions:
-
-	- Install Command: 'yarn install', or 'npm install'
-	- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
-	- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
+- Install Command: 'yarn install', or 'npm install'
+- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'`)
 
 	return nil
 }
@@ -443,12 +432,10 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	// err :=
-	runCommand(cmd, conf, envs)
-	//if err != nil {
-	//	fmt.Println("err: ", err.Error())
-	//	//return err
-	//}
+	err := runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
+	}
 
 	showInstructions(cmd, `    [ General Instructions ]
     - Requirements:
@@ -479,21 +466,12 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 		return msg.ErrorFailedCreatingPublicDirectory
 	}
 
-	showInstructions(cmd, `$ azioncli webapp init --name nextjs-blog
+	showInstructions(cmd, `
+General Instructions:
 
-	Auto-detected Project Settings (Next.js)
-
-	Fetched Azion template settings
-
-	Project [PROJECT NAME] initialized*
-
-	*There is a message that appears at the end of the execution of initcmd. Maybe we can edit that message to include the project name.
-
-	General Instructions:
-
-	- Install Command: 'yarn install', or 'npm install'
-	- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
-	- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
+- Install Command: 'yarn install', or 'npm install'
+- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
+- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
 
 	return nil
 }
