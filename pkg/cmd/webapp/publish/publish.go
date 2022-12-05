@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type publishCmd struct {
+type PublishCmd struct {
 	Io                    *iostreams.IOStreams
 	GetWorkDir            func() (string, error)
 	FileReader            func(path string) ([]byte, error)
@@ -37,8 +37,8 @@ type publishCmd struct {
 
 var InstanceId int64
 
-func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
-	return &publishCmd{
+func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
+	return &PublishCmd{
 		Io:         f.IOStreams,
 		GetWorkDir: utils.GetWorkingDir,
 		FileReader: os.ReadFile,
@@ -54,7 +54,7 @@ func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
 	}
 }
 
-func NewCobraCmd(publish *publishCmd) *cobra.Command {
+func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
@@ -78,7 +78,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewPublishCmd(f))
 }
 
-func (cmd *publishCmd) run(f *cmdutil.Factory) error {
+func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	//Run build command
 	build := build.NewBuildCmd(f)
@@ -201,7 +201,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 	return nil
 }
 
-func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
+func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
 	ctx := context.Background()
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.Purge(ctx, domainNames)
@@ -213,7 +213,7 @@ func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 	return nil
 }
 
-func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqCre := api.CreateRequest{}
 
 	//Read code to upload
@@ -249,7 +249,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	return response.GetId(), nil
 }
 
-func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
 	//Read code to upload
@@ -286,7 +286,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	return response.GetId(), nil
 }
 
-func (cmd *publishCmd) runPublishPreCmdLine() error {
+func (cmd *PublishCmd) runPublishPreCmdLine() error {
 	conf, err := getConfig(cmd)
 	if err != nil {
 		return err
@@ -305,7 +305,7 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	return nil
 }
 
-func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, error) {
+func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
@@ -333,7 +333,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	return application.GetId(), nil
 }
 
-func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
+func (cmd *PublishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
 	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
@@ -349,7 +349,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	return nil
 }
 
-func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
+func (cmd *PublishCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
 	reqDom := apidom.CreateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetCnames([]string{})
@@ -364,7 +364,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	return domain, nil
 }
 
-func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
+func (cmd *PublishCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
@@ -377,7 +377,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	return domain, nil
 }
 
-func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 
 	reqRules := apiapp.UpdateRulesEngineRequest{}
 	reqRules.IdApplication = conf.Application.Id
@@ -391,7 +391,7 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 
 }
 
-func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+func runCommand(cmd *PublishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	//if no cmd is specified, we just return nil (no error)
 	if conf.PublishData.Cmd == "" {
 		return nil
@@ -427,7 +427,7 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 	return nil
 }
 
-func getConfig(cmd *publishCmd) (conf *contracts.AzionApplicationConfig, err error) {
+func getConfig(cmd *PublishCmd) (conf *contracts.AzionApplicationConfig, err error) {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		return conf, err
