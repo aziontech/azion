@@ -587,10 +587,10 @@ func Test_sortTag(t *testing.T) {
 			name: "branch main with major 0",
 			args: args{
 				tags:   tags,
-				major:  "0",
+				major:  "1",
 				branch: "main",
 			},
-			wantTag: "refs/tags/v0.5.0",
+			wantTag: "refs/tags/v1.0.0",
 			wantErr: false,
 		},
 	}
