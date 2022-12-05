@@ -463,6 +463,7 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 }
 
 func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+	fmt.Println("test cover error")
 
 	//if no cmd is specified, we just return nil (no error)
 	if conf.InitData.Cmd == "" {
