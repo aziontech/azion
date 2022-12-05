@@ -876,8 +876,7 @@ func TestNewCobraCmd(t *testing.T) {
 			return nil
 		}
 
-		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
-
+		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 		errPublish := cmdPublish.Execute()
 		fmt.Println(errPublish)
 		require.NoError(t, err)
@@ -1026,7 +1025,7 @@ func TestNewCobraCmd(t *testing.T) {
 			return nil
 		}
 
-		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
+		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 
 		errPublish := cmdPublish.Execute()
 		fmt.Println(errPublish)
