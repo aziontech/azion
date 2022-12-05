@@ -63,6 +63,7 @@ get-lint-deps:
 
 .PHONY: test
 test:
+	@go clean -testcache
 	@ echo Running GO tests
 	@ mkdir -p cover
 	@$(GO) test -v -failfast -coverprofile "./cover/$(NAME)coverage.out" -coverpkg=./... ./...
