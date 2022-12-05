@@ -37,6 +37,6 @@ var (
 	ErrorArgsFlag       = errors.New("Failed to read the args file. Verify if the file name and its path are correct and the file's content has a valid JSON format")
 	ErrorParseArgs      = errors.New("Failed to parse JSON args. Verify if the file's content has a valid JSON format")
 
-	ErrorGetAllTags     = errors.New("Failed tags returns all the tag References in a repository")
-	ErrorIterateOverGit = errors.New("failed to iterate over git reference")
+	ErrorGetAllTags     = errors.New("Failed returning all References tags in a repository. Run the command ‘azioncli webapp <subcommand> --help’ to display more information and try again. If the error persists, contact Azion support.")
+	ErrorIterateAllTags = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 )
