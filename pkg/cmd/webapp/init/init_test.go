@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"io"
 	"io/fs"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	buildcmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
