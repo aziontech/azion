@@ -2,7 +2,6 @@ package init
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -606,62 +605,4 @@ func Test_sortTag(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestDetectedProjectJS(t *testing.T) {
-	bJsonFlareact := []byte(`{
-  "name": "flareact-app",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "flareact dev",
-    "build": "azioncli webapp build",
-    "start": "next start",
-    "lint": "next lint"
-  ,"deploy":"azioncli webapp publish"},
-  "dependencies": {
-    "flareact": "13.0.5",
-  }
-}`)
-
-	bJsonNext := []byte(`{
-  "name": "next-app",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "azioncli webapp build",
-    "start": "next start",
-    "lint": "next lint"
-  ,"deploy":"azioncli webapp publish"},
-  "dependencies": {
-    "next": "13.0.5",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  }
-}`)
-
-	bJsonVue := []byte(`{
-  "name": "vue-app",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "vue dev",
-    "build": "azioncli webapp build",
-    "start": "next start",
-    "lint": "next lint"
-  ,"deploy":"azioncli webapp publish"},
-  "dependencies": {
-    "vue": "13.0.5",
-  }
-}`)
-
-	var packgeJsonNext PackageJson
-	json.Unmarshal(bJsonNext, &packgeJsonNext)
-
-	var packgeJsonFlareact PackageJson
-	json.Unmarshal(bJsonFlareact, &packgeJsonFlareact)
-
-	var packgeJsonVue PackageJson
-	json.Unmarshal(bJsonVue, &packgeJsonVue)
 }
