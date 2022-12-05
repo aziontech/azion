@@ -3,7 +3,6 @@ package init
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"io"
@@ -852,12 +851,12 @@ func TestNewCobraCmd(t *testing.T) {
 
 		publishCmd := publishcmd.NewPublishCmd(f)
 
-		publishCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"publish":{"pre_cmd":"./azion/webdev.sh publish","env":"./azion/init.env","output-ctrl":"on-error"},"type":"nextjs"}`), nil
-		}
-
 		publishCmd.EnvLoader = func(path string) ([]string, error) {
 			return buildEnvs, nil
+		}
+
+		publishCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
 		}
 
 		publishCmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
@@ -876,15 +875,14 @@ func TestNewCobraCmd(t *testing.T) {
 			return nil
 		}
 
-		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
+		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 		require.NoError(t, err)
 
 		require.NoError(t, errBuild)
 
-		//require.NoError(t, errPublish)
+		require.NoError(t, errPublish)
 	})
 
 	t.Run("flareact testing", func(t *testing.T) {
@@ -1028,15 +1026,14 @@ func TestNewCobraCmd(t *testing.T) {
 			return nil
 		}
 
-		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
+		cmdPublish := publishcmd.NewCobraCmd(publishCmd, buildCommand)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 
 		require.NoError(t, errBuild)
 
-		//require.NoError(t, errPublish)
+		require.NoError(t, errPublish)
 	})
 }

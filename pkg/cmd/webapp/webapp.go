@@ -24,8 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	webappCmd.AddCommand(initCmd.NewCmd(f))
-	webappCmd.AddCommand(buildCmd.NewCmd(f))
-	webappCmd.AddCommand(publishCmd.NewCmd(f))
+	b := buildCmd.NewCmd(f)
+	webappCmd.AddCommand(b)
+	webappCmd.AddCommand(publishCmd.NewCmd(f, buildCmd.NewBuildCmd(f)))
 	webappCmd.Flags().BoolP("help", "h", false, msg.WebappFlagHelp)
 
 	return webappCmd

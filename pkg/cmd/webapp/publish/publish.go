@@ -54,7 +54,7 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 	}
 }
 
-func NewCobraCmd(publish *PublishCmd) *cobra.Command {
+func NewCobraCmd(publish *PublishCmd, b *build.BuildCmd) *cobra.Command {
 	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
@@ -65,7 +65,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 		$ azioncli webapp publish --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.f)
+			return publish.run(publish.f, b)
 		},
 	}
 
@@ -74,15 +74,15 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 	return publishCmd
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewPublishCmd(f))
+func NewCmd(f *cmdutil.Factory, b *build.BuildCmd) *cobra.Command {
+	return NewCobraCmd(NewPublishCmd(f), b)
 }
 
-func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
+func (cmd *PublishCmd) run(f *cmdutil.Factory, b *build.BuildCmd) error {
 
-	//Run build command
-	build := build.NewBuildCmd(f)
-	err := build.Run()
+	//Run build command // todo: here
+	//build := build.NewBuildCmd(f)
+	err := b.Run()
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = utils.WriteAzionJsonContent(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
