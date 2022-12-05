@@ -1,6 +1,7 @@
 name: Test and Build
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize]
     branches-ignore:
