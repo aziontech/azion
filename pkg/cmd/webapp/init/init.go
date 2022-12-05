@@ -186,8 +186,8 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf("\n\n"+msg.WebappInitSuccessful, projectName))
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                        ///nolint:all
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", projectName)) //nolint:all
 	}
 
 	err = cmd.runInitCmdLine(info)
@@ -421,7 +421,7 @@ func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicati
 General Instructions:
 
 - Install Command: 'yarn install', or 'npm install'
-- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'`)
+- Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'`) //nolint:all
 
 	return nil
 }
@@ -447,7 +447,7 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
     - Build Command: npm run build
     - Publish Command: npm run deploy
     [ Notes ]
-        - Node 16x or higher`)
+        - Node 16x or higher`) //nolint:all
 	return nil
 }
 
@@ -471,13 +471,13 @@ General Instructions:
 
 - Install Command: 'yarn install', or 'npm install'
 - Build Command: 'azioncli webapp build', 'yarn build', or 'npm run build'
-- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`)
+- Publish Command: 'azioncli webapp publish', 'yarn deploy', or 'npm run deploy'`) //nolint:all
 
 	return nil
 }
 
 func showInstructions(cmd *InitCmd, instructions string) {
-	fmt.Fprintf(cmd.Io.Out, instructions)
+	fmt.Fprintf(cmd.Io.Out, instructions) //nolint:all
 }
 
 func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
