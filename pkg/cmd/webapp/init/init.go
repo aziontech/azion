@@ -161,7 +161,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 	}
 
-	var projectName, projectSettings string
+	var projectSettings string
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
 			return err
@@ -172,7 +172,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		projectName, projectSettings, err = DetectedProjectJS(bytePackageJson)
+		_, projectSettings, err = DetectedProjectJS(bytePackageJson)
 		fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings)
 		if err != nil {
 			return err
@@ -186,8 +186,8 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                        ///nolint:all
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", projectName)) //nolint:all
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                      // nolint:all
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", info.Name)) // nolint:all
 	}
 
 	err = cmd.runInitCmdLine(info)
