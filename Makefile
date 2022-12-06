@@ -89,12 +89,6 @@ build: ## build application
 	@ $(GO) version
 	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME) ./cmd/$(BIN)
 
-.PHONY : builddev
-builddev: ## build application
-	@ $(GO) version
-	@ source $(ENVFILE) && $(GO) build -ldflags "$(LDFLAGS)" -o ./bin/$(NAME) ./cmd/$(BIN)
-	cp bin/azioncli bin/flareact-app && cp bin/azioncli bin/next-app && cp bin/azioncli bin/vanillajs-app
-
 .PHONY : cross-build
 cross-build: ## cross-compile for all platforms/architectures.
 	@ $(GO) version

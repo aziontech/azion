@@ -173,7 +173,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 
 		projectName, projectSettings, err = DetectedProjectJS(bytePackageJson)
-		fmt.Fprintf(cmd.Io.Out, "Auto-detected Project Settings (%s)\n", projectSettings)
+		fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings)
 		if err != nil {
 			return err
 		}

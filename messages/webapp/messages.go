@@ -6,6 +6,7 @@ var (
 	WebappShortDescription = "Creates Web Applications on Azion's platform"
 	WebappLongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
 	WebappFlagHelp         = "Displays more information about the webapp command"
+	WebappAutoDetectec     = "Auto-detected Project Settings (%s)\n"
 
 	//build cmd
 	WebappBuildUsage            = "build [flags]"
