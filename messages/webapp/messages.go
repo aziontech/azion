@@ -6,6 +6,7 @@ var (
 	WebappShortDescription = "Creates Web Applications on Azion's platform"
 	WebappLongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
 	WebappFlagHelp         = "Displays more information about the webapp command"
+	WebappAutoDetectec     = "Auto-detected Project Settings (%s)\n"
 
 	//build cmd
 	WebappBuildUsage            = "build [flags]"
@@ -28,7 +29,7 @@ var (
 	WebAppInitContentOverridden = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
-	WebappInitSuccessful        = "Your Web Application was initialized successfully"
+	WebappInitSuccessful        = "Your project %s was initialized successfully"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
