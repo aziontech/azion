@@ -293,7 +293,7 @@ func TestWebappCmd(t *testing.T) {
 
 		require.NoError(t, errBuild)
 
-		//require.NoError(t, errPublish)
+		require.NoError(t, errPublish)
 
 	})
 
@@ -447,7 +447,7 @@ func TestWebappCmd(t *testing.T) {
 
 		require.NoError(t, errBuild)
 
-		//require.NoError(t, errPublish)
+		require.NoError(t, errPublish)
 
 	})
 }
