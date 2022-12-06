@@ -59,7 +59,7 @@ type InitCmd struct {
 	GitPlainClone func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 }
 
-func newInitCmd(f *cmdutil.Factory) *InitCmd {
+func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 	return &InitCmd{
 		Io:         f.IOStreams,
 		GetWorkDir: utils.GetWorkingDir,
@@ -82,7 +82,7 @@ func newInitCmd(f *cmdutil.Factory) *InitCmd {
 	}
 }
 
-func newCobraCmd(init *InitCmd) *cobra.Command {
+func NewCobraCmd(init *InitCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
@@ -112,7 +112,7 @@ func newCobraCmd(init *InitCmd) *cobra.Command {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return newCobraCmd(newInitCmd(f))
+	return NewCobraCmd(NewInitCmd(f))
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions) error {
