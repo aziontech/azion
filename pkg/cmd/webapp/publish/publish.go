@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"os/exec"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	errmsg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -25,46 +23,38 @@ import (
 )
 
 type publishCmd struct {
-	io            *iostreams.IOStreams
-	getWorkDir    func() (string, error)
-	fileReader    func(path string) ([]byte, error)
-	commandRunner func(cmd string, envvars []string) (string, int, error)
-	lookPath      func(bin string) (string, error)
-	isDirEmpty    func(dirpath string) (bool, error)
-	cleanDir      func(dirpath string) error
-	writeFile     func(filename string, data []byte, perm fs.FileMode) error
-	removeAll     func(path string) error
-	rename        func(oldpath string, newpath string) error
-	createTempDir func(dir string, pattern string) (string, error)
-	envLoader     func(path string) ([]string, error)
-	stat          func(path string) (fs.FileInfo, error)
-	f             *cmdutil.Factory
+	Io                    *iostreams.IOStreams
+	GetWorkDir            func() (string, error)
+	FileReader            func(path string) ([]byte, error)
+	CommandRunner         func(cmd string, envvars []string) (string, int, error)
+	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
+	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	EnvLoader             func(path string) ([]string, error)
+	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
+	f                     *cmdutil.Factory
 }
 
 var InstanceId int64
 
-func newPublishCmd(f *cmdutil.Factory) *publishCmd {
+func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
 	return &publishCmd{
-		io:         f.IOStreams,
-		getWorkDir: utils.GetWorkingDir,
-		fileReader: os.ReadFile,
-		commandRunner: func(cmd string, envvars []string) (string, int, error) {
+		Io:         f.IOStreams,
+		GetWorkDir: utils.GetWorkingDir,
+		FileReader: os.ReadFile,
+		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envvars, cmd)
 		},
-		lookPath:      exec.LookPath,
-		isDirEmpty:    utils.IsDirEmpty,
-		cleanDir:      utils.CleanDirectory,
-		writeFile:     os.WriteFile,
-		removeAll:     os.RemoveAll,
-		rename:        os.Rename,
-		createTempDir: os.MkdirTemp,
-		envLoader:     utils.LoadEnvVarsFromFile,
-		stat:          os.Stat,
-		f:             f,
+		WriteFile:             os.WriteFile,
+		EnvLoader:             utils.LoadEnvVarsFromFile,
+		BuildCmd:              build.NewBuildCmd,
+		GetAzionJsonContent:   utils.GetAzionJsonContent,
+		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		f:                     f,
 	}
 }
 
-func newCobraCmd(publish *publishCmd) *cobra.Command {
+func NewCobraCmd(publish *publishCmd) *cobra.Command {
 	publishCmd := &cobra.Command{
 		Use:           msg.WebappPublishUsage,
 		Short:         msg.WebappPublishShortDescription,
@@ -85,13 +75,13 @@ func newCobraCmd(publish *publishCmd) *cobra.Command {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return newCobraCmd(newPublishCmd(f))
+	return NewCobraCmd(NewPublishCmd(f))
 }
 
 func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
 	//Run build command
-	build := build.NewBuildCmd(f)
+	build := cmd.BuildCmd(f)
 	err := build.Run()
 	if err != nil {
 		return err
@@ -102,7 +92,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf, err := utils.GetAzionJsonContent()
+	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		return err
 	}
@@ -126,7 +116,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = utils.WriteAzionJsonContent(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -146,7 +136,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 		conf.Application.Id = applicationId
 
-		err = utils.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			return err
 		}
@@ -163,7 +153,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = utils.WriteAzionJsonContent(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -190,7 +180,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = utils.WriteAzionJsonContent(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -204,6 +194,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishSuccessful)
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainSuccess, domainReturnedName[0])
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishPropagation)
 
@@ -226,9 +217,9 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	reqCre := api.CreateRequest{}
 
 	//Read code to upload
-	code, err := cmd.fileReader(conf.Function.File)
+	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
 	reqCre.SetCode(string(code))
@@ -240,19 +231,19 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	}
 
 	//Read args
-	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
+	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		return 0, fmt.Errorf("%w: %s", errmsg.ErrorCreateFunction, err)
+		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	return response.GetId(), nil
@@ -262,9 +253,9 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	reqUpd := api.UpdateRequest{}
 
 	//Read code to upload
-	code, err := cmd.fileReader(conf.Function.File)
+	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorCodeFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
 	reqUpd.SetCode(string(code))
@@ -276,62 +267,39 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	}
 
 	//Read args
-	marshalledArgs, err := cmd.fileReader(conf.Function.Args)
+	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorArgsFlag, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorParseArgs, err)
+		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqUpd.Id = idReq
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", errmsg.ErrorUpdateFunction, err)
+		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
 	return response.GetId(), nil
 }
 
 func (cmd *publishCmd) runPublishPreCmdLine() error {
-	path, err := cmd.getWorkDir()
-	if err != nil {
-		return err
-	}
-	jsonConf := path + "/azion/config.json"
-	file, err := cmd.fileReader(jsonConf)
-	if err != nil {
-		fmt.Println(jsonConf)
-		return msg.ErrorOpeningConfigFile
-	}
-
-	conf := &contracts.AzionApplicationConfig{}
-	err = json.Unmarshal(file, &conf)
-	if err != nil {
-		return msg.ErrorUnmarshalConfigFile
-	}
-
-	if conf.PublishData.Cmd == "" {
-		return nil
-	}
-
-	envs, err := cmd.envLoader(conf.PublishData.Env)
+	conf, err := getConfig(cmd)
 	if err != nil {
 		return err
 	}
 
-	fmt.Fprintf(cmd.io.Out, msg.WebappPublishRunningCmd)
-	fmt.Fprintf(cmd.io.Out, "$ %s\n", conf.PublishData.Cmd)
-
-	output, exitCode, err := cmd.commandRunner(conf.PublishData.Cmd, envs)
-
-	fmt.Fprintf(cmd.io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.io.Out, msg.WebappOutput, exitCode)
-
+	envs, err := cmd.EnvLoader(conf.PublishData.Env)
 	if err != nil {
-		return utils.ErrorRunningCommand
+		return msg.ErrReadEnvFile
+	}
+
+	err = runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -420,5 +388,63 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 	}
 
 	return nil
+
+}
+
+func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+	//if no cmd is specified, we just return nil (no error)
+	if conf.PublishData.Cmd == "" {
+		return nil
+	}
+
+	switch conf.PublishData.OutputCtrl {
+	case "disable":
+		fmt.Fprintf(cmd.Io.Out, msg.WebappPublishRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.PublishData.Cmd)
+
+		output, _, err := cmd.CommandRunner(conf.PublishData.Cmd, envs)
+		if err != nil {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunPublishCommand
+		}
+
+		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+
+	case "on-error":
+		output, exitCode, err := cmd.CommandRunner(conf.PublishData.Cmd, envs)
+		if exitCode != 0 {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunPublishCommand
+		}
+		if err != nil {
+			return err
+		}
+
+	default:
+		return msg.WebappOutputErr
+	}
+
+	return nil
+}
+
+func getConfig(cmd *publishCmd) (conf *contracts.AzionApplicationConfig, err error) {
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return conf, err
+	}
+
+	jsonConf := path + "/azion/config.json"
+	file, err := cmd.FileReader(jsonConf)
+	if err != nil {
+		return conf, msg.ErrorOpeningConfigFile
+	}
+
+	conf = &contracts.AzionApplicationConfig{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return conf, msg.ErrorUnmarshalConfigFile
+	}
+
+	return conf, nil
 
 }

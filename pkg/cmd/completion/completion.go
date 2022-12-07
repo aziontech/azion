@@ -1,9 +1,10 @@
 package completion
 
 import (
+	"os"
+
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -13,7 +14,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:                  "To load completions",
 		DisableFlagsInUseLine: true,
 		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
-		Args:                  cobra.ExactValidArgs(1),
+		Args:                  cobra.MatchAll(cobra.ExactArgs(1)),
 		Annotations: map[string]string{
 			"Category": "skip",
 		},

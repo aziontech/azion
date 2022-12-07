@@ -2,11 +2,12 @@ package init
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/webapp"
@@ -15,6 +16,9 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing/storer"
+	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
 )
@@ -26,6 +30,11 @@ type InitInfo struct {
 	YesOption      bool
 	NoOption       bool
 }
+
+var (
+	TemplateBranch = "dev"
+	TemplateMajor  = "0"
+)
 
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
@@ -47,9 +56,10 @@ type InitCmd struct {
 	EnvLoader     func(path string) ([]string, error)
 	Stat          func(path string) (fs.FileInfo, error)
 	Mkdir         func(path string, perm os.FileMode) error
+	GitPlainClone func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 }
 
-func newInitCmd(f *cmdutil.Factory) *InitCmd {
+func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 	return &InitCmd{
 		Io:         f.IOStreams,
 		GetWorkDir: utils.GetWorkingDir,
@@ -68,10 +78,11 @@ func newInitCmd(f *cmdutil.Factory) *InitCmd {
 		EnvLoader:     utils.LoadEnvVarsFromFile,
 		Stat:          os.Stat,
 		Mkdir:         os.MkdirAll,
+		GitPlainClone: git.PlainClone,
 	}
 }
 
-func newCobraCmd(init *InitCmd) *cobra.Command {
+func NewCobraCmd(init *InitCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
@@ -101,7 +112,7 @@ func newCobraCmd(init *InitCmd) *cobra.Command {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return newCobraCmd(newInitCmd(f))
+	return NewCobraCmd(NewInitCmd(f))
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions) error {
@@ -150,12 +161,24 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 	}
 
+	var projectSettings string
 	if shouldFetchTemplates {
-		if err := cmd.fetchTemplates(info); err != nil {
+		if err = cmd.fetchTemplates(info); err != nil {
 			return err
 		}
 
-		if err = UpdateScript(info, cmd, path); err != nil {
+		bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
+		if err != nil {
+			return err
+		}
+
+		_, projectSettings, err = DetectedProjectJS(bytePackageJson)
+		fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings)
+		if err != nil {
+			return err
+		}
+
+		if err = UpdateScript(info, cmd, bytePackageJson, pathPackageJson); err != nil {
 			return err
 		}
 
@@ -163,14 +186,54 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                      // nolint:all
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", info.Name)) // nolint:all
 	}
 
 	err = cmd.runInitCmdLine(info)
 	if err != nil {
 		return err
 	}
+
 	return nil
+}
+
+type PackageJson struct {
+	Name         string `json:"name"`
+	Dependencies struct {
+		Next     string `json:"next"`
+		Flareact string `json:"flareact"`
+	} `json:"dependencies"`
+}
+
+func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
+	pathPackageJson := path + "/package.json"
+	bytePackageJson, err := cmd.FileReader(pathPackageJson)
+	if err != nil {
+		return []byte(""), "", msg.ErrorPackageJsonNotFound
+	}
+	return bytePackageJson, pathPackageJson, nil
+}
+
+func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSettings string, err error) {
+	var packageJson PackageJson
+	err = json.Unmarshal(bytePackageJson, &packageJson)
+	if err != nil {
+		return "", "", utils.ErrorUnmarshalReader
+	}
+
+	if len(packageJson.Dependencies.Next) > 0 {
+		projectName = packageJson.Name
+		projectSettings = "Nextjs"
+	} else if len(packageJson.Dependencies.Flareact) > 0 {
+		projectName = packageJson.Name
+		projectSettings = "Flareact"
+	} else {
+		projectName = packageJson.Name
+		projectSettings = "Javascript"
+	}
+
+	return projectName, projectSettings, nil
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
@@ -183,8 +246,24 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 		_ = cmd.RemoveAll(dir)
 	}()
 
-	_, err = git.PlainClone(dir, false, &git.CloneOptions{
-		URL: REPO,
+	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{URL: REPO})
+	if err != nil {
+		return utils.ErrorFetchingTemplates
+	}
+
+	tags, err := r.Tags()
+	if err != nil {
+		return msg.ErrorGetAllTags
+	}
+
+	tag, err := sortTag(tags, TemplateMajor, TemplateBranch)
+	if err != nil {
+		return msg.ErrorIterateAllTags
+	}
+
+	_, err = cmd.GitPlainClone(dir, false, &git.CloneOptions{
+		URL:           REPO,
+		ReferenceName: plumbing.ReferenceName(tag),
 	})
 	if err != nil {
 		return utils.ErrorFetchingTemplates
@@ -201,9 +280,65 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
+func sortTag(tags storer.ReferenceIter, major, branch string) (string, error) {
+	var tagCurrent int = 0
+	var tagCurrentStr string
+	var tagWithMajorOk int = 0
+	var tagWithMajorOKStr string
+	var err error
+	err = tags.ForEach(func(t *plumbing.Reference) error {
+		tagFormat := formatTag(string(t.Name()))
+		tagFormat = checkBranch(tagFormat, branch)
+		if tagFormat != "" {
+			if strings.Split(tagFormat, "")[0] == major {
+				var numberTag int
+				numberTag, err = strconv.Atoi(tagFormat)
+				if numberTag > tagWithMajorOk {
+					tagWithMajorOk = numberTag
+					tagWithMajorOKStr = string(t.Name())
+				}
+			} else {
+				var numberTag int
+				numberTag, err = strconv.Atoi(tagFormat)
+				if numberTag > tagCurrent {
+					tagCurrent = numberTag
+					tagCurrentStr = string(t.Name())
+				}
+			}
+		}
+		return err
+	})
+
+	if tagWithMajorOKStr != "" {
+		return tagWithMajorOKStr, err
+	}
+
+	return tagCurrentStr, err
+}
+
+// formatTag slice tag by '/' taking index 2 where the version is, transforming it into a list taking only the numbers
+func formatTag(tag string) string {
+	var t string
+	for _, v := range strings.Split(strings.Split(tag, "/")[2], "") {
+		if _, err := strconv.Atoi(v); err == nil {
+			t += v
+		}
+	}
+	return t
+}
+
+func checkBranch(num, branch string) string {
+	if branch == "dev" {
+		if len(num) == 4 {
+			return num
+		}
+	} else if len(num) == 3 {
+		return num
+	}
+	return ""
+}
+
 func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
-	var output string
-	var exitCode int
 	var err error
 
 	_, err = cmd.LookPath("npm")
@@ -211,12 +346,7 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrorNpmNotInstalled
 	}
 
-	path, err := utils.GetWorkingDir()
-	if err != nil {
-		return err
-	}
-
-	conf, err := getConfig(cmd, path)
+	conf, err := getConfig(cmd, info.PathWorkingDir)
 	if err != nil {
 		return err
 	}
@@ -228,33 +358,22 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 
 	switch info.TypeLang {
 	case "javascript":
-		output, exitCode, err = InitJavascript(info, cmd, conf, envs)
+		err = InitJavascript(info, cmd, conf, envs)
 		if err != nil {
 			return err
 		}
 	case "nextjs":
-		output, exitCode, err = InitNextjs(info, cmd, conf, envs)
+		err = InitNextjs(info, cmd, conf, envs)
 		if err != nil {
 			return err
 		}
 	case "flareact":
 		err = InitFlareact(info, cmd, conf, envs)
-		output = ""
-		exitCode = 0
 		if err != nil {
 			return err
 		}
 	default:
-		output = ""
-		exitCode = 0
-		err = errors.New("setp invalid")
-	}
-
-	fmt.Fprintf(cmd.Io.Out, "%s\n", output)
-	fmt.Fprintf(cmd.Io.Out, msg.WebappOutput, exitCode)
-
-	if err != nil {
-		return utils.ErrorRunningCommand
+		return utils.ErrorUnsupportedType
 	}
 
 	return nil
@@ -292,85 +411,83 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	return false
 }
 
-func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
+func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return "", 0, utils.ErrorCreateDir
+		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	if conf.InitData.Cmd != "" {
-		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
-
-		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-		if err != nil {
-			return "", 0, err
-		}
-		return output, exitCode, nil
+	err := runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
-	return "", 0, nil
+	showInstructions(cmd, `	[ General Instructions ]
+	[ Usage ]
+		- Build Command: npm run build
+		- Publish Command: npm run deploy
+	[ Notes ]
+		- Node 16x or higher`) //nolint:all
+
+	return nil
 }
 
-func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (string, int, error) {
+func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return "", 0, utils.ErrorCreateDir
+		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	if conf.InitData.Cmd != "" {
-		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
-
-		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-		if err != nil {
-			return "", 0, err
-		}
-
-		showInstructions()
-		return output, exitCode, nil
+	err := runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
-	return "", 0, nil
-
-}
-
-func showInstructions() {
-	fmt.Println(`    [ General Instructions ]
+	showInstructions(cmd, `	[ General Instructions ]
     - Requirements:
         - Tools: npm
         - AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
         - Customize the path to static content - AWS S3 storage (.azion/kv.json)
-
     [ Usage ]
-    - Build Command: npm run build
-    - Publish Command: npm run deploy
+    	- Build Command: npm run build
+    	- Publish Command: npm run deploy
     [ Notes ]
-        - Node 16x or higher`)
+        - Node 16x or higher`) //nolint:all
+	return nil
 }
 
-func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) (err error) {
+func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
-	if err = cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return utils.ErrorCreateDir
+	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+		return msg.ErrorFailedCreatingWorkerDirectory
 	}
 
-	if conf.InitData.Cmd != "" {
-		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
-
-		_, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
-		if err != nil {
-			return err
-		}
-		return nil
+	err := runCommand(cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
 	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
-		return utils.ErrorCreateDir
+		return msg.ErrorFailedCreatingPublicDirectory
 	}
 
+	showInstructions(cmd, `	[ General Instructions ]
+	- Requirements:
+		- Tools: npm
+		- AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+		- Customize the path to static content - AWS S3 storage (.azion/kv.json)
+	[ Usage ]
+		- Install Command: npm install
+		- Build Command: npm run build
+		- Publish Command: npm run deploy
+	[ Notes ]
+		- Node 16x or higher`) //nolint:all
+
 	return nil
+}
+
+func showInstructions(cmd *InitCmd, instructions string) {
+	fmt.Fprintf(cmd.Io.Out, instructions) //nolint:all
 }
 
 func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
@@ -388,13 +505,7 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 	return conf, nil
 }
 
-func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
-	packageJsonPath := path + "/package.json"
-	packageJson, err := cmd.FileReader(packageJsonPath)
-	if err != nil {
-		return msg.ErrorPackageJsonNotFound
-	}
-
+func UpdateScript(info *InitInfo, cmd *InitCmd, packageJson []byte, path string) error {
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
 		return msg.FailedUpdatingScriptsBuildField
@@ -405,9 +516,45 @@ func UpdateScript(info *InitInfo, cmd *InitCmd, path string) error {
 		return msg.FailedUpdatingScriptsDeployField
 	}
 
-	err = cmd.WriteFile(packageJsonPath, []byte(packJsonReplaceDeploy), 0644)
+	err = cmd.WriteFile(path, []byte(packJsonReplaceDeploy), 0644)
 	if err != nil {
-		return fmt.Errorf(utils.ErrorCreateFile.Error(), packageJsonPath)
+		return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
+	}
+
+	return nil
+}
+
+func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+	//if no cmd is specified, we just return nil (no error)
+	if conf.InitData.Cmd == "" {
+		return nil
+	}
+
+	switch conf.InitData.OutputCtrl {
+	case "disable":
+		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+
+		output, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		if err != nil {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunInitCommand
+		}
+
+		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+
+	case "on-error":
+		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		if exitCode != 0 {
+			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			return msg.ErrFailedToRunInitCommand
+		}
+		if err != nil {
+			return err
+		}
+
+	default:
+		return msg.WebappOutputErr
 	}
 
 	return nil

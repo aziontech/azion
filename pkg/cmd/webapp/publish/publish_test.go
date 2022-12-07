@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/webapp"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -43,29 +44,29 @@ var successResponseApp string = `
 `
 
 func TestPublishCmd(t *testing.T) {
-	//t.Run("without package.json", func(t *testing.T) {
-	//	f, _, _ := testutils.NewFactory(nil)
-	//
-	//	publishCmd := newPublishCmd(f)
-	//
-	//	publishCmd.fileReader = func(path string) ([]byte, error) {
-	//		return nil, os.ErrNotExist
-	//	}
-	//
-	//	cmd := newCobraCmd(publishCmd)
-	//
-	//	cmd.SetArgs([]string{""})
-	//
-	//	err := cmd.Execute()
-	//
-	//	require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file was deleted or changed or run the 'azioncli webapp init' command again")
-	//})
+	t.Run("without azion.json", func(t *testing.T) {
+		f, _, _ := testutils.NewFactory(nil)
+
+		publishCmd := NewPublishCmd(f)
+
+		publishCmd.FileReader = func(path string) ([]byte, error) {
+			return nil, os.ErrNotExist
+		}
+
+		cmd := NewCobraCmd(publishCmd)
+
+		cmd.SetArgs([]string{""})
+
+		err := cmd.Execute()
+
+		require.EqualError(t, err, "Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
+	})
 
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := newPublishCmd(f)
-		cmd.fileReader = func(path string) ([]byte, error) {
+		cmd := NewPublishCmd(f)
+		cmd.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
@@ -76,49 +77,48 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("publish.env not exist", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := newPublishCmd(f)
+		cmd := NewPublishCmd(f)
 
 		// Specified publish.env file but it cannot be read correctly
-		cmd.fileReader = func(path string) ([]byte, error) {
+		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env"}}`), nil
 		}
-		cmd.envLoader = func(path string) ([]string, error) {
+		cmd.EnvLoader = func(path string) ([]string, error) {
 			return nil, os.ErrNotExist
 		}
 
 		err := cmd.runPublishPreCmdLine()
-		require.ErrorIs(t, err, os.ErrNotExist)
+		require.ErrorIs(t, err, msg.ErrReadEnvFile)
 	})
 
 	t.Run("publish.env is ok", func(t *testing.T) {
-		f, stdout, _ := testutils.NewFactory(nil)
+		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := newPublishCmd(f)
+		cmd := NewPublishCmd(f)
 
 		// Specified publish.env file but it cannot be read correctly
-		cmd.fileReader = func(path string) ([]byte, error) {
-			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env"}}`), nil
+		cmd.FileReader = func(path string) ([]byte, error) {
+			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error"}}`), nil
 		}
-		cmd.envLoader = func(path string) ([]string, error) {
+		cmd.EnvLoader = func(path string) ([]string, error) {
 			return []string{"UEBA=OBA", "FAZER=UM_PENSO"}, nil
 		}
 
 		err := cmd.runPublishPreCmdLine()
 		require.NoError(t, err)
-		require.Contains(t, stdout.String(), "Command exited with code 0")
 	})
 
 	t.Run("without specifying publish.env", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		cmd := newPublishCmd(f)
-		cmd.fileReader = func(path string) ([]byte, error) {
+		cmd := NewPublishCmd(f)
+		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"cmd": "ls"}}`), nil
 		}
-		cmd.envLoader = func(path string) ([]string, error) {
+		cmd.EnvLoader = func(path string) ([]string, error) {
 			return nil, nil
 		}
-		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
+		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
 			if env != nil {
 				return "", -1, errors.New("unexpected env")
 			}
@@ -133,8 +133,8 @@ func TestPublishCmd(t *testing.T) {
 	t.Run("no pre_cmd.cmd", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)
 
-		cmd := newPublishCmd(f)
-		cmd.fileReader = func(path string) ([]byte, error) {
+		cmd := NewPublishCmd(f)
+		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {}}`), nil
 		}
 
@@ -147,14 +147,14 @@ func TestPublishCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := newPublishCmd(f)
-		cmd.fileReader = func(path string) ([]byte, error) {
+		cmd := NewPublishCmd(f)
+		cmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"cmd": "ls", "env": "./azion/publish.env"}}`), nil
 		}
-		cmd.envLoader = func(path string) ([]string, error) {
+		cmd.EnvLoader = func(path string) ([]string, error) {
 			return envs, nil
 		}
-		cmd.commandRunner = func(cmd string, env []string) (string, int, error) {
+		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
 			if !reflect.DeepEqual(envs, env) {
 				return "", -1, errors.New("unexpected env")
 			}
@@ -183,7 +183,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-		cmd := newPublishCmd(f)
+		cmd := NewPublishCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.EqualError(t, err, "Failed to create the Edge Application: Invalid. Check your settings and try again. If the error persists, contact Azion support")
@@ -217,7 +217,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-		cmd := newPublishCmd(f)
+		cmd := NewPublishCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.NoError(t, err)

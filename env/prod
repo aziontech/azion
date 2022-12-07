@@ -1,2 +1,4 @@
 API_URL=https://api.azionapi.net
 AUTH_URL=https://sso.azion.com/api/user/me
+TEMPLATE_BRANCH=main
+TEMPLATE_MAJOR=0

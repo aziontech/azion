@@ -32,18 +32,21 @@ type AzionApplicationConfig struct {
 }
 
 type InitConf struct {
-	Cmd string `json:"cmd"`
-	Env string `json:"env"`
+	Cmd        string `json:"cmd"`
+	Env        string `json:"env"`
+	OutputCtrl string `json:"output-ctrl"`
 }
 
 type BuildConf struct {
-	Cmd string `json:"cmd"`
-	Env string `json:"env"`
+	Cmd        string `json:"cmd"`
+	Env        string `json:"env"`
+	OutputCtrl string `json:"output-ctrl"`
 }
 
 type PublishConf struct {
-	Cmd string `json:"pre_cmd"`
-	Env string `json:"env"`
+	Cmd        string `json:"pre_cmd"`
+	Env        string `json:"env"`
+	OutputCtrl string `json:"output-ctrl"`
 }
 
 type CacheConf struct {
