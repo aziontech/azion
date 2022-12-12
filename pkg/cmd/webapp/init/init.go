@@ -182,19 +182,13 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		packageJson := path + "/package.json"
-		file, err := cmd.FileReader(packageJson)
-		if err != nil {
-			return msg.ErrorPackageJsonNotFound
-		}
-
 		//name was not sent through the --name flag
 		if !initCmd.Flags().Changed("name") {
-			name := gjson.Get(string(file), "name")
+			name := gjson.Get(string(bytePackageJson), "name")
 			info.Name = name.String()
 			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitNameNotSent)
 		} else {
-			_, err := sjson.Set(string(packageJson), "name", info.Name)
+			_, err := sjson.Set(string(bytePackageJson), "name", info.Name)
 			if err != nil {
 				return msg.FailedUpdatingNameField
 			}
