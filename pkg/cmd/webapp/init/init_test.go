@@ -104,7 +104,9 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd.SetArgs([]string{"--type", "javascript"})
 
-		cmd.Execute()
+		err := cmd.Execute()
+
+		require.NoError(t, err)
 
 		require.Contains(t, stdout.String(), `A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file`)
 	})
