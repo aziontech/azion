@@ -30,6 +30,7 @@ var (
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
 	WebappInitSuccessful        = "Your project %s was initialized successfully"
+	WebappInitNameNotSent       = "A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file\n"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
