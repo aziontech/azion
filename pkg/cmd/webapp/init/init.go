@@ -578,11 +578,3 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 	return nil
 }
-
-func updateNamePackageJson(info *InitInfo, packageJson []byte) error {
-	_, err := sjson.Set(string(packageJson), "name", info.Name)
-	if err != nil {
-		return err
-	}
-	return nil
-}
