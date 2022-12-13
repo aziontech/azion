@@ -20,6 +20,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -98,11 +99,10 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		$ azioncli webapp init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return init.run(info, options)
+			return init.run(info, options, cmd)
 		},
 	}
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.WebappInitFlagName)
-	_ = cobraCmd.MarkFlagRequired("name")
 	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.WebappInitFlagType)
 	_ = cobraCmd.MarkFlagRequired("type")
 	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.WebappInitFlagYes)
@@ -115,7 +115,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewInitCmd(f))
 }
 
-func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions) error {
+func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, initCmd *cobra.Command) error {
 	if info.YesOption && info.NoOption {
 		return msg.ErrorYesAndNoOptions
 	}
@@ -180,6 +180,19 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 
 		if err = UpdateScript(info, cmd, bytePackageJson, pathPackageJson); err != nil {
 			return err
+		}
+
+		//name was not sent through the --name flag
+		if !initCmd.Flags().Changed("name") {
+			name := gjson.Get(string(bytePackageJson), "name")
+			info.Name = name.String()
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitNameNotSent)
+		} else {
+			_, err := sjson.Set(string(bytePackageJson), "name", info.Name)
+			if err != nil {
+				return msg.FailedUpdatingNameField
+			}
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappUpdateNamePackageJson)
 		}
 
 		if err := cmd.organizeJsonFile(options, info); err != nil {

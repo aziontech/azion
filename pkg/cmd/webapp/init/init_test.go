@@ -66,6 +66,51 @@ func TestCobraCmd(t *testing.T) {
 		require.ErrorIs(t, err, msg.ErrorYesAndNoOptions)
 	})
 
+	t.Run("did not send name", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, stdout, _ := testutils.NewFactory(mock)
+		initCmd := NewInitCmd(f)
+
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
+		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
+			return "", 0, nil
+		}
+		initCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"javascript"}`), nil
+		}
+		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.Rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+		initCmd.Mkdir = func(path string, perm os.FileMode) error {
+			return nil
+		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
+		initCmd.Stat = func(path string) (fs.FileInfo, error) {
+			if !strings.HasSuffix(path, "package.json") {
+				return nil, os.ErrNotExist
+			}
+			return nil, nil
+		}
+
+		cmd := NewCobraCmd(initCmd)
+
+		cmd.SetArgs([]string{"--type", "javascript"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+
+		require.Contains(t, stdout.String(), `A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file`)
+	})
+
 	t.Run("success with javascript", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
