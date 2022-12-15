@@ -19,9 +19,8 @@ import (
 )
 
 type BuildCmd struct {
-	Io        *iostreams.IOStreams
-	WriteFile func(filename string, data []byte, perm fs.FileMode) error
-	// Return output, exit code and any errors
+	Io                 *iostreams.IOStreams
+	WriteFile          func(filename string, data []byte, perm fs.FileMode) error
 	CommandRunner      func(cmd string, envvars []string) (string, int, error)
 	FileReader         func(path string) ([]byte, error)
 	ConfigRelativePath string
@@ -108,6 +107,7 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	}
 
 	envs := make([]string, 0)
+	notFound := false
 
 	_, err = cmd.Stat(path + "/azion/webdev.env")
 	if err == nil {
@@ -118,6 +118,7 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	} else if errors.Is(err, os.ErrNotExist) {
 		if typeLang == "nextjs" || typeLang == "flareact" {
 			envs = insertAWSCredentials(cmd)
+			notFound = true
 		}
 	} else {
 		return msg.ErrReadEnvFile
@@ -134,9 +135,11 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 		if err != nil {
 			return err
 		}
-		errEnv := writeWebdevEnvFile(cmd, path, envs)
-		if errEnv != nil {
-			return errEnv
+		if notFound {
+			errEnv := writeWebdevEnvFile(cmd, path, envs)
+			if errEnv != nil {
+				return errEnv
+			}
 		}
 
 	default:
