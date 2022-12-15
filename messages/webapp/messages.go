@@ -32,6 +32,7 @@ var (
 	WebappInitSuccessful        = "Your project %s was initialized successfully"
 	WebappInitNameNotSent       = "A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file\n"
 	WebappUpdateNamePackageJson = "Updating your package.json with the name sent through the --name flag"
+	WebappInitTypeNotSent       = "A Type framework not sent through the --type flag; CLI will use the one found in your package.json file\n"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
