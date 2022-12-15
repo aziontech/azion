@@ -49,4 +49,8 @@ var (
 	WebappPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
 	WebappPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	WebappPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
+
+	WebappAWSMesaage = "Please inform your AWS credentials below:\n"
+	WebappAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
+	WebappAWSAcess   = "AWS_ACCESS_KEY_ID: "
 )
