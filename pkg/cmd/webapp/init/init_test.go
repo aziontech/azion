@@ -43,6 +43,10 @@ func TestCobraCmd(t *testing.T) {
 
 		initCmd := NewInitCmd(f)
 
+		initCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli webapp build\",\n    \"deploy\": \"azioncli webapp publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\"\n  }\n}\n"), nil
+		}
+
 		cmd := NewCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor"})
@@ -322,6 +326,11 @@ func TestCobraCmd(t *testing.T) {
 			}
 			return nil, nil
 		}
+
+		initCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli webapp build\",\n    \"deploy\": \"azioncli webapp publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\"\n  }\n}\n"), nil
+		}
+
 		initCmd.IsDirEmpty = func(dirpath string) (bool, error) {
 			return false, nil
 		}
@@ -339,7 +348,6 @@ func TestCobraCmd(t *testing.T) {
 
 		require.ErrorIs(t, err, utils.ErrorInvalidOption)
 	})
-
 }
 
 func TestInitCmd(t *testing.T) {

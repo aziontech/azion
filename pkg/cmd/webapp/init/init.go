@@ -129,10 +129,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 
 	projectName, projectSettings, err := DetectedProjectJS(bytePackageJson)
-	fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings) // nolint:all
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings) // nolint:all
 
 	if !hasThisFlag(c, "type") {
 		info.TypeLang = projectSettings
@@ -140,7 +140,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
-	testFunc, ok := makeTestFuncMap(cmd.Stat)[strings.ToLower(projectSettings)]
+	testFunc, ok := makeTestFuncMap(cmd.Stat)[info.TypeLang]
 	if !ok {
 		return utils.ErrorUnsupportedType
 	}
