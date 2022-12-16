@@ -2,10 +2,10 @@ package build
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
-	"regexp"
 
 	"github.com/tidwall/gjson"
 
@@ -19,14 +19,14 @@ import (
 )
 
 type BuildCmd struct {
-	Io        *iostreams.IOStreams
-	WriteFile func(filename string, data []byte, perm fs.FileMode) error
-	// Return output, exit code and any errors
+	Io                 *iostreams.IOStreams
+	WriteFile          func(filename string, data []byte, perm fs.FileMode) error
 	CommandRunner      func(cmd string, envvars []string) (string, int, error)
 	FileReader         func(path string) ([]byte, error)
 	ConfigRelativePath string
 	GetWorkDir         func() (string, error)
 	EnvLoader          func(path string) ([]string, error)
+	Stat               func(path string) (fs.FileInfo, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -64,6 +64,7 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		GetWorkDir:         utils.GetWorkingDir,
 		EnvLoader:          utils.LoadEnvVarsFromFile,
 		WriteFile:          os.WriteFile,
+		Stat:               os.Stat,
 	}
 }
 
@@ -100,8 +101,26 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 		return err
 	}
 
-	envs, err := cmd.EnvLoader(conf.BuildData.Env)
+	path, err := utils.GetWorkingDir()
 	if err != nil {
+		return err
+	}
+
+	envs := make([]string, 0)
+	notFound := false
+
+	_, err = cmd.Stat(path + "/azion/webdev.env")
+	if err == nil {
+		envs, err = cmd.EnvLoader(conf.BuildData.Env)
+		if err != nil {
+			return msg.ErrReadEnvFile
+		}
+	} else if errors.Is(err, os.ErrNotExist) {
+		if typeLang == "nextjs" || typeLang == "flareact" {
+			envs = insertAWSCredentials(cmd)
+			notFound = true
+		}
+	} else {
 		return msg.ErrReadEnvFile
 	}
 
@@ -111,16 +130,18 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 	}
 
 	switch typeLang {
-	case "javascript":
-		err = BuildJavascript(cmd, conf, envs)
+	case "javascript", "nextjs", "flareact":
+		err = BuildWebapp(cmd, conf, envs)
 		if err != nil {
 			return err
 		}
-	case "nextjs", "flareact":
-		err = BuildFlareactNextjs(cmd, conf, envs)
-		if err != nil {
-			return err
+		if notFound {
+			errEnv := writeWebdevEnvFile(cmd, path, envs)
+			if errEnv != nil {
+				return errEnv
+			}
 		}
+
 	default:
 		return utils.ErrorUnsupportedType
 	}
@@ -132,27 +153,12 @@ func (cmd *BuildCmd) Run() error {
 	return cmd.run()
 }
 
-func BuildJavascript(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+func BuildWebapp(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 
 	err := runCommand(cmd, conf, envs)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func BuildFlareactNextjs(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-
-	err := checkMandatoryEnv(envs)
-	if err != nil {
-		return err
-	}
-
-	err = runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -195,26 +201,6 @@ func checkArgsJson(cmd *BuildCmd) error {
 	return nil
 }
 
-func checkMandatoryEnv(env []string) error {
-	awsSecret := regexp.MustCompile("^AWS_SECRET_ACCESS_KEY=.+")
-	awsAccess := regexp.MustCompile("^AWS_ACCESS_KEY_ID=.+")
-	yesAccess := false
-	yesSecret := false
-	for _, item := range env {
-		access := awsAccess.FindString(item)
-		secret := awsSecret.FindString(item)
-		if access != "" {
-			yesAccess = true
-		} else if secret != "" {
-			yesSecret = true
-		}
-	}
-	if !yesAccess || !yesSecret {
-		return msg.ErrorMandatoryEnvs
-	}
-	return nil
-}
-
 func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 
 	//if no cmd is specified, we just return nil (no error)
@@ -253,5 +239,46 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 
 	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildSuccessful)
 
+	return nil
+}
+
+func insertAWSCredentials(cmd *BuildCmd) []string {
+
+	var access string
+	var secret string
+	envs := make([]string, 2)
+
+	filled := false
+
+	fmt.Fprintf(cmd.Io.Out, "%s \n", msg.WebappAWSMesaage)
+
+	for !filled {
+		fmt.Fprintf(cmd.Io.Out, "%s ", msg.WebappAWSAcess)
+		fmt.Fscanln(cmd.Io.In, &access)
+		fmt.Fprintf(cmd.Io.Out, "%s ", msg.WebappAWSSecret)
+		fmt.Fscanln(cmd.Io.In, &secret)
+		fmt.Fprintf(cmd.Io.Out, "\n")
+		if len(access) > 0 && len(secret) > 0 {
+			filled = true
+		}
+		envs[0] = "AWS_ACCESS_KEY_ID=" + access
+		envs[1] = "AWS_SECRET_ACCESS_KEY=" + secret
+	}
+
+	return envs
+
+}
+
+func writeWebdevEnvFile(cmd *BuildCmd, path string, envs []string) error {
+	var fileContent string
+
+	for _, env := range envs {
+		fileContent += env + "\n"
+	}
+
+	err := cmd.WriteFile(path+"/azion/webdev.env", []byte(fileContent), 0644)
+	if err != nil {
+		return err
+	}
 	return nil
 }
