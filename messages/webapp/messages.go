@@ -30,9 +30,9 @@ var (
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
 	WebappInitSuccessful        = "Your project %s was initialized successfully"
-	WebappInitNameNotSent       = "A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file\n"
-	WebappUpdateNamePackageJson = "Updating your package.json with the name sent through the --name flag"
-	WebappInitTypeNotSent       = "A Type framework not sent through the --type flag; CLI will use the one found in your package.json file\n"
+	WebappInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file is used\n"
+	WebappUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
+	WebappInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
