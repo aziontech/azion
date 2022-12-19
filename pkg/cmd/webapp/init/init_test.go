@@ -112,7 +112,7 @@ func TestCobraCmd(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Contains(t, stdout.String(), `A Project Name was not sent through the --name flag; CLI will use the one found in your package.json file`)
+		require.Contains(t, stdout.String(), `The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file is used`)
 	})
 
 	t.Run("success with javascript", func(t *testing.T) {
