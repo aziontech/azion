@@ -131,7 +131,7 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 
 	switch typeLang {
 	case "javascript", "nextjs", "flareact":
-		err = BuildWebapp(cmd, conf, envs)
+		err := runCommand(cmd, conf, envs)
 		if err != nil {
 			return err
 		}
@@ -151,15 +151,6 @@ func RunBuildCmdLine(cmd *BuildCmd, typeLang string) error {
 
 func (cmd *BuildCmd) Run() error {
 	return cmd.run()
-}
-
-func BuildWebapp(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
