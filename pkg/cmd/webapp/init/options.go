@@ -14,23 +14,17 @@ type statFunc func(filename string) (fs.FileInfo, error)
 
 func makeTestFuncMap(stat statFunc) map[string]TestFunc {
 	return map[string]TestFunc{
-		"javascript": func(path string) error {
-			if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
-				return msg.ErrorPackageJsonNotFound
-			}
-			return nil
-		},
-		"flareact": func(path string) error {
-			if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
-				return msg.ErrorPackageJsonNotFound
-			}
-			return nil
-		},
-		"nextjs": func(path string) error {
-			if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
-				return msg.ErrorPackageJsonNotFound
-			}
-			return nil
-		},
+		"javascript": testPackageJsonExists(stat),
+		"flareact":   testPackageJsonExists(stat),
+		"nextjs":     testPackageJsonExists(stat),
+	}
+}
+
+func testPackageJsonExists(stat statFunc) TestFunc {
+	return func(path string) error {
+		if _, err := stat(path + "/package.json"); errors.Is(err, os.ErrNotExist) {
+			return msg.ErrorPackageJsonNotFound
+		}
+		return nil
 	}
 }

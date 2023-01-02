@@ -244,12 +244,20 @@ func TestWebappCmd(t *testing.T) {
 			return "Build completed", 0, nil
 		}
 
+		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
+			return nil, nil
+		}
+
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
 			return buildEnvs, nil
 		}
 
 		buildCommand.GetWorkDir = func() (string, error) {
 			return "", nil
+		}
+
+		buildCommand.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
 		}
 
 		cmdBuild := buildcmd.NewCobraCmd(buildCommand)
@@ -400,6 +408,14 @@ func TestWebappCmd(t *testing.T) {
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
 			return buildEnvs, nil
+		}
+
+		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
+			return nil, nil
+		}
+
+		buildCommand.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
 		}
 
 		buildCommand.GetWorkDir = func() (string, error) {

@@ -98,13 +98,11 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		$ azioncli webapp init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return init.run(info, options)
+			return init.run(info, options, cmd)
 		},
 	}
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.WebappInitFlagName)
-	_ = cobraCmd.MarkFlagRequired("name")
 	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.WebappInitFlagType)
-	_ = cobraCmd.MarkFlagRequired("type")
 	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.WebappInitFlagYes)
 	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.WebappInitFlagNo)
 
@@ -115,20 +113,36 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewInitCmd(f))
 }
 
-func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions) error {
+func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
 	if info.YesOption && info.NoOption {
 		return msg.ErrorYesAndNoOptions
+	}
+
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
+	if err != nil {
+		return err
+	}
+
+	projectName, projectSettings, err := DetectedProjectJS(bytePackageJson)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings) // nolint:all
+
+	if !hasThisFlag(c, "type") {
+		info.TypeLang = projectSettings
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitTypeNotSent) // nolint:all
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
 	testFunc, ok := makeTestFuncMap(cmd.Stat)[info.TypeLang]
 	if !ok {
 		return utils.ErrorUnsupportedType
-	}
-
-	path, err := cmd.GetWorkDir()
-	if err != nil {
-		return err
 	}
 
 	info.PathWorkingDir = path
@@ -161,28 +175,28 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 	}
 
-	var projectSettings string
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
 			return err
 		}
 
-		bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
-		if err != nil {
+		if err = UpdateScript(cmd, bytePackageJson, pathPackageJson); err != nil {
 			return err
 		}
 
-		_, projectSettings, err = DetectedProjectJS(bytePackageJson)
-		fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings)
-		if err != nil {
-			return err
+		//name was not sent through the --name flag
+		if !hasThisFlag(c, "name") {
+			info.Name = projectName
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitNameNotSent)
+		} else {
+			_, err = sjson.Set(string(bytePackageJson), "name", info.Name)
+			if err != nil {
+				return msg.FailedUpdatingNameField
+			}
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappUpdateNamePackageJson)
 		}
 
-		if err = UpdateScript(info, cmd, bytePackageJson, pathPackageJson); err != nil {
-			return err
-		}
-
-		if err := cmd.organizeJsonFile(options, info); err != nil {
+		if err = cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
 
@@ -196,6 +210,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 
 	return nil
+}
+
+func hasThisFlag(c *cobra.Command, flag string) bool {
+	return c.Flags().Changed(flag)
 }
 
 type PackageJson struct {
@@ -224,13 +242,13 @@ func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSetti
 
 	if len(packageJson.Dependencies.Next) > 0 {
 		projectName = packageJson.Name
-		projectSettings = "Nextjs"
+		projectSettings = "nextjs"
 	} else if len(packageJson.Dependencies.Flareact) > 0 {
 		projectName = packageJson.Name
-		projectSettings = "Flareact"
+		projectSettings = "flareact"
 	} else {
 		projectName = packageJson.Name
-		projectSettings = "Javascript"
+		projectSettings = "javascript"
 	}
 
 	return projectName, projectSettings, nil
@@ -505,7 +523,7 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 	return conf, nil
 }
 
-func UpdateScript(info *InitInfo, cmd *InitCmd, packageJson []byte, path string) error {
+func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
 	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
 	if err != nil {
 		return msg.FailedUpdatingScriptsBuildField

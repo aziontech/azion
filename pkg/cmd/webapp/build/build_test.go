@@ -3,6 +3,7 @@ package build
 import (
 	"bytes"
 	"errors"
+	"io/fs"
 	"os"
 	"testing"
 
@@ -33,6 +34,14 @@ func TestBuild(t *testing.T) {
 
 		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
+		}
+
+		command.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+
+		command.Stat = func(path string) (fs.FileInfo, error) {
+			return nil, nil
 		}
 
 		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
@@ -136,7 +145,8 @@ func TestBuild(t *testing.T) {
 		jsonContent := bytes.NewBufferString(`
 	   {
 			"build": {
-		   		"cmd": "npm run build"
+		   		"cmd": "npm run build",
+				"output-ctrl": "on-error"
 	   		},
 			"type": "javascript"
 	   }
@@ -146,6 +156,9 @@ func TestBuild(t *testing.T) {
 
 		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
+		}
+		command.Stat = func(path string) (fs.FileInfo, error) {
+			return nil, nil
 		}
 		command.EnvLoader = func(path string) ([]string, error) {
 			return nil, utils.ErrorLoadingEnvVars

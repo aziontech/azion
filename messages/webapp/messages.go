@@ -30,6 +30,9 @@ var (
 	WebAppInitCmdSuccess        = "Template successfully fetched and configured\n"
 	WebappInitFlagHelp          = "Displays more information about the init subcommand"
 	WebappInitSuccessful        = "Your project %s was initialized successfully"
+	WebappInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file is used\n"
+	WebappUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
+	WebappInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
 	//publish cmd
 	WebappPublishUsage                       = "publish"
@@ -47,4 +50,8 @@ var (
 	WebappPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
 	WebappPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	WebappPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
+
+	WebappAWSMesaage = "Please inform your AWS credentials below:\n"
+	WebappAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
+	WebappAWSAcess   = "AWS_ACCESS_KEY_ID: "
 )
