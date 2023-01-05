@@ -544,16 +544,17 @@ func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
 
 func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	//if no cmd is specified, we just return nil (no error)
+    var command string = ""
 	if conf.InitData.Cmd == "" {
-		return nil
+        command = conf.InitData.Default
 	}
 
 	switch conf.InitData.OutputCtrl {
 	case "disable":
 		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunInitCommand
@@ -562,7 +563,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
-		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunInitCommand
