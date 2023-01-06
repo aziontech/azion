@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -86,25 +86,25 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.WebappInitUsage,
-		Short:         msg.WebappInitShortDescription,
-		Long:          msg.WebappInitLongDescription,
+		Use:           msg.EdgeApplicationsInitUsage,
+		Short:         msg.EdgeApplicationsInitShortDescription,
+		Long:          msg.EdgeApplicationsInitLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azioncli init --help
-		$ azioncli webapp init --name "thisisatest" --type javascript
-		$ azioncli webapp init --name "thisisatest" --type flareact
-		$ azioncli webapp init --name "thisisatest" --type nextjs
+		$ azioncli edge_applications init --name "thisisatest" --type javascript
+		$ azioncli edge_applications init --name "thisisatest" --type flareact
+		$ azioncli edge_applications init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options, cmd)
 		},
 	}
-	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.WebappInitFlagName)
-	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.WebappInitFlagType)
-	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.WebappInitFlagYes)
-	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.WebappInitFlagNo)
+	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
+	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.EdgeApplicationsInitFlagType)
+	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
+	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 
 	return cobraCmd
 }
@@ -132,11 +132,11 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings) // nolint:all
+	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsAutoDetectec, projectSettings) // nolint:all
 
 	if !hasThisFlag(c, "type") {
 		info.TypeLang = projectSettings
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitTypeNotSent) // nolint:all
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
@@ -187,21 +187,21 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		//name was not sent through the --name flag
 		if !hasThisFlag(c, "name") {
 			info.Name = projectName
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitNameNotSent)
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
 		} else {
 			_, err = sjson.Set(string(bytePackageJson), "name", info.Name)
 			if err != nil {
 				return msg.FailedUpdatingNameField
 			}
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappUpdateNamePackageJson)
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                      // nolint:all
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", info.Name)) // nolint:all
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                                // nolint:all
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
 	}
 
 	err = cmd.runInitCmdLine(info)
@@ -524,12 +524,12 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 }
 
 func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
-	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
+	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli edge_applications build")
 	if err != nil {
 		return msg.FailedUpdatingScriptsBuildField
 	}
 
-	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
+	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli edge_applications publish")
 	if err != nil {
 		return msg.FailedUpdatingScriptsDeployField
 	}
@@ -550,7 +550,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 	switch conf.InitData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
 
 		output, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
@@ -572,7 +572,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 		}
 
 	default:
-		return msg.WebappOutputErr
+		return msg.EdgeApplicationsOutputErr
 	}
 
 	return nil

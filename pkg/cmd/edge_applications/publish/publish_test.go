@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"

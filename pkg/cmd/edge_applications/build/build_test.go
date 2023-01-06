@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/testutils"

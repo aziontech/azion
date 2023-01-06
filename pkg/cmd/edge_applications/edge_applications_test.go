@@ -1,4 +1,4 @@
-package webapp
+package edge_applications
 
 import (
 	"fmt"
@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	buildcmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
-	initcmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/init"
-	publishcmd "github.com/aziontech/azion-cli/pkg/cmd/webapp/publish"
+	buildcmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
+	initcmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init"
+	publishcmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/publish"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -142,7 +142,7 @@ var successResponseDom string = `
   }
   `
 
-func TestWebappCmd(t *testing.T) {
+func TestEdgeApplicationsCmd(t *testing.T) {
 	t.Run("nextjs testing", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
