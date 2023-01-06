@@ -392,10 +392,11 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 }
 
 func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-    var command string = conf.PublishData.Cmd   
-	if conf.PublishData.Cmd == "" {
-        command = conf.PublishData.Default
+    var command string = conf.PublishData.Cmd
+    if len(conf.PublishData.Cmd) > 0 && len(conf.PublishData.Default) > 0 {
+        command += " && "
     }
+    command += conf.PublishData.Default
 
 	//if no cmd is specified, we just return nil (no error)
 	if command == "" {
@@ -408,6 +409,7 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
 		output, _, err := cmd.CommandRunner(command, envs)
+        fmt.Println(">>> err: ", err)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunPublishCommand

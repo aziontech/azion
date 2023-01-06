@@ -544,9 +544,10 @@ func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
 
 func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
     var command string = conf.InitData.Cmd
-	if conf.InitData.Cmd == "" {
-        command = conf.InitData.Default
+	if len(conf.InitData.Cmd) > 0 && len(conf.InitData.Default) > 0 {
+        command += " && "
 	}
+    command += conf.InitData.Default
 
     //if no cmd is specified, we just return nil (no error)
 	if command == "" {

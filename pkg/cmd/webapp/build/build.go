@@ -194,9 +194,10 @@ func checkArgsJson(cmd *BuildCmd) error {
 
 func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
     var command string = conf.BuildData.Cmd
-	if conf.BuildData.Cmd == "" {
-        command = conf.BuildData.Default
-    }
+	if len(conf.BuildData.Cmd) > 0 && len(conf.BuildData.Default) > 0{
+        command += " && "
+	}
+    command += conf.BuildData.Default
 
 	//if no cmd is specified, we just return nil (no error)
 	if command == "" {
