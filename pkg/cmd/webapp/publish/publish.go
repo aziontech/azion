@@ -392,17 +392,22 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 }
 
 func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	//if no cmd is specified, we just return nil (no error)
+    var command string = conf.PublishData.Cmd   
 	if conf.PublishData.Cmd == "" {
+        command = conf.PublishData.Default
+    }
+
+	//if no cmd is specified, we just return nil (no error)
+	if command == "" {
 		return nil
 	}
 
 	switch conf.PublishData.OutputCtrl {
 	case "disable":
 		fmt.Fprintf(cmd.Io.Out, msg.WebappPublishRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.PublishData.Cmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(conf.PublishData.Cmd, envs)
+		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunPublishCommand
@@ -411,7 +416,7 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
-		output, exitCode, err := cmd.CommandRunner(conf.PublishData.Cmd, envs)
+		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunPublishCommand

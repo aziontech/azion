@@ -193,9 +193,13 @@ func checkArgsJson(cmd *BuildCmd) error {
 }
 
 func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+    var command string = conf.BuildData.Cmd
+	if conf.BuildData.Cmd == "" {
+        command = conf.BuildData.Default
+    }
 
 	//if no cmd is specified, we just return nil (no error)
-	if conf.BuildData.Cmd == "" {
+	if command == "" {
 		return nil
 	}
 
@@ -204,9 +208,9 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 	switch conf.BuildData.OutputCtrl {
 	case "disable":
 		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.BuildData.Cmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunBuildCommand
@@ -215,7 +219,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
-		output, exitCode, err := cmd.CommandRunner(conf.BuildData.Cmd, envs)
+		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunBuildCommand
