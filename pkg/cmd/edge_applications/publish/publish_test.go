@@ -98,7 +98,7 @@ func TestPublishCmd(t *testing.T) {
 
 		// Specified publish.env file but it cannot be read correctly
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error"}}`), nil
+			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error", "default": "ls -lia"}}`), nil
 		}
 		cmd.EnvLoader = func(path string) ([]string, error) {
 			return []string{"UEBA=OBA", "FAZER=UM_PENSO"}, nil
@@ -113,21 +113,14 @@ func TestPublishCmd(t *testing.T) {
 
 		cmd := NewPublishCmd(f)
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"publish": {"cmd": "ls"}}`), nil
+			return []byte(`{"publish": {"default": "ls"}}`), nil
 		}
 		cmd.EnvLoader = func(path string) ([]string, error) {
 			return nil, nil
 		}
-		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
-			if env != nil {
-				return "", -1, errors.New("unexpected env")
-			}
-			return "", 0, nil
-		}
-
 		err := cmd.runPublishPreCmdLine()
 
-		require.NoError(t, err)
+		require.ErrorIs(t, err, msg.EdgeApplicationsOutputErr)
 	})
 
 	t.Run("no pre_cmd.cmd", func(t *testing.T) {
