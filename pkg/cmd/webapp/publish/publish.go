@@ -409,7 +409,6 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
 		output, _, err := cmd.CommandRunner(command, envs)
-        fmt.Println(">>> err: ", err)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunPublishCommand
