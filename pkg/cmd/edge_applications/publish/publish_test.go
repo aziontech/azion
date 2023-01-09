@@ -1,6 +1,6 @@
 package publish
 
-import ( 
+import (
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -98,7 +98,7 @@ func TestPublishCmd(t *testing.T) {
 
 		// Specified publish.env file but it cannot be read correctly
 		cmd.FileReader = func(path string) ([]byte, error) {
-            return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error", "default": "ls -lia"}}`), nil
+			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error", "default": "ls -lia"}}`), nil
 		}
 		cmd.EnvLoader = func(path string) ([]string, error) {
 			return []string{"UEBA=OBA", "FAZER=UM_PENSO"}, nil
@@ -120,8 +120,8 @@ func TestPublishCmd(t *testing.T) {
 		}
 		err := cmd.runPublishPreCmdLine()
 
-		require.ErrorIs(t, err, msg.WebappOutputErr)
-    })
+		require.ErrorIs(t, err, msg.EdgeApplicationsOutputErr)
+	})
 
 	t.Run("no pre_cmd.cmd", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)

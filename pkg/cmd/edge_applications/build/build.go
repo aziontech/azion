@@ -10,7 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -35,20 +35,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd := &cobra.Command{
-		Use:           msg.WebappBuildUsage,
-		Short:         msg.WebappBuildShortDescription,
-		Long:          msg.WebappBuildLongDescription,
+		Use:           msg.EdgeApplicationsBuildUsage,
+		Short:         msg.EdgeApplicationsBuildShortDescription,
+		Long:          msg.EdgeApplicationsBuildLongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-        $ azioncli webapp build
+        $ azioncli edge_applications build
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return build.run()
 		},
 	}
 
-	buildCmd.Flags().BoolP("help", "h", false, msg.WebappBuildFlagHelp)
+	buildCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsBuildFlagHelp)
 
 	return buildCmd
 }
@@ -193,22 +193,22 @@ func checkArgsJson(cmd *BuildCmd) error {
 }
 
 func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-    var command string = conf.BuildData.Cmd
-	if len(conf.BuildData.Cmd) > 0 && len(conf.BuildData.Default) > 0{
-        command += " && "
+	var command string = conf.BuildData.Cmd
+	if len(conf.BuildData.Cmd) > 0 && len(conf.BuildData.Default) > 0 {
+		command += " && "
 	}
-    command += conf.BuildData.Default
+	command += conf.BuildData.Default
 
 	//if no cmd is specified, we just return nil (no error)
 	if command == "" {
 		return nil
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildStart)
+	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildStart)
 
 	switch conf.BuildData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.WebappBuildRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
 		output, _, err := cmd.CommandRunner(command, envs)
@@ -230,10 +230,10 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 		}
 
 	default:
-		return msg.WebappOutputErr
+		return msg.EdgeApplicationsOutputErr
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.WebappBuildSuccessful)
+	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildSuccessful)
 
 	return nil
 }
@@ -246,12 +246,12 @@ func insertAWSCredentials(cmd *BuildCmd) []string {
 
 	filled := false
 
-	fmt.Fprintf(cmd.Io.Out, "%s \n", msg.WebappAWSMesaage)
+	fmt.Fprintf(cmd.Io.Out, "%s \n", msg.EdgeApplicationsAWSMesaage)
 
 	for !filled {
-		fmt.Fprintf(cmd.Io.Out, "%s ", msg.WebappAWSAcess)
+		fmt.Fprintf(cmd.Io.Out, "%s ", msg.EdgeApplicationsAWSAcess)
 		fmt.Fscanln(cmd.Io.In, &access)
-		fmt.Fprintf(cmd.Io.Out, "%s ", msg.WebappAWSSecret)
+		fmt.Fprintf(cmd.Io.Out, "%s ", msg.EdgeApplicationsAWSSecret)
 		fmt.Fscanln(cmd.Io.In, &secret)
 		fmt.Fprintf(cmd.Io.Out, "\n")
 		if len(access) > 0 && len(secret) > 0 {

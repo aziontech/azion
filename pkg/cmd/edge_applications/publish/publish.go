@@ -9,12 +9,12 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
-	"github.com/aziontech/azion-cli/pkg/cmd/webapp/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -56,20 +56,20 @@ func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
 
 func NewCobraCmd(publish *publishCmd) *cobra.Command {
 	publishCmd := &cobra.Command{
-		Use:           msg.WebappPublishUsage,
-		Short:         msg.WebappPublishShortDescription,
-		Long:          msg.WebappPublishLongDescription,
+		Use:           msg.EdgeApplicationsPublishUsage,
+		Short:         msg.EdgeApplicationsPublishShortDescription,
+		Long:          msg.EdgeApplicationsPublishLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli webapp publish --help
+		$ azioncli edge_applications publish --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f)
 		},
 	}
 
-	publishCmd.Flags().BoolP("help", "h", false, msg.WebappPublishFlagHelp)
+	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
 
 	return publishCmd
 }
@@ -194,9 +194,9 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		}
 	}
 
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishSuccessful)
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainSuccess, domainReturnedName[0])
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishPropagation)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, domainReturnedName[0])
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
 }
@@ -209,7 +209,7 @@ func (cmd *publishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 		return err
 	}
 
-	fmt.Fprintln(cmd.f.IOStreams.Out, msg.WebappPublishOutputCachePurge)
+	fmt.Fprintln(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
 	return nil
 }
 
@@ -245,7 +245,7 @@ func (cmd *publishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	return response.GetId(), nil
 }
 
@@ -282,7 +282,7 @@ func (cmd *publishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
 	return response.GetId(), nil
 }
 
@@ -313,7 +313,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
 	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
@@ -341,7 +341,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	if err != nil {
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetName(conf.Name)
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -360,7 +360,7 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainCreate, name, domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
 	return domain, nil
 }
 
@@ -373,7 +373,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.WebappPublishOutputDomainUpdate, name, domain.GetId())
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId())
 	return domain, nil
 }
 
@@ -392,11 +392,11 @@ func (cmd *publishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 }
 
 func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-    var command string = conf.PublishData.Cmd
-    if len(conf.PublishData.Cmd) > 0 && len(conf.PublishData.Default) > 0 {
-        command += " && "
-    }
-    command += conf.PublishData.Default
+	var command string = conf.PublishData.Cmd
+	if len(conf.PublishData.Cmd) > 0 && len(conf.PublishData.Default) > 0 {
+		command += " && "
+	}
+	command += conf.PublishData.Default
 
 	//if no cmd is specified, we just return nil (no error)
 	if command == "" {
@@ -405,7 +405,7 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 
 	switch conf.PublishData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.WebappPublishRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsPublishRunningCmd)
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
 		output, _, err := cmd.CommandRunner(command, envs)
@@ -427,7 +427,7 @@ func runCommand(cmd *publishCmd, conf *contracts.AzionApplicationConfig, envs []
 		}
 
 	default:
-		return msg.WebappOutputErr
+		return msg.EdgeApplicationsOutputErr
 	}
 
 	return nil
