@@ -34,95 +34,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azioncli edge_functions list --sort "asc" 
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			ctx := context.Background()
+            var numberPage int64 = opts.Page
 
-            var numberPage int64 = 1
             if opts.Page == 1 {
                 for {
-                    table.DefaultWriter = f.IOStreams.Out
-                    tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
-			        fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}
-
-			        functions, err := client.List(ctx, opts)
-			        if err != nil {
-			        	return nil // return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
-			        }
-
-			        if opts.Details {
-			        	fields = append(fields, "GetLastEditor()", "GetModified()", "GetReferenceCount()", "GetInitiatorType()")
-                        tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
-			        }
-
-                    headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-                    columnFmt := color.New(color.FgGreen).SprintfFunc()
-                    tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-	                rows := printer.BuildRows(functions, fields) 
-	                for _, row := range rows {
-                        if len(row) == 8 {
-                            tbl.AddRow(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-                        } else {
-                            tbl.AddRow(row[0], row[1], row[2], row[3])
-                        }
-	                }
-
-	                format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	                tbl.CalculateWidths([]string{}) 
-                    if numberPage == 1 {
-                        tbl.PrintHeader(format)
+                    if err := PrintTable(f, opts, &numberPage); err != nil {
+                        return nil
                     }
-
-	                for _, row := range tbl.GetRows() {
-		                tbl.PrintRow(format, row)
-	                }
-
-                    numberPage +=1
-                    opts.Page = numberPage
                 }
-
-                return nil
             }
 
-            table.DefaultWriter = f.IOStreams.Out
-            tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
-			fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}
-
-			functions, err := client.List(ctx, opts)
-			if err != nil {
+            if err := PrintTable(f, opts, &numberPage); err != nil {
 				return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
-			}
-
-			if opts.Details {
-				fields = append(fields, "GetLastEditor()", "GetModified()", "GetReferenceCount()", "GetInitiatorType()")
-                tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
-			}
-
-            headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-            columnFmt := color.New(color.FgGreen).SprintfFunc()
-            tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-	        rows := printer.BuildRows(functions, fields) 
-	        for _, row := range rows {
-                if len(row) == 8 {
-                    tbl.AddRow(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
-                } else {
-                    tbl.AddRow(row[0], row[1], row[2], row[3])
-                }
-	        }
-
-	        format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	        tbl.CalculateWidths([]string{}) 
-            if numberPage == 1 {
-                tbl.PrintHeader(format)
             }
 
-	        for _, row := range tbl.GetRows() {
-		        tbl.PrintRow(format, row)
-	        }
-
-            numberPage +=1
-            opts.Page = numberPage
 			return nil
 		},
 	}
@@ -132,3 +57,50 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	return cmd
 }
+
+func PrintTable(f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) error { 
+	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+    ctx := context.Background()
+
+    table.DefaultWriter = f.IOStreams.Out
+    tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
+	fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}
+
+	functions, err := client.List(ctx, opts)
+	if err != nil {
+		return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+	}
+
+	if opts.Details {
+		fields = append(fields, "GetLastEditor()", "GetModified()", "GetReferenceCount()", "GetInitiatorType()")
+        tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
+	}
+
+    headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
+    columnFmt := color.New(color.FgGreen).SprintfFunc()
+    tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+	rows := printer.BuildRows(functions, fields) 
+	for _, row := range rows {
+        if len(row) == 8 {
+            tbl.AddRow(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7])
+        } else {
+            tbl.AddRow(row[0], row[1], row[2], row[3])
+        }
+	}
+
+	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
+	tbl.CalculateWidths([]string{}) 
+    if *numberPage == 1 {
+        tbl.PrintHeader(format)
+    }
+
+	for _, row := range tbl.GetRows() {
+	    tbl.PrintRow(format, row)
+	}
+
+    *numberPage +=1
+    opts.Page = *numberPage
+    return nil
+}
+
