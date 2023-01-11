@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
     "github.com/fatih/color"
-    // "github.com/rodaine/table"
+    table "github.com/MaxwelMazur/tablecli"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -40,8 +40,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
             var numberPage int64 = 1
             if opts.Page == 1 {
                 for {
-                    DefaultWriter = f.IOStreams.Out
-                    tbl := New("ID", "NAME", "LANGUAGE", "ACTIVE")
+                    table.DefaultWriter = f.IOStreams.Out
+                    tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
 			        fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}
 
 			        functions, err := client.List(ctx, opts)
@@ -51,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			        if opts.Details {
 			        	fields = append(fields, "GetLastEditor()", "GetModified()", "GetReferenceCount()", "GetInitiatorType()")
-                        tbl = New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
+                        tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
 			        }
 
                     headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -84,8 +84,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
                 return nil
             }
 
-            DefaultWriter = f.IOStreams.Out
-            tbl := New("ID", "NAME", "LANGUAGE", "ACTIVE")
+            table.DefaultWriter = f.IOStreams.Out
+            tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
 			fields := []string{"GetId()", "GetName()", "GetLanguage()", "GetActive()"}
 
 			functions, err := client.List(ctx, opts)
@@ -95,7 +95,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if opts.Details {
 				fields = append(fields, "GetLastEditor()", "GetModified()", "GetReferenceCount()", "GetInitiatorType()")
-                tbl = New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
+                tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
 			}
 
             headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
