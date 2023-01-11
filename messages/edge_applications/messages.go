@@ -1,6 +1,11 @@
 package edge_applications
 
 var (
+
+	//used by more than one cmd
+	EdgeApplicationFlagId      = "Unique identifier of the Edge Function"
+	EdgeApplicationFileWritten = "File successfully written to: %s\n"
+
 	//edge_applications cmd
 	EdgeApplicationsUsage            = "edge_applications"
 	EdgeApplicationsShortDescription = "Creates Web Applications on Azion's platform"
@@ -59,4 +64,14 @@ var (
 	EdgeApplicationsAWSMesaage = "Please inform your AWS credentials below:\n"
 	EdgeApplicationsAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
 	EdgeApplicationsAWSAcess   = "AWS_ACCESS_KEY_ID: "
+
+	//CRUD
+
+	//describe cmd
+	EdgeApplicationDescribeUsage            = "describe --application-id <function_id> [flags]"
+	EdgeApplicationDescribeShortDescription = "Returns the Edge Application data"
+	EdgeApplicationDescribeLongDescription  = "Displays information about the Edge Application via a given ID to show the function’s attributes in detail"
+	EdgeApplicationDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
+	EdgeApplicationDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
+	EdgeApplicationDescribeHelpFlag         = "Displays more information about the describe command"
 )

@@ -10,6 +10,27 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 )
 
+type EdgeApplicationResponse interface {
+	GetId() int64
+	GetName() string
+	GetActive() bool
+	GetApplicationAcceleration() bool
+	GetCaching() bool
+	GetDeliveryProtocol() string
+	GetDeviceDetection() bool
+	GetEdgeFirewall() bool
+	GetEdgeFunctions() bool
+	GetHttpPort() int64
+	GetHttpsPort() int64
+	GetImageOptimization() bool
+	GetL2Caching() bool
+	GetLoadBalancer() bool
+	GetMinimumTlsVersion() string
+	GetNext() string
+	GetRawLogs() bool
+	GetWebApplicationFirewall() bool
+}
+
 type Client struct {
 	apiClient *sdk.APIClient
 }
@@ -59,6 +80,17 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
 	}
+}
+
+func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
+	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdGet(ctx, id)
+
+	res, httpResp, err := req.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return &res.Results, nil
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicationsResponse, error) {

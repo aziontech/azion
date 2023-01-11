@@ -41,4 +41,7 @@ var (
 	ErrorGetAllTags       = errors.New("Failed returning all Reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
 	ErrorIterateAllTags   = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 	ErrorWritingWebdevEnv = errors.New("Failed to write 'webdev.env' file. Verify if the file is writable and/or you have access to it, if the data format is JSON, or fix the content according to the JSON format specification at https://www.json.org/json-en.html")
+
+	ErrorMissingApplicationIdArgument = errors.New("A mandatory flag is missing. You must provide an application_id as an argument or path to import the file. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
+	ErrorGetApplication               = errors.New("Failed to get the Edge Application: %s. Check your settings and try again. If the error persists, contact Azion support")
 )
