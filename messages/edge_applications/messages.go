@@ -3,7 +3,7 @@ package edge_applications
 var (
 
 	//used by more than one cmd
-	EdgeApplicationFlagId      = "Unique identifier of the Edge Function"
+	EdgeApplicationFlagId      = "Unique identifier of the Edge Applications"
 	EdgeApplicationFileWritten = "File successfully written to: %s\n"
 
 	//edge_applications cmd
