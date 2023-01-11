@@ -68,9 +68,9 @@ var (
 	//CRUD
 
 	//describe cmd
-	EdgeApplicationDescribeUsage            = "describe --application-id <function_id> [flags]"
+	EdgeApplicationDescribeUsage            = "describe --application-id <application_id> [flags]"
 	EdgeApplicationDescribeShortDescription = "Returns the Edge Application data"
-	EdgeApplicationDescribeLongDescription  = "Displays information about the Edge Application via a given ID to show the function’s attributes in detail"
+	EdgeApplicationDescribeLongDescription  = "Displays information about the Edge Application via a given ID to show the application’s attributes in detail"
 	EdgeApplicationDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
 	EdgeApplicationDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	EdgeApplicationDescribeHelpFlag         = "Displays more information about the describe command"
