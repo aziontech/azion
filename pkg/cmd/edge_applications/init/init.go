@@ -32,7 +32,7 @@ type InitInfo struct {
 }
 
 var (
-	TemplateBranch = "dev"
+	TemplateBranch = "main"
 	TemplateMajor  = "0"
 )
 
