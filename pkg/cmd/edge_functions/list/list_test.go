@@ -11,8 +11,8 @@ import (
 )
 
 var (
-    tblWithFunc string = "\x1b[34;4mID    NAME             LANGUAGE    ACTIVE  \n\x1b[0m\x1b[32m2995  \x1b[0m20220124-batata  javascript  false   \n\x1b[32m3032  \x1b[0mTestandoCLI4     javascript  false   \n"
-    tblNoFunc string = "\x1b[34;4mID    NAME             LANGUAGE    ACTIVE  \n\x1b[0m"
+    tblWithFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n2995  20220124-batata  javascript  false   \n3032  TestandoCLI4     javascript  false   \n"
+    tblNoFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n"
 )
 
 func TestList(t *testing.T) {
