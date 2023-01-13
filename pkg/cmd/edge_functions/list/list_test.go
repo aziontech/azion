@@ -1,12 +1,18 @@
 package list
 
 import (
+    // "fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+var (
+    tblWithFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n2995  20220124-batata  javascript  false   \n3032  TestandoCLI4     javascript  false   \n"
+    tblNoFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n"
 )
 
 func TestList(t *testing.T) {
@@ -24,19 +30,12 @@ func TestList(t *testing.T) {
 
 		cmd.SetArgs([]string{})
 
-		_, err := cmd.ExecuteC()
+ 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
+		assert.Equal(t,tblWithFunc, stdout.String())
+})
 
-		assert.Equal(t,
-			`ID      NAME               LANGUAGE      ACTIVE
-2995    20220124-batata    javascript    false
-3032    TestandoCLI4       javascript    false
-`,
-			stdout.String(),
-		)
-	})
-
-	t.Run("no services", func(t *testing.T) {
+	t.Run("no functions", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -53,7 +52,6 @@ func TestList(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, `ID    NAME    LANGUAGE    ACTIVE
-`, stdout.String())
+		assert.Equal(t, tblNoFunc, stdout.String())
 	})
 }
