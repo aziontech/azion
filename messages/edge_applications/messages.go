@@ -66,6 +66,11 @@ var (
 	EdgeApplicationsAWSAcess   = "AWS_ACCESS_KEY_ID: "
 
 	//CRUD
+	//list cmd
+	EdgeApplicationsListUsage            = "list [flags]"
+	EdgeApplicationsListShortDescription = "Displays your account's Edge Applicationss"
+	EdgeApplicationsListLongDescription  = "Displays all Applicationss in the user account’s Edge Applicationss library"
+	EdgeApplicationsListHelpFlag         = "Displays more information about the list subcommand"
 
 	//describe cmd
 	EdgeApplicationDescribeUsage            = "describe --application-id <application_id> [flags]"
