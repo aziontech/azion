@@ -68,8 +68,8 @@ var (
 	//CRUD
 	//list cmd
 	EdgeApplicationsListUsage            = "list [flags]"
-	EdgeApplicationsListShortDescription = "Displays your account's Edge Applicationss"
-	EdgeApplicationsListLongDescription  = "Displays all Applicationss in the user account’s Edge Applicationss library"
+	EdgeApplicationsListShortDescription = "Displays your account's Edge Applications"
+	EdgeApplicationsListLongDescription  = "Displays all Applications in the user account’s Edge Applications library"
 	EdgeApplicationsListHelpFlag         = "Displays more information about the list subcommand"
 
 	//describe cmd
