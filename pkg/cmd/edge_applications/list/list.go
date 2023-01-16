@@ -3,8 +3,9 @@ package list
 import (
 	"context"
 	"fmt"
-	"github.com/fatih/color"
 	"strings"
+
+	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
@@ -22,8 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short:         msg.EdgeApplicationsListShortDescription,
 		Long:          msg.EdgeApplicationsListLongDescription,
 		SilenceUsage:  true,
-		SilenceErrors: true,
-		Example: heredoc.Doc(`
+		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azioncli edge_functions list --details
 		$ azioncli edge_functions list --order_by "id"
 		$ azioncli edge_functions list --page 1  
@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if !insertTheFlagPage(cmd) {
 				for {
 					pages, err := PrintTable(cmd, f, opts, &numberPage)
-					if numberPage > pages {
+					if numberPage > pages && err == nil {
 						return nil
 					}
 					if err != nil {

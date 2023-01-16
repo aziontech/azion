@@ -187,11 +187,5 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
 		return sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	//var result []EdgeFunctionResponse
-
-	//for i := range resp.GetResults() {
-	//	result = append(result, &resp.GetResults()[i])
-	//}
-
 	return resp, nil
 }

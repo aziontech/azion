@@ -1,0 +1,141 @@
+{
+  "count": 11,
+  "total_pages": 2,
+  "schema_version": 3,
+  "links": {
+    "previous": null,
+    "next": "https://api.azionapi.net/edge_applications?page=2"
+  },
+  "results": [
+    {
+      "id": 1673615821,
+      "name": "New Edge Application Max",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "8a7dbe52-1e45-4f43-8fe4-edfe7d8eecf3"
+        }
+      ]
+    },
+    {
+      "id": 1673635839,
+      "name": "New Edge Application Max 2",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "0cee30cd-1743-4202-b0dd-da9b636a6035"
+        }
+      ]
+    },
+    {
+      "id": 1673635840,
+      "name": "New Edge Application Max 3",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "1ee3dfd1-59f6-4a2d-9072-bc156cd93f5e"
+        }
+      ]
+    },
+    {
+      "id": 1673635841,
+      "name": "New Edge Application Max 4",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "3d9a1278-dd63-4490-ac89-6213975d3b5d"
+        }
+      ]
+    },
+    {
+      "id": 1673635842,
+      "name": "New Edge Application Max 5",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "5997de8d-60bf-4047-92b1-cceb517d778d"
+        }
+      ]
+    },
+    {
+      "id": 1673635843,
+      "name": "New Edge Application Max 6",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "6d26c221-bf1c-4694-97b2-3cbe1d13cf6e"
+        }
+      ]
+    },
+    {
+      "id": 1673635844,
+      "name": "New Edge Application Max 7",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "24e57801-772e-47ab-821b-9024238f8d58"
+        }
+      ]
+    },
+    {
+      "id": 1673635845,
+      "name": "New Edge Application Max 8",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "d44c3128-beb6-4aff-9fa6-51693c871e65"
+        }
+      ]
+    },
+    {
+      "id": 1673635846,
+      "name": "New Edge Application Max 9",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "180a871a-a5e0-4cbd-b8d5-b21b8f3545b1"
+        }
+      ]
+    },
+    {
+      "id": 1673635847,
+      "name": "New Edge Application Max 10",
+      "active": true,
+      "debug_rules": false,
+      "origins": [
+        {
+          "name": "Default Origin",
+          "origin_type": "single_origin",
+          "origin_id": "eb7ec816-ddf5-497d-8852-bc95bd0add0c"
+        }
+      ]
+    }
+  ]
+}
