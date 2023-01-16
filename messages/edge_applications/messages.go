@@ -79,4 +79,11 @@ var (
 	EdgeApplicationDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
 	EdgeApplicationDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	EdgeApplicationDescribeHelpFlag         = "Displays more information about the describe command"
+
+	//delete cmd
+	EdgeApplicationDeleteUsage            = "delete --application-id <application_id> [flags]"
+	EdgeApplicationDeleteShortDescription = "Removes an Edge Function"
+	EdgeApplicationDeleteLongDescription  = "Removes an Edge Application from the Edge Applications library based on its given ID"
+	EdgeApplicationDeleteOutputSuccess    = "Edge Application %s was successfully deleted\n"
+	EdgeApplicationDeleteHelpFlag         = "Displays more information about the delete subcommand"
 )

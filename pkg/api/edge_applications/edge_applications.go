@@ -172,6 +172,19 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	return &edgeApplicationsResponse.Results, nil
 }
 
+
+func (c *Client) Delete(ctx context.Context, id string) error {
+	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, id)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}
+
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.GetApplicationsResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

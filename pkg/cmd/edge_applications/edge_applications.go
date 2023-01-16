@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/describe"
 	initCmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/list"
@@ -29,7 +30,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edge_applicationsCmd.AddCommand(buildCmd.NewCmd(f))
 	edge_applicationsCmd.AddCommand(publishCmd.NewCmd(f))
 	edge_applicationsCmd.AddCommand(describe.NewCmd(f))
-	edge_applicationsCmd.AddCommand(list.NewCmd(f))
+  edge_applicationsCmd.AddCommand(delete.NewCmd(f))
+  edge_applicationsCmd.AddCommand(list.NewCmd(f))
 	edge_applicationsCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsFlagHelp)
 
 	return edge_applicationsCmd
