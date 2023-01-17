@@ -2,6 +2,7 @@ package edgeapplications
 
 import (
 	"context"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"net/http"
 	"time"
 
@@ -171,6 +172,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	return &edgeApplicationsResponse.Results, nil
 }
 
+
 func (c *Client) Delete(ctx context.Context, id string) error {
 	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, id)
 
@@ -181,4 +183,22 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.GetApplicationsResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsGet(ctx).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
 }
