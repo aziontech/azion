@@ -163,9 +163,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 
-	shouldFetchTemplates := true
-
-	shouldFetchTemplates, err = shouldFetch(cmd, info)
+	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
 	}
@@ -616,7 +614,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 			return utils.ErrorInternalServerError
 		}
 
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
 
 	}
 
