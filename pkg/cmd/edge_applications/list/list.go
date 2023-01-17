@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
-			if !insertTheFlagPage(cmd) {
+			if !cmd.Flags().Changed("page") {
 				for {
 					pages, err := PrintTable(cmd, f, opts, &numberPage)
 					if numberPage > pages && err == nil {
@@ -57,18 +57,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func insertTheFlagDetails(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed("details")
-}
-
-func insertTheFlagPage(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed("page")
-}
-
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) (int64, error) {
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
-
+    
 	applications, err := client.List(ctx, opts)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorGetApplication.Error(), err)
@@ -76,7 +68,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	tbl := table.New("ID", "NAME")
 	table.DefaultWriter = f.IOStreams.Out
-	if insertTheFlagDetails(cmd) {
+	if cmd.Flags().Changed("details") {
 		tbl = table.New("ID", "NAME", "ACTIVE")
 	}
 
@@ -85,7 +77,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, v := range applications.Results {
-		if insertTheFlagDetails(cmd) {
+		if cmd.Flags().Changed("details") {
 			tbl.AddRow(v.Id, v.Name, v.Active)
 		} else {
 			tbl.AddRow(v.Id, v.Name)
@@ -104,5 +96,6 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	*numberPage += 1
 	opts.Page = *numberPage
+    f.IOStreams.Out = table.DefaultWriter
 	return applications.TotalPages, nil
 }
