@@ -624,7 +624,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 	var response string
 	var err error
-	shouldFetchTemplates := true
+	var shouldFetchTemplates bool
 	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
 		if info.NoOption || info.YesOption {
 			shouldFetchTemplates = yesNoFlagToResponse(info)
