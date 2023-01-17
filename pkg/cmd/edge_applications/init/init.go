@@ -572,7 +572,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	var err error
-	shouldFetchTemplates := true
+	var shouldFetchTemplates bool
 	options := &contracts.AzionApplicationCdn{}
 
 	if info.Name == "" {
