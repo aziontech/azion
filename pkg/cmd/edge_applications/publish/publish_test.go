@@ -98,7 +98,7 @@ func TestPublishCmd(t *testing.T) {
 
 		// Specified publish.env file but it cannot be read correctly
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error", "default": "ls -lia"}}`), nil
+			return []byte(`{"publish": {"pre_cmd": "ls", "env": "./azion/publish.env", "output-ctrl": "on-error", "default": "ls -la"}}`), nil
 		}
 		cmd.EnvLoader = func(path string) ([]string, error) {
 			return []string{"UEBA=OBA", "FAZER=UM_PENSO"}, nil

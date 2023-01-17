@@ -20,6 +20,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -92,7 +93,8 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli init --help
+		$ azioncli edge_applications init
+		$ azioncli edge_applications init --help
 		$ azioncli edge_applications init --name "thisisatest" --type javascript
 		$ azioncli edge_applications init --name "thisisatest" --type flareact
 		$ azioncli edge_applications init --name "thisisatest" --type nextjs
@@ -132,6 +134,15 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
+
+	if info.TypeLang == "cdn" {
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
+		if err != nil {
+			return err
+		}
+		return initCdn(cmd, path, info)
+	}
+
 	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsAutoDetectec, projectSettings) // nolint:all
 
 	if !hasThisFlag(c, "type") {
@@ -152,27 +163,11 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 
-	var response string
 	shouldFetchTemplates := true
 
-	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
-		if info.NoOption || info.YesOption {
-			shouldFetchTemplates = yesNoFlagToResponse(info)
-		} else {
-			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
-			fmt.Fscanln(cmd.Io.In, &response)
-			shouldFetchTemplates, err = utils.ResponseToBool(response)
-			if err != nil {
-				return err
-			}
-		}
-
-		if shouldFetchTemplates {
-			err = cmd.CleanDir("./azion")
-			if err != nil {
-				return err
-			}
-		}
+	shouldFetchTemplates, err = shouldFetch(cmd, info)
+	if err != nil {
+		return err
 	}
 
 	if shouldFetchTemplates {
@@ -184,16 +179,9 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		//name was not sent through the --name flag
-		if !hasThisFlag(c, "name") {
-			info.Name = projectName
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
-		} else {
-			_, err = sjson.Set(string(bytePackageJson), "name", info.Name)
-			if err != nil {
-				return msg.FailedUpdatingNameField
-			}
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, info.PathWorkingDir)
+		if err != nil {
+			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
@@ -579,6 +567,106 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 	default:
 		return msg.EdgeApplicationsOutputErr
+	}
+
+	return nil
+}
+
+func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
+	var err error
+	shouldFetchTemplates := true
+	options := &contracts.AzionApplicationCdn{}
+
+	if info.Name == "" {
+		jsonConf := path + "/package.json"
+		file, err := cmd.FileReader(jsonConf)
+		if err != nil {
+			return msg.ErrorOpeningAzionFile
+		}
+
+		name := gjson.Get(string(file), "type")
+		options.Name = name.String()
+	}
+
+	shouldFetchTemplates, err = shouldFetch(cmd, info)
+	if err != nil {
+		return err
+	}
+
+	if shouldFetchTemplates {
+		pathWorker := path + "/azion"
+		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+			fmt.Println(err)
+			return msg.ErrorFailedCreatingAzionDirectory
+		}
+
+		options.Name = info.Name
+		options.Type = info.TypeLang
+		options.Domain.Name = "__DEFAULT__"
+		options.Application.Name = "__DEFAULT__"
+
+		data, err := json.MarshalIndent(options, "", "  ")
+		if err != nil {
+			return msg.ErrorUnmarshalAzionFile
+		}
+
+		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
+		if err != nil {
+			fmt.Println(err)
+			return utils.ErrorInternalServerError
+		}
+
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
+
+	}
+
+	return nil
+}
+
+func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
+	var response string
+	var err error
+	shouldFetchTemplates := true
+	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
+		if info.NoOption || info.YesOption {
+			shouldFetchTemplates = yesNoFlagToResponse(info)
+		} else {
+			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
+			fmt.Fscanln(cmd.Io.In, &response)
+			shouldFetchTemplates, err = utils.ResponseToBool(response)
+			if err != nil {
+				return false, err
+			}
+		}
+
+		if shouldFetchTemplates {
+			err = cmd.CleanDir("./azion")
+			if err != nil {
+				return false, err
+			}
+		}
+		return shouldFetchTemplates, nil
+	}
+	return true, nil
+}
+
+func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectName string, bytePackageJson []byte, path string) error {
+	//name was not sent through the --name flag
+	if !hasThisFlag(c, "name") {
+		info.Name = projectName
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
+	} else {
+		updatePackageJson, err := sjson.Set(string(bytePackageJson), "name", info.Name)
+		if err != nil {
+			return msg.FailedUpdatingNameField
+		}
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
+		path = path + "/package.json"
+
+		err = cmd.WriteFile(path, []byte(updatePackageJson), 0644)
+		if err != nil {
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
+		}
 	}
 
 	return nil

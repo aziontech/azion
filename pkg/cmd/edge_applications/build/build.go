@@ -85,6 +85,12 @@ func (cmd *BuildCmd) run() error {
 	}
 
 	typeLang := gjson.Get(string(file), "type")
+
+	if typeLang.String() == "cdn" {
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsBuildCdn)
+		return nil
+	}
+
 	err = RunBuildCmdLine(cmd, typeLang.String())
 	if err != nil {
 		return err
