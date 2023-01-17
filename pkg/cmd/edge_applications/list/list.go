@@ -25,7 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azioncli edge_applications list --details
-		$ azioncli edge_applications ist --order_by "id"
+		$ azioncli edge_applications list --order_by "id"
 		$ azioncli edge_applications list --page 1  
 		$ azioncli edge_applications list --page_size 5
 		$ azioncli edge_applications list --sort "asc" 
