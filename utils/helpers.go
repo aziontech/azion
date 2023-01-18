@@ -134,6 +134,27 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	return conf, nil
 }
 
+func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
+	path, err := GetWorkingDir()
+	if err != nil {
+		return nil, err
+	}
+	jsonConf := path + "/azion/azion.json"
+	file, err := os.ReadFile(jsonConf)
+	if err != nil {
+		fmt.Println(&jsonConf)
+		return nil, ErrorOpeningAzionJsonFile
+	}
+
+	conf := &contracts.AzionApplicationCdn{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		return nil, ErrorUnmarshalAzionJsonFile
+	}
+
+	return conf, nil
+}
+
 func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 	path, err := GetWorkingDir()
 	if err != nil {

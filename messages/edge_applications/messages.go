@@ -21,6 +21,7 @@ var (
 	EdgeApplicationsBuildStart            = "Building your Web Application\n"
 	EdgeApplicationsBuildSuccessful       = "Your Web Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
+	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
 
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
@@ -50,6 +51,7 @@ var (
 	EdgeApplicationsPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
 	EdgeApplicationsPublishRunningCmd                  = "Running pre publish command:\n\n"
 	EdgeApplicationsPublishSuccessful                  = "Your Web Application was published successfully\n"
+	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
 	EdgeApplicationsPublishOutputEdgeFunctionCreate    = "Created Edge Function %s with ID %d\n"

@@ -25,6 +25,13 @@ type AzionApplicationOptions struct {
 	RtPurge     AzionJsonDataPurge       `json:"rt-purge"`
 }
 
+type AzionApplicationCdn struct {
+	Name        string                   `json:"name"`
+	Type        string                   `json:"type"`
+	Domain      AzionJsonDataDomain      `json:"domain"`
+	Application AzionJsonDataApplication `json:"application"`
+}
+
 type AzionApplicationConfig struct {
 	InitData    InitConf    `json:"init"`
 	BuildData   BuildConf   `json:"build"`
@@ -34,22 +41,22 @@ type AzionApplicationConfig struct {
 type InitConf struct {
 	Cmd        string `json:"cmd"`
 	Env        string `json:"env"`
-    OutputCtrl string `json:"output-ctrl"`
-    Default    string `json:"default"`
+	OutputCtrl string `json:"output-ctrl"`
+	Default    string `json:"default"`
 }
 
 type BuildConf struct {
 	Cmd        string `json:"cmd"`
 	Env        string `json:"env"`
 	OutputCtrl string `json:"output-ctrl"`
-    Default    string `json:"default"`
+	Default    string `json:"default"`
 }
 
 type PublishConf struct {
 	Cmd        string `json:"pre_cmd"`
 	Env        string `json:"env"`
 	OutputCtrl string `json:"output-ctrl"`
-    Default    string `json:"default"`
+	Default    string `json:"default"`
 }
 
 type CacheConf struct {

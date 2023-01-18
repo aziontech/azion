@@ -20,6 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 )
 
 type publishCmd struct {
@@ -29,6 +30,7 @@ type publishCmd struct {
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
+	GetAzionJsonCdn       func() (*contracts.AzionApplicationCdn, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
@@ -50,6 +52,7 @@ func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		GetAzionJsonCdn:       utils.GetAzionJsonCdn,
 		f:                     f,
 	}
 }
@@ -80,9 +83,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	jsonConf := path + "/azion/azion.json"
+	file, err := cmd.FileReader(jsonConf)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
+	typeLang := gjson.Get(string(file), "type")
+
+	if typeLang.String() == "cdn" {
+		err := publishCdn(cmd, f)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
 	//Run build command
 	build := cmd.BuildCmd(f)
-	err := build.Run()
+	err = build.Run()
 	if err != nil {
 		return err
 	}
@@ -333,6 +357,18 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	return application.GetId(), nil
 }
 
+func (cmd *publishCmd) createApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (int64, error) {
+	reqApp := apiapp.CreateRequest{}
+	reqApp.SetName(name)
+	reqApp.SetDeliveryProtocol("http,https")
+	application, err := client.Create(ctx, &reqApp)
+	if err != nil {
+		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
+	return application.GetId(), nil
+}
+
 func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
@@ -342,10 +378,18 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
-	reqIns := apiapp.UpdateInstanceRequest{}
-	reqIns.SetName(conf.Name)
-	reqIns.SetEdgeFunctionId(conf.Function.Id)
+	return nil
+}
 
+func (cmd *publishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) error {
+	reqApp := apiapp.UpdateRequest{}
+	reqApp.SetName(name)
+	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+	application, err := client.Update(ctx, &reqApp)
+	if err != nil {
+		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	return nil
 }
 
@@ -364,7 +408,35 @@ func (cmd *publishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	return domain, nil
 }
 
+func (cmd *publishCmd) createDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
+	reqDom := apidom.CreateRequest{}
+	reqDom.SetName(name)
+	reqDom.SetCnames([]string{})
+	reqDom.SetCnameAccessOnly(false)
+	reqDom.SetIsActive(true)
+	reqDom.SetEdgeApplicationId(conf.Application.Id)
+	domain, err := client.Create(ctx, &reqDom)
+	if err != nil {
+		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
+	return domain, nil
+}
+
 func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
+	reqDom := apidom.UpdateRequest{}
+	reqDom.SetName(name)
+	reqDom.SetEdgeApplicationId(conf.Application.Id)
+	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
+	domain, err := client.Update(ctx, &reqDom)
+	if err != nil {
+		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId())
+	return domain, nil
+}
+
+func (cmd *publishCmd) updateDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
@@ -453,4 +525,77 @@ func getConfig(cmd *publishCmd) (conf *contracts.AzionApplicationConfig, err err
 
 	return conf, nil
 
+}
+
+func publishCdn(cmd *publishCmd, f *cmdutil.Factory) error {
+
+	conf, err := cmd.GetAzionJsonCdn()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	applicationName := conf.Name
+	if conf.Application.Name != "__DEFAULT__" {
+		applicationName = conf.Application.Name
+	}
+
+	if conf.Application.Id == 0 {
+		applicationId, err := cmd.createApplicationCdn(cliapp, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+		conf.Application.Id = applicationId
+
+	} else {
+		err := cmd.updateApplicationCdn(cliapp, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+	}
+
+	domainName := conf.Name
+	if conf.Domain.Name != "__DEFAULT__" {
+		domainName = conf.Domain.Name
+	}
+
+	var domain apidom.DomainResponse
+
+	if conf.Domain.Id == 0 {
+		domain, err = cmd.createDomainCdn(clidom, ctx, conf, domainName)
+		if err != nil {
+			return err
+		}
+		conf.Domain.Id = domain.GetId()
+	} else {
+		_, err = cmd.updateDomainCdn(clidom, ctx, conf, domainName)
+		if err != nil {
+			return err
+		}
+	}
+
+	workingDir, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	azionCdnFile := workingDir + "/azion/azion.json"
+
+	data, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return msg.ErrorUnmarshalAzionFile
+	}
+
+	err = cmd.WriteFile(azionCdnFile, data, 0644)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsCdnPublishSuccessful)
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
+
+	return nil
 }

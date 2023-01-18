@@ -31,6 +31,7 @@ var (
 	ErrorMandatoryEnvs                 = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingPublicDirectory = errors.New("Failed to create the public directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
+	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 
 	ErrorCreateFunction = errors.New("Failed to create edge function: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateFunction = errors.New("Failed to update the Edge Function: %s. Check your settings and try again. If the error persists, contact Azion support")
