@@ -35,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
-			if !InsertTheFlagPage(cmd) {
+			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
 				for {
 					pages, err := PrintTable(f, opts, &numberPage)
 					if numberPage > pages {
@@ -57,10 +57,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionListHelpFlag)
 	return cmd
-}
-
-func InsertTheFlagPage(cmd *cobra.Command) bool {
-	return cmd.Flags().Changed("page")
 }
 
 func PrintTable(f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) (int64, error) {

@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
-			if !cmd.Flags().Changed("page") {
+			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
 				for {
 					pages, err := PrintTable(cmd, f, opts, &numberPage)
 					if numberPage > pages && err == nil {
