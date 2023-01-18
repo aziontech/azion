@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"os"
 
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 )
 
 type TestFunc func(path string) error

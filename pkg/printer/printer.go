@@ -32,7 +32,7 @@ func NewTab(w io.Writer) *TabPrinter {
 // PrintWithHeaders(elems, []string{"Name", "Price"}, []string{"NAME","PRICE"})
 // PrintWithHeaders(elems, []string{"GetName()", "GetPrice()"}, []string{"NAME","PRICE"})
 func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, headers []string) {
-	fmt.Fprintf(p.writer, "%s", buildLine(headers))
+	fmt.Fprintf(p.writer, "%s", BuildLine(headers))
 	p.Print(elems, fields)
 }
 
@@ -41,15 +41,15 @@ func (p *TabPrinter) PrintWithHeaders(elems interface{}, fields []string, header
 // If a field does not exist in a given element of `elems`, it will panic
 // If `elems` is not of a slice type, nothing will be printed.
 func (p *TabPrinter) Print(elems interface{}, fields []string) {
-	rows := buildRows(elems, fields)
+	rows := BuildRows(elems, fields)
 	for _, row := range rows {
-		fmt.Fprintf(p.writer, "%s", buildLine(row))
+		fmt.Fprintf(p.writer, "%s", BuildLine(row))
 	}
 
 	p.writer.Flush()
 }
 
-func buildLine(args []string) string {
+func BuildLine(args []string) string {
 	var b strings.Builder
 
 	for idx, arg := range args {
@@ -63,11 +63,11 @@ func buildLine(args []string) string {
 	return b.String()
 }
 
-// buildRows returns a slice of string slice
+// BuildRows returns a slice of string slice
 // Each top-level slice represents a 'row' and the values inside a given
 // row are the columns
 // NOTE: Not tested for non-basic types (structs,slices,maps)
-func buildRows(elems interface{}, fields []string) [][]string {
+func BuildRows(elems interface{}, fields []string) [][]string {
 	if reflect.TypeOf(elems).Kind() != reflect.Slice {
 		// ignore if not a slice
 		return nil

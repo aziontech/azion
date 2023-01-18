@@ -2,6 +2,7 @@ package edgeapplications
 
 import (
 	"context"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"net/http"
 	"time"
 
@@ -9,6 +10,27 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 )
+
+type EdgeApplicationResponse interface {
+	GetId() int64
+	GetName() string
+	GetActive() bool
+	GetApplicationAcceleration() bool
+	GetCaching() bool
+	GetDeliveryProtocol() string
+	GetDeviceDetection() bool
+	GetEdgeFirewall() bool
+	GetEdgeFunctions() bool
+	GetHttpPort() int64
+	GetHttpsPort() int64
+	GetImageOptimization() bool
+	GetL2Caching() bool
+	GetLoadBalancer() bool
+	GetMinimumTlsVersion() string
+	GetNext() string
+	GetRawLogs() bool
+	GetWebApplicationFirewall() bool
+}
 
 type Client struct {
 	apiClient *sdk.APIClient
@@ -59,6 +81,17 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
 	}
+}
+
+func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
+	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdGet(ctx, id)
+
+	res, httpResp, err := req.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return &res.Results, nil
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicationsResponse, error) {
@@ -137,4 +170,35 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	}
 
 	return &edgeApplicationsResponse.Results, nil
+}
+
+
+func (c *Client) Delete(ctx context.Context, id string) error {
+	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, id)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}
+
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.GetApplicationsResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsGet(ctx).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
 }

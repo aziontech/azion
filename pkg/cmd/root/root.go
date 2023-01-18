@@ -1,16 +1,17 @@
 package cmd
 
 import (
-	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"net/http"
 	"time"
 
+	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
+
 	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmd/configure"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/cmd/webapp"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -47,7 +48,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(version.NewCmd(f))
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
-	rootCmd.AddCommand(webapp.NewCmd(f))
+	rootCmd.AddCommand(edge_applications.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 	return rootCmd
 }

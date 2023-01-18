@@ -114,7 +114,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 	return edgeFuncResponse.Results, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, int64, error) {
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -122,8 +122,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Sort(opts.Sort).
 		Execute()
 
+    pages := resp.TotalPages
+
 	if err != nil {
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	var result []EdgeFunctionResponse
@@ -132,5 +134,5 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		result = append(result, &resp.GetResults()[i])
 	}
 
-	return result, nil
+	return result, *pages, nil
 }

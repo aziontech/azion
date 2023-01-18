@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/webapp"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -20,6 +20,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -32,7 +33,7 @@ type InitInfo struct {
 }
 
 var (
-	TemplateBranch = "dev"
+	TemplateBranch = "main"
 	TemplateMajor  = "0"
 )
 
@@ -86,25 +87,26 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.WebappInitUsage,
-		Short:         msg.WebappInitShortDescription,
-		Long:          msg.WebappInitLongDescription,
+		Use:           msg.EdgeApplicationsInitUsage,
+		Short:         msg.EdgeApplicationsInitShortDescription,
+		Long:          msg.EdgeApplicationsInitLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli init --help
-		$ azioncli webapp init --name "thisisatest" --type javascript
-		$ azioncli webapp init --name "thisisatest" --type flareact
-		$ azioncli webapp init --name "thisisatest" --type nextjs
+		$ azioncli edge_applications init
+		$ azioncli edge_applications init --help
+		$ azioncli edge_applications init --name "thisisatest" --type javascript
+		$ azioncli edge_applications init --name "thisisatest" --type flareact
+		$ azioncli edge_applications init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options, cmd)
 		},
 	}
-	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.WebappInitFlagName)
-	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.WebappInitFlagType)
-	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.WebappInitFlagYes)
-	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.WebappInitFlagNo)
+	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
+	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.EdgeApplicationsInitFlagType)
+	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
+	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 
 	return cobraCmd
 }
@@ -132,11 +134,20 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
-	fmt.Fprintf(cmd.Io.Out, msg.WebappAutoDetectec, projectSettings) // nolint:all
+
+	if info.TypeLang == "cdn" {
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
+		if err != nil {
+			return err
+		}
+		return initCdn(cmd, path, info)
+	}
+
+	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsAutoDetectec, projectSettings) // nolint:all
 
 	if !hasThisFlag(c, "type") {
 		info.TypeLang = projectSettings
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitTypeNotSent) // nolint:all
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
 	}
 
 	//gets the test function (if it could not find it, it means it is currently not supported)
@@ -152,27 +163,9 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 
-	var response string
-	shouldFetchTemplates := true
-
-	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
-		if info.NoOption || info.YesOption {
-			shouldFetchTemplates = yesNoFlagToResponse(info)
-		} else {
-			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
-			fmt.Fscanln(cmd.Io.In, &response)
-			shouldFetchTemplates, err = utils.ResponseToBool(response)
-			if err != nil {
-				return err
-			}
-		}
-
-		if shouldFetchTemplates {
-			err = cmd.CleanDir("./azion")
-			if err != nil {
-				return err
-			}
-		}
+	shouldFetchTemplates, err := shouldFetch(cmd, info)
+	if err != nil {
+		return err
 	}
 
 	if shouldFetchTemplates {
@@ -184,24 +177,17 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		//name was not sent through the --name flag
-		if !hasThisFlag(c, "name") {
-			info.Name = projectName
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappInitNameNotSent)
-		} else {
-			_, err = sjson.Set(string(bytePackageJson), "name", info.Name)
-			if err != nil {
-				return msg.FailedUpdatingNameField
-			}
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebappUpdateNamePackageJson)
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, info.PathWorkingDir)
+		if err != nil {
+			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                      // nolint:all
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.WebappInitSuccessful+"\n", info.Name)) // nolint:all
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                                // nolint:all
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
 	}
 
 	err = cmd.runInitCmdLine(info)
@@ -524,12 +510,12 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 }
 
 func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
-	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli webapp build")
+	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli edge_applications build")
 	if err != nil {
 		return msg.FailedUpdatingScriptsBuildField
 	}
 
-	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli webapp publish")
+	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli edge_applications publish")
 	if err != nil {
 		return msg.FailedUpdatingScriptsDeployField
 	}
@@ -543,17 +529,23 @@ func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
 }
 
 func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+	var command string = conf.InitData.Cmd
+	if len(conf.InitData.Cmd) > 0 && len(conf.InitData.Default) > 0 {
+		command += " && "
+	}
+	command += conf.InitData.Default
+
 	//if no cmd is specified, we just return nil (no error)
-	if conf.InitData.Cmd == "" {
+	if command == "" {
 		return nil
 	}
 
 	switch conf.InitData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.WebappInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", conf.InitData.Cmd)
+		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
+		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunInitCommand
@@ -562,7 +554,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
-		output, exitCode, err := cmd.CommandRunner(conf.InitData.Cmd, envs)
+		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunInitCommand
@@ -572,7 +564,107 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 		}
 
 	default:
-		return msg.WebappOutputErr
+		return msg.EdgeApplicationsOutputErr
+	}
+
+	return nil
+}
+
+func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
+	var err error
+	var shouldFetchTemplates bool
+	options := &contracts.AzionApplicationCdn{}
+
+	if info.Name == "" {
+		jsonConf := path + "/package.json"
+		file, err := cmd.FileReader(jsonConf)
+		if err != nil {
+			return msg.ErrorOpeningAzionFile
+		}
+
+		name := gjson.Get(string(file), "type")
+		options.Name = name.String()
+	}
+
+	shouldFetchTemplates, err = shouldFetch(cmd, info)
+	if err != nil {
+		return err
+	}
+
+	if shouldFetchTemplates {
+		pathWorker := path + "/azion"
+		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+			fmt.Println(err)
+			return msg.ErrorFailedCreatingAzionDirectory
+		}
+
+		options.Name = info.Name
+		options.Type = info.TypeLang
+		options.Domain.Name = "__DEFAULT__"
+		options.Application.Name = "__DEFAULT__"
+
+		data, err := json.MarshalIndent(options, "", "  ")
+		if err != nil {
+			return msg.ErrorUnmarshalAzionFile
+		}
+
+		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
+		if err != nil {
+			fmt.Println(err)
+			return utils.ErrorInternalServerError
+		}
+
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+
+	}
+
+	return nil
+}
+
+func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
+	var response string
+	var err error
+	var shouldFetchTemplates bool
+	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
+		if info.NoOption || info.YesOption {
+			shouldFetchTemplates = yesNoFlagToResponse(info)
+		} else {
+			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
+			fmt.Fscanln(cmd.Io.In, &response)
+			shouldFetchTemplates, err = utils.ResponseToBool(response)
+			if err != nil {
+				return false, err
+			}
+		}
+
+		if shouldFetchTemplates {
+			err = cmd.CleanDir("./azion")
+			if err != nil {
+				return false, err
+			}
+		}
+		return shouldFetchTemplates, nil
+	}
+	return true, nil
+}
+
+func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectName string, bytePackageJson []byte, path string) error {
+	//name was not sent through the --name flag
+	if !hasThisFlag(c, "name") {
+		info.Name = projectName
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
+	} else {
+		updatePackageJson, err := sjson.Set(string(bytePackageJson), "name", info.Name)
+		if err != nil {
+			return msg.FailedUpdatingNameField
+		}
+		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
+		path = path + "/package.json"
+
+		err = cmd.WriteFile(path, []byte(updatePackageJson), 0644)
+		if err != nil {
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
+		}
 	}
 
 	return nil

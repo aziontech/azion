@@ -37,7 +37,7 @@ var (
 	EdgeFunctionDescribeShortDescription = "Returns the Edge Function data"
 	EdgeFunctionDescribeLongDescription  = "Displays information about the Edge Function via a given ID to show the function’s attributes in detail"
 	EdgeFunctionDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	EdgeFunctionDescribeFlagFormat       = "Changes the output format passing a json value to the flag"
+	EdgeFunctionDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	EdgeFunctionDescribeFlagWithCode     = "Displays the Edge Function's code; disabled by default"
 	EdgeFunctionDescribeHelpFlag         = "Displays more information about the describe command"
 
