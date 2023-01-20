@@ -51,7 +51,7 @@ var (
 	EdgeFunctionUpdateUsage            = "update --function-id <function_id> [flags]"
 	EdgeFunctionUpdateShortDescription = "Modifies an Edge Function"
 	EdgeFunctionUpdateLongDescription  = "Modifies an Edge Function based on its ID to update its name, activity status, code path, and other attributes"
-	EdgeFunctionUpdateFlagName         = "The Edge Function’s name"
+	EdgeFunctionUpdateFlagName         = "The Edge Function's name"
 	EdgeFunctionUpdateFlagCode         = "Path and name to the file containing the Edge Function's code"
 	EdgeFunctionUpdateFlagActive       = "Whether the Edge Function should be active or not"
 	EdgeFunctionUpdateFlagArgs         = "Path and name of the JSON file containing the Edge Function's arguments"

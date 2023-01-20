@@ -340,7 +340,7 @@ func (cmd *publishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
-	reqUpApp.Id = strconv.FormatInt(application.GetId(), 10)
+	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
@@ -372,7 +372,7 @@ func (cmd *publishCmd) createApplicationCdn(client *apiapp.Client, ctx context.C
 func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
-	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
@@ -384,7 +384,7 @@ func (cmd *publishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 func (cmd *publishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
-	reqApp.Id = strconv.FormatInt(conf.Application.Id, 10)
+	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
