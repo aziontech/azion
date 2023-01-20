@@ -3,7 +3,7 @@ package edgefunctions
 import "errors"
 
 var (
-	ErrorMandatoryCreateFlags      = errors.New("A mandatory flag is missing. You must provide --active, --code, and --name flags when the --in flag is not provided. Run the command 'azion cli edge_functions create --help' to display more information and try again")
+	ErrorMandatoryCreateFlags      = errors.New("A mandatory flag is missing. You must provide --active, --code, and --name flags when the --in flag is not provided. Run the command 'azioncli edge_functions create --help' to display more information and try again")
 	ErrorActiveFlag                = errors.New("Invalid --active flag provided. The flag must have 'true' or 'false' values. Run the command 'azioncli edge_functions <subcommand> --help' to display more information and try again")
 	ErrorCodeFlag                  = errors.New("Failed to read the code file. Verify if the file name and its path are correct and the file content has a valid code format. Run the command 'azioncli edge_functions <subcommand> --help' to display more information and try again")
 	ErrorArgsFlag                  = errors.New("Failed to read the args file. Verify if the file name and its path are correct and the file's content has a valid JSON format. Run the command 'azioncli edge_functions <subcommand> --help' to display more information and try again")
