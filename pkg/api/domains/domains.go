@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 )
@@ -66,4 +67,14 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 	}
 
 	return &domainsResponse.Results, nil
+}
+
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.DomainResponseWithResults, error) {
+	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).Execute()
+
+	if err != nil {
+		return sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
 }

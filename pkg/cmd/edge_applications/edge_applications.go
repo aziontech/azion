@@ -30,8 +30,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edge_applicationsCmd.AddCommand(buildCmd.NewCmd(f))
 	edge_applicationsCmd.AddCommand(publishCmd.NewCmd(f))
 	edge_applicationsCmd.AddCommand(describe.NewCmd(f))
-  edge_applicationsCmd.AddCommand(delete.NewCmd(f))
-  edge_applicationsCmd.AddCommand(list.NewCmd(f))
+	edge_applicationsCmd.AddCommand(delete.NewCmd(f))
+	edge_applicationsCmd.AddCommand(list.NewCmd(f))
 	edge_applicationsCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsFlagHelp)
 
 	return edge_applicationsCmd

@@ -1,11 +1,12 @@
 package list
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/stretchr/testify/require"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestList(t *testing.T) {
