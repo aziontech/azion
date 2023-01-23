@@ -3,6 +3,7 @@ package domains
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
@@ -66,4 +67,17 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 	}
 
 	return &domainsResponse.Results, nil
+}
+
+func (c *Client) Delete(ctx context.Context, id int64) error {
+	str := strconv.FormatInt(id, 10)
+	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
 }

@@ -86,8 +86,11 @@ var (
 	EdgeApplicationDeleteUsage            = "delete --application-id <application_id> [flags]"
 	EdgeApplicationDeleteShortDescription = "Removes an Edge Function"
 	EdgeApplicationDeleteLongDescription  = "Removes an Edge Application from the Edge Applications library based on its given ID"
-	EdgeApplicationDeleteOutputSuccess    = "Edge Application %s was successfully deleted\n"
+	EdgeApplicationDeleteOutputSuccess    = "Edge Application %d was successfully deleted\n"
 	EdgeApplicationDeleteHelpFlag         = "Displays more information about the delete subcommand"
+	EdgeApplicationDeleteCascadeFlag      = "Deletes all resources created through the command azioncli edge_applications publish"
+	EdgeApplicationDeleteMissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion"
+	EdgeApplicationDeleteCascadeSuccess   = "Cascade delete carried out successfully"
 
 	//update cmd
 	EdgeApplicationUpdateUsage                       = "update --application-id <application_id> [flags]"

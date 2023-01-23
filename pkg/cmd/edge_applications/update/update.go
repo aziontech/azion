@@ -73,7 +73,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
-					fmt.Println(err)
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
