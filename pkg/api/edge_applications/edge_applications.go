@@ -2,9 +2,11 @@ package edgeapplications
 
 import (
 	"context"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/aziontech/azion-cli/pkg/contracts"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/utils"
@@ -42,7 +44,7 @@ type CreateRequest struct {
 
 type UpdateRequest struct {
 	sdk.ApplicationUpdateRequest
-	Id string
+	Id int64
 }
 
 type UpdateInstanceRequest struct {
@@ -107,7 +109,8 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicatio
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
-	request := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdPatch(ctx, req.Id).ApplicationUpdateRequest(req.ApplicationUpdateRequest)
+	str := strconv.FormatInt(req.Id, 10)
+	request := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdPatch(ctx, str).ApplicationUpdateRequest(req.ApplicationUpdateRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -171,7 +174,6 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	return &edgeApplicationsResponse.Results, nil
 }
-
 
 func (c *Client) Delete(ctx context.Context, id string) error {
 	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, id)

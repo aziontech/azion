@@ -60,7 +60,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) (int64, error) {
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
-    
+
 	applications, err := client.List(ctx, opts)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorGetApplication.Error(), err)
@@ -96,6 +96,6 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	*numberPage += 1
 	opts.Page = *numberPage
-    f.IOStreams.Out = table.DefaultWriter
+	f.IOStreams.Out = table.DefaultWriter
 	return applications.TotalPages, nil
 }
