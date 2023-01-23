@@ -26,16 +26,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azioncli domains list
 		`),
-
-		// $ azioncli domains list --details
-		// $ azioncli domains list --order_by "id"
-		// $ azioncli domains list --page 1
-		// $ azioncli domains list --page_size 5
-		// $ azioncli domains list --sort "asc"
-
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var numberPage int64 = opts.Page
-			if err := PrintTable(cmd, f, opts, &numberPage); err != nil {
+			if err := PrintTable(cmd, f, opts); err != nil {
 				return fmt.Errorf(msg.ErrorGetDomains.Error(), err)
 			}
 			return nil
@@ -47,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) error {
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
@@ -72,16 +64,11 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
-	if *numberPage == 1 {
-		tbl.PrintHeader(format)
-	}
-
+	tbl.PrintHeader(format)
 	for _, row := range tbl.GetRows() {
 		tbl.PrintRow(format, row)
 	}
 
-	*numberPage += 1
-	opts.Page = *numberPage
 	f.IOStreams.Out = table.DefaultWriter
 	return nil
 }

@@ -3,7 +3,7 @@ package domains
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/domains"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/list"
+	"github.com/aziontech/azion-cli/pkg/cmd/domains/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
