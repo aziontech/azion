@@ -28,7 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetDomains.Error(), err)
+				return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
 			}
 			return nil
 		},
@@ -45,7 +45,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	domains, err := client.List(ctx, opts)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorGetDomains.Error(), err)
+		return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
 	}
 
 	tbl := table.New("ID", "NAME")

@@ -41,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			domain, err := client.Get(ctx, domain_id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetDomains.Error(), err)
+				return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
 			}
 
 			out := f.IOStreams.Out
