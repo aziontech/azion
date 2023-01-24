@@ -120,10 +120,15 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = os.Stat(path + "/azion/azion.json")
+	if err != nil {
+		return nil, err
+	}
+
 	jsonConf := path + "/azion/azion.json"
 	file, err := os.ReadFile(jsonConf)
 	if err != nil {
-		fmt.Println(&jsonConf)
 		return nil, ErrorOpeningAzionJsonFile
 	}
 

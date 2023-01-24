@@ -60,4 +60,7 @@ var (
 	ErrorRawLogsFlag                 = errors.New("Invalid --raw-logs flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
 	ErrorWebApplicationFirewallFlag  = errors.New("Invalid --webapp-firewall flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
 	ErrorMinTlsVersion               = errors.New("This is not a valid TLS Version. Run azioncli edge_applications <subcommand> --help for more information")
+	ErrorMissingApplicationIdJson    = errors.New("Application ID is missing from azion.json. Please initialize and publish your project first before using cascade delete")
+	ErrorMissingAzionJson            = errors.New("Azion.json file is missing. Please initialize and publish your project first before using cascade delete")
+	ErrorFailedUpdateAzionJson       = errors.New("Failed to update azion.json file to remove IDs of deleted resource")
 )

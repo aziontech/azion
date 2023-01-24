@@ -175,8 +175,9 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	return &edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) Delete(ctx context.Context, id string) error {
-	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, id)
+func (c *Client) Delete(ctx context.Context, id int64) error {
+	str := strconv.FormatInt(id, 10)
+	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, str)
 
 	httpResp, err := req.Execute()
 
