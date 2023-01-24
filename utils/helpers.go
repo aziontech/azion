@@ -11,7 +11,9 @@ import (
 	"os/exec"
 	"strings"
 
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/tidwall/gjson"
 )
 
 const shell = "/bin/sh"
@@ -118,10 +120,15 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	_, err = os.Stat(path + "/azion/azion.json")
+	if err != nil {
+		return nil, err
+	}
+
 	jsonConf := path + "/azion/azion.json"
 	file, err := os.ReadFile(jsonConf)
 	if err != nil {
-		fmt.Println(&jsonConf)
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
@@ -219,5 +226,28 @@ func checkStatusCode500Error(err error) error {
 // read the body of the response and returns its content
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := io.ReadAll(httpResp.Body)
+	if err := checkNoProduct(string(responseBody)); err != nil {
+		return err
+	}
+	if err := checkTlsVersion(string(responseBody)); err != nil {
+		return err
+	}
 	return fmt.Errorf("%s", responseBody)
+}
+
+func checkNoProduct(body string) error {
+
+	if strings.Contains(body, "user_has_no_product") {
+		product := gjson.Get(body, "user_has_no_product")
+		return fmt.Errorf("%w: %s", ErrorProductNotOwned, product)
+	}
+
+	return nil
+}
+
+func checkTlsVersion(body string) error {
+	if strings.Contains(body, "minimum_tls_version") {
+		return msg.ErrorMinTlsVersion
+	}
+	return nil
 }
