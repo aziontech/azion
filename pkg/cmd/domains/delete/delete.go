@@ -20,7 +20,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli domains delete --domain-id 1234
+		$ azioncli domains delete --domain-id 1234
 		$ azioncli domains delete -d 1234
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
