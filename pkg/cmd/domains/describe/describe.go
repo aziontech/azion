@@ -67,7 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&domain_id, "domain-id", "a", "", msg.DomainsFlagId)
+	cmd.Flags().StringVarP(&domain_id, "domain-id", "d", "", msg.DomainsFlagId)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DomainsDescribeFlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DomainsDescribeFlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.DomainsDescribeHelpFlag)

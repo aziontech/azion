@@ -24,7 +24,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "878"})
+		cmd.SetArgs([]string{"-d", "878"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
