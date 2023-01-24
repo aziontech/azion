@@ -12,7 +12,7 @@ import (
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var function_id int64
+	var domain_id int64
 	cmd := &cobra.Command{
 		Use:           msg.DomainDeleteUsage,
 		Short:         msg.DomainDeleteShortDescription,
@@ -32,19 +32,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			ctx := context.Background()
 
-			err := client.Delete(ctx, function_id)
+			err := client.Delete(ctx, domain_id)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.DomainDeleteOutputSuccess, function_id)
+			fmt.Fprintf(out, msg.DomainDeleteOutputSuccess, domain_id)
 
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "domain-id", "d", 0, msg.DomainFlagId)
+	cmd.Flags().Int64VarP(&domain_id, "domain-id", "d", 0, msg.DomainFlagId)
 	cmd.Flags().BoolP("help", "h", false, msg.DomainDeleteHelpFlag)
 
 	return cmd
