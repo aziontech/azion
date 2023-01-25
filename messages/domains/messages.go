@@ -14,6 +14,14 @@ var (
 	DomainsListLongDescription  = "Displays all your domain references to your edges"
 	DomainsListHelpFlag         = "Displays more information about the list subcommand"
 
+	//describe cmd
+	DomainsDescribeUsage            = "describe --domain-id <domain_id> [flags]"
+	DomainsDescribeShortDescription = "Returns the domain data"
+	DomainsDescribeLongDescription  = "Displays information about the domain via a given ID to show the application’s attributes in detail"
+	DomainsDescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
+	DomainsDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
+	DomainsDescribeHelpFlag         = "Displays more information about the describe command"
+
 	//delete cmd
 	DomainDeleteUsage            = "delete --domain-id <domain_id> [flags]"
 	DomainDeleteShortDescription = "Removes a Domain"
