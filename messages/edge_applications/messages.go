@@ -111,7 +111,6 @@ var (
 	EdgeApplicationUpdateFlagLoadBalancer            = "Whether the Edge Application has Load Balancer active or not"
 	EdgeApplicationUpdateRawLogs                     = "Whether the Edge Application has Raw Logs active or not"
 	EdgeApplicationUpdateWebApplicationFirewall      = "Whether the Edge Application has Web Application Firewall active or not"
-	EdgeApplicationUpdateFlagActive                  = "Whether the Edge Application should be active or not"
 	EdgeApplicationUpdateFlagIn                      = "Given path and JSON file to automatically update the Edge Application attributes; you can use - for reading from stdin"
 	EdgeApplicationUpdateOutputSuccess               = "Updated Edge Application with ID %d\n"
 	EdgeApplicationUpdateHelpFlag                    = "Displays more information about the update subcommand"

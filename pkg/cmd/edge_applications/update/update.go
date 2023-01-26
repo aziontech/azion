@@ -99,14 +99,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					request.SetMinimumTlsVersion(fields.MinimumTlsVersion)
 				}
 
-				if cmd.Flags().Changed("active") {
-					active, err := strconv.ParseBool(fields.Active)
-					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorActiveFlag, fields.Active)
-					}
-					request.SetActive(active)
-				}
-
 				if cmd.Flags().Changed("application-acceleration") {
 					converted, err := strconv.ParseBool(fields.ApplicationAcceleration)
 					if err != nil {
@@ -195,7 +187,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
+				return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Edge Application with ID %d\n", response.GetId())
@@ -211,7 +203,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&fields.HttpPort, "http-port", 80, msg.EdgeApplicationUpdateFlagHttpPort)
 	flags.Int64Var(&fields.HttpsPort, "https-port", 443, msg.EdgeApplicationUpdateFlagHttpsPort)
 	flags.StringVar(&fields.MinimumTlsVersion, "min-tsl-ver", "", msg.EdgeApplicationUpdateFlagMinimumTlsVersion)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeApplicationUpdateFlagActive)
 	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.EdgeApplicationUpdateFlagApplicationAcceleration)
 	flags.StringVar(&fields.Caching, "caching", "", msg.EdgeApplicationUpdateFlagCaching)
 	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.EdgeApplicationUpdateFlagDeviceDetection)
