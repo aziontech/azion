@@ -51,15 +51,21 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	tbl := table.New("ID", "NAME")
 	table.DefaultWriter = f.IOStreams.Out
 	if cmd.Flags().Changed("details") {
-		tbl = table.New("ID", "NAME", "ACTIVE")
+		tbl = table.New("ID", "NAME", "EDGE DOMAIN", "ACTIVE")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-	for _, v := range domains.Results {
-		tbl.AddRow(v.Id, v.Name)
+	if cmd.Flags().Changed("details") {
+		for _, v := range domains.Results {
+			tbl.AddRow(v.Id, v.Name, *v.DomainName, *v.IsActive)
+		}
+	} else {
+		for _, v := range domains.Results {
+			tbl.AddRow(v.Id, v.Name)
+		}
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
