@@ -37,7 +37,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azioncli domains create --name asdfçlkj --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
-        $ azioncli domains create --name withargs --edge-application-id 1231 --active true
+        $ azioncli domains create --name withargs --application-id 1231 --active true
         $ azioncli domains create --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -82,7 +82,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.DomainsCreateFlagCnames)
 	flags.BoolVar(&fields.CnameAccessOnly, "cname-access-only", false, msg.DomainsCreateFlagCnameAccessOnly)
 	flags.IntVarP(&fields.DigitalCertificateId, "digital-certificate-id", "d", 0, msg.DomainsCreateFlagDigitalCertificateId)
-	flags.IntVarP(&fields.EdgeApplicationId, "edge-application-id", "e", 0, msg.DomainsCreateFlagEdgeApplicationId)
+  flags.IntVarP(&fields.EdgeApplicationId, "application-id", "e", 0, msg.DomainsCreateFlagEdgeApplicationId)
 	flags.BoolVar(&fields.IsActive, "active", false, msg.DomainsCreateFlagIsActive)
 	flags.StringVar(&fields.Path, "in", "", msg.DomainsCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.DomainsCreateHelpFlag)
