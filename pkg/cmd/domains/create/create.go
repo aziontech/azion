@@ -43,8 +43,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azioncli domains create --name "max" --cnames  "asdfg.com",max.com,123.com -c true -d 1234 -e 42312434 -a true --in example.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := new(api.CreateRequest)
-
 			if cmd.Flags().Changed("in") {
 				f, err := os.ReadFile(fields.Path)
 				if err != nil {
@@ -61,6 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMandatoryCreateFlags
 			}
 
+			request := new(api.CreateRequest)
 			request.SetName(fields.Name)
 			request.SetCnames(fields.Cnames)
 			request.SetCnameAccessOnly(fields.CnameAccessOnly)
@@ -69,7 +68,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.SetDigitalCertificateId(int64(fields.DigitalCertificateId))
 			}
 			request.SetIsActive(fields.IsActive)
-
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), request)
 			if err != nil {
