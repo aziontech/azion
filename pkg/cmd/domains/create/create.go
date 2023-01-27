@@ -39,7 +39,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli domains create --name asdfçlkj --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
         $ azioncli domains create --name withargs --edge-application-id 1231 --active true
         $ azioncli domains create --in "create.json"
-		$ azioncli domains create --name "max" --cnames  "asdfg.com",max.com,123.com -c true -d 1234 -e 42312434 -a true --in example.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("in") {
