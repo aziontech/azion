@@ -2,6 +2,7 @@ package domains
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -22,7 +23,7 @@ type CreateRequest struct {
 
 type UpdateRequest struct {
 	sdk.UpdateDomainRequest
-	DomainId string
+	Id int64
 }
 
 type DomainResponse interface {
@@ -68,10 +69,11 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
-
-	request := c.apiClient.DomainsApi.UpdateDomain(ctx, req.DomainId).UpdateDomainRequest(req.UpdateDomainRequest)
+	str := strconv.FormatInt(req.Id, 10)
+	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
 
 	domainsResponse, httpResp, err := request.Execute()
+	fmt.Println(httpResp.Body)
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
