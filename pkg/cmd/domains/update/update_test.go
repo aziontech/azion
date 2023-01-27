@@ -29,7 +29,7 @@ var successResponse string = `
 `
 
 func TestUpdate(t *testing.T) {
-	t.Run("update edge function", func(t *testing.T) {
+	t.Run("update domain", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

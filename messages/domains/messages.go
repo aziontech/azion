@@ -37,7 +37,7 @@ var (
 	DomainUpdateFlagName            = "The Domain's name"
 	DomainUpdateFlagCnames          = "Cnames of your Domain"
 	DomainUpdateFlagCnameAccessOnly = "Whether the Domain should be Accessed through Cname only or not"
-	DomainUpdateFlagIn              = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
+	DomainUpdateFlagIn              = "Given path and JSON file to automatically update the Domain attributes; you can use - for reading from stdin"
 	DomainUpdateOutputSuccess       = "Updated Domain with ID %d\n"
 	DomainUpdateFlagActive          = "Whether the Domain should be active or not"
 	DomainUpdateHelpFlag            = "Displays more information about the update subcommand"
