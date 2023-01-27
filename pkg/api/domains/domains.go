@@ -2,7 +2,6 @@ package domains
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -71,9 +70,8 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
 	str := strconv.FormatInt(req.Id, 10)
 	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
-
 	domainsResponse, httpResp, err := request.Execute()
-	fmt.Println(httpResp.Body)
+
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}

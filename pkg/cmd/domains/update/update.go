@@ -15,13 +15,14 @@ import (
 )
 
 type Fields struct {
-	Id                int64
-	EdgeApplicationId int64
-	Name              string
-	CnameAccessOnly   string
-	Active            string
-	InPath            string
-	Cnames            []string
+	Id                 int64
+	EdgeApplicationId  int64
+	Name               string
+	CnameAccessOnly    string
+	Active             string
+	InPath             string
+	Cnames             []string
+	DigitalCertificate string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -83,6 +84,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					request.SetCnames(fields.Cnames)
 				}
 
+				if cmd.Flags().Changed("digital-certificate-id") {
+					if fields.DigitalCertificate == "null" {
+						request.SetDigitalCertificateIdNil()
+					} else {
+						n, err := strconv.ParseInt(fields.DigitalCertificate, 10, 64)
+						if err != nil {
+							return msg.ErrorDigitalCertificateFlag
+						}
+						request.SetDigitalCertificateId(n)
+					}
+				}
+
 				if cmd.Flags().Changed("cname-access-only") {
 					active, err := strconv.ParseBool(fields.CnameAccessOnly)
 					if err != nil {
@@ -119,6 +132,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64VarP(&fields.Id, "domain-id", "d", 0, msg.DomainFlagId)
 	flags.Int64VarP(&fields.EdgeApplicationId, "application-id", "a", 0, msg.ApplicationFlagId)
+	flags.StringVar(&fields.DigitalCertificate, "digital-certificate-id", "", msg.DomainFlagDigitalCertificateId)
 	flags.StringVar(&fields.Name, "name", "", msg.DomainUpdateFlagName)
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.DomainUpdateFlagCnames)
 	flags.StringVar(&fields.Active, "active", "", msg.DomainUpdateFlagActive)

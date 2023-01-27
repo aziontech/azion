@@ -11,5 +11,6 @@ var (
 	ErrorMissingDomainIdArgumentDelete = errors.New("A mandatory flag is missing. You must provide a domain_id as an argument. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
 	ErrorFailToDeleteDomain            = errors.New("Failed to delete the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorActiveFlag                    = errors.New("Invalid --active flag provided. The flag must have 'true' or 'false' values. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
+	ErrorDigitalCertificateFlag        = errors.New("Invalid --digital-certificate-id flag provided. The flag must have an Integer or 'null' as a value. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
 	ErrorUpdateDomain                  = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 )

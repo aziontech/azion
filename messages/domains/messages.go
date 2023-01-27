@@ -2,12 +2,13 @@ package domains
 
 var (
 	//domains cmd
-	DomainsUsage            = "domains"
-	DomainsShortDescription = "Create domains for edges on Azion's platform"
-	DomainsLongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
-	DomainsFlagHelp         = "Displays more information about the domains command"
-	DomainFlagId            = "Unique identifier of the Domain"
-	ApplicationFlagId       = "Unique identifier of the Edge Application used by this domain"
+	DomainsUsage                   = "domains"
+	DomainsShortDescription        = "Create domains for edges on Azion's platform"
+	DomainsLongDescription         = "Build your Web applications in minutes without the need to manage infrastructure or security"
+	DomainsFlagHelp                = "Displays more information about the domains command"
+	DomainFlagId                   = "Unique identifier of the Domain"
+	DomainFlagDigitalCertificateId = "Unique identifier of the Digital Certificate; this value is either an Integer or null"
+	ApplicationFlagId              = "Unique identifier of the Edge Application used by this domain"
 
 	//list cmd
 	DomainsListUsage            = "list [flags]"
