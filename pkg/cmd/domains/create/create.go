@@ -4,20 +4,27 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/MakeNowJust/heredoc"
+
 	//msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/domains"
 	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 type Fields struct {
-	Cnames                                  []string
-	Name, Path                              string
-	EdgeApplicationId, DigitalCertificateId int
-	CnameAccessOnly, IsActive               bool
+	Name                 string   `json:"name"`
+	Cnames               []string `json:"cnames,omitempty"`
+	EdgeApplicationId    int      `json:"edge_application_id"`
+	DigitalCertificateId int      `json:"digital_certificate_id,omitempty"`
+	CnameAccessOnly      bool     `json:"cname_access-only,omitempty"`
+	IsActive             bool     `json:"is_active,omitempty"`
+	Path                 string   `json:"path,omitempty"`
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -36,12 +43,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azioncli domains create --name "max" --cnames  "asdfg.com",max.com,123.com -c true -d 1234 -e 42312434 -a true --in example.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			b, _ := json.MarshalIndent(fields, " ", "	")
-			fmt.Println(string(b))
-
 			request := new(api.CreateRequest)
 
-			if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("edge-application-id") {
+			if cmd.Flags().Changed("in") {
+				f, err := os.ReadFile(fields.Path)
+				if err != nil {
+					return fmt.Errorf("%s %s", utils.ErrorOpeningFile, fields.Path)
+				}
+
+				err = json.Unmarshal(f, &fields)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
+			}
+
+			if len(fields.Name) < 1 || fields.EdgeApplicationId < 1 {
 				return msg.ErrorMandatoryCreateFlags
 			}
 
@@ -49,7 +65,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request.SetCnames(fields.Cnames)
 			request.SetCnameAccessOnly(fields.CnameAccessOnly)
 			request.SetEdgeApplicationId(int64(fields.EdgeApplicationId))
-			request.SetDigitalCertificateId(int64(fields.DigitalCertificateId))
+			if fields.DigitalCertificateId > 0 {
+				request.SetDigitalCertificateId(int64(fields.DigitalCertificateId))
+			}
 			request.SetIsActive(fields.IsActive)
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
