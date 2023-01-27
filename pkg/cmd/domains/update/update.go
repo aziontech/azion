@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azioncli domains update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// either function-id or in path should be passed
+			// either domain-id or in path should be passed
 			if !cmd.Flags().Changed("domain-id") && !cmd.Flags().Changed("in") {
 				return msg.ErrorMissingApplicationIdArgument
 			}
