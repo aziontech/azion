@@ -121,7 +121,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64VarP(&fields.EdgeApplicationId, "application-id", "a", 0, msg.ApplicationFlagId)
 	flags.StringVar(&fields.Name, "name", "", msg.DomainUpdateFlagName)
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.DomainUpdateFlagCnames)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionUpdateFlagActive)
+	flags.StringVar(&fields.Active, "active", "", msg.DomainUpdateFlagActive)
 	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "", msg.DomainUpdateFlagCnameAccessOnly)
 	flags.StringVar(&fields.InPath, "in", "", msg.DomainUpdateFlagIn)
 	flags.BoolP("help", "h", false, msg.DomainUpdateHelpFlag)
