@@ -11,8 +11,8 @@ import (
 	//msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/domains"
 	api "github.com/aziontech/azion-cli/pkg/api/domains"
-	"github.com/aziontech/azion-cli/utils"
 
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -82,10 +82,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&fields.Name, "name", "", msg.DomainsCreateFlagName)
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.DomainsCreateFlagCnames)
-	flags.BoolVarP(&fields.CnameAccessOnly, "cname-access-only", "c", false, msg.DomainsCreateFlagCnameAccessOnly)
+	flags.BoolVar(&fields.CnameAccessOnly, "cname-access-only", false, msg.DomainsCreateFlagCnameAccessOnly)
 	flags.IntVarP(&fields.DigitalCertificateId, "digital-certificate-id", "d", 0, msg.DomainsCreateFlagDigitalCertificateId)
 	flags.IntVarP(&fields.EdgeApplicationId, "edge-application-id", "e", 0, msg.DomainsCreateFlagEdgeApplicationId)
-	flags.BoolVarP(&fields.IsActive, "active", "a", false, msg.DomainsCreateFlagIsActive)
+	flags.BoolVar(&fields.IsActive, "active", false, msg.DomainsCreateFlagIsActive)
 	flags.StringVar(&fields.Path, "in", "", msg.DomainsCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.DomainsCreateHelpFlag)
 	return cmd
