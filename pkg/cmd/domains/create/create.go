@@ -8,7 +8,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 
-	//msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	msg "github.com/aziontech/azion-cli/messages/domains"
 	api "github.com/aziontech/azion-cli/pkg/api/domains"
 
