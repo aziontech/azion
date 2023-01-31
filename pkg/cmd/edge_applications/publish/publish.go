@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
@@ -427,7 +426,7 @@ func (cmd *publishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
-	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
+	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
@@ -440,7 +439,7 @@ func (cmd *publishCmd) updateDomainCdn(client *apidom.Client, ctx context.Contex
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
-	reqDom.DomainId = strconv.FormatInt(conf.Domain.Id, 10)
+	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
