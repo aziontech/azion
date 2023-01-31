@@ -25,7 +25,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--name", "one piece is the best",
-			"--edge-application-id", "1673635841",
+			"--application-id", "1673635841",
 		})
 
 		err := cmd.Execute()
