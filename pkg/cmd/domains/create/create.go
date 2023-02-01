@@ -16,7 +16,7 @@ import (
 )
 
 type Fields struct {
-	Name                 string  `json:"name"`
+	Name                 string   `json:"name"`
 	Cnames               []string `json:"cnames,omitempty"`
 	EdgeApplicationId    int      `json:"edge_application_id"`
 	DigitalCertificateId int      `json:"digital_certificate_id,omitempty"`
@@ -40,15 +40,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli domains create --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-      
-      // flags requireds
-      if !cmd.Flags().Changed("name") && !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("in") {
-				return msg.ErrorMissingApplicationIdArgument
-			}
 
-      request := new(api.CreateRequest)
+			request := new(api.CreateRequest)
 			if cmd.Flags().Changed("in") {
-        var (
+				var (
 					file *os.File
 					err  error
 				)
@@ -64,21 +59,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-      } else {
-        if fields.CnameAccessOnly {
-          if len(fields.Cnames) < 1 {
-            return msg.ErrorMissingCnames
-          }
-        }
+			} else {
+				// flags requireds
+				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("application-id") {
+					return msg.ErrorMandatoryCreateFlags
+				}
 
-			  request.SetName(fields.Name)
-			  request.SetCnames(fields.Cnames)
-			  request.SetEdgeApplicationId(int64(fields.EdgeApplicationId))
-			  if fields.DigitalCertificateId > 0 {
-          request.SetDigitalCertificateId(int64(fields.DigitalCertificateId))
-			  }
-			  request.SetIsActive(fields.IsActive) 
-      }
+				if fields.CnameAccessOnly {
+					if len(fields.Cnames) < 1 {
+						return msg.ErrorMissingCnames
+					}
+				}
+
+				request.SetCnameAccessOnly(fields.CnameAccessOnly)
+				request.SetName(fields.Name)
+				request.SetCnames(fields.Cnames)
+				request.SetEdgeApplicationId(int64(fields.EdgeApplicationId))
+				if fields.DigitalCertificateId > 0 {
+					request.SetDigitalCertificateId(int64(fields.DigitalCertificateId))
+				}
+				request.SetIsActive(fields.IsActive)
+			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), request)
@@ -95,7 +96,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.DomainsCreateFlagCnames)
 	flags.BoolVar(&fields.CnameAccessOnly, "cname-access-only", false, msg.DomainsCreateFlagCnameAccessOnly)
 	flags.IntVarP(&fields.DigitalCertificateId, "digital-certificate-id", "d", 0, msg.DomainsCreateFlagDigitalCertificateId)
-  flags.IntVarP(&fields.EdgeApplicationId, "application-id", "e", 0, msg.DomainsCreateFlagEdgeApplicationId)
+	flags.IntVarP(&fields.EdgeApplicationId, "application-id", "a", 0, msg.DomainsCreateFlagEdgeApplicationId)
 	flags.BoolVar(&fields.IsActive, "active", true, msg.DomainsCreateFlagIsActive)
 	flags.StringVar(&fields.Path, "in", "", msg.DomainsCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.DomainsCreateHelpFlag)

@@ -1,13 +1,11 @@
 {
     "results": {
-        "id": 878,
-        "name": "asdfasdf",
-        "cnames": [
-            "asdfasdf.com"
-        ],
-        "cname_access_only": true,
+        "id": 1675272891,
+        "name": "Valideishoun",
+        "cnames": [],
+        "cname_access_only": false,
         "digital_certificate_id": null,
-        "edge_application_id": 123213 ,
+        "edge_application_id": 1674767911 ,
         "is_active": true,
         "domain_name": "oda1ssad1f1.map.azionedge.net"
     },

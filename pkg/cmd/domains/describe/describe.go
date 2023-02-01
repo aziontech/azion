@@ -90,8 +90,19 @@ func format(cmd *cobra.Command, domain api.DomainResponse) ([]byte, error) {
 		}
 		return file, nil
 	} else {
-		b.Write([]byte(fmt.Sprintf("ID: %d\n", uint64(domain.GetId()))))
-		b.Write([]byte(fmt.Sprintf("Name: %s\n", domain.GetDomainName())))
+		b.Write([]byte(fmt.Sprintf("ID: %d\n", domain.GetId())))
+		b.Write([]byte(fmt.Sprintf("Name: %s\n", domain.GetName())))
+		b.Write([]byte(fmt.Sprintf("Domain: %s\n", domain.GetDomainName())))
+		b.Write([]byte(fmt.Sprintf("Cname Access Only: %t\n", domain.GetCnameAccessOnly())))
+		if domain.GetCnameAccessOnly() {
+			Cnames := domain.GetCnames()
+			b.Write([]byte("Cnames:\n"))
+			for _, cname := range Cnames {
+				b.Write([]byte(fmt.Sprintf("%s\n", cname)))
+			}
+		}
+		b.Write([]byte(fmt.Sprintf("Application ID: %d\n", domain.GetEdgeApplicationId())))
+		b.Write([]byte(fmt.Sprintf("Digital Certificate ID: %d\n", domain.GetDigitalCertificateId())))
 		return b.Bytes(), nil
 	}
 }

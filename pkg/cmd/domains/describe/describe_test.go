@@ -16,7 +16,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "domains/878"),
+			httpmock.REST("GET", "domains/1675272891"),
 			httpmock.JSONFromFile("./fixtures/domain.json"),
 		)
 
@@ -24,12 +24,12 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-d", "878"})
+		cmd.SetArgs([]string{"-d", "1675272891"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
 
-		require.Equal(t, "ID: 878\nName: oda1ssad1f1.map.azionedge.net\n", stdout.String())
+		require.Equal(t, "ID: 1675272891\nName: Valideishoun\nDomain: oda1ssad1f1.map.azionedge.net\nCname Access Only: false\nApplication ID: 1674767911\nDigital Certificate ID: 0\n", stdout.String())
 	})
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}

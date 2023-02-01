@@ -27,7 +27,12 @@ type UpdateRequest struct {
 
 type DomainResponse interface {
 	GetId() int64
+	GetName() string
 	GetDomainName() string
+	GetCnames() []string
+	GetCnameAccessOnly() bool
+	GetDigitalCertificateId() int64
+	GetEdgeApplicationId() int64
 }
 
 func NewClient(c *http.Client, url string, token string) *Client {
