@@ -56,14 +56,11 @@ func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
-
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
-
 	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return &domainsResponse.Results, nil
 }
 

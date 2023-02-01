@@ -16,6 +16,20 @@ var (
 	DomainsListLongDescription  = "Displays all your domain references to your edges"
 	DomainsListHelpFlag         = "Displays more information about the list subcommand"
 
+	//create cmd
+	DomainsCreateUsage                    = "create [flags]"
+	DomainsCreateShortDescription         = "Makes a new domain"
+	DomainsCreateLongDescription          = "Makes a Domain based on given attributes to be used in Edge Applications"
+	DomainsCreateFlagName                 = "The Domain's name"
+	DomainsCreateFlagCnames               = "List of domains names"
+	DomainsCreateFlagCnameAccessOnly      = "Whether the domain is accessed only through the CNAMES or not"
+	DomainsCreateFlagDigitalCertificateId = "The digital certificate's unique identifier. It can be an integer or null."
+	DomainsCreateFlagEdgeApplicationId    = "The Edge Application's unique identifier"
+	DomainsCreateFlagIsActive             = "Whether the Domain is active or not"
+	DomainsCreateFlagIn                   = " Path to a JSON file containing the attributes that will be updated; you can use - for reading from stdin"
+	DomainsCreateOutputSuccess            = "Created domain with ID %d\n"
+	DomainsCreateHelpFlag                 = "Displays more information about the create subcommand"
+
 	//describe cmd
 	DomainsDescribeUsage            = "describe --domain-id <domain_id> [flags]"
 	DomainsDescribeShortDescription = "Returns the domain data"
