@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	ErrorMandatoryCreateFlags    = errors.New("A mandatory flag is missing. You must provide --name --application-id flags when the --in flag is not provided. Run the command 'azion cli edge_functions create --help' to display more information and try again.")
+	ErrorActiveFlag              = errors.New("Invalid --active flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_functions <subcommand> --help' to display more information and try again.")
 	ErrorMissingDomainIdArgument = errors.New("The flag '--domain-id' must be informed. Please, inform the correct id and try again or run the command ‘azioncli domains <subcommand> --help’ to display more information and try again. ")
 	ErrorCreateDomain            = errors.New("Failed to create the Domain: [API Response Body]. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorGetDomains              = errors.New("Failed to list your domains. Check your settings and try again. If the error persists, contact Azion support.")
