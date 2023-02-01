@@ -16,13 +16,13 @@ import (
 )
 
 type Fields struct {
-	Name                 string   `json:"name"`
-	Cnames               []string `json:"cnames,omitempty"`
-	EdgeApplicationId    int      `json:"edge_application_id"`
-	DigitalCertificateId int      `json:"digital_certificate_id,omitempty"`
-	CnameAccessOnly      bool     `json:"cname_access-only,omitempty"`
-	IsActive             bool     `json:"is_active,omitempty"`
-	Path                 string   `json:"path,omitempty"`
+	Name                 string
+	Cnames               []string
+	EdgeApplicationId    int
+	DigitalCertificateId int
+	CnameAccessOnly      bool
+	IsActive             bool
+	Path                 string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
