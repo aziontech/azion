@@ -3,9 +3,11 @@ package domains
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 )
@@ -20,12 +22,17 @@ type CreateRequest struct {
 
 type UpdateRequest struct {
 	sdk.UpdateDomainRequest
-	DomainId string
+	Id int64
 }
 
 type DomainResponse interface {
 	GetId() int64
+	GetName() string
 	GetDomainName() string
+	GetCnames() []string
+	GetCnameAccessOnly() bool
+	GetDigitalCertificateId() int64
+	GetEdgeApplicationId() int64
 }
 
 func NewClient(c *http.Client, url string, token string) *Client {
@@ -44,11 +51,29 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
+func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
+	req := c.apiClient.DomainsApi.GetDomain(ctx, id)
+	res, httpResp, err := req.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &res.Results, nil
+}
+
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
-
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
-
 	domainsResponse, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &domainsResponse.Results, nil
+}
+
+func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
+	str := strconv.FormatInt(req.Id, 10)
+	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
+	domainsResponse, httpResp, err := request.Execute()
+
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -56,14 +81,25 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 	return &domainsResponse.Results, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.DomainResponseWithResults, error) {
+	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).Execute()
 
-	request := c.apiClient.DomainsApi.UpdateDomain(ctx, req.DomainId).UpdateDomainRequest(req.UpdateDomainRequest)
-
-	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return &domainsResponse.Results, nil
+	return resp, nil
+}
+
+func (c *Client) Delete(ctx context.Context, id int64) error {
+	str := strconv.FormatInt(id, 10)
+	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
 }

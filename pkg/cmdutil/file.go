@@ -31,6 +31,5 @@ func UnmarshallJsonFromReader(file io.Reader, object interface{}) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

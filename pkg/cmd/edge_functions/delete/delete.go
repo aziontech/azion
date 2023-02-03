@@ -24,7 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				return msg.ErrorMissingFunctionIdArgument
+				return msg.ErrorMissingFunctionIdArgumentDelete
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
