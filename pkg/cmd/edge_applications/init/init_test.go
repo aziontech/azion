@@ -669,9 +669,11 @@ func Test_SortTag(t *testing.T) {
 		}
   
 		for _, ref := range refs {
-      f(ref)
+      if err := f(ref); err != nil {
+        panic(err)
+      }
 		}
-	}).Return(nil)
+  }).Return(nil)
 
 	// call func sortTag with the mock
   result, err := sortTag(mockIter, "2", "main")
