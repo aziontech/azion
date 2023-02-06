@@ -206,7 +206,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
   return resp, nil
 }
 
-func (c *Client) ListOrigins(ctx context.Context, edgeApplicationID int64, opts *contracts.ListOptions) (sdk.OriginsResponse, error) {
+func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (sdk.OriginsResponse, error) {
   req := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID)
   resp, httpResp, err := req.Execute()
   if err != nil {
