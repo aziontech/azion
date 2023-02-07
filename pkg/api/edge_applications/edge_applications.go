@@ -207,12 +207,12 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
   return resp, nil
 }
 
-func (c *Client) GetOrigin(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
+func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
   resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
   if err != nil {
     return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
   }
-  if len(resp.Results) == 0 {
+  if len(resp.Results) > 0 {
     for _, result := range resp.Results {
       if result.OriginId == originID {
         return result, nil
