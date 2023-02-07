@@ -2,6 +2,7 @@ package edgeapplications
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -206,9 +207,23 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
   return resp, nil
 }
 
+func (c *Client) GetOrigin(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
+  resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+  if err != nil {
+    return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+  }
+  if len(resp.Results) == 0 {
+    for _, result := range resp.Results {
+      if result.OriginId == originID {
+        return result, nil
+      }
+    }
+  }
+  return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
+}
+
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (sdk.OriginsResponse, error) {
-  req := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID)
-  resp, httpResp, err := req.Execute()
+  resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
   if err != nil {
     return sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
   }
