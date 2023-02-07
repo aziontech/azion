@@ -656,7 +656,6 @@ func (m *mockReferenceIter) ForEach(f func(*plumbing.Reference) error) error {
 }
 
 func Test_SortTag(t *testing.T) {
-  // var mockIter = new(ReferenceIter)
 	mockIter := new(mockReferenceIter)
 
 	// defines the mock action
