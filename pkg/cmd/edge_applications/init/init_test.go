@@ -14,9 +14,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/storer"
-	"github.com/go-git/go-git/v5/storage/memory"
+
+  "github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/require"
+  "github.com/stretchr/testify/mock"
 )
 
 func TestCobraCmd(t *testing.T) {
@@ -597,8 +598,8 @@ func Test_formatTag(t *testing.T) {
 				t.Errorf("formatTag() = %v, want %v", got, tt.want)
 			}
 		})
+  }
 	}
-}
 
 func Test_checkBranch(t *testing.T) {
 	type args struct {
@@ -641,45 +642,42 @@ func Test_checkBranch(t *testing.T) {
 				t.Errorf("checkBranch() = %v, want %v", got, tt.want)
 			}
 		})
-	}
+  }
 }
 
-func Test_sortTag(t *testing.T) {
-	r, _ := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{URL: "https://github.com/MaxwelMazur/action-testing.git"})
-	tags, _ := r.Tags()
 
-	type args struct {
-		tags   storer.ReferenceIter
-		major  string
-		branch string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantTag string
-		wantErr bool
-	}{
-		{
-			name: "branch main with major 0",
-			args: args{
-				tags:   tags,
-				major:  "1",
-				branch: "main",
-			},
-			wantTag: "refs/tags/v1.0.0",
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotTag, err := sortTag(tt.args.tags, tt.args.major, tt.args.branch)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("sortTag() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if gotTag != tt.wantTag {
-				t.Errorf("sortTag() gotTag = %v, want %v", gotTag, tt.wantTag)
-			}
-		})
-	}
+type mockReferenceIter struct {
+	mock.Mock
+}
+
+func (m *mockReferenceIter) ForEach(f func(*plumbing.Reference) error) error {
+	args := m.Called(f)
+	return args.Error(0)
+}
+
+func Test_SortTag(t *testing.T) {
+	mockIter := new(mockReferenceIter)
+
+	// defines the mock action
+	mockIter.On("ForEach", mock.Anything).Run(func(args mock.Arguments) {
+    f := args.Get(0).(func(*plumbing.Reference) error)
+		refs := []*plumbing.Reference{
+			plumbing.NewReferenceFromStrings("refs/tags/v2.0.0", "beefdead"),
+      plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "deadbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v3.0.0", "deafbeef"),
+		}
+  
+		for _, ref := range refs {
+      if err := f(ref); err != nil {
+        panic(err)
+      }
+		}
+  }).Return(nil)
+
+	// call func sortTag with the mock
+  result, err := sortTag(mockIter, "2", "main")
+	require.NoError(t, err)
+
+	expected := "refs/tags/v2.0.0"
+	require.Equal(t, expected, result)
 }
