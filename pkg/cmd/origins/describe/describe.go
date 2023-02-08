@@ -10,7 +10,7 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
+	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/origins"
 
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -85,7 +85,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, fields map[string]interface{}) ([]byte, error) {
+type Fields []struct {
+  key   string 
+  value interface{}
+}
+
+  func format(cmd *cobra.Command, fields map[string]interface{}) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err
@@ -95,7 +100,7 @@ func format(cmd *cobra.Command, fields map[string]interface{}) ([]byte, error) {
 		return json.MarshalIndent(fields, "", " ")
 	}
 
-	tbl := tablecli.New("", "")
+	tbl := table.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
 
   for _, p := range ResultsSetFieldsOutput(fields) {

@@ -188,6 +188,8 @@ github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ
 github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
 github.com/MaxwelMazur/tablecli v0.0.0-20230111205821-634576290228 h1:0v/h/69n72chjEeAWInSZ+0+WVGff/e/HK71DxcZPOo=
 github.com/MaxwelMazur/tablecli v0.0.0-20230111205821-634576290228/go.mod h1:XTbnIbjcCDbZenA2rqSIQK9aa4MSL//Wt/b04tgdCO4=
+github.com/MaxwelMazur/tablecli v0.0.0-20230208120512-8f5fe30a6a22 h1:TOX7iMojtqZXeC9RCZK54fQmkNJrcA2dq24wYASPnkw=
+github.com/MaxwelMazur/tablecli v0.0.0-20230208120512-8f5fe30a6a22/go.mod h1:eepQZpVhQN9tZIbJ+/nLb+Gi/vUAjzQsB0eLhfnB5gk=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/cFDk=
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
