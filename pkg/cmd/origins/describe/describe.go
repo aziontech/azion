@@ -10,13 +10,14 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
+	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/origins"
 
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
@@ -50,23 +51,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorGetOrigin
 			}
 
-      // var mapsStr map[string]interface{}
-      // bOrigin, err := json.Marshal(origin)
-      // json.Unmarshal(bOrigin, &mapsStr)
-
-			formattedFuction, err := Describe(cmd, origin, resultsSetFieldsOutput)
+			out := f.IOStreams.Out  
+			formattedFuction, err := format(cmd, origin)
 			if err != nil {
 				return utils.ErrorFormatOut
 			}
 
 			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, f.IOStreams.Out)
+				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(f.IOStreams.Out, msg.OriginsFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, msg.OriginsFileWritten, filepath.Clean(opts.OutPath))
 			} else {
-				_, err := f.IOStreams.Out.Write(formattedFuction[:])
+				_, err := out.Write(formattedFuction[:])
 				if err != nil {
 					return err
 				}
@@ -85,63 +83,37 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-type Fields struct {
-  key   string 
-  value interface{}
-}
-
-func Describe(cmd *cobra.Command, str interface{}, funcFields func(fields map[string]interface{}) []Fields ) ([]byte, error) {
-  var mapsStr map[string]interface{}
-  byteStr, err := json.Marshal(str)
-  if err != nil {
-    return nil, err
-  }
-
-  err = json.Unmarshal(byteStr, &mapsStr)
-  if err != nil {
-    return nil, err
-  }
-
-
+func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err
 	}
 
 	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(mapsStr, "", " ")
+		return json.MarshalIndent(origin, "", " ")
 	}
 
-	tbl := table.New("", "")
+	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
+	tbl.AddRow("Origin ID: ", origin.OriginId)
+	tbl.AddRow("Name: ", origin.Name)
+	tbl.AddRow("Origin Type: ", origin.OriginType)
+	tbl.AddRow("Addresses: ", origin.Addresses)
+	tbl.AddRow("Origin Protocol Policy: ", origin.OriginProtocolPolicy)
+	tbl.AddRow("Is Origin Redirection Enable: ", origin.IsOriginRedirectionEnabled)
+	tbl.AddRow("Host Header: ", origin.HostHeader)
+	tbl.AddRow("Method: ", origin.Method)
+	tbl.AddRow("Origin Path: ", origin.OriginPath)
+	tbl.AddRow("Connection Timeout: ", origin.ConnectionTimeout)
+	tbl.AddRow("Timeout Between Bytes: ", origin.TimeoutBetweenBytes)
+	tbl.AddRow("Hmac Authentication: ", origin.HmacAuthentication)
+	tbl.AddRow("Hmac Region Name: ", origin.HmacRegionName)
+	tbl.AddRow("Hmac Secret Key: ", origin.HmacSecretKey)
+	tbl.AddRow("Hmac Access Key: ", origin.HmacAccessKey)
+  tbl.Print()
 
-  for _, p := range funcFields(mapsStr) {
-  	tbl.AddRow(p.key, p.value)
-  }
-
-	tbl.Print()
 	var b bytes.Buffer
 	b.WriteTo(tbl.GetWriter())
 	return b.Bytes(), nil
-}
-
-func resultsSetFieldsOutput(fields map[string]interface{}) []Fields {
-  return []Fields{
-    {"Origin ID: ", fields["origin_id"]},
-    {"Name: ", fields["name"]},
-    {"Origin Type: ", fields["origin_type"]},
-    {"Addresses: ", fields["addresses"]},
-    {"Origin Protocol Policy: ", fields["origin_protocol_policy"]},
-    {"Is Origin Redirection Enable: ", fields["is_origin_redirection_enabled"]},
-    {"Host Header: ", fields["host_header"]},
-    {"Method: ", fields["method"]},
-    {"Origin Path: ", fields["origin_path"]},
-    {"Connection Timeout: ", fields["connection_timeout"]},
-    {"Timeout Between Bytes: ", fields["timeout_between_bytes"]},
-    {"Hmac Authentication: ", fields["hmac_authentication"]},
-    {"Hmac Region Name: ", fields["hmac_region_name"]},
-    {"Hmac Secret Key: ", fields["hmac_secret_key"]},
-    {"Hmac Access Key: ", fields["hmac_access_key"]},
-  }
 }
 
