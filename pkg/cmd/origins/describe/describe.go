@@ -1,7 +1,7 @@
 package describe
 
 import (
-	"bytes"
+	// "bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -110,10 +110,6 @@ func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error
 	tbl.AddRow("Hmac Region Name: ", origin.HmacRegionName)
 	tbl.AddRow("Hmac Secret Key: ", origin.HmacSecretKey)
 	tbl.AddRow("Hmac Access Key: ", origin.HmacAccessKey)
-  tbl.Print()
-
-	var b bytes.Buffer
-	b.WriteTo(tbl.GetWriter())
-	return b.Bytes(), nil
+	return tbl.GetByteFormat(), nil
 }
 

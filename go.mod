@@ -3,7 +3,7 @@ module github.com/aziontech/azion-cli
 go 1.17
 
 require (
-	github.com/MaxwelMazur/tablecli v0.0.0-20230208120512-8f5fe30a6a22
+	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
 	github.com/aziontech/azionapi-go-sdk v0.20.0
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
