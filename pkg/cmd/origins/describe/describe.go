@@ -50,11 +50,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorGetOrigin
 			}
 
-      var fields map[string]interface{}
-      bOrigin, _ := json.Marshal(origin)
-      json.Unmarshal(bOrigin, &fields)
+      // var mapsStr map[string]interface{}
+      // bOrigin, err := json.Marshal(origin)
+      // json.Unmarshal(bOrigin, &mapsStr)
 
-			formattedFuction, err := format(cmd, fields)
+			formattedFuction, err := Describe(cmd, origin, resultsSetFieldsOutput)
 			if err != nil {
 				return utils.ErrorFormatOut
 			}
@@ -85,25 +85,37 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-type Fields []struct {
+type Fields struct {
   key   string 
   value interface{}
 }
 
-  func format(cmd *cobra.Command, fields map[string]interface{}) ([]byte, error) {
+func Describe(cmd *cobra.Command, str interface{}, funcFields func(fields map[string]interface{}) []Fields ) ([]byte, error) {
+  var mapsStr map[string]interface{}
+  byteStr, err := json.Marshal(str)
+  if err != nil {
+    return nil, err
+  }
+
+  err = json.Unmarshal(byteStr, &mapsStr)
+  if err != nil {
+    return nil, err
+  }
+
+
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err
 	}
 
 	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(fields, "", " ")
+		return json.MarshalIndent(mapsStr, "", " ")
 	}
 
 	tbl := table.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
 
-  for _, p := range ResultsSetFieldsOutput(fields) {
+  for _, p := range funcFields(mapsStr) {
   	tbl.AddRow(p.key, p.value)
   }
 
@@ -113,11 +125,8 @@ type Fields []struct {
 	return b.Bytes(), nil
 }
 
-func ResultsSetFieldsOutput(fields map[string]interface{}) []struct{key string; value interface{}} {
-  return []struct{ 
-    key   string
-  	value interface{}
-  }{
+func resultsSetFieldsOutput(fields map[string]interface{}) []Fields {
+  return []Fields{
     {"Origin ID: ", fields["origin_id"]},
     {"Name: ", fields["name"]},
     {"Origin Type: ", fields["origin_type"]},
