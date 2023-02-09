@@ -1,7 +1,6 @@
 package describe
 
 import (
-	// "bytes"
 	"context"
 	"encoding/json"
 	"fmt"
