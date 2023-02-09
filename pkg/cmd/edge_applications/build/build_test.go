@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var versionId string = `{"version_id":"v20230208T212918"}`
+
 func TestBuild(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(nil)

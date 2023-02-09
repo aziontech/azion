@@ -142,6 +142,8 @@ var successResponseDom string = `
   }
   `
 
+var versionId string = `{"version_id":"v20230208T212918"}`
+
 func TestEdgeApplicationsCmd(t *testing.T) {
 	t.Run("nextjs testing", func(t *testing.T) {
 		mock := &httpmock.Registry{}
@@ -242,6 +244,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		buildCommand.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Build completed", 0, nil
+		}
+
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
 		}
 
 		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
@@ -404,6 +410,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		buildCommand.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Build completed", 0, nil
+		}
+
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
 		}
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
