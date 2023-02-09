@@ -8,7 +8,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/domains"
+	msg "github.com/aziontech/azion-cli/messages/origins"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -36,9 +36,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.DomainsCreateUsage,
-		Short:         msg.DomainsCreateShortDescription,
-		Long:          msg.DomainsCreateLongDescription,
+		Use:           msg.OriginsCreateUsage,
+		Short:         msg.OriginsCreateShortDescription,
+		Long:          msg.OriginsCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -62,7 +62,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					}
 				}
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
-        fmt.Println("err ", err)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
@@ -87,7 +86,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         if cmd.Flags().Changed("hmac-authentication") { 
 					hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorActiveFlag, fields.HmacAuthentication)
+						return fmt.Errorf("%w: %q", msg.ErrorHmacAuthenticationFlag, fields.HmacAuthentication)
 					}
           request.SetHmacAuthentication(hmacAuth)
         }
@@ -105,27 +104,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.CreateOrigins(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
+				return fmt.Errorf(msg.ErrorCreateOrigin.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.DomainsCreateOutputSuccess, response.GetOriginId())
+			fmt.Fprintf(f.IOStreams.Out, msg.OriginsCreateOutputSuccess, response.GetOriginId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.DomainsCreateFlagIsActive)
-	flags.StringVar(&fields.Name, "name", "", msg.DomainsCreateFlagName)
-	flags.StringVar(&fields.OriginType, "origin-type", "", msg.DomainsCreateFlagName)
-	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, msg.DomainsCreateFlagCnames)
-	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.DomainsCreateFlagCnameAccessOnly)
-	flags.StringVar(&fields.HostHeader, "host-header", "", msg.DomainsCreateFlagDigitalCertificateId)
-	flags.StringVar(&fields.OriginPath, "origin-path", "", msg.DomainsCreateFlagEdgeApplicationId)
-	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", msg.DomainsCreateFlagIsActive)
-  flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.DomainsCreateFlagIsActive)
-	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.DomainsCreateFlagIsActive)
-	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.DomainsCreateFlagIsActive)
-	flags.StringVar(&fields.Path, "in", "", msg.DomainsCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.DomainsCreateHelpFlag)
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.OriginsCreateFlagEdgeApplicationId)
+	flags.StringVar(&fields.Name, "name", "", msg.OriginsCreateFlagName)
+	flags.StringVar(&fields.OriginType, "origin-type", "", msg.OriginsCreateFlagOriginType)
+	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, msg.OriginsCreateFlagAddresses)
+	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.OriginsCreateFlagOriginProtocolPolicy)
+	flags.StringVar(&fields.HostHeader, "host-header", "", msg.OriginsCreateFlagHostHeader)
+	flags.StringVar(&fields.OriginPath, "origin-path", "", msg.OriginsCreateFlagOriginPath)
+	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", msg.OriginsCreateFlagHmacAuthentication)
+  flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.OriginsCreateFlagHmacRegionName)
+	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.OriginsCreateFlagHmacAccessKey)
+	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.OriginsCreateFlagHmacSecretKey)
+	flags.StringVar(&fields.Path, "in", "", msg.OriginsCreateFlagIn)
+	flags.BoolP("help", "h", false, msg.OriginsCreateHelpFlag)
 	return cmd
 }
 
