@@ -142,8 +142,6 @@ var successResponseDom string = `
   }
   `
 
-var versionId string = `{"version_id":"v20230208T212918"}`
-
 func TestEdgeApplicationsCmd(t *testing.T) {
 	t.Run("nextjs testing", func(t *testing.T) {
 		mock := &httpmock.Registry{}
