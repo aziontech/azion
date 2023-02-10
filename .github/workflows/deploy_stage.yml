@@ -38,21 +38,21 @@ jobs:
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make build ENVFILE=./env/stage
         
       - name: test env
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: cat ./env/stage 
 
       - name: Cross-build
         env: 
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
-          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI
