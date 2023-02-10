@@ -15,7 +15,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/storage_api"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
@@ -312,28 +311,12 @@ func writeWebdevEnvFile(cmd *BuildCmd, path string, envs []string) error {
 
 func GetVersionID(cmd *BuildCmd, appID string) (string, error) {
 
-	fmt.Println("STAGE URL")
-	fmt.Println(cmd.f.Config.GetString("storage_url"))
-
-	fmt.Println("API URL")
-	fmt.Println(cmd.f.Config.GetString("api_url"))
-
-	fmt.Println("STAGE URL - CONSTANT")
-	fmt.Println(constants.StorageApiURL)
-
-	fmt.Println("API URL - CONSTANT")
-	fmt.Println(constants.ApiURL)
-
-	fmt.Println("SSO - CONSTANT")
-	fmt.Println(constants.AuthURL)
-
 	client := api.NewClient(cmd.f.HttpClient, cmd.f.Config.GetString("storage_url"), cmd.f.Config.GetString("token"))
 
 	ctx := context.Background()
 
 	verId, err := client.CreateVersionId(ctx, appID)
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", fmt.Errorf(msg.ErrorGetVersionId.Error(), err)
 	}
 

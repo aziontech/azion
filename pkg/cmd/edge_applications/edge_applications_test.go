@@ -1,7 +1,6 @@
 package edge_applications
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"testing"
@@ -299,7 +298,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 
@@ -465,7 +463,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 

@@ -15,9 +15,9 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 
-  "github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-  "github.com/stretchr/testify/mock"
 )
 
 func TestCobraCmd(t *testing.T) {
@@ -159,7 +159,6 @@ func TestCobraCmd(t *testing.T) {
 		f.IOStreams.In = io.NopCloser(in)
 
 		err := cmd.Execute()
-		// fmt.Println(err.Error())
 
 		require.NoError(t, err)
 		require.Contains(t, stdout.String(), `Template successfully fetched and configured`)
@@ -598,8 +597,8 @@ func Test_formatTag(t *testing.T) {
 				t.Errorf("formatTag() = %v, want %v", got, tt.want)
 			}
 		})
-  }
 	}
+}
 
 func Test_checkBranch(t *testing.T) {
 	type args struct {
@@ -642,9 +641,8 @@ func Test_checkBranch(t *testing.T) {
 				t.Errorf("checkBranch() = %v, want %v", got, tt.want)
 			}
 		})
-  }
+	}
 }
-
 
 type mockReferenceIter struct {
 	mock.Mock
@@ -660,22 +658,22 @@ func Test_SortTag(t *testing.T) {
 
 	// defines the mock action
 	mockIter.On("ForEach", mock.Anything).Run(func(args mock.Arguments) {
-    f := args.Get(0).(func(*plumbing.Reference) error)
+		f := args.Get(0).(func(*plumbing.Reference) error)
 		refs := []*plumbing.Reference{
 			plumbing.NewReferenceFromStrings("refs/tags/v2.0.0", "beefdead"),
-      plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "deadbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "deadbeef"),
 			plumbing.NewReferenceFromStrings("refs/tags/v3.0.0", "deafbeef"),
 		}
-  
+
 		for _, ref := range refs {
-      if err := f(ref); err != nil {
-        panic(err)
-      }
+			if err := f(ref); err != nil {
+				panic(err)
+			}
 		}
-  }).Return(nil)
+	}).Return(nil)
 
 	// call func sortTag with the mock
-  result, err := sortTag(mockIter, "2", "main")
+	result, err := sortTag(mockIter, "2", "main")
 	require.NoError(t, err)
 
 	expected := "refs/tags/v2.0.0"
