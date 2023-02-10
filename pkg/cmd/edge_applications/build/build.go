@@ -141,9 +141,13 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	switch typeLang.String() {
 	case "nextjs", "flareact":
 
-		verId, err := cmd.GetVerId(cmd, applicationId.String())
-		if err != nil {
-			return err
+		var verId string = ""
+
+		if applicationId.String() != "" && applicationId.String() != "0" {
+			verId, err = cmd.GetVerId(cmd, applicationId.String())
+			if err != nil {
+				return err
+			}
 		}
 
 		jsonReplaceFunc, err := sjson.Set(string(file), "version-id", verId)
