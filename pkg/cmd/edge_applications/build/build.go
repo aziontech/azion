@@ -323,6 +323,7 @@ func GetVersionID(cmd *BuildCmd, appID string) (string, error) {
 
 	verId, err := client.CreateVersionId(ctx, appID)
 	if err != nil {
+		fmt.Println(err)
 		return "", fmt.Errorf(msg.ErrorGetVersionId.Error(), err)
 	}
 
