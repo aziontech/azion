@@ -314,6 +314,9 @@ func GetVersionID(cmd *BuildCmd, appID string) (string, error) {
 	fmt.Println("STAGE URL")
 	fmt.Println(cmd.f.Config.GetString("storage_url"))
 
+	fmt.Println("API URL")
+	fmt.Println(cmd.f.Config.GetString("api_url"))
+
 	client := api.NewClient(cmd.f.HttpClient, cmd.f.Config.GetString("storage_url"), cmd.f.Config.GetString("token"))
 
 	ctx := context.Background()
