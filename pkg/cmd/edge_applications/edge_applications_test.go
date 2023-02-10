@@ -244,6 +244,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 			return "Build completed", 0, nil
 		}
 
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
+		}
+
 		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
 			return nil, nil
 		}
@@ -404,6 +408,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		buildCommand.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Build completed", 0, nil
+		}
+
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
 		}
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
