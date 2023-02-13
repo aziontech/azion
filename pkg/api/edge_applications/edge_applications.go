@@ -249,6 +249,7 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	}
 	return &resp.Results, nil
 }
+
 func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPut(ctx, edgeApplicationID, originKey).UpdateOriginsRequest(req.UpdateOriginsRequest).Execute()

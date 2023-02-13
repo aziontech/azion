@@ -18,7 +18,7 @@ import (
 )
 
 type Fields struct {
-  OriginID             string
+  OriginKey            string
 	ApplicationID        int64
 	Name                 string 
 	OriginType           string 
@@ -43,9 +43,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli origins update --application-id 1673635839 --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
-        $ azioncli origins update --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-        $ azioncli origins update --application-id 1673635839 --in "update.json"
+        $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
+        $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+        $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.UpdateOriginsRequest{}
@@ -67,18 +67,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-id") {
+
+				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-key") ||
+          !cmd.Flags().Changed("name") ||  !cmd.Flags().Changed("addresses") || !cmd.Flags().Changed("host-header") {  // flags requireds
 					return msg.ErrorMandatoryUpdateFlags
 				}
-        if cmd.Flags().Changed("name") {
-          request.SetName(fields.Name)
-        }
-        if cmd.Flags().Changed("addresses") {
-          request.SetAddresses(prepareAddresses(fields.Addresses))
-        }
-        if cmd.Flags().Changed("host-header") {
-          request.SetHostHeader(fields.HostHeader)
-        }
+
+        request.SetName(fields.Name)
+        request.SetAddresses(prepareAddresses(fields.Addresses))
+        request.SetHostHeader(fields.HostHeader)
+       
         if cmd.Flags().Changed("origin-type") {
           request.SetOriginType(fields.OriginType)
         }
@@ -107,17 +105,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			response, err := client.UpdateOrigins(context.Background(), fields.ApplicationID, fields.OriginID, &request)
+			response, err := client.UpdateOrigins(context.Background(), fields.ApplicationID, fields.OriginKey, &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.OriginsCreateOutputSuccess, response.GetOriginId())
+			fmt.Fprintf(f.IOStreams.Out, msg.OriginsUpdateOutputSuccess, response.GetOriginId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&fields.OriginID, "origin-id", "o", "", msg.OriginsUpdateFlagOriginID)
+	flags.StringVarP(&fields.OriginKey, "origin-key", "o", "", msg.OriginsUpdateFlagOriginKey)
 	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.OriginsCreateFlagEdgeApplicationId)
 	flags.StringVar(&fields.Name, "name", "", msg.OriginsCreateFlagName)
 	flags.StringVar(&fields.OriginType, "origin-type", "", msg.OriginsCreateFlagOriginType)

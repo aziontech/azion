@@ -47,7 +47,7 @@ var (
 	OriginsUpdateUsage                    = "update [flags]"
 	OriginsUpdateShortDescription         = "Modifies an Origin"
 	OriginsUpdateLongDescription          = "Modifies an Origin based on its ID to update its name, activity status, and other attributes"
-  OriginsUpdateFlagOriginID             = "The Origins unique identifier"
+  OriginsUpdateFlagOriginKey             = "The Origins unique identifier"
 	OriginsUpdateFlagEdgeApplicationId    = "The Edge Application's unique identifier"
 	OriginsUpdateFlagName                 = "The Origin name"
   OriginsUpdateFlagOriginType           = "Origin Type is a field used to identify the source of a record. It is typically used to differentiate between records that were created manually or automatically. For example, a record may have an Origin Type of 'Manual' if it was created by a user, or 'Automatic' if it was created by a system. Origin Type can also be used to differentiate between records that were imported from an external source, such as a CSV file, or created within the system."
