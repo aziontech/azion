@@ -1,0 +1,28 @@
+{
+    "results": {
+        "origin_id": 92760,
+        "origin_key": "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
+        "name": "onepiece",
+        "origin_type": "single_origin",
+        "addresses": [
+            {
+                "address": "asdfsd.cvdf",
+                "weight": null,
+                "server_role": "primary",
+                "is_active": true
+            }
+        ],
+        "origin_protocol_policy": "preserve",
+        "is_origin_redirection_enabled": false,
+        "host_header": "asdfsdfsd.cvdf",
+        "method": "",
+        "origin_path": "",
+        "connection_timeout": 60,
+        "timeout_between_bytes": 120,
+        "hmac_authentication": false,
+        "hmac_region_name": "",
+        "hmac_access_key": "",
+        "hmac_secret_key": ""
+    },
+    "schema_version": 3
+}

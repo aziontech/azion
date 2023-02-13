@@ -109,7 +109,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.OriginsUpdateOutputSuccess, response.GetOriginId())
+			fmt.Fprintf(f.IOStreams.Out, msg.OriginsUpdateOutputSuccess, response.GetOriginKey())
 			return nil
 		},
 	}
