@@ -60,7 +60,7 @@ var (
   OriginsUpdateFlagHmacAccessKey        = "HmacAccessKey is a type of authentication key used to access an API or other secure system. It is a combination of a secret key and a cryptographic hash algorithm, such as SHA-256, to generate a unique signature for each request. The signature is then used to verify the authenticity of the request and ensure that it has not been tampered with. HmacAccessKey is often used in combination with other authentication methods, such as OAuth or API keys, to provide an additional layer of security."
   OriginsUpdateFlagHmacSecretKey        = "HmacSecretKey is a type of cryptographic key used in the HMAC (Hash-based Message Authentication Code) algorithm. It is a secret key that is used to generate a cryptographic hash of a message, which is then used to verify the authenticity and integrity of the message. The key is typically a string of random characters that is known only to the sender and receiver of the message."
 	OriginsUpdateFlagIn                   = "Path to a JSON file containing the attributes that will be updated; you can use - for reading from stdin"
-	OriginsUpdateOutputSuccess            = "Update origin with ID %d\n"
+	OriginsUpdateOutputSuccess            = "Update origin with ID %s\n"
 	OriginsUpdateHelpFlag                 = "Displays more information about the create subcommand"
 
   // [ general ]

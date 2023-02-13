@@ -24,7 +24,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--name", "one piece is the best",
+			"--name", "onepieceisthebest",
 			"--addresses", "asdfsd.cvdf",
 			"--host-header", "asdfsdfsd.cvdf",
 		})
