@@ -4,7 +4,7 @@ var (
 	// [ origins ]
 	OriginsUsage            = "origins"
 	OriginsShortDescription = "Origins is the original source of data."
-	OriginsLongDescription  = "Origins is the original source of data in edge platforms, where data is fetched when cache is not available."
+	OriginsLongDescription  = "Origins is the original source of data on edge platforms, where data is fetched when cache is not available."
 	OriginsFlagHelp         = "Displays more information about the origins command"
 
 	// [ list ]
