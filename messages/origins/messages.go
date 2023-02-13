@@ -43,6 +43,15 @@ var (
 	OriginsCreateOutputSuccess            = "Created origin with ID %d\n"
 	OriginsCreateHelpFlag                 = "Displays more information about the create subcommand"
 
+	// [ delete ] 
+	OriginsDeleteUsage                    = "delete [flags]"
+	OriginsDeleteShortDescription         = "Removes an Origin"
+	OriginsDeleteLongDescription          = "Removes an Origin from the Edge Applications library based on its given ID"
+  OriginsDeleteOutputSuccess            = "Origin %s was successfully deleted\n"
+  OriginsDeleteFlagApplicationID        = "The Edge Application's unique identifier"
+  OriginsDeleteFlagOriginKey            = "The Origin key unique identifier"
+  OriginsDeleteHelpFlag                 = "Displays more information about the delete subcommand"
+
   // [ general ]
 	OriginsFileWritten                    = "File successfully written to: %s\n"
 )
