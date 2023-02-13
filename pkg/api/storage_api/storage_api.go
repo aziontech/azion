@@ -2,7 +2,6 @@ package storageapi
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -44,8 +43,6 @@ func (c *Client) CreateVersionId(ctx context.Context, id string) (VersionIdRespo
 
 	res, httpResp, err := req.Execute()
 	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println(httpResp.Body)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
