@@ -1,4 +1,5 @@
 API_URL=https://${AZION_API}
 AUTH_URL=https://${AZION_SSO}/api/user/me
+STORAGE_URL=https://${STORAGE_API}
 TEMPLATE_BRANCH=dev
 TEMPLATE_MAJOR=0
