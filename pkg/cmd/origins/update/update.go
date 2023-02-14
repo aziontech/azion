@@ -1,10 +1,10 @@
 package update
 
 import (
-  "strconv"
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
@@ -13,23 +13,23 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
-  sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
 type Fields struct {
-  OriginKey            string
+	OriginKey            string
 	ApplicationID        int64
-	Name                 string 
-	OriginType           string 
+	Name                 string
+	OriginType           string
 	Addresses            []string
-	OriginProtocolPolicy string 
-	HostHeader           string 
-	OriginPath           string 
+	OriginProtocolPolicy string
+	HostHeader           string
+	OriginPath           string
 	HmacAuthentication   string
-	HmacRegionName       string 
-	HmacAccessKey        string 
-	HmacSecretKey        string 
+	HmacRegionName       string
+	HmacAccessKey        string
+	HmacSecretKey        string
 	Path                 string
 }
 
@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
         $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-        $ azioncli origins update --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --in "update.json"
+        $ azioncli origins update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.UpdateOriginsRequest{}
@@ -67,41 +67,43 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-
-				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-key") ||
-          !cmd.Flags().Changed("name") ||  !cmd.Flags().Changed("addresses") || !cmd.Flags().Changed("host-header") {  // flags requireds
+				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-key") {
 					return msg.ErrorMandatoryUpdateFlags
 				}
-
-        request.SetName(fields.Name)
-        request.SetAddresses(prepareAddresses(fields.Addresses))
-        request.SetHostHeader(fields.HostHeader)
-       
-        if cmd.Flags().Changed("origin-type") {
-          request.SetOriginType(fields.OriginType)
-        }
-        if cmd.Flags().Changed("origin-protocol-policy") {
-          request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
-        }
-        if cmd.Flags().Changed("origin-path") {
-          request.SetOriginPath(fields.OriginPath)
-        }
-        if cmd.Flags().Changed("hmac-authentication") { 
+				if cmd.Flags().Changed("name") {
+					request.SetName(fields.Name)
+				}
+				if cmd.Flags().Changed("addresses") {
+					request.SetAddresses(prepareAddresses(fields.Addresses))
+				}
+				if cmd.Flags().Changed("host-header") {
+					request.SetHostHeader(fields.HostHeader)
+				}
+				if cmd.Flags().Changed("origin-type") {
+					request.SetOriginType(fields.OriginType)
+				}
+				if cmd.Flags().Changed("origin-protocol-policy") {
+					request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+				}
+				if cmd.Flags().Changed("origin-path") {
+					request.SetOriginPath(fields.OriginPath)
+				}
+				if cmd.Flags().Changed("hmac-authentication") {
 					hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
 					if err != nil {
 						return fmt.Errorf("%w: %q", msg.ErrorHmacAuthenticationFlag, fields.HmacAuthentication)
 					}
-          request.SetHmacAuthentication(hmacAuth)
-        }
-        if cmd.Flags().Changed("hmac-region-name") { 
-          request.SetHmacRegionName(fields.HmacRegionName)
-        }
-        if cmd.Flags().Changed("hmac-access-key") {
-          request.SetHmacAccessKey(fields.HmacAccessKey)
-        }
-        if cmd.Flags().Changed("hmac-secret-key") {
-          request.SetHmacSecretKey(fields.HmacSecretKey)
-        }
+					request.SetHmacAuthentication(hmacAuth)
+				}
+				if cmd.Flags().Changed("hmac-region-name") {
+					request.SetHmacRegionName(fields.HmacRegionName)
+				}
+				if cmd.Flags().Changed("hmac-access-key") {
+					request.SetHmacAccessKey(fields.HmacAccessKey)
+				}
+				if cmd.Flags().Changed("hmac-secret-key") {
+					request.SetHmacSecretKey(fields.HmacSecretKey)
+				}
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -124,7 +126,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.HostHeader, "host-header", "", msg.OriginsCreateFlagHostHeader)
 	flags.StringVar(&fields.OriginPath, "origin-path", "", msg.OriginsCreateFlagOriginPath)
 	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", msg.OriginsCreateFlagHmacAuthentication)
-  flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.OriginsCreateFlagHmacRegionName)
+	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.OriginsCreateFlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.OriginsCreateFlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.OriginsCreateFlagHmacSecretKey)
 	flags.StringVar(&fields.Path, "in", "", msg.OriginsCreateFlagIn)
@@ -133,10 +135,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
-  var addr sdk.CreateOriginsRequestAddresses
-  for _, v := range addrs {
-    addr.Address = v 
-    addresses = append(addresses, addr)
-  }
-  return
+	var addr sdk.CreateOriginsRequestAddresses
+	for _, v := range addrs {
+		addr.Address = v
+		addresses = append(addresses, addr)
+	}
+	return
 }

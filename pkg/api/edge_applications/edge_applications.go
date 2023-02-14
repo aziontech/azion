@@ -211,7 +211,7 @@ type CreateOriginsRequest struct {
 }
 
 type UpdateOriginsRequest struct {
-	sdk.UpdateOriginsRequest
+	sdk.PatchOriginsRequest
 }
 
 type OriginsResponse interface {
@@ -253,7 +253,7 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 
 func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.
-		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPut(ctx, edgeApplicationID, originKey).UpdateOriginsRequest(req.UpdateOriginsRequest).Execute()
+		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
