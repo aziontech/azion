@@ -35,12 +35,12 @@ jobs:
 
       - name: Build
         env: 
-          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make build ENVFILE=./env/prod
 
       - name: Cross-build
         env: 
-          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make cross-build ENVFILE=./env/prod
 
       - name: Install AWS CLI

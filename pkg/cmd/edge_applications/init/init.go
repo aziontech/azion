@@ -294,8 +294,8 @@ func sortTag(tags ReferenceIter, major, branch string) (string, error) {
 	var tagWithMajorOKStr string
 	var err error
 	err = tags.ForEach(func(t *plumbing.Reference) error {
-    tagFormat := formatTag(string(t.Name())) 
-	 	tagFormat = checkBranch(tagFormat, branch)
+		tagFormat := formatTag(string(t.Name()))
+		tagFormat = checkBranch(tagFormat, branch)
 		if tagFormat != "" {
 			if strings.Split(tagFormat, "")[0] == major {
 				var numberTag int
@@ -596,7 +596,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	if shouldFetchTemplates {
 		pathWorker := path + "/azion"
 		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-			fmt.Println(err)
 			return msg.ErrorFailedCreatingAzionDirectory
 		}
 
@@ -612,7 +611,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 
 		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
 		if err != nil {
-			fmt.Println(err)
 			return utils.ErrorInternalServerError
 		}
 
