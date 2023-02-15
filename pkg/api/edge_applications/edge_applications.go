@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 )
@@ -203,46 +203,60 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
 		return sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-  return resp, nil
+	return resp, nil
 }
 
 type CreateOriginsRequest struct {
 	sdk.CreateOriginsRequest
 }
 
+type UpdateOriginsRequest struct {
+	sdk.PatchOriginsRequest
+}
+
 type OriginsResponse interface {
+  GetOriginKey() string
 	GetOriginId() int64
 	GetName() string
 }
 
 func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
-  resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
-  if err != nil {
-    return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-  }
-  if len(resp.Results) > 0 {
-    for _, result := range resp.Results {
-      if result.OriginId == originID {
-        return result, nil
-      }
-    }
-  }
-  return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+	if err != nil {
+		return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	if len(resp.Results) > 0 {
+		for _, result := range resp.Results {
+			if result.OriginId == originID {
+				return result, nil
+			}
+		}
+	}
+	return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
 }
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (sdk.OriginsResponse, error) {
-  resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
-  if err != nil {
-    return sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-  }
-  return resp, nil
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+	if err != nil {
+		return sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
 }
 
 func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (OriginsResponse, error) {
-  resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
-  if err != nil {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
+	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
-	} 
+	}
+	return &resp.Results, nil
+}
+
+func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.
+		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
 	return &resp.Results, nil
 }
 
