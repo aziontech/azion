@@ -245,3 +245,13 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	} 
 	return &resp.Results, nil
 }
+
+func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, originKey string) error {
+  httpResp, err:= c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+
