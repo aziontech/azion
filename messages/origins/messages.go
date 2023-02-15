@@ -32,16 +32,45 @@ var (
 	OriginsCreateFlagName                 = "The origin's name"
 	OriginsCreateFlagOriginType           = `Identifies the source of a record. I.e. "single_origin"`
 	OriginsCreateFlagAddresses            = "Passes a list of addresses linked to the origin"
-	OriginsCreateFlagOriginProtocolPolicy = "Tells the protocol policy used in the origin" 
+	OriginsCreateFlagOriginProtocolPolicy = "Tells the protocol policy used in the origin"
 	OriginsCreateFlagHostHeader           = "Specifies the hostname of the server being accessed"
 	OriginsCreateFlagOriginPath           = "Gives a file path to the origin"
-	OriginsCreateFlagHmacAuthentication   = "Whether Hmac Authentication is used or not" 
+	OriginsCreateFlagHmacAuthentication   = "Whether Hmac Authentication is used or not"
 	OriginsCreateFlagHmacRegionName       = "Informs Hmac region name"
 	OriginsCreateFlagHmacAccessKey        = "Informs Hmac Access Key"
 	OriginsCreateFlagHmacSecretKey        = "Informs Hmac Secret Key"
 	OriginsCreateFlagIn                   = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
 	OriginsCreateOutputSuccess            = "Created origin with ID %d\n"
 	OriginsCreateHelpFlag                 = "Displays more information about the create subcommand"
+
+	// [ update ]
+	OriginsUpdateUsage                    = "update [flags]"
+	OriginsUpdateShortDescription         = "Updates an Origin"
+	OriginsUpdateLongDescription          = "Updates an Origin based on its ID and given attributes"
+	OriginsUpdateFlagOriginKey            = "The Origin's key unique identifier"
+	OriginsUpdateFlagEdgeApplicationId    = "Unique identifier for an edge application"
+	OriginsUpdateFlagName                 = "The origin's name"
+	OriginsUpdateFlagOriginType           = `Identifies the source of a record. I.e. "single_origin"`
+	OriginsUpdateFlagAddresses            = "Passes a list of addresses linked to the origin"
+	OriginsUpdateFlagOriginProtocolPolicy = "Tells the protocol policy used in the origin"
+	OriginsUpdateFlagHostHeader           = "Specifies the hostname of the server being accessed"
+	OriginsUpdateFlagOriginPath           = "Gives a file path to the origin"
+	OriginsUpdateFlagHmacAuthentication   = "Whether Hmac Authentication is used or not"
+	OriginsUpdateFlagHmacRegionName       = "Informs Hmac region name"
+	OriginsUpdateFlagHmacAccessKey        = "Informs Hmac Access Key"
+	OriginsUpdateFlagHmacSecretKey        = "Informs Hmac Secret Key"
+	OriginsUpdateFlagIn                   = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
+	OriginsUpdateOutputSuccess            = "Updated origin with ID %s\n"
+	OriginsUpdateHelpFlag                 = "Displays more information about the update subcommand"
+
+	// [ delete ]
+	OriginsDeleteUsage             = "delete [flags]"
+	OriginsDeleteShortDescription  = "Deletes an Origin"
+	OriginsDeleteLongDescription   = "Deletes an Origin from the Edge Applications library based on its given ID"
+	OriginsDeleteOutputSuccess     = "Origin %s was successfully deleted\n"
+	OriginsDeleteFlagApplicationID = "Unique identifier for an edge application"
+	OriginsDeleteFlagOriginKey     = "The Origin's key unique identifier"
+	OriginsDeleteHelpFlag          = "Displays more information about the delete subcommand"
 
 	// [ general ]
 	OriginsFileWritten = "File successfully written to: %s\n"
