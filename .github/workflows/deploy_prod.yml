@@ -34,9 +34,13 @@ jobs:
         run: git fetch --tags
 
       - name: Build
+        env: 
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make build ENVFILE=./env/prod
 
       - name: Cross-build
+        env: 
+          STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make cross-build ENVFILE=./env/prod
 
       - name: Install AWS CLI
@@ -76,5 +80,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           API_URL: https://api.azionapi.net
+          STORAGE_URL: ${{ secrets.STORAGE_API_STAGE }}
           AUTH_URL: https://sso.azion.com/api/user/me
           TEMPLATE_BRANCH: main

@@ -17,7 +17,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
@@ -284,7 +283,11 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
-func sortTag(tags storer.ReferenceIter, major, branch string) (string, error) {
+type ReferenceIter interface {
+	ForEach(func(*plumbing.Reference) error) error
+}
+
+func sortTag(tags ReferenceIter, major, branch string) (string, error) {
 	var tagCurrent int = 0
 	var tagCurrentStr string
 	var tagWithMajorOk int = 0
@@ -321,14 +324,13 @@ func sortTag(tags storer.ReferenceIter, major, branch string) (string, error) {
 }
 
 // formatTag slice tag by '/' taking index 2 where the version is, transforming it into a list taking only the numbers
-func formatTag(tag string) string {
-	var t string
+func formatTag(tag string) (version string) {
 	for _, v := range strings.Split(strings.Split(tag, "/")[2], "") {
 		if _, err := strconv.Atoi(v); err == nil {
-			t += v
+			version += v
 		}
 	}
-	return t
+	return
 }
 
 func checkBranch(num, branch string) string {
@@ -594,7 +596,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	if shouldFetchTemplates {
 		pathWorker := path + "/azion"
 		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-			fmt.Println(err)
 			return msg.ErrorFailedCreatingAzionDirectory
 		}
 
@@ -610,7 +611,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 
 		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
 		if err != nil {
-			fmt.Println(err)
 			return utils.ErrorInternalServerError
 		}
 

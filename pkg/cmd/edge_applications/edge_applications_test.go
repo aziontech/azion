@@ -1,7 +1,6 @@
 package edge_applications
 
 import (
-	"fmt"
 	"io/fs"
 	"os"
 	"testing"
@@ -244,6 +243,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 			return "Build completed", 0, nil
 		}
 
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
+		}
+
 		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
 			return nil, nil
 		}
@@ -295,7 +298,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 
@@ -406,6 +408,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 			return "Build completed", 0, nil
 		}
 
+		buildCommand.GetVerId = func(cmd *buildcmd.BuildCmd, appID string) (string, error) {
+			return "v123456789", nil
+		}
+
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
 			return buildEnvs, nil
 		}
@@ -457,7 +463,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		cmdPublish := publishcmd.NewCobraCmd(publishCmd)
 
 		errPublish := cmdPublish.Execute()
-		fmt.Println(errPublish)
 
 		require.NoError(t, err)
 
