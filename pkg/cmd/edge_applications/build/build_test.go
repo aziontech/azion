@@ -54,7 +54,7 @@ func TestBuild(t *testing.T) {
 		err := command.run()
 		require.NoError(t, err)
 
-		require.Contains(t, stdout.String(), `Your Web Application was built successfully`)
+		require.Contains(t, stdout.String(), `Your Edge Application was built successfully`)
 	})
 
 	t.Run("cmd failed", func(t *testing.T) {

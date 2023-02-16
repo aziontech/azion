@@ -8,18 +8,18 @@ var (
 
 	//edge_applications cmd
 	EdgeApplicationsUsage            = "edge_applications"
-	EdgeApplicationsShortDescription = "Creates Web Applications on Azion's platform"
-	EdgeApplicationsLongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
+	EdgeApplicationsShortDescription = "Creates Edge Applications on Azion's platform"
+	EdgeApplicationsLongDescription  = "Build your Edge applications in minutes without the need to manage infrastructure or security"
 	EdgeApplicationsFlagHelp         = "Displays more information about the edge_application command"
 	EdgeApplicationsAutoDetectec     = "Auto-detected Project Settings (%s)\n"
 
 	//build cmd
 	EdgeApplicationsBuildUsage            = "build [flags]"
-	EdgeApplicationsBuildShortDescription = "Builds a Web Application"
-	EdgeApplicationsBuildLongDescription  = "Builds your Web Application to run on Azion’s Edge Computing Platform"
+	EdgeApplicationsBuildShortDescription = "Builds an Edge Application"
+	EdgeApplicationsBuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Computing Platform"
 	EdgeApplicationsBuildRunningCmd       = "Running build step command:\n\n"
-	EdgeApplicationsBuildStart            = "Building your Web Application\n"
-	EdgeApplicationsBuildSuccessful       = "Your Web Application was built successfully\n"
+	EdgeApplicationsBuildStart            = "Building your Edge Application\n"
+	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
 	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
 
@@ -30,11 +30,11 @@ var (
 	javascript          Create a serverless Javascript application on edge.
 	flareact            Create a serverless Flareact application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
-	EdgeApplicationsInitShortDescription  = "Initializes a Web Application"
-	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Web Application on Azion’s platform"
+	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
+	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
-	EdgeApplicationsInitFlagName          = "The Web application's name"
-	EdgeApplicationsInitFlagType          = "The type of  Web application <javascript | flareact | nextjs>"
+	EdgeApplicationsInitFlagName          = "The Edge application's name"
+	EdgeApplicationsInitFlagType          = "The type of Edge application <javascript | flareact | nextjs>"
 	EdgeApplicationsInitFlagYes           = "Forces the automatic response 'yes' to all user input"
 	EdgeApplicationsInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
@@ -47,10 +47,10 @@ var (
 
 	//publish cmd
 	EdgeApplicationsPublishUsage                       = "publish"
-	EdgeApplicationsPublishShortDescription            = "Publishes a Web Application on the Azion platform"
-	EdgeApplicationsPublishLongDescription             = "Publishes a Web Application based on the Azion’s Platform"
+	EdgeApplicationsPublishShortDescription            = "Publishes an Edge Application on the Azion platform"
+	EdgeApplicationsPublishLongDescription             = "Publishes an Edge Application based on the Azion’s Platform"
 	EdgeApplicationsPublishRunningCmd                  = "Running pre publish command:\n\n"
-	EdgeApplicationsPublishSuccessful                  = "Your Web Application was published successfully\n"
+	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
 	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
