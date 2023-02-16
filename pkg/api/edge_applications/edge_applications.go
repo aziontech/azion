@@ -188,7 +188,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.GetApplicationsResponse, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.GetApplicationsResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -200,7 +200,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (sdk.Get
 		Sort(opts.Sort).Execute()
 
 	if err != nil {
-		return sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+		return &sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil
@@ -215,7 +215,7 @@ type UpdateOriginsRequest struct {
 }
 
 type OriginsResponse interface {
-  GetOriginKey() string
+	GetOriginKey() string
 	GetOriginId() int64
 	GetName() string
 }
@@ -235,10 +235,10 @@ func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int6
 	return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
 }
 
-func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (sdk.OriginsResponse, error) {
+func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
-		return sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+		return &sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return resp, nil
 }
@@ -261,11 +261,9 @@ func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, ori
 }
 
 func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, originKey string) error {
-  httpResp, err:= c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
 	if err != nil {
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
 }
-
-
