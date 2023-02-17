@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type Fields struct {
@@ -56,8 +57,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMissingApplicationIdArgument
 			}
 
-			request := api.UpdateRequest{}
+			if !returnAnyField(cmd) {
+				return msg.ErrorNoFieldInformed
+			}
 
+			request := api.UpdateRequest{}
 			if cmd.Flags().Changed("in") {
 				var (
 					file *os.File
@@ -215,6 +219,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.EdgeApplicationUpdateWebApplicationFirewall)
 	flags.StringVar(&fields.InPath, "in", "", msg.EdgeApplicationUpdateFlagIn)
 	flags.BoolP("help", "h", false, msg.EdgeApplicationUpdateHelpFlag)
-
 	return cmd
+}
+
+func returnAnyField(cmd *cobra.Command) bool {
+	anyFlagChanged := false
+	cmd.Flags().Visit(func(flag *pflag.Flag) {
+    if flag.Changed && flag.Name != "application-id" && flag.Shorthand != "a" { 			
+      anyFlagChanged = true
+		}
+	})
+	return anyFlagChanged
 }

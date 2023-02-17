@@ -41,7 +41,7 @@ var (
 	WebAppInitCmdSuccess                  = "Template successfully fetched and configured\n"
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init subcommand"
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully"
-	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file is used\n"
+	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n"
 	EdgeApplicationsUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
 	EdgeApplicationsInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
@@ -84,7 +84,7 @@ var (
 
 	//delete cmd
 	EdgeApplicationDeleteUsage            = "delete --application-id <application_id> [flags]"
-	EdgeApplicationDeleteShortDescription = "Removes an Edge Function"
+	EdgeApplicationDeleteShortDescription = "Removes an Edge Application"
 	EdgeApplicationDeleteLongDescription  = "Removes an Edge Application from the Edge Applications library based on its given ID"
 	EdgeApplicationDeleteOutputSuccess    = "Edge Application %d was successfully deleted\n"
 	EdgeApplicationDeleteHelpFlag         = "Displays more information about the delete subcommand"
