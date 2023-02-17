@@ -7,6 +7,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 )
 
 var successResponse string = `
@@ -91,4 +92,21 @@ func TestUpdate(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "Updated Edge Application with ID 1337\n", stdout.String())
 	})
+
+	t.Run("return some fields", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("PATCH", "edge_applications/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+		cmd.SetArgs([]string{"-a", "1337"})
+		err := cmd.Execute()
+    require.ErrorContains(t, err, msg.ErrorNoFieldInformed.Error(), nil)
+  })
 }
+
