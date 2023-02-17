@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -651,7 +652,15 @@ func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectName string, bytePackageJson []byte, path string) error {
 	//name was not sent through the --name flag
 	if !hasThisFlag(c, "name") {
-		info.Name = projectName
+		// in case package.json does not contain a name field, we set the name as the parent directory
+		if projectName == "" {
+			dir := filepath.Dir(info.PathWorkingDir)
+			fmt.Println(info.PathWorkingDir)
+			parent := filepath.Base(dir)
+			info.Name = parent
+		} else {
+			info.Name = projectName
+		}
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
 	} else {
 		updatePackageJson, err := sjson.Set(string(bytePackageJson), "name", info.Name)
