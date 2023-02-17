@@ -63,6 +63,4 @@ var (
 	ErrorMissingApplicationIdJson    = errors.New("Application ID is missing from azion.json. Please initialize and publish your project first before using cascade delete")
 	ErrorMissingAzionJson            = errors.New("Azion.json file is missing. Please initialize and publish your project first before using cascade delete")
 	ErrorFailedUpdateAzionJson       = errors.New("Failed to update azion.json file to remove IDs of deleted resource")
-
-	ErrorGetVersionId = errors.New("Failed to get Version Id: %s")
 )
