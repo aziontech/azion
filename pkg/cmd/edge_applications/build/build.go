@@ -1,7 +1,6 @@
 package build
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,11 +8,9 @@ import (
 	"os"
 
 	"github.com/tidwall/gjson"
-	"github.com/tidwall/sjson"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/api/storage_api"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -30,7 +27,6 @@ type BuildCmd struct {
 	GetWorkDir         func() (string, error)
 	EnvLoader          func(path string) ([]string, error)
 	Stat               func(path string) (fs.FileInfo, error)
-	GetVerId           func(cmd *BuildCmd, appID string) (string, error)
 	f                  *cmdutil.Factory
 }
 
@@ -70,7 +66,6 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		EnvLoader:          utils.LoadEnvVarsFromFile,
 		WriteFile:          os.WriteFile,
 		Stat:               os.Stat,
-		GetVerId:           GetVersionID,
 		f:                  f,
 	}
 }
@@ -103,7 +98,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	}
 
 	typeLang := gjson.Get(string(file), "type")
-	applicationId := gjson.Get(string(file), "application.id")
 
 	if typeLang.String() == "cdn" {
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsBuildCdn)
@@ -140,25 +134,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 	switch typeLang.String() {
 	case "nextjs", "flareact":
-
-		var verId string = ""
-
-		if applicationId.String() != "" && applicationId.String() != "0" {
-			verId, err = cmd.GetVerId(cmd, applicationId.String())
-			if err != nil {
-				return err
-			}
-		}
-
-		jsonReplaceFunc, err := sjson.Set(string(file), "version-id", verId)
-		if err != nil {
-			return msg.ErrorFailedUpdateAzionJson
-		}
-
-		err = cmd.WriteFile(azionJson, []byte(jsonReplaceFunc), 0644)
-		if err != nil {
-			return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
-		}
 
 		err = runCommand(cmd, conf, envs)
 		if err != nil {
@@ -311,18 +286,4 @@ func writeWebdevEnvFile(cmd *BuildCmd, path string, envs []string) error {
 		return err
 	}
 	return nil
-}
-
-func GetVersionID(cmd *BuildCmd, appID string) (string, error) {
-
-	client := api.NewClient(cmd.f.HttpClient, cmd.f.Config.GetString("storage_url"), cmd.f.Config.GetString("token"))
-
-	ctx := context.Background()
-
-	verId, err := client.CreateVersionId(ctx, appID)
-	if err != nil {
-		return "", fmt.Errorf(msg.ErrorGetVersionId.Error(), err)
-	}
-
-	return verId.GetVersionId(), nil
 }
