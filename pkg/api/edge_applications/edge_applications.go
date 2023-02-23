@@ -267,3 +267,17 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 	}
 	return nil
 }
+
+func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationCacheGetResponse, error) {
+    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+        OrderBy(opts.OrderBy).
+        Page(opts.Page).
+        PageSize(opts.PageSize).
+        Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
+}
