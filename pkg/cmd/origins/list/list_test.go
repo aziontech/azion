@@ -18,7 +18,7 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 
-    f, stdout, _ := testutils.NewFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"-a", "123423424"})
@@ -32,14 +32,14 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-      httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.REST("GET", "edge_applications/123423424/origins"),
 			httpmock.JSONFromFile("./fixtures/noorigins.json"),
 		)
 
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-    cmd.SetArgs([]string{"-a", "123423424"})
+		cmd.SetArgs([]string{"-a", "123423424"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
