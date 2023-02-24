@@ -1,4 +1,4 @@
-package cachesettings
+package cache_settings
 
 var (
 	// [ cache_settings ]
@@ -6,6 +6,12 @@ var (
 	CacheSettingsShortDescription = "Cache Settings lets you check, remove or update existing settings, besides creating new ones"
 	CacheSettingsLongDescription  = "Cache Settings lets you check, remove or update existing settings, besides creating new ones"
 	CacheSettingsFlagHelp         = "Displays more information about the cache_settings command"
+
+	// [ list ]
+	CacheSettingsListUsage            = "list [flags]"
+	CacheSettingsListShortDescription = "Displays yours cache settings"
+	CacheSettingsListLongDescription  = "Displays all cache settings"
+	CacheSettingsListHelpFlag         = "Displays more information about the list subcommand"
 
 	// [ create ]
 	CacheSettingsCreateUsage                          = "create [flags]"

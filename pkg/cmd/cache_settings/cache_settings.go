@@ -1,9 +1,10 @@
-package cachesettings
+package cache_settings 
 
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/create"
+  "github.com/aziontech/azion-cli/pkg/cmd/cache_settings/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -23,6 +24,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cacheCmd.AddCommand(create.NewCmd(f))
+  originsCmd.AddCommand(list.NewCmd(f))
 	cacheCmd.Flags().BoolP("help", "h", false, msg.CacheSettingsFlagHelp)
 	return cacheCmd
 }
+

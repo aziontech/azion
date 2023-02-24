@@ -301,3 +301,21 @@ func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettin
 
 	return cacheResponse.Results, nil
 }
+
+func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationCacheGetResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+        OrderBy(opts.OrderBy).
+        Page(opts.Page).
+        PageSize(opts.PageSize).
+        Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
+}
