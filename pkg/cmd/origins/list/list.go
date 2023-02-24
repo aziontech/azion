@@ -16,7 +16,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 var edgeApplicationID int64 = 0
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -35,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
 				return msg.ErrorMissingApplicationIDArgument
-			} 
+			}
 
 			if err := PrintTable(cmd, f, opts); err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
@@ -46,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	flags := cmd.Flags()
-  flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.OriginsListFlagEdgeApplicationID)
+	flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.OriginsListFlagEdgeApplicationID)
 	flags.BoolP("help", "h", false, msg.OriginsListHelpFlag)
 	return cmd
 }
@@ -60,10 +59,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
 	}
 
-  tbl := table.New("ID", "NAME")
-  tbl.WithWriter(f.IOStreams.Out)
+	tbl := table.New("ID", "NAME")
+	tbl.WithWriter(f.IOStreams.Out)
 	if cmd.Flags().Changed("details") {
-    tbl = table.New("ID", "NAME", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
+		tbl = table.New("ID", "NAME", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -74,9 +73,9 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			tbl.AddRow(v.OriginId, v.Name, v.OriginType, v.OriginPath, v.Addresses, v.ConnectionTimeout)
 		}
 	} else {
-    for _, v := range response.Results {
-      tbl.AddRow(v.OriginId, v.Name)
-	  }
+		for _, v := range response.Results {
+			tbl.AddRow(v.OriginId, v.Name)
+		}
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
@@ -84,7 +83,6 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	tbl.PrintHeader(format)
 	for _, row := range tbl.GetRows() {
 		tbl.PrintRow(format, row)
-	}  
+	}
 	return nil
 }
-

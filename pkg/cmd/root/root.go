@@ -7,6 +7,7 @@ import (
 	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	cachesettings "github.com/aziontech/azion-cli/pkg/cmd/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/cmd/configure"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications"
@@ -53,6 +54,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(edge_applications.NewCmd(f))
 	rootCmd.AddCommand(domains.NewCmd(f))
 	rootCmd.AddCommand(origins.NewCmd(f))
+	rootCmd.AddCommand(cachesettings.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 	return rootCmd
 }

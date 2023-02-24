@@ -1,14 +1,14 @@
 package delete
 
 import (
-  "fmt"
+	"fmt"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	msg "github.com/aziontech/azion-cli/messages/origins"
 )
 
 func TestCreate(t *testing.T) {
