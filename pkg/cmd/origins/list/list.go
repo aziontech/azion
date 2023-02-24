@@ -16,7 +16,6 @@ import (
     "github.com/spf13/cobra"
 )
 
-
 var edgeApplicationID int64 = 0
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -36,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
             if !cmd.Flags().Changed("application-id") {
                 return msg.ErrorMissingApplicationIDArgument
             } 
-
+            
             if err := PrintTable(cmd, f, opts); err != nil {
                 return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
             }
@@ -59,7 +58,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
     if err != nil {
         return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
     }
-
+    
     tbl := table.New("ID", "NAME")
     tbl.WithWriter(f.IOStreams.Out)
     if cmd.Flags().Changed("details") {
@@ -87,4 +86,3 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
     }  
     return nil
 }
-

@@ -21,7 +21,7 @@ import (
 )
 
 var (
-  applicationID int64 
+	applicationID int64
 	originID      int64
 )
 
@@ -50,7 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorGetOrigin
 			}
 
-			out := f.IOStreams.Out  
+			out := f.IOStreams.Out
 			formattedFuction, err := format(cmd, origin)
 			if err != nil {
 				return utils.ErrorFormatOut
@@ -111,4 +111,3 @@ func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error
 	tbl.AddRow("Hmac Access Key: ", origin.HmacAccessKey)
 	return tbl.GetByteFormat(), nil
 }
-

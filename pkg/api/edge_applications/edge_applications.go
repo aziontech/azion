@@ -13,6 +13,24 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 )
 
+type CacheSettingsResponse interface {
+	GetId() int64
+	GetName() string
+	GetBrowserCacheSettings() string
+	GetBrowserCacheSettingsMaximumTtl() int64
+	GetCdnCacheSettingsMaximumTtl() int64
+	GetCdnCacheSettings() string
+	GetCacheByQueryString() string
+	GetQueryStringFields() []string
+	GetEnableQueryStringSort() bool
+	GetCacheByCookies() string
+	GetCookieNames() []string
+	GetEnableCachingForPost() bool
+	GetL2CachingEnabled() bool
+	GetAdaptiveDeliveryAction() string
+	GetDeviceGroup() []string
+}
+
 type EdgeApplicationResponse interface {
 	GetId() int64
 	GetName() string
@@ -266,6 +284,22 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
+}
+
+type CreateCacheSettingsRequest struct {
+	sdk.ApplicationCacheCreateRequest
+}
+
+func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
+
+	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
+
+	cacheResponse, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return cacheResponse.Results, nil
 }
 
 func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationCacheGetResponse, error) {

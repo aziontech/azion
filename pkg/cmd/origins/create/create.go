@@ -1,10 +1,10 @@
 package create
 
 import (
-  "strconv"
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
@@ -13,22 +13,22 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
-  sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
 type Fields struct {
 	ApplicationID        int64
-	Name                 string 
-	OriginType           string 
+	Name                 string
+	OriginType           string
 	Addresses            []string
-	OriginProtocolPolicy string 
-	HostHeader           string 
-	OriginPath           string 
+	OriginProtocolPolicy string
+	HostHeader           string
+	OriginPath           string
 	HmacAuthentication   string
-	HmacRegionName       string 
-	HmacAccessKey        string 
-	HmacSecretKey        string 
+	HmacRegionName       string
+	HmacAccessKey        string
+	HmacSecretKey        string
 	Path                 string
 }
 
@@ -66,39 +66,39 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("name") || 
-          !cmd.Flags().Changed("addresses") || !cmd.Flags().Changed("host-header") {  // flags requireds
+				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("name") ||
+					!cmd.Flags().Changed("addresses") || !cmd.Flags().Changed("host-header") { // flags requireds
 					return msg.ErrorMandatoryCreateFlags
 				}
 
-        request.SetName(fields.Name)
-        request.SetAddresses(prepareAddresses(fields.Addresses))
-        request.SetHostHeader(fields.HostHeader)
-        if cmd.Flags().Changed("origin-type") {
-          request.SetOriginType(fields.OriginType)
-        }
-        if cmd.Flags().Changed("origin-protocol-policy") {
-          request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
-        }
-        if cmd.Flags().Changed("origin-path") {
-          request.SetOriginPath(fields.OriginPath)
-        }
-        if cmd.Flags().Changed("hmac-authentication") { 
+				request.SetName(fields.Name)
+				request.SetAddresses(prepareAddresses(fields.Addresses))
+				request.SetHostHeader(fields.HostHeader)
+				if cmd.Flags().Changed("origin-type") {
+					request.SetOriginType(fields.OriginType)
+				}
+				if cmd.Flags().Changed("origin-protocol-policy") {
+					request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+				}
+				if cmd.Flags().Changed("origin-path") {
+					request.SetOriginPath(fields.OriginPath)
+				}
+				if cmd.Flags().Changed("hmac-authentication") {
 					hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
 					if err != nil {
 						return fmt.Errorf("%w: %q", msg.ErrorHmacAuthenticationFlag, fields.HmacAuthentication)
 					}
-          request.SetHmacAuthentication(hmacAuth)
-        }
-        if cmd.Flags().Changed("hmac-region-name") { 
-          request.SetHmacRegionName(fields.HmacRegionName)
-        }
-        if cmd.Flags().Changed("hmac-access-key") {
-          request.SetHmacAccessKey(fields.HmacAccessKey)
-        }
-        if cmd.Flags().Changed("hmac-secret-key") {
-          request.SetHmacSecretKey(fields.HmacSecretKey)
-        }
+					request.SetHmacAuthentication(hmacAuth)
+				}
+				if cmd.Flags().Changed("hmac-region-name") {
+					request.SetHmacRegionName(fields.HmacRegionName)
+				}
+				if cmd.Flags().Changed("hmac-access-key") {
+					request.SetHmacAccessKey(fields.HmacAccessKey)
+				}
+				if cmd.Flags().Changed("hmac-secret-key") {
+					request.SetHmacSecretKey(fields.HmacSecretKey)
+				}
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -120,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.HostHeader, "host-header", "", msg.OriginsCreateFlagHostHeader)
 	flags.StringVar(&fields.OriginPath, "origin-path", "", msg.OriginsCreateFlagOriginPath)
 	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", msg.OriginsCreateFlagHmacAuthentication)
-  flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.OriginsCreateFlagHmacRegionName)
+	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.OriginsCreateFlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.OriginsCreateFlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.OriginsCreateFlagHmacSecretKey)
 	flags.StringVar(&fields.Path, "in", "", msg.OriginsCreateFlagIn)
@@ -129,10 +129,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
-  var addr sdk.CreateOriginsRequestAddresses
-  for _, v := range addrs {
-    addr.Address = v 
-    addresses = append(addresses, addr)
-  }
-  return
+	var addr sdk.CreateOriginsRequestAddresses
+	for _, v := range addrs {
+		addr.Address = v
+		addresses = append(addresses, addr)
+	}
+	return
 }

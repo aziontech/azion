@@ -232,16 +232,25 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	if err := checkTlsVersion(string(responseBody)); err != nil {
 		return err
 	}
+	if err := checkOriginlessCacheSettings(string(responseBody)); err != nil {
+		return err
+	}
 	return fmt.Errorf("%s", responseBody)
 }
 
 func checkNoProduct(body string) error {
-
 	if strings.Contains(body, "user_has_no_product") {
 		product := gjson.Get(body, "user_has_no_product")
-		return fmt.Errorf("%w: %s", ErrorProductNotOwned, product)
+		return fmt.Errorf("%w: %s", ErrorProductNotOwned, product.String())
 	}
+	return nil
+}
 
+func checkOriginlessCacheSettings(body string) error {
+	if strings.Contains(body, "originless_cache_settings") {
+		msgorigin := gjson.Get(body, "originless_cache_settings")
+		return fmt.Errorf("%s", msgorigin.String())
+	}
 	return nil
 }
 
