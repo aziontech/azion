@@ -35,7 +35,6 @@ type Fields struct {
 	enable_caching_for_options         string
 	l2_caching_enabled                 string
 	is_slice_configuration_enabled     string
-	is_slice_edge_caching_enabled      string
 	is_slice_l2_caching_enabled        string
 	slice_configuration_range          int64
 	Path                               string
