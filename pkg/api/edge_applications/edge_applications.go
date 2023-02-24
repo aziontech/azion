@@ -269,6 +269,10 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 }
 
 func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationCacheGetResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
     resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
         OrderBy(opts.OrderBy).
         Page(opts.Page).
