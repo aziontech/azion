@@ -18,6 +18,7 @@ var (
 	ErrorSliceL2CachingFlag     = errors.New("Invalid --slice-l2-caching-enabled flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 	ErrorL2CachingEnabledFlag   = errors.New("Invalid --l2-caching-enabled flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 
-	ErrorCreateCacheSettings      = errors.New("Failed to create the Cache Setting: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorBrowserMaximumTtlNotSent = errors.New("When browser cache settings is 'override' you must send the --browser-cache-settings-maximum-ttl flag")
+	ErrorCreateCacheSettings               = errors.New("Failed to create the Cache Setting: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorBrowserMaximumTtlNotSent          = errors.New("When browser cache settings is 'override' you must send the --browser-cache-settings-maximum-ttl flag")
+	ErrorApplicationAccelerationNotEnabled = errors.New("When --enable-caching-string-sort, --enable-caching-for-post or --enable-caching-for-options is sent, application acceleration must be enabled")
 )
