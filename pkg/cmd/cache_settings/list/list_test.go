@@ -26,7 +26,7 @@ func TestList(t *testing.T) {
 
         _, err := cmd.ExecuteC()
         require.NoError(t, err)
-        assert.Equal(t, "\x1b[34;4mID      NAME                    BROWSER CACHE SETTINGS  \n\x1b[0m\x1b[32m107313  \x1b[0mDefault Cache Settings  override                \n", stdout.String())
+        assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n107313  Default Cache Settings  override                \n", stdout.String())
     })
 
     t.Run("list page 1 with iten 1", func(t *testing.T) {
@@ -44,7 +44,7 @@ func TestList(t *testing.T) {
 
         _, err := cmd.ExecuteC()
         require.NoError(t, err)
-        assert.Equal(t, "\x1b[34;4mID      NAME                    BROWSER CACHE SETTINGS  \n\x1b[0m\x1b[32m107313  \x1b[0mDefault Cache Settings  override                \n\x1b[32m107314  \x1b[0mDefault Cache Settings  override                \n\x1b[32m107315  \x1b[0mDefault Cache Settings  override                \n", stdout.String())
+        assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n107313  Default Cache Settings  override                \n107314  Default Cache Settings  override                \n107315  Default Cache Settings  override                \n", stdout.String())
     })
 
 
@@ -63,7 +63,7 @@ func TestList(t *testing.T) {
 
         _, err := cmd.ExecuteC()
         require.NoError(t, err)
-        assert.Equal(t, "\x1b[32m107313  \x1b[0mDefault Cache Settings  override                \n\x1b[32m107314  \x1b[0mDefault Cache Settings  override                \n\x1b[32m107315  \x1b[0mDefault Cache Settings  override                \n", stdout.String())
+        assert.Equal(t, "107313  Default Cache Settings  override                \n107314  Default Cache Settings  override                \n107315  Default Cache Settings  override                \n", stdout.String())
     })
 
 
@@ -82,7 +82,7 @@ func TestList(t *testing.T) {
 
         _, err := cmd.ExecuteC()
         require.NoError(t, err)
-        assert.Equal(t, "\x1b[34;4mID      NAME                    BROWSER CACHE SETTINGS  \n\x1b[0m", stdout.String())
+        assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n", stdout.String())
     })
 
     t.Run("list page 1 with iten 1", func(t *testing.T) {
