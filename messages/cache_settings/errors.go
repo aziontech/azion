@@ -21,4 +21,6 @@ var (
 	ErrorCreateCacheSettings               = errors.New("Failed to create the Cache Setting: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorBrowserMaximumTtlNotSent          = errors.New("When browser cache settings is 'override' you must send the --browser-cache-settings-maximum-ttl flag")
 	ErrorApplicationAccelerationNotEnabled = errors.New("When --enable-caching-string-sort, --enable-caching-for-post or --enable-caching-for-options is sent, application acceleration must be enabled")
+
+	ErrorMissingArguments = errors.New("Required flags are missing. You must supply application-id and cache-settings-id as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 )
