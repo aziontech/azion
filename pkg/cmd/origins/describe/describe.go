@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			origin, err := client.GetOrigin(ctx, applicationID, originID)
 			if err != nil {
-				return msg.ErrorGetOrigin
+                return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
 
 			out := f.IOStreams.Out
