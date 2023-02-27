@@ -44,13 +44,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
             client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
             ctx := context.Background()
-            origin, err := client.GetCacheSettings(ctx, applicationID, cacheSettingsID)
+            respClient, err := client.GetCacheSettings(ctx, applicationID, cacheSettingsID)
             if err != nil {
-                return msg.ErrorGetCache
+                return fmt.Errorf(msg.ErrorGetCache.Error(), err)
             }
 
             out := f.IOStreams.Out
-            formattedFuction, err := format(cmd, *origin)
+            formattedFuction, err := format(cmd, *respClient)
             if err != nil {
                 return utils.ErrorFormatOut
             }
