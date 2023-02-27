@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/stretchr/testify/require"
+	msg "github.com/aziontech/azion-cli/messages/edge_services"
 )
 
 var responseBody = `
@@ -60,7 +61,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name flag when --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+		require.ErrorIs(t, err, msg.ErrorMandatoryName)
 	})
 
 	t.Run("create service with name", func(t *testing.T) {

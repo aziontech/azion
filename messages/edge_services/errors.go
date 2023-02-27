@@ -3,8 +3,8 @@ package edgeservices
 import "errors"
 
 var (
-	ErrorMissingServiceIdArgument      = errors.New("A mandatory --service_id flag is missing. You must provide a valid service_id. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
-	ErrorMissingResourceIdArgument     = errors.New("A mandatory flag is missing. You must provide valid service_id and resource_id. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+	ErrorMissingServiceIdArgument      = errors.New("A required --service_id flag is missing. You must provide a valid service_id. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+	ErrorMissingResourceIdArgument     = errors.New("One or more required flags are missing. You must provide a valid service_id and resource_id. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
 	ErrorInvalidResourceTrigger        = errors.New("The trigger is invalid. You must provide a valid trigger. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
 	ErrorUpdateNoFlagsSent             = errors.New("No values/flags sent during update. You must provide at least one valid value in the update. Run the command 'azioncli edge_services resources update --help' to display more information and try again")
 	ErrorDeleteResource                = errors.New("Failed to delete the Resource: %s. Check your settings and try again. If the error persists, contact Azion support")
@@ -21,8 +21,8 @@ var (
 	ErrorDeleteService                 = errors.New("Failed to delete Edge Service: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorCreateService                 = errors.New("Failed to create the Edge Service: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateService                 = errors.New("Failed to update the Edge Service: %s. Check your settings and try again. If the error persists, contact Azion support")
-	ErrorMandatoryName                 = errors.New("A mandatory flag is missing. You must provide --name flag when --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
-	ErrorMandatoryFlagsResource        = errors.New("A mandatory flag is missing. You must provide --name, --content-type, and --content-file flags when the --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+	ErrorMandatoryName                 = errors.New("A required flag is missing. You must provide --name flag when --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+	ErrorMandatoryFlagsResource        = errors.New("One or more required flags are missing. You must provide --name, --content-type, and --content-file flags when the --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
 	ErrorMissingArgumentUpdate         = errors.New("A mandatory flag or file is missing. You must provide a service_id as an argument or path to import the file. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
-	ErrorMissingArgumentUpdateResource = errors.New("A mandatory flag or file is missing. You must provide a service_id and a resource_id as an argument or path to import the file. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try againx")
+	ErrorMissingArgumentUpdateResource = errors.New("One or more required flags or a file is missing. You must provide a service_id and a resource_id as an argument or path to import the file. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try againx")
 )

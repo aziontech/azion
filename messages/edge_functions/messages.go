@@ -15,8 +15,8 @@ var (
 
 	//create cmd
 	EdgeFunctionCreateUsage            = "create [flags]"
-	EdgeFunctionCreateShortDescription = "Makes a new serverless Edge Function"
-	EdgeFunctionCreateLongDescription  = "Makes an Edge Function based on given attributes to create a serverless code for Edge Applications"
+	EdgeFunctionCreateShortDescription = "Creates a new serverless Edge Function"
+	EdgeFunctionCreateLongDescription  = "Creates an Edge Function based on given attributes to create a serverless code for Edge Applications"
 	EdgeFunctionCreateFlagName         = "The Edge Function's name"
 	EdgeFunctionCreateFlagCode         = "Path to the Edge Function's code"
 	EdgeFunctionCreateFlagActive       = "Whether the Edge Function is active or not"
