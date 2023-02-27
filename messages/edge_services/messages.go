@@ -25,8 +25,8 @@ var (
 
 	//create cmd
 	EdgeServiceCreateUsage            = "create [flags]"
-	EdgeServiceCreateShortDescription = "Makes a new Edge Service"
-	EdgeServiceCreateLongDescription  = "Makes a new Edge Service in the Azion Edge Orchestrator based on its name or configuration file"
+	EdgeServiceCreateShortDescription = "Creates a new Edge Service"
+	EdgeServiceCreateLongDescription  = "Creates a new Edge Service in the Azion Edge Orchestrator based on its name or configuration file"
 	EdgeServiceCreateFlagName         = "The Edge Service's name"
 	EdgeServiceCreateFlagIn           = "Path and file to create an Edge Service; you can use - for reading from stdin"
 	EdgeServiceCreateOutputSuccess    = "Created Edge Service with ID %d\n"

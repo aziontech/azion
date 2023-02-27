@@ -43,11 +43,11 @@ var (
 	ErrorIterateAllTags   = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 	ErrorWritingWebdevEnv = errors.New("Failed to write 'webdev.env' file. Verify if the file is writable and/or you have access to it, if the data format is JSON, or fix the content according to the JSON format specification at https://www.json.org/json-en.html")
 
-	ErrorMissingApplicationIdArgument = errors.New("A mandatory flag is missing. You must provide an application_id as an argument or path to import the file. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
+	ErrorMissingApplicationIdArgument = errors.New("A required flag is missing. You must provide an application_id as an argument or path to import the file. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
 	ErrorGetApplication               = errors.New("Failed to get the Edge Application: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorFailToDeleteApplication      = errors.New("Failed to delete the Edge Application: %s. Check your settings and try again. If the error persists, contact Azion support")
 
-	ErrorMandatoryCreateFlags        = errors.New("A mandatory flag is missing. You must provide --active, --code, and --name flags when the --in flag is not provided. Run the command 'azioncli edge_applications create --help' to display more information and try again")
+	ErrorMandatoryCreateFlags        = errors.New("One or more required flags are missing. You must provide --active, --code, and --name flags when the --in flag is not provided. Run the command 'azioncli edge_applications create --help' to display more information and try again")
 	ErrorActiveFlag                  = errors.New("Invalid --active flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
 	ErrorApplicationAccelerationFlag = errors.New("Invalid --application-acceleration flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
 	ErrorCachingFlag                 = errors.New("Invalid --caching flag provided. The flag must have  'true' or 'false' values. Run the command 'azioncli edge_applications <subcommand> --help' to display more information and try again")
