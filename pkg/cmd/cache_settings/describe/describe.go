@@ -80,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
     return cmd
 }
 
-func format(cmd *cobra.Command, strResp sdk.ApplicationCacheGetOneResponse) ([]byte, error) {
+func format(cmd *cobra.Command, strResp sdk.ApplicationCacheResults) ([]byte, error) {
     format, err := cmd.Flags().GetString("format")
     if err != nil {
         return nil, err
@@ -92,21 +92,21 @@ func format(cmd *cobra.Command, strResp sdk.ApplicationCacheGetOneResponse) ([]b
 
     tbl := tablecli.New("", "")
     tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-    tbl.AddRow("Id: ", strResp.Results.Id)
-    tbl.AddRow("Name: ", strResp.Results.Name)
-    tbl.AddRow("Browser cache settings: ", strResp.Results.BrowserCacheSettings)
-    tbl.AddRow("Browser cache settings maximum TTL: ", strResp.Results.BrowserCacheSettingsMaximumTtl)
-    tbl.AddRow("Cdn cache settings: ", strResp.Results.CdnCacheSettings)
-    tbl.AddRow("Cdn cache settings maximum TTL: ", strResp.Results.CdnCacheSettingsMaximumTtl)
-    tbl.AddRow("Cache by query string: ", strResp.Results.CacheByQueryString)
-    tbl.AddRow("Query string fields: ", strResp.Results.QueryStringFields)
-    tbl.AddRow("Enable query string sort: ", strResp.Results.EnableQueryStringSort)
-    tbl.AddRow("Cache by cookies: ", strResp.Results.CacheByCookies)
-    tbl.AddRow("Cache by cookies: ", strResp.Results.CacheByCookies)
-    tbl.AddRow("Cookie Names: ", strResp.Results.CookieNames)
-    tbl.AddRow("Adaptive delivery action: ", strResp.Results.AdaptiveDeliveryAction)
-    tbl.AddRow("Device group: ", strResp.Results.DeviceGroup)
-    tbl.AddRow("EnableCachingForPost: ", strResp.Results.EnableCachingForPost)
-    tbl.AddRow("L2 caching enabled: ", strResp.Results.L2CachingEnabled)
+    tbl.AddRow("Id: ", strResp.Id)
+    tbl.AddRow("Name: ", strResp.Name)
+    tbl.AddRow("Browser cache settings: ", strResp.BrowserCacheSettings)
+    tbl.AddRow("Browser cache settings maximum TTL: ", strResp.BrowserCacheSettingsMaximumTtl)
+    tbl.AddRow("Cdn cache settings: ", strResp.CdnCacheSettings)
+    tbl.AddRow("Cdn cache settings maximum TTL: ", strResp.CdnCacheSettingsMaximumTtl)
+    tbl.AddRow("Cache by query string: ", strResp.CacheByQueryString)
+    tbl.AddRow("Query string fields: ", strResp.QueryStringFields)
+    tbl.AddRow("Enable query string sort: ", strResp.EnableQueryStringSort)
+    tbl.AddRow("Cache by cookies: ", strResp.CacheByCookies)
+    tbl.AddRow("Cache by cookies: ", strResp.CacheByCookies)
+    tbl.AddRow("Cookie Names: ", strResp.CookieNames)
+    tbl.AddRow("Adaptive delivery action: ", strResp.AdaptiveDeliveryAction)
+    tbl.AddRow("Device group: ", strResp.DeviceGroup)
+    tbl.AddRow("EnableCachingForPost: ", strResp.EnableCachingForPost)
+    tbl.AddRow("L2 caching enabled: ", strResp.L2CachingEnabled)
     return tbl.GetByteFormat(), nil
 }
