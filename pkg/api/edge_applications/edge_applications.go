@@ -3,6 +3,7 @@ package edgeapplications
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -290,6 +291,11 @@ type CreateCacheSettingsRequest struct {
 	sdk.ApplicationCacheCreateRequest
 }
 
+type UpdateCacheSettingsRequest struct {
+	sdk.ApplicationCachePatchRequest
+	Id int64
+}
+
 func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
 
 	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
@@ -302,16 +308,29 @@ func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettin
 	return cacheResponse.Results, nil
 }
 
+func (c *Client) UpdateCacheSettings(ctx context.Context, req *UpdateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
+
+	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
+
+	cacheResponse, httpResp, err := request.Execute()
+	if err != nil {
+		fmt.Println(err.Error())
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return cacheResponse.Results, nil
+}
+
 func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationCacheGetResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
 
-    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
-        OrderBy(opts.OrderBy).
-        Page(opts.Page).
-        PageSize(opts.PageSize).
-        Sort(opts.Sort).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
 
 	if err != nil {
 		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
