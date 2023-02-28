@@ -41,9 +41,23 @@ var (
 	CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl = "Browser cache settings' maximum TTL"
 	CacheSettingsCreateFlagAdaptiveDeliveryAction     = "Cache Settings' adaptive delivery action"
 
+
 	// [ update ]
 	CacheSettingsUpdateUsage            = "update [flags]"
 	CacheSettingsUpdateShortDescription = "Modifies a Cache Setting"
 	CacheSettingsUpdateLongDescription  = "Modifies a Cache Setting based on given attributes to be used in edge applications"
 	CacheSettingsUpdateOutputSuccess    = "Updated cache setting with ID %d\n"
+
+	// [ describe ]
+	CacheSettingsDescribeUsage               = "describe --application-id <application_id> --cache-settings-id <cache-settings-id> [flags]"
+	CacheSettingsDescribeShortDescription    = "Returns information about a specific cache settings"
+	CacheSettingsDescribeLongDescription     = "Returns information about a specific cache settings, based on a given ID, in details"
+	CacheSettingsDescribeFlagApplicationID   = "Unique identifier for an edge application. The '--application-id' flag is mandatory"
+	CacheSettingsDescribeFlagCacheSettingsID = "Unique identifier for an origin. The '--cache-settings-id' flag is mandatory"
+	CacheSettingsDescribeFlagOut             = "Exports the output to the given <file_path/file_name.ext>"
+	CacheSettingsDescribeFlagFormat          = "Changes the output format passing the json value to the flag"
+	CacheSettingsDescribeHelpFlag            = "Displays more information about the describe subcommand"
+
+	CacheSettingsFileWritten = "File successfully written to: %s\n"
+
 )

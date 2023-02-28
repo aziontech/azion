@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	ErrorGetOrigins                   = errors.New("Failed to describe the origins: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorGetOrigin                    = errors.New("Failed to describe the origin. Check your settings and try again. If the error persists, contact Azion support.")
+    ErrorGetOrigin                    = errors.New("Failed to describe the origin: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorMissingApplicationIDArgument = errors.New("A required flag is missing. You must supply application-id as an argument. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 	ErrorMissingArguments             = errors.New("Required flags are missing. You must supply application-id and origin-id as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 	ErrorMissingArgumentsDelete       = errors.New("Required flags are missing. You must supply application-id and origin-key as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")

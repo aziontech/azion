@@ -6,7 +6,7 @@ import (
 
 var (
 	ErrorGetCaches          = errors.New("Failed to list your cache settings. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorGetCache           = errors.New("Failed to get cache settings. Check your settings and try again. If the error persists, contact Azion support.")
+    ErrorGetCache           = errors.New("Failed to get cache settings: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorMandatoryListFlags = errors.New("Required flags are missing. You must provide application-id, name, addresses and host-header flags when the --application-id flag are not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 
 	ErrorMandatoryCreateFlags   = errors.New("Required flags are missing. You must provide the application-id and name flags when --in flag is not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
@@ -24,4 +24,5 @@ var (
 
 	ErrorMandatoryUpdateFlags   = errors.New("Required flags are missing. You must provide the application-id and cache-settings-id flags when --in flag is not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 	ErrorMandatoryUpdateInFlags = errors.New("Required flags are missing. You must provide the application-id flag when --in flag is not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
+	ErrorMissingArguments = errors.New("Required flags are missing. You must supply application-id and cache-settings-id as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 )

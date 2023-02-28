@@ -13,9 +13,11 @@ var (
 	//used by more than one cmd
 	DomainsFlagId                      = "Unique identifier of the Domain"
 	DomainsFileWritten                 = "File successfully written to: %s\n"
-	ErrorMissingApplicationIdArgument  = errors.New("A required flag is missing. You must provide a domain_id as an argument or path to import the file. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
-	ErrorGetDomain                     = errors.New("Failed to describe the domain. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorMissingDomainIdArgumentDelete = errors.New("A required flag is missing. You must provide a domain_id as an argument. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
+  
+	ErrorMissingApplicationIdArgument  = errors.New("A mandatory flag is missing. You must provide a domain_id as an argument or path to import the file. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
+  ErrorGetDomain                     = errors.New("Failed to describe the domain: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorMissingDomainIdArgumentDelete = errors.New("A mandatory flag is missing. You must provide a domain_id as an argument. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")
+
 	ErrorFailToDeleteDomain            = errors.New("Failed to delete the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorMissingCnames                 = errors.New("Missing Cnames. When the flag '--cname-access-only`is set as 'true', at least one CNAME must be provided through the flag '--cnames'. Add one or more CNAMES, or set '--cname-access-only' as false and try again.")
 	ErrorDigitalCertificateFlag        = errors.New("Invalid --digital-certificate-id flag provided. The flag must have an Integer or 'null' as a value. Run the command 'azioncli domains <subcommand> --help' to display more information and try again")

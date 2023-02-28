@@ -1,0 +1,27 @@
+{
+    "results": {
+        "id": 107313,
+        "name": "Default Cache Settings",
+        "browser_cache_settings": "override",
+        "browser_cache_settings_maximum_ttl": 20,
+        "cdn_cache_settings": "honor",
+        "cdn_cache_settings_maximum_ttl": 60,
+        "cache_by_query_string": "ignore",
+        "query_string_fields": null,
+        "enable_query_string_sort": false,
+        "cache_by_cookies": "ignore",
+        "cookie_names": null,
+        "adaptive_delivery_action": "ignore",
+        "device_group": [],
+        "enable_caching_for_post": false,
+        "l2_caching_enabled": false,
+        "is_slice_configuration_enabled": false,
+        "is_slice_edge_caching_enabled": false,
+        "is_slice_l2_caching_enabled": false,
+        "slice_configuration_range": 1024,
+        "enable_caching_for_options": false,
+        "enable_stale_cache": true,
+        "l2_region": null
+    },
+    "schema_version": 3
+}
