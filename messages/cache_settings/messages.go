@@ -6,6 +6,7 @@ var (
 	CacheSettingsShortDescription = "Cache Settings lets you check, remove or update existing settings, besides creating new ones"
 	CacheSettingsLongDescription  = "Cache Settings lets you check, remove or update existing settings, besides creating new ones"
 	CacheSettingsFlagHelp         = "Displays more information about the cache_settings command"
+	CacheSettingsId               = "Unique identifier for a cache setting"
 
 	// [ list ]
 	CacheSettingsListUsage            = "list [flags]"
@@ -15,7 +16,7 @@ var (
 
 	// [ create ]
 	CacheSettingsCreateUsage                          = "create [flags]"
-	CacheSettingsCreateShortDescription               = "Creates a new Cache Settings"
+	CacheSettingsCreateShortDescription               = "Creates a new Cache Setting"
 	CacheSettingsCreateLongDescription                = "Creates a Cache Setting based on given attributes to be used in edge applications"
 	CacheSettingsCreateFlagEdgeApplicationId          = "Unique identifier for an edge application"
 	CacheSettingsCreateFlagName                       = "The Cache Settings' name"
@@ -40,6 +41,13 @@ var (
 	CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl = "Browser cache settings' maximum TTL"
 	CacheSettingsCreateFlagAdaptiveDeliveryAction     = "Cache Settings' adaptive delivery action"
 
+
+	// [ update ]
+	CacheSettingsUpdateUsage            = "update [flags]"
+	CacheSettingsUpdateShortDescription = "Modifies a Cache Setting"
+	CacheSettingsUpdateLongDescription  = "Modifies a Cache Setting based on given attributes to be used in edge applications"
+	CacheSettingsUpdateOutputSuccess    = "Updated cache setting with ID %d\n"
+
 	// [ describe ]
 	CacheSettingsDescribeUsage               = "describe --application-id <application_id> --cache-settings-id <cache-settings-id> [flags]"
 	CacheSettingsDescribeShortDescription    = "Returns information about a specific cache settings"
@@ -51,4 +59,5 @@ var (
 	CacheSettingsDescribeHelpFlag            = "Displays more information about the describe subcommand"
 
 	CacheSettingsFileWritten = "File successfully written to: %s\n"
+
 )

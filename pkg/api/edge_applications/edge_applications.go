@@ -290,9 +290,26 @@ type CreateCacheSettingsRequest struct {
 	sdk.ApplicationCacheCreateRequest
 }
 
+type UpdateCacheSettingsRequest struct {
+	sdk.ApplicationCachePatchRequest
+	Id int64
+}
+
 func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
 
 	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
+
+	cacheResponse, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return cacheResponse.Results, nil
+}
+
+func (c *Client) UpdateCacheSettings(ctx context.Context, req *UpdateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
+
+	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -307,11 +324,11 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
 		opts.OrderBy = "id"
 	}
 
-    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
-        OrderBy(opts.OrderBy).
-        Page(opts.Page).
-        PageSize(opts.PageSize).
-        Sort(opts.Sort).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
 
 	if err != nil {
 		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
@@ -320,10 +337,10 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
 	return resp, nil
 }
 
-func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID  int64) (*sdk.ApplicationCacheGetOneResponse, error) {
-    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
+func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (*sdk.ApplicationCacheGetOneResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
-		return &sdk.ApplicationCacheGetOneResponse{} ,utils.ErrorPerStatusCode(httpResp, err)
+		return &sdk.ApplicationCacheGetOneResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil
