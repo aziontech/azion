@@ -25,6 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azioncli domains list
+		$ azioncli domains list --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, opts); err != nil {
