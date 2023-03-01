@@ -3,7 +3,6 @@ package edgeapplications
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -314,7 +313,6 @@ func (c *Client) UpdateCacheSettings(ctx context.Context, req *UpdateCacheSettin
 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -339,10 +337,10 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
 	return resp, nil
 }
 
-func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID  int64) (*sdk.ApplicationCacheGetOneResponse, error) {
-    resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
+func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (*sdk.ApplicationCacheGetOneResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
-		return &sdk.ApplicationCacheGetOneResponse{} ,utils.ErrorPerStatusCode(httpResp, err)
+		return &sdk.ApplicationCacheGetOneResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil
