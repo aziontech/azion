@@ -2,7 +2,6 @@ package domains
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -95,8 +94,6 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		Execute()
 
 	if err != nil {
-		fmt.Println(err.Error())
-		fmt.Println(httpResp.Body)
 		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
