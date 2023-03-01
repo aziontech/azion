@@ -24,8 +24,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         SilenceUsage:  true,
         SilenceErrors: true,
         Example: heredoc.Doc(`
-        $ azioncli cache delete --application-id 1234 --cache-settings-id 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
-        $ azioncli cache delete -a 1234 -c 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
+        $ azioncli cache_settings delete --application-id 1673635839 --cache-settings-id 107313
+        $ azioncli cache_settings delete -a 1673635839 -c 107313
         `),
         RunE: func(cmd *cobra.Command, args []string) error {
             if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("cache-settings-id") {
