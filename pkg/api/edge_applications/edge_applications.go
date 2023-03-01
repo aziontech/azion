@@ -1,7 +1,6 @@
 package edgeapplications
 
 import (
-    "fmt"
     "context"
     "errors"
     "net/http"
