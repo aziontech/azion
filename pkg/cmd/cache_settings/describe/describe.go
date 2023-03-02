@@ -15,7 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
@@ -44,13 +43,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			respClient, err := client.GetCacheSettings(ctx, applicationID, cacheSettingsID)
+			resp, err := client.GetCacheSettings(ctx, applicationID, cacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetCache.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, *respClient)
+			formattedFuction, err := format(cmd, resp)
 			if err != nil {
 				return utils.ErrorFormatOut
 			}
@@ -80,7 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, strResp sdk.ApplicationCacheGetOneResponse) ([]byte, error) {
+func format(cmd *cobra.Command, strResp api.CacheSettingsResponse) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err
@@ -92,21 +91,20 @@ func format(cmd *cobra.Command, strResp sdk.ApplicationCacheGetOneResponse) ([]b
 
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("Id: ", strResp.Results.Id)
-	tbl.AddRow("Name: ", strResp.Results.Name)
-	tbl.AddRow("Browser cache settings: ", strResp.Results.BrowserCacheSettings)
-	tbl.AddRow("Browser cache settings maximum TTL: ", strResp.Results.BrowserCacheSettingsMaximumTtl)
-	tbl.AddRow("Cdn cache settings: ", strResp.Results.CdnCacheSettings)
-	tbl.AddRow("Cdn cache settings maximum TTL: ", strResp.Results.CdnCacheSettingsMaximumTtl)
-	tbl.AddRow("Cache by query string: ", strResp.Results.CacheByQueryString)
-	tbl.AddRow("Query string fields: ", strResp.Results.QueryStringFields)
-	tbl.AddRow("Enable query string sort: ", strResp.Results.EnableQueryStringSort)
-	tbl.AddRow("Cache by cookies: ", strResp.Results.CacheByCookies)
-	tbl.AddRow("Cache by cookies: ", strResp.Results.CacheByCookies)
-	tbl.AddRow("Cookie Names: ", strResp.Results.CookieNames)
-	tbl.AddRow("Adaptive delivery action: ", strResp.Results.AdaptiveDeliveryAction)
-	tbl.AddRow("Device group: ", strResp.Results.DeviceGroup)
-	tbl.AddRow("EnableCachingForPost: ", strResp.Results.EnableCachingForPost)
-	tbl.AddRow("L2 caching enabled: ", strResp.Results.L2CachingEnabled)
+	tbl.AddRow("Id: ", strResp.GetId())
+	tbl.AddRow("Name: ", strResp.GetName())
+	tbl.AddRow("Browser cache settings: ", strResp.GetBrowserCacheSettings())
+	tbl.AddRow("Browser cache settings maximum TTL: ", strResp.GetBrowserCacheSettingsMaximumTtl())
+	tbl.AddRow("Cdn cache settings: ", strResp.GetCdnCacheSettings())
+	tbl.AddRow("Cdn cache settings maximum TTL: ", strResp.GetCdnCacheSettingsMaximumTtl())
+	tbl.AddRow("Cache by query string: ", strResp.GetCacheByQueryString())
+	tbl.AddRow("Query string fields: ", strResp.GetQueryStringFields())
+	tbl.AddRow("Enable query string sort: ", strResp.GetEnableCachingForPost())
+	tbl.AddRow("Cache by cookies: ", strResp.GetCacheByCookies())
+	tbl.AddRow("Cookie Names: ", strResp.GetCookieNames())
+	tbl.AddRow("Adaptive delivery action: ", strResp.GetAdaptiveDeliveryAction())
+	tbl.AddRow("Device group: ", strResp.GetDeviceGroup())
+	tbl.AddRow("EnableCachingForPost: ", strResp.GetEnableCachingForPost())
+	tbl.AddRow("L2 caching enabled: ", strResp.GetL2CachingEnabled())
 	return tbl.GetByteFormat(), nil
 }
