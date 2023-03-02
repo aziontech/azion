@@ -238,6 +238,9 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	if err := checkDetail(string(responseBody)); err != nil {
 		return err
 	}
+	if err := checkOrderField(string(responseBody)); err != nil {
+		return err
+	}
 
 	return fmt.Errorf("%s", responseBody)
 }
@@ -268,6 +271,14 @@ func checkTlsVersion(body string) error {
 func checkDetail(body string) error {
 	if strings.Contains(body, "detail") {
 		msgDetail := gjson.Get(body, "detail")
+		return fmt.Errorf("%s", msgDetail.String())
+	}
+	return nil
+}
+
+func checkOrderField(body string) error {
+	if strings.Contains(body, "invalid_order_field") {
+		msgDetail := gjson.Get(body, "invalid_order_field")
 		return fmt.Errorf("%s", msgDetail.String())
 	}
 	return nil

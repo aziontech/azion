@@ -46,13 +46,13 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	domains, err := client.List(ctx, opts)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
+		return err
 	}
 
 	tbl := table.New("ID", "NAME")
 	table.DefaultWriter = f.IOStreams.Out
 	if cmd.Flags().Changed("details") {
-		tbl = table.New("ID", "NAME", "EDGE DOMAIN", "ACTIVE")
+		tbl = table.New("ID", "NAME", "EDGE DOMAIN", "ACTIVE", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -61,7 +61,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	if cmd.Flags().Changed("details") {
 		for _, v := range domains.Results {
-			tbl.AddRow(v.Id, v.Name, *v.DomainName, *v.IsActive)
+			tbl.AddRow(v.Id, v.Name, *v.DomainName, *v.IsActive, v.DigitalCertificateId.Get(), *v.EdgeApplicationId, *v.CnameAccessOnly, *v.Cnames)
 		}
 	} else {
 		for _, v := range domains.Results {
