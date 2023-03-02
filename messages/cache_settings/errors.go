@@ -25,4 +25,7 @@ var (
     ErrorMissingArguments = errors.New("Required flags are missing. You must supply application-id and cache-settings-id as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 
     ErrorFailToDelete = errors.New("Failed to delete the Cache settings: %s. Check your settings and try again. If the error persists, contact Azion support.")
+
+	ErrorMandatoryUpdateFlags   = errors.New("Required flags are missing. You must provide the application-id and cache-settings-id flags when --in flag is not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
+	ErrorMandatoryUpdateInFlags = errors.New("Required flags are missing. You must provide the application-id flag when --in flag is not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 )
