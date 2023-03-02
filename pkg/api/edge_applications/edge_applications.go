@@ -320,10 +320,10 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
     return resp, nil
 }
 
-func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID  int64) (*sdk.ApplicationCacheResults, error) {
+func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID  int64) (CacheSettingsResponse, error) {
     resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
     if err != nil {
-        return &sdk.ApplicationCacheResults{} ,utils.ErrorPerStatusCode(httpResp, err)
+        return nil, utils.ErrorPerStatusCode(httpResp, err)
     }
 
     return &resp.Results, nil
