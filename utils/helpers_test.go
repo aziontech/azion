@@ -85,4 +85,11 @@ func TestCobraCmd(t *testing.T) {
 		require.Contains(t, azJsonData.Function.File, "myfile.js")
 		require.EqualValues(t, azJsonData.Function.Id, 476)
 	})
+
+	t.Run("returns invalid order_by", func(t *testing.T) {
+		body := `{"invalid_order_field":"'edge_domain' is not a valid option for 'order_by'","available_order_fields":["id","name","cnames","cname_access_only","digital_certificate_id","edge_application_id","is_active"]}`
+		err := checkOrderField(body)
+
+		require.Equal(t, `'edge_domain' is not a valid option for 'order_by'`, err.Error())
+	})
 }
