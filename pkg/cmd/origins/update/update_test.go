@@ -1,14 +1,14 @@
 package update
 
 import (
-  "fmt"
+	"fmt"
 	"net/http"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
-	msg "github.com/aziontech/azion-cli/messages/origins"
 )
 
 func TestUpdate(t *testing.T) {
@@ -25,7 +25,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
-      "--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
+			"--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
 			"--name", "onepiece",
 			"--addresses", "asdfsd.cvdf",
 			"--host-header", "asdfsdfsd.cvdf",
@@ -49,7 +49,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
-      "--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
+			"--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
 			"--name", "onepiece",
 			"--addresses", "asdfsd.cvdf",
 			"--host-header", "asdfsdfsd.cvdf",
@@ -74,9 +74,9 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
-      "--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
-      "--in", "./fixtures/update.json",
-    })
+			"--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
+			"--in", "./fixtures/update.json",
+		})
 
 		err := cmd.Execute()
 

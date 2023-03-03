@@ -82,7 +82,16 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.DomainResponseWithResults, error) {
-	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).Execute()
+	// different from other APIs, domains will return internal server error if order by is empty
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).
+		Execute()
 
 	if err != nil {
 		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)

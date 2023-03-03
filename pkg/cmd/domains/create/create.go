@@ -35,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli domains create --name asdfçlkj --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
+        $ azioncli domains create --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
         $ azioncli domains create --name withargs --application-id 1231 --active true
         $ azioncli domains create --in "create.json"
         `),

@@ -38,25 +38,25 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			function, err := client.Get(ctx, application_id)
+			application, err := client.Get(ctx, application_id)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, function)
+			formattedApp, err := format(cmd, application)
 			if err != nil {
 				return utils.ErrorFormatOut
 			}
 
 			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
+				err := cmdutil.WriteDetailsToFile(formattedApp, opts.OutPath, out)
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
 				fmt.Fprintf(out, msg.EdgeApplicationFileWritten, filepath.Clean(opts.OutPath))
 			} else {
-				_, err := out.Write(formattedFuction[:])
+				_, err := out.Write(formattedApp[:])
 				if err != nil {
 					return err
 				}

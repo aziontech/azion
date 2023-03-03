@@ -223,7 +223,7 @@ func checkStatusCode500Error(err error) error {
 	return ErrorInternalServerError
 }
 
-// read the body of the response and returns its content
+// read the body of the response and returns a personalized error or the body if the error is not identified
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := io.ReadAll(httpResp.Body)
 	if err := checkNoProduct(string(responseBody)); err != nil {
@@ -232,22 +232,54 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	if err := checkTlsVersion(string(responseBody)); err != nil {
 		return err
 	}
+	if err := checkOriginlessCacheSettings(string(responseBody)); err != nil {
+		return err
+	}
+	if err := checkDetail(string(responseBody)); err != nil {
+		return err
+	}
+	if err := checkOrderField(string(responseBody)); err != nil {
+		return err
+	}
+
 	return fmt.Errorf("%s", responseBody)
 }
 
 func checkNoProduct(body string) error {
-
 	if strings.Contains(body, "user_has_no_product") {
 		product := gjson.Get(body, "user_has_no_product")
-		return fmt.Errorf("%w: %s", ErrorProductNotOwned, product)
+		return fmt.Errorf("%w: %s", ErrorProductNotOwned, product.String())
 	}
+	return nil
+}
 
+func checkOriginlessCacheSettings(body string) error {
+	if strings.Contains(body, "originless_cache_settings") {
+		msgorigin := gjson.Get(body, "originless_cache_settings")
+		return fmt.Errorf("%s", msgorigin.String())
+	}
 	return nil
 }
 
 func checkTlsVersion(body string) error {
 	if strings.Contains(body, "minimum_tls_version") {
 		return msg.ErrorMinTlsVersion
+	}
+	return nil
+}
+
+func checkDetail(body string) error {
+	if strings.Contains(body, "detail") {
+		msgDetail := gjson.Get(body, "detail")
+		return fmt.Errorf("%s", msgDetail.String())
+	}
+	return nil
+}
+
+func checkOrderField(body string) error {
+	if strings.Contains(body, "invalid_order_field") {
+		msgDetail := gjson.Get(body, "invalid_order_field")
+		return fmt.Errorf("%s", msgDetail.String())
 	}
 	return nil
 }

@@ -31,7 +31,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.OriginsCreateOutputSuccess,  92779), stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.OriginsCreateOutputSuccess, 92779), stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -47,8 +47,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-      "--in", "./fixtures/create.json",
-    })
+			"--in", "./fixtures/create.json",
+		})
 
 		err := cmd.Execute()
 		require.NoError(t, err)

@@ -138,7 +138,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetErr(io.Discard)
 
 		_, err := cmd.ExecuteC()
-		require.EqualError(t, err, "A mandatory flag is missing. You must provide --name, --content-type, and --content-file flags when the --in flag is not sent. Run the command 'azioncli edge_services <subcommand> --help' to display more information and try again")
+		require.ErrorIs(t, err, errmsg.ErrorMandatoryFlagsResource)
 	})
 
 	t.Run("content file cannot be empty", func(t *testing.T) {

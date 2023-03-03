@@ -2,15 +2,14 @@ package describe
 
 import (
 	"log"
-	"os"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
-
 
 func TestDescribe(t *testing.T) {
 	t.Run("describe an domains", func(t *testing.T) {
@@ -28,7 +27,7 @@ func TestDescribe(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-  })
+	})
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

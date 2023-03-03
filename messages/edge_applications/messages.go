@@ -49,7 +49,7 @@ var (
 	EdgeApplicationsPublishUsage                       = "publish"
 	EdgeApplicationsPublishShortDescription            = "Publishes an Edge Application on the Azion platform"
 	EdgeApplicationsPublishLongDescription             = "Publishes an Edge Application based on the Azion’s Platform"
-	EdgeApplicationsPublishRunningCmd                  = "Running pre publish command:\n\n"
+	EdgeApplicationsPublishRunningCmd                  = "Running pre-publish command:\n\n"
 	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
 	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
