@@ -52,7 +52,7 @@ var (
     CacheSettingsDescribeShortDescription    = "Returns information about a specific Cache Settings configuration"
     CacheSettingsDescribeLongDescription     = "Returns information about a specific Cache Settings configuration, based on a given ID, in details"
     CacheSettingsDescribeFlagApplicationID   = "Unique identifier for an edge application. The '--application-id' flag is required"
-    CacheSettingsDescribeFlagCacheSettingsID = "Unique identifier for an origin. The '--cache-settings-id' flag is required"
+    CacheSettingsDescribeFlagCacheSettingsID = "Unique identifier for a Cache Settings configuration. The '--cache-settings-id' flag is required"
     CacheSettingsDescribeFlagOut             = "Exports the output to the given <file_path/file_name.ext>"
     CacheSettingsDescribeFlagFormat          = "Changes the output format passing the json value to the flag"
     CacheSettingsDescribeHelpFlag            = "Displays more information about the describe subcommand"
