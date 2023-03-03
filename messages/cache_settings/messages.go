@@ -3,7 +3,7 @@ package cache_settings
 var (
     // [ cache_settings ]
     CacheSettingsUsage            = "cache_settings"
-    CacheSettingsShortDescription = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
+    CacheSettingsShortDescription = "Cache Settings allows you to manage existing cache configurations and create new ones"
     CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
     CacheSettingsFlagHelp         = "Displays more information about the cache_settings command"
     CacheSettingsId               = "Unique identifier for a Cache Settings configuration"
@@ -11,7 +11,7 @@ var (
     // [ list ]
     CacheSettingsListUsage            = "list [flags]"
     CacheSettingsListShortDescription = "Displays your Cache Settings configurations"
-    CacheSettingsListLongDescription  = "Displays all Cache Settings configurations"
+    CacheSettingsListLongDescription  = "Displays your Cache Settings configurations on the Azion platform"
     CacheSettingsListHelpFlag         = "Displays more information about the list subcommand"
 
     // [ create ]
