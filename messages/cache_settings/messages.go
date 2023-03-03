@@ -10,25 +10,25 @@ var (
 
     // [ list ]
     CacheSettingsListUsage            = "list [flags]"
-    CacheSettingsListShortDescription = "Displays your cache settings configurations"
-    CacheSettingsListLongDescription  = "Displays all cache settings configurations"
+    CacheSettingsListShortDescription = "Displays your Cache Settings configurations"
+    CacheSettingsListLongDescription  = "Displays all Cache Settings configurations"
     CacheSettingsListHelpFlag         = "Displays more information about the list subcommand"
 
     // [ create ]
     CacheSettingsCreateUsage                          = "create [flags]"
-    CacheSettingsCreateShortDescription               = "Creates a new Cache Setting configuration"
+    CacheSettingsCreateShortDescription               = "Creates a new Cache Settings configuration"
     CacheSettingsCreateLongDescription                = "Creates a Cache Settings configuration based on given attributes to be used in edge applications"
     CacheSettingsCreateFlagEdgeApplicationId          = "Unique identifier for an edge application"
     CacheSettingsCreateFlagName                       = "The Cache Settings configuration name"
     CacheSettingsCreateFlagIn                         = "Path to a JSON file containing the attributes of the Cache Settings configuration that will be created; you can use - for reading from stdin"
-    CacheSettingsCreateOutputSuccess                  = "Created cache settings configuration with ID %d\n"
+    CacheSettingsCreateOutputSuccess                  = "Created Cache Settings configuration with ID %d\n"
     CacheSettingsCreateHelpFlag                       = "Displays more information about the create subcommand"
     CacheSettingsCreateFlagBrowserCacheSettings       = "Configures the amount of time that the content is cached in the web browser"
-    CacheSettingsCreateFlagQueryStringFields          = "Gives a list of query strings to be considered in the Cache Settings configuration"
+    CacheSettingsCreateFlagQueryStringFields          = "Gives a list of query strings parameters to be considered in the Cache Settings configuration, that will segregate the cache to the same URL"
     CacheSettingsCreateFlagCookieNames                = "Distinguishes objects in the Azion cache by name/value of cookies"
     CacheSettingsCreateFlagCacheByCookies             = "Whether cache by cookies is active or not"
     CacheSettingsCreateFlagCacheByQueryString         = "Defines how you want the content to be cached according to variations of Query String in your URLs" 
-    CacheSettingsCreateFlagCdnCacheSettings           = "Configures the amount of time Azion's Edge Applications take to cache the content" // Check
+    CacheSettingsCreateFlagCdnCacheSettings           = "Configures the amount of time Azion's Edge Applications take to cache the content. It can either Honor Origin Cache Headers or Override Cache Settings" 
     CacheSettingsCreateFlagCachingForOptions          = "Whether caching for options is active or not"
     CacheSettingsCreateFlagCachingStringSort          = "Whether caching string sort is active or not"
     CacheSettingsCreateFlagCachingForPost             = "Whether caching for post is active or not"
@@ -38,8 +38,8 @@ var (
     CacheSettingsCreateFlagL2CachingEnabled           = "Whether L2 caching is active or not"
     CacheSettingsCreateFlagSliceConfigurationRange    = "Informs slice configuration range"
     CacheSettingsCreateFlagCdnCacheSettingsMaxTtl     = "Informs CDN Cache Settings configuration maximum TTL"
-    CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl = "Informs Browser Cache Settings configuration maximum TTL" // Check
-    CacheSettingsCreateFlagAdaptiveDeliveryAction     = "Informs the Cache Settings configuration adaptive delivery action" // Check
+    CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl = "Informs Browser Cache Settings configuration maximum TTL" 
+    CacheSettingsCreateFlagAdaptiveDeliveryAction     = "Informs the Cache Settings configuration adaptive delivery action." 
 
     // [ update ]
     CacheSettingsUpdateUsage            = "update [flags]"
