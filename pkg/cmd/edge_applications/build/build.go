@@ -143,7 +143,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 		verID, err := cmd.VersionId(path)
 		if err != nil {
-			fmt.Println(err.Error())
 			return err
 		}
 
