@@ -129,7 +129,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
             dir := filepath.Dir(info.PathWorkingDir)
             parent := filepath.Base(dir)
             info.Name = parent
-            fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
+            fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
 	    }
 		return initCdn(cmd, path, info)
 	}
