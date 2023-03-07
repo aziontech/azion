@@ -40,6 +40,10 @@ func TestBuild(t *testing.T) {
 			return nil
 		}
 
+		command.VersionId = func(dir string) (string, error) {
+			return "123456789", nil
+		}
+
 		command.Stat = func(path string) (fs.FileInfo, error) {
 			return nil, nil
 		}

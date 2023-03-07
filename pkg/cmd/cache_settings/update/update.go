@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli cache_settings update -a 1673635839 -c 115247 --name "cachesettingstest"
         $ azioncli cache_settings update -a 1673635839 -c 115247 --name "cachesettingswithfields" --browser-cache-settings honor --cdn-cache-settings honor --cache-by-query-string ignore 
         $ azioncli cache_settings update -a 1673635839 --in "update.json"
-		$ azioncli cache_settings update -a 1674767911 -c 115247 --name "updateagain" --browser-cache-settings override --browser-cache-settings-maximum-ttl 60  --cdn-cache-settings honor --cnd-cache-settings-maximum-ttl 60 --cache-by-query-string ignore --cache-by-query-string whitelist --query-string-fields "heyyy,yoooo" --adaptive-delivery-action ignore --cache-by-cookies blacklist --cookie-names "nem,vem" --enable-caching-for-options true --enable-caching-for-post true --enable-caching-string-sort true --slice-configuration-enabled true
+        $ azioncli cache_settings update -a 1674767911 -c 115247 --name "updateagain" --browser-cache-settings override --browser-cache-settings-maximum-ttl 60  --cdn-cache-settings honor --cnd-cache-settings-maximum-ttl 60 --cache-by-query-string ignore --cache-by-query-string whitelist --query-string-fields "heyyy,yoooo" --adaptive-delivery-action ignore --cache-by-cookies blacklist --cookie-names "nem,vem" --enable-caching-for-options true --enable-caching-for-post true --enable-caching-string-sort true --slice-configuration-enabled true
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

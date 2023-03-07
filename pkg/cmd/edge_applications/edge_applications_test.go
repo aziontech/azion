@@ -251,6 +251,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 			return buildEnvs, nil
 		}
 
+		buildCommand.VersionId = func(dir string) (string, error) {
+			return "123456789", nil
+		}
+
 		buildCommand.GetWorkDir = func() (string, error) {
 			return "", nil
 		}
@@ -402,6 +406,10 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		buildCommand.CommandRunner = func(cmd string, envs []string) (string, int, error) {
 			return "Build completed", 0, nil
+		}
+
+		buildCommand.VersionId = func(dir string) (string, error) {
+			return "123456789", nil
 		}
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {

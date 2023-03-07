@@ -1,11 +1,15 @@
 package build
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/tidwall/gjson"
 
@@ -27,6 +31,7 @@ type BuildCmd struct {
 	GetWorkDir         func() (string, error)
 	EnvLoader          func(path string) ([]string, error)
 	Stat               func(path string) (fs.FileInfo, error)
+	VersionId          func(dir string) (string, error)
 	f                  *cmdutil.Factory
 }
 
@@ -67,6 +72,7 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		WriteFile:          os.WriteFile,
 		Stat:               os.Stat,
 		f:                  f,
+		VersionId:          createVersionID,
 	}
 }
 
@@ -134,6 +140,16 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 	switch typeLang.String() {
 	case "nextjs", "flareact":
+
+		verID, err := cmd.VersionId(path)
+		if err != nil {
+			fmt.Println(err.Error())
+			return err
+		}
+
+		confS := conf.BuildData.Default
+		confS = strings.Replace(confS, "%s", verID, 1)
+		conf.BuildData.Default = confS
 
 		err = runCommand(cmd, conf, envs)
 		if err != nil {
@@ -286,4 +302,34 @@ func writeWebdevEnvFile(cmd *BuildCmd, path string, envs []string) error {
 		return err
 	}
 	return nil
+}
+
+func createVersionID(dir string) (string, error) {
+
+	var bytesDir []byte
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			dat, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			bytesDir = append(bytesDir, dat...)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return "", msg.ErrorCreateVersionID
+	}
+	hash := md5.New()
+	hash.Write(bytesDir)
+
+	stringMd5 := hex.EncodeToString(hash.Sum(nil))
+
+	return stringMd5, nil
 }
