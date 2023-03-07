@@ -327,7 +327,10 @@ func createVersionID(dir string) (string, error) {
 		return "", msg.ErrorCreateVersionID
 	}
 	hash := md5.New()
-	hash.Write(bytesDir)
+	_, err = hash.Write(bytesDir)
+	if err != nil {
+		return "", msg.ErrorCreateVersionID
+	}
 
 	stringMd5 := hex.EncodeToString(hash.Sum(nil))
 
