@@ -20,7 +20,6 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
@@ -125,6 +124,16 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 
+	if info.TypeLang == "cdn" {
+	    if !hasThisFlag(c, "name") {
+            dir := filepath.Dir(info.PathWorkingDir)
+            parent := filepath.Base(dir)
+            info.Name = parent
+            fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
+	    }
+		return initCdn(cmd, path, info)
+	}
+
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
 		return err
@@ -133,14 +142,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	projectName, projectSettings, err := DetectedProjectJS(bytePackageJson)
 	if err != nil {
 		return err
-	}
-
-	if info.TypeLang == "cdn" {
-		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
-		if err != nil {
-			return err
-		}
-		return initCdn(cmd, path, info)
 	}
 
 	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsAutoDetectec, projectSettings) // nolint:all
@@ -578,17 +579,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	var shouldFetchTemplates bool
 	options := &contracts.AzionApplicationCdn{}
 
-	if info.Name == "" {
-		jsonConf := path + "/package.json"
-		file, err := cmd.FileReader(jsonConf)
-		if err != nil {
-			return msg.ErrorOpeningAzionFile
-		}
-
-		name := gjson.Get(string(file), "type")
-		options.Name = name.String()
-	}
-
 	shouldFetchTemplates, err = shouldFetch(cmd, info)
 	if err != nil {
 		return err
@@ -655,7 +645,6 @@ func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectNa
 		// in case package.json does not contain a name field, we set the name as the parent directory
 		if projectName == "" {
 			dir := filepath.Dir(info.PathWorkingDir)
-			fmt.Println(info.PathWorkingDir)
 			parent := filepath.Base(dir)
 			info.Name = parent
 		} else {
