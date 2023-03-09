@@ -10,6 +10,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	"github.com/aziontech/azion-cli/pkg/api/storage"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
@@ -110,10 +111,32 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.runPublishPreCmdLine()
-	if err != nil {
-		return err
-	}
+    // TODO: upload
+
+    // versionID := "b5392936c6c4af3c123c1d0a94d8c576"
+
+    pathStatic := "package.json"
+
+    fileContent, err := os.Open(pathStatic)
+    if err != nil {
+    	return err
+    }
+
+    fmt.Println("esse é o ponto")
+
+    // request := storage.UploadRequest{}
+    clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+    if err = clientUpload.Upload(context.Background(), "b4b28e36f24e0fb8f70b310024e84b5e", pathStatic, fileContent); err != nil {
+        return err    
+    }
+    fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
+    return nil
+
+
+	// err = cmd.runPublishPreCmdLine()
+	// if err != nil {
+	// 	return err
+	// }
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
@@ -319,7 +342,7 @@ func (cmd *publishCmd) runPublishPreCmdLine() error {
 	if err != nil {
 		return msg.ErrReadEnvFile
 	}
-
+ 
 	err = runCommand(cmd, conf, envs)
 	if err != nil {
 		return err

@@ -23,6 +23,9 @@ var (
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
 	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
 
+
+	UploadSuccessful       = "Your Upload completed successfully!\n"
+
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
 	--type string       The type of Edge application
