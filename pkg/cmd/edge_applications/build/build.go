@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -115,24 +114,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		return err
 	}
 
-	envs := make([]string, 0)
-	notFound := false
-
-	_, err = cmd.Stat(path + "/azion/webdev.env")
-	if err == nil {
-		envs, err = cmd.EnvLoader(conf.BuildData.Env)
-		if err != nil {
-			return msg.ErrReadEnvFile
-		}
-	} else if errors.Is(err, os.ErrNotExist) {
-		if typeLang.String() == "nextjs" || typeLang.String() == "flareact" {
-			envs = insertAWSCredentials(cmd)
-			notFound = true
-		}
-	} else {
-		return msg.ErrReadEnvFile
-	}
-
 	err = checkArgsJson(cmd)
 	if err != nil {
 		return err
@@ -150,18 +131,12 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		confS = strings.Replace(confS, "%s", verID, 1)
 		conf.BuildData.Default = confS
 
-		err = runCommand(cmd, conf, envs)
+		err = runCommand(cmd, conf)
 		if err != nil {
 			return err
 		}
-		if notFound {
-			errEnv := writeWebdevEnvFile(cmd, path, envs)
-			if errEnv != nil {
-				return errEnv
-			}
-		}
 	case "javascript":
-		err := runCommand(cmd, conf, envs)
+		err := runCommand(cmd, conf)
 		if err != nil {
 			return err
 		}
@@ -216,7 +191,7 @@ func checkArgsJson(cmd *BuildCmd) error {
 	return nil
 }
 
-func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
+func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 	var command string = conf.BuildData.Cmd
 	if len(conf.BuildData.Cmd) > 0 && len(conf.BuildData.Default) > 0 {
 		command += " && "
@@ -235,7 +210,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(command, envs)
+		output, _, err := cmd.CommandRunner(command, []string{})
 		if err != nil {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunBuildCommand
@@ -244,7 +219,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
-		output, exitCode, err := cmd.CommandRunner(command, envs)
+		output, exitCode, err := cmd.CommandRunner(command, []string{})
 		if exitCode != 0 {
 			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunBuildCommand
@@ -259,47 +234,6 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig, envs []st
 
 	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildSuccessful)
 
-	return nil
-}
-
-func insertAWSCredentials(cmd *BuildCmd) []string {
-
-	var access string
-	var secret string
-	envs := make([]string, 2)
-
-	filled := false
-
-	fmt.Fprintf(cmd.Io.Out, "%s \n", msg.EdgeApplicationsAWSMesaage)
-
-	for !filled {
-		fmt.Fprintf(cmd.Io.Out, "%s ", msg.EdgeApplicationsAWSAcess)
-		fmt.Fscanln(cmd.Io.In, &access)
-		fmt.Fprintf(cmd.Io.Out, "%s ", msg.EdgeApplicationsAWSSecret)
-		fmt.Fscanln(cmd.Io.In, &secret)
-		fmt.Fprintf(cmd.Io.Out, "\n")
-		if len(access) > 0 && len(secret) > 0 {
-			filled = true
-		}
-		envs[0] = "AWS_ACCESS_KEY_ID=" + access
-		envs[1] = "AWS_SECRET_ACCESS_KEY=" + secret
-	}
-
-	return envs
-
-}
-
-func writeWebdevEnvFile(cmd *BuildCmd, path string, envs []string) error {
-	var fileContent string
-
-	for _, env := range envs {
-		fileContent += env + "\n"
-	}
-
-	err := cmd.WriteFile(path+"/azion/webdev.env", []byte(fileContent), 0644)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
