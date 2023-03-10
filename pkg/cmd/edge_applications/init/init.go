@@ -125,12 +125,12 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 
 	if info.TypeLang == "cdn" {
-	    if !hasThisFlag(c, "name") {
-            dir := filepath.Dir(info.PathWorkingDir)
-            parent := filepath.Base(dir)
-            info.Name = parent
-            fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
-	    }
+		if !hasThisFlag(c, "name") {
+			dir := filepath.Dir(info.PathWorkingDir)
+			parent := filepath.Base(dir)
+			info.Name = parent
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
+		}
 		return initCdn(cmd, path, info)
 	}
 
@@ -514,12 +514,8 @@ func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfi
 }
 
 func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
-	packJsonReplaceBuild, err := sjson.Set(string(packageJson), "scripts.build", "azioncli edge_applications build")
-	if err != nil {
-		return msg.FailedUpdatingScriptsBuildField
-	}
 
-	packJsonReplaceDeploy, err := sjson.Set(packJsonReplaceBuild, "scripts.deploy", "azioncli edge_applications publish")
+	packJsonReplaceDeploy, err := sjson.Set(string(packageJson), "scripts.deploy", "azioncli edge_applications publish")
 	if err != nil {
 		return msg.FailedUpdatingScriptsDeployField
 	}
