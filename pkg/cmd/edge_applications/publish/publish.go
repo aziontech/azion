@@ -115,7 +115,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
     	return err
     }
 
-    pathStatic := "./public"
+    pathStatic := ".vercel/output/static"
 
     // Get total amount of files to display progress
     totalFiles := 0
@@ -154,7 +154,9 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
             }
 
             percentage := float64(currentFile+1) * 100 / float64(totalFiles)
-            fmt.Fprintf(f.IOStreams.Out, "\033[2K\r%s - %.2f%% carregado", path, percentage)
+            progress := int(percentage / 10)
+            bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
+            fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s]%s - %.2f%% loading", bar, path, percentage)
             currentFile++
         }
         return nil
