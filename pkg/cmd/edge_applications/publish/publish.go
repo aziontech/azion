@@ -153,7 +153,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
             percentage := float64(currentFile+1) * 100 / float64(totalFiles)
             progress := int(percentage / 10)
             bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-            fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s]%s - %.2f%% loading", bar, path, percentage)
+            fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
             currentFile++
         }
         return nil
@@ -266,7 +266,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
     }
 
     fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
-    fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, domainReturnedName[0])
+    fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https//"+domainReturnedName[0])
     fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
     return nil
