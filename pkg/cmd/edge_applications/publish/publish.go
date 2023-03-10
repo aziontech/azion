@@ -164,9 +164,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
         return err
     }
 
-
     fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
-    return nil
 
     conf, err := cmd.GetAzionJsonContent()
     if err != nil {
