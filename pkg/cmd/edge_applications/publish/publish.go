@@ -38,6 +38,8 @@ type publishCmd struct {
     WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
     EnvLoader             func(path string) ([]string, error)
     BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
+    Open                  func(name string) (*os.File, error)
+    FilepathWalk          func(root string, fn filepath.WalkFunc) error
     f                     *cmdutil.Factory
 }
 
@@ -57,6 +59,8 @@ func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
         GetAzionJsonContent:   utils.GetAzionJsonContent,
         WriteAzionJsonContent: utils.WriteAzionJsonContent,
         GetAzionJsonCdn:       utils.GetAzionJsonCdn,
+        Open:                  os.Open,
+        FilepathWalk:          filepath.Walk,
         f:                     f,
     }
 }
@@ -119,7 +123,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
     // Get total amount of files to display progress
     totalFiles := 0
-    if err = filepath.Walk(pathStatic, func(path string, info os.FileInfo, err error) error {
+    if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
         if err != nil {
             return err
         }
@@ -134,17 +138,17 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
     clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
     currentFile := 0
-    if err = filepath.Walk(pathStatic, func(path string, info os.FileInfo, err error) error {
+    if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
         defer time.Sleep(time.Millisecond*1)
         if err != nil {
             return err
         }
         if !info.IsDir() {
-            fileContent, err := os.Open(path)
+            fileContent, err := cmd.Open(path)
             if err != nil {
                 return err
             }
- 
+
             fileString := strings.TrimPrefix(path, pathStatic)
             if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileString, fileContent); err != nil {
                 return err

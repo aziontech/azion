@@ -1,6 +1,7 @@
 package edge_applications
 
 import (
+    "path/filepath"
 	"io/fs"
 	"os"
 	"testing"
@@ -184,7 +185,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		buildEnvs := []string{"AWS_ACCESS_KEY_ID=123456789", "AWS_SECRET_ACCESS_KEY=987654321"}
 
 		// INIT
 
@@ -193,6 +193,11 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		initCmd.LookPath = func(bin string) (string, error) {
 			return "", nil
 		}
+
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
 
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -248,7 +253,7 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		}
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
-			return buildEnvs, nil
+			return []string{}, nil
 		}
 
 		buildCommand.VersionId = func(dir string) (string, error) {
@@ -271,12 +276,20 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		publishCmd := publishcmd.NewPublishCmd(f)
 
+        publishCmd.Open = func(name string) (*os.File, error) {
+            return nil, nil
+        }
+
+        publishCmd.FilepathWalk = func(root string, fn filepath.WalkFunc) error {
+            return nil
+        }
+
 		publishCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
 		}
 
 		publishCmd.EnvLoader = func(path string) ([]string, error) {
-			return buildEnvs, nil
+			return []string{}, nil
 		}
 
 		publishCmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
@@ -349,7 +362,6 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		buildEnvs := []string{"AWS_ACCESS_KEY_ID=123456789", "AWS_SECRET_ACCESS_KEY=987654321"}
 
 		// INIT
 
@@ -413,7 +425,7 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 		}
 
 		buildCommand.EnvLoader = func(path string) ([]string, error) {
-			return buildEnvs, nil
+			return []string{}, nil
 		}
 
 		buildCommand.Stat = func(path string) (fs.FileInfo, error) {
@@ -436,12 +448,21 @@ func TestEdgeApplicationsCmd(t *testing.T) {
 
 		publishCmd := publishcmd.NewPublishCmd(f)
 
+
+        publishCmd.Open = func(name string) (*os.File, error) {
+            return nil, nil
+        }
+
+        publishCmd.FilepathWalk = func(root string, fn filepath.WalkFunc) error {
+            return nil
+        }
+
 		publishCmd.FileReader = func(path string) ([]byte, error) {
 			return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
 		}
 
 		publishCmd.EnvLoader = func(path string) ([]string, error) {
-			return buildEnvs, nil
+			return []string{}, nil
 		}
 
 		publishCmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
