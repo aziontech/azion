@@ -2,7 +2,6 @@ package publish
 
 import (
     "strings"
-    "time"
     "context"
     "encoding/json"
     "fmt"
@@ -102,7 +101,6 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
     }
 
     typeLang := gjson.Get(string(file), "type")
-    versionID := gjson.Get(string(file), "version-id")
 
     if typeLang.String() == "cdn" {
         err := publishCdn(cmd, f)
@@ -118,6 +116,8 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
     if err != nil {
         return err
     }
+
+    versionID := gjson.Get(string(file), "version-id")
 
     pathStatic := ".vercel/output/static"
 
@@ -139,7 +139,6 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
     currentFile := 0
     if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
-        defer time.Sleep(time.Millisecond*1)
         if err != nil {
             return err
         }
@@ -150,7 +149,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
             }
 
             fileString := strings.TrimPrefix(path, pathStatic)
-            if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileString, fileContent); err != nil {
+            if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileContent); err != nil {
                 return err
             }
 
