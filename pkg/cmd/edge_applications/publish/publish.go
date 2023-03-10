@@ -108,11 +108,11 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
         return nil
     }
 
-    //Run build command
+    // Run build command
     build := cmd.BuildCmd(f)
     err = build.Run()
     if err != nil {
-    	return err
+        return err
     }
 
     pathStatic := ".vercel/output/static"
@@ -131,11 +131,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
         return err
     }
 
-    url := "https://storage-api.azion.com"
-    if strings.Contains(f.Config.GetString("api_url"), "stage") {
-        url = "https://stage-storage-api.azion.com"
-    }
-    clientUpload := storage.NewClient(f.HttpClient, url, f.Config.GetString("token"))
+    clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
     currentFile := 0
     if err = filepath.Walk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -148,8 +144,9 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
             if err != nil {
                 return err
             }
-
-            if err = clientUpload.Upload(context.Background(), versionID.String(), path, path, fileContent); err != nil {
+ 
+            fileString := strings.TrimPrefix(path, pathStatic)
+            if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileString, fileContent); err != nil {
                 return err
             }
 
