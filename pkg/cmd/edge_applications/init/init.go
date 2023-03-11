@@ -454,8 +454,6 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 	showInstructions(cmd, `	[ General Instructions ]
     - Requirements:
         - Tools: npm
-        - AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-        - Customize the path to static content - AWS S3 storage (.azion/kv.json)
     [ Usage ]
     	- Build Command: npm run build
     	- Publish Command: npm run deploy
@@ -482,8 +480,6 @@ func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplication
 	showInstructions(cmd, `	[ General Instructions ]
 	- Requirements:
 		- Tools: npm
-		- AWS Credentials (./azion/webdev.env): AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-		- Customize the path to static content - AWS S3 storage (.azion/kv.json)
 	[ Usage ]
 		- Install Command: npm install
 		- Build Command: npm run build

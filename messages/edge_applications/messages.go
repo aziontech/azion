@@ -67,10 +67,6 @@ var (
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
 
-	EdgeApplicationsAWSMesaage = "Please inform your AWS credentials below:\n"
-	EdgeApplicationsAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
-	EdgeApplicationsAWSAcess   = "AWS_ACCESS_KEY_ID: "
-
 	//CRUD
 	//list cmd
 	EdgeApplicationsListUsage            = "list [flags]"
