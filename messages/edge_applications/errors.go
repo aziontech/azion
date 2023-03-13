@@ -28,7 +28,6 @@ var (
 	FailedUpdatingScriptsDeployField   = errors.New("Failed to update scripts.deploy field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
 	FailedUpdatingScriptsBuildField    = errors.New("Failed to update scripts.build field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
 	FailedUpdatingNameField            = errors.New("Failed to update name field in package.json file. Make sure you have the needed permissions and try again. If the error persists, contact the Azion support")
-	ErrorMandatoryEnvs                 = errors.New("You must provide the following enviroment variables: AWS_SECRET_ACCESS_KEY and AWS_ACCESS_KEY_ID. Please edit the following file 'azion/webdev.env' and add your credentials")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingPublicDirectory = errors.New("Failed to create the public directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
@@ -64,5 +63,6 @@ var (
 	ErrorMissingAzionJson            = errors.New("Azion.json file is missing. Please initialize and publish your project first before using cascade delete")
 	ErrorFailedUpdateAzionJson       = errors.New("Failed to update azion.json file to remove IDs of deleted resource")
 
-	ErrorNoFieldInformed             = errors.New("Inform at least one field to be updated. It is not possible to update an edge application without specifying the fields that will be updated. Run ‘azioncli edge_applications update --help’ to display more information and try again.  If the error persists, contact Azion support.")
+	ErrorNoFieldInformed = errors.New("Inform at least one field to be updated. It is not possible to update an edge application without specifying the fields that will be updated. Run ‘azioncli edge_applications update --help’ to display more information and try again.  If the error persists, contact Azion support.")
+	ErrorCreateVersionID = errors.New("Failed to create the VersionID.The VersionID is generated based on the files in your working directory. Check the files in your working directory and try again. If the error persists, contact Azion support")
 )

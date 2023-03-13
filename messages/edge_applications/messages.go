@@ -18,10 +18,13 @@ var (
 	EdgeApplicationsBuildShortDescription = "Builds an Edge Application"
 	EdgeApplicationsBuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Computing Platform"
 	EdgeApplicationsBuildRunningCmd       = "Running build step command:\n\n"
-	EdgeApplicationsBuildStart            = "Building your Edge Application\n"
+	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
 	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
+
+
+	UploadSuccessful       = "Your Upload completed successfully!\n"
 
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
@@ -42,6 +45,7 @@ var (
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init subcommand"
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully"
 	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n"
+	EdgeApplicationsInitNameNotSentCdn    = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
 	EdgeApplicationsInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
@@ -62,10 +66,6 @@ var (
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
-
-	EdgeApplicationsAWSMesaage = "Please inform your AWS credentials below:\n"
-	EdgeApplicationsAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
-	EdgeApplicationsAWSAcess   = "AWS_ACCESS_KEY_ID: "
 
 	//CRUD
 	//list cmd

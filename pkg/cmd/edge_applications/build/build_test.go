@@ -40,6 +40,10 @@ func TestBuild(t *testing.T) {
 			return nil
 		}
 
+		command.VersionId = func(dir string) (string, error) {
+			return "123456789", nil
+		}
+
 		command.Stat = func(path string) (fs.FileInfo, error) {
 			return nil, nil
 		}
@@ -137,34 +141,5 @@ func TestBuild(t *testing.T) {
 
 		err := command.run()
 		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
-	})
-
-	t.Run("invalid env", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		jsonContent := bytes.NewBufferString(`
-	   {
-			"build": {
-		   		"cmd": "npm run build",
-				"output-ctrl": "on-error"
-	   		},
-			"type": "javascript"
-	   }
-	   `)
-
-		command := newBuildCmd(f)
-
-		command.FileReader = func(path string) ([]byte, error) {
-			return jsonContent.Bytes(), nil
-		}
-		command.Stat = func(path string) (fs.FileInfo, error) {
-			return nil, nil
-		}
-		command.EnvLoader = func(path string) ([]string, error) {
-			return nil, utils.ErrorLoadingEnvVars
-		}
-
-		err := command.run()
-		require.ErrorIs(t, err, msg.ErrReadEnvFile)
 	})
 }
