@@ -18,10 +18,13 @@ var (
 	EdgeApplicationsBuildShortDescription = "Builds an Edge Application"
 	EdgeApplicationsBuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Computing Platform"
 	EdgeApplicationsBuildRunningCmd       = "Running build step command:\n\n"
-	EdgeApplicationsBuildStart            = "Building your Edge Application\n"
+	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
 	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
+
+
+	UploadSuccessful       = "Your Upload completed successfully!\n"
 
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
@@ -63,10 +66,6 @@ var (
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
-
-	EdgeApplicationsAWSMesaage = "Please inform your AWS credentials below:\n"
-	EdgeApplicationsAWSSecret  = "AWS_SECRET_ACCESS_KEY: "
-	EdgeApplicationsAWSAcess   = "AWS_ACCESS_KEY_ID: "
 
 	//CRUD
 	//list cmd

@@ -6,13 +6,17 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -33,6 +37,8 @@ type publishCmd struct {
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
+	Open                  func(name string) (*os.File, error)
+	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	f                     *cmdutil.Factory
 }
 
@@ -52,6 +58,8 @@ func NewPublishCmd(f *cmdutil.Factory) *publishCmd {
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		GetAzionJsonCdn:       utils.GetAzionJsonCdn,
+		Open:                  os.Open,
+		FilepathWalk:          filepath.Walk,
 		f:                     f,
 	}
 }
@@ -64,8 +72,8 @@ func NewCobraCmd(publish *publishCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_applications publish --help
-		`),
+        $ azioncli edge_applications publish --help
+        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.f)
 		},
@@ -81,6 +89,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *publishCmd) run(f *cmdutil.Factory) error {
+
+	// Run build command
+	build := cmd.BuildCmd(f)
+	err := build.Run()
+	if err != nil {
+		return err
+	}
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
@@ -103,17 +118,54 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 		return nil
 	}
 
-	//Run build command
-	build := cmd.BuildCmd(f)
-	err = build.Run()
-	if err != nil {
+	versionID := gjson.Get(string(file), "version-id")
+
+	pathStatic := ".vercel/output/static"
+
+	// Get total amount of files to display progress
+	totalFiles := 0
+	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			totalFiles++
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
 
-	err = cmd.runPublishPreCmdLine()
-	if err != nil {
+	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+
+	currentFile := 0
+	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			fileContent, err := cmd.Open(path)
+			if err != nil {
+				return err
+			}
+
+			fileString := strings.TrimPrefix(path, pathStatic)
+			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileContent); err != nil {
+				return err
+			}
+
+			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
+			progress := int(percentage / 10)
+			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
+			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
+			currentFile++
+		}
+		return nil
+	}); err != nil {
 		return err
 	}
+
+	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
@@ -218,7 +270,7 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
-	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, domainReturnedName[0])
+	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https//"+domainReturnedName[0])
 	fmt.Fprintf(cmd.f.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
