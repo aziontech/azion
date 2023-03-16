@@ -138,6 +138,8 @@ func (cmd *publishCmd) run(f *cmdutil.Factory) error {
 
 	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
+	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
+
 	currentFile := 0
 	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
