@@ -1,0 +1,16 @@
+{
+    "results": {
+        "id": 6597,
+        "name": "imimimi",
+        "language": "javascript",
+        "code": "async function handleRequest(request) {\n    return new Response(\"Hello World!\",\n      {\n          status:204\n      })\n   }\n   addEventListener(\"fetch\", event => {\n    event.respondWith(handleRequest(event.request))\n   })",
+        "json_args": {},
+        "function_to_run": "",
+        "initiator_type": "edge_application",
+        "active": true,
+        "last_editor": "patrickmenott@gmail.com",
+        "modified": "2022-06-30T19:26:17.003242Z",
+        "reference_count": 0
+    },
+    "schema_version": 3
+}

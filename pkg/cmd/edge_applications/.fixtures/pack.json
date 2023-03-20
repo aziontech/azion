@@ -1,0 +1,26 @@
+{
+    "name": "cf-pages-test",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint",
+        "cloudflare:build": "node node_modules/@cloudflare/next-on-pages/bin/index.js --experimental-minify",
+        "postinstall": "patch-package",
+        "deploy": "azioncli edge_applications publish"
+    },
+    "dependencies": {
+        "next": "^12",
+        "react": "^18",
+        "react-dom": "^18"
+    },
+    "devDependencies": {
+        "@cloudflare/next-on-pages": "^0.1.0",
+        "eslint": "8.26.0",
+        "eslint-config-next": "13.0.0",
+        "patch-package": "^6.5.0",
+        "vercel": "^28.4.14"
+    }
+}
