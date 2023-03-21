@@ -9,34 +9,42 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/domains"
-	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/spf13/cobra"
 )
 
+var edgeApplicationID int64
+var phase string
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.DomainsListUsage,
-		Short:         msg.DomainsListShortDescription,
-		Long:          msg.DomainsListLongDescription,
+		Use:           msg.RulesEngineListUsage,
+		Short:         msg.RulesEngineListShortDescription,
+		Long:          msg.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-		$ azioncli rules_engine list
-		$ azioncli rules_engine list --details
+		$ azioncli rules_engine list -a 1234 -p request
+		$ azioncli rules_engine list --application-id 1234 --phase response --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") {
+				return msg.ErrorMandatoryListFlags
+			}
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
+				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.DomainsListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
+	cmd.Flags().Int64VarP(&edgeApplicationID, "application-id", "a", 0, "")
+	cmd.Flags().StringVarP(&phase, "phase", "p", "request", "")
 	return cmd
 }
 
@@ -44,7 +52,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	domains, err := client.List(ctx, opts)
+	rules, err := client.ListRulesEngine(ctx, opts, edgeApplicationID, phase)
 	if err != nil {
 		return err
 	}
@@ -52,7 +60,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	tbl := table.New("ID", "NAME")
 	table.DefaultWriter = f.IOStreams.Out
 	if cmd.Flags().Changed("details") {
-		tbl = table.New("ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE")
+		tbl = table.New("ID", "NAME", "ORDER", "PHASE", "ACTIVE")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -60,11 +68,11 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	if cmd.Flags().Changed("details") {
-		for _, v := range domains.Results {
-			tbl.AddRow(v.Id, v.Name, *v.DomainName, v.DigitalCertificateId.Get(), *v.EdgeApplicationId, *v.CnameAccessOnly, *v.Cnames, *v.IsActive)
+		for _, v := range rules.Results {
+			tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
 		}
 	} else {
-		for _, v := range domains.Results {
+		for _, v := range rules.Results {
 			tbl.AddRow(v.Id, v.Name)
 		}
 	}
