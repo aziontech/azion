@@ -1,7 +1,6 @@
 package domains
 
 var (
-	//domains cmd
 	RulesEngineUsage            = "rules_engine"
 	RulesEngineShortDescription = "Create rules engines for edges on Azion's platform"
 	RulesEngineLongDescription  = "Create rules engines for edges on Azion's platform"
@@ -10,8 +9,8 @@ var (
 
 	//list cmd
 	RulesEngineListUsage            = "list [flags]"
-	RulesEngineListShortDescription = "Displays your domains"
-	RulesEngineListLongDescription  = "Displays all your domain references to your edge locations"
+	RulesEngineListShortDescription = "Displays your rules engines"
+	RulesEngineListLongDescription  = "Displays all your rules engine references to your edge locations"
 	RulesEngineListHelpFlag         = "Displays more information about the list subcommand"
 	RulesEngineListHelpPhase        = "Rules Engine Phase <request|response>"
 )
