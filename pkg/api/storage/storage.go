@@ -36,7 +36,6 @@ func (c *Client) Upload(ctx context.Context, versionID, path string, file *os.Fi
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		fmt.Println(err.Error())
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
