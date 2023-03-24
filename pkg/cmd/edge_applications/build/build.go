@@ -20,8 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildType = "standard"
-
 type BuildCmd struct {
 	Io                 *iostreams.IOStreams
 	WriteFile          func(filename string, data []byte, perm fs.FileMode) error
