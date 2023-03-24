@@ -41,8 +41,8 @@ type EdgeApplicationResponse interface {
 	GetDeviceDetection() bool
 	GetEdgeFirewall() bool
 	GetEdgeFunctions() bool
-	GetHttpPort() int64
-	GetHttpsPort() int64
+	GetHttpPort() interface{}
+	GetHttpsPort() interface{}
 	GetImageOptimization() bool
 	GetL2Caching() bool
 	GetLoadBalancer() bool
@@ -50,6 +50,16 @@ type EdgeApplicationResponse interface {
 	GetNext() string
 	GetRawLogs() bool
 	GetWebApplicationFirewall() bool
+}
+
+type RulesEngineResponse interface {
+	GetId() int64
+	GetPhase() string
+	GetBehaviors() []sdk.RulesEngineResultResponseBehaviors
+	GetCriteria() [][]sdk.RulesEngineCriteria
+	GetIsActive() bool
+	GetOrder() int64
+	GetName() string
 }
 
 type Client struct {
@@ -370,4 +380,15 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 	}
 
 	return resp, nil
+}
+
+func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID int64, phase string) (RulesEngineResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
+	if err != nil {
+		return &sdk.RulesEngineResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }

@@ -35,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMandatoryListFlags
 			}
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
+				return fmt.Errorf(msg.ErrorGetRulesEngines.Error(), err)
 			}
 			return nil
 		},
