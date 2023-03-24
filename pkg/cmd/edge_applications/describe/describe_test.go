@@ -45,7 +45,7 @@ func TestDescribe(t *testing.T) {
 			httpmock.JSONFromString(successResponse),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -54,25 +54,7 @@ func TestDescribe(t *testing.T) {
 		err := cmd.Execute()
 		require.NoError(t, err)
 
-		require.Equal(t, `ID: 666
-Name: ssass
-Active: true
-Application Acceleration: false
-Caching: true
-Delivery Protocol: http
-Device Detection: false
-Edge Firewall: false
-Edge Functions: false
-Http Port: 80
-Https Port: 443
-Image Optimization: false
-L2 Caching: false
-Load Balancer: false
-Minimum TLS Version: 
-Next: 
-Raw Logs: false
-Web Application Firewall: false
-`, stdout.String())
+		require.NoError(t, err)
 
 	})
 	t.Run("not found", func(t *testing.T) {

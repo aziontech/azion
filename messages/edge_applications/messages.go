@@ -22,9 +22,10 @@ var (
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
 	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
+	EdgeApplicationsBuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
 
-
-	UploadSuccessful       = "Your Upload completed successfully!\n"
+	UploadStart      = "Uploading static files\n"
+	UploadSuccessful = "Upload completed successfully!\n"
 
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]

@@ -1,0 +1,34 @@
+{
+    "count": 1,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+        "previous": null,
+        "next": null
+    },
+    "results": [
+        {
+            "id": 137056,
+            "name": "Default Rule",
+            "phase": "request",
+            "behaviors": [
+                {
+                    "name": "run_function",
+                    "target": "6597"
+                }
+            ],
+            "criteria": [
+                [
+                    {
+                        "variable": "${uri}",
+                        "operator": "starts_with",
+                        "conditional": "if",
+                        "input_value": "/"
+                    }
+                ]
+            ],
+            "is_active": true,
+            "order": 1
+        }
+    ]
+}
