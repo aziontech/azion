@@ -1,14 +1,12 @@
 package build
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -21,8 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
-
-var buildType = "standard"
 
 type BuildCmd struct {
 	Io                 *iostreams.IOStreams
@@ -131,12 +127,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 			return err
 		}
 
-		verIDGet := gjson.Get(string(file), "version-id")
-		if buildType == "publish" && verIDGet.String() == verID {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsBuildNotNecessary)
-			return nil
-		}
-
 		confS := conf.BuildData.Default
 		confS = strings.Replace(confS, "%s", verID, 1)
 		conf.BuildData.Default = confS
@@ -146,13 +136,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 			return err
 		}
 
-		// if there was a change, we generate a post-build version-id and save it to the file
-		buildID, err := cmd.VersionId(path)
-		if err != nil {
-			return err
-		}
-
-		azJson, err := sjson.Set(string(file), "version-id", buildID)
+		azJson, err := sjson.Set(string(file), "version-id", verID)
 		if err != nil {
 			return utils.ErrorWritingAzionJsonFile
 		}
@@ -176,7 +160,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 }
 
 func (cmd *BuildCmd) Run() error {
-	buildType = "publish"
 	return cmd.run()
 }
 
@@ -266,34 +249,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 }
 
 func createVersionID(dir string) (string, error) {
-	var bytesDir []byte
-
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() && info.Name() != "azion.json" {
-			dat, err := os.ReadFile(path)
-			if err != nil {
-				return err
-			}
-			bytesDir = append(bytesDir, dat...)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return "", msg.ErrorCreateVersionID
-	}
-
-	hash := md5.New()
-	_, err = hash.Write(bytesDir)
-	if err != nil {
-		return "", msg.ErrorCreateVersionID
-	}
-
-	stringMd5 := hex.EncodeToString(hash.Sum(nil))
-
-	return stringMd5, nil
+	t := time.Now()
+	timeFormatted := t.Format("20060102150405")
+	return timeFormatted, nil
 }

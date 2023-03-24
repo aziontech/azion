@@ -41,8 +41,8 @@ type EdgeApplicationResponse interface {
 	GetDeviceDetection() bool
 	GetEdgeFirewall() bool
 	GetEdgeFunctions() bool
-	GetHttpPort() int64
-	GetHttpsPort() int64
+	GetHttpPort() interface{}
+	GetHttpsPort() interface{}
 	GetImageOptimization() bool
 	GetL2Caching() bool
 	GetLoadBalancer() bool
