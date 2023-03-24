@@ -160,7 +160,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 }
 
 func (cmd *BuildCmd) Run() error {
-	buildType = "publish"
 	return cmd.run()
 }
 
