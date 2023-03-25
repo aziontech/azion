@@ -14,7 +14,6 @@ var (
 	RulesEngineListShortDescription = "Displays your rules engines"
 	RulesEngineListLongDescription  = "Displays all your rules engine references to your edge locations"
 	RulesEngineListHelpFlag         = "Displays more information about the list subcommand"
-  RulesEngineListHelpPhase        = "Rules Engine Phase <request|response>"
 
 	//describe cmd
 	RulesEngineDescribeUsage            = "describe --application-id <application_id> --phase <phase> --rule-id <rule_id> [flags]"
@@ -24,7 +23,6 @@ var (
 	RulesEngineDescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	RulesEngineDescribeHelpFlag         = "Displays more information about the describe command"
 	RulesEngineFileWritten              = "File successfully written to: %s\n"
-
 
 	// [ delete ]
 	RulesEngineDeleteUsage             = "delete [flags]"
