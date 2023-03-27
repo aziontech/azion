@@ -385,9 +385,6 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID int64, phase string) (RulesEngineResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
 	if err != nil {
-		return &sdk.RulesEngineResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-	}
-	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
