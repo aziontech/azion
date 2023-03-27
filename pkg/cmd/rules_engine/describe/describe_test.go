@@ -1,67 +1,39 @@
 package describe
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
-var successResponse string = `
-{
-	"results": {
-	  "id": 666,
-	  "name": "ssass",
-	  "delivery_protocol": "http",
-	  "http_port": [80],
-	  "https_port": [443],
-	  "minimum_tls_version": "",
-	  "active": true,
-	  "debug_rules": false,
-	  "application_acceleration": false,
-	  "caching": true,
-	  "device_detection": false,
-	  "edge_firewall": false,
-	  "edge_functions": false,
-	  "image_optimization": false,
-	  "l2_caching": false,
-	  "load_balancer": false,
-	  "raw_logs": false,
-	  "web_application_firewall": false
-	},
-	"schema_version": 3
-  }
-`
-
 func TestDescribe(t *testing.T) {
-	t.Run("describe an edge application", func(t *testing.T) {
+	t.Run("describe an domains", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/666"),
-			httpmock.JSONFromString(successResponse),
+			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"-a", "666"})
+		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-
-		require.NoError(t, err)
-
 	})
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1234"),
+			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/666"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -69,49 +41,42 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1234"})
-
 		err := cmd.Execute()
-
 		require.Error(t, err)
 	})
 
-	t.Run("no id sent", func(t *testing.T) {
+	t.Run("missing mandatory flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1234"),
+			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/1"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
-
 		cmd := NewCmd(f)
+		cmd.SetArgs([]string{})
 
 		err := cmd.Execute()
-
-		require.Error(t, err)
+		require.ErrorIs(t, err, msg.ErrorMandatoryFlags)
 	})
 
 	t.Run("export to a file", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/123"),
-			httpmock.JSONFromString(successResponse),
+			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-
 		path := "./out.json"
-
-		cmd.SetArgs([]string{"--application-id", "123", "--out", path})
+		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {
-			t.Fatalf("error executing cmd")
+			log.Println("error executing cmd err: ", err.Error())
 		}
 
 		_, err = os.ReadFile(path)
@@ -126,7 +91,5 @@ func TestDescribe(t *testing.T) {
 
 		require.Equal(t, `File successfully written to: out.json
 `, stdout.String())
-
 	})
-
 }

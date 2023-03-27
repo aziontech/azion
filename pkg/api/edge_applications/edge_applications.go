@@ -52,6 +52,16 @@ type EdgeApplicationResponse interface {
 	GetWebApplicationFirewall() bool
 }
 
+type RulesEngineResponse interface {
+	GetId() int64
+	GetPhase() string
+	GetBehaviors() []sdk.RulesEngineResultResponseBehaviors
+	GetCriteria() [][]sdk.RulesEngineCriteria
+	GetIsActive() bool
+	GetOrder() int64
+	GetName() string
+}
+
 type Client struct {
 	apiClient *sdk.APIClient
 }
@@ -370,6 +380,14 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 	}
 
 	return resp, nil
+}
+
+func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID int64, phase string) (RulesEngineResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }
 
 func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64, phase string, ruleID int64) error {
