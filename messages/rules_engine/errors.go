@@ -11,4 +11,8 @@ var (
 
 	ErrorMissingArgumentsDelete = errors.New("Required flags are missing. You must supply application-id and phase and rule-id as arguments. Run 'azioncli <command> <subcommand> --help' command to display more information and try again")
 	ErrorFailToDelete           = errors.New("Failed to delete the Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
+
+	ErrorMandatoryCreateFlags = errors.New("Required flags are missing. You must provide application-id and phase flags when the --application-id and --in flag are not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
+
+	ErrorCreateRulesEngine = errors.New("Failed to create the Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
 )

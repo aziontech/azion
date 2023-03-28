@@ -33,4 +33,15 @@ var (
 	RulesEngineDeleteFlagRuleID        = "The Rules Engine 's key unique identifier"
 	RulesEngineDeleteFlagPhase         = "phase is request input or response output"
 	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
+
+	// [ create ]
+	RulesEngineCreateUsage                 = "create [flags]"
+	RulesEngineCreateShortDescription      = "Creates a new Rules Engine"
+	RulesEngineCreateLongDescription       = "Creates an Rules Engine based on given attributes to be used in edge applications"
+	RulesEngineCreateFlagEdgeApplicationID = "Unique identifier for an edge application"
+	RulesEngineCreateFlagName              = "The rule name"
+	RulesEngineCreateFlagPhase             = "The rule phase"
+	RulesEngineCreateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
+	RulesEngineCreateOutputSuccess         = "Created Rules Engine with ID %d\n"
+	RulesEngineCreateHelpFlag              = "Displays more information about the create subcommand"
 )

@@ -6,6 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/list"
+	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/create"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	rulesEngineCmd.AddCommand(list.NewCmd(f))
 	rulesEngineCmd.AddCommand(describe.NewCmd(f))
 	rulesEngineCmd.AddCommand(delete.NewCmd(f))
+	rulesEngineCmd.AddCommand(create.NewCmd(f))
 
 	rulesEngineCmd.Flags().BoolP("help", "h", false, msg.RulesEngineFlagHelp)
 
