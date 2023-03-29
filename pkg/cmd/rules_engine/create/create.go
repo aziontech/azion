@@ -1,96 +1,122 @@
 package create
 
 import (
-    "context"
-    "fmt"
-    "os"
+	"context"
+	"fmt"
+	"os"
 
-    "github.com/MakeNowJust/heredoc"
+	"github.com/MakeNowJust/heredoc"
 
-    msg "github.com/aziontech/azion-cli/messages/rules_engine"
-    api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
-    "github.com/aziontech/azion-cli/pkg/cmdutil"
-    "github.com/aziontech/azion-cli/utils"
-    "github.com/spf13/cobra"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
+	"github.com/spf13/cobra"
 )
-
-type Criterio struct {
-    Conditional string `json:"conditional"`
-    Variable    string `json:"variable"`
-    Operator    string `json:"operator"`
-    InputValue  string `json:"input_value"`
-}
-
-type Behaviors struct {
-    Name string `json:"name"`
-}
 
 type Fields struct {
-    Name          string       `json:"name"`
-    Criteria      [][]Criterio `json:"criteria"`
-    Behaviors     []Behaviors  `json:"behaviors"`
+	ApplicationID int64
+	Phase         string
+	Path          string
 }
 
-var (
-    ApplicationID int64 
-    Phase         string
-    Path          string      
-)
-
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-    fields := &Fields{}
+	fields := &Fields{}
 
-    cmd := &cobra.Command{
-        Use:           msg.RulesEngineCreateUsage,
-        Short:         msg.RulesEngineCreateShortDescription,
-        Long:          msg.RulesEngineCreateLongDescription,
-        SilenceUsage:  true,
-        SilenceErrors: true,
-        Example: heredoc.Doc(`
+	cmd := &cobra.Command{
+		Use:           msg.RulesEngineCreateUsage,
+		Short:         msg.RulesEngineCreateShortDescription,
+		Long:          msg.RulesEngineCreateLongDescription,
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Example: heredoc.Doc(`
         `),
-        RunE: func(cmd *cobra.Command, args []string) error {
-            if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") {
-                return msg.ErrorMandatoryCreateFlags
-            }
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") {
+				return msg.ErrorMandatoryCreateFlags
+			}
 
-            request := api.CreateRulesEngineRequest{}
-            if cmd.Flags().Changed("in") {
-                var (
-                    file *os.File
-                    err  error
-                )
-                if Path == "-" {
-                    file = os.Stdin
-                } else {
-                    file, err = os.Open(Path)
-                    if err != nil {
-                        return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, Path)
-                    }
-                }
-                err = cmdutil.UnmarshallJsonFromReader(file, &request)
-                if err != nil {
-                    return utils.ErrorUnmarshalReader
-                }
-            } else {
-                request.SetName(fields.Name)
-            }
+			request := api.CreateRulesEngineRequest{}
+			if cmd.Flags().Changed("in") {
+				var (
+					file *os.File
+					err  error
+				)
+				if fields.Path == "-" {
+					file = os.Stdin
+				} else {
+					file, err = os.Open(fields.Path)
+					if err != nil {
+						return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
+					}
+				}
+				err = cmdutil.UnmarshallJsonFromReader(file, &request)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
 
-            client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-            response, err := client.CreateRulesEngine(context.Background(), ApplicationID, Phase, &request)
-            if err != nil {
-                return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
-            }
-            fmt.Fprintf(f.IOStreams.Out, msg.RulesEngineCreateOutputSuccess, response.GetId())
-            return nil
-        },
-    }
+				if err := validRequest(request); err != nil {
+					return err
+				}
+			}
 
-    flags := cmd.Flags()
-    flags.Int64VarP(&ApplicationID, "application-id", "a", 0, msg.RulesEngineCreateFlagEdgeApplicationID)
-    flags.StringVar(&fields.Name, "name", "", msg.RulesEngineCreateFlagName)
-    flags.StringVar(&Phase, "phase", "", msg.RulesEngineCreateFlagPhase)
-    flags.StringVar(&Path, "in", "", msg.RulesEngineCreateFlagIn)
-    flags.BoolP("help", "h", false, msg.RulesEngineCreateHelpFlag)
-    return cmd
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			response, err := client.CreateRulesEngine(context.Background(), fields.ApplicationID, fields.Phase, &request)
+			if err != nil {
+				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
+			}
+			fmt.Fprintf(f.IOStreams.Out, msg.RulesEngineCreateOutputSuccess, response.GetId())
+			return nil
+		},
+	}
+
+	flags := cmd.Flags()
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.RulesEngineCreateFlagEdgeApplicationID)
+	flags.StringVar(&fields.Phase, "phase", "", msg.RulesEngineCreateFlagPhase)
+	flags.StringVar(&fields.Path, "in", "", msg.RulesEngineCreateFlagIn)
+	flags.BoolP("help", "h", false, msg.RulesEngineCreateHelpFlag)
+	return cmd
+}
+
+func validRequest(request api.CreateRulesEngineRequest) error {
+	if request.GetName() == "" {
+		return msg.ErrorNameEmpty
+	}
+
+	if request.GetCriteria() == nil {
+		return msg.ErrorStructCriteriaNil
+	}
+
+	for _, itemCriteria := range request.GetCriteria() {
+		for _, item := range itemCriteria {
+			if item.Conditional == "" {
+				return msg.ErrorConditionalEmpty
+			}
+
+			if item.Variable == "" {
+				return msg.ErrorVariableEmpty
+			}
+
+			if item.Operator == "" {
+				return msg.ErrorOperatorEmpty
+			}
+
+			if item.InputValue == nil {
+				return msg.ErrorInputValueEmpty
+			}
+		}
+	}
+
+	if request.GetBehaviors() == nil {
+		return msg.ErrorStructBehaviorsNil
+	}
+
+	for _, item := range request.GetBehaviors() {
+		if item.Name == "" {
+			return msg.ErrorNameBehaviorsEmpty
+		}
+	}
+
+	return nil
 }
