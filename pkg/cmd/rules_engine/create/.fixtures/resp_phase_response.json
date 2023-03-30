@@ -1,0 +1,26 @@
+{
+    "results": {
+        "id": 210544,
+        "name": "New Rule 534322",
+        "phase": "response",
+        "behaviors": [
+            {
+                "name": "deliver",
+                "target": null
+            }
+        ],
+        "criteria": [
+            [
+                {
+                    "variable": "${uri}",
+                    "operator": "starts_with",
+                    "conditional": "if",
+                    "input_value": "/"
+                }
+            ]
+        ],
+        "is_active": true,
+        "order": 2
+    },
+    "schema_version": 3
+}
