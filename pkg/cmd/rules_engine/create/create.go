@@ -33,32 +33,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") {
+			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("in") {
 				return msg.ErrorMandatoryCreateFlags
 			}
 
 			request := api.CreateRulesEngineRequest{}
-			if cmd.Flags().Changed("in") {
-				var (
-					file *os.File
-					err  error
-				)
-				if fields.Path == "-" {
-					file = os.Stdin
-				} else {
-					file, err = os.Open(fields.Path)
-					if err != nil {
-						return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
-					}
-				}
-				err = cmdutil.UnmarshallJsonFromReader(file, &request)
+			var (
+				file *os.File
+				err  error
+			)
+			if fields.Path == "-" {
+				file = os.Stdin
+			} else {
+				file, err = os.Open(fields.Path)
 				if err != nil {
-					return utils.ErrorUnmarshalReader
+					return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
 				}
+			}
+			err = cmdutil.UnmarshallJsonFromReader(file, &request)
+			if err != nil {
+				return utils.ErrorUnmarshalReader
+			}
 
-				if err := validRequest(request); err != nil {
-					return err
-				}
+			if err := validRequest(request); err != nil {
+				return err
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -73,7 +71,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.RulesEngineCreateFlagEdgeApplicationID)
-	flags.StringVar(&fields.Phase, "phase", "", msg.RulesEngineCreateFlagPhase)
+    flags.StringVarP(&fields.Phase, "phase", "p", "", msg.RulesEngineCreateFlagPhase)
 	flags.StringVar(&fields.Path, "in", "", msg.RulesEngineCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.RulesEngineCreateHelpFlag)
 	return cmd
