@@ -415,6 +415,8 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	return &edgeApplicationsResponse.Results, nil
 
+}
+
 func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
