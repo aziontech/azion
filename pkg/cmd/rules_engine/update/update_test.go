@@ -55,4 +55,27 @@ func TestUpdate(t *testing.T) {
 
 		require.ErrorIs(t, err, msg.ErrorMandatoryFlagsUpdate)
 	})
+
+	t.Run("missing fields", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		mock.Register(
+			httpmock.REST(http.MethodPatch, "edge_applications/1673635839/rules_engine/request/rules/1234"),
+			httpmock.StatusStringResponse(http.StatusBadRequest, `{}`),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{
+			"--application-id", "1673635839",
+			"--rule-id", "1234",
+			"--phase", "request",
+			"--in", "./fixtures/missing.json",
+		})
+
+		err := cmd.Execute()
+
+		require.ErrorIs(t, err, msg.ErrorVariableEmpty)
+	})
 }
