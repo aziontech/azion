@@ -75,7 +75,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.ApplicationFlagId)
 	cmd.Flags().Int64VarP(&ruleID, "rule-id", "r", 0, msg.RulesEngineFlagId)
-	cmd.Flags().StringVarP(&phase, "phase", "p", "request", msg.RulesEngineListHelpPhase)
+	cmd.Flags().StringVarP(&phase, "phase", "p", "request", msg.RulesEnginePhase)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.RulesEngineDescribeFlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.RulesEngineDescribeFlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineDescribeHelpFlag)

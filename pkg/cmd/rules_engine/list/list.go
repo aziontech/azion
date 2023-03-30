@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
 	cmd.Flags().Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.ApplicationFlagId)
-	cmd.Flags().StringVarP(&phase, "phase", "p", "request", msg.RulesEngineListHelpPhase)
+	cmd.Flags().StringVarP(&phase, "phase", "p", "request", msg.RulesEnginePhase)
 	return cmd
 }
 
