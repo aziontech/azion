@@ -41,7 +41,7 @@ var (
 	RulesEngineCreateFlagEdgeApplicationID = "Unique identifier for an edge application"
 	RulesEngineCreateFlagName              = "The rule name"
 	RulesEngineCreateFlagPhase             = "The rule phase"
-	RulesEngineCreateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
+	RulesEngineCreateFlagIn                = "Path to a JSON file containing the attributes of the rule that will be created; you can use - for reading from stdin"
 	RulesEngineCreateOutputSuccess         = "Created Rules Engine with ID %d\n"
 	RulesEngineCreateHelpFlag              = "Displays more information about the create subcommand"
 )
