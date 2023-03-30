@@ -12,7 +12,7 @@ import (
 )
 
 func TestUpdate(t *testing.T) {
-	t.Run("update edge application", func(t *testing.T) {
+	t.Run("update origins", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

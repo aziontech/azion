@@ -7,7 +7,7 @@ var (
 	RulesEngineFlagHelp         = "Displays more information about the rules engines command"
 	ApplicationFlagId           = "Unique identifier for an edge application used by this rules engine. The '--application-id' flag is required"
 	RulesEngineFlagId           = "Unique identifier for a Rules Engine. The '--rule-id' flag is required"
-	RulesEngineListHelpPhase    = "Rules Engine Phase <request|response>. The '--phase' flag is required"
+	RulesEnginePhase            = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
 	//list cmd
 	RulesEngineListUsage            = "list [flags]"
@@ -26,13 +26,23 @@ var (
 
 	// [ delete ]
 	RulesEngineDeleteUsage             = "delete [flags]"
-	RulesEngineDeleteShortDescription  = "Deletes an Rules Engine"
-	RulesEngineDeleteLongDescription   = "Deletes an Rules Engine from the Edge Applications library based on its given ID"
-	RulesEngineDeleteOutputSuccess     = "Rules Engine %d was successfully deleted\n"
+	RulesEngineDeleteShortDescription  = "Deletes an Rule Engine"
+	RulesEngineDeleteLongDescription   = "Deletes an Rule Engine from the Edge Applications library based on its given ID"
+	RulesEngineDeleteOutputSuccess     = "Rule Engine %d was successfully deleted\n"
 	RulesEngineDeleteFlagApplicationID = "Unique identifier for an edge application"
-	RulesEngineDeleteFlagRuleID        = "The Rules Engine 's key unique identifier"
+	RulesEngineDeleteFlagRuleID        = "The Rule Engine's key unique identifier"
 	RulesEngineDeleteFlagPhase         = "phase is request input or response output"
 	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
+
+
+	// [ Update ]
+	RulesEngineUpdateUsage                 = "update [flags]"
+	RulesEngineUpdateShortDescription      = "Updates a rule engine"
+	RulesEngineUpdateLongDescription       = "Updates a rule engine based on given attributes to be used in edge applications"
+	RulesEngineUpdateFlagEdgeApplicationId = "Unique identifier for an edge application"
+	RulesEngineUpdateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
+	RulesEngineUpdateOutputSuccess         = "Updated rule engine with ID %d\n"
+	RulesEngineUpdateHelpFlag              = "Displays more information about the update subcommand"
 
 	// [ create ]
 	RulesEngineCreateUsage                 = "create [flags]"
