@@ -5,17 +5,12 @@ import (
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewCmd(t *testing.T) {
-	type args struct {
-		f *cmdutil.Factory
-	}
-
 	type apiMock struct {
 		method, url, path string
 	}
