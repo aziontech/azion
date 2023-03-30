@@ -340,6 +340,10 @@ func (c *Client) DeleteCacheSettings(ctx context.Context, edgeApplicationID, cac
 	return nil
 }
 
+type CreateRulesEngineRequest struct {
+	sdk.CreateRulesEngineRequest
+}
+
 func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64, phase string) (*sdk.RulesEngineResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -410,4 +414,13 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	}
 
 	return &edgeApplicationsResponse.Results, nil
+
+func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
+		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
+		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }

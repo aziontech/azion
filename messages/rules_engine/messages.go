@@ -34,6 +34,7 @@ var (
 	RulesEngineDeleteFlagPhase         = "phase is request input or response output"
 	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
 
+
 	// [ Update ]
 	RulesEngineUpdateUsage                 = "update [flags]"
 	RulesEngineUpdateShortDescription      = "Updates a rule engine"
@@ -42,4 +43,15 @@ var (
 	RulesEngineUpdateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
 	RulesEngineUpdateOutputSuccess         = "Updated rule engine with ID %d\n"
 	RulesEngineUpdateHelpFlag              = "Displays more information about the update subcommand"
+
+	// [ create ]
+	RulesEngineCreateUsage                 = "create [flags]"
+	RulesEngineCreateShortDescription      = "Creates a new Rules Engine"
+	RulesEngineCreateLongDescription       = "Creates an Rules Engine based on given attributes to be used in edge applications"
+	RulesEngineCreateFlagEdgeApplicationID = "Unique identifier for an edge application"
+	RulesEngineCreateFlagName              = "The rule name"
+	RulesEngineCreateFlagPhase             = "The rule phase"
+	RulesEngineCreateFlagIn                = "Path to a JSON file containing the attributes of the rule that will be created; you can use - for reading from stdin"
+	RulesEngineCreateOutputSuccess         = "Created Rules Engine with ID %d\n"
+	RulesEngineCreateHelpFlag              = "Displays more information about the create subcommand"
 )
