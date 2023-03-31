@@ -505,7 +505,7 @@ func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 	reqRules := apiapp.UpdateRulesEngineRequest{}
 	reqRules.IdApplication = conf.Application.Id
 
-	_, err := client.UpdateRulesEngine(ctx, &reqRules, InstanceId)
+	_, err := client.UpdateRulesEnginePublish(ctx, &reqRules, InstanceId)
 	if err != nil {
 		return err
 	}

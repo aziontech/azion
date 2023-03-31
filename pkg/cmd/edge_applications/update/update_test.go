@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 )
 
 var successResponse string = `
@@ -106,7 +106,6 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"-a", "1337"})
 		err := cmd.Execute()
-    require.ErrorContains(t, err, msg.ErrorNoFieldInformed.Error(), nil)
-  })
+		require.ErrorContains(t, err, msg.ErrorNoFieldInformed.Error(), nil)
+	})
 }
-
