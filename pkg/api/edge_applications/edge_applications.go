@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
@@ -425,4 +424,29 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
+}
+
+type FunctionsInstancesResponse interface {
+    GetId() int64
+    GetEdgeFunctionId() int64    
+    GetName() string
+    GetArgs() interface{}
+}
+
+func (c *Client) GetFunctionsInstances(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.
+		EdgeApplicationsEdgeApplicationIdFunctionsInstancesGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
 }
