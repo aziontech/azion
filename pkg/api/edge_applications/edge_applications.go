@@ -96,7 +96,7 @@ type UpdateRulesEngineRequest struct {
 	sdk.PatchRulesEngineRequest
 	IdApplication int64
 	Phase         string
-	Id            int64 `json:"id"`
+	Id            int64
 }
 
 func NewClient(c *http.Client, url string, token string) *Client {
