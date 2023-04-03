@@ -34,7 +34,6 @@ var (
 	RulesEngineDeleteFlagPhase         = "phase is request input or response output"
 	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
 
-
 	// [ Update ]
 	RulesEngineUpdateUsage                 = "update [flags]"
 	RulesEngineUpdateShortDescription      = "Updates a rule engine"
@@ -54,4 +53,11 @@ var (
 	RulesEngineCreateFlagIn                = "Path to a JSON file containing the attributes of the rule that will be created; you can use - for reading from stdin"
 	RulesEngineCreateOutputSuccess         = "Created Rules Engine with ID %d\n"
 	RulesEngineCreateHelpFlag              = "Displays more information about the create subcommand"
+
+	// [ template ]
+	RulesEngineTemplateUsage            = "template [flags]"
+	RulesEngineTemplateShortDescription = "Generates a default template for rules engine"
+	RulesEngineTemplateLongDescription  = "Generates a default template to be used with rules engine's create and update commands"
+	RulesEngineTemplateFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
+	RulesEngineTemplateHelpFlag         = "Displays more information about the template command"
 )

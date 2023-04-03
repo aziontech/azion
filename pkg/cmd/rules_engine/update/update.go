@@ -32,11 +32,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli origins update --application-id 1673635839 --phase request --in ruleengine.json"
-		$ azioncli origins update --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
+		$ azioncli rules_engine update --application-id 1673635839 --phase request --in ruleengine.json"
+		$ azioncli rules_engine update --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("in") {
+			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") || !cmd.Flags().Changed("in") {
 				return msg.ErrorMandatoryFlagsUpdate
 			}
 
@@ -63,6 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 			request.IdApplication = fields.ApplicationID
 			request.Phase = fields.Phase
+			request.Id = fields.RuleID
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.UpdateRulesEngine(context.Background(), &request)
