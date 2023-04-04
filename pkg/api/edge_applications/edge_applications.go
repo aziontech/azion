@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
@@ -427,13 +428,13 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 }
 
 type FunctionsInstancesResponse interface {
-    GetId() int64
-    GetEdgeFunctionId() int64    
-    GetName() string
-    GetArgs() interface{}
+	GetId() int64
+	GetEdgeFunctionId() int64
+	GetName() string
+	GetArgs() interface{}
 }
 
-func (c *Client) GetFunctionsInstances(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
+func (c *Client) EdgeFunctionsInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
