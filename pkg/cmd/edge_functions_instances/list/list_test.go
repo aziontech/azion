@@ -1,44 +1,81 @@
 package list
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestNewCmd(t *testing.T) {
-	t.Run("list all edge functions instances", func(t *testing.T) {
+	t.Run("list url not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12312333/functions_instances"),
-			httpmock.JSONFromFile("./.fixtures/resp.json"),
+			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
+			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
+
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "12312333"})
+		cmd.SetArgs([]string{"-a", "12321"})
 
 		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
+		require.Error(t, err)
 	})
 
-	t.Run("no itens", func(t *testing.T) {
+	t.Run("empty", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12312333/functions_instances"),
-			httpmock.JSONFromFile("./.fixtures/no_resp.json"),
+			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
+			httpmock.StatusStringResponse(204, ""),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
+
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{})
+		cmd.SetArgs([]string{"-a", "12321"})
 
 		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
+		require.Error(t, err)
+	})
+	t.Run("list empty", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
+			httpmock.JSONFromFile(".fixtures/no_resp.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"-a", "12321"})
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
+	t.Run("list success", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
+			httpmock.JSONFromFile(".fixtures/resp.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"-a", "12321"})
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
 	})
 }
