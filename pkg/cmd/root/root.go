@@ -5,6 +5,7 @@ import (
 	"time"
 
 	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings"
@@ -52,6 +53,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(version.NewCmd(f))
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
+	rootCmd.AddCommand(edge_functions_instances.NewCmd(f))
 	rootCmd.AddCommand(edge_applications.NewCmd(f))
 	rootCmd.AddCommand(domains.NewCmd(f))
 	rootCmd.AddCommand(origins.NewCmd(f))
