@@ -30,6 +30,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
+ 		$ azioncli edge_functions_instances create --application-id 1673635839 --instance-id 12314 --name "ffcafe222sdsdffdf"
+		$ azioncli edge_functions_instances create -a 1673635839 -i 12314 --name "ffcafe222sdsdffdf"
+        $ azioncli edge_functions_instances create -a 1673635839 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateFuncInstancesRequest{}
