@@ -18,7 +18,6 @@ var (
 	EdgeApplicationFlagId        = "Unique identifier of the Edge Application"
 	EdgeFunctionsInstancesFlagId = "Unique identifier of the Edge Functions Instances"
 
-
 	//domains cmd
 	EdgeFuncInstanceUsage            = "edge_functions_instances"
 	EdgeFuncInstanceShortDescription = "Create Edge Functions Instances for edges on Azion's platform"
@@ -34,4 +33,15 @@ var (
 	EdgeFuncInstanceDeleteOutputSuccess    = "Edge Function Instance %s was successfully deleted\n"
 	EdgeFuncInstanceDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
+	// [ create ]
+	EdgeFuncInstanceCreateUsage                 = "create [flags]"
+	EdgeFuncInstanceCreateShortDescription      = "Creates a new Function Instances"
+	EdgeFuncInstanceCreateLongDescription       = "Creates an Function Instances based on given attributes to be used in edge applications"
+	EdgeFuncInstanceCreateFlagEdgeApplicationId = "Unique identifier for an edge application"
+	EdgeFuncInstanceCreateFlagEdgeFunctionID    = "Unique identifier for an Edge Function Instances"
+	EdgeFuncInstanceCreateFlagName              = "The Function Instances name"
+	EdgeFuncInstanceCreateFlagArgs              = "The args name"
+	EdgeFuncInstanceCreateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
+	EdgeFuncInstanceCreateOutputSuccess         = "Created Function Instances with ID %d\n"
+	EdgeFuncInstanceCreateHelpFlag              = "Displays more information about the create subcommand"
 )

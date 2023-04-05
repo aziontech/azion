@@ -434,7 +434,11 @@ type FunctionsInstancesResponse interface {
 	GetArgs() interface{}
 }
 
-func (c *Client) EdgeFunctionsInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
+type CreateFuncInstancesRequest struct {
+	sdk.ApplicationCreateInstanceRequest
+}
+
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -462,4 +466,13 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 	}
 
 	return nil
+}
+
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
+		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp.Results, nil
 }
