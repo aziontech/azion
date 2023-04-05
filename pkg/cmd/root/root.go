@@ -53,6 +53,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(version.NewCmd(f))
 	rootCmd.AddCommand(edge_services.NewCmd(f))
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
+	rootCmd.AddCommand(edge_functions_instances.NewCmd(f))
 	rootCmd.AddCommand(edge_applications.NewCmd(f))
 	rootCmd.AddCommand(domains.NewCmd(f))
 	rootCmd.AddCommand(origins.NewCmd(f))

@@ -451,3 +451,15 @@ func (c *Client) EdgeFunctionsInstancesList(ctx context.Context, opts *contracts
 	}
 	return resp, nil
 }
+
+func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
+	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}
