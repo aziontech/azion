@@ -427,6 +427,13 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 	return &resp.Results, nil
 }
 
+type FunctionsInstancesResponse interface {
+	GetId() int64
+	GetEdgeFunctionId() int64
+	GetName() string
+	GetArgs() interface{}
+}
+
 func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
 	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
 
@@ -437,4 +444,12 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 	}
 
 	return nil
+}
+
+func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID int64) (FunctionsInstancesResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdGet(ctx, edgeApplicationID, instanceID).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }

@@ -20,9 +20,8 @@ import (
 )
 
 var (
-	applicationID string
-	instanceID    string
-	phase         string
+	applicationID int64
+	instanceID    int64
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -39,19 +38,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
       $ azioncli edge_functions_instances describe --application-id 1337 --instance-id 31223 --out "./tmp/test.json"
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {
+			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("instance-id") {
 				return msg.ErrorMandatoryFlags
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			rules, err := client.GetRulesEngine(ctx, applicationID, ruleID, phase)
+			instance, err := client.GetFuncInstance(ctx, applicationID, instanceID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetEdgeFuncInstances.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, rules)
+			formattedFuction, err := format(cmd, instance)
 			if err != nil {
 				return utils.ErrorFormatOut
 			}
@@ -73,8 +72,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&applicationID, "application-id", "a", "", msg.ApplicationFlagId)
-	cmd.Flags().StringVarP(&instanceID, "instance-id", "i", "", msg.EdgeFuncInstanceFlagId)
+	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.ApplicationFlagId)
+	cmd.Flags().Int64VarP(&instanceID, "instance-id", "i", 0, msg.EdgeFuncInstanceFlagId)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeFuncInstanceDescribeFlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeFuncInstanceDescribeFlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.EdgeFuncInstanceDescribeHelpFlag)
@@ -82,38 +81,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, rules api.RulesEngineResponse) ([]byte, error) {
+func format(cmd *cobra.Command, instance api.FunctionsInstancesResponse) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err
 	}
 
 	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(rules, "", " ")
+		return json.MarshalIndent(instance, "", " ")
 	}
 
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("Rules Engine ID: ", rules.GetId())
-	tbl.AddRow("Name: ", rules.GetName())
-	tbl.AddRow("Order: ", rules.GetOrder())
-	tbl.AddRow("Active: ", rules.GetIsActive())
-	tbl.AddRow("")
-	tbl.AddRow("Behaviours: ")
-	for _, b := range rules.GetBehaviors() {
-		tbl.AddRow("  Name: ", b.GetName())
-		tbl.AddRow("  Target: ", b.GetTarget())
-		tbl.AddRow("")
-	}
-	tbl.AddRow("Criteria: ")
-	for _, c := range rules.GetCriteria() {
-		for _, c2 := range c {
-			tbl.AddRow("  Conditional: ", c2.GetConditional())
-			tbl.AddRow("  Variable: ", c2.GetVariable())
-			tbl.AddRow("  Operator: ", c2.GetOperator())
-			tbl.AddRow("  Input Value: ", c2.GetInputValue())
-			tbl.AddRow("")
-		}
-	}
+	tbl.AddRow("Edge Function Instance ID: ", instance.GetId())
+	tbl.AddRow("Instance Name: ", instance.GetName())
+	tbl.AddRow("Edge Function ID: ", instance.GetEdgeFunctionId())
+	tbl.AddRow("Args: ", instance.GetArgs())
 	return tbl.GetByteFormat(), nil
 }
