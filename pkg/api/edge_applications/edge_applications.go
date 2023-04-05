@@ -164,7 +164,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest)
 	return edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
+func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
 
 	args := make(map[string]interface{})
 	req.SetArgs(args)
