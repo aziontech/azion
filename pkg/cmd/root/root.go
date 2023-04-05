@@ -59,6 +59,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(origins.NewCmd(f))
 	rootCmd.AddCommand(rules_engine.NewCmd(f))
 	rootCmd.AddCommand(cache_settings.NewCmd(f))
+	rootCmd.AddCommand(edge_functions_instances.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 	return rootCmd
 }
