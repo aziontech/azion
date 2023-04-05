@@ -63,7 +63,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	applications, err := client.EdgeFunctionsInstancesList(ctx, opts, edgeApplicationID)
+	applications, err := client.EdgeFuncInstancesList(ctx, opts, edgeApplicationID)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 	}
