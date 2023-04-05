@@ -13,7 +13,7 @@ import (
 )
 
 func TestDescribe(t *testing.T) {
-	t.Run("describe an domains", func(t *testing.T) {
+	t.Run("describe a domain", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
