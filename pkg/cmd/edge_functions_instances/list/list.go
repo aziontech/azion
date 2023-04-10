@@ -30,10 +30,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		    $ azioncli edge_functions_instances list --application-id 1234123423 --page 1  
 		    $ azioncli edge_functions_instances list --application-id 1234123423 --page_size 5
 		    $ azioncli edge_functions_instances list -a 1234123423 --sort "asc" 
+ 			$ azioncli edge_functions_instances list -a 1234123423" 	
 		`),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
+			if !cmd.Flags().Changed("application-id") {
+				return msg.ErrorMandatoryListFlags
+			}
 			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
 				for {
 					pages, err := PrintTable(cmd, f, opts, &numberPage, edgeApplicationID)
