@@ -18,6 +18,7 @@ var (
 	EdgeApplicationFlagId        = "Unique identifier of the Edge Application"
 	EdgeFunctionsInstancesFlagId = "Unique identifier of the Edge Functions Instances"
 
+	//Edge Functions Instances cmd
 	EdgeFuncInstanceUsage            = "edge_functions_instances"
 	EdgeFuncInstanceShortDescription = "Create Edge Functions Instances for edges on Azion's platform"
 	EdgeFuncInstanceLongDescription  = "Create Edge Functions Instances for edges on Azion's platform"
@@ -32,6 +33,17 @@ var (
 	EdgeFuncInstanceDeleteOutputSuccess    = "Edge Function Instance %s was successfully deleted\n"
 	EdgeFuncInstanceDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
+	// [ create ]
+	EdgeFuncInstanceCreateUsage                 = "create [flags]"
+	EdgeFuncInstanceCreateShortDescription      = "Creates a new Function Instances"
+	EdgeFuncInstanceCreateLongDescription       = "Creates an Function Instances based on given attributes to be used in edge applications"
+	EdgeFuncInstanceCreateFlagEdgeApplicationId = "Unique identifier for an edge application"
+	EdgeFuncInstanceCreateFlagEdgeFunctionID    = "Unique identifier for an Edge Function Instances"
+	EdgeFuncInstanceCreateFlagName              = "The Function Instances name"
+	EdgeFuncInstanceCreateFlagArgs              = "The args name"
+	EdgeFuncInstanceCreateFlagIn                = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
+	EdgeFuncInstanceCreateOutputSuccess         = "Created Function Instances with ID %d\n"
+	EdgeFuncInstanceCreateHelpFlag              = "Displays more information about the create subcommand"
 	//describe cmd
 	EdgeFuncInstanceDescribeUsage            = "describe --application-id <application_id> --instance-id <instance_id> [flags]"
 	EdgeFuncInstanceDescribeShortDescription = "Returns the information related to the Edge Function Instance"
@@ -40,6 +52,7 @@ var (
 	EdgeFuncInstanceDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	EdgeFuncInstanceDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	EdgeFuncInstanceFileWritten              = "File successfully written to: %s\n"
+
 
 	// [ Update ]
 	EdgeFuncInstanceUpdateUsage                 = "update --application-id <application_id> --instance-id <instance_id> [flags]"

@@ -159,7 +159,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 	return edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
+func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
 
 	args := make(map[string]interface{})
 	req.SetArgs(args)
@@ -429,7 +429,11 @@ type FunctionsInstancesResponse interface {
 	GetArgs() interface{}
 }
 
-func (c *Client) EdgeFunctionsInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
+type CreateFuncInstancesRequest struct {
+	sdk.ApplicationCreateInstanceRequest
+}
+
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -457,6 +461,15 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 	}
 
 	return nil
+}
+
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
+		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp.Results, nil
 }
 
 func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID int64) (FunctionsInstancesResponse, error) {
