@@ -3,6 +3,7 @@ package edgeapplications
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -77,9 +78,6 @@ type UpdateRequest struct {
 
 type UpdateInstanceRequest struct {
 	sdk.ApplicationUpdateInstanceRequest
-	Id         string
-	IdInstace  string
-	FunctionId int64
 }
 
 type CreateInstanceRequest struct {
@@ -150,14 +148,11 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	return &edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest) (EdgeApplicationsResponse, error) {
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, req.Id, req.IdInstace).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
-
-	req.ApplicationUpdateInstanceRequest.SetName("justfortests2")
-	req.SetEdgeFunctionId(req.FunctionId)
-
+func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID string, instanceID string) (FunctionsInstancesResponse, error) {
+	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, appID, instanceID).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		fmt.Println(httpResp.Body)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
