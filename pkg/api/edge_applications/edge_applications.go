@@ -3,7 +3,6 @@ package edgeapplications
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -152,7 +151,6 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, appID, instanceID).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		fmt.Println(httpResp.Body)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
