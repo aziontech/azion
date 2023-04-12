@@ -7,6 +7,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/list"
+	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -28,6 +29,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	funcInstCmd.AddCommand(list.NewCmd(f))
 	funcInstCmd.AddCommand(create.NewCmd(f))
 	funcInstCmd.AddCommand(describe.NewCmd(f))
+	funcInstCmd.AddCommand(list.NewCmd(f))
+	funcInstCmd.AddCommand(update.NewCmd(f))
+
 	funcInstCmd.Flags().BoolP("help", "h", false, msg.EdgeFuncInstanceFlagHelp)
 	return funcInstCmd
 }

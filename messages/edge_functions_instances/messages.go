@@ -18,7 +18,7 @@ var (
 	EdgeApplicationFlagId        = "Unique identifier of the Edge Application"
 	EdgeFunctionsInstancesFlagId = "Unique identifier of the Edge Functions Instances"
 
-	//domains cmd
+	//Edge Functions Instances cmd
 	EdgeFuncInstanceUsage            = "edge_functions_instances"
 	EdgeFuncInstanceShortDescription = "Create Edge Functions Instances for edges on Azion's platform"
 	EdgeFuncInstanceLongDescription  = "Create Edge Functions Instances for edges on Azion's platform"
@@ -52,4 +52,18 @@ var (
 	EdgeFuncInstanceDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	EdgeFuncInstanceDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	EdgeFuncInstanceFileWritten              = "File successfully written to: %s\n"
+
+
+	// [ Update ]
+	EdgeFuncInstanceUpdateUsage                 = "update --application-id <application_id> --instance-id <instance_id> [flags]"
+	EdgeFuncInstanceUpdateShortDescription      = "Updates an edge function instance"
+	EdgeFuncInstanceUpdateLongDescription       = "Updates an edge function instance based on given attributes to be used in edge applications"
+	EdgeFuncInstanceUpdateFlagEdgeApplicationId = "Unique identifier for an edge application"
+	EdgeFuncInstanceUpdateFlagIn                = "Path to a JSON file containing the attributes of the rule that will be updated; you can use - for reading from stdin"
+	EdgeFuncInstanceUpdateFlagName              = "Edge Function Instance name"
+	EdgeFuncInstanceUpdateFlagArgs              = "Edge Function Instance args"
+	EdgeFuncInstanceUpdateFlagInstanceID        = "Unique identifier for an edge function instance"
+	EdgeFuncInstanceUpdateFlagFunctionID        = "Edge Function ID to be used in the Edge Function Instance"
+	EdgeFuncInstanceUpdateOutputSuccess         = "Updated edge function instance with ID %d\n"
+	EdgeFuncInstanceUpdateHelpFlag              = "Displays more information about the update subcommand"
 )
