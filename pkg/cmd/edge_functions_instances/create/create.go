@@ -3,13 +3,14 @@ package create
 import (
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 type Fields struct {
@@ -30,8 +31,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
- 		$ azioncli edge_functions_instances create --application-id 1673635839 --instance-id 12314 --name "ffcafe222sdsdffdf"
-		$ azioncli edge_functions_instances create -a 1673635839 -i 12314 --name "ffcafe222sdsdffdf"
+ 		$ azioncli edge_functions_instances create --application-id 1673635839 --function-id 12314 --name "ffcafe222sdsdffdf"
+		$ azioncli edge_functions_instances create -a 1673635839 -f 12314 --name "ffcafe222sdsdffdf"
         $ azioncli edge_functions_instances create -a 1673635839 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -54,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("instance-id") || !cmd.Flags().Changed("name") {
+				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("function-id") || !cmd.Flags().Changed("name") {
 					return msg.ErrorMandatoryCreateFlags
 				}
 				request.SetName(fields.Name)
@@ -74,7 +75,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.EdgeFuncInstanceCreateFlagEdgeApplicationId)
-	flags.Int64VarP(&fields.EdgeFunctionId, "instance-id", "i", 0, msg.EdgeFuncInstanceCreateFlagEdgeFunctionID)
+	flags.Int64VarP(&fields.EdgeFunctionId, "function-id", "f", 0, msg.EdgeFuncInstanceCreateFlagEdgeFunctionID)
 	flags.StringVar(&fields.Name, "name", "", msg.EdgeFuncInstanceCreateFlagName)
 	flags.StringVar(&fields.Args, "args", "", msg.EdgeFuncInstanceCreateFlagArgs)
 	flags.StringVar(&fields.Path, "in", "", msg.EdgeFuncInstanceCreateFlagIn)

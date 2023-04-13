@@ -34,9 +34,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions_instances update 
-        $ azioncli edge_functions_instances update 
-        $ azioncli edge_functions_instances update --in "update.json"
+        $ azioncli edge_functions_instances update -a 1674767911 -i 43121 -f 1209
+        $ azioncli edge_functions_instances update --application-id 1674767911 --instance-id 2121 --function-id 1212 --name updated
+        $ azioncli edge_functions_instances update  -a 1674767911 -i 43121 --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("in") && (!cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("instance-id")) {
