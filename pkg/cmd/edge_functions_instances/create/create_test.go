@@ -2,9 +2,10 @@ package create
 
 import (
 	"fmt"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	"net/http"
 	"testing"
+
+	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -24,7 +25,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--instance-id", "1483",
+			"--function-id", "1483",
 			"--name", "Azion - Hello World test",
 		})
 
