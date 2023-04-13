@@ -26,7 +26,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	funcInstCmd.AddCommand(delete.NewCmd(f))
-	funcInstCmd.AddCommand(list.NewCmd(f))
 	funcInstCmd.AddCommand(create.NewCmd(f))
 	funcInstCmd.AddCommand(describe.NewCmd(f))
 	funcInstCmd.AddCommand(list.NewCmd(f))
