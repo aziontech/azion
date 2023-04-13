@@ -400,7 +400,7 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
 	reqIns.SetName(conf.Name)
 	reqIns.ApplicationId = application.GetId()
-	instance, err := client.CreateInstance(ctx, &reqIns)
+	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}

@@ -66,7 +66,7 @@ func TestNewCmd(t *testing.T) {
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
 				path:   "./.fixtures/resp_phase_response.json",
 			},
-			wantError: msg.ErrorConditionalEmpty ,
+			wantError: msg.ErrorConditionalEmpty,
 			err:       true,
 		},
 	}

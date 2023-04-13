@@ -77,9 +77,6 @@ type UpdateRequest struct {
 
 type UpdateInstanceRequest struct {
 	sdk.ApplicationUpdateInstanceRequest
-	Id         string
-	IdInstace  string
-	FunctionId int64
 }
 
 type CreateInstanceRequest struct {
@@ -150,12 +147,8 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	return &edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest) (EdgeApplicationsResponse, error) {
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, req.Id, req.IdInstace).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
-
-	req.ApplicationUpdateInstanceRequest.SetName("justfortests2")
-	req.SetEdgeFunctionId(req.FunctionId)
-
+func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID string, instanceID string) (FunctionsInstancesResponse, error) {
+	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, appID, instanceID).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
@@ -164,7 +157,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest)
 	return edgeApplicationsResponse.Results, nil
 }
 
-func (c *Client) CreateInstance(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
+func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
 
 	args := make(map[string]interface{})
 	req.SetArgs(args)
@@ -421,6 +414,64 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
+}
+
+type FunctionsInstancesResponse interface {
+	GetId() int64
+	GetEdgeFunctionId() int64
+	GetName() string
+	GetArgs() interface{}
+}
+
+type CreateFuncInstancesRequest struct {
+	sdk.ApplicationCreateInstanceRequest
+}
+
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.
+		EdgeApplicationsEdgeApplicationIdFunctionsInstancesGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
+}
+
+func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
+	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}
+
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
+		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp.Results, nil
+}
+
+func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID int64) (FunctionsInstancesResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdGet(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}

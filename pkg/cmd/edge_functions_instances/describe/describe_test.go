@@ -6,25 +6,25 @@ import (
 	"os"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDescribe(t *testing.T) {
-	t.Run("describe a domain", func(t *testing.T) {
+	t.Run("describe a function instance", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
+			httpmock.REST("GET", "edge_applications/1678743802/functions_instances/9767"),
+			httpmock.JSONFromFile("./fixtures/instance.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request"})
+		cmd.SetArgs([]string{"-a", "1678743802", "-i", "9767"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestDescribe(t *testing.T) {
 	t.Run("missing mandatory flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/1"),
+			httpmock.REST("GET", "edge_applications/1678743802/functions_instances/9767"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -64,15 +64,15 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
+			httpmock.REST("GET", "edge_applications/1678743802/functions_instances/9767"),
+			httpmock.JSONFromFile("./fixtures/instance.json"),
 		)
 
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		path := "./out.json"
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request", "--out", path})
+		cmd.SetArgs([]string{"-a", "1678743802", "-i", "9767", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {

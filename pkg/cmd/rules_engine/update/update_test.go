@@ -26,6 +26,7 @@ func TestUpdate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
 			"--phase", "request",
+			"--rule-id", "1234",
 			"--in", "./fixtures/update.json",
 		})
 
