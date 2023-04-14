@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+  azioncli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/go/src/app
+    environment:
+      - GO111MODULE=on
+    stdin_open: true
+    tty: true

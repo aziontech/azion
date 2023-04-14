@@ -477,3 +477,20 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	}
 	return &resp.Results, nil
 }
+
+func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.DeviceGroupsResponse, error) {
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.
+		EdgeApplicationsEdgeApplicationIdDeviceGroupsGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
+
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
+}
