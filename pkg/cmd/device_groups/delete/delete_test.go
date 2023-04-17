@@ -11,7 +11,7 @@ import (
 
 func TestCreate(t *testing.T) {
 
-	t.Run("delete instance by id", func(t *testing.T) {
+	t.Run("delete device group by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, "Device Group 4321 was successfully deleted\n", stdout.String())
 	})
 
-	t.Run("try delete instance that is not found", func(t *testing.T) {
+	t.Run("try delete device group that is not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
