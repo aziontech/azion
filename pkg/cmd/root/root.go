@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/aziontech/azion-cli/pkg/cmd/device_groups"
 	"net/http"
 	"time"
 
@@ -55,6 +56,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(edge_functions.NewCmd(f))
 	rootCmd.AddCommand(edge_functions_instances.NewCmd(f))
 	rootCmd.AddCommand(edge_applications.NewCmd(f))
+	rootCmd.AddCommand(device_groups.NewCmd(f))
 	rootCmd.AddCommand(domains.NewCmd(f))
 	rootCmd.AddCommand(origins.NewCmd(f))
 	rootCmd.AddCommand(rules_engine.NewCmd(f))
