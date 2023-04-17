@@ -74,6 +74,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	tbl := table.New("ID", "NAME")
+	tbl.WithWriter(f.IOStreams.Out)
 	table.DefaultWriter = f.IOStreams.Out
 	if cmd.Flags().Changed("details") {
 		tbl = table.New("ID", "NAME", "USER AGENT")
@@ -85,9 +86,9 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	for _, v := range applications.Results {
 		if cmd.Flags().Changed("details") {
-			tbl.AddRow(v.Id, v.Name, v.UserAgent)
+			tbl.AddRow(*v.Id, v.Name, v.UserAgent)
 		} else {
-			tbl.AddRow(v.Id, v.Name)
+			tbl.AddRow(*v.Id, v.Name)
 		}
 	}
 
@@ -103,6 +104,5 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	*numberPage += 1
 	opts.Page = *numberPage
-	f.IOStreams.Out = table.DefaultWriter
 	return applications.TotalPages, nil
 }
