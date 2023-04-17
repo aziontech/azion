@@ -477,3 +477,15 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	}
 	return &resp.Results, nil
 }
+
+func (c *Client) DeleteDeviceGroup(ctx context.Context, appID int64, groupID int64) error {
+	req := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdDelete(ctx, appID, groupID)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}
