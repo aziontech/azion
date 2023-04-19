@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if err != nil {
-						return fmt.Errorf(msg.ErrorGetDeviceGroups.Error(), err)
+						return fmt.Errorf(msg.ErrorListDeviceGroups.Error(), err)
 					}
 				}
 			}

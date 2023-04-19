@@ -6,25 +6,25 @@ import (
 	"os"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDescribe(t *testing.T) {
-	t.Run("describe a rule engine", func(t *testing.T) {
+	t.Run("describe a device group", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
+			httpmock.REST("GET", "edge_applications/1676400693/device_groups/2259"),
+			httpmock.JSONFromFile("./fixtures/groups.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request"})
+		cmd.SetArgs([]string{"-a", "1676400693", "-g", "2259"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/666"),
+			httpmock.REST("GET", "edge_applications/1676400693/device_groups/666"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -48,7 +48,7 @@ func TestDescribe(t *testing.T) {
 	t.Run("missing mandatory flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/1"),
+			httpmock.REST("GET", "edge_applications/1676400693/device_groups/2259"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -64,15 +64,15 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
+			httpmock.REST("GET", "edge_applications/1676400693/device_groups/2259"),
+			httpmock.JSONFromFile("./fixtures/groups.json"),
 		)
 
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		path := "./out.json"
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request", "--out", path})
+		cmd.SetArgs([]string{"-a", "1676400693", "-g", "2259", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {

@@ -62,6 +62,12 @@ type RulesEngineResponse interface {
 	GetName() string
 }
 
+type DeviceGroupsResponse interface {
+	GetId() int64
+	GetName() string
+	GetUserAgent() string
+}
+
 type Client struct {
 	apiClient *sdk.APIClient
 }
@@ -505,4 +511,12 @@ func (c *Client) DeleteDeviceGroup(ctx context.Context, appID int64, groupID int
 	}
 
 	return nil
+}
+
+func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID int64) (DeviceGroupsResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdGet(ctx, edgeApplicationID, groupID).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }

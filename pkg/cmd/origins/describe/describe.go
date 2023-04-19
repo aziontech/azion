@@ -34,9 +34,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azioncli origins describe --application-id 4312 --origin-id 31223
-      $ azioncli origins describe --application-id 1337 --origin-id 31223--format json
-      $ azioncli origins describe --application-id 1337 --origin-id 31223--out "./tmp/test.json" --format json
+      $ azioncli origins describe --application-id 1673635839 --origin-id 31223
+      $ azioncli origins describe --application-id 1673635839 --origin-id 31223--format json
+      $ azioncli origins describe --application-id 1673635839 --origin-id 31223--out "./tmp/test.json" --format json
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-id") {
@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			origin, err := client.GetOrigin(ctx, applicationID, originID)
 			if err != nil {
-                return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
+				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
 
 			out := f.IOStreams.Out

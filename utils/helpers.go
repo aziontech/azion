@@ -93,6 +93,44 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
+// RunCommandSteamOutput executes the provived command while streaming its logs (stdou+stderr) directly to terminal
+func RunCommandSteamOutput(out io.Writer, envVars []string, comm string) error {
+	command := exec.Command(shell, "-c", comm)
+	if len(envVars) > 0 {
+		command.Env = os.Environ()
+		command.Env = append(command.Env, envVars...)
+	}
+
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	stderr, err := command.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	multi := io.MultiReader(stdout, stderr)
+
+	// start the command after having set up the pipe
+	if err := command.Start(); err != nil {
+		return fmt.Errorf(ErrorRunningCommandStream.Error(), err)
+	}
+
+	// read command's stdout line by line
+	in := bufio.NewScanner(multi)
+
+	for in.Scan() {
+		fmt.Fprintf(out, "%s\n", in.Text())
+	}
+	if err := in.Err(); err != nil {
+		return fmt.Errorf(ErrorRunningCommandStream.Error(), err)
+	}
+
+	return nil
+}
+
 func GetWorkingDir() (string, error) {
 	pathWorkingDir, err := os.Getwd()
 	if err != nil {
