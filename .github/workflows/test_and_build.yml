@@ -22,13 +22,19 @@ jobs:
           fetch-depth: 0
 
       - name: Build & Test
-        run: make test build
+        run: |
+          echo "Building and testing"
+          make test build
 
       - name: Linter
-        run: make lint
+        run: |
+          echo "Static checking the code"
+          make lint
 
       - name: Gosec
-        run: make sec
+        run: |
+          echo "Checking Security"
+          make sec
 
       - name: Go Report
         uses: creekorful/goreportcard-action@v1.0
