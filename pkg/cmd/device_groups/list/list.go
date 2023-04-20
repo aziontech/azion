@@ -28,10 +28,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azioncli device_groups list -a 16736354321
         $ azioncli device_groups list --application-id 16736354321
         $ azioncli device_groups list --application-id 16736354321 --details
-		$ azioncli device_groups list --application-id 16736354321 --order_by "id"
-		$ azioncli device_groups list --application-id 16736354321 --page 1
-		$ azioncli device_groups list --application-id 16736354321 --page_size 5
-		$ azioncli device_groups list --application-id 16736354321 --sort "asc"
+        $ azioncli device_groups list --application-id 16736354321 --order_by "id"
+        $ azioncli device_groups list --application-id 16736354321 --page 1
+        $ azioncli device_groups list --application-id 16736354321 --page_size 5
+        $ azioncli device_groups list --application-id 16736354321 --sort "asc"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
