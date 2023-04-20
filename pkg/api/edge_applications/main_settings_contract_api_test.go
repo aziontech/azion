@@ -41,6 +41,10 @@ func getRequest() []byte {
 	return b
 }
 
+func token() string {
+	return "Token <token>"
+}
+
 func TestEdgeApplicationsAPIContract(t *testing.T) {
 	const host string = "https://api.azionapi.net"
 
@@ -59,7 +63,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodGet,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token <token>",
+				"Authorization": token(),
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications",
@@ -72,7 +76,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodGet,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token <token>",
+				"Authorization": token(),
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications/1673635839",
@@ -85,7 +89,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodPost,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token <token>",
+				"Authorization": token(),
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications",

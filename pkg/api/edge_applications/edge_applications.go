@@ -506,3 +506,22 @@ func (c *Client) DeleteDeviceGroup(ctx context.Context, appID int64, groupID int
 
 	return nil
 }
+
+type CreateDeviceGroupsRequest struct {
+	sdk.CreateDeviceGroupsRequest
+}
+
+type DeviceGroupsResponse interface {
+	GetId() int64
+	GetName() string
+	GetUserAgent() string
+}
+
+func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroupsRequest, applicationID int64) (DeviceGroupsResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsPost(ctx, applicationID).
+		CreateDeviceGroupsRequest(req.CreateDeviceGroupsRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
+}
