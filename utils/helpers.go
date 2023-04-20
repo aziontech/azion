@@ -93,8 +93,8 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
-// RunCommandSteamOutput executes the provived command while streaming its logs (stdou+stderr) directly to terminal
-func RunCommandSteamOutput(out io.Writer, envVars []string, comm string) error {
+// RunCommandStreamOutput executes the provived command while streaming its logs (stdou+stderr) directly to terminal
+func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error {
 	command := exec.Command(shell, "-c", comm)
 	if len(envVars) > 0 {
 		command.Env = os.Environ()

@@ -67,7 +67,7 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 			return utils.RunCommandWithOutput(envs, cmd)
 		},
 		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
-			return utils.RunCommandSteamOutput(f.IOStreams.Out, envs, cmd)
+			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
 		ConfigRelativePath: "/azion/config.json",
 		GetWorkDir:         utils.GetWorkingDir,
