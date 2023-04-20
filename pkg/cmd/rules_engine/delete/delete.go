@@ -22,8 +22,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		  $ azioncli rules_engine delete --application-id 1234 --rule-id 12312
-		  $ azioncli rules_engine delete -a 1234 -r 12312
+		  $ azioncli rules_engine delete --application-id 1673635839 --rule-id 12312
+		  $ azioncli rules_engine delete -a 1673635839 -r 12312
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {

@@ -21,6 +21,15 @@ var (
 	DeviceGroupsDeleteOutputSuccess    = "Device Group %d was successfully deleted\n"
 	DeviceGroupsDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
+	// describe cmd
+	DeviceGroupsDescribeUsage            = "describe --application-id <application_id> --group-id <group_id> [flags]"
+	DeviceGroupsDescribeShortDescription = "Returns the information related to the Device Group"
+	DeviceGroupsDescribeLongDescription  = "Returns the information related to the Device Group, informed through the flag '--group-id' in detail"
+	DeviceGroupsDescribeFlagOut          = "Exports the output of the subcommand 'describe' to the given file path <file_path/file_name.ext>"
+	DeviceGroupsDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
+	DeviceGroupsDescribeHelpFlag         = "Displays more information about the describe subcommand"
+	DeviceGroupsFileWritten              = "File successfully written to: %s\n"
+
 	// [ create ]
 	DeviceGroupsCreateUsage                 = "create [flags]"
 	DeviceGroupsCreateShortDescription      = "Creates a new device groups"

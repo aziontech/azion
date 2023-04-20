@@ -3,6 +3,7 @@ package build
 import (
 	"bytes"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"testing"
@@ -82,8 +83,9 @@ func TestBuild(t *testing.T) {
 		command.FileReader = func(path string) ([]byte, error) {
 			return jsonContent.Bytes(), nil
 		}
-		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
-			return "Command output goes here", 42, expectedErr
+		command.CommandRunnerStream = func(out io.Writer, cmd string, envvars []string) error {
+			return expectedErr
+
 		}
 		command.EnvLoader = func(path string) ([]string, error) {
 			return envVars, nil

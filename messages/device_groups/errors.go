@@ -11,4 +11,5 @@ var (
 	ErrorFailToDelete                 = errors.New("Failed to delete the rule in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorMandatoryCreateFlags         = errors.New("Required flags are missing. You must provide application-id, name, user-agent flags when the --application-id and --in flag are not provided. Run the command 'azioncli <command> <subcommand> --help' to display more information and try again.")
 	ErrorCreateDeviceGroups           = errors.New("Failed to create the Device groups: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorListDeviceGroups             = errors.New("Failed to list your rules in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
 )
