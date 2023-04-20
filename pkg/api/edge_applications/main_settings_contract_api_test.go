@@ -59,7 +59,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodGet,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token azion871e6f2e5f007b7fcac11039f49137ec587",
+				"Authorization": "Token <token>",
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications",
@@ -72,7 +72,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodGet,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token azion871e6f2e5f007b7fcac11039f49137ec587",
+				"Authorization": "Token <token>",
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications/1673635839",
@@ -85,7 +85,7 @@ func TestEdgeApplicationsAPIContract(t *testing.T) {
 			methodHttp: http.MethodPost,
 			headers: map[string]string{
 				"Accept":        "application/json; version=3",
-				"Authorization": "Token azion871e6f2e5f007b7fcac11039f49137ec587",
+				"Authorization": "Token <token>",
 				"Content-Type":  "application/json",
 			},
 			path:           "/edge_applications",
