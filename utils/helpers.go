@@ -93,7 +93,7 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
-// RunCommandStreamOutput executes the provived command while streaming its logs (stdou+stderr) directly to terminal
+// RunCommandStreamOutput executes the provived command while streaming its logs (stdout+stderr) directly to terminal
 func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error {
 	command := exec.Command(shell, "-c", comm)
 	if len(envVars) > 0 {
