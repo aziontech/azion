@@ -3,6 +3,7 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"strings"
@@ -21,16 +22,17 @@ import (
 )
 
 type BuildCmd struct {
-	Io                 *iostreams.IOStreams
-	WriteFile          func(filename string, data []byte, perm fs.FileMode) error
-	CommandRunner      func(cmd string, envvars []string) (string, int, error)
-	FileReader         func(path string) ([]byte, error)
-	ConfigRelativePath string
-	GetWorkDir         func() (string, error)
-	EnvLoader          func(path string) ([]string, error)
-	Stat               func(path string) (fs.FileInfo, error)
-	VersionId          func(dir string) (string, error)
-	f                  *cmdutil.Factory
+	Io                  *iostreams.IOStreams
+	WriteFile           func(filename string, data []byte, perm fs.FileMode) error
+	CommandRunner       func(cmd string, envvars []string) (string, int, error)
+	CommandRunnerStream func(out io.Writer, cmd string, envvars []string) error
+	FileReader          func(path string) ([]byte, error)
+	ConfigRelativePath  string
+	GetWorkDir          func() (string, error)
+	EnvLoader           func(path string) ([]string, error)
+	Stat                func(path string) (fs.FileInfo, error)
+	VersionId           func(dir string) (string, error)
+	f                   *cmdutil.Factory
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -63,6 +65,9 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		FileReader: os.ReadFile,
 		CommandRunner: func(cmd string, envs []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envs, cmd)
+		},
+		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
+			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
 		ConfigRelativePath: "/azion/config.json",
 		GetWorkDir:         utils.GetWorkingDir,
@@ -221,13 +226,10 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
 		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
 
-		output, _, err := cmd.CommandRunner(command, []string{})
+		err := cmd.CommandRunnerStream(cmd.Io.Out, command, []string{})
 		if err != nil {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 			return msg.ErrFailedToRunBuildCommand
 		}
-
-		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
 
 	case "on-error":
 		output, exitCode, err := cmd.CommandRunner(command, []string{})
