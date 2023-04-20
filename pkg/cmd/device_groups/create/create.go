@@ -11,7 +11,6 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
@@ -82,13 +81,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Path, "in", "", msg.DeviceGroupsCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.DeviceGroupsFlagHelp)
 	return cmd
-}
-
-func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
-	var addr sdk.CreateOriginsRequestAddresses
-	for _, v := range addrs {
-		addr.Address = v
-		addresses = append(addresses, addr)
-	}
-	return
 }
