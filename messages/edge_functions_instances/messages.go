@@ -62,7 +62,7 @@ var (
 	EdgeFuncInstanceUpdateFlagEdgeApplicationId = "Unique identifier for an edge application"
 	EdgeFuncInstanceUpdateFlagIn                = "Path to a JSON file containing the attributes of the edge functions instance that will be updated; you can use - for reading from stdin"
 	EdgeFuncInstanceUpdateFlagName              = "The edge functions instance name"
-	EdgeFuncInstanceUpdateFlagArgs              = "The JSON args related to the edge functions instance being created"
+	EdgeFuncInstanceUpdateFlagArgs              = "The JSON args related to the edge functions instance being updated"
 	EdgeFuncInstanceUpdateFlagInstanceID        = "Unique identifier for an edge functions instance"
 	EdgeFuncInstanceUpdateFlagFunctionID        = "Edge function ID to be used in the edge functions instance"
 	EdgeFuncInstanceUpdateOutputSuccess         = "Updated edge functions instance with ID %d\n"
