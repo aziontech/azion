@@ -21,7 +21,7 @@ var (
 	//Edge Functions Instances cmd
 	EdgeFuncInstanceUsage            = "edge_functions_instances"
 	EdgeFuncInstanceShortDescription = "Edge Functions Instances allows you to instantiate serverless functions in your edge applications at Azion."
-	EdgeFuncInstanceLongDescription  = "Edge Functions Instances allows you to instantiate serverless functions in your edge applications at Azion, as well as set up conditions for its execution."
+	EdgeFuncInstanceLongDescription  = "Edge Functions Instances allows you to instantiate serverless functions in your edge applications at Azion, as well as set up conditions for their execution."
 	EdgeFuncInstanceFlagHelp         = "Displays more information about the edge functions instances command"
 	EdgeFuncInstanceFlagId           = "Unique identifier for an edge functions instance"
 	ApplicationFlagId                = "Unique identifier for the edge application related to an edge functions instance. The '--application-id' flag is required"
