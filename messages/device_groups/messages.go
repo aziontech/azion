@@ -21,7 +21,7 @@ var (
 	DeviceGroupsDeleteOutputSuccess    = "Device Group %d was successfully deleted\n"
 	DeviceGroupsDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
-	//describe cmd
+	// describe cmd
 	DeviceGroupsDescribeUsage            = "describe --application-id <application_id> --group-id <group_id> [flags]"
 	DeviceGroupsDescribeShortDescription = "Returns the information related to the Device Group"
 	DeviceGroupsDescribeLongDescription  = "Returns the information related to the Device Group, informed through the flag '--group-id' in detail"
@@ -29,6 +29,17 @@ var (
 	DeviceGroupsDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	DeviceGroupsDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	DeviceGroupsFileWritten              = "File successfully written to: %s\n"
+
+	// [ create ]
+	DeviceGroupsCreateUsage                 = "create [flags]"
+	DeviceGroupsCreateShortDescription      = "Creates a new device groups"
+	DeviceGroupsCreateLongDescription       = "Creates an device groups based on given attributes to be used in edge applications"
+	DeviceGroupsCreateFlagEdgeApplicationId = "Unique identifier for an edge application"
+	DeviceGroupsCreateFlagName              = "The device group name"
+	DeviceGroupsCreateFlagUserAgent         = "the device group flag user agent"
+	DeviceGroupsCreateFlagIn                = "Path to a JSON file containing the attributes of the  device group that will be created; you can use - for reading from stdin"
+	DeviceGroupsCreateOutputSuccess         = "Created  device group with ID %d\n"
+	DeviceGroupsCreateHelpFlag              = "Displays more information about the create subcommand"
 
 	ApplicationFlagId = "Unique identifier for the edge application that implements this Device Group. The '--application-id' flag is required"
 	DeviceGroupFlagId = "Unique identifier for a Device Group. The '--group-id' flag is required"
