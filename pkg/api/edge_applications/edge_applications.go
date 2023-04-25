@@ -62,12 +62,6 @@ type RulesEngineResponse interface {
 	GetName() string
 }
 
-type DeviceGroupsResponse interface {
-	GetId() int64
-	GetName() string
-	GetUserAgent() string
-}
-
 type Client struct {
 	apiClient *sdk.APIClient
 }
@@ -484,8 +478,14 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	return &resp.Results, nil
 }
 
-type UpdateDeviceGroupRequest struct {
-	sdk.PatchDeviceGroupsRequest
+type CreateDeviceGroupsRequest struct {
+	sdk.CreateDeviceGroupsRequest
+}
+
+type DeviceGroupsResponse interface {
+	GetId() int64
+	GetName() string
+	GetUserAgent() string
 }
 
 func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.DeviceGroupsResponse, error) {
@@ -533,4 +533,13 @@ func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchDeviceGroup
 	}
 
 	return &deviceGroup.Results, nil
+}
+
+func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroupsRequest, applicationID int64) (DeviceGroupsResponse, error) {
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsPost(ctx, applicationID).
+		CreateDeviceGroupsRequest(req.CreateDeviceGroupsRequest).Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &resp.Results, nil
 }
