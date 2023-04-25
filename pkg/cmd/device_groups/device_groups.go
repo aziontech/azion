@@ -6,6 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/list"
+	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	deviceGroupsCmd.AddCommand(list.NewCmd(f))
 	deviceGroupsCmd.AddCommand(delete.NewCmd(f))
 	deviceGroupsCmd.AddCommand(describe.NewCmd(f))
+	deviceGroupsCmd.AddCommand(update.NewCmd(f))
 
 	deviceGroupsCmd.Flags().BoolP("help", "h", false, msg.DeviceGroupsFlagHelp)
 	return deviceGroupsCmd
