@@ -25,9 +25,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.DeviceGroupsUsage,
-		Short:         msg.DeviceGroupsShortDescription,
-		Long:          msg.DeviceGroupsLongDescription,
+		Use:           msg.DeviceGroupsCreateUsage,
+		Short:         msg.DeviceGroupsCreateShortDescription,
+		Long:          msg.DeviceGroupsCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
