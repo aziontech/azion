@@ -525,6 +525,16 @@ func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID
 	return &resp.Results, nil
 }
 
+func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchDeviceGroupsRequest, appID int64, groupID int64) (DeviceGroupsResponse, error) {
+	request := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdPatch(ctx, appID, groupID).PatchDeviceGroupsRequest(req)
+	deviceGroup, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return &deviceGroup.Results, nil
+}
+
 func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroupsRequest, applicationID int64) (DeviceGroupsResponse, error) {
 	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsPost(ctx, applicationID).
 		CreateDeviceGroupsRequest(req.CreateDeviceGroupsRequest).Execute()

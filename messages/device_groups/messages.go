@@ -29,6 +29,15 @@ var (
 	DeviceGroupsDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	DeviceGroupsDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	DeviceGroupsFileWritten              = "File successfully written to: %s\n"
+  
+	//update command
+	DeviceGroupsUpdateUsage            = "update [flags]"
+	DeviceGroupsUpdateShortDescription = "Updates a device group"
+	DeviceGroupsUpdateLongDescription  = "Updates a device group based on given attributes to be used in edge applications"
+	DeviceGroupsUpdateFlagName         = "The device group name"
+	DeviceGroupsUpdateFlagUserAgent    = "The device group flag user agent"
+	DeviceGroupsUpdateFlagIn           = "Path to a JSON file containing the attributes of the  device group that will be created; you can use - for reading from stdin"
+	DeviceGroupsUpdateOutputSuccess    = "Device Group %d was updated updated\n"
 
 	// [ create ]
 	DeviceGroupsCreateUsage                 = "create [flags]"
