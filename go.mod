@@ -4,8 +4,9 @@ go 1.17
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.35.0
+	github.com/aziontech/azionapi-go-sdk v0.37.0
 	github.com/fatih/color v1.13.0
+	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
