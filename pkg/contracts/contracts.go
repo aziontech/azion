@@ -33,6 +33,15 @@ type AzionApplicationCdn struct {
 	Application AzionJsonDataApplication `json:"application"`
 }
 
+type AzionApplicationStatic struct {
+	Name        string                   `json:"name"`
+	Type        string                   `json:"type"`
+	VersionID   string                   `json:"version-id"`
+	Domain      AzionJsonDataDomain      `json:"domain"`
+	Application AzionJsonDataApplication `json:"application"`
+	Function    AzionJsonDataFunction    `json:"function"`
+}
+
 type AzionApplicationConfig struct {
 	InitData    InitConf    `json:"init"`
 	BuildData   BuildConf   `json:"build"`

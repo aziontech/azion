@@ -47,6 +47,7 @@ var (
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully"
 	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n"
 	EdgeApplicationsInitNameNotSentCdn    = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
+	EdgeApplicationsInitNameNotSentStatic = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
 	EdgeApplicationsInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
