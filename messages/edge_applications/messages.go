@@ -32,13 +32,12 @@ var (
 	--type string       The type of Edge application
 	cdn                 Create an edge application to cache and deliver your content.
 	javascript          Create a serverless Javascript application on edge.
-	flareact            Create a serverless Flareact application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge application's name"
-	EdgeApplicationsInitFlagType          = "The type of Edge application <javascript | flareact | nextjs>"
+	EdgeApplicationsInitFlagType          = "The type of Edge application <javascript | nextjs>"
 	EdgeApplicationsInitFlagYes           = "Forces the automatic response 'yes' to all user input"
 	EdgeApplicationsInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
