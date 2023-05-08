@@ -140,7 +140,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			info.Name = filepath.Base(path)
 			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentStatic)
 		}
-
 		return initStatic(cmd, path, info)
 	}
 
@@ -227,7 +226,7 @@ func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSetti
 		projectName = packageJson.Name
 		projectSettings = "nextjs"
 	} else {
-		return "", "", msg.ErrorNotSupportTypeLang
+		return "", "", utils.ErrorUnsupportedType
 	}
 
 	return projectName, projectSettings, nil
@@ -574,8 +573,6 @@ func initStatic(cmd *InitCmd, path string, info *InitInfo) error {
 		options.Domain.Name = "__DEFAULT__"
 		options.Function.Name = "__DEFAULT__"
 		options.Application.Name = "__DEFAULT__"
-
-		fmt.Println("options ", options)
 
 		data, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
