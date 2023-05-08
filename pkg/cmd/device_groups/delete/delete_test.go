@@ -1,8 +1,10 @@
 package delete
 
 import (
+	"fmt"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +29,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Device Group 4321 was successfully deleted\n", stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.DeviceGroupsDeleteOutputSuccess, 4321), stdout.String())
 	})
 
 	t.Run("try delete device group that is not found", func(t *testing.T) {
