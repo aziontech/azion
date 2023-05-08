@@ -73,7 +73,7 @@ func TestNewCmd(t *testing.T) {
 						Io:         f.IOStreams,
 						GetWorkDir: func() (string, error) { return "", nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner: func(cmd string, envvars []string) (string, int, error) { return "", 0, nil },
 						LookPath:      func(bin string) (string, error) { return "", nil },
@@ -96,7 +96,7 @@ func TestNewCmd(t *testing.T) {
 					return &buildcmd.BuildCmd{
 						Io: f.IOStreams,
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner:      func(cmd string, envs []string) (string, int, error) { return "Build completed", 0, nil },
 						ConfigRelativePath: "/azion/config.json",
@@ -118,7 +118,7 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
@@ -137,7 +137,7 @@ func TestNewCmd(t *testing.T) {
 						Io:         f.IOStreams,
 						GetWorkDir: func() (string, error) { return "", nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner: func(cmd string, envvars []string) (string, int, error) { return "", 0, nil },
 						LookPath:      func(bin string) (string, error) { return "", nil },
@@ -160,7 +160,7 @@ func TestNewCmd(t *testing.T) {
 					return &buildcmd.BuildCmd{
 						Io: f.IOStreams,
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner:      func(cmd string, envs []string) (string, int, error) { return "Build completed", 0, nil },
 						ConfigRelativePath: "/azion/config.json",
@@ -182,7 +182,7 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
