@@ -2,9 +2,6 @@ package build
 
 import (
 	"bytes"
-	"errors"
-	"io"
-	"io/fs"
 	"os"
 	"testing"
 
@@ -16,87 +13,6 @@ import (
 )
 
 func TestBuild(t *testing.T) {
-	t.Run("basic", func(t *testing.T) {
-		f, stdout, _ := testutils.NewFactory(nil)
-
-		jsonContent := bytes.NewBufferString(`
-        {
-            "build": {
-                "cmd": "npm run build",
-				"output-ctrl": "on-error"
-            },
-			"type": "javascript"
-        }
-        `)
-
-		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
-
-		command := newBuildCmd(f)
-
-		command.FileReader = func(path string) ([]byte, error) {
-			return jsonContent.Bytes(), nil
-		}
-
-		command.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-
-		command.VersionId = func(dir string) (string, error) {
-			return "123456789", nil
-		}
-
-		command.Stat = func(path string) (fs.FileInfo, error) {
-			return nil, nil
-		}
-
-		command.CommandRunner = func(cmd string, envs []string) (string, int, error) {
-			return "Build completed", 0, nil
-		}
-		command.EnvLoader = func(path string) ([]string, error) {
-			return envVars, nil
-		}
-
-		err := command.run()
-		require.NoError(t, err)
-
-		require.Contains(t, stdout.String(), `Your Edge Application was built successfully`)
-	})
-
-	t.Run("cmd failed", func(t *testing.T) {
-		f, stdout, _ := testutils.NewFactory(nil)
-
-		jsonContent := bytes.NewBufferString(`
-        {
-            "build": {
-                "cmd": "npm run build",
-				"output-ctrl": "disable"
-            },
-			"type": "javascript"
-        }
-        `)
-
-		envVars := []string{"VAR1=PAODEBATATA", "VAR2=PAODEQUEIJO"}
-		expectedErr := errors.New("invalid file")
-
-		command := newBuildCmd(f)
-
-		command.FileReader = func(path string) ([]byte, error) {
-			return jsonContent.Bytes(), nil
-		}
-		command.CommandRunnerStream = func(out io.Writer, cmd string, envvars []string) error {
-			return expectedErr
-
-		}
-		command.EnvLoader = func(path string) ([]string, error) {
-			return envVars, nil
-		}
-
-		err := command.run()
-		require.Error(t, err, expectedErr)
-
-		require.Contains(t, stdout.String(), `Running build step command`)
-	})
-
 	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 

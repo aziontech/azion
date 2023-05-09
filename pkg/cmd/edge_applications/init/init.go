@@ -123,6 +123,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
+	info.PathWorkingDir = path
 
 	if info.TypeLang == "cdn" {
 		if !hasThisFlag(c, "name") {
@@ -132,6 +133,15 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
 		}
 		return initCdn(cmd, path, info)
+	}
+
+	if info.TypeLang == "static" {
+		if !hasThisFlag(c, "name") {
+			info.Name = filepath.Base(path)
+			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentStatic)
+		}
+
+		return initStatic(cmd, path, info)
 	}
 
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
@@ -151,19 +161,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
 	}
 
-	//gets the test function (if it could not find it, it means it is currently not supported)
-	testFunc, ok := makeTestFuncMap(cmd.Stat)[info.TypeLang]
-	if !ok {
-		return utils.ErrorUnsupportedType
-	}
-
-	info.PathWorkingDir = path
-
-	options.Test = testFunc
-	if err = options.Test(info.PathWorkingDir); err != nil {
-		return err
-	}
-
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
@@ -178,7 +175,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, info.PathWorkingDir)
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
 		if err != nil {
 			return err
 		}
@@ -206,8 +203,7 @@ func hasThisFlag(c *cobra.Command, flag string) bool {
 type PackageJson struct {
 	Name         string `json:"name"`
 	Dependencies struct {
-		Next     string `json:"next"`
-		Flareact string `json:"flareact"`
+		Next string `json:"next"`
 	} `json:"dependencies"`
 }
 
@@ -230,12 +226,8 @@ func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSetti
 	if len(packageJson.Dependencies.Next) > 0 {
 		projectName = packageJson.Name
 		projectSettings = "nextjs"
-	} else if len(packageJson.Dependencies.Flareact) > 0 {
-		projectName = packageJson.Name
-		projectSettings = "flareact"
 	} else {
-		projectName = packageJson.Name
-		projectSettings = "javascript"
+		return "", "", utils.ErrorUnsupportedType
 	}
 
 	return projectName, projectSettings, nil
@@ -365,18 +357,8 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 	}
 
 	switch info.TypeLang {
-	case "javascript":
-		err = InitJavascript(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
 	case "nextjs":
 		err = InitNextjs(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
-	case "flareact":
-		err = InitFlareact(info, cmd, conf, envs)
 		if err != nil {
 			return err
 		}
@@ -419,27 +401,6 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	return false
 }
 
-func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	pathWorker := info.PathWorkingDir + "/worker"
-	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingWorkerDirectory
-	}
-
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-
-	showInstructions(cmd, `	[ General Instructions ]
-	[ Usage ]
-		- Build Command: npm run build
-		- Publish Command: npm run deploy
-	[ Notes ]
-		- Node 16x or higher`) //nolint:all
-
-	return nil
-}
-
 func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
@@ -459,34 +420,6 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
     	- Publish Command: npm run deploy
     [ Notes ]
         - Node 16x or higher`) //nolint:all
-	return nil
-}
-
-func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	pathWorker := info.PathWorkingDir + "/worker"
-	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingWorkerDirectory
-	}
-
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-
-	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingPublicDirectory
-	}
-
-	showInstructions(cmd, `	[ General Instructions ]
-	- Requirements:
-		- Tools: npm
-	[ Usage ]
-		- Install Command: npm install
-		- Build Command: npm run build
-		- Publish Command: npm run deploy
-	[ Notes ]
-		- Node 16x or higher`) //nolint:all
-
 	return nil
 }
 
@@ -598,8 +531,50 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 		}
 
 		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
-
 	}
+
+	return nil
+}
+
+func initStatic(cmd *InitCmd, path string, info *InitInfo) error {
+	var err error
+	var shouldFetchTemplates bool
+	options := &contracts.AzionApplicationStatic{}
+
+	shouldFetchTemplates, err = shouldFetch(cmd, info)
+	if err != nil {
+		return err
+	}
+
+	if shouldFetchTemplates {
+		pathWorker := path + "/azion"
+		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+			return msg.ErrorFailedCreatingAzionDirectory
+		}
+
+		options.Name = info.Name
+		options.Type = info.TypeLang
+		options.VersionID = utils.CreateVersionID()
+		options.Domain.Name = "__DEFAULT__"
+		options.Function.Name = "__DEFAULT__"
+		options.Application.Name = "__DEFAULT__"
+
+		data, err := json.MarshalIndent(options, "", "  ")
+		if err != nil {
+			return msg.ErrorUnmarshalAzionFile
+		}
+
+		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
+		if err != nil {
+			return utils.ErrorInternalServerError
+		}
+
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+	}
+
+	showInstructions(cmd, `	[ General Instructions ]
+	[ Usage ]
+		- Publish Command: publish page static`) //nolint:all
 
 	return nil
 }

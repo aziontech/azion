@@ -8,7 +8,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-git/go-git/v5 v5.4.2
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.14.0
 	github.com/tidwall/gjson v1.14.3
 	github.com/tidwall/sjson v1.2.5
@@ -17,7 +17,7 @@ require (
 require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
