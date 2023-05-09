@@ -140,6 +140,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			info.Name = filepath.Base(path)
 			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentStatic)
 		}
+
 		return initStatic(cmd, path, info)
 	}
 
@@ -400,22 +401,6 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	return false
 }
 
-func InitStatic(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	pathWorker := info.PathWorkingDir + "/worker"
-	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingWorkerDirectory
-	}
-
-	showInstructions(cmd, `	[ General Instructions ]
-	[ Usage ]
-		- Build Command: npm run build
-		- Publish Command: npm run deploy
-	[ Notes ]
-		- Node 16x or higher`) //nolint:all
-
-	return nil
-}
-
 func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
@@ -586,6 +571,10 @@ func initStatic(cmd *InitCmd, path string, info *InitInfo) error {
 
 		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
 	}
+
+	showInstructions(cmd, `	[ General Instructions ]
+	[ Usage ]
+		- Publish Command: publish page static`) //nolint:all
 
 	return nil
 }
