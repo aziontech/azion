@@ -12,6 +12,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -908,40 +909,31 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationStatic) (int64, error) {
 	reqCre := api.CreateRequest{}
 
-	//Read code to upload
+	conf.Function.File = "./azion/function.js"
 
-	// temporario
-	code := []byte(`/* eslint-disable no-undef */
- 
- // caminho completo conforme esta no bucket
-self.__PROJECT_TYPE_PATTERN = "edge-application-statics/8310q/b5392936c6c4af3c123c1d0a94d8c455";
-addEventListener('fetch', event => {
-    event.respondWith(handleEvent(event))
-})
-
-async function handleEvent(event) {
-    try {
-        const request_path = new URL(event.request.url).pathname;
-        // version id usada no upload
-        const version_id = "b5392936c6c4af3c123c1d0a94d8c455";
-        const defaultRoute = version_id.concat("/index.html");
-        const customRoute = version_id.concat(request_path);
-        const asset_url = new URL(request_path === "/" ? defaultRoute : customRoute, "file://");
-        return fetch(asset_url);
-
-    } catch (e) {
-        return new Response(e.message || e.toString(), { status: 500 })
-    }
-}`)
-
-	/**
-	code, err := cmd.FileReader(conf.Function.File)
+	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
+		return 0, utils.ErrorReadingFile
 	}
-	*/
 
-	reqCre.SetCode(string(code))
+	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
+	if err != nil {
+		return 0, utils.ErrorParsingModel
+	}
+
+	data := struct {
+		VersionId string
+	}{
+		VersionId: conf.VersionID,
+	}
+
+	var result strings.Builder
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return 0, utils.ErrorExecTemplate
+	}
+
+	reqCre.SetCode(result.String())
 	reqCre.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqCre.SetName(conf.Name)
@@ -961,36 +953,10 @@ async function handleEvent(event) {
 func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationStatic) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
-	// temporario
-	code := []byte(`/* eslint-disable no-undef */
- 
- // caminho completo conforme esta no bucket
-self.__PROJECT_TYPE_PATTERN = "edge-application-statics/8310q/b5392936c6c4af3c123c1d0a94d8c455";
-addEventListener('fetch', event => {
-    event.respondWith(handleEvent(event))
-})
-
-async function handleEvent(event) {
-    try {
-        const request_path = new URL(event.request.url).pathname;
-        // version id usada no upload
-        const version_id = "b5392936c6c4af3c123c1d0a94d8c455";
-        const defaultRoute = version_id.concat("/index.html");
-        const customRoute = version_id.concat(request_path);
-        const asset_url = new URL(request_path === "/" ? defaultRoute : customRoute, "file://");
-        return fetch(asset_url);
-
-    } catch (e) {
-        return new Response(e.message || e.toString(), { status: 500 })
-    }
-}`)
-
-	/**
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
-	*/
 
 	reqUpd.SetCode(string(code))
 	reqUpd.SetActive(true)

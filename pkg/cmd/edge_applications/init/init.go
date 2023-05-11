@@ -140,7 +140,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentStatic)
 		}
 
-		return initStatic(cmd, path, info)
+		return initStatic(cmd, info)
 	}
 
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
@@ -535,37 +535,15 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	return nil
 }
 
-func initStatic(cmd *InitCmd, path string, info *InitInfo) error {
-	var err error
-	var shouldFetchTemplates bool
-	options := &contracts.AzionApplicationStatic{}
-
-	shouldFetchTemplates, err = shouldFetch(cmd, info)
+func initStatic(cmd *InitCmd, info *InitInfo) error {
+	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
 	}
 
 	if shouldFetchTemplates {
-		pathWorker := path + "/azion"
-		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-			return msg.ErrorFailedCreatingAzionDirectory
-		}
-
-		options.Name = info.Name
-		options.Type = info.TypeLang
-		options.VersionID = utils.CreateVersionID()
-		options.Domain.Name = "__DEFAULT__"
-		options.Function.Name = "__DEFAULT__"
-		options.Application.Name = "__DEFAULT__"
-
-		data, err := json.MarshalIndent(options, "", "  ")
-		if err != nil {
-			return msg.ErrorUnmarshalAzionFile
-		}
-
-		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
-		if err != nil {
-			return utils.ErrorInternalServerError
+		if err = cmd.fetchTemplates(info); err != nil {
+			return err
 		}
 
 		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
