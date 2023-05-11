@@ -94,8 +94,7 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azioncli edge_applications init
 		$ azioncli edge_applications init --help
-		$ azioncli edge_applications init --name "thisisatest" --type javascript
-		$ azioncli edge_applications init --name "thisisatest" --type flareact
+		$ azioncli edge_applications init --name "thisisatest" --type static
 		$ azioncli edge_applications init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
