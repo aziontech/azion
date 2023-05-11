@@ -271,6 +271,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0])
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationPublishDomainHint)
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil

@@ -58,6 +58,7 @@ var (
 	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
 	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
+	EdgeApplicationPublishDomainHint                   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure you DNS\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
 	EdgeApplicationsPublishOutputEdgeFunctionCreate    = "Created Edge Function %s with ID %d\n"
 	EdgeApplicationsPublishOutputEdgeFunctionUpdate    = "Updated Edge Function %s with ID %d\n"
