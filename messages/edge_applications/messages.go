@@ -31,7 +31,7 @@ var (
 	EdgeApplicationsInitUsage = `init [flags]
 	--type string       The type of Edge application
 	cdn                 Create an edge application to cache and deliver your content.
-	static          	Create a page static in application on edge.
+	static          	Create a static page in application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
