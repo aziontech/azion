@@ -35,8 +35,6 @@ type PublishCmd struct {
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
 	GetAzionJsonCdn       func() (*contracts.AzionApplicationCdn, error)
-	GetAzionJsonStatic    func() (*contracts.AzionApplicationStatic, error)
-	WriteAzionJsonStatic  func(conf *contracts.AzionApplicationStatic) error
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
@@ -61,8 +59,6 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		GetAzionJsonCdn:       utils.GetAzionJsonCdn,
-		GetAzionJsonStatic:    utils.GetAzionJsonStatic,
-		WriteAzionJsonStatic:  utils.WriteAzionJsonStatic,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
@@ -218,7 +214,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	if conf.Application.Id == 0 {
-		applicationId, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
+		applicationId, _, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
@@ -393,35 +389,7 @@ func (cmd *PublishCmd) runPublishPreCmdLine() error {
 	return nil
 }
 
-func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, error) {
-	reqApp := apiapp.CreateRequest{}
-	reqApp.SetName(name)
-	reqApp.SetDeliveryProtocol("http,https")
-	application, err := client.Create(ctx, &reqApp)
-	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
-	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
-	reqUpApp := apiapp.UpdateRequest{}
-	reqUpApp.SetEdgeFunctions(true)
-	reqUpApp.Id = application.GetId()
-	application, err = client.Update(ctx, &reqUpApp)
-	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
-	}
-	reqIns := apiapp.CreateInstanceRequest{}
-	reqIns.SetEdgeFunctionId(conf.Function.Id)
-	reqIns.SetName(conf.Name)
-	reqIns.ApplicationId = application.GetId()
-	instance, err := client.CreateInstancePublish(ctx, &reqIns)
-	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
-	}
-	InstanceId = instance.GetId()
-	return application.GetId(), nil
-}
-
-func (cmd *PublishCmd) createApplicationStatic(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationStatic, name string) (int64, int64, error) {
+func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
@@ -447,18 +415,6 @@ func (cmd *PublishCmd) createApplicationStatic(client *apiapp.Client, ctx contex
 	}
 	InstanceId = instance.GetId()
 	return application.GetId(), instance.GetId(), nil
-}
-
-func (cmd *PublishCmd) updateApplicationStatic(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationStatic, name string) error {
-	reqApp := apiapp.UpdateRequest{}
-	reqApp.SetName(name)
-	reqApp.Id = conf.Application.Id
-	application, err := client.Update(ctx, &reqApp)
-	if err != nil {
-		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
-	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
-	return nil
 }
 
 func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (int64, error) {
@@ -524,34 +480,6 @@ func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Contex
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
-	return domain, nil
-}
-
-func (cmd *PublishCmd) createDomainStatic(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationStatic, name string) (apidom.DomainResponse, error) {
-	reqDom := apidom.CreateRequest{}
-	reqDom.SetName(name)
-	reqDom.SetCnames([]string{})
-	reqDom.SetCnameAccessOnly(false)
-	reqDom.SetIsActive(true)
-	reqDom.SetEdgeApplicationId(conf.Application.Id)
-	domain, err := client.Create(ctx, &reqDom)
-	if err != nil {
-		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
-	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
-	return domain, nil
-}
-
-func (cmd *PublishCmd) updateDomainStatic(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationStatic, name string) (apidom.DomainResponse, error) {
-	reqDom := apidom.UpdateRequest{}
-	reqDom.SetName(name)
-	reqDom.SetEdgeApplicationId(conf.Application.Id)
-	reqDom.Id = conf.Domain.Id
-	domain, err := client.Update(ctx, &reqDom)
-	if err != nil {
-		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
-	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId())
 	return domain, nil
 }
 
@@ -731,7 +659,7 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 }
 
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
-	conf, err := cmd.GetAzionJsonStatic()
+	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		return err
 	}
@@ -806,7 +734,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		}
 	}
 
-	err = cmd.WriteAzionJsonStatic(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -821,13 +749,13 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 	// create application
 	if conf.Application.Id == 0 {
-		applicationID, instanceID, err := cmd.createApplicationStatic(clientApplication, ctx, conf, applicationName)
+		applicationID, instanceID, err := cmd.createApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
 		conf.Application.Id = applicationID
 
-		err = cmd.WriteAzionJsonStatic(conf)
+		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			return err
 		}
@@ -861,13 +789,13 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			return err
 		}
 	} else {
-		err := cmd.updateApplicationStatic(clientApplication, ctx, conf, applicationName)
+		err := cmd.updateApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = cmd.WriteAzionJsonStatic(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -881,19 +809,19 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	var domain apidom.DomainResponse
 
 	if conf.Domain.Id == 0 {
-		domain, err = cmd.createDomainStatic(clientDomain, ctx, conf, domaiName)
+		domain, err = cmd.createDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
 	} else {
-		domain, err = cmd.updateDomainStatic(clientDomain, ctx, conf, domaiName)
+		domain, err = cmd.updateDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = cmd.WriteAzionJsonStatic(conf)
+	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		return err
 	}
@@ -906,7 +834,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	return nil
 }
 
-func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationStatic) (int64, error) {
+func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqCre := api.CreateRequest{}
 
 	conf.Function.File = "./azion/function.js"
@@ -950,7 +878,7 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	return response.GetId(), nil
 }
 
-func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationStatic) (int64, error) {
+func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
 	code, err := cmd.FileReader(conf.Function.File)

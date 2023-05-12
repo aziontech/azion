@@ -201,48 +201,7 @@ func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
 	return conf, nil
 }
 
-func GetAzionJsonStatic() (*contracts.AzionApplicationStatic, error) {
-	path, err := GetWorkingDir()
-	if err != nil {
-		return nil, err
-	}
-	jsonConf := path + "/azion/azion.json"
-	file, err := os.ReadFile(jsonConf)
-	if err != nil {
-		fmt.Println(&jsonConf)
-		return nil, ErrorOpeningAzionJsonFile
-	}
-
-	conf := &contracts.AzionApplicationStatic{}
-	err = json.Unmarshal(file, &conf)
-	if err != nil {
-		return nil, ErrorUnmarshalAzionJsonFile
-	}
-
-	return conf, nil
-}
-
 func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
-	path, err := GetWorkingDir()
-	if err != nil {
-		return err
-	}
-	jsonConf := path + "/azion/azion.json"
-
-	data, err := json.MarshalIndent(conf, "", "  ")
-	if err != nil {
-		return ErrorMarshalAzionJsonFile
-	}
-
-	err = os.WriteFile(jsonConf, data, 0644)
-	if err != nil {
-		return ErrorWritingAzionJsonFile
-	}
-
-	return nil
-}
-
-func WriteAzionJsonStatic(conf *contracts.AzionApplicationStatic) error {
 	path, err := GetWorkingDir()
 	if err != nil {
 		return err
