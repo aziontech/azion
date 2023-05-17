@@ -178,7 +178,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cmd := NewPublishCmd(f)
 
-		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
+		_, _, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.EqualError(t, err, "Failed to create the Edge Application: Invalid. Check your settings and try again. If the error persists, contact Azion support")
 	})
 
@@ -212,7 +212,7 @@ func TestPublishCmd(t *testing.T) {
 
 		cmd := NewPublishCmd(f)
 
-		_, err := cmd.createApplication(cliapp, ctx, options, applicationName)
+		_, _, err := cmd.createApplication(cliapp, ctx, options, applicationName)
 		require.NoError(t, err)
 	})
 }
