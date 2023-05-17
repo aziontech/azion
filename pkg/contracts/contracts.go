@@ -24,6 +24,7 @@ type AzionApplicationOptions struct {
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`
 	RtPurge     AzionJsonDataPurge       `json:"rt-purge"`
+	Origin      AzionJsonDataOrigin      `json:"origin"`
 }
 
 type AzionApplicationCdn struct {
@@ -83,6 +84,12 @@ type AzionJsonDataFunction struct {
 type AzionJsonDataApplication struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+type AzionJsonDataOrigin struct {
+	Id      int64    `json:"id"`
+	Name    string   `json:"name"`
+	Address []string `json:"address"`
 }
 
 type AzionJsonDataDomain struct {
