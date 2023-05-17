@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -24,7 +25,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 )
