@@ -15,27 +15,21 @@ type (
 	errMsg error
 )
 
-const listHeight = 14
-
 var (
-	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
-	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
-	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
-	helpStyle         = list.DefaultStyles().HelpStyle.PaddingLeft(4).PaddingBottom(1)
-	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
+	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)                                   // nolint:all
+	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170")) // nolint:all
 )
 
-type item string
+type item string // nolint:all
 
-func (i item) FilterValue() string { return "" }
+func (i item) FilterValue() string { return "" } // nolint:all
 
-type itemDelegate struct{}
+type itemDelegate struct{} // nolint:all
 
-func (d itemDelegate) Height() int                               { return 1 }
-func (d itemDelegate) Spacing() int                              { return 0 }
-func (d itemDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd { return nil }
-func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
+func (d itemDelegate) Height() int                               { return 1 }   // nolint:all
+func (d itemDelegate) Spacing() int                              { return 0 }   // nolint:all
+func (d itemDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd { return nil } // nolint:all
+func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) { // nolint:all
 	i, ok := listItem.(item)
 	if !ok {
 		return
@@ -55,10 +49,8 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 
 type model struct {
 	textInput textinput.Model
-	choice    string
-	quitting  bool
 	err       error
-}
+} // nolint:all
 
 func (m model) Init() tea.Cmd {
 	return nil
