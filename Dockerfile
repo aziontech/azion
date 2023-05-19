@@ -8,7 +8,7 @@ WORKDIR /go/src/app
 COPY . .
 
 # Execute o comando make build quando o container for iniciado
-CMD ["make", "build"]
+CMD ["make", "build", "lint"]
 
 # Defina a variável de ambiente PATH com o diretório bin do Go
 ENV PATH="/go/bin:${PATH}"
