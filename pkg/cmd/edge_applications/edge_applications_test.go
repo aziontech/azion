@@ -1,6 +1,7 @@
 package edge_applications
 
 import (
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -41,6 +42,22 @@ func Mock(mock *httpmock.Registry) {
 	)
 	mock.Register(
 		httpmock.REST("PATCH", "edge_applications/777/rules_engine/request/rules/137056"),
+		httpmock.JSONFromFile(".fixtures/rule.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/cache_settings"),
+		httpmock.JSONFromFile(".fixtures/cache.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/origins"),
+		httpmock.JSONFromFile(".fixtures/origin.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/rules_engine/request/rules"),
+		httpmock.JSONFromFile(".fixtures/rule.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/rules_engine/response/rules"),
 		httpmock.JSONFromFile(".fixtures/rule.json"),
 	)
 	mock.Register(
@@ -124,6 +141,9 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
 						},
+						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
+							return "www.test.com"
+						},
 					}
 				},
 			},
@@ -187,6 +207,9 @@ func TestNewCmd(t *testing.T) {
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
+						},
+						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
+							return "www.test.com"
 						},
 					}
 				},
