@@ -33,29 +33,8 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
-
-		err := cmd.Execute()
-
-		require.ErrorIs(t, err, msg.ErrorPackageJsonNotFound)
-	})
-
-	t.Run("with unsupported type", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		initCmd := NewInitCmd(f)
-
-		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli edge_applications build\",\n    \"deploy\": \"azioncli edge_applications publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\"\n  }\n}\n"), nil
-		}
-
-		cmd := NewCobraCmd(initCmd)
-
-		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor"})
-
-		err := cmd.Execute()
-
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static", "-y"})
+		require.NoError(t, cmd.Execute())
 	})
 
 	t.Run("with -y and -n flags", func(t *testing.T) {
@@ -70,45 +49,6 @@ func TestCobraCmd(t *testing.T) {
 		err := cmd.Execute()
 
 		require.ErrorIs(t, err, msg.ErrorYesAndNoOptions)
-	})
-
-	t.Run("did not send name", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, stdout, _ := testutils.NewFactory(mock)
-		initCmd := NewInitCmd(f)
-
-		initCmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-
-		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
-			return "", 0, nil
-		}
-		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"static" }`), nil
-		}
-		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-		initCmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-		initCmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-
-		cmd := NewCobraCmd(initCmd)
-
-		cmd.SetArgs([]string{"--type", "static"})
-
-		err := cmd.Execute()
-
-		require.NoError(t, err)
-
-		require.Contains(t, stdout.String(), fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", "init"))
 	})
 
 	t.Run("success with static", func(t *testing.T) {

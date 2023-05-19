@@ -3,6 +3,15 @@ package init
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -14,12 +23,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
-	"io/fs"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 type InitInfo struct {
@@ -123,31 +126,19 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
-	if info.TypeLang == "cdn" {
-		if !hasThisFlag(c, "name") {
-			dir := filepath.Dir(info.PathWorkingDir)
-			parent := filepath.Base(dir)
-			info.Name = parent
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
-		}
-		return initCdn(cmd, path, info)
-	}
-
-	if info.TypeLang == "static" {
-		if !hasThisFlag(c, "name") {
-			info.Name = filepath.Base(path)
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentStatic)
-		}
-
-		return initStatic(cmd, info)
-	}
-
-	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
+	projectName, projectSettings, err := DetectedProjectJS(info, cmd, path)
 	if err != nil {
 		return err
 	}
 
-	projectName, projectSettings, err := DetectedProjectJS(bytePackageJson)
+	switch info.TypeLang {
+	case "cdn":
+		return initCdn(cmd, path, info)
+	case "static":
+		return initStatic(cmd, info)
+	}
+
+	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
 		return err
 	}
@@ -214,18 +205,57 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 	return bytePackageJson, pathPackageJson, nil
 }
 
-func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSettings string, err error) {
+func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
 	var packageJson PackageJson
-	err = json.Unmarshal(bytePackageJson, &packageJson)
+	path = path + "/package.json"
+	_, err = cmd.Stat(path)
 	if err != nil {
-		return "", "", utils.ErrorUnmarshalReader
+		if len(info.Name) > 0 {
+			projectName = info.Name
+		} else {
+
+			projectName, err = insert.Insert()
+			if err != nil {
+				return "", "", err
+			}
+			info.Name = projectName
+
+			projectSettings, err = choose.Choose()
+			if err != nil {
+				return "", "", err
+			}
+			info.TypeLang = projectSettings
+			return projectName, projectSettings, nil
+		}
+	} else {
+		pathPackageJson := path
+		bytePackageJson, errReadFile := cmd.FileReader(pathPackageJson)
+		if errReadFile != nil {
+			return "", "", msg.ErrorPackageJsonNotFound
+		}
+
+		if len(info.Name) == 0 {
+			projectName = packageJson.Name
+			info.Name = projectName
+		}
+
+		err = json.Unmarshal(bytePackageJson, &packageJson)
+		if err != nil {
+			return "", "", utils.ErrorUnmarshalReader
+		}
 	}
 
-	if len(packageJson.Dependencies.Next) > 0 {
-		projectName = packageJson.Name
+	switch {
+	case len(packageJson.Dependencies.Next) > 0:
 		projectSettings = "nextjs"
-	} else {
-		return "", "", utils.ErrorUnsupportedType
+	case info.TypeLang == "nextjs", info.TypeLang == "static", info.TypeLang == "cdn":
+		projectSettings = info.TypeLang
+	default:
+		projectSettings, err = choose.Choose()
+		if err != nil {
+			return "", "", err
+		}
+		info.TypeLang = projectSettings
 	}
 
 	return projectName, projectSettings, nil
