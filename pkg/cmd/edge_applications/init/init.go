@@ -3,13 +3,6 @@ package init
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -21,6 +14,12 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type InitInfo struct {

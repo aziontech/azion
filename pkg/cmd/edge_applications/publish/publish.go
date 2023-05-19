@@ -27,6 +27,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 type PublishCmd struct {
@@ -42,8 +43,9 @@ type PublishCmd struct {
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
-	AskInput              func(in io.ReadCloser, out io.Writer, message string) string
 	F                     *cmdutil.Factory
+	AskInput              func(in io.ReadCloser, out io.Writer, message string) (response string)
+	createVersionID       func() string
 }
 
 var InstanceId int64
@@ -66,6 +68,7 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
 		AskInput:              utils.AskForInput,
+		createVersionID:       utils.CreateVersionID,
 	}
 }
 
@@ -709,6 +712,27 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 }
 
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	azionJson := path + "/azion/azion.json"
+	file, err := cmd.FileReader(azionJson)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
+	azJson, err := sjson.Set(string(file), "version-id", cmd.createVersionID())
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
+	err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		return err
