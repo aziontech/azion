@@ -543,3 +543,73 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	}
 	return &resp.Results, nil
 }
+
+// this function creates the necessary cache settings for next applications to work correctly on the edge
+func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
+	req.SetBrowserCacheSettings("override")
+	req.SetBrowserCacheSettingsMaximumTtl(31536000)
+	req.SetCdnCacheSettings("override")
+	req.SetCdnCacheSettingsMaximumTtl(31536000)
+
+	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
+
+	resp, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp.Results, nil
+}
+
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string) error {
+	req := CreateRulesEngineRequest{}
+	req.SetName("cache policy")
+	behavior := make([]sdk.RulesEngineBehavior, 1)
+	behavior[0].SetName("set_cache_policy")
+	behavior[0].SetTarget(cacheId)
+	req.SetBehaviors(behavior)
+
+	criteria := make([][]sdk.RulesEngineCriteria, 1)
+	for i := 0; i < 1; i++ {
+		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
+	}
+
+	criteria[0][0].SetConditional("if")
+	criteria[0][0].SetVariable("${uri}")
+	criteria[0][0].SetOperator("starts_with")
+	if typeLang == "nextjs" {
+		criteria[0][0].SetInputValue("/_next/static")
+	} else {
+		criteria[0][0].SetInputValue("/")
+	}
+
+	req.SetCriteria(criteria)
+
+	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
+		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
+		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	req.SetName("enable gzip")
+
+	behavior[0].SetName("enable_gzip")
+	behavior[0].SetTarget("")
+	req.SetBehaviors(behavior)
+
+	criteria[0][0].SetConditional("if")
+	criteria[0][0].SetVariable("${request_uri}")
+	criteria[0][0].SetOperator("exists")
+	criteria[0][0].SetInputValue("")
+	req.SetCriteria(criteria)
+
+	_, httpResp, err = c.apiClient.EdgeApplicationsRulesEngineApi.
+		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
+		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
+}

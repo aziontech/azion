@@ -326,3 +326,9 @@ func checkOrderField(body string) error {
 func CreateVersionID() string {
 	return time.Now().Format("20060102150405")
 }
+
+func AskForInput(in io.ReadCloser, out io.Writer, message string) (response string) {
+	fmt.Fprintf(out, "%s: ", message)
+	fmt.Fscanln(in, &response)
+	return response
+}
