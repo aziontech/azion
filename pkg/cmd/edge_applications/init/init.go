@@ -248,7 +248,7 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 	switch {
 	case len(packageJson.Dependencies.Next) > 0:
 		projectSettings = "nextjs"
-	case info.TypeLang == "nextjs" || info.TypeLang == "static" || info.TypeLang == "cdn":
+	case info.TypeLang == "nextjs", info.TypeLang == "static", info.TypeLang == "cdn":
 		projectSettings = info.TypeLang
 	default:
 		projectSettings, err = choose.Choose()
