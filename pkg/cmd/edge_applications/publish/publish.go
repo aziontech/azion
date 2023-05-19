@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/MakeNowJust/heredoc"
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -25,6 +27,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 type PublishCmd struct {
@@ -41,6 +44,8 @@ type PublishCmd struct {
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
+	AskInput              func(in io.ReadCloser, out io.Writer, message string) (response string)
+	createVersionID       func() string
 }
 
 var InstanceId int64
@@ -62,6 +67,8 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
+		AskInput:              utils.AskForInput,
+		createVersionID:       utils.CreateVersionID,
 	}
 }
 
@@ -257,6 +264,41 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		conf.Domain.Id = domain.GetId()
 		newDomain = true
+
+		//after everything was create, we now create the cache and rules required
+		reqOrigin := apiapp.CreateOriginsRequest{}
+		var addresses []string
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			addresses = conf.Origin.Address
+			reqOrigin.SetAddresses(address)
+		} else {
+			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
+			addresses = strings.Split(response, ",")
+			address := prepareAddresses(addresses)
+			reqOrigin.SetAddresses(address)
+		}
+		reqOrigin.SetName(conf.Name)
+		reqOrigin.SetHostHeader("${host}")
+		origin, err := cliapp.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+		if err != nil {
+			return err
+		}
+		conf.Origin.Id = origin.GetOriginId()
+		conf.Origin.Address = addresses
+		reqCache := apiapp.CreateCacheSettingsRequest{}
+		reqCache.SetName(conf.Name)
+		cache, err := cliapp.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		err = cliapp.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), typeLang.String())
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
+
 	} else {
 		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
@@ -401,6 +443,7 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
+	reqUpApp.SetApplicationAcceleration(true)
 	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
@@ -659,7 +702,37 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	return nil
 }
 
+func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
+	var addr sdk.CreateOriginsRequestAddresses
+	for _, v := range addrs {
+		addr.Address = v
+		addresses = append(addresses, addr)
+	}
+	return
+}
+
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	azionJson := path + "/azion/azion.json"
+	file, err := cmd.FileReader(azionJson)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
+	azJson, err := sjson.Set(string(file), "version-id", cmd.createVersionID())
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
+	err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		return err

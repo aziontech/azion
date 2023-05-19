@@ -58,7 +58,7 @@ var (
 	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
 	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
-	EdgeApplicationPublishDomainHint                   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure you DNS\n"
+	EdgeApplicationPublishDomainHint                   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
 	EdgeApplicationsPublishOutputEdgeFunctionCreate    = "Created Edge Function %s with ID %d\n"
 	EdgeApplicationsPublishOutputEdgeFunctionUpdate    = "Updated Edge Function %s with ID %d\n"
@@ -66,6 +66,9 @@ var (
 	EdgeApplicationsPublishOutputEdgeApplicationUpdate = "Updated Edge Application %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainCreate          = "Created Domain %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
+	EdgeApplicationsCacheSettingsSuccessful            = "Created Cache Settings for web application"
+	EdgeApplicationsPublishInputAddress                = "Please inform an address to be used in the origin of this application: "
+	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
 
