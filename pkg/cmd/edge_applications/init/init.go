@@ -214,12 +214,17 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 		if len(info.Name) > 0 {
 			projectName = info.Name
 		} else {
-			insert.Insert()
-			projectName = insert.NameProject
+
+			projectName, err = insert.Insert()
+			if err != nil {
+				return "", "", err
+			}
 			info.Name = projectName
 
-			choose.Choose()
-			projectSettings = choose.TypeSelect
+			projectSettings, err = choose.Choose()
+			if err != nil {
+				return "", "", err
+			}
 			info.TypeLang = projectSettings
 			return projectName, projectSettings, nil
 		}
@@ -251,8 +256,10 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 	case info.TypeLang == "cdn":
 		projectSettings = info.TypeLang
 	default:
-		choose.Choose()
-		projectSettings = choose.TypeSelect
+		projectSettings, err = choose.Choose()
+		if err != nil {
+			return "", "", err
+		}
 		info.TypeLang = projectSettings
 	}
 

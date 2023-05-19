@@ -13,8 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/spf13/cobra"
 
-	table "github.com/MaxwelMazur/tablecli"
 	"github.com/fatih/color"
+	table "github.com/maxwelbm/tablecli"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {

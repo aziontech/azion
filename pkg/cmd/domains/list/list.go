@@ -8,11 +8,11 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/domains"
 	api "github.com/aziontech/azion-cli/pkg/api/domains"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
