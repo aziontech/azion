@@ -286,6 +286,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		conf.Origin.Id = origin.GetOriginId()
 		conf.Origin.Address = addresses
+		conf.Origin.Name = origin.GetName()
 		reqCache := apiapp.CreateCacheSettingsRequest{}
 		reqCache.SetName(conf.Name)
 		cache, err := cliapp.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
@@ -893,6 +894,43 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if conf.Origin.Id == 0 {
+		//after everything was create, we now create the cache and rules required
+		reqOrigin := apiapp.CreateOriginsRequest{}
+		var addresses []string
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			addresses = conf.Origin.Address
+			reqOrigin.SetAddresses(address)
+		} else {
+			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
+			addresses = strings.Split(response, ",")
+			address := prepareAddresses(addresses)
+			reqOrigin.SetAddresses(address)
+		}
+		reqOrigin.SetName(conf.Name)
+		reqOrigin.SetHostHeader("${host}")
+		origin, err := clientApplication.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+		if err != nil {
+			return err
+		}
+		conf.Origin.Id = origin.GetOriginId()
+		conf.Origin.Address = addresses
+		conf.Origin.Name = origin.GetName()
+		reqCache := apiapp.CreateCacheSettingsRequest{}
+		reqCache.SetName(conf.Name)
+		cache, err := clientApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		err = clientApplication.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), "static")
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
