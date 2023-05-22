@@ -29,7 +29,7 @@ var (
 	DeviceGroupsDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	DeviceGroupsDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	DeviceGroupsFileWritten              = "File successfully written to: %s\n"
-  
+
 	//update command
 	DeviceGroupsUpdateUsage            = "update [flags]"
 	DeviceGroupsUpdateShortDescription = "Updates a device group"
