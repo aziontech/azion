@@ -135,7 +135,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	case "cdn":
 		return initCdn(cmd, path, info)
 	case "static":
-		return initStatic(cmd, info)
+		return initStatic(cmd, info, options)
 	}
 
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
@@ -564,7 +564,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 	return nil
 }
 
-func initStatic(cmd *InitCmd, info *InitInfo) error {
+func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
@@ -572,6 +572,10 @@ func initStatic(cmd *InitCmd, info *InitInfo) error {
 
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
+			return err
+		}
+
+		if err = cmd.organizeJsonFile(options, info); err != nil {
 			return err
 		}
 
