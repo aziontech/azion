@@ -31,6 +31,14 @@ func TestCobraCmd(t *testing.T) {
 			return nil, os.ErrNotExist
 		}
 
+		initCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte("{\n  \"name\": \"__DEFAULT__\",\n  \"env\": \"production\",\n  \"type\": \"static\",\n  \"version-id\": \"\",\n  \"domain\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\"\n  },\n  \"application\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\"\n  },\n  \"origin\": {\n    \"name\": \"__DEFAULT__\",\n    \"address\": [\"\"]\n},\n  \"function\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\",\n    \"file\": \"\",\n    \"args\": \"\"\n  }\n}"), nil
+		}
+
+		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+
 		cmd := NewCobraCmd(initCmd)
 
 		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static", "-y"})
