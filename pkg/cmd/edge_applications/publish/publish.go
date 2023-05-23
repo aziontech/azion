@@ -4,14 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -24,6 +27,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
 type PublishCmd struct {
@@ -40,6 +44,8 @@ type PublishCmd struct {
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
+	AskInput              func(in io.ReadCloser, out io.Writer, message string) (response string)
+	createVersionID       func() string
 }
 
 var InstanceId int64
@@ -61,6 +67,8 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
+		AskInput:              utils.AskForInput,
+		createVersionID:       utils.CreateVersionID,
 	}
 }
 
@@ -88,13 +96,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
-	// Run build command
-	build := cmd.BuildCmd(f)
-	err := build.Run()
-	if err != nil {
-		return err
-	}
-
 	path, err := cmd.GetWorkDir()
 	if err != nil {
 		return err
@@ -114,6 +115,21 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			return err
 		}
 		return nil
+	}
+
+	if typeLang.String() == "static" {
+		err = publishStatic(cmd, f)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// Run build command
+	build := cmd.BuildCmd(f)
+	err = build.Run()
+	if err != nil {
+		return err
 	}
 
 	versionID := gjson.Get(string(file), "version-id")
@@ -205,7 +221,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	if conf.Application.Id == 0 {
-		applicationId, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
+		applicationId, _, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
 			return err
 		}
@@ -248,6 +264,42 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		conf.Domain.Id = domain.GetId()
 		newDomain = true
+
+		//after everything was create, we now create the cache and rules required
+		reqOrigin := apiapp.CreateOriginsRequest{}
+		var addresses []string
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			addresses = conf.Origin.Address
+			reqOrigin.SetAddresses(address)
+		} else {
+			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
+			addresses = strings.Split(response, ",")
+			address := prepareAddresses(addresses)
+			reqOrigin.SetAddresses(address)
+		}
+		reqOrigin.SetName(conf.Name)
+		reqOrigin.SetHostHeader("${host}")
+		origin, err := cliapp.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+		if err != nil {
+			return err
+		}
+		conf.Origin.Id = origin.GetOriginId()
+		conf.Origin.Address = addresses
+		conf.Origin.Name = origin.GetName()
+		reqCache := apiapp.CreateCacheSettingsRequest{}
+		reqCache.SetName(conf.Name)
+		cache, err := cliapp.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		err = cliapp.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), typeLang.String())
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
+
 	} else {
 		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
@@ -271,6 +323,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0])
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationPublishDomainHint)
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
@@ -380,21 +433,22 @@ func (cmd *PublishCmd) runPublishPreCmdLine() error {
 	return nil
 }
 
-func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, error) {
+func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
+		return 0, 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
+	reqUpApp.SetApplicationAcceleration(true)
 	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
+		return 0, 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
@@ -402,10 +456,10 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
+		return 0, 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}
 	InstanceId = instance.GetId()
-	return application.GetId(), nil
+	return application.GetId(), instance.GetId(), nil
 }
 
 func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (int64, error) {
@@ -501,7 +555,6 @@ func (cmd *PublishCmd) updateDomainCdn(client *apidom.Client, ctx context.Contex
 }
 
 func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-
 	reqRules := apiapp.UpdateRulesEngineRequest{}
 	reqRules.IdApplication = conf.Application.Id
 
@@ -511,7 +564,6 @@ func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 	}
 
 	return nil
-
 }
 
 func runCommand(cmd *PublishCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
@@ -649,4 +701,327 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
+}
+
+func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
+	var addr sdk.CreateOriginsRequestAddresses
+	for _, v := range addrs {
+		addr.Address = v
+		addresses = append(addresses, addr)
+	}
+	return
+}
+
+func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
+	path, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	azionJson := path + "/azion/azion.json"
+	file, err := cmd.FileReader(azionJson)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
+	azJson, err := sjson.Set(string(file), "version-id", cmd.createVersionID())
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
+	err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
+	if err != nil {
+		return utils.ErrorWritingAzionJsonFile
+	}
+
+	conf, err := cmd.GetAzionJsonContent()
+	if err != nil {
+		return err
+	}
+
+	pathStatic := "./"
+
+	// upload the page static
+	// Get total amount of files to display progress
+	totalFiles := 0
+	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			totalFiles++
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+
+	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
+
+	versionID := conf.VersionID
+	currentFile := 0
+	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			fileContent, err := cmd.Open(path)
+			if err != nil {
+				return err
+			}
+
+			fileString := strings.TrimPrefix(path, pathStatic)
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, fileContent); err != nil {
+				return err
+			}
+
+			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
+			progress := int(percentage / 10)
+			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
+			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
+			currentFile++
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
+
+	// create function
+	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	ctx := context.Background()
+
+	if conf.Function.Id == 0 {
+		//Create New function
+		PublishId, err := cmd.CreateFunction(client, ctx, conf)
+		if err != nil {
+			return err
+		}
+		conf.Function.Id = PublishId
+	} else {
+		//Update existing function
+		_, err := cmd.UpdateFunction(client, ctx, conf.Function.Id, conf)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = cmd.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
+	}
+
+	clientApplication := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientDomain := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	applicationName := conf.Name
+	if conf.Application.Name != "__DEFAULT__" {
+		applicationName = conf.Application.Name
+	}
+
+	// create application
+	if conf.Application.Id == 0 {
+		applicationID, instanceID, err := cmd.createApplication(clientApplication, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+		conf.Application.Id = applicationID
+
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			return err
+		}
+
+		reqRulesEngine := apiapp.CreateRulesEngineRequest{}
+		reqRulesEngine.SetName(conf.Application.Name)
+		behaviors := []sdk.RulesEngineBehavior{
+			{
+				Name:   "run_function",
+				Target: instanceID, // id edge function instance
+			},
+		}
+
+		var inputValue string = "/"
+		criteria := [][]sdk.RulesEngineCriteria{
+			{
+				{
+					Variable:    "${uri}",
+					Operator:    "starts_with",
+					Conditional: "if",
+					InputValue:  &inputValue,
+				},
+			},
+		}
+
+		reqRulesEngine.SetBehaviors(behaviors)
+		reqRulesEngine.SetCriteria(criteria)
+
+		_, err = clientApplication.CreateRulesEngine(ctx, applicationID, "request", &reqRulesEngine)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := cmd.updateApplication(clientApplication, ctx, conf, applicationName)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = cmd.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
+	}
+
+	// create domain
+	domaiName := conf.Name
+	if conf.Domain.Name != "__DEFAULT__" {
+		domaiName = conf.Domain.Name
+	}
+
+	var domain apidom.DomainResponse
+
+	if conf.Domain.Id == 0 {
+		domain, err = cmd.createDomain(clientDomain, ctx, conf, domaiName)
+		if err != nil {
+			return err
+		}
+		conf.Domain.Id = domain.GetId()
+	} else {
+		domain, err = cmd.updateDomain(clientDomain, ctx, conf, domaiName)
+		if err != nil {
+			return err
+		}
+	}
+
+	if conf.Origin.Id == 0 {
+		//after everything was create, we now create the cache and rules required
+		reqOrigin := apiapp.CreateOriginsRequest{}
+		var addresses []string
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			addresses = conf.Origin.Address
+			reqOrigin.SetAddresses(address)
+		} else {
+			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
+			addresses = strings.Split(response, ",")
+			address := prepareAddresses(addresses)
+			reqOrigin.SetAddresses(address)
+		}
+		reqOrigin.SetName(conf.Name)
+		reqOrigin.SetHostHeader("${host}")
+		origin, err := clientApplication.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+		if err != nil {
+			return err
+		}
+		conf.Origin.Id = origin.GetOriginId()
+		conf.Origin.Address = addresses
+		conf.Origin.Name = origin.GetName()
+		reqCache := apiapp.CreateCacheSettingsRequest{}
+		reqCache.SetName(conf.Name)
+		cache, err := clientApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		err = clientApplication.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), "static")
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
+	}
+
+	err = cmd.WriteAzionJsonContent(conf)
+	if err != nil {
+		return err
+	}
+
+	domainReturnedName := []string{domain.GetDomainName()}
+
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0])
+
+	return nil
+}
+
+func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+	reqCre := api.CreateRequest{}
+
+	conf.Function.File = "./azion/function.js"
+
+	jsByte, err := os.ReadFile(conf.Function.File)
+	if err != nil {
+		return 0, utils.ErrorReadingFile
+	}
+
+	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
+	if err != nil {
+		return 0, utils.ErrorParsingModel
+	}
+
+	data := struct {
+		VersionId string
+	}{
+		VersionId: conf.VersionID,
+	}
+
+	var result strings.Builder
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return 0, utils.ErrorExecTemplate
+	}
+
+	reqCre.SetCode(result.String())
+	reqCre.SetActive(true)
+	if conf.Function.Name == "__DEFAULT__" {
+		reqCre.SetName(conf.Name)
+	} else {
+		reqCre.SetName(conf.Function.Name)
+	}
+	args := make(map[string]interface{})
+	reqCre.SetJsonArgs(args)
+	response, err := client.Create(ctx, &reqCre)
+	if err != nil {
+		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
+	}
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
+	return response.GetId(), nil
+}
+
+func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
+	reqUpd := api.UpdateRequest{}
+
+	code, err := cmd.FileReader(conf.Function.File)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
+	}
+
+	reqUpd.SetCode(string(code))
+	reqUpd.SetActive(true)
+	if conf.Function.Name == "__DEFAULT__" {
+		reqUpd.SetName(conf.Name)
+	} else {
+		reqUpd.SetName(conf.Function.Name)
+	}
+
+	//Read args
+	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+	}
+	args := make(map[string]interface{})
+	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+	}
+
+	reqUpd.Id = idReq
+	reqUpd.SetJsonArgs(args)
+	response, err := client.Update(ctx, &reqUpd)
+	if err != nil {
+		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
+	}
+	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
+	return response.GetId(), nil
 }

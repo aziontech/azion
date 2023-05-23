@@ -31,14 +31,13 @@ var (
 	EdgeApplicationsInitUsage = `init [flags]
 	--type string       The type of Edge application
 	cdn                 Create an edge application to cache and deliver your content.
-	javascript          Create a serverless Javascript application on edge.
-	flareact            Create a serverless Flareact application on edge.
+	static          	Create a static page in application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge application's name"
-	EdgeApplicationsInitFlagType          = "The type of Edge application <javascript | flareact | nextjs>"
+	EdgeApplicationsInitFlagType          = "The type of Edge application <javascript | nextjs>"
 	EdgeApplicationsInitFlagYes           = "Forces the automatic response 'yes' to all user input"
 	EdgeApplicationsInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
@@ -47,6 +46,7 @@ var (
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully"
 	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n"
 	EdgeApplicationsInitNameNotSentCdn    = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
+	EdgeApplicationsInitNameNotSentStatic = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag"
 	EdgeApplicationsInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n"
 
@@ -58,6 +58,7 @@ var (
 	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
 	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %s\n"
+	EdgeApplicationPublishDomainHint                   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
 	EdgeApplicationsPublishOutputEdgeFunctionCreate    = "Created Edge Function %s with ID %d\n"
 	EdgeApplicationsPublishOutputEdgeFunctionUpdate    = "Updated Edge Function %s with ID %d\n"
@@ -65,6 +66,9 @@ var (
 	EdgeApplicationsPublishOutputEdgeApplicationUpdate = "Updated Edge Application %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainCreate          = "Created Domain %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
+	EdgeApplicationsCacheSettingsSuccessful            = "Created Cache Settings for web application"
+	EdgeApplicationsPublishInputAddress                = "Please inform an address to be used in the origin of this application: "
+	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
 

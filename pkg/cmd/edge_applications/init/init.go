@@ -3,6 +3,8 @@ package init
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -94,8 +96,7 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azioncli edge_applications init
 		$ azioncli edge_applications init --help
-		$ azioncli edge_applications init --name "thisisatest" --type javascript
-		$ azioncli edge_applications init --name "thisisatest" --type flareact
+		$ azioncli edge_applications init --name "thisisatest" --type static
 		$ azioncli edge_applications init --name "thisisatest" --type nextjs
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -123,23 +124,21 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if err != nil {
 		return err
 	}
+	info.PathWorkingDir = path
 
-	if info.TypeLang == "cdn" {
-		if !hasThisFlag(c, "name") {
-			dir := filepath.Dir(info.PathWorkingDir)
-			parent := filepath.Base(dir)
-			info.Name = parent
-			fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSentCdn)
-		}
-		return initCdn(cmd, path, info)
-	}
-
-	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
+	projectName, projectSettings, err := DetectedProjectJS(info, cmd, path)
 	if err != nil {
 		return err
 	}
 
-	projectName, projectSettings, err := DetectedProjectJS(bytePackageJson)
+	switch info.TypeLang {
+	case "cdn":
+		return initCdn(cmd, path, info)
+	case "static":
+		return initStatic(cmd, info, options)
+	}
+
+	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
 		return err
 	}
@@ -149,19 +148,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	if !hasThisFlag(c, "type") {
 		info.TypeLang = projectSettings
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
-	}
-
-	//gets the test function (if it could not find it, it means it is currently not supported)
-	testFunc, ok := makeTestFuncMap(cmd.Stat)[info.TypeLang]
-	if !ok {
-		return utils.ErrorUnsupportedType
-	}
-
-	info.PathWorkingDir = path
-
-	options.Test = testFunc
-	if err = options.Test(info.PathWorkingDir); err != nil {
-		return err
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
@@ -178,7 +164,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, info.PathWorkingDir)
+		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
 		if err != nil {
 			return err
 		}
@@ -206,8 +192,7 @@ func hasThisFlag(c *cobra.Command, flag string) bool {
 type PackageJson struct {
 	Name         string `json:"name"`
 	Dependencies struct {
-		Next     string `json:"next"`
-		Flareact string `json:"flareact"`
+		Next string `json:"next"`
 	} `json:"dependencies"`
 }
 
@@ -220,22 +205,57 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 	return bytePackageJson, pathPackageJson, nil
 }
 
-func DetectedProjectJS(bytePackageJson []byte) (projectName string, projectSettings string, err error) {
+func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
 	var packageJson PackageJson
-	err = json.Unmarshal(bytePackageJson, &packageJson)
+	path = path + "/package.json"
+	_, err = cmd.Stat(path)
 	if err != nil {
-		return "", "", utils.ErrorUnmarshalReader
+		if len(info.Name) > 0 {
+			projectName = info.Name
+		} else {
+
+			projectName, err = insert.Insert()
+			if err != nil {
+				return "", "", err
+			}
+			info.Name = projectName
+
+			projectSettings, err = choose.Choose()
+			if err != nil {
+				return "", "", err
+			}
+			info.TypeLang = projectSettings
+			return projectName, projectSettings, nil
+		}
+	} else {
+		pathPackageJson := path
+		bytePackageJson, errReadFile := cmd.FileReader(pathPackageJson)
+		if errReadFile != nil {
+			return "", "", msg.ErrorPackageJsonNotFound
+		}
+
+		if len(info.Name) == 0 {
+			projectName = packageJson.Name
+			info.Name = projectName
+		}
+
+		err = json.Unmarshal(bytePackageJson, &packageJson)
+		if err != nil {
+			return "", "", utils.ErrorUnmarshalReader
+		}
 	}
 
-	if len(packageJson.Dependencies.Next) > 0 {
-		projectName = packageJson.Name
+	switch {
+	case len(packageJson.Dependencies.Next) > 0:
 		projectSettings = "nextjs"
-	} else if len(packageJson.Dependencies.Flareact) > 0 {
-		projectName = packageJson.Name
-		projectSettings = "flareact"
-	} else {
-		projectName = packageJson.Name
-		projectSettings = "javascript"
+	case info.TypeLang == "nextjs", info.TypeLang == "static", info.TypeLang == "cdn":
+		projectSettings = info.TypeLang
+	default:
+		projectSettings, err = choose.Choose()
+		if err != nil {
+			return "", "", err
+		}
+		info.TypeLang = projectSettings
 	}
 
 	return projectName, projectSettings, nil
@@ -365,18 +385,8 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 	}
 
 	switch info.TypeLang {
-	case "javascript":
-		err = InitJavascript(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
 	case "nextjs":
 		err = InitNextjs(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
-	case "flareact":
-		err = InitFlareact(info, cmd, conf, envs)
 		if err != nil {
 			return err
 		}
@@ -419,27 +429,6 @@ func yesNoFlagToResponse(info *InitInfo) bool {
 	return false
 }
 
-func InitJavascript(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	pathWorker := info.PathWorkingDir + "/worker"
-	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingWorkerDirectory
-	}
-
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-
-	showInstructions(cmd, `	[ General Instructions ]
-	[ Usage ]
-		- Build Command: npm run build
-		- Publish Command: npm run deploy
-	[ Notes ]
-		- Node 16x or higher`) //nolint:all
-
-	return nil
-}
-
 func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
 	pathWorker := info.PathWorkingDir + "/worker"
 	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
@@ -459,34 +448,6 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
     	- Publish Command: npm run deploy
     [ Notes ]
         - Node 16x or higher`) //nolint:all
-	return nil
-}
-
-func InitFlareact(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []string) error {
-	pathWorker := info.PathWorkingDir + "/worker"
-	if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingWorkerDirectory
-	}
-
-	err := runCommand(cmd, conf, envs)
-	if err != nil {
-		return err
-	}
-
-	if err = cmd.Mkdir(info.PathWorkingDir+"/public", os.ModePerm); err != nil {
-		return msg.ErrorFailedCreatingPublicDirectory
-	}
-
-	showInstructions(cmd, `	[ General Instructions ]
-	- Requirements:
-		- Tools: npm
-	[ Usage ]
-		- Install Command: npm install
-		- Build Command: npm run build
-		- Publish Command: npm run deploy
-	[ Notes ]
-		- Node 16x or higher`) //nolint:all
-
 	return nil
 }
 
@@ -598,8 +559,32 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 		}
 
 		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
-
 	}
+
+	return nil
+}
+
+func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
+	shouldFetchTemplates, err := shouldFetch(cmd, info)
+	if err != nil {
+		return err
+	}
+
+	if shouldFetchTemplates {
+		if err = cmd.fetchTemplates(info); err != nil {
+			return err
+		}
+
+		if err = cmd.organizeJsonFile(options, info); err != nil {
+			return err
+		}
+
+		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+	}
+
+	showInstructions(cmd, `	[ General Instructions ]
+	[ Usage ]
+		- Publish Command: publish page static`) //nolint:all
 
 	return nil
 }

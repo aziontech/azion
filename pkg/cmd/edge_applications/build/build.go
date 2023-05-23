@@ -124,7 +124,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	}
 
 	switch typeLang.String() {
-	case "nextjs", "flareact":
+	case "nextjs":
 
 		//pre-build version id. Used to check if there were changes to the project
 		verID, err := cmd.VersionId(path)
@@ -149,12 +149,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
 		if err != nil {
 			return utils.ErrorWritingAzionJsonFile
-		}
-
-	case "javascript":
-		err := runCommand(cmd, conf)
-		if err != nil {
-			return err
 		}
 
 	default:

@@ -3,6 +3,7 @@ package init
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -30,31 +31,18 @@ func TestCobraCmd(t *testing.T) {
 			return nil, os.ErrNotExist
 		}
 
-		cmd := NewCobraCmd(initCmd)
-
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
-
-		err := cmd.Execute()
-
-		require.ErrorIs(t, err, msg.ErrorPackageJsonNotFound)
-	})
-
-	t.Run("with unsupported type", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		initCmd := NewInitCmd(f)
-
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli edge_applications build\",\n    \"deploy\": \"azioncli edge_applications publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\"\n  }\n}\n"), nil
+			return []byte("{\n  \"name\": \"__DEFAULT__\",\n  \"env\": \"production\",\n  \"type\": \"static\",\n  \"version-id\": \"\",\n  \"domain\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\"\n  },\n  \"application\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\"\n  },\n  \"origin\": {\n    \"name\": \"__DEFAULT__\",\n    \"address\": [\"\"]\n},\n  \"function\": {\n    \"id\": 0,\n    \"name\": \"__DEFAULT__\",\n    \"file\": \"\",\n    \"args\": \"\"\n  }\n}"), nil
+		}
+
+		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
 		}
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "BLEBLEBLE", "--type", "demeuamor"})
-
-		err := cmd.Execute()
-
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static", "-y"})
+		require.NoError(t, cmd.Execute())
 	})
 
 	t.Run("with -y and -n flags", func(t *testing.T) {
@@ -71,7 +59,7 @@ func TestCobraCmd(t *testing.T) {
 		require.ErrorIs(t, err, msg.ErrorYesAndNoOptions)
 	})
 
-	t.Run("did not send name", func(t *testing.T) {
+	t.Run("success with static", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
 		initCmd := NewInitCmd(f)
@@ -84,7 +72,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"static"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -98,61 +86,10 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
 			return &git.Repository{}, nil
 		}
-		initCmd.Stat = func(path string) (fs.FileInfo, error) {
-			if !strings.HasSuffix(path, "package.json") {
-				return nil, os.ErrNotExist
-			}
-			return nil, nil
-		}
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--type", "javascript"})
-
-		err := cmd.Execute()
-
-		require.NoError(t, err)
-
-		require.Contains(t, stdout.String(), `The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used`)
-	})
-
-	t.Run("success with javascript", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, stdout, _ := testutils.NewFactory(mock)
-		initCmd := NewInitCmd(f)
-
-		initCmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-
-		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
-			return "", 0, nil
-		}
-		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"javascript"}`), nil
-		}
-		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-		initCmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-		initCmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-		initCmd.Stat = func(path string) (fs.FileInfo, error) {
-			if !strings.HasSuffix(path, "package.json") {
-				return nil, os.ErrNotExist
-			}
-			return nil, nil
-		}
-
-		cmd := NewCobraCmd(initCmd)
-
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("yes\n")
@@ -161,51 +98,7 @@ func TestCobraCmd(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Contains(t, stdout.String(), `Template successfully fetched and configured`)
-	})
-
-	t.Run("success with javascript using flag -y", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		f, stdout, _ := testutils.NewFactory(mock)
-		initCmd := NewInitCmd(f)
-
-		initCmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-
-		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
-			return "", 0, nil
-		}
-		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
-		}
-		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-		initCmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-		initCmd.Stat = func(path string) (fs.FileInfo, error) {
-			if !strings.HasSuffix(path, "package.json") {
-				return nil, os.ErrNotExist
-			}
-			return nil, nil
-		}
-		initCmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-
-		cmd := NewCobraCmd(initCmd)
-
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-y"})
-
-		err := cmd.Execute()
-
-		require.NoError(t, err)
-		require.Contains(t, stdout.String(), `Template successfully fetched and configured`)
+		require.Contains(t, stdout.String(), fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", "SUUPA_DOOPA"))
 	})
 
 	t.Run("does not overwrite contents", func(t *testing.T) {
@@ -222,7 +115,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"static"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -233,12 +126,6 @@ func TestCobraCmd(t *testing.T) {
 		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
 			return &git.Repository{}, nil
 		}
-		initCmd.Stat = func(path string) (fs.FileInfo, error) {
-			if !strings.HasSuffix(path, "package.json") {
-				return nil, os.ErrNotExist
-			}
-			return nil, nil
-		}
 		initCmd.IsDirEmpty = func(dirpath string) (bool, error) {
 			return false, nil
 		}
@@ -248,7 +135,7 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("no\n")
@@ -273,7 +160,7 @@ func TestCobraCmd(t *testing.T) {
 			return "", 0, nil
 		}
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"},"type":"static"}`), nil
 		}
 		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -299,7 +186,7 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript", "-n"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static", "-n"})
 
 		err := cmd.Execute()
 
@@ -328,7 +215,7 @@ func TestCobraCmd(t *testing.T) {
 		}
 
 		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli edge_applications build\",\n    \"deploy\": \"azioncli edge_applications publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\"\n  }\n}\n"), nil
+			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli edge_applications build\",\n    \"deploy\": \"azioncli edge_applications publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\",\n  \"next\": \"12.2.5\"\n  }\n}\n"), nil
 		}
 
 		initCmd.IsDirEmpty = func(dirpath string) (bool, error) {
@@ -338,7 +225,7 @@ func TestCobraCmd(t *testing.T) {
 			return nil
 		}
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "javascript"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "static"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("pix\n")
@@ -416,7 +303,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "notacmd", "output-ctrl": "disable"},"type":"javascript"}`), nil
+			return []byte(`{"init": {"cmd": "notacmd", "output-ctrl": "disable"},"type":"static"}`), nil
 		}
 		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
 			return nil
@@ -431,9 +318,9 @@ func TestInitCmd(t *testing.T) {
 			return nil
 		}
 
-		i := InitInfo{TypeLang: "javascript", PathWorkingDir: "."}
+		i := InitInfo{TypeLang: "static", PathWorkingDir: "."}
 		err := cmd.runInitCmdLine(&i)
-		require.ErrorIs(t, err, msg.ErrFailedToRunInitCommand)
+		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
 	})
 
 	t.Run("success with NextJS", func(t *testing.T) {
@@ -480,55 +367,6 @@ func TestInitCmd(t *testing.T) {
 
 		i := InitInfo{
 			TypeLang: "nextjs",
-		}
-		err := cmd.runInitCmdLine(&i)
-		require.NoError(t, err)
-	})
-
-	t.Run("success with Flareact", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		envs := []string{"UEBA=OBA", "FAZER=UM_PENSO"}
-		cmd := NewInitCmd(f)
-
-		cmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-
-		cmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
-			return nil
-		}
-
-		cmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-
-		cmd.Stat = func(path string) (fs.FileInfo, error) {
-			return nil, nil
-		}
-
-		cmd.FileReader = func(path string) ([]byte, error) {
-			return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
-		}
-
-		cmd.EnvLoader = func(path string) ([]string, error) {
-			return envs, nil
-		}
-
-		cmd.CommandRunner = func(cmd string, env []string) (string, int, error) {
-			return "my command output", 0, nil
-		}
-
-		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-
-		cmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-
-		i := InitInfo{
-			TypeLang: "flareact",
 		}
 		err := cmd.runInitCmdLine(&i)
 		require.NoError(t, err)

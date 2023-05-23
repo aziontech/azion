@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -320,4 +321,14 @@ func checkOrderField(body string) error {
 		return fmt.Errorf("%s", msgDetail.String())
 	}
 	return nil
+}
+
+func CreateVersionID() string {
+	return time.Now().Format("20060102150405")
+}
+
+func AskForInput(in io.ReadCloser, out io.Writer, message string) (response string) {
+	fmt.Fprintf(out, "%s: ", message)
+	fmt.Fscanln(in, &response)
+	return response
 }

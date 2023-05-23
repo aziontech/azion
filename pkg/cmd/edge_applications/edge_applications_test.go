@@ -1,6 +1,7 @@
 package edge_applications
 
 import (
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -44,6 +45,22 @@ func Mock(mock *httpmock.Registry) {
 		httpmock.JSONFromFile(".fixtures/rule.json"),
 	)
 	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/cache_settings"),
+		httpmock.JSONFromFile(".fixtures/cache.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/origins"),
+		httpmock.JSONFromFile(".fixtures/origin.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/rules_engine/request/rules"),
+		httpmock.JSONFromFile(".fixtures/rule.json"),
+	)
+	mock.Register(
+		httpmock.REST("POST", "edge_applications/777/rules_engine/response/rules"),
+		httpmock.JSONFromFile(".fixtures/rule.json"),
+	)
+	mock.Register(
 		httpmock.REST("POST", "domains"),
 		httpmock.JSONFromFile(".fixtures/domain.json"),
 	)
@@ -73,7 +90,7 @@ func TestNewCmd(t *testing.T) {
 						Io:         f.IOStreams,
 						GetWorkDir: func() (string, error) { return "", nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner: func(cmd string, envvars []string) (string, int, error) { return "", 0, nil },
 						LookPath:      func(bin string) (string, error) { return "", nil },
@@ -96,7 +113,7 @@ func TestNewCmd(t *testing.T) {
 					return &buildcmd.BuildCmd{
 						Io: f.IOStreams,
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner:      func(cmd string, envs []string) (string, int, error) { return "Build completed", 0, nil },
 						ConfigRelativePath: "/azion/config.json",
@@ -118,11 +135,14 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
+						},
+						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
+							return "www.test.com"
 						},
 					}
 				},
@@ -137,7 +157,7 @@ func TestNewCmd(t *testing.T) {
 						Io:         f.IOStreams,
 						GetWorkDir: func() (string, error) { return "", nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner: func(cmd string, envvars []string) (string, int, error) { return "", 0, nil },
 						LookPath:      func(bin string) (string, error) { return "", nil },
@@ -160,7 +180,7 @@ func TestNewCmd(t *testing.T) {
 					return &buildcmd.BuildCmd{
 						Io: f.IOStreams,
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						CommandRunner:      func(cmd string, envs []string) (string, int, error) { return "Build completed", 0, nil },
 						ConfigRelativePath: "/azion/config.json",
@@ -182,75 +202,14 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs"}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
 						},
-					}
-				},
-			},
-		},
-		{
-			// go test -run  TestNewCmd/flow_success_full_flareact_init,_build_and_publih -v -cover
-			name: "flow success full flareact init, build and publih",
-			args: args{
-				init: func(f *cmdutil.Factory) *initcmd.InitCmd {
-					return &initcmd.InitCmd{
-						Io:         f.IOStreams,
-						GetWorkDir: func() (string, error) { return "", nil },
-						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"init": {"cmd": "ls", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
-						},
-						CommandRunner: func(cmd string, envvars []string) (string, int, error) { return "", 0, nil },
-						LookPath:      func(bin string) (string, error) { return "", nil },
-						IsDirEmpty:    func(dirpath string) (bool, error) { return true, nil },
-						CleanDir:      func(dirpath string) error { return nil },
-						WriteFile:     func(filename string, data []byte, perm fs.FileMode) error { return nil },
-						OpenFile:      func(name string) (*os.File, error) { return nil, nil },
-						RemoveAll:     func(path string) error { return nil },
-						Rename:        func(oldpath, newpath string) error { return nil },
-						CreateTempDir: func(dir, pattern string) (string, error) { return "", nil },
-						EnvLoader:     func(path string) ([]string, error) { return []string{}, nil },
-						Stat:          func(path string) (fs.FileInfo, error) { return nil, nil },
-						Mkdir:         func(path string, perm os.FileMode) error { return nil },
-						GitPlainClone: func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-							return &git.Repository{}, nil
-						},
-					}
-				},
-				build: func(f *cmdutil.Factory) *buildcmd.BuildCmd {
-					return &buildcmd.BuildCmd{
-						Io: f.IOStreams,
-						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"build": {"cmd": "./azion/webdev.sh build", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
-						},
-						CommandRunner:      func(cmd string, envs []string) (string, int, error) { return "Build completed", 0, nil },
-						ConfigRelativePath: "/azion/config.json",
-						GetWorkDir:         func() (string, error) { return "", nil },
-						EnvLoader:          func(path string) ([]string, error) { return []string{}, nil },
-						WriteFile:          func(filename string, data []byte, perm fs.FileMode) error { return nil },
-						Stat:               func(path string) (fs.FileInfo, error) { return nil, nil },
-						VersionId:          func(dir string) (string, error) { return "123456789", nil },
-					}
-				},
-				publish: func(f *cmdutil.Factory) *publishcmd.PublishCmd {
-					return &publishcmd.PublishCmd{
-						Io:                    f.IOStreams,
-						Open:                  func(name string) (*os.File, error) { return nil, nil },
-						GetWorkDir:            func() (string, error) { return "", nil },
-						FilepathWalk:          func(root string, fn filepath.WalkFunc) error { return nil },
-						EnvLoader:             func(path string) ([]string, error) { return []string{}, nil },
-						CommandRunner:         func(cmd string, env []string) (string, int, error) { return "", 0, nil },
-						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
-						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
-						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "flareact"}`), nil
-						},
-						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
-						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
-							return &contracts.AzionApplicationCdn{}, nil
+						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
+							return "www.test.com"
 						},
 					}
 				},
