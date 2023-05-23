@@ -34,10 +34,10 @@ var (
 	DeviceGroupsUpdateUsage            = "update [flags]"
 	DeviceGroupsUpdateShortDescription = "Updates a device group"
 	DeviceGroupsUpdateLongDescription  = "Updates a device group based on given attributes to be used in edge applications"
-	DeviceGroupsUpdateFlagName         = "The name of your device group"
-	DeviceGroupsUpdateFlagUserAgent    = "The regex to match against the User-Agent header"
-	DeviceGroupsUpdateFlagIn           = "Path to a JSON file containing the attributes of the  device group that will be updated; you can use - for reading from stdin"
-	DeviceGroupsUpdateOutputSuccess    = "Device group %d was updated updated\n"
+	DeviceGroupsUpdateFlagName         = "The device group name"
+	DeviceGroupsUpdateFlagUserAgent    = "The device group flag user agent"
+	DeviceGroupsUpdateFlagIn           = "Path to a JSON file containing the attributes of the  device group that will be created; you can use - for reading from stdin"
+	DeviceGroupsUpdateOutputSuccess    = "Device Group %d was updated\n"
 
 	// [ create ]
 	DeviceGroupsCreateUsage                 = "create [flags]"
