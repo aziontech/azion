@@ -17,10 +17,14 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-func NewClient(c *http.Client, url string, token string) *Client {
+func NewClient(c *http.Client, url string, token string, contentType string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.AddDefaultHeader("Content-Type", "text/html")
+	if len(contentType) > 0 {
+		conf.AddDefaultHeader("Content-Type", contentType)
+	} else {
+		conf.AddDefaultHeader("Accept", "application/json; version=3")
+	}
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
