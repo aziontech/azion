@@ -132,6 +132,11 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	file, err = cmd.FileReader(jsonConf)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
 	versionID := gjson.Get(string(file), "version-id")
 
 	pathStatic := ".vercel/output/static"
