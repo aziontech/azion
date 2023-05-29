@@ -34,7 +34,6 @@ func (c *Client) Upload(ctx context.Context, versionID, path, contentType string
 	if len(contentType) > 0 {
 		c.apiClient.GetConfig().DefaultHeader["Content-Type"] = contentType
 	}
-	return nil
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file)
 	_, httpResp, err := req.Execute()
 	if err != nil {
