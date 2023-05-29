@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -331,4 +332,20 @@ func AskForInput(in io.ReadCloser, out io.Writer, message string) (response stri
 	fmt.Fprintf(out, "%s: ", message)
 	fmt.Fscanln(in, &response)
 	return response
+}
+
+func ContentType(filename string) string {
+	extension := filepath.Ext(filename)
+	switch extension {
+	case ".css":
+		return "text/css"
+	case ".csv":
+		return "text/csv"
+	case ".html":
+		return "text/html"
+	case ".js":
+		return "text/javascript"
+	default:
+		return ""
+	}
 }
