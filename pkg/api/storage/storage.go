@@ -20,7 +20,6 @@ type Client struct {
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.AddDefaultHeader("Accept", "application/json; version=3")
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
@@ -30,8 +29,11 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Upload(ctx context.Context, versionID, path string, file *os.File) error {
+func (c *Client) Upload(ctx context.Context, versionID, path, contentType string, file *os.File) error {
 	c.apiClient.GetConfig().DefaultHeader["Content-Disposition"] = fmt.Sprintf("attachment; filename=\"%s\"", path)
+	if len(contentType) > 0 {
+		c.apiClient.GetConfig().DefaultHeader["Content-Type"] = contentType
+	}
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file)
 	_, httpResp, err := req.Execute()
 	if err != nil {

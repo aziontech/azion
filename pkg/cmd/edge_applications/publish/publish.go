@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/zRedShift/mimemagic"
 )
 
 type PublishCmd struct {
@@ -132,6 +133,11 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	file, err = cmd.FileReader(jsonConf)
+	if err != nil {
+		return msg.ErrorOpeningAzionFile
+	}
+
 	versionID := gjson.Get(string(file), "version-id")
 
 	pathStatic := ".vercel/output/static"
@@ -166,7 +172,12 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileContent); err != nil {
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				return err
+			}
+
+			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
 				return err
 			}
 
@@ -773,7 +784,12 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, fileContent); err != nil {
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				return err
+			}
+
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
 				return err
 			}
 
@@ -829,37 +845,15 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			return err
 		}
 		conf.Application.Id = applicationID
+		InstanceId = instanceID
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			return err
 		}
 
-		reqRulesEngine := apiapp.CreateRulesEngineRequest{}
-		reqRulesEngine.SetName(conf.Application.Name)
-		behaviors := []sdk.RulesEngineBehavior{
-			{
-				Name:   "run_function",
-				Target: instanceID, // id edge function instance
-			},
-		}
-
-		var inputValue string = "/"
-		criteria := [][]sdk.RulesEngineCriteria{
-			{
-				{
-					Variable:    "${uri}",
-					Operator:    "starts_with",
-					Conditional: "if",
-					InputValue:  &inputValue,
-				},
-			},
-		}
-
-		reqRulesEngine.SetBehaviors(behaviors)
-		reqRulesEngine.SetCriteria(criteria)
-
-		_, err = clientApplication.CreateRulesEngine(ctx, applicationID, "request", &reqRulesEngine)
+		//TODO: Review what to do when user updates Function ID directly in azion.json
+		err = cmd.updateRulesEngine(clientApplication, ctx, conf)
 		if err != nil {
 			return err
 		}
