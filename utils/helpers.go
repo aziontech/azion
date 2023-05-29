@@ -332,3 +332,18 @@ func AskForInput(in io.ReadCloser, out io.Writer, message string) (response stri
 	fmt.Fscanln(in, &response)
 	return response
 }
+
+func ContentType(extensionFile string) string {
+	switch extensionFile {
+	case "css":
+		return "text/css"
+	case "csv":
+		return "text/csv"
+	case "html":
+		return "text/html"
+	case "js":
+		return "text/javascript"
+	default:
+		return ""
+	}
+}

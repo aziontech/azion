@@ -155,7 +155,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"), "")
+	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
 
@@ -171,7 +171,12 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, fileContent); err != nil {
+			splitFileString := strings.Split(fileString, ".")
+			var contentType string = ""
+			if len(splitFileString) > 0 {
+				contentType = utils.ContentType(splitFileString[1])
+			}
+			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, contentType, fileContent); err != nil {
 				return err
 			}
 
@@ -761,7 +766,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		return err
 	}
 
-	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"), "text/html")
+	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
 
@@ -778,7 +783,12 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, fileContent); err != nil {
+			splitFileString := strings.Split(fileString, ".")
+			var contentType string = ""
+			if len(splitFileString) > 0 {
+				contentType = utils.ContentType(splitFileString[1])
+			}
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, contentType, fileContent); err != nil {
 				return err
 			}
 
