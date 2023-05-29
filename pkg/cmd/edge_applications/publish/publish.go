@@ -171,11 +171,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			splitFileString := strings.Split(fileString, ".")
-			var contentType string = ""
-			if len(splitFileString) > 0 {
-				contentType = utils.ContentType(splitFileString[1])
-			}
+			contentType := utils.ContentType(fileString)
 			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, contentType, fileContent); err != nil {
 				return err
 			}
@@ -783,11 +779,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			splitFileString := strings.Split(fileString, ".")
-			var contentType string = ""
-			if len(splitFileString) > 0 {
-				contentType = utils.ContentType(splitFileString[1])
-			}
+			contentType := utils.ContentType(fileString)
 			if err = clientUpload.Upload(context.Background(), versionID, fileString, contentType, fileContent); err != nil {
 				return err
 			}
