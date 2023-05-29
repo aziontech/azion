@@ -28,6 +28,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"github.com/zRedShift/mimemagic"
 )
 
 type PublishCmd struct {
@@ -171,8 +172,12 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			contentType := utils.ContentType(fileString)
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, contentType, fileContent); err != nil {
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				return err
+			}
+
+			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
 				return err
 			}
 
@@ -779,8 +784,12 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
-			contentType := utils.ContentType(fileString)
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, contentType, fileContent); err != nil {
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				return err
+			}
+
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
 				return err
 			}
 
