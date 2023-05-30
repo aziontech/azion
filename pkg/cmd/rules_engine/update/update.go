@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli rules_engine update --application-id 1673635839 --phase request --in ruleengine.json"
+		$ azioncli rules_engine update --rule-id 1234 --application-id 1673635839 --phase request --in ruleengine.json"
 		$ azioncli rules_engine update --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
