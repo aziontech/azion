@@ -21,7 +21,7 @@ type Fields struct {
 	FunctionID    int64
 	InstanceID    string
 	Path          string
-	Args          interface{}
+	Args          string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -88,6 +88,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVarP(&fields.ApplicationID, "application-id", "a", "0", msg.EdgeFuncInstanceUpdateFlagEdgeApplicationId)
 	flags.StringVar(&fields.Name, "name", "", msg.EdgeFuncInstanceUpdateFlagName)
+	flags.StringVar(&fields.Args, "args", "", msg.EdgeFuncInstanceUpdateFlagArgs)
 	flags.Int64VarP(&fields.FunctionID, "function-id", "f", 0, msg.EdgeFuncInstanceUpdateFlagFunctionID)
 	flags.StringVarP(&fields.InstanceID, "instance-id", "i", "0", msg.EdgeFuncInstanceUpdateFlagInstanceID)
 	flags.StringVar(&fields.Path, "in", "", msg.EdgeFuncInstanceUpdateFlagIn)
