@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -965,6 +966,11 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	err = tmpl.Execute(&result, data)
 	if err != nil {
 		return 0, utils.ErrorExecTemplate
+	}
+
+	err = ioutil.WriteFile(conf.Function.File, []byte(result.String()), 0644)
+	if err != nil {
+		return 0, utils.ErrorWriteFile
 	}
 
 	reqCre.SetCode(result.String())
