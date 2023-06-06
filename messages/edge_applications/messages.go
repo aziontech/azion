@@ -66,6 +66,7 @@ var (
 	EdgeApplicationsPublishOutputEdgeApplicationUpdate = "Updated Edge Application %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainCreate          = "Created Domain %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
+	EdgeApplicationPublishPathFlag                     = "Path to where your static files are stored"
 	EdgeApplicationsCacheSettingsSuccessful            = "Created Cache Settings for web application"
 	EdgeApplicationsPublishInputAddress                = "Please inform an address to be used in the origin of this application: "
 	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application"

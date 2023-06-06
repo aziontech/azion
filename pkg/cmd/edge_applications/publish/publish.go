@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -45,11 +44,13 @@ type PublishCmd struct {
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
-	AskInput              func(in io.ReadCloser, out io.Writer, message string) (response string)
 	createVersionID       func() string
 }
 
 var InstanceId int64
+var Path string
+
+var DEFAULTORIGIN [1]string = [1]string{"www.example.com"}
 
 func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 	return &PublishCmd{
@@ -68,7 +69,6 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
-		AskInput:              utils.AskForInput,
 		createVersionID:       utils.CreateVersionID,
 	}
 }
@@ -88,6 +88,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 		},
 	}
 	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
+	publishCmd.Flags().StringVar(&Path, "path", "public", msg.EdgeApplicationPublishPathFlag)
 	return publishCmd
 }
 
@@ -109,6 +110,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	typeLang := gjson.Get(string(file), "type")
+	fmt.Println(Path)
 
 	if typeLang.String() == "cdn" {
 		err := publishCdn(cmd, f)
@@ -284,10 +286,8 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			addresses = conf.Origin.Address
 			reqOrigin.SetAddresses(address)
 		} else {
-			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
-			addresses = strings.Split(response, ",")
-			address := prepareAddresses(addresses)
-			reqOrigin.SetAddresses(address)
+			addresses := prepareAddresses(DEFAULTORIGIN[:])
+			reqOrigin.SetAddresses(addresses)
 		}
 		reqOrigin.SetName(conf.Name)
 		reqOrigin.SetHostHeader("${host}")
@@ -749,13 +749,10 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
-
-	pathStatic := "./"
-
 	// upload the page static
 	// Get total amount of files to display progress
 	totalFiles := 0
-	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -773,7 +770,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 	versionID := conf.VersionID
 	currentFile := 0
-	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -783,7 +780,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 				return err
 			}
 
-			fileString := strings.TrimPrefix(path, pathStatic)
+			fileString := strings.TrimPrefix(path, Path)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
 				return err
@@ -891,7 +888,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	}
 
 	if conf.Origin.Id == 0 {
-		//after everything was create, we now create the cache and rules required
+		//after everything was created, we now create the cache and rules required
 		reqOrigin := apiapp.CreateOriginsRequest{}
 		var addresses []string
 		if len(conf.Origin.Address) > 0 {
@@ -899,10 +896,8 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			addresses = conf.Origin.Address
 			reqOrigin.SetAddresses(address)
 		} else {
-			response := cmd.AskInput(cmd.Io.In, cmd.Io.Out, msg.EdgeApplicationsPublishInputAddress)
-			addresses = strings.Split(response, ",")
-			address := prepareAddresses(addresses)
-			reqOrigin.SetAddresses(address)
+			addresses := prepareAddresses(DEFAULTORIGIN[:])
+			reqOrigin.SetAddresses(addresses)
 		}
 		reqOrigin.SetName(conf.Name)
 		reqOrigin.SetHostHeader("${host}")
