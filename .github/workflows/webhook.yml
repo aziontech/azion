@@ -1,0 +1,49 @@
+name: Generate docs and upload to wiki
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test-webhook
+
+jobs:
+  send_webhook:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Setup Env
+        run: apt-get update && apt-get install -y curl docker 
+        shell: bash
+
+      - name: Clean up
+        run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 find . -delete
+
+      - name: Fix permissions
+        run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 chmod -R a+rw .
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract PR Information
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          commit_message="${{ github.event.head_commit.message }}"
+          echo "1. $commit_message"
+          commit_message="${commit_message/Merge pull request #/}"
+          echo "2. $commit_message"
+          pr_number="${commit_message%% *}"
+          echo "3. $pr_number"
+          content=$(gh pr view $pr_number --json title,body --jq '.title,.body')
+
+          echo $content
+
+          curl -X POST \
+            -H 'Content-Type: application/json' \
+            -d "{ \"text\": \"$content\"}" \
+            https://hooks.slack.com/services/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
