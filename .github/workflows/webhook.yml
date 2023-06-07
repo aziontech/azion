@@ -16,9 +16,18 @@ jobs:
       pull-requests: read
 
     steps:
+      - uses: docker-practice/actions-setup-docker@master
+        timeout-minutes: 12
+
       - name: Setup Env
         run: apt-get update && apt-get install -y curl git 
         shell: bash
+
+      - name: Clean up
+        run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 find . -delete
+
+      - name: Fix permissions
+        run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 chmod -R a+rw .
 
       - name: install gh cli
         run: |
@@ -51,6 +60,6 @@ jobs:
           curl -X POST \
             -H 'Content-Type: application/json' \
             -d "{ \"text\": \"$content\"}" \
-            https://hooks.slack.com/services/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
+            ${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}
         shell: bash
 
