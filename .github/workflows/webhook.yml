@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Setup Env
-        run: apt-get update && apt-get install -y curl git docker sudo
+        run: apt-get update && apt-get install -y curl git docker sudo gnupg
         shell: bash
 
       - name: Install Latest Docker
