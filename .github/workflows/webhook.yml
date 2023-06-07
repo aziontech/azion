@@ -16,12 +16,12 @@ jobs:
       pull-requests: read
 
     steps:
+      - name: Setup Env
+        run: apt-get update && apt-get install -y curl git sudo gpg
+        shell: bash
+
       - uses: docker-practice/actions-setup-docker@master
         timeout-minutes: 12
-
-      - name: Setup Env
-        run: apt-get update && apt-get install -y curl git 
-        shell: bash
 
       - name: Clean up
         run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 find . -delete
