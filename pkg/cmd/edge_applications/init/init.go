@@ -310,10 +310,7 @@ type ReferenceIter interface {
 
 // sortTag return value in format refs/tags/v0.10.0
 func sortTag(tags ReferenceIter, majorStr string) (tag string, err error) {
-	major, err := strconv.Atoi(majorStr)
-	if err != nil {
-		return "", err
-	}
+	major, _ := strconv.Atoi(majorStr)
 
 	var previousMinor int = 0
 	var previousPatch int = 0
@@ -323,18 +320,9 @@ func sortTag(tags ReferenceIter, majorStr string) (tag string, err error) {
 		if !strings.Contains(tagCurrent, "dev") {
 			versionParts := strings.Split(tagCurrent, ".")
 
-			majorCurrent, err := strconv.Atoi(versionParts[0])
-			if err != nil {
-				return err
-			}
-			minorCurrent, err := strconv.Atoi(versionParts[1])
-			if err != nil {
-				return err
-			}
-			patchCurrent, err := strconv.Atoi(versionParts[2])
-			if err != nil {
-				return err
-			}
+			majorCurrent, _ := strconv.Atoi(versionParts[0])
+			minorCurrent, _ := strconv.Atoi(versionParts[1])
+			patchCurrent, _ := strconv.Atoi(versionParts[2])
 
 			if majorCurrent == major {
 				if minorCurrent > previousMinor {
