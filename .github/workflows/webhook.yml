@@ -39,7 +39,7 @@ jobs:
 
       - name: Extract PR Information
         env:
-          GH_TOKEN: ${{ secrets.GLOBAL_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           commit_message="${{ github.event.head_commit.message }}"
           echo "1. $commit_message"
