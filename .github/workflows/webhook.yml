@@ -53,3 +53,4 @@ jobs:
             -d "{ \"text\": \"$content\"}" \
             https://hooks.slack.com/services/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
         shell: bash
+
