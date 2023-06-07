@@ -47,12 +47,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     container:
-      image: golang:1.17
+      image: ubuntu:22.04
     permissions:
       contents: read
       pull-requests: read
 
     steps:
+      - name: Setup Env
+        run: apt-get update && apt-get install -y curl docker 
+        shell: bash
+
       - name: Clean up
         run: docker run --rm --volume "`pwd`:/app" --workdir "/app" alpine:3.13 find . -delete
 
