@@ -45,9 +45,6 @@ jobs:
           echo "1. $commit_message"
           commit_message="${commit_message/Merge pull request #/}"
           echo "2. $commit_message"
-          pr_number="${commit_message%% *}"
-          echo "3. $pr_number"
-          content=$(gh pr view $pr_number --json title,body --jq '.title,.body')
 
           echo $content
 
