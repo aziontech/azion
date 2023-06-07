@@ -398,90 +398,6 @@ func Test_fetchTemplates(t *testing.T) {
 	})
 }
 
-func Test_formatTag(t *testing.T) {
-	type args struct {
-		tag string
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{
-			name: "case branch dev",
-			args: args{
-				tag: "refs/tags/v0.1.0-dev.2",
-			},
-			want: "0102",
-		},
-		{
-			name: "case branch main",
-			args: args{
-				tag: "refs/tags/v0.1.0",
-			},
-			want: "010",
-		},
-		{
-			name: "case major not exist",
-			args: args{
-				tag: "refs/tags/v0.1.0",
-			},
-			want: "010",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := formatTag(tt.args.tag); got != tt.want {
-				t.Errorf("formatTag() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_checkBranch(t *testing.T) {
-	type args struct {
-		num    string
-		branch string
-	}
-	tests := []struct {
-		name string
-		args args
-		want string
-	}{
-		{
-			name: "branch dev, with tag dev",
-			args: args{
-				num:    "1234",
-				branch: "dev",
-			},
-			want: "1234",
-		},
-		{
-			name: "branch any, with tag dev",
-			args: args{
-				num:    "1234",
-				branch: "any",
-			},
-			want: "",
-		},
-		{
-			name: "branch any, with tag any",
-			args: args{
-				num:    "123",
-				branch: "any",
-			},
-			want: "123",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := checkBranch(tt.args.num, tt.args.branch); got != tt.want {
-				t.Errorf("checkBranch() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 type mockReferenceIter struct {
 	mock.Mock
 }
@@ -498,9 +414,15 @@ func Test_SortTag(t *testing.T) {
 	mockIter.On("ForEach", mock.Anything).Run(func(args mock.Arguments) {
 		f := args.Get(0).(func(*plumbing.Reference) error)
 		refs := []*plumbing.Reference{
-			plumbing.NewReferenceFromStrings("refs/tags/v2.0.0", "beefdead"),
-			plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "deadbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v3.0.0", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.1.0", "beefdead"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.2.0", "deadbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.10.5", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.5.0", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.10.0", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v1.10.0", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.10.1", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.10.2", "deafbeef"),
+			plumbing.NewReferenceFromStrings("refs/tags/v0.11.0-dev.13", "deafbeef"),
 		}
 
 		for _, ref := range refs {
@@ -510,10 +432,9 @@ func Test_SortTag(t *testing.T) {
 		}
 	}).Return(nil)
 
-	// call func sortTag with the mock
-	result, err := sortTag(mockIter, "2", "main")
+	result, err := sortTag(mockIter, TemplateMajor)
 	require.NoError(t, err)
 
-	expected := "refs/tags/v2.0.0"
+	expected := "refs/tags/v0.10.5"
 	require.Equal(t, expected, result)
 }
