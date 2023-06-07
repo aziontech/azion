@@ -9,6 +9,8 @@ on:
 jobs:
   send_webhook:
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
     permissions:
       contents: read
       pull-requests: read
