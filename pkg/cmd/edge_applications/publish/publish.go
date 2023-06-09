@@ -110,7 +110,6 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	typeLang := gjson.Get(string(file), "type")
-	fmt.Println(Path)
 
 	if typeLang.String() == "cdn" {
 		err := publishCdn(cmd, f)
