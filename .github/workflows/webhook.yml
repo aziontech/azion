@@ -53,4 +53,3 @@ jobs:
             -d "{ \"text\": \"$content\"}" \
             "${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}"
         shell: bash
-
