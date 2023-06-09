@@ -45,10 +45,9 @@ jobs:
           echo "1. $commit_message"
           commit_message="${commit_message/Merge pull request #/}"
           echo "2. $commit_message"
-          content=$($commit_message)
 
           curl -X POST \
             -H 'Content-Type: application/json' \
-            -d "{ \"text\": \"$content\"}" \
+            -d "{ \"text\": \"$commit_message\"}" \
             "${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}"
         shell: bash
