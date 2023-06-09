@@ -3,6 +3,13 @@ package init
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
@@ -16,12 +23,6 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
-	"io/fs"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
 )
 
 type InitInfo struct {
@@ -149,6 +150,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
 	}
 
+	if info.TypeLang != "nextjs" {
+		return utils.ErrorUnsupportedType
+	}
+
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
@@ -212,20 +217,25 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 		if len(info.Name) > 0 {
 			projectName = info.Name
 		} else {
-
 			projectName, err = insert.Insert()
 			if err != nil {
 				return "", "", err
 			}
 			info.Name = projectName
+		}
 
+		if len(info.TypeLang) > 0 {
+			projectSettings = info.TypeLang
+		} else {
 			projectSettings, err = choose.Choose()
 			if err != nil {
 				return "", "", err
 			}
 			info.TypeLang = projectSettings
-			return projectName, projectSettings, nil
 		}
+
+		return projectName, projectSettings, nil
+
 	} else {
 		pathPackageJson := path
 		bytePackageJson, errReadFile := cmd.FileReader(pathPackageJson)
