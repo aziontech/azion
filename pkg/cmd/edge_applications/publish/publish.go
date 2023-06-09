@@ -982,12 +982,31 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
-	code, err := cmd.FileReader(conf.Function.File)
+	conf.Function.File = "./azion/function.js"
+
+	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
-		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
+		return 0, utils.ErrorReadingFile
 	}
 
-	reqUpd.SetCode(string(code))
+	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
+	if err != nil {
+		return 0, utils.ErrorParsingModel
+	}
+
+	data := struct {
+		VersionId string
+	}{
+		VersionId: conf.VersionID,
+	}
+
+	var result strings.Builder
+	err = tmpl.Execute(&result, data)
+	if err != nil {
+		return 0, utils.ErrorExecTemplate
+	}
+
+	reqUpd.SetCode(result.String())
 	reqUpd.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
 		reqUpd.SetName(conf.Name)

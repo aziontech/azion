@@ -3,17 +3,10 @@ package init
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
-	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
-	"io/fs"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"strconv"
-	"strings"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -23,6 +16,12 @@ import (
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
+	"io/fs"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type InitInfo struct {
@@ -281,7 +280,7 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 		return msg.ErrorGetAllTags
 	}
 
-	tag, err := sortTag(tags, TemplateMajor, TemplateBranch)
+	tag, err := sortTag(tags, TemplateMajor)
 	if err != nil {
 		return msg.ErrorIterateAllTags
 	}
@@ -309,61 +308,42 @@ type ReferenceIter interface {
 	ForEach(func(*plumbing.Reference) error) error
 }
 
-func sortTag(tags ReferenceIter, major, branch string) (string, error) {
-	var tagCurrent int = 0
-	var tagCurrentStr string
-	var tagWithMajorOk int = 0
-	var tagWithMajorOKStr string
-	var err error
+// sortTag return value in format refs/tags/v0.10.0
+func sortTag(tags ReferenceIter, majorStr string) (tag string, err error) {
+	major, _ := strconv.Atoi(majorStr)
+
+	var previousMinor int = 0
+	var previousPatch int = 0
+
 	err = tags.ForEach(func(t *plumbing.Reference) error {
-		tagFormat := formatTag(string(t.Name()))
-		tagFormat = checkBranch(tagFormat, branch)
-		if tagFormat != "" {
-			if strings.Split(tagFormat, "")[0] == major {
-				var numberTag int
-				numberTag, err = strconv.Atoi(tagFormat)
-				if numberTag > tagWithMajorOk {
-					tagWithMajorOk = numberTag
-					tagWithMajorOKStr = string(t.Name())
-				}
-			} else {
-				var numberTag int
-				numberTag, err = strconv.Atoi(tagFormat)
-				if numberTag > tagCurrent {
-					tagCurrent = numberTag
-					tagCurrentStr = string(t.Name())
+		tagCurrent := t.Name().String() // return this format "refs/tags/v0.10.0"
+		if !strings.Contains(tagCurrent, "dev") {
+			versionParts := strings.Split(tagCurrent, ".")
+
+			majorCurrent, _ := strconv.Atoi(versionParts[0])
+			minorCurrent, _ := strconv.Atoi(versionParts[1])
+			patchCurrent, _ := strconv.Atoi(versionParts[2])
+
+			if majorCurrent == major {
+				if minorCurrent > previousMinor {
+					previousMinor = minorCurrent
+					previousPatch = patchCurrent
+					tag = tagCurrent
+				} else if minorCurrent == previousMinor && patchCurrent > previousPatch {
+					previousPatch = patchCurrent
+					tag = tagCurrent
 				}
 			}
 		}
+
 		return err
 	})
 
-	if tagWithMajorOKStr != "" {
-		return tagWithMajorOKStr, err
+	if err != nil {
+		return tag, err
 	}
 
-	return tagCurrentStr, err
-}
-
-// formatTag slice tag by '/' taking index 2 where the version is, transforming it into a list taking only the numbers
-func formatTag(tag string) (version string) {
-	for _, v := range strings.Split(strings.Split(tag, "/")[2], "") {
-		if _, err := strconv.Atoi(v); err == nil {
-			version += v
-		}
-	}
-	return
-}
-
-func checkBranch(num, branch string) string {
-	if branch == "dev" {
-		if len(num) == 4 {
-			return num
-		}
-	} else if len(num) == 3 {
-		return num
-	}
-	return ""
+	return tag, err
 }
 
 func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
