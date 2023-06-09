@@ -150,6 +150,10 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitTypeNotSent) // nolint:all
 	}
 
+	if info.TypeLang != "nextjs" {
+		return utils.ErrorUnsupportedType
+	}
+
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
