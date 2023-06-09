@@ -47,8 +47,6 @@ jobs:
           echo "2. $commit_message"
           content=$($commit_message)
 
-          echo $content
-
           curl -X POST \
             -H 'Content-Type: application/json' \
             -d "{ \"text\": \"$content\"}" \
