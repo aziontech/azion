@@ -1,0 +1,58 @@
+name: Notify deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  send_webhook:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:22.04
+    permissions:
+      contents: read
+      pull-requests: read
+
+    steps:
+      - name: Setup Env
+        run: apt-get update && apt-get install -y curl git sudo
+        shell: bash
+
+      - name: install gh cli
+        run: |
+          type -p curl >/dev/null || (apt update && apt install curl -y)
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && apt update \
+          && apt install gh -y
+        shell: bash
+
+      - name: Setting GIT
+        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
+        shell: bash
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract PR Information
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          commit_message="${{ github.event.head_commit.message }}"
+          echo "1. $commit_message"
+          commit_message="${commit_message/Merge pull request #/}"
+          echo "2. $commit_message"
+          pr_number="${commit_message%% *}"
+          echo "3. $pr_number"
+          content=$(gh pr view $pr_number --json title,body --jq '.title,.body')
+
+          echo $content
+
+          curl -X POST \
+            -H 'Content-Type: application/json' \
+            -d "{ \"text\": \"$commit_message\"}" \
+            "${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}"
+        shell: bash
