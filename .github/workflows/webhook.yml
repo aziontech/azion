@@ -51,6 +51,6 @@ jobs:
           curl -X POST \
             -H 'Content-Type: application/json' \
             -d "{ \"text\": \"$content\"}" \
-            ${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}
+            "${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}"
         shell: bash
 
