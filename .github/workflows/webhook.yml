@@ -1,4 +1,4 @@
-name: Generate docs and upload to wiki
+name: Notify deploy
 
 on:
   workflow_dispatch:
