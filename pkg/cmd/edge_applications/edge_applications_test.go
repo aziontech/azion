@@ -1,7 +1,6 @@
 package edge_applications
 
 import (
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -141,9 +140,6 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
 						},
-						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
-							return "www.test.com"
-						},
 					}
 				},
 			},
@@ -207,9 +203,6 @@ func TestNewCmd(t *testing.T) {
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
 							return &contracts.AzionApplicationCdn{}, nil
-						},
-						AskInput: func(in io.ReadCloser, out io.Writer, message string) string {
-							return "www.test.com"
 						},
 					}
 				},
