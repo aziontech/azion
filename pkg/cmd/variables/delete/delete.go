@@ -13,7 +13,7 @@ import (
 
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var variables_id string
+	var variable_id string
 
 	deleteCmd := &cobra.Command{
 		Use: msg.VariableDeleteUsage,
@@ -22,8 +22,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage: true,
 		Example: heredoc.Doc(`
-		$ azioncli variables delete --variable-id 1234
-		$ azioncli variables delete -v 1234
+		$ azioncli variables delete --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
+		$ azioncli variables delete -v 7a187044-4a00-4a4a-93ed-d230900421f3
 		`),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -35,19 +35,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			
 			ctx := context.Background()
 
-			err := client.Delete(ctx, variables_id)
+			err := client.Delete(ctx, variable_id)
 
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
 			}
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.VariableDeleteOutputSuccess, variables_id)
+			fmt.Fprintf(out, msg.VariableDeleteOutputSuccess, variable_id)
 
 			return nil
 		},
 	}
 
-	deleteCmd.Flags().StringVarP(&variables_id, "variable-id", "v", "", msg.VariableFlagId)
+	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.VariableFlagId)
 	deleteCmd.Flags().BoolP("help", "h", false, msg.ValiableDeleteHelpFlag)
 
 	return deleteCmd
