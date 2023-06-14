@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/origins"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/cmd/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -60,6 +61,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(rules_engine.NewCmd(f))
 	rootCmd.AddCommand(cache_settings.NewCmd(f))
 	rootCmd.AddCommand(device_groups.NewCmd(f))
+	rootCmd.AddCommand(variables.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 	return rootCmd
 }
