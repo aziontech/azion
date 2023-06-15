@@ -214,6 +214,14 @@ github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPd
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/aziontech/azionapi-go-sdk v0.39.0 h1:vBTOAlhFbubAIffQTVerpjy1g17+VWMwHdE0lSgX3TE=
 github.com/aziontech/azionapi-go-sdk v0.39.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/azionapi-go-sdk v0.41.0 h1:6F39aLj8FF6GbbKk33XodCrpWXeWpyxMZHeYJo47l/8=
+github.com/aziontech/azionapi-go-sdk v0.41.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/azionapi-go-sdk v0.42.0 h1:r9zCMwqIy5HGizJiKruCRgg1yNHnzR4pW7k16VNbwZw=
+github.com/aziontech/azionapi-go-sdk v0.42.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/azionapi-go-sdk v0.45.0 h1:oCOupkE0Q0J5a2oLgcwgyYXMYQiYtbKvOW28e7B0eg8=
+github.com/aziontech/azionapi-go-sdk v0.45.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/azionapi-go-sdk v0.47.0 h1:xvhRKy5WLw79z5gscDWUkBhUp1PcyplOxiuTkEq2Vqc=
+github.com/aziontech/azionapi-go-sdk v0.47.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
 github.com/benbjohnson/clock v1.1.0/go.mod h1:J11/hYXuz8f4ySSvYwY0FKfm+ezbsZBKZxNJlLklBHA=
 github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24TaqPxmxbtue+5NUziq4I4S80YR8gNf3Q=
 github.com/beorn7/perks v1.0.0/go.mod h1:KWe93zE9D1o94FZ5RNwFwVgaQK1VOXiVxmqh+CedLV8=
@@ -1150,6 +1158,8 @@ google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQ
 google.golang.org/protobuf v1.28.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175w=
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+google.golang.org/protobuf v1.30.0 h1:kPPoIgf3TsEvrm0PFe15JQ+570QVxYzEvvHqChK+cng=
+google.golang.org/protobuf v1.30.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/alecthomas/kingpin.v2 v2.2.6/go.mod h1:FMv+mEhP44yOT+4EoQTLFTRgOQ1FBLkstjWtayDeSgw=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
