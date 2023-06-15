@@ -36,7 +36,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Delete(ctx context.Context, id string) error {
-	req := c.apiClient.ApiApi.ApiVariablesDestroy(ctx, id)
+	req := c.apiClient.VariablesApi.ApiVariablesDestroy(ctx, id)
 
 	httpResp, err := req.Execute()
 

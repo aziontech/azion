@@ -47,7 +47,6 @@ type EdgeApplicationResponse interface {
 	GetL2Caching() bool
 	GetLoadBalancer() bool
 	GetMinimumTlsVersion() string
-	GetNext() string
 	GetRawLogs() bool
 	GetWebApplicationFirewall() bool
 }

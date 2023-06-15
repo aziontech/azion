@@ -105,7 +105,6 @@ func format(cmd *cobra.Command, application api.EdgeApplicationResponse) ([]byte
 		b.Write([]byte(fmt.Sprintf("L2 Caching: %t\n", application.GetL2Caching())))
 		b.Write([]byte(fmt.Sprintf("Load Balancer: %t\n", application.GetLoadBalancer())))
 		b.Write([]byte(fmt.Sprintf("Minimum TLS Version: %s\n", application.GetMinimumTlsVersion())))
-		b.Write([]byte(fmt.Sprintf("Next: %s\n", application.GetNext())))
 		b.Write([]byte(fmt.Sprintf("Raw Logs: %t\n", application.GetRawLogs())))
 		b.Write([]byte(fmt.Sprintf("Web Application Firewall: %t\n", application.GetWebApplicationFirewall())))
 		return b.Bytes(), nil

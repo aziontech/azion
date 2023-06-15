@@ -87,10 +87,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		opts.OrderBy = "id"
 	}
 	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).
-		// OrderBy(opts.OrderBy).
-		// Page(opts.Page).
-		// PageSize(opts.PageSize).
-		// Sort(opts.Sort).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).
 		Execute()
 
 	if err != nil {
