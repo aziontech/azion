@@ -1,7 +1,6 @@
 package describe
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -88,7 +87,7 @@ func TestDescribe(t *testing.T) {
 		}()
 
 		require.NoError(t, err)
-		fmt.Println(">>> ", stdout.String())
-		require.Equal(t, `File successfully written to: out.json`, stdout.String())
+		require.Equal(t, `File successfully written to: out.json
+`, stdout.String())
 	})
 }

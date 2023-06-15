@@ -2,7 +2,6 @@ package variables
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -45,7 +44,6 @@ func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 	req := c.apiClient.VariablesApi.ApiVariablesRetrieve(ctx, id)
 	res, httpResp, err := req.Execute()
 	if err != nil {
-		fmt.Println("err: ", err)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return res, nil
