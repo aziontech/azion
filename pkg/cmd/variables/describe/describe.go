@@ -70,6 +70,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.Flags().StringVarP(&variableID, "variable-id", "v", "", msg.DescribeFlagVariableID)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd

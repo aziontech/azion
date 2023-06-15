@@ -2,6 +2,7 @@ package variables
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -15,13 +16,13 @@ type Client struct {
 }
 
 type VariableResponse interface {
-	GetUuid() int64
+	GetUuid() string
 	GetKey() string
 	GetValue() string
-	GetSecret() []string
-	GetLastEditor() bool
-	GetCreatedAt() int64
-	GetUpdatedAt() int64
+	GetSecret() bool
+	GetLastEditor() string
+	GetCreatedAt() time.Time
+	GetUpdatedAt() time.Time
 }
 
 func NewClient(c *http.Client, url string, token string) *Client {
@@ -42,9 +43,10 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 	req := c.apiClient.VariablesApi.ApiVariablesRetrieve(ctx, id)
-	_, httpResp, err := req.Execute()
+	res, httpResp, err := req.Execute()
 	if err != nil {
+		fmt.Println("err: ", err)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	return nil, nil
+	return res, nil
 }
