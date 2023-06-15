@@ -18,7 +18,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use: msg.VariableDeleteUsage,
 		Short: msg.VariableDeleteShortDescription,
-		Long: msg.CacheSettingsDeleteLongDescription,
+		Long: msg.VariableDeleteLongDescription,
 		SilenceErrors: true,
 		SilenceUsage: true,
 		Example: heredoc.Doc(`
