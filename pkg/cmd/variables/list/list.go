@@ -20,7 +20,7 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
-	cmd := &cobra.Command{
+	listCmd := &cobra.Command{
 		Use:           msg.VariablesListUsage,
 		Short:         msg.VariablesListShortDescription,
 		Long:          msg.VariablesListLongDescription,
@@ -40,9 +40,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	cmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
-	return cmd
+	listCmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
+	listCmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
+	return listCmd
 }
 
 func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOptions) error {
