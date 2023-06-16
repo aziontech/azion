@@ -122,8 +122,6 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Sort(opts.Sort).
 		Execute()
 
-	pages := resp.TotalPages
-
 	if err != nil {
 		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -134,5 +132,5 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		result = append(result, &resp.GetResults()[i])
 	}
 
-	return result, *pages, nil
+	return result, *resp.TotalPages, nil
 }
