@@ -23,15 +23,6 @@ type VariablesResponse interface {
 	GetLastEditor() string
 }
 
-
-type Client struct {
-	apiClient * sdk.APIClient
-}
-
-type VariablesResponse interface {
-	GetUuiD() string
-}
-
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c

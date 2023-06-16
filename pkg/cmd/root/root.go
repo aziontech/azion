@@ -18,7 +18,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/cmd/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
