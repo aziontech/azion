@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -44,7 +43,6 @@ func (c *Client) List(ctx context.Context) ([]VariablesResponse, error) {
 	resp, httpResp, err := c.apiClient.VariablesApi.ApiVariablesList(ctx).Execute()
 
 	if err != nil {
-		fmt.Println(err.Error())
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
