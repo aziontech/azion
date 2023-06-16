@@ -11,9 +11,9 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	variablesCmd := &cobra.Command{
-		Use:   msg.VariablesUsage,
-		Short: msg.VariablesShortDescription,
-		Long:  msg.VariablesLongDescription,
+		Use:   msg.Usage,
+		Short: msg.ShortDescription,
+		Long:  msg.LongDescription,
 		Example: heredoc.Doc(`
 		$ azioncli variables --help
         `),
@@ -24,7 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	variablesCmd.AddCommand(delete.NewCmd(f))
 
-	variablesCmd.Flags().BoolP("help", "h", false, msg.VariablesFlagHelp)
+	variablesCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return variablesCmd
 }

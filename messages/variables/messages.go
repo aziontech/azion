@@ -1,16 +1,16 @@
 package variables
 
 var (
-	VariablesUsage 				= "variables"
-	VariablesShortDescription   = "Manage your variables on the Azion Edge platform"
-	VariablesLongDescription    = "Manage your variables' varaibles on the Azion Edge platform"
-	VariablesFlagHelp           = "Displays more information about the Rules Engine command"
-	VariableFlagId              = "Unique identifier of the Variable"
+	Usage 				= "variables"
+	ShortDescription   = "Manage your variables on the Azion Edge platform"
+	LongDescription    = "Manage your variables' varaibles on the Azion Edge platform"
+	FlagHelp           = "Displays more information about the Rules Engine command"
+	FlagId              = "Unique identifier of the Variable"
 	
 	//delete cmd
-	VariableDeleteOutputSuccess            = "Variable %v was successfully deleted\n"
-	ValiableDeleteHelpFlag                 = "Displays more information about the delete subcommand"
-	VariableDeleteUsage               	   = "delete [flags]"
-	VariableDeleteShortDescription         = "Delete a Variable"
-	VariableDeleteLongDescription		   = "Delete a Variable using UUID"
+	DeleteOutputSuccess            = "Variable %v was successfully deleted\n"
+	DeleteHelpFlag                 = "Displays more information about the delete subcommand"
+	DeleteUsage               	   = "delete [flags]"
+	DeleteShortDescription         = "Delete a Variable"
+	DeleteLongDescription		   = "Delete a Variable using UUID"
 )

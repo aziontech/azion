@@ -16,9 +16,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var variable_id string
 
 	deleteCmd := &cobra.Command{
-		Use: msg.VariableDeleteUsage,
-		Short: msg.VariableDeleteShortDescription,
-		Long: msg.VariableDeleteLongDescription,
+		Use: msg.DeleteUsage,
+		Short: msg.DeleteShortDescription,
+		Long: msg.DeleteLongDescription,
 		SilenceErrors: true,
 		SilenceUsage: true,
 		Example: heredoc.Doc(`
@@ -41,14 +41,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
 			}
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.VariableDeleteOutputSuccess, variable_id)
+			fmt.Fprintf(out, msg.DeleteOutputSuccess, variable_id)
 
 			return nil
 		},
 	}
 
-	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.VariableFlagId)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.ValiableDeleteHelpFlag)
+	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.FlagId)
+	deleteCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return deleteCmd
 }
