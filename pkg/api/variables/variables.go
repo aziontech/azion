@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/utils"
@@ -25,11 +26,15 @@ type VariablesResponse interface {
 
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
+	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "Token "+token)
+	conf.AddDefaultHeader("Accept", "application/json;version=3")
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
+	conf.HTTPClient.Timeout = 30 * time.Second
+
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
 	}

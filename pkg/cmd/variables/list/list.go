@@ -54,6 +54,7 @@ func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOpt
 	}
 
 	tbl := table.New("ID", "KEY", "VALUE")
+	tbl.WithWriter(out)
 	fields := []string{"GetUuid()", "GetKey()", "GetValue()"}
 
 	if opts.Details {
