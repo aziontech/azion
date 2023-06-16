@@ -1,4 +1,4 @@
-package storage
+package variables
 
 import (
 	"context"
@@ -23,10 +23,20 @@ type VariablesResponse interface {
 	GetLastEditor() string
 }
 
+
+type Client struct {
+	apiClient * sdk.APIClient
+}
+
+type VariablesResponse interface {
+	GetUuiD() string
+}
+
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "Token "+token)
+	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.AddDefaultHeader("Accept", "application/json;version=3")
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
@@ -53,4 +63,15 @@ func (c *Client) List(ctx context.Context) ([]VariablesResponse, error) {
 	}
 
 	return result, nil
+}
+func (c *Client) Delete(ctx context.Context, id string) error {
+	req := c.apiClient.VariablesApi.ApiVariablesDestroy(ctx, id)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
 }
