@@ -4,12 +4,14 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/describe"
+	"github.com/aziontech/azion-cli/pkg/cmd/variables/delete"
+	"github.com/aziontech/azion-cli/pkg/cmd/variables/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	deviceGroupsCmd := &cobra.Command{
+	variablesCmd := &cobra.Command{
 		Use:   msg.Usage,
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription,
@@ -21,8 +23,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deviceGroupsCmd.AddCommand(describe.NewCmd(f))
+	variablesCmd.AddCommand(describe.NewCmd(f))
+	variablesCmd.AddCommand(list.NewCmd(f))
+	variablesCmd.AddCommand(delete.NewCmd(f))
+	variablesCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
-	deviceGroupsCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
-	return deviceGroupsCmd
+	return variablesCmd
 }

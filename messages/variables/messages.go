@@ -6,6 +6,7 @@ var (
 	ShortDescription = "Create variables for edges on Azion's platform"
 	LongDescription  = "Build your Web applications in minutes without the need to manage infrastructure or security"
 	FlagHelp         = "Displays more information about the variables command"
+	FlagId           = "Unique identifier of the Variable"
 
 	// [ describe ]
 	DescribeUsage            = "describe --variable-id <variable_id> [flags]"
@@ -18,4 +19,17 @@ var (
 
 	// [ general ]
 	FileWritten = "File successfully written to: %s\n"
+
+	// [ list ]
+	VariablesListUsage            = "list [flags]"
+	VariablesListShortDescription = "Displays your variables"
+	VariablesListLongDescription  = "Displays all variables related to your applications"
+	VariablesListHelpFlag         = "Displays more information about the list subcommand"
+
+	// [ delete ]
+	DeleteOutputSuccess    = "Variable %v was successfully deleted\n"
+	DeleteHelpFlag         = "Displays more information about the delete subcommand"
+	DeleteUsage            = "delete [flags]"
+	DeleteShortDescription = "Delete a Variable"
+	DeleteLongDescription  = "Delete a Variable using UUID"
 )

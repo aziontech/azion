@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
+	github.com/aziontech/azionapi-go-sdk v0.47.0
 	github.com/fatih/color v1.13.0
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-git/go-git/v5 v5.4.2
@@ -24,7 +25,7 @@ require (
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b // indirect
 	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 )
 
 require (

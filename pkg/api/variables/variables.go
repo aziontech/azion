@@ -7,6 +7,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/utils"
+
 	sdk "github.com/aziontech/azionapi-go-sdk/variables"
 )
 
@@ -38,6 +39,34 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
 	}
+}
+
+func (c *Client) List(ctx context.Context) ([]VariableResponse, error) {
+	resp, httpResp, err := c.apiClient.VariablesApi.ApiVariablesList(ctx).Execute()
+
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	var result []VariableResponse
+
+	for i := range resp {
+		result = append(result, &resp[i])
+	}
+
+	return result, nil
+}
+
+func (c *Client) Delete(ctx context.Context, id string) error {
+	req := c.apiClient.VariablesApi.ApiVariablesDestroy(ctx, id)
+
+	httpResp, err := req.Execute()
+
+	if err != nil {
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
 }
 
 func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
