@@ -15,18 +15,19 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-type VariablesResponse interface {
+type VariableResponse interface {
 	GetUuid() string
 	GetKey() string
 	GetValue() string
 	GetSecret() bool
 	GetLastEditor() string
+	GetCreatedAt() time.Time
+	GetUpdatedAt() time.Time
 }
 
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
-	conf.AddDefaultHeader("Authorization", "Token "+token)
 	conf.AddDefaultHeader("Authorization", "token "+token)
 	conf.AddDefaultHeader("Accept", "application/json;version=3")
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
@@ -40,14 +41,14 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) List(ctx context.Context) ([]VariablesResponse, error) {
+func (c *Client) List(ctx context.Context) ([]VariableResponse, error) {
 	resp, httpResp, err := c.apiClient.VariablesApi.ApiVariablesList(ctx).Execute()
 
 	if err != nil {
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	var result []VariablesResponse
+	var result []VariableResponse
 
 	for i := range resp {
 		result = append(result, &resp[i])
@@ -55,6 +56,7 @@ func (c *Client) List(ctx context.Context) ([]VariablesResponse, error) {
 
 	return result, nil
 }
+
 func (c *Client) Delete(ctx context.Context, id string) error {
 	req := c.apiClient.VariablesApi.ApiVariablesDestroy(ctx, id)
 
@@ -65,4 +67,13 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
+	req := c.apiClient.VariablesApi.ApiVariablesRetrieve(ctx, id)
+	res, httpResp, err := req.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return res, nil
 }
