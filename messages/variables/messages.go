@@ -40,8 +40,7 @@ var (
 	UpdateFlagKey          = "The Variable's key"
 	UpdateFlagValue        = "The value for the key"
 	UpdateFlagSecret       = "Whether the key and value should be secret or not"
-	UpdateFlagIn           = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
+	UpdateFlagIn           = "Given path and JSON file to automatically update the Variable attributes; you can use - for reading from stdin"
 	UpdateOutputSuccess    = "Updated Variable with ID %d\n"
 	UpdateHelpFlag         = "Displays more information about the update subcommand"
-
 )
