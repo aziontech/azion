@@ -33,6 +33,17 @@ var (
 	DeleteShortDescription = "Delete a Variable"
 	DeleteLongDescription  = "Delete a Variable using UUID"
 
+	//update cmd
+	UpdateUsage            = "update --variable-id <variable_id> [flags]"
+	UpdateShortDescription = "Modifies a Variable"
+	UpdateLongDescription  = "Modifies a Variable based on its ID to update its fields"
+	UpdateFlagKey          = "The Variable's key"
+	UpdateFlagValue        = "The value for the key"
+	UpdateFlagSecret       = "Whether the key and value should be secret or not"
+	UpdateFlagIn           = "Given path and JSON file to automatically update the Variable attributes; you can use - for reading from stdin"
+	UpdateOutputSuccess    = "Updated Variable with ID %d\n"
+	UpdateHelpFlag         = "Displays more information about the update subcommand"
+
 	// [ create ]
 	CreateUsage            = "create [flags]"
 	CreateShortDescription = "Creates a new variable"

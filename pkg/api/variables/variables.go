@@ -15,6 +15,11 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
+type UpdateRequest struct {
+	sdk.VariableCreate
+	Uuid string
+}
+
 type VariableResponse interface {
 	GetUuid() string
 	GetKey() string
@@ -67,6 +72,17 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) Update(ctx context.Context, req *UpdateRequest) (VariableResponse, error) {
+	request := c.apiClient.VariablesApi.ApiVariablesUpdate(ctx, req.Uuid).VariableCreate(req.VariableCreate)
+
+	variablesResponse, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return variablesResponse, nil
 }
 
 func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
