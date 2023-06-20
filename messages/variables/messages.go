@@ -40,7 +40,7 @@ var (
 	CreateFlagKey          = "Informs  Key"
 	CreateFlagValue        = "Informs  value"
 	CreateFlagSecret       = "Informs  Secret"
-	CreateFlagIn           = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
-	CreateOutputSuccess    = "Created origin with ID %s\n"
+	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
+	CreateOutputSuccess    = "Created variable with ID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 )
