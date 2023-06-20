@@ -32,4 +32,15 @@ var (
 	DeleteUsage            = "delete [flags]"
 	DeleteShortDescription = "Delete a Variable"
 	DeleteLongDescription  = "Delete a Variable using UUID"
+
+	// [ create ]
+	CreateUsage            = "create [flags]"
+	CreateShortDescription = "Creates a new variable"
+	CreateLongDescription  = "Creates a new variable"
+	CreateFlagKey          = "Informs  Key"
+	CreateFlagValue        = "Informs  value"
+	CreateFlagSecret       = "Informs  Secret"
+	CreateFlagIn           = "Path to a JSON file containing the attributes of the origin that will be created; you can use - for reading from stdin"
+	CreateOutputSuccess    = "Created origin with ID %s\n"
+	CreateHelpFlag         = "Displays more information about the create subcommand"
 )

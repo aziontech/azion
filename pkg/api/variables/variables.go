@@ -77,3 +77,16 @@ func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 	}
 	return res, nil
 }
+
+type CreateRequest struct {
+	sdk.VariableCreate
+}
+
+func (c *Client) Create(ctx context.Context, strReq CreateRequest) (VariableResponse, error) {
+	request := c.apiClient.VariablesApi.ApiVariablesCreate(ctx).VariableCreate(strReq.VariableCreate)
+	response, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return response, nil
+}
