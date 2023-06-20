@@ -17,6 +17,23 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
+type CreateRequest struct {
+	sdk.CreateEdgeFunctionRequest
+}
+
+func NewCreateRequest() *CreateRequest {
+	return &CreateRequest{}
+}
+
+type UpdateRequest struct {
+	sdk.PatchEdgeFunctionRequest
+	Id int64
+}
+
+func NewUpdateRequest(id int64) *UpdateRequest {
+	return &UpdateRequest{Id: id}
+}
+
 type EdgeFunctionResponse interface {
 	GetId() int64
 	GetName() string
@@ -71,14 +88,6 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-type CreateRequest struct {
-	sdk.CreateEdgeFunctionRequest
-}
-
-func NewCreateRequest() *CreateRequest {
-	return &CreateRequest{}
-}
-
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
@@ -92,15 +101,6 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	}
 
 	return edgeFuncResponse.Results, nil
-}
-
-type UpdateRequest struct {
-	sdk.PatchEdgeFunctionRequest
-	Id int64
-}
-
-func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{Id: id}
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
