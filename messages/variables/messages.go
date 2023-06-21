@@ -43,4 +43,15 @@ var (
 	UpdateFlagIn           = "Given path and JSON file to automatically update the Variable attributes; you can use - for reading from stdin"
 	UpdateOutputSuccess    = "Updated Variable with ID %d\n"
 	UpdateHelpFlag         = "Displays more information about the update subcommand"
+
+	// [ create ]
+	CreateUsage            = "create [flags]"
+	CreateShortDescription = "Creates a new variable"
+	CreateLongDescription  = "Creates a new variable"
+	CreateFlagKey          = "Informs  Key"
+	CreateFlagValue        = "Informs  value"
+	CreateFlagSecret       = "Informs  Secret"
+	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
+	CreateOutputSuccess    = "Created variable with ID %s\n"
+	CreateHelpFlag         = "Displays more information about the create subcommand"
 )
