@@ -17,6 +17,23 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
+type CreateRequest struct {
+	sdk.CreateEdgeFunctionRequest
+}
+
+func NewCreateRequest() *CreateRequest {
+	return &CreateRequest{}
+}
+
+type UpdateRequest struct {
+	sdk.PatchEdgeFunctionRequest
+	Id int64
+}
+
+func NewUpdateRequest(id int64) *UpdateRequest {
+	return &UpdateRequest{Id: id}
+}
+
 type EdgeFunctionResponse interface {
 	GetId() int64
 	GetName() string
@@ -71,14 +88,6 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-type CreateRequest struct {
-	sdk.CreateEdgeFunctionRequest
-}
-
-func NewCreateRequest() *CreateRequest {
-	return &CreateRequest{}
-}
-
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
@@ -92,15 +101,6 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	}
 
 	return edgeFuncResponse.Results, nil
-}
-
-type UpdateRequest struct {
-	sdk.PatchEdgeFunctionRequest
-	Id int64
-}
-
-func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{Id: id}
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
@@ -122,8 +122,6 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Sort(opts.Sort).
 		Execute()
 
-	pages := resp.TotalPages
-
 	if err != nil {
 		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -134,5 +132,5 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		result = append(result, &resp.GetResults()[i])
 	}
 
-	return result, *pages, nil
+	return result, *resp.TotalPages, nil
 }
