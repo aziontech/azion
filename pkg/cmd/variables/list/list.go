@@ -58,7 +58,7 @@ func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOpt
 	fields := []string{"GetUuid()", "GetKey()", "GetValue()"}
 
 	if opts.Details {
-		fields = append(fields, "GetUuid()", "GetKey()", "GetValue()", "GetSecret()", "GetLastEditor()")
+		fields = append(fields, "GetSecret()", "GetLastEditor()")
 		tbl = table.New("ID", "KEY", "VALUE", "SECRET", "LAST EDITOR")
 	}
 

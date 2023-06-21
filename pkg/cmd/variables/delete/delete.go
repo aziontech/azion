@@ -11,16 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var variable_id string
 
 	deleteCmd := &cobra.Command{
-		Use: msg.DeleteUsage,
-		Short: msg.DeleteShortDescription,
-		Long: msg.DeleteLongDescription,
+		Use:           msg.DeleteUsage,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceErrors: true,
-		SilenceUsage: true,
+		SilenceUsage:  true,
 		Example: heredoc.Doc(`
 		$ azioncli variables delete --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
 		$ azioncli variables delete -v 7a187044-4a00-4a4a-93ed-d230900421f3
@@ -31,8 +30,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMissingVariableIdArgumentDelete
 			}
 
-			client :=  api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
 			ctx := context.Background()
 
 			err := client.Delete(ctx, variable_id)
