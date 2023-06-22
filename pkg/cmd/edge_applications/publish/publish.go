@@ -49,6 +49,7 @@ type PublishCmd struct {
 
 var InstanceId int64
 var Path string
+var Ignore []string
 
 var DEFAULTORIGIN [1]string = [1]string{"www.example.com"}
 
@@ -89,6 +90,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 	}
 	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
 	publishCmd.Flags().StringVar(&Path, "path", "public", msg.EdgeApplicationPublishPathFlag)
+	publishCmd.Flags().StringSliceVarP(&Ignore, "ignore", "i", []string{}, msg.EdgeApplicationPublishIgnoreFlag)
 	return publishCmd
 }
 
@@ -143,17 +145,8 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	pathStatic := ".vercel/output/static"
 
-	// Get total amount of files to display progress
-	totalFiles := 0
-	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			totalFiles++
-		}
-		return nil
-	}); err != nil {
+	files, err := cmd.getFileList(pathStatic, Ignore)
+	if err != nil {
 		return err
 	}
 
@@ -161,36 +154,27 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
 
-	currentFile := 0
-	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+	totalFiles := len(files)
+	for currentFile, path := range files {
+		fileContent, err := cmd.Open(path)
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
-			fileContent, err := cmd.Open(path)
-			if err != nil {
-				return err
-			}
 
-			fileString := strings.TrimPrefix(path, pathStatic)
-			mimeType, err := mimemagic.MatchFilePath(path, -1)
-			if err != nil {
-				return err
-			}
-
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
-				return err
-			}
-
-			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
-			progress := int(percentage / 10)
-			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
-			currentFile++
+		fileString := strings.TrimPrefix(path, pathStatic)
+		mimeType, err := mimemagic.MatchFilePath(path, -1)
+		if err != nil {
+			return err
 		}
-		return nil
-	}); err != nil {
-		return err
+
+		if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
+			return err
+		}
+
+		percentage := float64(currentFile+1) * 100 / float64(totalFiles)
+		progress := int(percentage / 10)
+		bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
+		fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
 	}
 
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
@@ -748,18 +732,10 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
+	
 	// upload the page static
-	// Get total amount of files to display progress
-	totalFiles := 0
-	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			totalFiles++
-		}
-		return nil
-	}); err != nil {
+	files, err := cmd.getFileList(Path, Ignore)
+	if err != nil {
 		return err
 	}
 
@@ -768,36 +744,27 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
 
 	versionID := conf.VersionID
-	currentFile := 0
-	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
+	totalFiles := len(files)
+	for currentFile, path := range files {
+		fileContent, err := cmd.Open(path)
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
-			fileContent, err := cmd.Open(path)
-			if err != nil {
-				return err
-			}
 
-			fileString := strings.TrimPrefix(path, Path)
-			mimeType, err := mimemagic.MatchFilePath(path, -1)
-			if err != nil {
-				return err
-			}
-
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
-				return err
-			}
-
-			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
-			progress := int(percentage / 10)
-			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
-			currentFile++
+		fileString := strings.TrimPrefix(path, Path)
+		mimeType, err := mimemagic.MatchFilePath(path, -1)
+		if err != nil {
+			return err
 		}
-		return nil
-	}); err != nil {
-		return err
+
+		if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
+			return err
+		}
+
+		percentage := float64(currentFile+1) * 100 / float64(totalFiles)
+		progress := int(percentage / 10)
+		bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
+		fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
 	}
 
 	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
