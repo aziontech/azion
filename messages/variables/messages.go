@@ -48,7 +48,7 @@ var (
 	CreateUsage            = "create [flags]"
 	CreateShortDescription = "Creates a new environment variable or secret on the Azion's platform" 
 	CreateLongDescription  = "Creates a new environment variable or secret to be used inside edge functions on the Azion's platform"
-	CreateFlagKey          = "Informs the variable's Key"
+	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."
 	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
