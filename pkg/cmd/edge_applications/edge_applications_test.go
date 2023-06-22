@@ -120,7 +120,7 @@ func TestNewCmd(t *testing.T) {
 						EnvLoader:          func(path string) ([]string, error) { return []string{}, nil },
 						WriteFile:          func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						Stat:               func(path string) (fs.FileInfo, error) { return nil, nil },
-						VersionId:          func(dir string) (string, error) { return "123456789", nil },
+						VersionId:          func(dir string) string { return "123456789" },
 					}
 				},
 				publish: func(f *cmdutil.Factory) *publishcmd.PublishCmd {
@@ -184,7 +184,7 @@ func TestNewCmd(t *testing.T) {
 						EnvLoader:          func(path string) ([]string, error) { return []string{}, nil },
 						WriteFile:          func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						Stat:               func(path string) (fs.FileInfo, error) { return nil, nil },
-						VersionId:          func(dir string) (string, error) { return "123456789", nil },
+						VersionId:          func(dir string) string { return "123456789" },
 					}
 				},
 				publish: func(f *cmdutil.Factory) *publishcmd.PublishCmd {
