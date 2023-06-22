@@ -90,7 +90,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 	}
 	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
 	publishCmd.Flags().StringVar(&Path, "path", "public", msg.EdgeApplicationPublishPathFlag)
-	publishCmd.Flags().StringSliceVarP(&Ignore, "ignore", "i", []string{}, msg.EdgeApplicationPublishIgnoreFlag)
+	publishCmd.Flags().StringSliceVar(&Ignore, "ignore", []string{}, msg.EdgeApplicationPublishIgnoreFlag)
 	return publishCmd
 }
 
@@ -732,7 +732,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// upload the page static
 	files, err := cmd.getFileList(Path, Ignore)
 	if err != nil {

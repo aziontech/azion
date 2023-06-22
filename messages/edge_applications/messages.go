@@ -72,7 +72,7 @@ var (
 	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
-	EdgeApplicationPublishIgnoreFlag                   = "Files and directories to ignore when publishing the application"
+	EdgeApplicationPublishIgnoreFlag                   = "Files and directories to ignore when publishing the application; follows the gitignore pattern"
 
 	//CRUD
 	//list cmd
