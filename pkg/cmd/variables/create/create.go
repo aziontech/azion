@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 	$ azioncli variables create --key "Content-Type" --value "string" --secret false
-        $ azioncli variables create --in "create.json"
+	$ azioncli variables create --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
