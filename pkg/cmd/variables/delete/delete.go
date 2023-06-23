@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.FlagId)
+	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.FlagVariableID)
 	deleteCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return deleteCmd

@@ -34,6 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azioncli variables update --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --key 'Content-Type' --value 'json' --secret false
 		$ azioncli variables update -v 7a187044-4a00-4a4a-93ed-d230900421f3 --key 'Content-Type' --value 'json' --secret false
+		$ azioncli variables update --in variables.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either function-id or in path should be passed
@@ -88,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&fields.Id, "variable-id", "v", "0", msg.FlagId)
+	flags.StringVarP(&fields.Id, "variable-id", "v", "0", msg.FlagVariableID)
 	flags.StringVar(&fields.Key, "key", "", msg.UpdateFlagKey)
 	flags.StringVar(&fields.Value, "value", "", msg.UpdateFlagValue)
 	flags.StringVar(&fields.Secret, "secret", "", msg.UpdateFlagSecret)

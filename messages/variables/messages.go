@@ -6,13 +6,12 @@ var (
 	ShortDescription = "Manages your environment variables and secrets on the Azion's platform"
 	LongDescription  = "Manages your environment variables and secrets to be used inside edge functions on the Azion's platform"
 	FlagHelp         = "Displays more information about the variables command"
-	FlagId           = "Unique identifier of the variable"
+	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
 	// [ describe ]
 	DescribeUsage            = "describe --variable-id <variable_id> [flags]"
 	DescribeShortDescription = "Returns the specific variable's key and value"
 	DescribeLongDescription  = "Displays information about a variable based on a given UUID to show the variable's attributes in detail"
-	DescribeFlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 	DescribeFlagOut          = "Exports the output to the given filepath, such as: <file_path/file_name.ext>"
 	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe subcommand"
@@ -46,7 +45,7 @@ var (
 
 	// [ create ]
 	CreateUsage            = "create [flags]"
-	CreateShortDescription = "Creates a new environment variable or secret on the Azion's platform" 
+	CreateShortDescription = "Creates a new environment variable or secret on the Azion's platform"
 	CreateLongDescription  = "Creates a new environment variable or secret to be used inside edge functions on the Azion's platform"
 	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
