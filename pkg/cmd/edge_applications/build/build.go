@@ -21,6 +21,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const VERSIONID_FORMAT string = "20060102150405"
+
 type BuildCmd struct {
 	Io                  *iostreams.IOStreams
 	WriteFile           func(filename string, data []byte, perm fs.FileMode) error
@@ -31,7 +33,7 @@ type BuildCmd struct {
 	GetWorkDir          func() (string, error)
 	EnvLoader           func(path string) ([]string, error)
 	Stat                func(path string) (fs.FileInfo, error)
-	VersionId           func(dir string) (string, error)
+	VersionId           func(dir string) string
 	f                   *cmdutil.Factory
 }
 
@@ -127,10 +129,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	case "nextjs":
 
 		//pre-build version id. Used to check if there were changes to the project
-		verID, err := cmd.VersionId(path)
-		if err != nil {
-			return err
-		}
+		verID := cmd.VersionId(path)
 
 		confS := conf.BuildData.Default
 		confS = strings.Replace(confS, "%s", verID, 1)
@@ -244,8 +243,8 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 	return nil
 }
 
-func createVersionID(dir string) (string, error) {
+func createVersionID(dir string) string {
 	t := time.Now()
-	timeFormatted := t.Format("20060102150405")
-	return timeFormatted, nil
+	timeFormatted := t.Format(VERSIONID_FORMAT)
+	return timeFormatted
 }

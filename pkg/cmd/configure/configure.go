@@ -22,7 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:  configure.ConfigureLongDescription,
 		Example: heredoc.Doc(`
 		$ azioncli configure --help
-		$ azion configure --token azion123456abcdefg7891011hijklmn
+		$ azioncli configure --token azion123456abcdefg789asas1011hijklmn
 
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {

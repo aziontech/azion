@@ -3,55 +3,54 @@ package variables
 var (
 	// [ variables ]
 	Usage            = "variables"
-	ShortDescription = "Create variables for edges on Azion's platform"
-	LongDescription  = "Create variables for edges on Azion's platform"
+	ShortDescription = "Manages your environment variables and secrets on the Azion's platform"
+	LongDescription  = "Manages your environment variables and secrets to be used inside edge functions on the Azion's platform"
 	FlagHelp         = "Displays more information about the variables command"
-	FlagId           = "Unique identifier of the Variable"
+	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
 	// [ describe ]
 	DescribeUsage            = "describe --variable-id <variable_id> [flags]"
-	DescribeShortDescription = "Returns the variable data"
-	DescribeLongDescription  = "Displays information about the variable via a given ID to show the variable's attributes in detail"
-	DescribeFlagVariableID   = "Unique identifier for an variable. The '--variable-id' flag is mandatory"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
+	DescribeShortDescription = "Returns the specific variable's key and value"
+	DescribeLongDescription  = "Displays information about a variable based on a given UUID to show the variable's attributes in detail"
+	DescribeFlagOut          = "Exports the output to the given filepath, such as: <file_path/file_name.ext>"
 	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
-	DescribeHelpFlag         = "Displays more information about the describe command"
+	DescribeHelpFlag         = "Displays more information about the describe subcommand"
 
 	// [ general ]
 	FileWritten = "File successfully written to: %s\n"
 
 	// [ list ]
 	VariablesListUsage            = "list [flags]"
-	VariablesListShortDescription = "Displays your variables"
-	VariablesListLongDescription  = "Displays all variables related to your applications"
+	VariablesListShortDescription = "Displays your variables in a list"
+	VariablesListLongDescription  = "Displays all your environment variables and secrets in a list"
 	VariablesListHelpFlag         = "Displays more information about the list subcommand"
 
 	// [ delete ]
 	DeleteOutputSuccess    = "Variable %v was successfully deleted\n"
 	DeleteHelpFlag         = "Displays more information about the delete subcommand"
 	DeleteUsage            = "delete [flags]"
-	DeleteShortDescription = "Delete a Variable"
-	DeleteLongDescription  = "Delete a Variable using UUID"
+	DeleteShortDescription = "Deletes a variable"
+	DeleteLongDescription  = "Deletes a variable based on its UUID"
 
 	//update cmd
 	UpdateUsage            = "update --variable-id <variable_id> [flags]"
-	UpdateShortDescription = "Modifies a Variable"
-	UpdateLongDescription  = "Modifies a Variable based on its ID to update its fields"
-	UpdateFlagKey          = "The Variable's key"
-	UpdateFlagValue        = "The value for the key"
-	UpdateFlagSecret       = "Whether the key and value should be secret or not"
-	UpdateFlagIn           = "Given path and JSON file to automatically update the Variable attributes; you can use - for reading from stdin"
-	UpdateOutputSuccess    = "Updated Variable with ID %d\n"
+	UpdateShortDescription = "Modifies a variable's attributes"
+	UpdateLongDescription  = "Modifies a variable's attributes based on its UUID"
+	UpdateFlagKey          = "The variable's key"
+	UpdateFlagValue        = "The variable's value"
+	UpdateFlagSecret       = "Indicates whether the value is meant to be confidential."
+	UpdateFlagIn           = "Given path and JSON file to automatically update the variable attributes; you can use - for reading from stdin"
+	UpdateOutputSuccess    = "Updated variable with UUID %d\n"
 	UpdateHelpFlag         = "Displays more information about the update subcommand"
 
 	// [ create ]
 	CreateUsage            = "create [flags]"
-	CreateShortDescription = "Creates a new variable"
-	CreateLongDescription  = "Creates a new variable"
-	CreateFlagKey          = "Informs  Key"
-	CreateFlagValue        = "Informs  value"
-	CreateFlagSecret       = "Informs  Secret"
+	CreateShortDescription = "Creates a new environment variable or secret on the Azion's platform"
+	CreateLongDescription  = "Creates a new environment variable or secret to be used inside edge functions on the Azion's platform"
+	CreateFlagKey          = "Informs the variable's key"
+	CreateFlagValue        = "Informs the variable's value"
+	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."
 	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
-	CreateOutputSuccess    = "Created variable with ID %s\n"
+	CreateOutputSuccess    = "Created variable with UUID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 )
