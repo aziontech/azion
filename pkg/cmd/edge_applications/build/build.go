@@ -167,7 +167,7 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 		return conf, err
 	}
 
-	jsonConf := path + "/azion/config.json"
+	jsonConf := path + cmd.ConfigRelativePath
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
 		return conf, msg.ErrorOpeningConfigFile
