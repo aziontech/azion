@@ -31,10 +31,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Upload(ctx context.Context, versionID, path, contentType string, file *os.File) error {
 	c.apiClient.GetConfig().DefaultHeader["Content-Disposition"] = fmt.Sprintf("attachment; filename=\"%s\"", path)
-	if len(contentType) > 0 {
-		c.apiClient.GetConfig().DefaultHeader["Content-Type"] = contentType
-	}
-	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file)
+	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file).ContentType(contentType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		return utils.ErrorPerStatusCode(httpResp, err)
