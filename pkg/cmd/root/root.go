@@ -21,6 +21,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,6 +39,9 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			logger.LogLevel(f.Logger)
+		},
 		SilenceErrors: true,
 	}
 
@@ -48,6 +52,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		rootHelpFunc(f, cmd, args)
 	})
+
+	// Setting the optional flag
+	rootCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
+	rootCmd.PersistentFlags().BoolVarP(&f.Quiet, "quiet", "q", false, msg.RootLogQuiet)
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(completion.NewCmd(f))
@@ -63,6 +71,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(device_groups.NewCmd(f))
 	rootCmd.AddCommand(variables.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+
 	return rootCmd
 }
 
