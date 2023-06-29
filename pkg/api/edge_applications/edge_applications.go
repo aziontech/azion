@@ -287,7 +287,7 @@ func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettin
 
 func (c *Client) UpdateCacheSettings(ctx context.Context, req *UpdateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
 
-	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
+	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -325,7 +325,7 @@ func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheS
 }
 
 func (c *Client) DeleteCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
-	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsDelete(ctx, edgeApplicationID, cacheSettingsID).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
