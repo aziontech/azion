@@ -54,7 +54,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	})
 
 	// Setting the optional flag
-	rootCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
+	rootCmd.PersistentFlags().BoolVar(&f.Debug, "debug", false, msg.RootLogDebug)
 	rootCmd.PersistentFlags().BoolVarP(&f.Quiet, "quiet", "q", false, msg.RootLogQuiet)
 
 	rootCmd.AddCommand(configure.NewCmd(f))

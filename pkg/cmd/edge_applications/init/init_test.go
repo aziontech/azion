@@ -25,7 +25,7 @@ import (
 )
 
 func TestCobraCmd(t *testing.T) {
-	logger.New(os.Stdout, zapcore.DebugLevel)
+	logger.New(zapcore.DebugLevel)
 
 	t.Run("success with CDN", func(t *testing.T) {
 		mock := &httpmock.Registry{}
@@ -286,7 +286,7 @@ func TestCobraCmd(t *testing.T) {
 }
 
 func TestInitCmd(t *testing.T) {
-	logger.New(os.Stdout, zapcore.DebugLevel)
+	logger.New(zapcore.DebugLevel)
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
@@ -423,7 +423,7 @@ func TestInitCmd(t *testing.T) {
 }
 
 func Test_fetchTemplates(t *testing.T) {
-	logger.New(os.Stdout, zapcore.DebugLevel)
+	logger.New(zapcore.DebugLevel)
 
 	t.Run("tests flow full template", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
@@ -459,7 +459,7 @@ func (m *mockReferenceIter) ForEach(f func(*plumbing.Reference) error) error {
 }
 
 func Test_SortTag(t *testing.T) {
-	logger.New(os.Stdout, zapcore.DebugLevel)
+	logger.New(zapcore.DebugLevel)
 
 	mockIter := new(mockReferenceIter)
 
