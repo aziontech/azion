@@ -597,9 +597,9 @@ func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicatio
 		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(`  [ General Instructions ]
+	logger.FInfo(cmd.Io.Out, `  [ General Instructions ]
     [ Usage ]
-    - Publish Command: publish page static`))
+    - Publish Command: publish page static`)
 
 	return nil
 }
