@@ -2,12 +2,15 @@ package list
 
 import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 	"testing"
 )
 
 func TestNewCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("list url not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

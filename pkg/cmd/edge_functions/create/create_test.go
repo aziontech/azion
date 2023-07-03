@@ -1,6 +1,8 @@
 package create
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"testing"
@@ -29,6 +31,7 @@ var successResponse string = `
 `
 
 func TestCreate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("create new edge function", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

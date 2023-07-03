@@ -2,6 +2,8 @@ package delete
 
 import (
 	"encoding/json"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"testing"
 
@@ -13,7 +15,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-
+	logger.New(zapcore.DebugLevel)
 	t.Run("delete application by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

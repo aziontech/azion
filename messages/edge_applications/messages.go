@@ -21,7 +21,7 @@ var (
 	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
-	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'"
+	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'\n"
 	EdgeApplicationsBuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
 
 	UploadStart      = "Uploading static files\n"
@@ -67,9 +67,9 @@ var (
 	EdgeApplicationsPublishOutputDomainCreate          = "Created Domain %s with ID %d\n"
 	EdgeApplicationsPublishOutputDomainUpdate          = "Updated Domain %s with ID %d\n"
 	EdgeApplicationPublishPathFlag                     = "Path to where your static files are stored"
-	EdgeApplicationsCacheSettingsSuccessful            = "Created Cache Settings for web application"
+	EdgeApplicationsCacheSettingsSuccessful            = "Created Cache Settings for web application\n"
 	EdgeApplicationsPublishInputAddress                = "Please inform an address to be used in the origin of this application: "
-	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application"
+	EdgeApplicationsRulesEngineSuccessful              = "Created Rules Engine for web application\n"
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
 

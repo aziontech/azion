@@ -25,8 +25,7 @@ import (
 )
 
 func TestCobraCmd(t *testing.T) {
-	logger.New(zapcore.DebugLevel)
-
+	logger.New(zapcore.InfoLevel)
 	t.Run("success with CDN", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		f, stdout, _ := testutils.NewFactory(mock)
@@ -66,8 +65,7 @@ func TestCobraCmd(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		fmt.Println(stdout.String())
-		require.Contains(t, stdout.String(), fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", "SUUPA_DOOPA"))
+		require.Contains(t, stdout.String(), fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, "SUUPA_DOOPA"))
 	})
 
 	t.Run("without package.json", func(t *testing.T) {

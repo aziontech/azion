@@ -7,8 +7,10 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
+	"go.uber.org/zap"
 )
 
 const javascript = "javascript"
@@ -66,10 +68,13 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
+	logger.Debug("request", zap.Any("request", req))
 
 	res, httpResp, err := req.Execute()
+	logger.Debug("response", zap.Any("response struct", res), zap.Any("response http", httpResp), zap.Error(err))
 
 	if err != nil {
+		logger.Error("Get request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -78,10 +83,13 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
+	logger.Debug("request", zap.Any("request", req))
 
 	httpResp, err := req.Execute()
+	logger.Debug("response", zap.Any("response http", httpResp), zap.Error(err))
 
 	if err != nil {
+		logger.Error("Delete request.Execute return error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -94,9 +102,12 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
+	logger.Debug("request", zap.Any("request", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
+	logger.Debug("response", zap.Any("response struct", edgeFuncResponse), zap.Any("response http", httpResp), zap.Error(err))
 	if err != nil {
+		logger.Error("Create request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -105,9 +116,12 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+	logger.Debug("request", zap.Any("request", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
+	logger.Debug("response", zap.Any("response struct", edgeFuncResponse), zap.Any("response http", httpResp), zap.Error(err))
 	if err != nil {
+		logger.Error("Update request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -121,8 +135,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
+	logger.Debug("response", zap.Any("response struct", resp), zap.Any("response http", httpResp), zap.Error(err))
 
 	if err != nil {
+		logger.Error("list request.Execute return error", zap.Error(err))
 		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

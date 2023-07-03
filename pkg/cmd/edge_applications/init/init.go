@@ -119,7 +119,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
-	logger.Info("runner subcommand init from edge_applications")
+	logger.Debug("runner subcommand init from edge_applications")
 	if info.YesOption && info.NoOption {
 		return msg.ErrorYesAndNoOptions
 	}
@@ -213,7 +213,7 @@ type PackageJson struct {
 }
 
 func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
-	logger.Debug("Runner func  ReadPackageJson()")
+	logger.Debug("Running ReadPackageJson() func")
 	pathPackageJson := path + "/package.json"
 	bytePackageJson, err := cmd.FileReader(pathPackageJson)
 	if err != nil {
@@ -223,7 +223,7 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 }
 
 func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
-	logger.Debug("Runner func DetectedProjectJS()")
+	logger.Debug("Running DetectedProjectJS() func")
 	var packageJson PackageJson
 	path = path + "/package.json"
 	_, err = cmd.Stat(path)
@@ -285,7 +285,7 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
-	logger.Info("Runner func fetchTemplates()")
+	logger.Debug("Running fetchTemplates() func")
 	//create temporary directory to clone template into
 	dir, err := cmd.CreateTempDir(info.PathWorkingDir, ".template")
 	if err != nil {
@@ -403,7 +403,7 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 }
 
 func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *InitInfo) error {
-	logger.Info("Runner func organizeJsonFile()")
+	logger.Debug("Running organizeJsonFile() func")
 	file, err := cmd.FileReader(info.PathWorkingDir + "/azion/azion.json")
 	if err != nil {
 		return msg.ErrorOpeningAzionFile
@@ -534,7 +534,7 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 }
 
 func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
-	logger.Debug("Runner func initCdn()")
+	logger.Debug("Running initCdn() func")
 	var err error
 	var shouldFetchTemplates bool
 	options := &contracts.AzionApplicationCdn{}
@@ -568,7 +568,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 			logger.Error("WriteFile return error", zap.Error(err))
 			return utils.ErrorInternalServerError
 		}
-
+		//fmt.Fprintf(w, message)
 		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
@@ -576,7 +576,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 }
 
 func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
-	logger.Debug("Runner func initStatic()")
+	logger.Debug("Running initStatic() func")
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		logger.Error("initStatic return error", zap.Error(err))
@@ -605,7 +605,7 @@ func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicatio
 }
 
 func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
-	logger.Info("Runner func shouldFetch()")
+	logger.Debug("Running shouldFetch() func")
 	var response string
 	var err error
 	var shouldFetchTemplates bool

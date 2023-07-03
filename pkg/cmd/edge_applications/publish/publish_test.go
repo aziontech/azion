@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"reflect"
@@ -44,6 +46,7 @@ var successResponseApp string = `
 `
 
 func TestPublishCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("without azion.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 

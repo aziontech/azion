@@ -8,8 +8,10 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/domains"
+	"go.uber.org/zap"
 )
 
 type Client struct {
@@ -53,8 +55,11 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 	req := c.apiClient.DomainsApi.GetDomain(ctx, id)
+	logger.Debug("request", zap.Any("request", req))
 	res, httpResp, err := req.Execute()
+	logger.Debug("response", zap.Any("response struct", res), zap.Any("response http", httpResp), zap.Error(err))
 	if err != nil {
+		logger.Error("Get request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &res.Results, nil
@@ -62,8 +67,11 @@ func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
+	logger.Debug("request", zap.Any("request", request))
 	domainsResponse, httpResp, err := request.Execute()
+	logger.Debug("response", zap.Any("response struct", domainsResponse), zap.Any("response http", httpResp), zap.Error(err))
 	if err != nil {
+		logger.Error("Create request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &domainsResponse.Results, nil
@@ -72,9 +80,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
 	str := strconv.FormatInt(req.Id, 10)
 	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
+	logger.Debug("request", zap.Any("request", request))
+
 	domainsResponse, httpResp, err := request.Execute()
+	logger.Debug("response", zap.Any("response struct", domainsResponse), zap.Any("response http", httpResp), zap.Error(err))
 
 	if err != nil {
+		logger.Error("Update request.Execute return error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -92,8 +104,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
+	logger.Debug("response", zap.Any("response struct", resp), zap.Any("response http", httpResp), zap.Error(err))
 
 	if err != nil {
+		logger.Error("List request.Execute return error", zap.Error(err))
 		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -103,10 +117,12 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	str := strconv.FormatInt(id, 10)
 	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
+	logger.Debug("request", zap.Any("request", req))
 
 	httpResp, err := req.Execute()
-
+	logger.Debug("response", zap.Any("response http", httpResp), zap.Error(err))
 	if err != nil {
+		logger.Error("Delete request.Execute return error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
