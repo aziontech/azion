@@ -7,6 +7,6 @@ azioncli [flags]
 	RootShortDescription = "Azion-CLI"
 	RootLongDescription  = "Calls the CLI via subcommands to interact with Azion services easily"
 	RootHelpFlag         = "Displays more information about the Azion CLI"
-	RootLogDebug         = "take debug log with more information about the flow and everything that is entitled"
-	RootLogQuiet         = "leave the log clean for automation only returning the status if there is a problem"
+	RootLogDebug         = "Displays log at a debug level"
+	RootLogQuiet         = "Silences log completely; mostly used for automation purposes"
 )
