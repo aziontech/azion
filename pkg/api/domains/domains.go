@@ -54,39 +54,42 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
+	logger.Debug("Get Domain")
 	req := c.apiClient.DomainsApi.GetDomain(ctx, id)
-	logger.Debug("request", zap.Any("request", req))
+	logger.Debug("request", zap.Any("struct", req))
 	res, httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("response struct", res), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", res), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("Get request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &res.Results, nil
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
+	logger.Debug("Create Domain")
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
-	logger.Debug("request", zap.Any("request", request))
+	logger.Debug("request", zap.Any("struct", request))
 	domainsResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("response struct", domainsResponse), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", domainsResponse), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("Create request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &domainsResponse.Results, nil
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
+	logger.Debug("Update Domain")
 	str := strconv.FormatInt(req.Id, 10)
 	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
-	logger.Debug("request", zap.Any("request", request))
+	logger.Debug("request", zap.Any("struct", request))
 
 	domainsResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("response struct", domainsResponse), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", domainsResponse), zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("Update request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -95,6 +98,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.DomainResponseWithResults, error) {
 	// different from other APIs, domains will return internal server error if order by is empty
+	logger.Debug("List Domains")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -104,10 +108,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
-	logger.Debug("response", zap.Any("response struct", resp), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", resp), zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("List request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -115,14 +119,15 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 }
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
+	logger.Debug("Delete Domain")
 	str := strconv.FormatInt(id, 10)
 	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
-	logger.Debug("request", zap.Any("request", req))
+	logger.Debug("request", zap.Any("struct", req))
 
 	httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("Delete request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 

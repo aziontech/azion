@@ -88,7 +88,7 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 }
 
 func (cmd *BuildCmd) run() error {
-	logger.Debug("runner subcommand build from edge_applications")
+	logger.Debug("Running build subcommand from edge_applications command tree")
 	path, err := cmd.GetWorkDir()
 	if err != nil {
 		logger.Error("GetWorkDir return error", zap.Error(err))
@@ -105,7 +105,6 @@ func (cmd *BuildCmd) run() error {
 }
 
 func RunBuildCmdLine(cmd *BuildCmd, path string) error {
-	logger.Debug("Running RunBuildCmdLine() func")
 	var err error
 
 	azionJson := path + "/azion/azion.json"
@@ -174,7 +173,6 @@ func (cmd *BuildCmd) Run() error {
 }
 
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
-	logger.Debug("Running getConfig() func")
 	path, err := utils.GetWorkingDir()
 	if err != nil {
 		logger.Error("GetWorkingDir return error", zap.Error(err))
@@ -200,7 +198,6 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 }
 
 func checkArgsJson(cmd *BuildCmd) error {
-	logger.Debug("Running checkArgsJson() func")
 	workDirPath, err := cmd.GetWorkDir()
 	if err != nil {
 		logger.Error("GetWorkingDir return error", zap.Error(err))
@@ -220,7 +217,6 @@ func checkArgsJson(cmd *BuildCmd) error {
 }
 
 func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
-	logger.Debug("Running runCommand() func")
 	var command string = conf.BuildData.Cmd
 	if len(conf.BuildData.Cmd) > 0 && len(conf.BuildData.Default) > 0 {
 		command += " && "
@@ -266,7 +262,6 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 }
 
 func createVersionID(dir string) string {
-	logger.Debug("Running createVersionID() func")
 	t := time.Now()
 	timeFormatted := t.Format(VERSIONID_FORMAT)
 	return timeFormatted

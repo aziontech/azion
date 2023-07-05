@@ -99,7 +99,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
-	logger.Debug("runner subcommand publish from edge_applications")
+	logger.Debug("Running publish subcommand from edge_applications command tree")
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
@@ -175,7 +175,6 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	currentFile := 0
 	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			logger.Error("FilepathWalk return error", zap.Error(err))
 			return err
 		}
 		if !info.IsDir() {
@@ -200,7 +199,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
 			progress := int(percentage / 10)
 			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%s] %.2f%% %s ", bar, percentage, path))
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%v] %v %v", bar, percentage, path))
 			currentFile++
 		}
 		return nil
@@ -372,7 +371,6 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 }
 
 func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
-	logger.Debug("Running  purgeDomains() func")
 	ctx := context.Background()
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.Purge(ctx, domainNames)
@@ -386,7 +384,6 @@ func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 }
 
 func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
-	logger.Debug("Running  fillCreateRequestFromConf() func")
 	reqCre := api.CreateRequest{}
 
 	//Read code to upload
@@ -427,7 +424,6 @@ func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 }
 
 func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
-	logger.Debug("Running fillUpdateRequestFromConf() func")
 	reqUpd := api.UpdateRequest{}
 
 	//Read code to upload
@@ -464,12 +460,14 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 		logger.Error("Update return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
+
+	logger.Info(">>>>> here")
+	logger.Info(response.GetCode())
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
 	return response.GetId(), nil
 }
 
 func (cmd *PublishCmd) runPublishPreCmdLine() error {
-	logger.Debug("Running runPublishPreCmdLine() func")
 	conf, err := getConfig(cmd)
 	if err != nil {
 		logger.Error("getConfig return error", zap.Error(err))
@@ -492,7 +490,6 @@ func (cmd *PublishCmd) runPublishPreCmdLine() error {
 }
 
 func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (int64, int64, error) {
-	logger.Debug("Running createApplication() func")
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
@@ -525,7 +522,6 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 }
 
 func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (int64, error) {
-	logger.Debug("Running createApplicationCdn() func")
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
@@ -539,7 +535,6 @@ func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.C
 }
 
 func (cmd *PublishCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) error {
-	logger.Debug("Running updateApplication() func")
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
 	reqApp.Id = conf.Application.Id
@@ -553,7 +548,6 @@ func (cmd *PublishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 }
 
 func (cmd *PublishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) error {
-	logger.Debug("Running updateApplicationCdn() func")
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
 	reqApp.Id = conf.Application.Id
@@ -567,7 +561,6 @@ func (cmd *PublishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.C
 }
 
 func (cmd *PublishCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
-	logger.Debug("Running  createDomain() func")
 	reqDom := apidom.CreateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetCnames([]string{})
@@ -584,7 +577,6 @@ func (cmd *PublishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 }
 
 func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
-	logger.Debug("Running  createDomainCdn() func")
 	reqDom := apidom.CreateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetCnames([]string{})
@@ -601,7 +593,6 @@ func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Contex
 }
 
 func (cmd *PublishCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, name string) (apidom.DomainResponse, error) {
-	logger.Debug("Running  updateDomain() func")
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
@@ -616,7 +607,6 @@ func (cmd *PublishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 }
 
 func (cmd *PublishCmd) updateDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
-	logger.Debug("Running  updateDomainCdn() func")
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
@@ -631,7 +621,6 @@ func (cmd *PublishCmd) updateDomainCdn(client *apidom.Client, ctx context.Contex
 }
 
 func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	logger.Debug("Running  updateRulesEngine() func")
 	reqRules := apiapp.UpdateRulesEngineRequest{}
 	reqRules.IdApplication = conf.Application.Id
 
@@ -790,7 +779,6 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 }
 
 func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
-	logger.Debug("Running prepareAddresses() func")
 	var addr sdk.CreateOriginsRequestAddresses
 	for _, v := range addrs {
 		addr.Address = v
@@ -800,7 +788,6 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 }
 
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
-	logger.Debug("Running publishStatic() func")
 	path, err := cmd.GetWorkDir()
 	if err != nil {
 		logger.Error("GetWorkDir return error", zap.Error(err))
@@ -881,7 +868,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
 			progress := int(percentage / 10)
 			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%s] %.2f%% %s ", bar, percentage, path))
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%v] %v %v", bar, percentage, path))
 			currentFile++
 		}
 		return nil
@@ -1015,13 +1002,13 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 			logger.Error("CreateCacheSettingsNextApplication return error", zap.Error(err))
 			return err
 		}
-		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsCacheSettingsSuccessful))
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
 		err = clientApplication.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), "static")
 		if err != nil {
 			logger.Error("CreateRulesEngineNextApplication return error", zap.Error(err))
 			return err
 		}
-		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsRulesEngineSuccessful))
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
@@ -1039,7 +1026,6 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 }
 
 func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
-	logger.Debug("Running  CreateFunction() func")
 	reqCre := api.CreateRequest{}
 
 	conf.Function.File = "./azion/function.js"
@@ -1088,7 +1074,6 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 }
 
 func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, idReq int64, conf *contracts.AzionApplicationOptions) (int64, error) {
-	logger.Debug("Running  UpdateFunction() func")
 	reqUpd := api.UpdateRequest{}
 
 	conf.Function.File = "./azion/function.js"
@@ -1145,6 +1130,6 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 		logger.Error("client.Update return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprint(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
 	return response.GetId(), nil
 }

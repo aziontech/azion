@@ -119,7 +119,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
-	logger.Debug("runner subcommand init from edge_applications")
+	logger.Debug("Running init subcommand from edge_applications command tree")
 	if info.YesOption && info.NoOption {
 		return msg.ErrorYesAndNoOptions
 	}
@@ -132,7 +132,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	info.PathWorkingDir = path
 
 	projectName, projectSettings, err := DetectedProjectJS(info, cmd, path)
-	logger.Debug("Return func DetectedProjectJS()", zap.String("projectName", projectName), zap.String("projectSettings", projectSettings))
 	if err != nil {
 		logger.Error("DetectedProjectJS return error", zap.Error(err))
 		return err
@@ -213,7 +212,6 @@ type PackageJson struct {
 }
 
 func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
-	logger.Debug("Running ReadPackageJson() func")
 	pathPackageJson := path + "/package.json"
 	bytePackageJson, err := cmd.FileReader(pathPackageJson)
 	if err != nil {
@@ -223,7 +221,6 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 }
 
 func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
-	logger.Debug("Running DetectedProjectJS() func")
 	var packageJson PackageJson
 	path = path + "/package.json"
 	_, err = cmd.Stat(path)
@@ -285,7 +282,6 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
-	logger.Debug("Running fetchTemplates() func")
 	//create temporary directory to clone template into
 	dir, err := cmd.CreateTempDir(info.PathWorkingDir, ".template")
 	if err != nil {
@@ -403,7 +399,6 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 }
 
 func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *InitInfo) error {
-	logger.Debug("Running organizeJsonFile() func")
 	file, err := cmd.FileReader(info.PathWorkingDir + "/azion/azion.json")
 	if err != nil {
 		return msg.ErrorOpeningAzionFile
@@ -534,7 +529,6 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 }
 
 func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
-	logger.Debug("Running initCdn() func")
 	var err error
 	var shouldFetchTemplates bool
 	options := &contracts.AzionApplicationCdn{}
@@ -576,7 +570,6 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 }
 
 func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
-	logger.Debug("Running initStatic() func")
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		logger.Error("initStatic return error", zap.Error(err))
@@ -605,7 +598,6 @@ func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicatio
 }
 
 func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
-	logger.Debug("Running shouldFetch() func")
 	var response string
 	var err error
 	var shouldFetchTemplates bool

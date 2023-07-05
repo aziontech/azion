@@ -57,7 +57,6 @@ func New(level zapcore.Level) {
 
 // FInfo I need to check if the debug is false because the error comes in the debug also as true
 func FInfo(w io.Writer, message string) {
-	log.Info(message)
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
 		fmt.Fprintf(w, message) // nolint:all

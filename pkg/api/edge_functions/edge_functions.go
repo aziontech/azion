@@ -67,14 +67,15 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
+	logger.Debug("Get Edge Function")
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
-	logger.Debug("request", zap.Any("request", req))
+	logger.Debug("request", zap.Any("struct", req))
 
 	res, httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("response struct", res), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", res), zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("Get request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -82,14 +83,15 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 }
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
+	logger.Debug("Delete Edge Function")
 	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
-	logger.Debug("request", zap.Any("request", req))
+	logger.Debug("request", zap.Any("struct", req))
 
 	httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("Delete request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -99,15 +101,16 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
+	logger.Debug("Create Function")
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
-	logger.Debug("request", zap.Any("request", request))
+	logger.Debug("request", zap.Any("struct", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("response struct", edgeFuncResponse), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", edgeFuncResponse), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("Create request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -115,13 +118,14 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
+	logger.Debug("Update Edge Function")
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
-	logger.Debug("request", zap.Any("request", request))
+	logger.Debug("request", zap.Any("struct", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("response struct", edgeFuncResponse), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", edgeFuncResponse), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("Update request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -129,16 +133,17 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, int64, error) {
+	logger.Debug("List Edge Function")
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
-	logger.Debug("response", zap.Any("response struct", resp), zap.Any("response http", httpResp), zap.Error(err))
+	logger.Debug("response", zap.Any("struct", resp), zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("list request.Execute return error", zap.Error(err))
+		logger.Error("error", zap.Error(err))
 		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

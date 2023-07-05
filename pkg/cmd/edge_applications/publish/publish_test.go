@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
