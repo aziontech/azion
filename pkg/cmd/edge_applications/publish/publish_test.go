@@ -9,6 +9,9 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
+
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -44,6 +47,7 @@ var successResponseApp string = `
 `
 
 func TestPublishCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("without azion.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 

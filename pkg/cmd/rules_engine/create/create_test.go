@@ -2,6 +2,8 @@ package create
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
@@ -11,6 +13,7 @@ import (
 )
 
 func TestNewCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	type apiMock struct {
 		method, url, path string
 	}

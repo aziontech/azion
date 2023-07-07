@@ -2,6 +2,8 @@ package update
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
@@ -12,6 +14,7 @@ import (
 )
 
 func TestUpdate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("update ", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
