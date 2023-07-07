@@ -461,7 +461,6 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 
-	logger.Info(">>>>> here")
 	logger.Info(response.GetCode())
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
 	return response.GetId(), nil
