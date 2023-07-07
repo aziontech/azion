@@ -291,7 +291,6 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	//move contents from temporary directory into final destination
 	err = cmd.Rename(dir+"/webdev/"+typeLang, azionDir)
 	if err != nil {
-		fmt.Println(err.Error())
 		return utils.ErrorMovingFiles
 	}
 
