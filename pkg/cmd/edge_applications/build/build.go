@@ -109,18 +109,23 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	}
 
 	typeLang := gjson.Get(string(file), "type")
+	mode := gjson.Get(string(file), "mode")
 
 	if typeLang.String() == "cdn" {
 		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsBuildCdn)
 		return nil
 	}
 
-	conf, err := getConfig(cmd)
+	err = checkArgsJson(cmd)
 	if err != nil {
 		return err
 	}
 
-	err = checkArgsJson(cmd)
+	if typeLang.String() != "nextjs" {
+		return callVulcan(cmd, typeLang.String(), mode.String())
+	}
+
+	conf, err := getConfig(cmd)
 	if err != nil {
 		return err
 	}
@@ -247,4 +252,13 @@ func createVersionID(dir string) string {
 	t := time.Now()
 	timeFormatted := t.Format(VERSIONID_FORMAT)
 	return timeFormatted
+}
+
+func callVulcan(cmd *BuildCmd, typeLang, mode string) error {
+	command := "vulcan build --preset " + typeLang + " --mode " + mode
+	_, _, err := cmd.CommandRunner(command, []string{})
+	if err != nil {
+		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
+	}
+	return nil
 }

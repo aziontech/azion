@@ -134,7 +134,7 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs", "version-id":"123321123", "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
@@ -198,7 +198,7 @@ func TestNewCmd(t *testing.T) {
 						GetAzionJsonContent:   func() (*contracts.AzionApplicationOptions, error) { return &contracts.AzionApplicationOptions{}, nil },
 						WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error { return nil },
 						FileReader: func(path string) ([]byte, error) {
-							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs" , "dependencies": { "next": "12.2.5" }}`), nil
+							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs", "version-id":"123321123", "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
 						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
@@ -218,7 +218,9 @@ func TestNewCmd(t *testing.T) {
 
 			if cmd := NewCmd(fMock); cmd != nil {
 				init := tt.args.init(fMock)
-				errInit := initcmd.NewCobraCmd(init).Execute()
+				cmdInit := initcmd.NewCobraCmd(init)
+				cmdInit.SetArgs([]string{"--type", "nextjs"})
+				errInit := cmdInit.Execute()
 				if errInit != nil {
 					log.Fatal(errInit)
 					return

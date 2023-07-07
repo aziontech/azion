@@ -258,6 +258,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		i := InitInfo{}
+		i.TypeLang = "nextjs"
 		err := cmd.runInitCmdLine(&i)
 		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
@@ -289,11 +290,12 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		i := InitInfo{}
+		i.TypeLang = "nextjs"
 		err := cmd.runInitCmdLine(&i)
 		require.ErrorIs(t, err, msg.ErrReadEnvFile)
 	})
 
-	t.Run("Failed to run the command specified", func(t *testing.T) {
+	t.Run("If type is different than nextjs, return nil", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewInitCmd(f)
@@ -320,7 +322,7 @@ func TestInitCmd(t *testing.T) {
 
 		i := InitInfo{TypeLang: "static", PathWorkingDir: "."}
 		err := cmd.runInitCmdLine(&i)
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		require.NoError(t, err)
 	})
 
 	t.Run("success with NextJS", func(t *testing.T) {

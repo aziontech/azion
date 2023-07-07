@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -23,7 +22,7 @@ func TestBuild(t *testing.T) {
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		require.ErrorContains(t, err, "Error executing Vulcan")
 	})
 
 	t.Run("missing config file", func(t *testing.T) {
@@ -58,6 +57,6 @@ func TestBuild(t *testing.T) {
 		}
 
 		err := command.run()
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		require.ErrorContains(t, err, "Error executing Vulcan")
 	})
 }

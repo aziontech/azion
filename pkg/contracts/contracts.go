@@ -18,6 +18,7 @@ type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
 	Type        string                   `json:"type"`
+	Mode        string                   `json:"mode"`
 	Env         string                   `json:"env"`
 	VersionID   string                   `json:"version-id"`
 	Function    AzionJsonDataFunction    `json:"function"`
