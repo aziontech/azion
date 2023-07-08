@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/pkg/upbin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -35,6 +36,9 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 			DisableDefaultCmd: true,
 		},
 		Version: version.BinVersion,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return upbin.UpdateBin()
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
