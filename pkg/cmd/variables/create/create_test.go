@@ -16,7 +16,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "api/variables"),
+			httpmock.REST("POST", "variables"),
 			httpmock.JSONFromFile(".fixtures/response.json"),
 		)
 
@@ -37,7 +37,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "api/variables"),
+			httpmock.REST("POST", "variables"),
 			httpmock.JSONFromFile(".fixtures/response.json"),
 		)
 
@@ -57,7 +57,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "api/variables"),
+			httpmock.REST("POST", "variables"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, "Invalid"),
 		)
 
@@ -72,7 +72,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "api/variables"),
+			httpmock.REST("POST", "variables"),
 			httpmock.StatusStringResponse(http.StatusInternalServerError, "Invalid"),
 		)
 

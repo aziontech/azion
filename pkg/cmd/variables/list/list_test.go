@@ -1,10 +1,11 @@
 package list
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -18,7 +19,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST(http.MethodGet, "api/variables"),
+			httpmock.REST(http.MethodGet, "variables"),
 			httpmock.JSONFromFile(".fixtures/variables.json"),
 		)
 
@@ -36,7 +37,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "api/variables"),
+			httpmock.REST("GET", "variables"),
 			httpmock.JSONFromFile(".fixtures/nocontent.json"),
 		)
 

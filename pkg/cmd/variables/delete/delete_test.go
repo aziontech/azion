@@ -14,9 +14,9 @@ func TestCreate(t *testing.T) {
 
 	t.Run("delete variable by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		
+
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 
@@ -35,7 +35,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -49,12 +49,11 @@ func TestCreate(t *testing.T) {
 		require.Error(t, err)
 	})
 
-
 	t.Run("show error when not informing the --variable-id flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
