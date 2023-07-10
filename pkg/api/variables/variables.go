@@ -2,11 +2,13 @@ package variables
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/davecgh/go-spew/spew"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/variables"
 )
@@ -102,6 +104,9 @@ func (c *Client) Create(ctx context.Context, strReq CreateRequest) (VariableResp
 	request := c.apiClient.VariablesApi.ApiVariablesCreate(ctx).VariableCreate(strReq.VariableCreate)
 	response, httpResp, err := request.Execute()
 	if err != nil {
+		spew.Dump(request)
+		fmt.Println(err.Error())
+		fmt.Println(httpResp.Body)
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return response, nil
