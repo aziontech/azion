@@ -16,7 +16,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.JSONFromFile(".fixtures/variables.json"),
 		)
 
@@ -32,7 +32,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -47,7 +47,7 @@ func TestDescribe(t *testing.T) {
 	t.Run("no id sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "api/variables/123423424"),
+			httpmock.REST("GET", "variables/123423424"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -63,7 +63,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.JSONFromFile(".fixtures/variables.json"),
 		)
 
