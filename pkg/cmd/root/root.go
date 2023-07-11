@@ -62,11 +62,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-
 	// Setting the optional flag
 	rootCmd.PersistentFlags().BoolVar(&f.Debug, "debug", false, msg.RootLogDebug)
 	rootCmd.PersistentFlags().BoolVarP(&f.Quiet, "quiet", "q", false, msg.RootLogQuiet)
-  rootCmd.PersistentFlags().BoolVar(&DoNotUpdate, "no-update", false, msg.RootDoNotUpdate)
+	rootCmd.PersistentFlags().BoolVar(&DoNotUpdate, "no-update", false, msg.RootDoNotUpdate)
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(completion.NewCmd(f))
