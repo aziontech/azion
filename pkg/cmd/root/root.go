@@ -27,6 +27,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var DoNotUpdate bool
+
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   msg.RootUsage,
@@ -37,7 +39,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return upbin.UpdateBin()
+			if !DoNotUpdate {
+				return upbin.UpdateBin()
+			}
+			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -52,6 +57,8 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		rootHelpFunc(f, cmd, args)
 	})
+
+	rootCmd.PersistentFlags().BoolVar(&DoNotUpdate, "no-update", false, msg.RootDoNotUpdate)
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(completion.NewCmd(f))

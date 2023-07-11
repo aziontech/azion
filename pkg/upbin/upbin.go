@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -36,13 +37,61 @@ const (
 	repoURL string = "https://github.com/aziontech/azion-cli.git"
 	url     string = "https://downloads.azion.com/%s/x86_64/azioncli"
 
-	LastActivity string = "LAST_ACTIVITY"
+	LastActivity    string = "LAST_ACTIVITY"
+	packageAzioncli string = "aziontech/tap/azioncli"
 )
 
 type Version struct {
 	Major int
 	Minor int
 	Patch int
+}
+
+func UpdateBin() error {
+	notfy, err := notify()
+	if err != nil {
+		return err
+	}
+
+	if !notfy {
+		return nil
+	}
+
+	if !needToUpdate() {
+		return nil
+	}
+
+	if !wantToUpdate() {
+		return saveLastActivity()
+	}
+
+	fileURL, err := prepareURL()
+	if err != nil {
+		return err
+	}
+
+	install, err := ManagersPackages()
+	if err != nil {
+		return err
+	}
+
+	if install {
+		return nil
+	}
+
+	filePath, _ := Which(azioncli)
+
+	err = downloadFile(filePath, fileURL)
+	if err != nil {
+		return err
+	}
+
+	err = replaceFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetCurrentVersion() int {
@@ -170,58 +219,21 @@ func wantToUpdate() bool {
 	return result == "Yes"
 }
 
-func notify() bool {
-	lastAct, _ := getLastActivity()
+func notify() (bool, error) {
+	lastAct, err := getLastActivity()
+	if err != nil {
+		return false, err
+	}
 
 	// Difference is greater than or equal to half a day, notify user
 	dateHour, _ := time.Parse(time.RFC3339, lastAct)
 	diff := time.Since(dateHour)
 
 	if diff >= 12*time.Hour {
-		return true
+		return true, nil
 	} else {
-		return false
+		return false, nil
 	}
-}
-
-func UpdateBin() error {
-	if !notify() {
-		fmt.Println("foi notificado recentemente")
-		return nil
-	}
-
-	if !needToUpdate() {
-		return nil
-	}
-
-	if !wantToUpdate() {
-		return saveLastActivity()
-	}
-
-	fileURL, err := prepareURL()
-	if err != nil {
-		fmt.Println("sistema desconhecido")
-		return err
-	}
-
-	filePath, _ := Which(azioncli)
-
-	err = downloadFile(filePath, fileURL)
-	if err != nil {
-		fmt.Println("Erro ao baixar o arquivo:", err)
-		return err
-	}
-
-	fmt.Println("Download concluído!")
-
-	err = replaceFile(filePath)
-	if err != nil {
-		fmt.Println("Erro ao substituir o arquivo:", err)
-		return err
-	}
-
-	fmt.Println("Arquivo substituído com sucesso!")
-	return nil
 }
 
 func downloadFile(filePath, fileURL string) error {
@@ -269,7 +281,6 @@ func saveLastActivity() error {
 
 	err = writeConfig(data)
 	if err != nil {
-		fmt.Println("error ao escrever yaml config", err)
 		return err
 	}
 
@@ -279,27 +290,23 @@ func saveLastActivity() error {
 func openConfig() (map[string]interface{}, error) {
 	path, err := pathYamlConfig()
 	if err != nil {
-		fmt.Println("Erro ao obter o diretório home do usuário:", err)
 		return nil, err
 	}
 
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println("Erro ao abrir ou criar o arquivo YAML:", err)
 		return nil, err
 	}
 	defer file.Close()
 
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Println("Erro ao ler o arquivo YAML:", err)
 		return nil, err
 	}
 
 	data := make(map[string]interface{})
 	err = yaml.Unmarshal(content, &data)
 	if err != nil {
-		fmt.Println("Erro ao fazer o Unmarshal do arquivo YAML:", err)
 		return nil, err
 	}
 
@@ -342,4 +349,51 @@ func getLastActivity() (string, error) {
 
 	lastAct := data[LastActivity]
 	return fmt.Sprint(lastAct), nil
+}
+
+func ManagersPackages() (bool, error) {
+	packageManagers := []string{"brew"}
+
+	var install bool = false
+	var manager string
+	for _, man := range packageManagers {
+		exists := packageManagerExists(man)
+		if exists {
+			manager = man
+			install = true
+			break
+		}
+	}
+
+	err := installPackageManager(manager)
+	if err != nil {
+		return false, err
+	}
+
+	return install, nil
+}
+
+func packageManagerExists(command string) bool {
+	_, err := exec.LookPath(command)
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
+func installPackageManager(manager string) error {
+	var command string
+	switch manager {
+	case "brew":
+		command = "install"
+	}
+
+	cmd := exec.Command(manager, command, packageAzioncli)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
