@@ -12,17 +12,20 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
+	"go.uber.org/zap"
+
+	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 )
 
 type InitInfo struct {
@@ -122,18 +125,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
+	logger.Debug("Running init subcommand from edge_applications command tree")
 	if info.YesOption && info.NoOption {
 		return msg.ErrorYesAndNoOptions
 	}
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkDir return error", zap.Error(err))
 		return err
 	}
 	info.PathWorkingDir = path
 
 	projectName, err := DetectedProjectJS(info, cmd, path)
 	if err != nil {
+		logger.Error("DetectedProjectJS return error", zap.Error(err))
 		return err
 	}
 
@@ -150,34 +156,40 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
+		logger.Error("ReadPackageJson return error", zap.Error(err))
 		return err
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
+		logger.Error("shouldFetch return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
+			logger.Error("fetchTemplates return error", zap.Error(err))
 			return err
 		}
 
 		if err = UpdateScript(cmd, bytePackageJson, pathPackageJson); err != nil {
+			logger.Error("UpdateScript return error", zap.Error(err))
 			return err
 		}
 
 		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
 		if err != nil {
+			logger.Error("updateProjectName return error", zap.Error(err))
 			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
+			logger.Error("organizeJsonFile return error", zap.Error(err))
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.WebAppInitCmdSuccess)                                // nolint:all
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+		logger.FInfo(cmd.Io.Out, msg.WebAppInitCmdSuccess)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, info.Name))
 	}
 
 	err = cmd.runInitCmdLine(info)
@@ -507,12 +519,14 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 
 	shouldFetchTemplates, err = shouldFetch(cmd, info)
 	if err != nil {
+		logger.Error("shouldFetch return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		pathWorker := path + "/azion"
 		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
+			logger.Error("mkdir return error", zap.Error(err))
 			return msg.ErrorFailedCreatingAzionDirectory
 		}
 
@@ -523,15 +537,17 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 
 		data, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
+			logger.Error("MarshalIndent return error", zap.Error(err))
 			return msg.ErrorUnmarshalAzionFile
 		}
 
 		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
 		if err != nil {
+			logger.Error("WriteFile return error", zap.Error(err))
 			return utils.ErrorInternalServerError
 		}
-
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+		//fmt.Fprintf(w, message)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
 	return nil
@@ -540,24 +556,27 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
+		logger.Error("initStatic return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
+			logger.Error("fetchTemplates return error", zap.Error(err))
 			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
+			logger.Error("organizeJsonFile return error", zap.Error(err))
 			return err
 		}
 
-		fmt.Fprintf(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name)) // nolint:all
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
-	showInstructions(cmd, `	[ General Instructions ]
-	[ Usage ]
-		- Publish Command: publish page static`) //nolint:all
+	logger.FInfo(cmd.Io.Out, `  [ General Instructions ]
+    [ Usage ]
+    - Publish Command: publish page static`)
 
 	return nil
 }

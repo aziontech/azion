@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap"
 
 	"os"
 
@@ -34,6 +36,7 @@ func (c *Client) Upload(ctx context.Context, versionID, path, contentType string
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file).ContentType(contentType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
+		logger.Error("error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

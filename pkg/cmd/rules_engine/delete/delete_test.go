@@ -2,6 +2,8 @@ package delete
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
@@ -12,6 +14,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("delete rules engine with success", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

@@ -1,6 +1,8 @@
 package list
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
@@ -10,6 +12,7 @@ import (
 )
 
 func TestNewCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("list all rules engines", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

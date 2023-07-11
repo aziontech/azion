@@ -11,12 +11,14 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -86,13 +88,16 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 }
 
 func (cmd *BuildCmd) run() error {
+	logger.Debug("Running build subcommand from edge_applications command tree")
 	path, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkDir return error", zap.Error(err))
 		return err
 	}
 
 	err = RunBuildCmdLine(cmd, path)
 	if err != nil {
+		logger.Error("RunBuildCmdLine return error", zap.Error(err))
 		return err
 	}
 
@@ -105,6 +110,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	azionJson := path + "/azion/azion.json"
 	file, err := cmd.FileReader(azionJson)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
@@ -112,12 +118,13 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	mode := gjson.Get(string(file), "mode")
 
 	if typeLang.String() == "cdn" {
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsBuildCdn)
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildCdn)
 		return nil
 	}
 
 	err = checkArgsJson(cmd)
 	if err != nil {
+		logger.Error("getConfig return error", zap.Error(err))
 		return err
 	}
 
@@ -127,6 +134,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 	conf, err := getConfig(cmd)
 	if err != nil {
+		logger.Error("checkArgsJson return error", zap.Error(err))
 		return err
 	}
 
@@ -142,16 +150,19 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 		err = runCommand(cmd, conf)
 		if err != nil {
+			logger.Error("runCommand return error", zap.Error(err))
 			return err
 		}
 
 		azJson, err := sjson.Set(string(file), "version-id", verID)
 		if err != nil {
+			logger.Error("sjson.Set return error", zap.Error(err))
 			return utils.ErrorWritingAzionJsonFile
 		}
 
 		err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
 		if err != nil {
+			logger.Error("WriteFile return error", zap.Error(err))
 			return utils.ErrorWritingAzionJsonFile
 		}
 
@@ -169,18 +180,21 @@ func (cmd *BuildCmd) Run() error {
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
+		logger.Error("GetWorkingDir return error", zap.Error(err))
 		return conf, err
 	}
 
 	jsonConf := path + cmd.ConfigRelativePath
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return conf, msg.ErrorOpeningConfigFile
 	}
 
 	conf = &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
+		logger.Error("Unmarshal return error", zap.Error(err))
 		return conf, msg.ErrorUnmarshalConfigFile
 	}
 
@@ -191,6 +205,7 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 func checkArgsJson(cmd *BuildCmd) error {
 	workDirPath, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkingDir return error", zap.Error(err))
 		return utils.ErrorInternalServerError
 	}
 
@@ -198,6 +213,7 @@ func checkArgsJson(cmd *BuildCmd) error {
 	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
+			logger.Error("WriteFile return error", zap.Error(err))
 			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
 		}
 	}
@@ -217,25 +233,27 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 		return nil
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildStart)
+	logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildStart)
 
 	switch conf.BuildData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
 		err := cmd.CommandRunnerStream(cmd.Io.Out, command, []string{})
 		if err != nil {
+			logger.Error("CommandRunnerStream return error", zap.Error(err))
 			return msg.ErrFailedToRunBuildCommand
 		}
 
 	case "on-error":
 		output, exitCode, err := cmd.CommandRunner(command, []string{})
 		if exitCode != 0 {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunBuildCommand
 		}
 		if err != nil {
+			logger.Error("CommandRunner return error", zap.Error(err))
 			return err
 		}
 
@@ -243,7 +261,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 		return msg.EdgeApplicationsOutputErr
 	}
 
-	fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsBuildSuccessful)
+	logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSuccessful)
 
 	return nil
 }

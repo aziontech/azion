@@ -1,6 +1,8 @@
 package edge_applications
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"io/fs"
 	"log"
 	"os"
@@ -71,6 +73,8 @@ func Mock(mock *httpmock.Registry) {
 
 // TestNewCmd `go test -run TestNewCmd -v -cover`
 func TestNewCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
 	type args struct {
 		init    func(f *cmdutil.Factory) *initcmd.InitCmd
 		build   func(f *cmdutil.Factory) *buildcmd.BuildCmd

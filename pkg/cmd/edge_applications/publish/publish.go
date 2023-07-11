@@ -13,7 +13,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"go.uber.org/zap"
 
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
@@ -98,15 +100,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
+	logger.Debug("Running publish subcommand from edge_applications command tree")
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkDir return error", zap.Error(err))
 		return err
 	}
 
 	jsonConf := path + "/azion/azion.json"
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
@@ -115,6 +120,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if typeLang.String() == "cdn" {
 		err := publishCdn(cmd, f)
 		if err != nil {
+			logger.Error("publishCdn return error", zap.Error(err))
 			return err
 		}
 		return nil
@@ -123,6 +129,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if typeLang.String() == "static" {
 		err = publishStatic(cmd, f)
 		if err != nil {
+			logger.Error("publishStatic return error", zap.Error(err))
 			return err
 		}
 		return nil
@@ -132,11 +139,13 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	build := cmd.BuildCmd(f)
 	err = build.Run()
 	if err != nil {
+		logger.Error("build.Run return error", zap.Error(err))
 		return err
 	}
 
 	file, err = cmd.FileReader(jsonConf)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
@@ -170,6 +179,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	totalFiles := 0
 	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			logger.Error("FilepathWalk return error", zap.Error(err))
 			return err
 		}
 		if !info.IsDir() {
@@ -177,12 +187,13 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
+		logger.Error("FilepathWalk return error", zap.Error(err))
 		return err
 	}
 
 	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
-	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
+	logger.FInfo(f.IOStreams.Out, msg.UploadStart)
 
 	currentFile := 0
 	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -192,31 +203,35 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		if !info.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
+				logger.Error("cmd.Open return error", zap.Error(err))
 				return err
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
+				logger.Error("MatchFilePath return error", zap.Error(err))
 				return err
 			}
 
 			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
+				logger.Error("clientUpload return error", zap.Error(err))
 				return err
 			}
 
 			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
 			progress := int(percentage / 10)
 			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%v] %v %v", bar, percentage, path))
 			currentFile++
 		}
 		return nil
 	}); err != nil {
+		logger.Error("FilepathWalk return error", zap.Error(err))
 		return err
 	}
 
-	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
+	logger.FInfo(f.IOStreams.Out, msg.UploadSuccessful)
 
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
@@ -225,6 +240,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		//Create New function
 		PublishId, err := cmd.fillCreateRequestFromConf(client, ctx, conf)
 		if err != nil {
+			logger.Error("fillCreateRequestFromConf return error", zap.Error(err))
 			return err
 		}
 
@@ -233,12 +249,14 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		//Update existing function
 		_, err := cmd.fillUpdateRequestFromConf(client, ctx, conf.Function.Id, conf)
 		if err != nil {
+			logger.Error("fillUpdateRequestFromConf return error", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
@@ -253,29 +271,34 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.Application.Id == 0 {
 		applicationId, _, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("createApplication return error", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationId
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
+			logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 			return err
 		}
 
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(cliapp, ctx, conf)
 		if err != nil {
+			logger.Error("updateRulesEngine return error", zap.Error(err))
 			return err
 		}
 	} else {
 		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("updateApplication return error", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
@@ -290,6 +313,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
+			logger.Error("createDomain return error", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
@@ -310,6 +334,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		reqOrigin.SetHostHeader("${host}")
 		origin, err := cliapp.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
 		if err != nil {
+			logger.Error("CreateOrigin return error", zap.Error(err))
 			return err
 		}
 		conf.Origin.Id = origin.GetOriginId()
@@ -319,24 +344,28 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		reqCache.SetName(conf.Name)
 		cache, err := cliapp.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
 		if err != nil {
+			logger.Error("CreateCacheSettingsNextApplication return error", zap.Error(err))
 			return err
 		}
-		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
 		err = cliapp.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), typeLang.String())
 		if err != nil {
+			logger.Error("CreateRulesEngineNextApplication return error", zap.Error(err))
 			return err
 		}
-		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
 
 	} else {
 		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
+			logger.Error("updateDomain return error", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
@@ -345,14 +374,15 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
 		err = cmd.purgeDomains(f, domainReturnedName)
 		if err != nil {
+			logger.Error("purgeDomains return error", zap.Error(err))
 			return err
 		}
 	}
 
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0])
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationPublishDomainHint)
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0]))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationPublishDomainHint)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
 }
@@ -362,6 +392,7 @@ func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.Purge(ctx, domainNames)
 	if err != nil {
+		logger.Error("clipurge.Purge return error", zap.Error(err))
 		return err
 	}
 
@@ -375,6 +406,7 @@ func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -389,19 +421,22 @@ func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		logger.Error("Unmarshal return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
+		logger.Error("client.Create return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
 	return response.GetId(), nil
 }
 
@@ -411,6 +446,7 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -425,10 +461,12 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		logger.Error("Unmarshal return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
@@ -436,25 +474,31 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
+
+	logger.Info(response.GetCode())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
 	return response.GetId(), nil
 }
 
 func (cmd *PublishCmd) runPublishPreCmdLine() error {
 	conf, err := getConfig(cmd)
 	if err != nil {
+		logger.Error("getConfig return error", zap.Error(err))
 		return err
 	}
 
 	envs, err := cmd.EnvLoader(conf.PublishData.Env)
 	if err != nil {
+		logger.Error("EnvLoader return error", zap.Error(err))
 		return msg.ErrReadEnvFile
 	}
 
 	err = runCommand(cmd, conf, envs)
 	if err != nil {
+		logger.Error("runCommand return error", zap.Error(err))
 		return err
 	}
 
@@ -467,15 +511,17 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
+		logger.Error("Create return error", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
 	reqUpApp.SetApplicationAcceleration(true)
 	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
@@ -484,6 +530,7 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
+		logger.Error("CreateInstancePublish return error", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}
 	InstanceId = instance.GetId()
@@ -496,9 +543,10 @@ func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.C
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
+		logger.Error("Create return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
 	return application.GetId(), nil
 }
 
@@ -508,9 +556,10 @@ func (cmd *PublishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
 	return nil
 }
 
@@ -520,9 +569,10 @@ func (cmd *PublishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.C
 	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
 	return nil
 }
 
@@ -535,9 +585,10 @@ func (cmd *PublishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
+		logger.Error("Create return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId()))
 	return domain, nil
 }
 
@@ -550,9 +601,10 @@ func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Contex
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
+		logger.Error("Create return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId()))
 	return domain, nil
 }
 
@@ -563,9 +615,10 @@ func (cmd *PublishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId()))
 	return domain, nil
 }
 
@@ -576,9 +629,10 @@ func (cmd *PublishCmd) updateDomainCdn(client *apidom.Client, ctx context.Contex
 	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
+		logger.Error("Update return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId()))
 	return domain, nil
 }
 
@@ -588,6 +642,7 @@ func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 
 	_, err := client.UpdateRulesEnginePublish(ctx, &reqRules, InstanceId)
 	if err != nil {
+		logger.Error("UpdateRulesEnginePublish return error", zap.Error(err))
 		return err
 	}
 
@@ -608,21 +663,21 @@ func runCommand(cmd *PublishCmd, conf *contracts.AzionApplicationConfig, envs []
 
 	switch conf.PublishData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsPublishRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsPublishRunningCmd)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
 		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunPublishCommand
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 
 	case "on-error":
 		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunPublishCommand
 		}
 		if err != nil {
@@ -662,6 +717,7 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 	conf, err := cmd.GetAzionJsonCdn()
 	if err != nil {
+		logger.Error("GetAzionJsonCdn return error", zap.Error(err))
 		return err
 	}
 
@@ -677,6 +733,7 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Application.Id == 0 {
 		applicationId, err := cmd.createApplicationCdn(cliapp, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("createApplicationCdn return error", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationId
@@ -684,6 +741,7 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	} else {
 		err := cmd.updateApplicationCdn(cliapp, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("updateApplicationCdn return error", zap.Error(err))
 			return err
 		}
 	}
@@ -698,18 +756,21 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomainCdn(clidom, ctx, conf, domainName)
 		if err != nil {
+			logger.Error("createDomainCdn return error", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
 	} else {
 		_, err = cmd.updateDomainCdn(clidom, ctx, conf, domainName)
 		if err != nil {
+			logger.Error("updateDomainCdn return error", zap.Error(err))
 			return err
 		}
 	}
 
 	workingDir, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkDir return error", zap.Error(err))
 		return err
 	}
 
@@ -717,16 +778,18 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
+		logger.Error("MarshalIndent return error", zap.Error(err))
 		return msg.ErrorUnmarshalAzionFile
 	}
 
 	err = cmd.WriteFile(azionCdnFile, data, 0644)
 	if err != nil {
+		logger.Error("WriteFile return error", zap.Error(err))
 		return err
 	}
 
-	fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsCdnPublishSuccessful)
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsCdnPublishSuccessful))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
 }
@@ -743,29 +806,35 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	path, err := cmd.GetWorkDir()
 	if err != nil {
+		logger.Error("GetWorkDir return error", zap.Error(err))
 		return err
 	}
 
 	azionJson := path + "/azion/azion.json"
 	file, err := cmd.FileReader(azionJson)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
 	azJson, err := sjson.Set(string(file), "version-id", cmd.createVersionID())
 	if err != nil {
+		logger.Error("sjson.Set return error", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile
 	}
 
 	err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
 	if err != nil {
+		logger.Error("WriteFile return error", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile
 	}
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
+		logger.Error("GetAzionJsonContent return error", zap.Error(err))
 		return err
 	}
+
 	// upload the page static
 	// Get total amount of files to display progress
 	totalFiles := 0
@@ -778,47 +847,53 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
+		logger.Error("FilepathWalk return error", zap.Error(err))
 		return err
 	}
 
 	clientUpload := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
-	fmt.Fprintf(f.IOStreams.Out, msg.UploadStart)
+	logger.FInfo(f.IOStreams.Out, msg.UploadStart)
 
 	versionID := conf.VersionID
 	currentFile := 0
 	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
+			logger.Error("FilepathWalk return error", zap.Error(err))
 			return err
 		}
 		if !info.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
+				logger.Error("FilepathWalk return error", zap.Error(err))
 				return err
 			}
 
 			fileString := strings.TrimPrefix(path, Path)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
+				logger.Error("MatchFilePath return error", zap.Error(err))
 				return err
 			}
 
 			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
+				logger.Error("Upload return error", zap.Error(err))
 				return err
 			}
 
 			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
 			progress := int(percentage / 10)
 			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			fmt.Fprintf(f.IOStreams.Out, "\033[2K\r[%s] %.2f%% %s ", bar, percentage, path)
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("\033[2K\r[%v] %v %v", bar, percentage, path))
 			currentFile++
 		}
 		return nil
 	}); err != nil {
+		logger.Error("FilepathWalk return error", zap.Error(err))
 		return err
 	}
 
-	fmt.Fprintf(f.IOStreams.Out, msg.UploadSuccessful)
+	logger.FInfo(f.IOStreams.Out, msg.UploadSuccessful)
 
 	// create function
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -828,6 +903,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		//Create New function
 		PublishId, err := cmd.CreateFunction(client, ctx, conf)
 		if err != nil {
+			logger.Error("CreateFunction return error", zap.Error(err))
 			return err
 		}
 		conf.Function.Id = PublishId
@@ -835,12 +911,14 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		//Update existing function
 		_, err := cmd.UpdateFunction(client, ctx, conf.Function.Id, conf)
 		if err != nil {
+			logger.Error("UpdateFunction return error", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
@@ -856,6 +934,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Application.Id == 0 {
 		applicationID, instanceID, err := cmd.createApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("createApplication return error", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationID
@@ -863,23 +942,27 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
+			logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 			return err
 		}
 
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(clientApplication, ctx, conf)
 		if err != nil {
+			logger.Error("updateRulesEngine return error", zap.Error(err))
 			return err
 		}
 	} else {
 		err := cmd.updateApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
+			logger.Error("updateApplication return error", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
@@ -894,12 +977,14 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
+			logger.Error("createDomain return error", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
 	} else {
 		domain, err = cmd.updateDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
+			logger.Error("updateDomain return error", zap.Error(err))
 			return err
 		}
 	}
@@ -920,6 +1005,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		reqOrigin.SetHostHeader("${host}")
 		origin, err := clientApplication.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
 		if err != nil {
+			logger.Error("CreateOrigins return error", zap.Error(err))
 			return err
 		}
 		conf.Origin.Id = origin.GetOriginId()
@@ -929,25 +1015,28 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		reqCache.SetName(conf.Name)
 		cache, err := clientApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
 		if err != nil {
+			logger.Error("CreateCacheSettingsNextApplication return error", zap.Error(err))
 			return err
 		}
-		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsCacheSettingsSuccessful)
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
 		err = clientApplication.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), "static")
 		if err != nil {
+			logger.Error("CreateRulesEngineNextApplication return error", zap.Error(err))
 			return err
 		}
-		fmt.Fprintf(cmd.F.IOStreams.Out, "%s\n", msg.EdgeApplicationsRulesEngineSuccessful)
+		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
+		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
 		return err
 	}
 
 	domainReturnedName := []string{domain.GetDomainName()}
 
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0])
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainReturnedName[0]))
 
 	return nil
 }
@@ -959,11 +1048,13 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 
 	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
+		logger.Error("ReadFile return error", zap.Error(err))
 		return 0, utils.ErrorReadingFile
 	}
 
 	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
 	if err != nil {
+		logger.Error("template.New return error", zap.Error(err))
 		return 0, utils.ErrorParsingModel
 	}
 
@@ -976,6 +1067,7 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	var result strings.Builder
 	err = tmpl.Execute(&result, data)
 	if err != nil {
+		logger.Error("tmpl.Execute return error", zap.Error(err))
 		return 0, utils.ErrorExecTemplate
 	}
 
@@ -990,9 +1082,10 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
+		logger.Error("client.Create return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId())
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
 	return response.GetId(), nil
 }
 
@@ -1003,11 +1096,13 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 
 	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
+		logger.Error("ReadFile return error", zap.Error(err))
 		return 0, utils.ErrorReadingFile
 	}
 
 	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
 	if err != nil {
+		logger.Error("template.New return error", zap.Error(err))
 		return 0, utils.ErrorParsingModel
 	}
 
@@ -1020,6 +1115,7 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	var result strings.Builder
 	err = tmpl.Execute(&result, data)
 	if err != nil {
+		logger.Error("tmpl.Execute return error", zap.Error(err))
 		return 0, utils.ErrorExecTemplate
 	}
 
@@ -1034,10 +1130,12 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
+		logger.Error("FileReader return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		logger.Error("Unmarshal return error", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
@@ -1045,8 +1143,9 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
+		logger.Error("client.Update return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
-	fmt.Fprintf(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))
 	return response.GetId(), nil
 }

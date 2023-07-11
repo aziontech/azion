@@ -2,6 +2,8 @@ package create
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
@@ -13,6 +15,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("create new domains", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
