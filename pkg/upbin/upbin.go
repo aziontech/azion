@@ -41,14 +41,26 @@ const (
 	packageAzioncli string = "aziontech/tap/azioncli"
 )
 
-type Version struct {
-	Major int
-	Minor int
-	Patch int
-}
+// Variable factory for unit testing
+var (
+	notifyFunc           = notify
+	needToUpdateFunc     = needToUpdate
+	wantToUpdateFunc     = wantToUpdate
+	saveLastActivityFunc = saveLastActivity
+	prepareURLFunc       = prepareURL
+	managersPackagesFunc = managersPackages
+	whichFunc            = which
+	downloadFileFunc     = downloadFile
+	replaceFileFunc      = replaceFile
+
+	openConfigFunc = openConfig
+
+	packageManagerExistsFunc  = packageManagerExists
+	installPackageManagerFunc = installPackageManager
+)
 
 func UpdateBin() error {
-	notfy, err := notify()
+	notfy, err := notifyFunc()
 	if err != nil {
 		return err
 	}
@@ -57,20 +69,20 @@ func UpdateBin() error {
 		return nil
 	}
 
-	if !needToUpdate() {
+	if !needToUpdateFunc() {
 		return nil
 	}
 
-	if !wantToUpdate() {
-		return saveLastActivity()
+	if !wantToUpdateFunc() {
+		return saveLastActivityFunc()
 	}
 
-	fileURL, err := prepareURL()
+	fileURL, err := prepareURLFunc()
 	if err != nil {
 		return err
 	}
 
-	install, err := ManagersPackages()
+	install, err := managersPackagesFunc()
 	if err != nil {
 		return err
 	}
@@ -79,14 +91,14 @@ func UpdateBin() error {
 		return nil
 	}
 
-	filePath, _ := Which(azioncli)
+	filePath, _ := whichFunc(azioncli)
 
-	err = downloadFile(filePath, fileURL)
+	err = downloadFileFunc(filePath, fileURL)
 	if err != nil {
 		return err
 	}
 
-	err = replaceFile(filePath)
+	err = replaceFileFunc(filePath)
 	if err != nil {
 		return err
 	}
@@ -123,6 +135,12 @@ func Format(input string) (int, error) {
 	}
 
 	return number, nil
+}
+
+type Version struct {
+	Major int
+	Minor int
+	Patch int
 }
 
 type ReferenceIter interface {
@@ -170,7 +188,7 @@ func latestTag(tags ReferenceIter) (tag string, err error) {
 	return tag, err
 }
 
-func Which(command string) (string, error) {
+func which(command string) (string, error) {
 	path := os.Getenv("PATH")
 	paths := filepath.SplitList(path)
 
@@ -342,7 +360,7 @@ func pathYamlConfig() (string, error) {
 }
 
 func getLastActivity() (string, error) {
-	data, err := openConfig()
+	data, err := openConfigFunc()
 	if err != nil {
 		return "", err
 	}
@@ -351,13 +369,13 @@ func getLastActivity() (string, error) {
 	return fmt.Sprint(lastAct), nil
 }
 
-func ManagersPackages() (bool, error) {
+func managersPackages() (bool, error) {
 	packageManagers := []string{"brew"}
 
 	var install bool = false
 	var manager string
 	for _, man := range packageManagers {
-		exists := packageManagerExists(man)
+		exists := packageManagerExistsFunc(man)
 		if exists {
 			manager = man
 			install = true
@@ -365,7 +383,7 @@ func ManagersPackages() (bool, error) {
 		}
 	}
 
-	err := installPackageManager(manager)
+	err := installPackageManagerFunc(manager)
 	if err != nil {
 		return false, err
 	}
