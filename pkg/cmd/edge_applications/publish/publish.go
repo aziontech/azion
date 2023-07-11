@@ -84,6 +84,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azioncli edge_applications publish --help
+        $ azioncli edge_applications publish --path dist/static
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.F)
@@ -148,9 +149,31 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		return msg.ErrorOpeningAzionFile
 	}
 
-	versionID := gjson.Get(string(file), "version-id")
+	conf, err := cmd.GetAzionJsonContent()
+	if err != nil {
+		return err
+	}
 
-	pathStatic := ".vercel/output/static"
+	versionIDG := gjson.Get(string(file), "version-id")
+	var versionID = versionIDG.String()
+	if versionIDG.String() == "" {
+		envPath := path + "/.edge/.env"
+		fileEnv, err := cmd.FileReader(envPath)
+		if err != nil {
+			return msg.ErrorEnvFileVulcan
+		}
+		verIdSlice := strings.Split(string(fileEnv), "=")
+		versionID = verIdSlice[1]
+	}
+
+	var pathStatic string = ".edge/statics"
+	conf.Function.File = ".edge/worker.js"
+
+	// legacy type - will be removed once Framework Adapter is fully substituted by Vulcan
+	if typeLang.String() == "nextjs" {
+		pathStatic = ".vercel/output/static"
+		conf.Function.File = "./out/worker.js"
+	}
 
 	// Get total amount of files to display progress
 	totalFiles := 0
@@ -191,7 +214,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 				return err
 			}
 
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
 				logger.Error("clientUpload return error", zap.Error(err))
 				return err
 			}
@@ -209,12 +232,6 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	}
 
 	logger.FInfo(f.IOStreams.Out, msg.UploadSuccessful)
-
-	conf, err := cmd.GetAzionJsonContent()
-	if err != nil {
-		logger.Error("GetAzionJsonContent return error", zap.Error(err))
-		return err
-	}
 
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()

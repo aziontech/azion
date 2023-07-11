@@ -120,4 +120,8 @@ var (
 	EdgeApplicationUpdateFlagIn                      = "Given path and JSON file to automatically update the Edge Application attributes; you can use - for reading from stdin"
 	EdgeApplicationUpdateOutputSuccess               = "Updated Edge Application with ID %d\n"
 	EdgeApplicationUpdateHelpFlag                    = "Displays more information about the update subcommand"
+
+	LsUsage            = "ls"
+	LsShortDescription = "Displays presets accepted by Vulcan"
+	LsLongDescription  = "Displays presets accepted by Vulcan"
 )

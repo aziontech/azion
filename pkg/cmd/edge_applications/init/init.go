@@ -2,6 +2,7 @@ package init
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
 	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -31,6 +31,7 @@ import (
 type InitInfo struct {
 	Name           string
 	TypeLang       string
+	Mode           string
 	PathWorkingDir string
 	YesOption      bool
 	NoOption       bool
@@ -44,6 +45,8 @@ var (
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
 )
+
+var ErrNotFound = errors.New("executable file not found in $PATH")
 
 type InitCmd struct {
 	Io            *iostreams.IOStreams
@@ -101,13 +104,16 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		$ azioncli edge_applications init --help
 		$ azioncli edge_applications init --name "thisisatest" --type static
 		$ azioncli edge_applications init --name "thisisatest" --type nextjs
+		$ azioncli edge_applications init --name "thisisatest" --type hexo --mode deliver
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options, cmd)
 		},
 	}
+
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
 	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.EdgeApplicationsInitFlagType)
+	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagType)
 	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
 	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 
@@ -131,7 +137,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
-	projectName, projectSettings, err := DetectedProjectJS(info, cmd, path)
+	projectName, err := DetectedProjectJS(info, cmd, path)
 	if err != nil {
 		logger.Error("DetectedProjectJS return error", zap.Error(err))
 		return err
@@ -144,20 +150,14 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return initStatic(cmd, info, options)
 	}
 
+	if (!hasThisFlag(c, "mode") || !hasThisFlag(c, "type")) && info.TypeLang != "nextjs" {
+		return msg.ErrorModeNotSent
+	}
+
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
 		logger.Error("ReadPackageJson return error", zap.Error(err))
 		return err
-	}
-
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsAutoDetectec, projectSettings))
-	if !hasThisFlag(c, "type") {
-		info.TypeLang = projectSettings
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsInitTypeNotSent)
-	}
-
-	if info.TypeLang != "nextjs" {
-		return utils.ErrorUnsupportedType
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
@@ -220,7 +220,7 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 	return bytePackageJson, pathPackageJson, nil
 }
 
-func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
+func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, err error) {
 	var packageJson PackageJson
 	path = path + "/package.json"
 	_, err = cmd.Stat(path)
@@ -230,28 +230,18 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 		} else {
 			projectName, err = insert.Insert()
 			if err != nil {
-				return "", "", err
+				return "", err
 			}
 			info.Name = projectName
 		}
 
-		if len(info.TypeLang) > 0 {
-			projectSettings = info.TypeLang
-		} else {
-			projectSettings, err = choose.Choose()
-			if err != nil {
-				return "", "", err
-			}
-			info.TypeLang = projectSettings
-		}
-
-		return projectName, projectSettings, nil
+		return projectName, nil
 
 	} else {
 		pathPackageJson := path
 		bytePackageJson, errReadFile := cmd.FileReader(pathPackageJson)
 		if errReadFile != nil {
-			return "", "", msg.ErrorPackageJsonNotFound
+			return "", msg.ErrorPackageJsonNotFound
 		}
 
 		if len(info.Name) == 0 {
@@ -261,24 +251,11 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 
 		err = json.Unmarshal(bytePackageJson, &packageJson)
 		if err != nil {
-			return "", "", utils.ErrorUnmarshalReader
+			return "", utils.ErrorUnmarshalReader
 		}
 	}
 
-	switch {
-	case len(packageJson.Dependencies.Next) > 0:
-		projectSettings = "nextjs"
-	case info.TypeLang == "nextjs", info.TypeLang == "static", info.TypeLang == "cdn":
-		projectSettings = info.TypeLang
-	default:
-		projectSettings, err = choose.Choose()
-		if err != nil {
-			return "", "", err
-		}
-		info.TypeLang = projectSettings
-	}
-
-	return projectName, projectSettings, nil
+	return projectName, nil
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
@@ -316,8 +293,15 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 
 	azionDir := info.PathWorkingDir + "/azion"
 
+	// changing to Vulcan in case we are using any other type... this will be removed once Vulcan becomes the
+	// only adapter used by the cli
+	typeLang := info.TypeLang
+	if typeLang != "nextjs" && typeLang != "static" && typeLang != "cdn" {
+		typeLang = "vulcan"
+	}
+
 	//move contents from temporary directory into final destination
-	err = cmd.Rename(dir+"/webdev/"+info.TypeLang, azionDir)
+	err = cmd.Rename(dir+"/webdev/"+typeLang, azionDir)
 	if err != nil {
 		return utils.ErrorMovingFiles
 	}
@@ -375,6 +359,10 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrorNpmNotInstalled
 	}
 
+	if info.TypeLang != "nextjs" {
+		return nil
+	}
+
 	conf, err := getConfig(cmd, info.PathWorkingDir)
 	if err != nil {
 		return err
@@ -385,14 +373,9 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrReadEnvFile
 	}
 
-	switch info.TypeLang {
-	case "nextjs":
-		err = InitNextjs(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
-	default:
-		return utils.ErrorUnsupportedType
+	err = InitNextjs(info, cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -409,6 +392,7 @@ func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions,
 	}
 	options.Name = info.Name
 	options.Type = info.TypeLang
+	options.Mode = info.Mode
 
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
