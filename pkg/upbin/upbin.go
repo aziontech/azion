@@ -137,53 +137,34 @@ func Format(input string) (int, error) {
 	return number, nil
 }
 
-type Version struct {
-	Major int
-	Minor int
-	Patch int
-}
-
 type ReferenceIter interface {
 	ForEach(func(*plumbing.Reference) error) error
 }
 
 // latestTag return value in format refs/tags/v0.10.0
 func latestTag(tags ReferenceIter) (tag string, err error) {
-	var previousVersion Version
+	var biggerVersionSoFar int = 0
 
 	err = tags.ForEach(func(t *plumbing.Reference) error {
 		tagCurrent := t.Name().String() // return this format "refs/tags/v0.10.0"
+
 		if !strings.Contains(tagCurrent, "dev") {
 			versionParts := strings.Split(tagCurrent, ".")
 
-			majorCurrent, _ := strconv.Atoi(strings.TrimPrefix(versionParts[0], "v"))
-			minorCurrent, _ := strconv.Atoi(versionParts[1])
-			patchCurrent, _ := strconv.Atoi(versionParts[2])
+			major := strings.TrimPrefix(versionParts[0], "refs/tags/v")
+			minor := versionParts[1]
+			patch := versionParts[2]
 
-			currentVersion := Version{
-				Major: majorCurrent,
-				Minor: minorCurrent,
-				Patch: patchCurrent,
-			}
+			current, _ := strconv.Atoi(fmt.Sprintf("%s%s%s", major, minor, patch))
 
-			if currentVersion.Major > previousVersion.Major {
-				previousVersion = currentVersion
-				tag = tagCurrent
-			} else if currentVersion.Major == previousVersion.Major && currentVersion.Minor > previousVersion.Minor {
-				previousVersion = currentVersion
-				tag = tagCurrent
-			} else if currentVersion.Major == previousVersion.Major && currentVersion.Minor == previousVersion.Minor && currentVersion.Patch > previousVersion.Patch {
-				previousVersion = currentVersion
+			if current > biggerVersionSoFar {
+				biggerVersionSoFar = current
 				tag = tagCurrent
 			}
 		}
 
 		return err
 	})
-
-	if err != nil {
-		return tag, err
-	}
 
 	return tag, err
 }

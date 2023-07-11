@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,6 +43,48 @@ func TestUpdateBin(t *testing.T) {
 
 	err := UpdateBin()
 	assert.NoError(t, err)
+}
+
+type MockReferenceIter struct {
+	References []*plumbing.Reference
+}
+
+func (m *MockReferenceIter) ForEach(fn func(*plumbing.Reference) error) error {
+	for _, ref := range m.References {
+		err := fn(ref)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func TestLatestTag(t *testing.T) {
+	// Create mock references
+	refs := []*plumbing.Reference{
+		plumbing.NewReferenceFromStrings("refs/tags/v0.1.0", "commit1"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.2.0", "commit2"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.3.0", "commit3"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.3.1", "commit4"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.4.0", "commit5"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.4.1", "commit6"),
+		plumbing.NewReferenceFromStrings("refs/tags/v0.4.3", "commit7"),
+		plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "commit8"),
+		plumbing.NewReferenceFromStrings("refs/tags/v1.1.0", "commit9"),
+		plumbing.NewReferenceFromStrings("refs/tags/v1.1.1", "commit10"),
+	}
+
+	// Create mock reference iterator
+	mockIter := &MockReferenceIter{
+		References: refs,
+	}
+
+	// Call the function under test
+	tag, err := latestTag(mockIter)
+
+	// Assert the expected result
+	assert.NoError(t, err)
+	assert.Equal(t, "refs/tags/v1.1.1", tag)
 }
 
 func TestGetLastActivity(t *testing.T) {
