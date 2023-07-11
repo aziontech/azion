@@ -2,6 +2,8 @@ package delete
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/device_groups"
@@ -12,7 +14,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-
+	logger.New(zapcore.DebugLevel)
 	t.Run("delete device group by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

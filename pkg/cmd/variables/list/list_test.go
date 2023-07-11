@@ -1,6 +1,8 @@
 package list
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
@@ -11,6 +13,7 @@ import (
 )
 
 func TestList(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("list page 1", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

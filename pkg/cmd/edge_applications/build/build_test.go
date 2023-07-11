@@ -2,6 +2,8 @@ package build
 
 import (
 	"bytes"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"testing"
 
@@ -13,6 +15,7 @@ import (
 )
 
 func TestBuild(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("in build.cmd to run, type not informed", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
