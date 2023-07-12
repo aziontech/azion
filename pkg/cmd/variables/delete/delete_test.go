@@ -5,13 +5,15 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestCreate(t *testing.T) {
-
+	logger.New(zapcore.DebugLevel)
 	t.Run("delete variable by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

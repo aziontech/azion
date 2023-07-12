@@ -28,7 +28,7 @@ type AzionApplicationOptions struct {
 	Origin      AzionJsonDataOrigin      `json:"origin"`
 }
 
-type AzionApplicationCdn struct {
+type AzionApplicationSimple struct {
 	Name        string                   `json:"name"`
 	Type        string                   `json:"type"`
 	Domain      AzionJsonDataDomain      `json:"domain"`

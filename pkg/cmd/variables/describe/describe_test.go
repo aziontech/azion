@@ -7,11 +7,14 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestDescribe(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("describe an variables", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

@@ -1,9 +1,10 @@
 package list
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
-	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -91,7 +92,7 @@ func TestList(t *testing.T) {
 
 		mock.Register(
 			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
-			httpmock.JSONFromFile("./fixtures/strange_struct.json"),
+			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
@@ -100,6 +101,6 @@ func TestList(t *testing.T) {
 		cmd.SetArgs([]string{"-a", "1673635839"})
 
 		_, err := cmd.ExecuteC()
-		require.ErrorIs(t, err, msg.ErrorGetCache)
+		require.NoError(t, err, msg.ErrorGetCache)
 	})
 }

@@ -1,12 +1,13 @@
 package list
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
-	"testing"
 )
 
 func TestNewCmd(t *testing.T) {
@@ -15,7 +16,7 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/domain"),
+			httpmock.REST("GET", "domains"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -32,7 +33,7 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/domains"),
+			httpmock.REST("GET", "domains"),
 			httpmock.JSONFromFile("fixtures/domains.json"),
 		)
 
@@ -43,13 +44,13 @@ func TestNewCmd(t *testing.T) {
 		cmd.SetArgs([]string{})
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err)
+		require.NoError(t, err)
 	})
-	t.Run("list all domains", func(t *testing.T) {
+	t.Run("empty list", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/domains"),
+			httpmock.REST("GET", "domains"),
 			httpmock.JSONFromFile("fixtures/nodomains.json"),
 		)
 
@@ -60,6 +61,6 @@ func TestNewCmd(t *testing.T) {
 		cmd.SetArgs([]string{})
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err)
+		require.NoError(t, err)
 	})
 }

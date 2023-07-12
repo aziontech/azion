@@ -180,7 +180,7 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	return conf, nil
 }
 
-func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
+func GetAzionJsonSimple() (*contracts.AzionApplicationSimple, error) {
 	path, err := GetWorkingDir()
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
-	conf := &contracts.AzionApplicationCdn{}
+	conf := &contracts.AzionApplicationSimple{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
 		return nil, ErrorUnmarshalAzionJsonFile

@@ -1,10 +1,10 @@
 package list
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
-	// "fmt"
-	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"

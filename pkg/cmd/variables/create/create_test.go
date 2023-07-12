@@ -7,11 +7,14 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestCreate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("create new variables", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

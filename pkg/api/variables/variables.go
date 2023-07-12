@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/variables"
 )
@@ -50,6 +52,10 @@ func (c *Client) List(ctx context.Context) ([]VariableResponse, error) {
 	resp, httpResp, err := c.apiClient.VariablesApi.ApiVariablesList(ctx).Execute()
 
 	if err != nil {
+		logger.Debug("Error while listing variables", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -68,6 +74,10 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	httpResp, err := req.Execute()
 
 	if err != nil {
+		logger.Debug("Error while deleting a variable", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -79,6 +89,10 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (VariableRespon
 
 	variablesResponse, httpResp, err := request.Execute()
 	if err != nil {
+		logger.Debug("Error while updating a variable", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -89,6 +103,10 @@ func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 	req := c.apiClient.VariablesApi.ApiVariablesRetrieve(ctx, id)
 	res, httpResp, err := req.Execute()
 	if err != nil {
+		logger.Debug("Error while getting a variable", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return res, nil
@@ -102,6 +120,10 @@ func (c *Client) Create(ctx context.Context, strReq CreateRequest) (VariableResp
 	request := c.apiClient.VariablesApi.ApiVariablesCreate(ctx).VariableCreate(strReq.VariableCreate)
 	response, httpResp, err := request.Execute()
 	if err != nil {
+		logger.Debug("Error while creating a variable", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return response, nil

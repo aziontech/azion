@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/realtimepurge"
+	"go.uber.org/zap"
 )
 
 type Client struct {
@@ -39,6 +41,10 @@ func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
+		logger.Debug("Error while purgin a cache", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
