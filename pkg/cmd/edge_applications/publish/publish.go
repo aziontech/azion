@@ -396,7 +396,7 @@ func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 		return err
 	}
 
-	fmt.Fprintln(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
 	return nil
 }
 

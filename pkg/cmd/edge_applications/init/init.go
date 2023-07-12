@@ -437,7 +437,7 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 }
 
 func showInstructions(cmd *InitCmd, instructions string) {
-	fmt.Fprintf(cmd.Io.Out, instructions) //nolint:all
+	logger.FInfo(cmd.Io.Out, instructions) //nolint:all
 }
 
 func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
@@ -484,21 +484,21 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 	switch conf.InitData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
 		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunInitCommand
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 
 	case "on-error":
 		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunInitCommand
 		}
 		if err != nil {
@@ -546,7 +546,7 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 			logger.Error("WriteFile return error", zap.Error(err))
 			return utils.ErrorInternalServerError
 		}
-		//fmt.Fprintf(w, message)
+
 		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
@@ -589,7 +589,7 @@ func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 		if info.NoOption || info.YesOption {
 			shouldFetchTemplates = yesNoFlagToResponse(info)
 		} else {
-			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s: ", msg.WebAppInitContentOverridden))
 			fmt.Fscanln(cmd.Io.In, &response)
 			shouldFetchTemplates, err = utils.ResponseToBool(response)
 			if err != nil {
@@ -619,13 +619,13 @@ func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectNa
 		} else {
 			info.Name = projectName
 		}
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsInitNameNotSent))
 	} else {
 		updatePackageJson, err := sjson.Set(string(bytePackageJson), "name", info.Name)
 		if err != nil {
 			return msg.FailedUpdatingNameField
 		}
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsUpdateNamePackageJson))
 		path = path + "/package.json"
 
 		err = cmd.WriteFile(path, []byte(updatePackageJson), 0644)
