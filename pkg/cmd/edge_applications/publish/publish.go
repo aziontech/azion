@@ -39,7 +39,7 @@ type PublishCmd struct {
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
-	GetAzionJsonCdn       func() (*contracts.AzionApplicationCdn, error)
+	GetAzionJsonSimple    func() (*contracts.AzionApplicationSimple, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
@@ -67,7 +67,7 @@ func NewPublishCmd(f *cmdutil.Factory) *PublishCmd {
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
-		GetAzionJsonCdn:       utils.GetAzionJsonCdn,
+		GetAzionJsonSimple:    utils.GetAzionJsonSimple,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		F:                     f,
@@ -84,6 +84,7 @@ func NewCobraCmd(publish *PublishCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azioncli edge_applications publish --help
+        $ azioncli edge_applications publish --path dist/static
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return publish.run(publish.F)
@@ -103,23 +104,23 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkDir return error", zap.Error(err))
+		logger.Debug("Error while trying to get working directory", zap.Error(err))
 		return err
 	}
 
 	jsonConf := path + "/azion/azion.json"
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading azion.json file", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
 	typeLang := gjson.Get(string(file), "type")
 
-	if typeLang.String() == "cdn" {
-		err := publishCdn(cmd, f)
+	if typeLang.String() == "simple" {
+		err := publishSimple(cmd, f)
 		if err != nil {
-			logger.Error("publishCdn return error", zap.Error(err))
+			logger.Debug("Error while publishing simple edge application", zap.Error(err))
 			return err
 		}
 		return nil
@@ -128,7 +129,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if typeLang.String() == "static" {
 		err = publishStatic(cmd, f)
 		if err != nil {
-			logger.Error("publishStatic return error", zap.Error(err))
+			logger.Debug("Error while publishing static edge application", zap.Error(err))
 			return err
 		}
 		return nil
@@ -138,25 +139,47 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	build := cmd.BuildCmd(f)
 	err = build.Run()
 	if err != nil {
-		logger.Error("build.Run return error", zap.Error(err))
+		logger.Debug("Error while running build command called by publish command", zap.Error(err))
 		return err
 	}
 
 	file, err = cmd.FileReader(jsonConf)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading config.json file", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
-	versionID := gjson.Get(string(file), "version-id")
+	conf, err := cmd.GetAzionJsonContent()
+	if err != nil {
+		return err
+	}
 
-	pathStatic := ".vercel/output/static"
+	versionIDG := gjson.Get(string(file), "version-id")
+	var versionID = versionIDG.String()
+	if versionIDG.String() == "" {
+		envPath := path + "/.edge/.env"
+		fileEnv, err := cmd.FileReader(envPath)
+		if err != nil {
+			return msg.ErrorEnvFileVulcan
+		}
+		verIdSlice := strings.Split(string(fileEnv), "=")
+		versionID = verIdSlice[1]
+	}
+
+	var pathStatic string = ".edge/statics"
+	conf.Function.File = ".edge/worker.js"
+
+	// legacy type - will be removed once Framework Adapter is fully substituted by Vulcan
+	if typeLang.String() == "nextjs" {
+		pathStatic = ".vercel/output/static"
+		conf.Function.File = "./out/worker.js"
+	}
 
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err = cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			logger.Error("FilepathWalk return error", zap.Error(err))
+			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 			return err
 		}
 		if !info.IsDir() {
@@ -164,7 +187,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
-		logger.Error("FilepathWalk return error", zap.Error(err))
+		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
 
@@ -180,19 +203,19 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		if !info.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
-				logger.Error("cmd.Open return error", zap.Error(err))
+				logger.Debug("Error while trying to read file <"+path+"> about to be uploaded", zap.Error(err))
 				return err
 			}
 
 			fileString := strings.TrimPrefix(path, pathStatic)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
-				logger.Error("MatchFilePath return error", zap.Error(err))
+				logger.Debug("Error while matching file path", zap.Error(err))
 				return err
 			}
 
-			if err = clientUpload.Upload(context.Background(), versionID.String(), fileString, mimeType.MediaType(), fileContent); err != nil {
-				logger.Error("clientUpload return error", zap.Error(err))
+			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
+				logger.Debug("Error while uploading file to storage api", zap.Error(err))
 				return err
 			}
 
@@ -204,17 +227,11 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
-		logger.Error("FilepathWalk return error", zap.Error(err))
+		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
 
 	logger.FInfo(f.IOStreams.Out, msg.UploadSuccessful)
-
-	conf, err := cmd.GetAzionJsonContent()
-	if err != nil {
-		logger.Error("GetAzionJsonContent return error", zap.Error(err))
-		return err
-	}
 
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
@@ -223,7 +240,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		//Create New function
 		PublishId, err := cmd.fillCreateRequestFromConf(client, ctx, conf)
 		if err != nil {
-			logger.Error("fillCreateRequestFromConf return error", zap.Error(err))
+			logger.Debug("Error while creating edge functions", zap.Error(err))
 			return err
 		}
 
@@ -232,14 +249,14 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		//Update existing function
 		_, err := cmd.fillUpdateRequestFromConf(client, ctx, conf.Function.Id, conf)
 		if err != nil {
-			logger.Error("fillUpdateRequestFromConf return error", zap.Error(err))
+			logger.Debug("Error while updating edge functions", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -254,34 +271,34 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.Application.Id == 0 {
 		applicationId, _, err := cmd.createApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("createApplication return error", zap.Error(err))
+			logger.Debug("Error while creating edge application", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationId
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
-			logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
 
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(cliapp, ctx, conf)
 		if err != nil {
-			logger.Error("updateRulesEngine return error", zap.Error(err))
+			logger.Debug("Error while updating rules engine", zap.Error(err))
 			return err
 		}
 	} else {
 		err := cmd.updateApplication(cliapp, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("updateApplication return error", zap.Error(err))
+			logger.Debug("Error while updating edge application", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -296,7 +313,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
-			logger.Error("createDomain return error", zap.Error(err))
+			logger.Debug("Error while creating domain", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
@@ -317,7 +334,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		reqOrigin.SetHostHeader("${host}")
 		origin, err := cliapp.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
 		if err != nil {
-			logger.Error("CreateOrigin return error", zap.Error(err))
+			logger.Debug("Error while creating origin", zap.Error(err))
 			return err
 		}
 		conf.Origin.Id = origin.GetOriginId()
@@ -327,13 +344,13 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 		reqCache.SetName(conf.Name)
 		cache, err := cliapp.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
 		if err != nil {
-			logger.Error("CreateCacheSettingsNextApplication return error", zap.Error(err))
+			logger.Debug("Error while creating cache settings for Nextjs application", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
 		err = cliapp.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), typeLang.String())
 		if err != nil {
-			logger.Error("CreateRulesEngineNextApplication return error", zap.Error(err))
+			logger.Debug("Error while creating rules engine for Nextjs application", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
@@ -341,14 +358,14 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	} else {
 		domain, err = cmd.updateDomain(clidom, ctx, conf, domaiName)
 		if err != nil {
-			logger.Error("updateDomain return error", zap.Error(err))
+			logger.Debug("Error while updating domain", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -357,7 +374,7 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
 		err = cmd.purgeDomains(f, domainReturnedName)
 		if err != nil {
-			logger.Error("purgeDomains return error", zap.Error(err))
+			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
 		}
 	}
@@ -375,11 +392,11 @@ func (cmd *PublishCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) er
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.Purge(ctx, domainNames)
 	if err != nil {
-		logger.Error("clipurge.Purge return error", zap.Error(err))
+		logger.Debug("Error while purging domain", zap.Error(err))
 		return err
 	}
 
-	fmt.Fprintln(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
 	return nil
 }
 
@@ -389,7 +406,7 @@ func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -404,19 +421,19 @@ func (cmd *PublishCmd) fillCreateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reding args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Error("Unmarshal return error", zap.Error(err))
+		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		logger.Error("client.Create return error", zap.Error(err))
+		logger.Debug("Error while creating edge function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
@@ -429,7 +446,7 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read code to upload
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -444,12 +461,12 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Error("Unmarshal return error", zap.Error(err))
+		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
@@ -457,7 +474,6 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 
@@ -469,19 +485,19 @@ func (cmd *PublishCmd) fillUpdateRequestFromConf(client *api.Client, ctx context
 func (cmd *PublishCmd) runPublishPreCmdLine() error {
 	conf, err := getConfig(cmd)
 	if err != nil {
-		logger.Error("getConfig return error", zap.Error(err))
+		logger.Debug("Error while reading config.json file", zap.Error(err))
 		return err
 	}
 
 	envs, err := cmd.EnvLoader(conf.PublishData.Env)
 	if err != nil {
-		logger.Error("EnvLoader return error", zap.Error(err))
+		logger.Debug("Error while reading env vars file", zap.Error(err))
 		return msg.ErrReadEnvFile
 	}
 
 	err = runCommand(cmd, conf, envs)
 	if err != nil {
-		logger.Error("runCommand return error", zap.Error(err))
+		logger.Debug("Error while running command <"+conf.PublishData.Cmd+">", zap.Error(err))
 		return err
 	}
 
@@ -494,7 +510,6 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		logger.Error("Create return error", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
@@ -504,7 +519,7 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
+		logger.Debug("Error while setting up edge application", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
@@ -513,20 +528,19 @@ func (cmd *PublishCmd) createApplication(client *apiapp.Client, ctx context.Cont
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
-		logger.Error("CreateInstancePublish return error", zap.Error(err))
+		logger.Debug("Error while creating edge function instance", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}
 	InstanceId = instance.GetId()
 	return application.GetId(), instance.GetId(), nil
 }
 
-func (cmd *PublishCmd) createApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (int64, error) {
+func (cmd *PublishCmd) createApplicationSimple(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationSimple, name string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	reqApp.SetName(name)
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
-		logger.Error("Create return error", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
@@ -539,20 +553,18 @@ func (cmd *PublishCmd) updateApplication(client *apiapp.Client, ctx context.Cont
 	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
 	return nil
 }
 
-func (cmd *PublishCmd) updateApplicationCdn(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) error {
+func (cmd *PublishCmd) updateApplicationSimple(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationSimple, name string) error {
 	reqApp := apiapp.UpdateRequest{}
 	reqApp.SetName(name)
 	reqApp.Id = conf.Application.Id
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
@@ -568,14 +580,13 @@ func (cmd *PublishCmd) createDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
-		logger.Error("Create return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId()))
 	return domain, nil
 }
 
-func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
+func (cmd *PublishCmd) createDomainSimple(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationSimple, name string) (apidom.DomainResponse, error) {
 	reqDom := apidom.CreateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetCnames([]string{})
@@ -584,7 +595,6 @@ func (cmd *PublishCmd) createDomainCdn(client *apidom.Client, ctx context.Contex
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	domain, err := client.Create(ctx, &reqDom)
 	if err != nil {
-		logger.Error("Create return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainCreate, name, domain.GetId()))
@@ -598,21 +608,19 @@ func (cmd *PublishCmd) updateDomain(client *apidom.Client, ctx context.Context, 
 	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId()))
 	return domain, nil
 }
 
-func (cmd *PublishCmd) updateDomainCdn(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationCdn, name string) (apidom.DomainResponse, error) {
+func (cmd *PublishCmd) updateDomainSimple(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationSimple, name string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
 	reqDom.SetName(name)
 	reqDom.SetEdgeApplicationId(conf.Application.Id)
 	reqDom.Id = conf.Domain.Id
 	domain, err := client.Update(ctx, &reqDom)
 	if err != nil {
-		logger.Error("Update return error", zap.Error(err))
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainUpdate, name, domain.GetId()))
@@ -625,7 +633,6 @@ func (cmd *PublishCmd) updateRulesEngine(client *apiapp.Client, ctx context.Cont
 
 	_, err := client.UpdateRulesEnginePublish(ctx, &reqRules, InstanceId)
 	if err != nil {
-		logger.Error("UpdateRulesEnginePublish return error", zap.Error(err))
 		return err
 	}
 
@@ -696,11 +703,11 @@ func getConfig(cmd *PublishCmd) (conf *contracts.AzionApplicationConfig, err err
 
 }
 
-func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
+func publishSimple(cmd *PublishCmd, f *cmdutil.Factory) error {
 
-	conf, err := cmd.GetAzionJsonCdn()
+	conf, err := cmd.GetAzionJsonSimple()
 	if err != nil {
-		logger.Error("GetAzionJsonCdn return error", zap.Error(err))
+		logger.Debug("Error while reading azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -714,17 +721,17 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	}
 
 	if conf.Application.Id == 0 {
-		applicationId, err := cmd.createApplicationCdn(cliapp, ctx, conf, applicationName)
+		applicationId, err := cmd.createApplicationSimple(cliapp, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("createApplicationCdn return error", zap.Error(err))
+			logger.Debug("Error while creating simple edge application", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationId
 
 	} else {
-		err := cmd.updateApplicationCdn(cliapp, ctx, conf, applicationName)
+		err := cmd.updateApplicationSimple(cliapp, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("updateApplicationCdn return error", zap.Error(err))
+			logger.Debug("Error while updating simple edge application", zap.Error(err))
 			return err
 		}
 	}
@@ -737,41 +744,41 @@ func publishCdn(cmd *PublishCmd, f *cmdutil.Factory) error {
 	var domain apidom.DomainResponse
 
 	if conf.Domain.Id == 0 {
-		domain, err = cmd.createDomainCdn(clidom, ctx, conf, domainName)
+		domain, err = cmd.createDomainSimple(clidom, ctx, conf, domainName)
 		if err != nil {
-			logger.Error("createDomainCdn return error", zap.Error(err))
+			logger.Debug("Error while creating domain", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
 	} else {
-		_, err = cmd.updateDomainCdn(clidom, ctx, conf, domainName)
+		_, err = cmd.updateDomainSimple(clidom, ctx, conf, domainName)
 		if err != nil {
-			logger.Error("updateDomainCdn return error", zap.Error(err))
+			logger.Debug("Error while updating domain", zap.Error(err))
 			return err
 		}
 	}
 
 	workingDir, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
 
-	azionCdnFile := workingDir + "/azion/azion.json"
+	azionSimpleFile := workingDir + "/azion/azion.json"
 
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
-		logger.Error("MarshalIndent return error", zap.Error(err))
+		logger.Debug("Error while marshling the json file", zap.Error(err))
 		return msg.ErrorUnmarshalAzionFile
 	}
 
-	err = cmd.WriteFile(azionCdnFile, data, 0644)
+	err = cmd.WriteFile(azionSimpleFile, data, 0644)
 	if err != nil {
-		logger.Error("WriteFile return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsCdnPublishSuccessful))
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsSimplePublishSuccessful))
 	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
@@ -789,32 +796,32 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	path, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
 
 	azionJson := path + "/azion/azion.json"
 	file, err := cmd.FileReader(azionJson)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading azion.json file", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
 	azJson, err := sjson.Set(string(file), "version-id", cmd.createVersionID())
 	if err != nil {
-		logger.Error("sjson.Set return error", zap.Error(err))
+		logger.Debug("Error while writing version-id to azion.json file", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile
 	}
 
 	err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
 	if err != nil {
-		logger.Error("WriteFile return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile
 	}
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
-		logger.Error("GetAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while reading azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -830,7 +837,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
-		logger.Error("FilepathWalk return error", zap.Error(err))
+		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
 
@@ -842,25 +849,25 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	currentFile := 0
 	if err = cmd.FilepathWalk(Path, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			logger.Error("FilepathWalk return error", zap.Error(err))
+			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 			return err
 		}
 		if !info.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
-				logger.Error("FilepathWalk return error", zap.Error(err))
+				logger.Debug("Error while trying to read file <"+path+"> about to be uploaded", zap.Error(err))
 				return err
 			}
 
 			fileString := strings.TrimPrefix(path, Path)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
-				logger.Error("MatchFilePath return error", zap.Error(err))
+				logger.Debug("Error while matching file path", zap.Error(err))
 				return err
 			}
 
 			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
-				logger.Error("Upload return error", zap.Error(err))
+				logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 				return err
 			}
 
@@ -872,7 +879,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		}
 		return nil
 	}); err != nil {
-		logger.Error("FilepathWalk return error", zap.Error(err))
+		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
 
@@ -886,7 +893,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		//Create New function
 		PublishId, err := cmd.CreateFunction(client, ctx, conf)
 		if err != nil {
-			logger.Error("CreateFunction return error", zap.Error(err))
+			logger.Debug("Error while creating edge function", zap.Error(err))
 			return err
 		}
 		conf.Function.Id = PublishId
@@ -894,14 +901,14 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		//Update existing function
 		_, err := cmd.UpdateFunction(client, ctx, conf.Function.Id, conf)
 		if err != nil {
-			logger.Error("UpdateFunction return error", zap.Error(err))
+			logger.Debug("Error while updating edge function", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -917,7 +924,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Application.Id == 0 {
 		applicationID, instanceID, err := cmd.createApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("createApplication return error", zap.Error(err))
+			logger.Debug("Error while creating edge application", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationID
@@ -925,27 +932,27 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
-			logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
 
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(clientApplication, ctx, conf)
 		if err != nil {
-			logger.Error("updateRulesEngine return error", zap.Error(err))
+			logger.Debug("Error while updating rules engine", zap.Error(err))
 			return err
 		}
 	} else {
 		err := cmd.updateApplication(clientApplication, ctx, conf, applicationName)
 		if err != nil {
-			logger.Error("updateApplication return error", zap.Error(err))
+			logger.Debug("Error while updating edge application", zap.Error(err))
 			return err
 		}
 	}
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -960,14 +967,14 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 	if conf.Domain.Id == 0 {
 		domain, err = cmd.createDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
-			logger.Error("createDomain return error", zap.Error(err))
+			logger.Debug("Error while creating domain", zap.Error(err))
 			return err
 		}
 		conf.Domain.Id = domain.GetId()
 	} else {
 		domain, err = cmd.updateDomain(clientDomain, ctx, conf, domaiName)
 		if err != nil {
-			logger.Error("updateDomain return error", zap.Error(err))
+			logger.Debug("Error while updating domain", zap.Error(err))
 			return err
 		}
 	}
@@ -988,7 +995,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		reqOrigin.SetHostHeader("${host}")
 		origin, err := clientApplication.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
 		if err != nil {
-			logger.Error("CreateOrigins return error", zap.Error(err))
+			logger.Debug("Error while creating origin", zap.Error(err))
 			return err
 		}
 		conf.Origin.Id = origin.GetOriginId()
@@ -998,13 +1005,13 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 		reqCache.SetName(conf.Name)
 		cache, err := clientApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
 		if err != nil {
-			logger.Error("CreateCacheSettingsNextApplication return error", zap.Error(err))
+			logger.Debug("Error while creating cache settings for static application", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
 		err = clientApplication.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), "static")
 		if err != nil {
-			logger.Error("CreateRulesEngineNextApplication return error", zap.Error(err))
+			logger.Debug("Error while creating rules engine for static application", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
@@ -1012,7 +1019,7 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		logger.Error("WriteAzionJsonContent return error", zap.Error(err))
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
@@ -1031,13 +1038,13 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 
 	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
-		logger.Error("ReadFile return error", zap.Error(err))
+		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, utils.ErrorReadingFile
 	}
 
 	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
 	if err != nil {
-		logger.Error("template.New return error", zap.Error(err))
+		logger.Debug("Error while pasing template in javascript function", zap.Error(err))
 		return 0, utils.ErrorParsingModel
 	}
 
@@ -1050,7 +1057,7 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	var result strings.Builder
 	err = tmpl.Execute(&result, data)
 	if err != nil {
-		logger.Error("tmpl.Execute return error", zap.Error(err))
+		logger.Debug("Error while applying template to javascript function", zap.Error(err))
 		return 0, utils.ErrorExecTemplate
 	}
 
@@ -1065,7 +1072,7 @@ func (cmd *PublishCmd) CreateFunction(client *api.Client, ctx context.Context, c
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		logger.Error("client.Create return error", zap.Error(err))
+		logger.Debug("Error while creating edge function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
@@ -1079,13 +1086,13 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 
 	jsByte, err := os.ReadFile(conf.Function.File)
 	if err != nil {
-		logger.Error("ReadFile return error", zap.Error(err))
+		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, utils.ErrorReadingFile
 	}
 
 	tmpl, err := template.New("jsTemplate").Parse(string(jsByte))
 	if err != nil {
-		logger.Error("template.New return error", zap.Error(err))
+		logger.Debug("Error while pasing template in javascript function", zap.Error(err))
 		return 0, utils.ErrorParsingModel
 	}
 
@@ -1098,7 +1105,7 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	var result strings.Builder
 	err = tmpl.Execute(&result, data)
 	if err != nil {
-		logger.Error("tmpl.Execute return error", zap.Error(err))
+		logger.Debug("Error while applying template to javascript function", zap.Error(err))
 		return 0, utils.ErrorExecTemplate
 	}
 
@@ -1113,12 +1120,12 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	//Read args
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Error("Unmarshal return error", zap.Error(err))
+		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
@@ -1126,7 +1133,7 @@ func (cmd *PublishCmd) UpdateFunction(client *api.Client, ctx context.Context, i
 	reqUpd.SetJsonArgs(args)
 	response, err := client.Update(ctx, &reqUpd)
 	if err != nil {
-		logger.Error("client.Update return error", zap.Error(err))
+		logger.Debug("Error while updating edge function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), idReq))

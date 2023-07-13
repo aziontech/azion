@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
@@ -18,7 +19,7 @@ import (
 type Fields struct {
 	Key    string
 	Value  string
-	Secret bool
+	Secret string
 	Path   string
 }
 
@@ -56,14 +57,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// flags requireds
-				if !cmd.Flags().Changed("key") || !cmd.Flags().Changed("value") || !cmd.Flags().Changed("secret") {
+				// required flags
+				if !cmd.Flags().Changed("key") || !cmd.Flags().Changed("value") {
 					return msg.ErrorMandatoryCreateFlags
+				}
+
+				if cmd.Flags().Changed("secret") {
+					secret, err := strconv.ParseBool(fields.Secret)
+					if err != nil {
+						return fmt.Errorf("%w: %q", msg.ErrorSecretFlag, fields.Secret)
+					}
+					request.SetSecret(secret)
 				}
 
 				request.SetKey(fields.Key)
 				request.SetValue(fields.Value)
-				request.SetSecret(fields.Secret)
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -79,7 +87,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&fields.Key, "key", "", msg.CreateFlagKey)
 	flags.StringVar(&fields.Value, "value", "", msg.CreateFlagValue)
-	flags.BoolVar(&fields.Secret, "secret", true, msg.CreateFlagSecret)
+	flags.StringVar(&fields.Secret, "secret", "", msg.CreateFlagSecret)
 	flags.StringVar(&fields.Path, "in", "", msg.CreateFlagIn)
 	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
 	return cmd

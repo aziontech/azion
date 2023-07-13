@@ -6,8 +6,10 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 var successResponse string = `
@@ -23,11 +25,12 @@ var successResponse string = `
 `
 
 func TestUpdate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("update domain", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PUT", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("PUT", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.JSONFromString(successResponse),
 		)
 
@@ -47,7 +50,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PUT", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("PUT", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.JSONFromString(successResponse),
 		)
 
@@ -66,7 +69,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("bad request", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PUT", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("PUT", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, `{"details": "invalid field active"}`),
 		)
 
@@ -85,7 +88,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PUT", "api/variables/32e8ffca-4021-49a4-971f-330935566af4"),
+			httpmock.REST("PUT", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
 			httpmock.JSONFromString(successResponse),
 		)
 

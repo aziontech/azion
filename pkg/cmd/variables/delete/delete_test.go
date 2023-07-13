@@ -5,18 +5,20 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestCreate(t *testing.T) {
-
+	logger.New(zapcore.DebugLevel)
 	t.Run("delete variable by id", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		
+
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 
@@ -35,7 +37,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -49,12 +51,11 @@ func TestCreate(t *testing.T) {
 		require.Error(t, err)
 	})
 
-
 	t.Run("show error when not informing the --variable-id flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("DELETE", "api/variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
+			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 

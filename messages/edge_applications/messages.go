@@ -21,7 +21,7 @@ var (
 	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
 	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
-	EdgeApplicationsBuildCdn              = "Skipping build step. Build isn't applied to the type 'CDN'\n"
+	EdgeApplicationsBuildSimple           = "Skipping build step. Build isn't applied to the type 'Simple'\n"
 	EdgeApplicationsBuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
 
 	UploadStart      = "Uploading static files\n"
@@ -30,14 +30,14 @@ var (
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
 	--type string       The type of Edge application
-	cdn                 Create an edge application to cache and deliver your content.
+	simple              Create an edge application to cache and deliver your content.
 	static          	Create a static page in application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge application's name"
-	EdgeApplicationsInitFlagType          = "The type of Edge application <cdn | static | nextjs>"
+	EdgeApplicationsInitFlagType          = "The type of Edge application <simple | static | nextjs>"
 	EdgeApplicationsInitFlagYes           = "Forces the automatic response 'yes' to all user input"
 	EdgeApplicationsInitFlagNo            = "Forces the automatic response 'no' to all user input"
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
@@ -45,7 +45,7 @@ var (
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init subcommand"
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully\n"
 	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n\n"
-	EdgeApplicationsInitNameNotSentCdn    = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
+	EdgeApplicationsInitNameNotSentSimple = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsInitNameNotSentStatic = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsUpdateNamePackageJson = "Updating your package.json name field with the value informed through the --name flag\n"
 	EdgeApplicationsInitTypeNotSent       = "The Project Type was not sent through the --type flag; By default when --type is not informed it is auto-detected based on the framework used by the user\n\n"
@@ -56,7 +56,7 @@ var (
 	EdgeApplicationsPublishLongDescription             = "Publishes an Edge Application based on the Azion’s Platform"
 	EdgeApplicationsPublishRunningCmd                  = "Running pre-publish command:\n\n"
 	EdgeApplicationsPublishSuccessful                  = "Your Edge Application was published successfully\n"
-	EdgeApplicationsCdnPublishSuccessful               = "Your CDN Edge Application was published successfully\n"
+	EdgeApplicationsSimplePublishSuccessful            = "Your Simple Edge Application was published successfully\n"
 	EdgeApplicationsPublishOutputDomainSuccess         = "\nTo visualize your application access the domain: %v\n"
 	EdgeApplicationPublishDomainHint                   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
 	EdgeApplicationsPublishOutputCachePurge            = "Domain cache was purged\n"
@@ -120,4 +120,8 @@ var (
 	EdgeApplicationUpdateFlagIn                      = "Given path and JSON file to automatically update the Edge Application attributes; you can use - for reading from stdin"
 	EdgeApplicationUpdateOutputSuccess               = "Updated Edge Application with ID %d\n"
 	EdgeApplicationUpdateHelpFlag                    = "Displays more information about the update subcommand"
+
+	LsUsage            = "ls"
+	LsShortDescription = "Displays presets accepted by Vulcan"
+	LsLongDescription  = "Displays presets accepted by Vulcan"
 )

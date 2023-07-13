@@ -2,12 +2,13 @@ package describe
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -52,16 +53,14 @@ func TestDescribe(t *testing.T) {
 	t.Run("no id sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings/122149"),
+			httpmock.REST("GET", "edge_applications/123423424/cache_settings/122149"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "123423424", "-c", "122149"})
-
 		err := cmd.Execute()
-		require.Error(t, err)
+		require.ErrorIs(t, err, msg.ErrorMissingArguments)
 	})
 
 	t.Run("export to a file", func(t *testing.T) {

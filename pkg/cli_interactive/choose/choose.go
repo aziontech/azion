@@ -7,7 +7,7 @@ import (
 func Choose() (string, error) {
 	prompt := promptui.Select{
 		Label: "Select Type",
-		Items: []string{"nextjs", "static", "cdn"},
+		Items: []string{"nextjs", "static", "simple"},
 	}
 
 	_, result, err := prompt.Run()

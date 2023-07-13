@@ -68,14 +68,14 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	logger.Debug("Get Edge Function")
-	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
-	logger.Debug("request", zap.Any("struct", req))
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
 
-	res, httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("struct", res), zap.Any("http", httpResp), zap.Error(err))
-
+	res, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		logger.Debug("Error while getting an edge function", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -84,14 +84,15 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Edge Function")
-	req := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
-	logger.Debug("request", zap.Any("struct", req))
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
 
-	httpResp, err := req.Execute()
-	logger.Debug("response", zap.Any("http", httpResp), zap.Error(err))
+	httpResp, err := request.Execute()
 
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		logger.Debug("Error while deleting an edge function", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -105,12 +106,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
-	logger.Debug("request", zap.Any("struct", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("struct", edgeFuncResponse), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		logger.Debug("Error while creating an edge function", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -120,12 +122,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
 	logger.Debug("Update Edge Function")
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
-	logger.Debug("request", zap.Any("struct", request))
 
 	edgeFuncResponse, httpResp, err := request.Execute()
-	logger.Debug("response", zap.Any("struct", edgeFuncResponse), zap.Any("http", httpResp), zap.Error(err))
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		logger.Debug("Error while updating an edge function", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -140,10 +143,12 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		PageSize(opts.PageSize).
 		Sort(opts.Sort).
 		Execute()
-	logger.Debug("response", zap.Any("struct", resp), zap.Any("http", httpResp), zap.Error(err))
 
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		logger.Debug("Error while listing edge functions", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

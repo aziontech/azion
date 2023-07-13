@@ -2,6 +2,7 @@ package init
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -19,7 +20,6 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
-	"github.com/aziontech/azion-cli/pkg/cli_interactive/choose"
 	"github.com/aziontech/azion-cli/pkg/cli_interactive/insert"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -31,6 +31,7 @@ import (
 type InitInfo struct {
 	Name           string
 	TypeLang       string
+	Mode           string
 	PathWorkingDir string
 	YesOption      bool
 	NoOption       bool
@@ -44,6 +45,8 @@ var (
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
 )
+
+var ErrNotFound = errors.New("executable file not found in $PATH")
 
 type InitCmd struct {
 	Io            *iostreams.IOStreams
@@ -101,13 +104,16 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		$ azioncli edge_applications init --help
 		$ azioncli edge_applications init --name "thisisatest" --type static
 		$ azioncli edge_applications init --name "thisisatest" --type nextjs
+		$ azioncli edge_applications init --name "thisisatest" --type hexo --mode deliver
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return init.run(info, options, cmd)
 		},
 	}
+
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
 	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.EdgeApplicationsInitFlagType)
+	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagType)
 	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
 	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 
@@ -126,65 +132,55 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
 	info.PathWorkingDir = path
 
-	projectName, projectSettings, err := DetectedProjectJS(info, cmd, path)
+	projectName, err := DetectedProjectJS(info, cmd, path)
 	if err != nil {
-		logger.Error("DetectedProjectJS return error", zap.Error(err))
+		logger.Debug("Error while detecting information about your project", zap.Error(err))
 		return err
 	}
 
 	switch info.TypeLang {
-	case "cdn":
-		return initCdn(cmd, path, info)
+	case "simple":
+		return initSimple(cmd, path, info)
 	case "static":
 		return initStatic(cmd, info, options)
 	}
 
+	if (!hasThisFlag(c, "mode") || !hasThisFlag(c, "type")) && info.TypeLang != "nextjs" {
+		return msg.ErrorModeNotSent
+	}
+
 	bytePackageJson, pathPackageJson, err := ReadPackageJson(cmd, path)
 	if err != nil {
-		logger.Error("ReadPackageJson return error", zap.Error(err))
+		logger.Debug("Error while reading package.json file", zap.Error(err))
 		return err
-	}
-
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsAutoDetectec, projectSettings))
-	if !hasThisFlag(c, "type") {
-		info.TypeLang = projectSettings
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsInitTypeNotSent)
-	}
-
-	if info.TypeLang != "nextjs" {
-		return utils.ErrorUnsupportedType
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
-		logger.Error("shouldFetch return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
-			logger.Error("fetchTemplates return error", zap.Error(err))
 			return err
 		}
 
 		if err = UpdateScript(cmd, bytePackageJson, pathPackageJson); err != nil {
-			logger.Error("UpdateScript return error", zap.Error(err))
 			return err
 		}
 
 		err = updateProjectName(c, info, cmd, projectName, bytePackageJson, path)
 		if err != nil {
-			logger.Error("updateProjectName return error", zap.Error(err))
 			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
-			logger.Error("organizeJsonFile return error", zap.Error(err))
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
 
@@ -220,7 +216,7 @@ func ReadPackageJson(cmd *InitCmd, path string) ([]byte, string, error) {
 	return bytePackageJson, pathPackageJson, nil
 }
 
-func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, projectSettings string, err error) {
+func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName string, err error) {
 	var packageJson PackageJson
 	path = path + "/package.json"
 	_, err = cmd.Stat(path)
@@ -230,28 +226,18 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 		} else {
 			projectName, err = insert.Insert()
 			if err != nil {
-				return "", "", err
+				return "", err
 			}
 			info.Name = projectName
 		}
 
-		if len(info.TypeLang) > 0 {
-			projectSettings = info.TypeLang
-		} else {
-			projectSettings, err = choose.Choose()
-			if err != nil {
-				return "", "", err
-			}
-			info.TypeLang = projectSettings
-		}
-
-		return projectName, projectSettings, nil
+		return projectName, nil
 
 	} else {
 		pathPackageJson := path
 		bytePackageJson, errReadFile := cmd.FileReader(pathPackageJson)
 		if errReadFile != nil {
-			return "", "", msg.ErrorPackageJsonNotFound
+			return "", msg.ErrorPackageJsonNotFound
 		}
 
 		if len(info.Name) == 0 {
@@ -261,30 +247,18 @@ func DetectedProjectJS(info *InitInfo, cmd *InitCmd, path string) (projectName s
 
 		err = json.Unmarshal(bytePackageJson, &packageJson)
 		if err != nil {
-			return "", "", utils.ErrorUnmarshalReader
+			return "", utils.ErrorUnmarshalReader
 		}
 	}
 
-	switch {
-	case len(packageJson.Dependencies.Next) > 0:
-		projectSettings = "nextjs"
-	case info.TypeLang == "nextjs", info.TypeLang == "static", info.TypeLang == "cdn":
-		projectSettings = info.TypeLang
-	default:
-		projectSettings, err = choose.Choose()
-		if err != nil {
-			return "", "", err
-		}
-		info.TypeLang = projectSettings
-	}
-
-	return projectName, projectSettings, nil
+	return projectName, nil
 }
 
 func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	//create temporary directory to clone template into
 	dir, err := cmd.CreateTempDir(info.PathWorkingDir, ".template")
 	if err != nil {
+		logger.Debug("Error while creating temporary directory for clining template", zap.Error(err))
 		return utils.ErrorInternalServerError
 	}
 	defer func() {
@@ -293,16 +267,19 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 
 	r, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{URL: REPO})
 	if err != nil {
+		logger.Debug("Error while fetching templates from github", zap.Error(err))
 		return utils.ErrorFetchingTemplates
 	}
 
 	tags, err := r.Tags()
 	if err != nil {
+		logger.Debug("Error while getting github tags", zap.Error(err))
 		return msg.ErrorGetAllTags
 	}
 
 	tag, err := sortTag(tags, TemplateMajor)
 	if err != nil {
+		logger.Debug("Error while sorting tags for correct template application", zap.Error(err))
 		return msg.ErrorIterateAllTags
 	}
 
@@ -311,14 +288,23 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 		ReferenceName: plumbing.ReferenceName(tag),
 	})
 	if err != nil {
+		logger.Debug("Error while fetching templates from github", zap.Error(err))
 		return utils.ErrorFetchingTemplates
 	}
 
 	azionDir := info.PathWorkingDir + "/azion"
 
+	// changing to Vulcan in case we are using any other type... this will be removed once Vulcan becomes the
+	// only adapter used by the cli
+	typeLang := info.TypeLang
+	if typeLang != "nextjs" && typeLang != "static" && typeLang != "simple" {
+		typeLang = "vulcan"
+	}
+
 	//move contents from temporary directory into final destination
-	err = cmd.Rename(dir+"/webdev/"+info.TypeLang, azionDir)
+	err = cmd.Rename(dir+"/webdev/"+typeLang, azionDir)
 	if err != nil {
+		logger.Debug("Error while copying files to current project directory", zap.Error(err))
 		return utils.ErrorMovingFiles
 	}
 
@@ -375,6 +361,10 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrorNpmNotInstalled
 	}
 
+	if info.TypeLang != "nextjs" {
+		return nil
+	}
+
 	conf, err := getConfig(cmd, info.PathWorkingDir)
 	if err != nil {
 		return err
@@ -385,14 +375,9 @@ func (cmd *InitCmd) runInitCmdLine(info *InitInfo) error {
 		return msg.ErrReadEnvFile
 	}
 
-	switch info.TypeLang {
-	case "nextjs":
-		err = InitNextjs(info, cmd, conf, envs)
-		if err != nil {
-			return err
-		}
-	default:
-		return utils.ErrorUnsupportedType
+	err = InitNextjs(info, cmd, conf, envs)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -409,6 +394,7 @@ func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions,
 	}
 	options.Name = info.Name
 	options.Type = info.TypeLang
+	options.Mode = info.Mode
 
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
@@ -453,7 +439,7 @@ func InitNextjs(info *InitInfo, cmd *InitCmd, conf *contracts.AzionApplicationCo
 }
 
 func showInstructions(cmd *InitCmd, instructions string) {
-	fmt.Fprintf(cmd.Io.Out, instructions) //nolint:all
+	logger.FInfo(cmd.Io.Out, instructions) //nolint:all
 }
 
 func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
@@ -475,11 +461,13 @@ func UpdateScript(cmd *InitCmd, packageJson []byte, path string) error {
 
 	packJsonReplaceDeploy, err := sjson.Set(string(packageJson), "scripts.deploy", "azioncli edge_applications publish")
 	if err != nil {
+		logger.Debug("Error while setting azioncli command as default deploy scrip", zap.Error(err))
 		return msg.FailedUpdatingScriptsDeployField
 	}
 
 	err = cmd.WriteFile(path, []byte(packJsonReplaceDeploy), 0644)
 	if err != nil {
+		logger.Debug("Error while writing package.json file", zap.Error(err))
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
 	}
 
@@ -500,21 +488,21 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 
 	switch conf.InitData.OutputCtrl {
 	case "disable":
-		fmt.Fprintf(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
-		fmt.Fprintf(cmd.Io.Out, "$ %s\n", command)
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsInitRunningCmd)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
 		output, _, err := cmd.CommandRunner(command, envs)
 		if err != nil {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunInitCommand
 		}
 
-		fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 
 	case "on-error":
 		output, exitCode, err := cmd.CommandRunner(command, envs)
 		if exitCode != 0 {
-			fmt.Fprintf(cmd.Io.Out, "%s\n", output)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", output))
 			return msg.ErrFailedToRunInitCommand
 		}
 		if err != nil {
@@ -528,21 +516,20 @@ func runCommand(cmd *InitCmd, conf *contracts.AzionApplicationConfig, envs []str
 	return nil
 }
 
-func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
+func initSimple(cmd *InitCmd, path string, info *InitInfo) error {
 	var err error
 	var shouldFetchTemplates bool
-	options := &contracts.AzionApplicationCdn{}
+	options := &contracts.AzionApplicationSimple{}
 
 	shouldFetchTemplates, err = shouldFetch(cmd, info)
 	if err != nil {
-		logger.Error("shouldFetch return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		pathWorker := path + "/azion"
 		if err := cmd.Mkdir(pathWorker, os.ModePerm); err != nil {
-			logger.Error("mkdir return error", zap.Error(err))
+			logger.Debug("Error while creating azion directory", zap.Error(err))
 			return msg.ErrorFailedCreatingAzionDirectory
 		}
 
@@ -553,16 +540,16 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 
 		data, err := json.MarshalIndent(options, "", "  ")
 		if err != nil {
-			logger.Error("MarshalIndent return error", zap.Error(err))
+			logger.Debug("Error while marshling json file", zap.Error(err))
 			return msg.ErrorUnmarshalAzionFile
 		}
 
 		err = cmd.WriteFile(path+"/azion/azion.json", data, 0644)
 		if err != nil {
-			logger.Error("WriteFile return error", zap.Error(err))
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return utils.ErrorInternalServerError
 		}
-		//fmt.Fprintf(w, message)
+
 		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
 	}
 
@@ -572,18 +559,16 @@ func initCdn(cmd *InitCmd, path string, info *InitInfo) error {
 func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicationOptions) error {
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
-		logger.Error("initStatic return error", zap.Error(err))
 		return err
 	}
 
 	if shouldFetchTemplates {
 		if err = cmd.fetchTemplates(info); err != nil {
-			logger.Error("fetchTemplates return error", zap.Error(err))
 			return err
 		}
 
 		if err = cmd.organizeJsonFile(options, info); err != nil {
-			logger.Error("organizeJsonFile return error", zap.Error(err))
+			logger.Debug("Error while writing json file", zap.Error(err))
 			return err
 		}
 
@@ -605,10 +590,11 @@ func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 		if info.NoOption || info.YesOption {
 			shouldFetchTemplates = yesNoFlagToResponse(info)
 		} else {
-			fmt.Fprintf(cmd.Io.Out, "%s: ", msg.WebAppInitContentOverridden)
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s: ", msg.WebAppInitContentOverridden))
 			fmt.Fscanln(cmd.Io.In, &response)
 			shouldFetchTemplates, err = utils.ResponseToBool(response)
 			if err != nil {
+				logger.Debug("Error while trying to convert string to boolean", zap.Error(err))
 				return false, err
 			}
 		}
@@ -616,6 +602,7 @@ func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 		if shouldFetchTemplates {
 			err = cmd.CleanDir("./azion")
 			if err != nil {
+				logger.Debug("Error while trying to clean azion directory", zap.Error(err))
 				return false, err
 			}
 		}
@@ -635,17 +622,19 @@ func updateProjectName(c *cobra.Command, info *InitInfo, cmd *InitCmd, projectNa
 		} else {
 			info.Name = projectName
 		}
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsInitNameNotSent)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsInitNameNotSent))
 	} else {
 		updatePackageJson, err := sjson.Set(string(bytePackageJson), "name", info.Name)
 		if err != nil {
+			logger.Debug("Error while updating project name in package.json file", zap.Error(err))
 			return msg.FailedUpdatingNameField
 		}
-		fmt.Fprintf(cmd.Io.Out, "%s\n", msg.EdgeApplicationsUpdateNamePackageJson)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s\n", msg.EdgeApplicationsUpdateNamePackageJson))
 		path = path + "/package.json"
 
 		err = cmd.WriteFile(path, []byte(updatePackageJson), 0644)
 		if err != nil {
+			logger.Debug("Error while writing package.json file", zap.Error(err))
 			return fmt.Errorf(utils.ErrorCreateFile.Error(), path)
 		}
 	}
