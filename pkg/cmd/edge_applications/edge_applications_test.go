@@ -1,13 +1,14 @@
 package edge_applications
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	buildcmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init"
@@ -141,8 +142,8 @@ func TestNewCmd(t *testing.T) {
 							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs", "version-id":"123321123", "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
-						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
-							return &contracts.AzionApplicationCdn{}, nil
+						GetAzionJsonSimple: func() (*contracts.AzionApplicationSimple, error) {
+							return &contracts.AzionApplicationSimple{}, nil
 						},
 					}
 				},
@@ -205,8 +206,8 @@ func TestNewCmd(t *testing.T) {
 							return []byte(`{"publish": {"pre_cmd": "./azion/webdev.sh publish", "env": "./azion/init.env", "output-ctrl": "on-error"}, "type": "nextjs", "version-id":"123321123", "dependencies": { "next": "12.2.5" }}`), nil
 						},
 						WriteFile: func(filename string, data []byte, perm fs.FileMode) error { return nil },
-						GetAzionJsonCdn: func() (*contracts.AzionApplicationCdn, error) {
-							return &contracts.AzionApplicationCdn{}, nil
+						GetAzionJsonSimple: func() (*contracts.AzionApplicationSimple, error) {
+							return &contracts.AzionApplicationSimple{}, nil
 						},
 					}
 				},

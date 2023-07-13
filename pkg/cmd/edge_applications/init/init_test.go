@@ -56,7 +56,7 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(initCmd)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "cdn"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "simple"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("yes\n")

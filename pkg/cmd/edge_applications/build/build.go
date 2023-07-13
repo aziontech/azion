@@ -91,13 +91,12 @@ func (cmd *BuildCmd) run() error {
 	logger.Debug("Running build subcommand from edge_applications command tree")
 	path, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
 
 	err = RunBuildCmdLine(cmd, path)
 	if err != nil {
-		logger.Error("RunBuildCmdLine return error", zap.Error(err))
 		return err
 	}
 
@@ -110,21 +109,20 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	azionJson := path + "/azion/azion.json"
 	file, err := cmd.FileReader(azionJson)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading azion.json file", zap.Error(err))
 		return msg.ErrorOpeningAzionFile
 	}
 
 	typeLang := gjson.Get(string(file), "type")
 	mode := gjson.Get(string(file), "mode")
 
-	if typeLang.String() == "cdn" {
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildCdn)
+	if typeLang.String() == "simple" {
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
 		return nil
 	}
 
 	err = checkArgsJson(cmd)
 	if err != nil {
-		logger.Error("getConfig return error", zap.Error(err))
 		return err
 	}
 
@@ -134,7 +132,6 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 	conf, err := getConfig(cmd)
 	if err != nil {
-		logger.Error("checkArgsJson return error", zap.Error(err))
 		return err
 	}
 
@@ -150,19 +147,18 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 
 		err = runCommand(cmd, conf)
 		if err != nil {
-			logger.Error("runCommand return error", zap.Error(err))
 			return err
 		}
 
 		azJson, err := sjson.Set(string(file), "version-id", verID)
 		if err != nil {
-			logger.Error("sjson.Set return error", zap.Error(err))
+			logger.Debug("Error while writing version-id to azion.json file: ", zap.Error(err))
 			return utils.ErrorWritingAzionJsonFile
 		}
 
 		err = cmd.WriteFile(azionJson, []byte(azJson), 0644)
 		if err != nil {
-			logger.Error("WriteFile return error", zap.Error(err))
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return utils.ErrorWritingAzionJsonFile
 		}
 
@@ -180,21 +176,21 @@ func (cmd *BuildCmd) Run() error {
 func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error) {
 	path, err := utils.GetWorkingDir()
 	if err != nil {
-		logger.Error("GetWorkingDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return conf, err
 	}
 
 	jsonConf := path + cmd.ConfigRelativePath
 	file, err := cmd.FileReader(jsonConf)
 	if err != nil {
-		logger.Error("FileReader return error", zap.Error(err))
+		logger.Debug("Error while reading config.json file", zap.Error(err))
 		return conf, msg.ErrorOpeningConfigFile
 	}
 
 	conf = &contracts.AzionApplicationConfig{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
-		logger.Error("Unmarshal return error", zap.Error(err))
+		logger.Debug("Error while unmarshling config.json file", zap.Error(err))
 		return conf, msg.ErrorUnmarshalConfigFile
 	}
 
@@ -205,7 +201,7 @@ func getConfig(cmd *BuildCmd) (conf *contracts.AzionApplicationConfig, err error
 func checkArgsJson(cmd *BuildCmd) error {
 	workDirPath, err := cmd.GetWorkDir()
 	if err != nil {
-		logger.Error("GetWorkingDir return error", zap.Error(err))
+		logger.Debug("Error while getting working directory", zap.Error(err))
 		return utils.ErrorInternalServerError
 	}
 
@@ -213,7 +209,7 @@ func checkArgsJson(cmd *BuildCmd) error {
 	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
-			logger.Error("WriteFile return error", zap.Error(err))
+			logger.Debug("Error while trying to create args.json file", zap.Error(err))
 			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
 		}
 	}
@@ -242,7 +238,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 
 		err := cmd.CommandRunnerStream(cmd.Io.Out, command, []string{})
 		if err != nil {
-			logger.Error("CommandRunnerStream return error", zap.Error(err))
+			logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 			return msg.ErrFailedToRunBuildCommand
 		}
 
@@ -253,7 +249,7 @@ func runCommand(cmd *BuildCmd, conf *contracts.AzionApplicationConfig) error {
 			return msg.ErrFailedToRunBuildCommand
 		}
 		if err != nil {
-			logger.Error("CommandRunner return error", zap.Error(err))
+			logger.Debug("Error while running command", zap.Error(err))
 			return err
 		}
 
