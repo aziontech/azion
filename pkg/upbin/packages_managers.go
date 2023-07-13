@@ -2,7 +2,6 @@ package upbin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/aziontech/azion-cli/utils"
 	"io"
@@ -61,7 +60,7 @@ func formatUrlPackageAzioncli() (string, error) {
 
 	listPacks, err := getAssetsNamesPackagesAzioncli()
 	if err != nil {
-		return "", errors.New("falhou ao buscar os assets names da azioncli")
+		return "", utils.ErrorGetAssetsNamesAzioncli
 	}
 
 	sysAr := GetInfoSystem()
@@ -83,7 +82,7 @@ func findItemByArchAndPackage(items []string, arch, packages string) string {
 }
 
 func checkingPackages() string {
-	var listPackages = []string{"brew", "dpkg", "rpm"}
+	var listPackages = []string{"brew", "dpkg", "rpm", "apk"}
 
 	var packMan string = ""
 
@@ -141,6 +140,8 @@ func installPackage(fileName string) error {
 		return exec.Command("dpkg", "-i", fileName).Run()
 	case "rpm":
 		return exec.Command("rpm", "-i", fileName).Run()
+	case "apk":
+		return exec.Command("apk", "add", fileName).Run()
 	default:
 		return fmt.Errorf("unsupported package %s", ext)
 	}
