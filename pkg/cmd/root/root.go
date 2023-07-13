@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"net/http"
 	"time"
 
@@ -21,7 +22,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/pkg/upbin"
 	"github.com/spf13/cobra"
@@ -40,6 +40,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			logger.LogLevel(f.Logger)
 			if !DoNotUpdate {
 				return upbin.UpdateBin()
 			}
@@ -47,9 +48,6 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
-		},
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			logger.LogLevel(f.Logger)
 		},
 		SilenceErrors: true,
 	}

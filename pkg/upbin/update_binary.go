@@ -1,13 +1,10 @@
 package upbin
 
 import (
-	"errors"
 	"fmt"
-	"io"
+	"github.com/aziontech/azion-cli/utils"
 	"io/ioutil"
-	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -24,21 +21,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 )
 
-type system string
-
 const (
-	azioncli string = "azioncli"
-
-	windows system = "windows"
-	darwin  system = "darwin"
-	linux   system = "linux"
-	unknown system = "unknown"
-
-	repoURL string = "https://github.com/aziontech/azion-cli.git"
-	url     string = "https://downloads.azion.com/%s/x86_64/azioncli"
-
-	LastActivity    string = "LAST_ACTIVITY"
-	packageAzioncli string = "aziontech/tap/azioncli"
+	azioncli     string = "azioncli"
+	repoURL      string = "https://github.com/aziontech/azion-cli.git"
+	LastActivity string = "LAST_ACTIVITY"
+	unknown      string = "unknown"
 )
 
 // Variable factory for unit testing
@@ -48,15 +35,8 @@ var (
 	wantToUpdateFunc     = wantToUpdate
 	saveLastActivityFunc = saveLastActivity
 	prepareURLFunc       = prepareURL
-	managersPackagesFunc = managersPackages
 	whichFunc            = which
-	downloadFileFunc     = downloadFile
-	replaceFileFunc      = replaceFile
-
-	openConfigFunc = openConfig
-
-	packageManagerExistsFunc  = packageManagerExists
-	installPackageManagerFunc = installPackageManager
+	openConfigFunc       = openConfig
 )
 
 func UpdateBin() error {
@@ -77,11 +57,6 @@ func UpdateBin() error {
 		return saveLastActivityFunc()
 	}
 
-	fileURL, err := prepareURLFunc()
-	if err != nil {
-		return err
-	}
-
 	install, err := managersPackagesFunc()
 	if err != nil {
 		return err
@@ -91,14 +66,12 @@ func UpdateBin() error {
 		return nil
 	}
 
-	filePath, _ := whichFunc(azioncli)
-
-	err = downloadFileFunc(filePath, fileURL)
+	filePath, err := whichFunc(azioncli)
 	if err != nil {
 		return err
 	}
 
-	err = replaceFileFunc(filePath)
+	err = replaceBinaryFunc(filePath)
 	if err != nil {
 		return err
 	}
@@ -176,33 +149,13 @@ func which(command string) (string, error) {
 	for _, dir := range paths {
 		executablePath := filepath.Join(dir, command)
 		_, err := os.Stat(executablePath)
-		if err == nil {
-			return executablePath, nil
+		if err != nil {
+			return "", err
 		}
+		return executablePath, nil
 	}
 
-	return "", fmt.Errorf("command '%s' not found", command)
-}
-
-func GetSystem() system {
-	switch system(runtime.GOOS) {
-	case linux:
-		return linux
-	case darwin:
-		return darwin
-	case windows:
-		return windows
-	default:
-		return unknown
-	}
-}
-
-func prepareURL() (string, error) {
-	sys := GetSystem()
-	if sys == unknown {
-		return "", errors.New("unknown system")
-	}
-	return fmt.Sprintf(url, sys), nil
+	return "", fmt.Errorf(utils.ErrorCommandNotFound.Error(), command)
 }
 
 func needToUpdate() bool {
@@ -211,7 +164,7 @@ func needToUpdate() bool {
 
 func wantToUpdate() bool {
 	prompt := promptui.Select{
-		Label: "Do you want to update 'azioncli'?",
+		Label: "A new version of 'azioncli' was published. Do you wish to update to the latest version?",
 		Items: []string{"Yes", "No"},
 	}
 	_, result, _ := prompt.Run()
@@ -233,41 +186,6 @@ func notify() (bool, error) {
 	} else {
 		return false, nil
 	}
-}
-
-func downloadFile(filePath, fileURL string) error {
-	response, err := http.Get(fileURL)
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func replaceFile(filePath string) error {
-	exe, err := os.Executable()
-	if err != nil {
-		return err
-	}
-
-	err = os.Rename(filePath, exe)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func saveLastActivity() error {
@@ -323,7 +241,7 @@ func writeConfig(data map[string]interface{}) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(path, content, 0644)
+	err = os.WriteFile(path, content, 0644)
 	if err != nil {
 		return err
 	}
@@ -350,49 +268,35 @@ func getLastActivity() (string, error) {
 	return fmt.Sprint(lastAct), nil
 }
 
-func managersPackages() (bool, error) {
-	packageManagers := []string{"brew"}
+type SystemArch struct {
+	System string
+	Arch   string
+}
 
-	var install bool = false
-	var manager string
-	for _, man := range packageManagers {
-		exists := packageManagerExistsFunc(man)
-		if exists {
-			manager = man
-			install = true
-			break
+func GetInfoSystem() SystemArch {
+	ar := runtime.GOARCH
+	os := runtime.GOOS
+
+	switch os {
+	case "darwin":
+		switch ar {
+		case "arm64":
+			return SystemArch{System: "Darwin", Arch: "arm64"}
+		case "amd64":
+			return SystemArch{System: "Darwin", Arch: "x86_64"}
+		}
+	case "linux":
+		switch ar {
+		case "386":
+			return SystemArch{System: "linux", Arch: "386"}
+		case "amd64":
+			return SystemArch{System: "linux", Arch: "amd64"}
+		case "arm64":
+			return SystemArch{System: "linux", Arch: "arm64"}
+		case "arm":
+			return SystemArch{System: "linux", Arch: "arm"}
 		}
 	}
 
-	err := installPackageManagerFunc(manager)
-	if err != nil {
-		return false, err
-	}
-
-	return install, nil
-}
-
-func packageManagerExists(command string) bool {
-	_, err := exec.LookPath(command)
-	if err != nil {
-		return false
-	} else {
-		return true
-	}
-}
-
-func installPackageManager(manager string) error {
-	var command string
-	switch manager {
-	case "brew":
-		command = "install"
-	}
-
-	cmd := exec.Command(manager, command, packageAzioncli)
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return SystemArch{System: unknown, Arch: unknown}
 }

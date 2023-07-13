@@ -1,6 +1,8 @@
 package utils
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	//Generic errors that can be used by any package
@@ -39,4 +41,6 @@ var (
 	ErrorTimeoutAPICall         = errors.New("CLI's request has timed out during communication with Azion. Verify if it has completed successfully or wait some time and try the command again")
 	ErrorCreateFile             = errors.New("Failed to create %s file")
 	ErrorProductNotOwned        = errors.New("This account does not own the following product")
+	ErrorUnknownSystem          = errors.New("unknown system")
+	ErrorCommandNotFound        = errors.New("command '%s' not found")
 )

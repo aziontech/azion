@@ -1,7 +1,6 @@
 package upbin
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -33,7 +32,7 @@ func TestUpdateBin(t *testing.T) {
 		return "/path/to/azioncli", nil
 	}
 
-	downloadFileFunc = func(string, string) error {
+	downloadFileFunc = func(string) error {
 		return nil
 	}
 
@@ -99,25 +98,4 @@ func TestGetLastActivity(t *testing.T) {
 	lastActivity, err := getLastActivity()
 	assert.NoError(t, err)
 	assert.Equal(t, expectedLastActivity, lastActivity)
-}
-
-func TestManagersPackages(t *testing.T) {
-	packageManagerExistsFunc = func(manager string) bool {
-		if manager == "brew" {
-			return true
-		} else {
-			return false
-		}
-	}
-
-	installPackageManagerFunc = func(manager string) error {
-		if manager == "brew" {
-			return nil
-		}
-		return errors.New("Package manager installation failed")
-	}
-
-	install, err := managersPackages()
-	assert.True(t, install)
-	assert.Nil(t, err)
 }
