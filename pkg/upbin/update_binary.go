@@ -2,7 +2,6 @@ package upbin
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/utils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -143,19 +142,16 @@ func latestTag(tags ReferenceIter) (tag string, err error) {
 }
 
 func which(command string) (string, error) {
-	path := os.Getenv("PATH")
-	paths := filepath.SplitList(path)
+	paths := filepath.SplitList(os.Getenv("PATH"))
 
 	for _, dir := range paths {
 		executablePath := filepath.Join(dir, command)
-		_, err := os.Stat(executablePath)
-		if err != nil {
-			return "", err
+		if _, err := os.Stat(executablePath); err == nil {
+			return executablePath, nil
 		}
-		return executablePath, nil
 	}
 
-	return "", fmt.Errorf(utils.ErrorCommandNotFound.Error(), command)
+	return "", fmt.Errorf("command not found: %s", command)
 }
 
 func needToUpdate() bool {
