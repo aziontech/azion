@@ -30,7 +30,7 @@ var (
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]
 	--type string       The type of Edge application
-	Simple              Create an edge application to cache and deliver your content.
+	simple              Create an edge application to cache and deliver your content.
 	static          	Create a static page in application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
