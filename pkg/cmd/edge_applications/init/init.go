@@ -2,7 +2,6 @@ package init
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -45,8 +44,6 @@ var (
 const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
 )
-
-var ErrNotFound = errors.New("executable file not found in $PATH")
 
 type InitCmd struct {
 	Io            *iostreams.IOStreams

@@ -124,4 +124,5 @@ var (
 	LsUsage            = "ls"
 	LsShortDescription = "Displays presets accepted by Vulcan"
 	LsLongDescription  = "Displays presets accepted by Vulcan"
+	InstallingVulcan   = "Vulcan was not found in your machine. Please wait while vulcan is being installed"
 )
