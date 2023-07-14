@@ -1,8 +1,8 @@
 package ls
 
 import (
-	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 
@@ -11,17 +11,17 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
-var ErrNotFound = errors.New("executable file not found in $PATH")
-
 type LsCmd struct {
-	Io            *iostreams.IOStreams
-	CommandRunner func(cmd string, envvars []string) (string, int, error)
-	LookPath      func(bin string) (string, error)
+	Io                  *iostreams.IOStreams
+	CommandRunner       func(cmd string, envvars []string) (string, int, error)
+	CommandRunnerStream func(out io.Writer, cmd string, envvars []string) error
+	LookPath            func(bin string) (string, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -33,6 +33,9 @@ func NewLsCmd(f *cmdutil.Factory) *LsCmd {
 		Io: f.IOStreams,
 		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envvars, cmd)
+		},
+		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
+			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
 		LookPath: exec.LookPath,
 	}
@@ -50,23 +53,30 @@ func NewCobraCmd(ls *LsCmd) *cobra.Command {
 		$ azioncli edge_applications ls --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return ls.run()
+			return ls.run(cmd)
 		},
 	}
 
 	return cobraCmd
 }
 
-func (cmd *LsCmd) run() error {
+func (cmd *LsCmd) run(cobraCmd *cobra.Command) error {
 	_, err := cmd.LookPath("vulcan")
 	if err != nil {
-		if err == ErrNotFound {
-			_, _, err := cmd.CommandRunner("npm install edge-functions -g", []string{})
-			return err
+		if strings.Contains(err.Error(), "executable file not found in $PATH") {
+			var errInstall error
+			if cobraCmd.Flags().Changed("debug") {
+				logger.FInfo(cmd.Io.Out, msg.InstallingVulcan)
+				errInstall = cmd.CommandRunnerStream(cmd.Io.Out, "npm install edge-functions -g", []string{})
+			} else {
+				logger.FInfo(cmd.Io.Out, msg.InstallingVulcan)
+				_, _, errInstall = cmd.CommandRunner("npm install edge-functions -g", []string{})
+			}
+			if errInstall != nil {
+				return fmt.Errorf("%s: %w", msg.ErrorInstallVulcan, err)
+			}
 		}
-		return err
 	}
-
 	_, _, err = cmd.CommandRunner("npm update -g edge-functions", []string{})
 	if err != nil {
 		return fmt.Errorf("%s: %w", msg.ErrorUpdatingVulcan, err)
