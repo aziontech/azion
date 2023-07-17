@@ -332,3 +332,10 @@ func AskForInput(in io.ReadCloser, out io.Writer, message string) (response stri
 	fmt.Fscanln(in, &response)
 	return response
 }
+
+func TruncateString(str string) string {
+	if len(str) > 30 {
+		return str[:30] + "..."
+	}
+	return str
+}
