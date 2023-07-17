@@ -1,5 +1,6 @@
 {
     "name": "",
+    "description": "This is a very basic rule engine description",
     "criteria": [
         [
             {

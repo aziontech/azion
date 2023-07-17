@@ -57,7 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorUnmarshalReader
 			}
 
-			if err := validRequest(request); err != nil {
+			if err := validateRequest(request); err != nil {
 				return err
 			}
 
@@ -73,13 +73,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.RulesEngineCreateFlagEdgeApplicationID)
-    flags.StringVarP(&fields.Phase, "phase", "p", "", msg.RulesEngineCreateFlagPhase)
+	flags.StringVarP(&fields.Phase, "phase", "p", "", msg.RulesEngineCreateFlagPhase)
 	flags.StringVar(&fields.Path, "in", "", msg.RulesEngineCreateFlagIn)
 	flags.BoolP("help", "h", false, msg.RulesEngineCreateHelpFlag)
 	return cmd
 }
 
-func validRequest(request api.CreateRulesEngineRequest) error {
+func validateRequest(request api.CreateRulesEngineRequest) error {
 	if request.GetName() == "" {
 		return msg.ErrorNameEmpty
 	}
