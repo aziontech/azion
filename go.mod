@@ -9,12 +9,14 @@ require (
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/manifoldco/promptui v0.9.0
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.14.0
 	github.com/tidwall/gjson v1.14.3
 	github.com/tidwall/sjson v1.2.5
 	github.com/zRedShift/mimemagic v1.2.0
 	go.uber.org/zap v1.24.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -69,6 +71,5 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
