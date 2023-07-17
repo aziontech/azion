@@ -43,5 +43,5 @@ var (
 	ErrorProductNotOwned        = errors.New("This account does not own the following product")
 	ErrorUnknownSystem          = errors.New("Unknown system")
 	ErrorCommandNotFound        = errors.New("Command '%s' not found")
-	ErrorGetAssetsNamesAzioncli = errors.New("failed to fetch the assets names from azioncli")
+	ErrorGetAssetsNamesAzioncli = errors.New("Failed to fetch the assets names from azioncli")
 )
