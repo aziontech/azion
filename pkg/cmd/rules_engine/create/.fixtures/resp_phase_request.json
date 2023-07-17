@@ -3,6 +3,7 @@
         "id": 210543,
         "name": "New Rule 534322",
         "phase": "request",
+        "description": "Are you approaching me?",
         "behaviors": [
             {
                 "name": "deliver",

@@ -97,6 +97,7 @@ func format(cmd *cobra.Command, rules api.RulesEngineResponse) ([]byte, error) {
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
 	tbl.AddRow("Rules Engine ID: ", rules.GetId())
 	tbl.AddRow("Name: ", rules.GetName())
+	tbl.AddRow("Description: ", rules.GetDescription())
 	tbl.AddRow("Order: ", rules.GetOrder())
 	tbl.AddRow("Active: ", rules.GetIsActive())
 	tbl.AddRow("")

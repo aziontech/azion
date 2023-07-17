@@ -56,6 +56,7 @@ type EdgeApplicationResponse interface {
 type RulesEngineResponse interface {
 	GetId() int64
 	GetPhase() string
+	GetDescription() string
 	GetBehaviors() []sdk.RulesEngineResultResponseBehaviors
 	GetCriteria() [][]sdk.RulesEngineCriteria
 	GetIsActive() bool
