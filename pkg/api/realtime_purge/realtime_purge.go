@@ -34,6 +34,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
+	logger.Debug("Purge")
 	var purg sdk.PurgeUrlRequest
 	purg.SetUrls(urlToPurge)
 	purg.SetMethod("delete")
@@ -41,7 +42,7 @@ func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
 
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
-		logger.Debug("Error while purgin a cache", zap.Error(err))
+		logger.Debug("Error while purging a cache", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))

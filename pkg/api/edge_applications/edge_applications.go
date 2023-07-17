@@ -453,7 +453,7 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 		Sort(opts.Sort).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing rules engines", zap.Error(err))
+		logger.Debug("Error while listing rules in rules engines", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -467,7 +467,7 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	logger.Debug("Get Rules Engine")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting a rules engine", zap.Error(err))
+		logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -480,7 +480,7 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64,
 	logger.Debug("Delete Rules Engine")
 	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
 	if err != nil {
-		logger.Debug("Error while deleting a rules engine", zap.Error(err))
+		logger.Debug("Error while deleting a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -495,7 +495,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	edgeApplicationRules, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a rules engine", zap.Error(err))
+		logger.Debug("Error while updating a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -513,7 +513,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a rules engine [run-function step]", zap.Error(err))
+		logger.Debug("Error while updating a rule in rules engine [run-function step]", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -529,7 +529,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a rules engine", zap.Error(err))
+		logger.Debug("Error while updating a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -546,7 +546,7 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating a rules engine", zap.Error(err))
+		logger.Debug("Error while creating a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
@@ -556,7 +556,7 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 }
 
 func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.ApplicationInstancesGetResponse, error) {
-	logger.Debug("List Instances Edge Function")
+	logger.Debug("List Edge Function Instances")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -579,7 +579,7 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 }
 
 func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
-	logger.Debug("Delete Instance Edge Function")
+	logger.Debug("Delete Edge Function Instance")
 	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
 
 	httpResp, err := req.Execute()
@@ -595,7 +595,7 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 }
 
 func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
-	logger.Debug("Create Instance Edge Function")
+	logger.Debug("Create Edge Function Instance")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
 		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
 	if err != nil {
@@ -609,7 +609,7 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstanc
 }
 
 func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID int64) (FunctionsInstancesResponse, error) {
-	logger.Debug("Get Instance Edge Function")
+	logger.Debug("Get Edge Function Instance")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdGet(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting an edge function instance", zap.Error(err))

@@ -102,7 +102,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionResponse, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
-	logger.Debug("Create Function")
+	logger.Debug("Create Edge Function")
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 
 	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
@@ -136,7 +136,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, int64, error) {
-	logger.Debug("List Edge Function")
+	logger.Debug("List Edge Functions")
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).

@@ -34,7 +34,7 @@ var (
 	static          	Create a static page in application on edge.
 	nextjs              Create a serverless NextJS edge-runtime application on edge.`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
-	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start a Edge Application on Azion’s platform"
+	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application type to start an Edge Application on the Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge application's name"
 	EdgeApplicationsInitFlagType          = "The type of Edge application <simple | static | nextjs>"
