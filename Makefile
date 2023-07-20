@@ -1,10 +1,10 @@
-PATH := /usr/local/go/bin:$(PATH)
-SHELL := env PATH=$(PATH) /bin/bash
 GO := $(shell which go)
+PATH := $(dir $(GO)):$(PATH)
+SHELL := env PATH=$(PATH) /bin/bash
 NAME := azioncli
 
 ifeq (, $(GO))
-$(error "No go binary found in $(PATH), please install go 1.17 before continue")
+$(error "No go binary found in your system, please install go 1.17 before continuing")
 endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)

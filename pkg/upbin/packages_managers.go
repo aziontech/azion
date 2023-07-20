@@ -3,13 +3,14 @@ package upbin
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/utils"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/aziontech/azion-cli/utils"
 )
 
 const (
@@ -43,6 +44,7 @@ func managersPackages() (bool, error) {
 		if err != nil {
 			return false, err
 		}
+		return true, nil
 	}
 
 	err = downloadAndInstallPackageFunc(url)
