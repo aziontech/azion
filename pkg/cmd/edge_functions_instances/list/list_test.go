@@ -4,78 +4,45 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
-func TestNewCmd(t *testing.T) {
-	t.Run("list url not found", func(t *testing.T) {
+func TestList(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	t.Run("command list with successes", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
-			httpmock.StatusStringResponse(404, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"-a", "12321"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
-
-	t.Run("empty", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
-			httpmock.StatusStringResponse(204, ""),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"-a", "12321"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
-	t.Run("list empty", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
-			httpmock.JSONFromFile(".fixtures/no_resp.json"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"-a", "12321"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
-	t.Run("list success", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "/edge_applications/12321/functions_instance"),
+			httpmock.REST("GET", "edge_applications/1674040168/functions_instances"),
 			httpmock.JSONFromFile(".fixtures/resp.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
-
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "12321"})
+		cmd.SetArgs([]string{"-a", "1674040168"})
 
 		_, err := cmd.ExecuteC()
-		require.Error(t, err)
+		require.NoError(t, err)
+	})
+
+	t.Run("command list response without items", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1674040168/functions_instances"),
+			httpmock.JSONFromFile(".fixtures/no_resp.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"-a", "1674040168"})
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
 	})
 }

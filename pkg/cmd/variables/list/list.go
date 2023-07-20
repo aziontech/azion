@@ -2,7 +2,7 @@ package list
 
 import (
 	"context"
-	"io"
+	"github.com/aziontech/azion-cli/utils"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -12,7 +12,6 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/printer"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-			if err := listAllVariables(client, f.IOStreams.Out, opts); err != nil {
+			if err := listAllVariables(client, f, opts); err != nil {
 				return err
 			}
 			return nil
@@ -45,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return listCmd
 }
 
-func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOptions) error {
+func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	c := context.Background()
 
 	resp, err := client.List(c)
@@ -54,11 +53,9 @@ func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOpt
 	}
 
 	tbl := table.New("ID", "KEY", "VALUE")
-	tbl.WithWriter(out)
-	fields := []string{"GetUuid()", "GetKey()", "GetValue()"}
+	tbl.WithWriter(f.IOStreams.Out)
 
 	if opts.Details {
-		fields = append(fields, "GetSecret()", "GetLastEditor()")
 		tbl = table.New("ID", "KEY", "VALUE", "SECRET", "LAST EDITOR")
 	}
 
@@ -66,13 +63,8 @@ func listAllVariables(client *api.Client, out io.Writer, opts *contracts.ListOpt
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-	rows := printer.BuildRows(resp, fields)
-	for _, row := range rows {
-		if len(row) == 5 {
-			tbl.AddRow(row[0], row[1], row[2], row[3], row[4])
-		} else {
-			tbl.AddRow(row[0], row[1], row[2])
-		}
+	for _, v := range resp {
+		tbl.AddRow(v.GetUuid(), v.GetKey(), utils.TruncateString(v.GetValue()), v.GetSecret(), v.GetLastEditor())
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"

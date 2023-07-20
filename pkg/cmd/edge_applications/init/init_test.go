@@ -10,6 +10,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
+
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -22,6 +25,49 @@ import (
 )
 
 func TestCobraCmd(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+	t.Run("success with CDN", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		f, stdout, _ := testutils.NewFactory(mock)
+		initCmd := NewInitCmd(f)
+
+		initCmd.LookPath = func(bin string) (string, error) {
+			return "", nil
+		}
+
+		initCmd.CommandRunner = func(cmd string, envs []string) (string, int, error) {
+			return "", 0, nil
+		}
+		initCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte(`{"init": {"cmd": "ls", "output-ctrl": "on-error"}, "type":"static"}`), nil
+		}
+		initCmd.WriteFile = func(filename string, data []byte, perm fs.FileMode) error {
+			return nil
+		}
+		initCmd.Rename = func(oldpath string, newpath string) error {
+			return nil
+		}
+		initCmd.Mkdir = func(path string, perm os.FileMode) error {
+			return nil
+		}
+		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
+			return &git.Repository{}, nil
+		}
+
+		cmd := NewCobraCmd(initCmd)
+
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--type", "simple"})
+
+		in := bytes.NewBuffer(nil)
+		in.WriteString("yes\n")
+		f.IOStreams.In = io.NopCloser(in)
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Contains(t, stdout.String(), fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, "SUUPA_DOOPA"))
+	})
+
 	t.Run("without package.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
@@ -238,6 +284,7 @@ func TestCobraCmd(t *testing.T) {
 }
 
 func TestInitCmd(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("without config.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
@@ -258,6 +305,7 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		i := InitInfo{}
+		i.TypeLang = "nextjs"
 		err := cmd.runInitCmdLine(&i)
 		require.EqualError(t, err, "Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
@@ -289,11 +337,12 @@ func TestInitCmd(t *testing.T) {
 		}
 
 		i := InitInfo{}
+		i.TypeLang = "nextjs"
 		err := cmd.runInitCmdLine(&i)
 		require.ErrorIs(t, err, msg.ErrReadEnvFile)
 	})
 
-	t.Run("Failed to run the command specified", func(t *testing.T) {
+	t.Run("If type is different than nextjs, return nil", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
 		cmd := NewInitCmd(f)
@@ -320,7 +369,7 @@ func TestInitCmd(t *testing.T) {
 
 		i := InitInfo{TypeLang: "static", PathWorkingDir: "."}
 		err := cmd.runInitCmdLine(&i)
-		require.ErrorIs(t, err, utils.ErrorUnsupportedType)
+		require.NoError(t, err)
 	})
 
 	t.Run("success with NextJS", func(t *testing.T) {
@@ -374,6 +423,8 @@ func TestInitCmd(t *testing.T) {
 }
 
 func Test_fetchTemplates(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
 	t.Run("tests flow full template", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 		cmd := NewInitCmd(f)
@@ -408,6 +459,8 @@ func (m *mockReferenceIter) ForEach(f func(*plumbing.Reference) error) error {
 }
 
 func Test_SortTag(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
 	mockIter := new(mockReferenceIter)
 
 	// defines the mock action

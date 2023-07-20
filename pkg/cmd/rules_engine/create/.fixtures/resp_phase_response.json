@@ -3,6 +3,7 @@
         "id": 210544,
         "name": "New Rule 534322",
         "phase": "response",
+        "description": "This is a very basic rule engine description",
         "behaviors": [
             {
                 "name": "deliver",

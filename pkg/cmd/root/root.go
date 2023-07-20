@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"net/http"
 	"time"
 
@@ -22,9 +23,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/pkg/upbin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
+
+var DoNotUpdate bool
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -35,6 +39,13 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 			DisableDefaultCmd: true,
 		},
 		Version: version.BinVersion,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			logger.LogLevel(f.Logger)
+			if !DoNotUpdate {
+				return upbin.UpdateBin()
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -48,6 +59,11 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		rootHelpFunc(f, cmd, args)
 	})
+
+	// Setting the optional flag
+	rootCmd.PersistentFlags().BoolVar(&f.Debug, "debug", false, msg.RootLogDebug)
+	rootCmd.PersistentFlags().BoolVarP(&f.Quiet, "quiet", "q", false, msg.RootLogQuiet)
+	rootCmd.PersistentFlags().BoolVar(&DoNotUpdate, "no-update", false, msg.RootDoNotUpdate)
 
 	rootCmd.AddCommand(configure.NewCmd(f))
 	rootCmd.AddCommand(completion.NewCmd(f))
@@ -63,6 +79,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(device_groups.NewCmd(f))
 	rootCmd.AddCommand(variables.NewCmd(f))
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+
 	return rootCmd
 }
 

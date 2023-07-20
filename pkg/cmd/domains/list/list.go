@@ -61,7 +61,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	if cmd.Flags().Changed("details") {
 		for _, v := range domains.Results {
-			tbl.AddRow(v.Id, v.Name, *v.DomainName, v.DigitalCertificateId.Get(), *v.EdgeApplicationId, *v.CnameAccessOnly, v.Cnames, *v.IsActive)
+			tbl.AddRow(v.Id, v.Name, v.DomainName, v.DigitalCertificateId.Get(), v.EdgeApplicationId, v.CnameAccessOnly, v.Cnames, v.IsActive)
 		}
 	} else {
 		for _, v := range domains.Results {

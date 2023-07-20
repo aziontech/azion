@@ -180,7 +180,7 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 	return conf, nil
 }
 
-func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
+func GetAzionJsonSimple() (*contracts.AzionApplicationSimple, error) {
 	path, err := GetWorkingDir()
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func GetAzionJsonCdn() (*contracts.AzionApplicationCdn, error) {
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
-	conf := &contracts.AzionApplicationCdn{}
+	conf := &contracts.AzionApplicationSimple{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
 		return nil, ErrorUnmarshalAzionJsonFile
@@ -331,4 +331,11 @@ func AskForInput(in io.ReadCloser, out io.Writer, message string) (response stri
 	fmt.Fprintf(out, "%s: ", message)
 	fmt.Fscanln(in, &response)
 	return response
+}
+
+func TruncateString(str string) string {
+	if len(str) > 30 {
+		return str[:30] + "..."
+	}
+	return str
 }

@@ -1,6 +1,8 @@
 package describe
 
 import (
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +14,7 @@ import (
 )
 
 func TestDescribe(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("describe an domains", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

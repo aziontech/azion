@@ -2,6 +2,8 @@ package update
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_settings"
@@ -12,6 +14,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("create new cache_setting", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

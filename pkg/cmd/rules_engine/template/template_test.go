@@ -8,12 +8,14 @@ import (
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestDescribe(t *testing.T) {
-
+	logger.New(zapcore.DebugLevel)
 	t.Run("export to a path", func(t *testing.T) {
 
 		f, stdout, _ := testutils.NewFactory(nil)

@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap"
 
 	"os"
 
@@ -31,12 +33,11 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Upload(ctx context.Context, versionID, path, contentType string, file *os.File) error {
 	c.apiClient.GetConfig().DefaultHeader["Content-Disposition"] = fmt.Sprintf("attachment; filename=\"%s\"", path)
-	if len(contentType) > 0 {
-		c.apiClient.GetConfig().DefaultHeader["Content-Type"] = contentType
-	}
-	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file)
+	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, versionID).XAzionStaticPath(path).Body(file).ContentType(contentType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
+		logger.Debug("Error while uploading file to storage api", zap.Error(err))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

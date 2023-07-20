@@ -1,8 +1,10 @@
 package list
 
 import (
-    // "fmt"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -11,11 +13,12 @@ import (
 )
 
 var (
-    tblWithFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n2995  20220124-batata  javascript  false   \n3032  TestandoCLI4     javascript  false   \n"
-    tblNoFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n"
+	tblWithFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n2995  20220124-batata  javascript  false   \n3032  TestandoCLI4     javascript  false   \n"
+	tblNoFunc   string = "ID    NAME             LANGUAGE    ACTIVE  \n"
 )
 
 func TestList(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	t.Run("more than one function", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
@@ -30,10 +33,10 @@ func TestList(t *testing.T) {
 
 		cmd.SetArgs([]string{})
 
- 		_, err := cmd.ExecuteC()
+		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t,tblWithFunc, stdout.String())
-})
+		assert.Equal(t, tblWithFunc, stdout.String())
+	})
 
 	t.Run("no functions", func(t *testing.T) {
 		mock := &httpmock.Registry{}

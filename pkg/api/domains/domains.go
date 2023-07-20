@@ -8,8 +8,10 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/domains"
+	"go.uber.org/zap"
 )
 
 type Client struct {
@@ -52,29 +54,45 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
-	req := c.apiClient.DomainsApi.GetDomain(ctx, id)
-	res, httpResp, err := req.Execute()
+	logger.Debug("Get Domain")
+	request := c.apiClient.DomainsApi.GetDomain(ctx, id)
+	res, httpResp, err := request.Execute()
 	if err != nil {
+		logger.Debug("Error while getting a domain", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &res.Results, nil
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
+	logger.Debug("Create Domain")
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		logger.Debug("Error while creating a domain", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &domainsResponse.Results, nil
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
+	logger.Debug("Update Domain")
 	str := strconv.FormatInt(req.Id, 10)
 	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
+
 	domainsResponse, httpResp, err := request.Execute()
 
 	if err != nil {
+		logger.Debug("Error while updating a domain", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -83,6 +101,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.DomainResponseWithResults, error) {
 	// different from other APIs, domains will return internal server error if order by is empty
+	logger.Debug("List Domains")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -94,6 +113,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		Execute()
 
 	if err != nil {
+		logger.Debug("Error while listing domains", zap.Error(err))
+		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+		logger.Debug("Headers", zap.Any("http", httpResp.Header))
+		logger.Debug("Response body", zap.Any("http", httpResp.Body))
 		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -101,12 +124,13 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 }
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
+	logger.Debug("Delete Domain")
 	str := strconv.FormatInt(id, 10)
 	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
 
 	httpResp, err := req.Execute()
-
 	if err != nil {
+		logger.Error("error", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
