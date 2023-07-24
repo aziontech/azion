@@ -269,7 +269,7 @@ func createVersionID(dir string) string {
 }
 
 func callVulcan(cmd *BuildCmd, typeLang, mode string) error {
-	command := "vulcan build --preset " + typeLang + " --mode " + mode
+	command := "npx --yes edge-functions@1.0.0 build --preset " + typeLang + " --mode " + mode
 	_, _, err := cmd.CommandRunner(command, []string{})
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
