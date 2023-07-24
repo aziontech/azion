@@ -1,9 +1,7 @@
 package ls
 
 import (
-	"fmt"
 	"io"
-	"os/exec"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -11,7 +9,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -21,7 +18,6 @@ type LsCmd struct {
 	Io                  *iostreams.IOStreams
 	CommandRunner       func(cmd string, envvars []string) (string, int, error)
 	CommandRunnerStream func(out io.Writer, cmd string, envvars []string) error
-	LookPath            func(bin string) (string, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -37,7 +33,6 @@ func NewLsCmd(f *cmdutil.Factory) *LsCmd {
 		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
 			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
-		LookPath: exec.LookPath,
 	}
 }
 
@@ -61,28 +56,8 @@ func NewCobraCmd(ls *LsCmd) *cobra.Command {
 }
 
 func (cmd *LsCmd) run(cobraCmd *cobra.Command) error {
-	_, err := cmd.LookPath("vulcan")
-	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found in $PATH") {
-			var errInstall error
-			if cobraCmd.Flags().Changed("debug") {
-				logger.FInfo(cmd.Io.Out, msg.InstallingVulcan)
-				errInstall = cmd.CommandRunnerStream(cmd.Io.Out, "npm install edge-functions -g", []string{})
-			} else {
-				logger.FInfo(cmd.Io.Out, msg.InstallingVulcan)
-				_, _, errInstall = cmd.CommandRunner("npm install edge-functions -g", []string{})
-			}
-			if errInstall != nil {
-				return fmt.Errorf("%s: %w", msg.ErrorInstallVulcan, err)
-			}
-		}
-	}
-	_, _, err = cmd.CommandRunner("npm update -g edge-functions", []string{})
-	if err != nil {
-		return fmt.Errorf("%s: %w", msg.ErrorUpdatingVulcan, err)
-	}
 
-	output, _, err := cmd.CommandRunner("vulcan presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.0.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
