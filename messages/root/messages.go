@@ -1,8 +1,8 @@
 package root
 
 var (
-	RootUsage = `azioncli <command> <subcommand> [flags]
-azioncli [flags]
+	RootUsage = `azion <command> <subcommand> [flags]
+azion [flags]
  	`
 	RootDescription = "Azion CLI %s"
 	RootHelpFlag    = "Displays more information about the Azion CLI"
