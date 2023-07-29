@@ -59,7 +59,6 @@ func (m *MockReferenceIter) ForEach(fn func(*plumbing.Reference) error) error {
 }
 
 func TestLatestTag(t *testing.T) {
-	// Create mock references
 	refs := []*plumbing.Reference{
 		plumbing.NewReferenceFromStrings("refs/tags/0.1.0", "commit1"),
 		plumbing.NewReferenceFromStrings("refs/tags/0.2.0", "commit2"),
@@ -73,15 +72,12 @@ func TestLatestTag(t *testing.T) {
 		plumbing.NewReferenceFromStrings("refs/tags/1.1.1", "commit10"),
 	}
 
-	// Create mock reference iterator
 	mockIter := &MockReferenceIter{
 		References: refs,
 	}
 
-	// Call the function under test
 	tag, err := latestTag(mockIter)
 
-	// Assert the expected result
 	assert.NoError(t, err)
 	assert.Equal(t, "refs/tags/1.1.1", tag)
 }
@@ -98,4 +94,38 @@ func TestGetLastActivity(t *testing.T) {
 	lastActivity, err := getLastActivity()
 	assert.NoError(t, err)
 	assert.Equal(t, expectedLastActivity, lastActivity)
+}
+
+func Test_getNumbersString(t *testing.T) {
+	type args struct {
+		str string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "random",
+			args: args{"abc 123 def 456.78 ghi 9"},
+			want: "123456789",
+		},
+		{
+			name: "version",
+			args: args{"v1.0.0"},
+			want: "100",
+		},
+		{
+			name: "tag",
+			args: args{"refs/tags/1.1.1"},
+			want: "111",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := getNumbersString(tt.args.str); got != tt.want {
+				t.Errorf("getNumbersString() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

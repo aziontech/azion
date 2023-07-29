@@ -121,16 +121,7 @@ func latestTag(tags ReferenceIter) (tag string, err error) {
 		tagCurrent := t.Name().String() // return this format "refs/tags/0.10.0"
 
 		if !strings.Contains(tagCurrent, "dev") && !strings.Contains(tagCurrent, "beta") {
-			versionParts := strings.Split(tagCurrent, ".")
-
-			const prefix string = "refs/tags/"
-
-			major := versionParts[0][len(prefix):]
-			minor := versionParts[1]
-			patch := versionParts[2]
-
-			current, _ := strconv.Atoi(fmt.Sprintf("%s%s%s", major, minor, patch))
-
+			current, _ := strconv.Atoi(getNumbersString(tagCurrent))
 			if current > biggerVersionSoFar {
 				biggerVersionSoFar = current
 				tag = tagCurrent
@@ -141,6 +132,17 @@ func latestTag(tags ReferenceIter) (tag string, err error) {
 	})
 
 	return tag, err
+}
+
+// getNumbersString get numbers from a string
+func getNumbersString(str string) string {
+	var currentNumber string
+	for _, char := range str {
+		if unicode.IsDigit(char) {
+			currentNumber += string(char)
+		}
+	}
+	return currentNumber
 }
 
 func which(command string) (string, error) {
