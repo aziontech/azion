@@ -61,16 +61,16 @@ func (m *MockReferenceIter) ForEach(fn func(*plumbing.Reference) error) error {
 func TestLatestTag(t *testing.T) {
 	// Create mock references
 	refs := []*plumbing.Reference{
-		plumbing.NewReferenceFromStrings("refs/tags/v0.1.0", "commit1"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.2.0", "commit2"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.3.0", "commit3"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.3.1", "commit4"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.4.0", "commit5"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.4.1", "commit6"),
-		plumbing.NewReferenceFromStrings("refs/tags/v0.4.3", "commit7"),
-		plumbing.NewReferenceFromStrings("refs/tags/v1.0.0", "commit8"),
-		plumbing.NewReferenceFromStrings("refs/tags/v1.1.0", "commit9"),
-		plumbing.NewReferenceFromStrings("refs/tags/v1.1.1", "commit10"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.1.0", "commit1"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.2.0", "commit2"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.3.0", "commit3"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.3.1", "commit4"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.4.0", "commit5"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.4.1", "commit6"),
+		plumbing.NewReferenceFromStrings("refs/tags/0.4.3", "commit7"),
+		plumbing.NewReferenceFromStrings("refs/tags/1.0.0", "commit8"),
+		plumbing.NewReferenceFromStrings("refs/tags/1.1.0", "commit9"),
+		plumbing.NewReferenceFromStrings("refs/tags/1.1.1", "commit10"),
 	}
 
 	// Create mock reference iterator
@@ -83,7 +83,7 @@ func TestLatestTag(t *testing.T) {
 
 	// Assert the expected result
 	assert.NoError(t, err)
-	assert.Equal(t, "refs/tags/v1.1.1", tag)
+	assert.Equal(t, "refs/tags/1.1.1", tag)
 }
 
 func TestGetLastActivity(t *testing.T) {

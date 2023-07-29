@@ -113,17 +113,19 @@ type ReferenceIter interface {
 	ForEach(func(*plumbing.Reference) error) error
 }
 
-// latestTag return value in format refs/tags/v0.10.0
+// latestTag return value in format refs/tags/0.10.0
 func latestTag(tags ReferenceIter) (tag string, err error) {
 	var biggerVersionSoFar int = 0
 
 	err = tags.ForEach(func(t *plumbing.Reference) error {
-		tagCurrent := t.Name().String() // return this format "refs/tags/v0.10.0"
+		tagCurrent := t.Name().String() // return this format "refs/tags/0.10.0"
 
-		if !strings.Contains(tagCurrent, "dev") {
+		if !strings.Contains(tagCurrent, "dev") && !strings.Contains(tagCurrent, "beta") {
 			versionParts := strings.Split(tagCurrent, ".")
 
-			major := strings.TrimPrefix(versionParts[0], "refs/tags/v")
+			const prefix string = "refs/tags/"
+
+			major := versionParts[0][len(prefix):]
 			minor := versionParts[1]
 			patch := versionParts[2]
 
