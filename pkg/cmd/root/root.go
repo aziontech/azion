@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -19,7 +20,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rootCmd := &cobra.Command{
 		Use:     msg.RootUsage,
-		Short:   fmt.Sprintf(msg.RootDescription, version),
+		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
 		Version: version,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -36,6 +37,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	})
 
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 
 	return rootCmd
 }
