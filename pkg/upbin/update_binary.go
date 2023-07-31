@@ -113,22 +113,15 @@ type ReferenceIter interface {
 	ForEach(func(*plumbing.Reference) error) error
 }
 
-// latestTag return value in format refs/tags/v0.10.0
+// latestTag return value in format refs/tags/0.10.0
 func latestTag(tags ReferenceIter) (tag string, err error) {
 	var biggerVersionSoFar int = 0
 
 	err = tags.ForEach(func(t *plumbing.Reference) error {
-		tagCurrent := t.Name().String() // return this format "refs/tags/v0.10.0"
+		tagCurrent := t.Name().String() // return this format "refs/tags/0.10.0"
 
-		if !strings.Contains(tagCurrent, "dev") {
-			versionParts := strings.Split(tagCurrent, ".")
-
-			major := strings.TrimPrefix(versionParts[0], "refs/tags/v")
-			minor := versionParts[1]
-			patch := versionParts[2]
-
-			current, _ := strconv.Atoi(fmt.Sprintf("%s%s%s", major, minor, patch))
-
+		if !strings.Contains(tagCurrent, "dev") && !strings.Contains(tagCurrent, "beta") {
+			current, _ := strconv.Atoi(getNumbersString(tagCurrent))
 			if current > biggerVersionSoFar {
 				biggerVersionSoFar = current
 				tag = tagCurrent
@@ -139,6 +132,17 @@ func latestTag(tags ReferenceIter) (tag string, err error) {
 	})
 
 	return tag, err
+}
+
+// getNumbersString get numbers from a string
+func getNumbersString(str string) string {
+	var currentNumber string
+	for _, char := range str {
+		if unicode.IsDigit(char) {
+			currentNumber += string(char)
+		}
+	}
+	return currentNumber
 }
 
 func which(command string) (string, error) {
