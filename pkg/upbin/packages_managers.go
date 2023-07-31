@@ -16,7 +16,6 @@ import (
 const (
 	urlDownloadPackage string = "https://github.com/aziontech/azion-cli/releases/download/%s/%s"
 	urlAssetsAzioncli  string = "https://api.github.com/repos/aziontech/azion-cli/releases/latest"
-	tapAzioncli        string = "aziontech/tap/azioncli"
 )
 
 type Release struct {
