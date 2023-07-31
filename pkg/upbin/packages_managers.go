@@ -191,18 +191,9 @@ func packageManagerExists(command string) bool {
 }
 
 func installPackageManager(manager string) error {
-	var command string
-	switch manager {
-
-	case "brew":
-		command = "upgrade"
-	}
-
-	cmd := exec.Command(manager, command, tapAzioncli)
-	err := cmd.Run()
+	_, _, err := utils.RunCommandWithOutput([]string{}, "brew upgrade azioncli")
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
