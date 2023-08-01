@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var TokenFlag string
+
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	version := "1.0.0"
 
@@ -22,10 +24,18 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:     msg.RootUsage,
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
 		Version: version,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			err := doPreCommandCheck(cmd, f, TokenFlag)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
-		SilenceErrors: true,
+		SilenceErrors: true, // Silence errors, so the help message won't be shown on flag error
+		SilenceUsage:  true, // Silence usage on error
 	}
 
 	rootCmd.SetIn(f.IOStreams.In)
@@ -36,7 +46,12 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
+	//Global flags
+	rootCmd.PersistentFlags().StringVarP(&TokenFlag, "token", "t", "", msg.RootTokenFlag)
+
+	//other flags
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+	//set template for -v flag
 	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 
 	return rootCmd
