@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Carry out all pre-cmd checks needed
+// doPreCommandCheck carries out all pre-cmd checks needed
 func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, configureToken string) error {
 
 	err := checkTokenSent(cmd, f, configureToken)
