@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	msg "github.com/aziontech/azion-cli/messages/configure"
+	msg "github.com/aziontech/azion-cli/messages/root"
 
 	"github.com/aziontech/azion-cli/pkg/constants"
 )
