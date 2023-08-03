@@ -16,7 +16,6 @@ import (
 const (
 	urlDownloadPackage string = "https://github.com/aziontech/azion-cli/releases/download/%s/%s"
 	urlAssetsAzioncli  string = "https://api.github.com/repos/aziontech/azion-cli/releases/latest"
-	tapAzioncli        string = "aziontech/tap/azioncli"
 )
 
 type Release struct {
@@ -191,18 +190,9 @@ func packageManagerExists(command string) bool {
 }
 
 func installPackageManager(manager string) error {
-	var command string
-	switch manager {
-
-	case "brew":
-		command = "upgrade"
-	}
-
-	cmd := exec.Command(manager, command, tapAzioncli)
-	err := cmd.Run()
+	_, _, err := utils.RunCommandWithOutput([]string{}, "brew upgrade azioncli")
 	if err != nil {
 		return err
 	}
-
 	return nil
 }

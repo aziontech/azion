@@ -1,4 +1,4 @@
-package cmd
+package root
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -15,17 +16,24 @@ import (
 	"github.com/spf13/viper"
 )
 
-var TokenFlag string
+var (
+	tokenFlag  string
+	configFlag string
+)
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
-	version := "1.0.0"
+	version := version.BinVersion
 
 	rootCmd := &cobra.Command{
 		Use:     msg.RootUsage,
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
 		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			err := doPreCommandCheck(cmd, f, TokenFlag)
+			err := doPreCommandCheck(cmd, f, PreCmd{
+				config: configFlag,
+				token:  tokenFlag,
+			})
+
 			if err != nil {
 				return err
 			}
@@ -47,10 +55,12 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	})
 
 	//Global flags
-	rootCmd.PersistentFlags().StringVarP(&TokenFlag, "token", "t", "", msg.RootTokenFlag)
+	rootCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
+	rootCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
 
 	//other flags
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+
 	//set template for -v flag
 	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 

@@ -7,7 +7,13 @@ bin/
 dist/
 docs/
 .vscode/
+<<<<<<< HEAD
+azion/
+.edge/
+
+=======
 utils/azion
+>>>>>>> origin/create-token-flag
 #Files
 .DS_Store
 package.json

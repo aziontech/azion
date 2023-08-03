@@ -1,20 +1,39 @@
-package cmd
+package root
 
 import (
 	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
-// doPreCommandCheck carries out all pre-cmd checks needed
-func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, configureToken string) error {
+type PreCmd struct {
+	token  string
+	config string
+}
 
-	err := checkTokenSent(cmd, f, configureToken)
-	if err != nil {
+// doPreCommandCheck carry out all pre-cmd checks needed
+func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error {
+
+	if err := setConfigPath(cmd, pre.config); err != nil {
 		return err
+	}
+
+	if err := checkTokenSent(cmd, f, pre.token); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func setConfigPath(cmd *cobra.Command, cfg string) error {
+
+	if cmd.Flags().Changed("config") {
+		config.SetPath(cfg)
+		return nil
 	}
 
 	return nil

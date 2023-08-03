@@ -10,6 +10,7 @@ azion [flags]
 	RootLogDebug    = "Displays log at a debug level"
 	RootLogQuiet    = "Silences log completely; mostly used for automation purposes"
 	RootTokenFlag   = "Saves a given personal token locally to authorize CLI commands"
+	RootConfigFlag  = "Sets the Azion configuration folder for the current command only, without changing persistent settings."
 	TokenSavedIn    = "Token saved in %v\n"
 	TokenUsedIn     = "This token will be used by default when calling any command"
 )
