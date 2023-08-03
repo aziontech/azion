@@ -188,7 +188,6 @@ func GetAzionJsonSimple() (*contracts.AzionApplicationSimple, error) {
 	jsonConf := path + "/azion/azion.json"
 	file, err := os.ReadFile(jsonConf)
 	if err != nil {
-		fmt.Println(&jsonConf)
 		return nil, ErrorOpeningAzionJsonFile
 	}
 

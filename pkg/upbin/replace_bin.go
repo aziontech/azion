@@ -2,10 +2,11 @@ package upbin
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/utils"
 	"io"
 	"net/http"
 	"os"
+
+	"github.com/aziontech/azion-cli/utils"
 )
 
 const urlDownloadAzioncli string = "https://downloads.azion.com/%s/%s/azioncli"

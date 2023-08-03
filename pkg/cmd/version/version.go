@@ -1,10 +1,10 @@
 package version
 
 import (
-	"fmt"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +20,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azioncli version
         `),
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintln(f.IOStreams.Out, "azioncli version "+BinVersion)
+			color.New(color.Bold).Fprintln(f.IOStreams.Out, "Azion CLI "+BinVersion+"\n")
 		},
 	}
 

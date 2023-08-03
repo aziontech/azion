@@ -1,55 +1,48 @@
-package cmd
+package root
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"fmt"
 	"net/http"
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
-	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings"
-	completion "github.com/aziontech/azion-cli/pkg/cmd/completion"
-	"github.com/aziontech/azion-cli/pkg/cmd/configure"
-	"github.com/aziontech/azion-cli/pkg/cmd/device_groups"
-	"github.com/aziontech/azion-cli/pkg/cmd/domains"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_services"
-	"github.com/aziontech/azion-cli/pkg/cmd/origins"
-	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine"
-	"github.com/aziontech/azion-cli/pkg/cmd/variables"
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/token"
-	"github.com/aziontech/azion-cli/pkg/upbin"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var DoNotUpdate bool
+var (
+	tokenFlag  string
+	configFlag string
+)
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
+	version := "1.0.0"
+
 	rootCmd := &cobra.Command{
-		Use:   msg.RootUsage,
-		Short: msg.RootShortDescription,
-		Long:  msg.RootLongDescription,
-		CompletionOptions: cobra.CompletionOptions{
-			DisableDefaultCmd: true,
-		},
-		Version: version.BinVersion,
+		Use:     msg.RootUsage,
+		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
+		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			logger.LogLevel(f.Logger)
-			if !DoNotUpdate {
-				return upbin.UpdateBin()
+			err := doPreCommandCheck(cmd, f, PreCmd{
+				config: configFlag,
+				token:  tokenFlag,
+			})
+
+			if err != nil {
+				return err
 			}
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
-		SilenceErrors: true,
+		SilenceErrors: true, // Silence errors, so the help message won't be shown on flag error
+		SilenceUsage:  true, // Silence usage on error
 	}
 
 	rootCmd.SetIn(f.IOStreams.In)
@@ -60,25 +53,15 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	// Setting the optional flag
-	rootCmd.PersistentFlags().BoolVar(&f.Debug, "debug", false, msg.RootLogDebug)
-	rootCmd.PersistentFlags().BoolVarP(&f.Quiet, "quiet", "q", false, msg.RootLogQuiet)
-	rootCmd.PersistentFlags().BoolVar(&DoNotUpdate, "no-update", false, msg.RootDoNotUpdate)
+	//Global flags
+	rootCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
+	rootCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
 
-	rootCmd.AddCommand(configure.NewCmd(f))
-	rootCmd.AddCommand(completion.NewCmd(f))
-	rootCmd.AddCommand(version.NewCmd(f))
-	rootCmd.AddCommand(edge_services.NewCmd(f))
-	rootCmd.AddCommand(edge_functions.NewCmd(f))
-	rootCmd.AddCommand(edge_functions_instances.NewCmd(f))
-	rootCmd.AddCommand(edge_applications.NewCmd(f))
-	rootCmd.AddCommand(domains.NewCmd(f))
-	rootCmd.AddCommand(origins.NewCmd(f))
-	rootCmd.AddCommand(rules_engine.NewCmd(f))
-	rootCmd.AddCommand(cache_settings.NewCmd(f))
-	rootCmd.AddCommand(device_groups.NewCmd(f))
-	rootCmd.AddCommand(variables.NewCmd(f))
+	//other flags
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+
+	//set template for -v flag
+	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 
 	return rootCmd
 }

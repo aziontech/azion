@@ -7,8 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	msg "github.com/aziontech/azion-cli/messages/configure"
+	msg "github.com/aziontech/azion-cli/messages/root"
 
+	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
@@ -33,7 +34,7 @@ type Config struct {
 }
 
 func New(c *Config) (*Token, error) {
-	dir, err := TokenDir()
+	dir, err := config.Dir()
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,8 @@ func (t *Token) Validate(token *string) (bool, error) {
 func (t *Token) Save() error {
 	fbyte := []byte(t.token)
 
-	err := os.MkdirAll(filepath.Dir(t.filepath), os.ModePerm)
+	filepath := filepath.Dir(t.filepath)
+	err := os.MkdirAll(filepath, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -90,7 +92,7 @@ func (t *Token) Save() error {
 }
 
 func ReadFromDisk() (string, error) {
-	dir, err := TokenDir()
+	dir, err := config.Dir()
 	if err != nil {
 		return "", fmt.Errorf("failed to get token dir: %w", err)
 	}
@@ -101,12 +103,4 @@ func ReadFromDisk() (string, error) {
 	}
 
 	return string(filedata[:]), nil
-}
-
-func TokenDir() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(home, ".azion"), nil
 }
