@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// PreCmd pre commands
 type PreCmd struct {
 	token  string
 	config string
