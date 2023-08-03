@@ -6,6 +6,7 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -21,7 +22,7 @@ var (
 )
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
-	version := "1.0.0"
+	version := version.BinVersion
 
 	rootCmd := &cobra.Command{
 		Use:     msg.RootUsage,
