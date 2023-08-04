@@ -1,4 +1,4 @@
-package cmd
+package root
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/text"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -47,6 +48,11 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
 		hasFailed = true
+		return
+	}
+
+	// in case root command is run only with --token flag, we only show the token being saved
+	if command.Flags().Changed("token") {
 		return
 	}
 
@@ -97,32 +103,55 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 		helpEntries = append(helpEntries, helpEntry{"", longText})
 	}
 
-	helpEntries = append(helpEntries, helpEntry{"USAGE", command.UseLine()})
+	styleTitle := color.Bold
+	styleBody := color.FgHiWhite
+
+	helpEntries = append(helpEntries, helpEntry{
+		Title: color.New(styleTitle).Sprint("USAGE"),
+		Body:  color.New(styleBody).Sprint(command.UseLine()),
+	})
 
 	if len(examples) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"EXAMPLES", strings.Join(examples, "\n")})
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("EXAMPLES"),
+			Body:  color.New(color.FgGreen).Sprint(strings.Join(examples, "\n")),
+		})
 	}
 
 	if len(baseCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"COMMANDS", strings.Join(baseCommands, "\n")})
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("COMMANDS"),
+			Body:  color.New(styleBody).Sprint(strings.Join(baseCommands, "\n")),
+		})
 	}
 
 	if len(subcmdCommands) > 0 {
-		helpEntries = append(helpEntries, helpEntry{"SUBCOMMANDS", strings.Join(subcmdCommands, "\n")})
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("SUBCOMMANDS"),
+			Body:  color.New(styleBody).Sprint(strings.Join(subcmdCommands, "\n")),
+		})
 	}
 
 	flagUsages := command.LocalFlags().FlagUsages()
 	if flagUsages != "" {
-		helpEntries = append(helpEntries, helpEntry{"FLAGS", dedent(flagUsages)})
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("FLAGS"),
+			Body:  color.New(styleBody).Sprint(dedent(flagUsages)),
+		})
 	}
 
 	inheritedFlagUsages := command.InheritedFlags().FlagUsages()
 	if inheritedFlagUsages != "" {
-		helpEntries = append(helpEntries, helpEntry{"INHERITED FLAGS", dedent(inheritedFlagUsages)})
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("INHERITED FLAGS"),
+			Body:  color.New(styleBody).Sprint(dedent(inheritedFlagUsages)),
+		})
 	}
 
-	helpEntries = append(helpEntries, helpEntry{"LEARN MORE", `
-Use 'azioncli <command> <subcommand> --help' for more information about a command`})
+	helpEntries = append(helpEntries, helpEntry{
+		Title: color.New(styleTitle).Sprint("LEARN MORE"),
+		Body:  color.New(styleBody).Sprint("\nUse 'azioncli <command> <subcommand> --help' for more information about a command"),
+	})
 
 	out := command.OutOrStdout()
 	for _, e := range helpEntries {

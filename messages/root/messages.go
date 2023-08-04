@@ -1,13 +1,16 @@
 package root
 
 var (
-	RootUsage = `azioncli <command> <subcommand> [flags]
-azioncli [flags]
+	RootUsage = `azion <command> <subcommand> [flags]
+azion [flags]
  	`
-	RootShortDescription = "Azion-CLI"
-	RootLongDescription  = "Calls the CLI via subcommands to interact with Azion services easily"
-	RootHelpFlag         = "Displays more information about the Azion CLI"
-	RootDoNotUpdate      = "Do not receive update notification"
-	RootLogDebug         = "Displays log at a debug level"
-	RootLogQuiet         = "Silences log completely; mostly used for automation purposes"
+	RootDescription = "Azion CLI %s"
+	RootHelpFlag    = "Displays more information about the Azion CLI"
+	RootDoNotUpdate = "Do not receive update notification"
+	RootLogDebug    = "Displays log at a debug level"
+	RootLogQuiet    = "Silences log completely; mostly used for automation purposes"
+	RootTokenFlag   = "Saves a given personal token locally to authorize CLI commands"
+	RootConfigFlag  = "Sets the Azion configuration folder for the current command only, without changing persistent settings."
+	TokenSavedIn    = "Token saved in %v\n"
+	TokenUsedIn     = "This token will be used by default when calling any command"
 )

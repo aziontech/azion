@@ -31,7 +31,7 @@ To download azioncli through Homebrew, use the following:
 * `brew install aziontech/tap/azioncli`
 
 
-## Building
+## Building Locally
 
 ```sh
 # Build project, by default it will connect to Production APIs

@@ -1,7 +1,7 @@
 GO := $(shell which go)
 PATH := $(dir $(GO)):$(PATH)
 SHELL := env PATH=$(PATH) /bin/bash
-NAME := azioncli
+NAME := azion
 
 ifeq (, $(GO))
 $(error "No go binary found in your system, please install go 1.17 before continuing")
@@ -17,7 +17,7 @@ RELOAD ?= $(GOBIN)/CompileDaemon
 # Variables for token endpoints
 ENVFILE ?= ./env/prod
 
-BIN := azioncli
+BIN := azion
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
