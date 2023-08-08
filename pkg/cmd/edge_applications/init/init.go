@@ -110,7 +110,7 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
 	cobraCmd.Flags().StringVar(&info.TypeLang, "type", "", msg.EdgeApplicationsInitFlagTemplate)
-	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagMode)
+	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagTemplate)
 	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
 	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 

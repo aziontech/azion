@@ -16,7 +16,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/go-git/go-git/v5"
 
 	"github.com/go-git/go-git/v5/plumbing"
@@ -200,49 +199,6 @@ func TestCobraCmd(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-	})
-
-	t.Run("invalid option", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-
-		initCmd := NewInitCmd(f)
-
-		cmd := NewCobraCmd(initCmd)
-
-		initCmd.LookPath = func(bin string) (string, error) {
-			return "", nil
-		}
-		initCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return &git.Repository{}, nil
-		}
-
-		initCmd.Stat = func(path string) (fs.FileInfo, error) {
-			if !strings.HasSuffix(path, "package.json") {
-				return nil, os.ErrNotExist
-			}
-			return nil, nil
-		}
-
-		initCmd.FileReader = func(path string) ([]byte, error) {
-			return []byte("{\n  \"name\": \"vanillajs-app\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"scripts\": {\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\",\n    \"build\": \"azioncli edge_applications build\",\n    \"deploy\": \"azioncli edge_applications publish\"\n  },\n  \"repository\": {\n    \"type\": \"git\",\n    \"url\": \"git+https://github.com/aziontech/azioncli-template.git\"\n  },\n  \"author\": \"\",\n  \"license\": \"ISC\",\n  \"bugs\": {\n    \"url\": \"https://github.com/aziontech/azioncli-template/issues\"\n  },\n  \"homepage\": \"https://github.com/aziontech/azioncli-template#readme\",\n  \"description\": \"\",\n  \"devDependencies\": {\n    \"clean-webpack-plugin\": \"^4.0.0\",\n    \"webpack-cli\": \"^4.9.2\",\n  \"next\": \"12.2.5\"\n  }\n}\n"), nil
-		}
-
-		initCmd.IsDirEmpty = func(dirpath string) (bool, error) {
-			return false, nil
-		}
-		initCmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--template", "static"})
-
-		in := bytes.NewBuffer(nil)
-		in.WriteString("pix\n")
-		f.IOStreams.In = io.NopCloser(in)
-
-		err := cmd.Execute()
-
-		require.ErrorIs(t, err, utils.ErrorInvalidOption)
 	})
 }
 

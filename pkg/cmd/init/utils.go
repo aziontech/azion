@@ -2,7 +2,7 @@ package init
 
 import (
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
@@ -119,20 +119,16 @@ func (cmd *InitCmd) createJsonFile(options *contracts.AzionApplicationOptions, i
 }
 
 func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
-	var response string
 	var err error
 	var shouldFetchTemplates bool
 	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
 		if info.NoOption || info.YesOption {
 			shouldFetchTemplates = yesNoFlagToResponse(info)
 		} else {
-			logger.FInfo(cmd.Io.Out, fmt.Sprintf("%s: ", msg.WebAppInitContentOverridden))
-			fmt.Fscanln(cmd.Io.In, &response)
-			shouldFetchTemplates, err = utils.ResponseToBool(response)
-			if err != nil {
-				logger.Debug("Error while trying to convert string to boolean", zap.Error(err))
-				return false, err
+			prompt := &survey.Confirm{
+				Message: "This project was already configured. Do you want to override the previous configuration?",
 			}
+			survey.AskOne(prompt, &shouldFetchTemplates)
 		}
 
 		if shouldFetchTemplates {
@@ -160,4 +156,34 @@ func askForInput(msg string, defaultIn string) (string, error) {
 		return "", err
 	}
 	return userInput, nil
+}
+
+func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
+	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.0.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	if err != nil {
+		return err
+	}
+
+	newLineSplit := strings.Split(output, "\n")
+	newLineSplit[len(newLineSplit)-1] = "nextjs (faststore)"
+
+	answer := ""
+	template := ""
+	mode := ""
+	prompt := &survey.Select{
+		Message: "Choose a template:",
+		Options: newLineSplit,
+	}
+	survey.AskOne(prompt, &answer)
+
+	modeSplit := strings.Split(answer, " ")
+	template = modeSplit[0]
+	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
+
+	info.Template = template
+	info.Mode = mode
+
+	return nil
+
 }

@@ -53,6 +53,7 @@ type InitCmd struct {
 	Stat          func(path string) (fs.FileInfo, error)
 	Mkdir         func(path string, perm os.FileMode) error
 	GitPlainClone func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
+	CommandRunner func(cmd string, envvars []string) (string, int, error)
 }
 
 func NewInitCmd(f *cmdutil.Factory) *InitCmd {
@@ -72,6 +73,9 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 		Stat:          os.Stat,
 		Mkdir:         os.MkdirAll,
 		GitPlainClone: git.PlainClone,
+		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
+			return utils.RunCommandWithOutput(envvars, cmd)
+		},
 	}
 }
 
@@ -122,6 +126,13 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
+	if !c.Flags().Changed("template") {
+		err = cmd.selectVulcanTemplates(info)
+		if err != nil {
+			return err
+		}
+	}
+
 	switch info.Template {
 	case "simple":
 		return initSimple(cmd, path, info, c)
@@ -129,7 +140,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return initStatic(cmd, info, options, c)
 	}
 
-	if (!c.Flags().Changed("mode") || !c.Flags().Changed("type")) && info.Template != "nextjs" {
+	if (!c.Flags().Changed("mode") || !c.Flags().Changed("template")) && info.Template != "nextjs" {
 		return msg.ErrorModeNotSent
 	}
 
