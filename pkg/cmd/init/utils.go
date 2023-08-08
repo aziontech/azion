@@ -128,7 +128,10 @@ func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 			prompt := &survey.Confirm{
 				Message: "This project was already configured. Do you want to override the previous configuration?",
 			}
-			survey.AskOne(prompt, &shouldFetchTemplates)
+			err := survey.AskOne(prompt, &shouldFetchTemplates)
+			if err != nil {
+				return false, err
+			}
 		}
 
 		if shouldFetchTemplates {
@@ -175,7 +178,10 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		Message: "Choose a template:",
 		Options: newLineSplit,
 	}
-	survey.AskOne(prompt, &answer)
+	err = survey.AskOne(prompt, &answer)
+	if err != nil {
+		return err
+	}
 
 	modeSplit := strings.Split(answer, " ")
 	template = modeSplit[0]
