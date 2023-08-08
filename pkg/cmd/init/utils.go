@@ -15,21 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-func getConfig(cmd *InitCmd, path string) (conf *contracts.AzionApplicationConfig, err error) {
-	jsonConf := path + "/azion/config.json"
-	file, err := cmd.FileReader(jsonConf)
-	if err != nil {
-		return conf, msg.ErrorOpeningConfigFile
-	}
-	conf = &contracts.AzionApplicationConfig{}
-	err = json.Unmarshal(file, &conf)
-	if err != nil {
-		return conf, msg.ErrorUnmarshalConfigFile
-	}
-
-	return conf, nil
-}
-
 func yesNoFlagToResponse(info *InitInfo) bool {
 	if info.YesOption {
 		return info.YesOption
