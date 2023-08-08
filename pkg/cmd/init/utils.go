@@ -120,31 +120,6 @@ func (cmd *InitCmd) fetchTemplates(info *InitInfo) error {
 	return nil
 }
 
-func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions, info *InitInfo) error {
-	file, err := cmd.FileReader(info.PathWorkingDir + "/azion/azion.json")
-	if err != nil {
-		return msg.ErrorOpeningAzionFile
-	}
-	err = json.Unmarshal(file, &options)
-	if err != nil {
-		return msg.ErrorUnmarshalAzionFile
-	}
-	options.Name = info.Name
-	options.Type = info.Template
-	options.Mode = info.Mode
-
-	data, err := json.MarshalIndent(options, "", "  ")
-	if err != nil {
-		return msg.ErrorUnmarshalAzionFile
-	}
-
-	err = cmd.WriteFile(info.PathWorkingDir+"/azion/azion.json", data, 0644)
-	if err != nil {
-		return utils.ErrorInternalServerError
-	}
-	return nil
-}
-
 func (cmd *InitCmd) createJsonFile(options *contracts.AzionApplicationOptions, info *InitInfo) error {
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
