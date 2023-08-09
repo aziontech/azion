@@ -23,11 +23,6 @@ const (
 	REPO string = "https://github.com/aziontech/azioncli-template.git"
 )
 
-var (
-	TemplateBranch = "main"
-	TemplateMajor  = "0"
-)
-
 type InitInfo struct {
 	Name           string
 	Template       string
