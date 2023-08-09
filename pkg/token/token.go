@@ -73,8 +73,12 @@ func (t *Token) Validate(token *string) (bool, error) {
 func (t *Token) Save() error {
 	fbyte := []byte(t.token)
 
-	filepath := filepath.Dir(t.filepath)
-	err := os.MkdirAll(filepath, os.ModePerm)
+	filepath, err := config.Dir()
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath, os.ModePerm)
 	if err != nil {
 		return err
 	}
