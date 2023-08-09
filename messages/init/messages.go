@@ -17,7 +17,7 @@ var (
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess                  = "Template successfully fetched and configured\n\n"
 	InitGettingTemplates                  = "Getting templates available"
-	InitProjectQuestion                   = "(Hit enter to accept suggested name in parenthesis) Your project's name: "
+	InitProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your project's name: "
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init subcommand"
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully\n"
 	EdgeApplicationsInitNameNotSent       = "The Project Name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n\n"

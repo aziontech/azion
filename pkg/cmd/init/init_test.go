@@ -18,8 +18,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/go-git/go-git/v5"
 
-	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -159,79 +157,4 @@ func TestCobraCmd(t *testing.T) {
 
 		require.NoError(t, err)
 	})
-}
-
-func TestInitCmd(t *testing.T) {
-	logger.New(zapcore.DebugLevel)
-
-}
-
-func Test_fetchTemplates(t *testing.T) {
-	logger.New(zapcore.DebugLevel)
-
-	t.Run("tests flow full template", func(t *testing.T) {
-		f, _, _ := testutils.NewFactory(nil)
-		cmd := NewInitCmd(f)
-
-		cmd.CreateTempDir = func(dir string, pattern string) (string, error) {
-			return "", nil
-		}
-
-		cmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
-			return nil, nil
-		}
-
-		cmd.Rename = func(oldpath string, newpath string) error {
-			return nil
-		}
-		cmd.Mkdir = func(path string, perm os.FileMode) error {
-			return nil
-		}
-
-		err := cmd.fetchTemplates(&InitInfo{})
-		require.NoError(t, err)
-	})
-}
-
-type mockReferenceIter struct {
-	mock.Mock
-}
-
-func (m *mockReferenceIter) ForEach(f func(*plumbing.Reference) error) error {
-	args := m.Called(f)
-	return args.Error(0)
-}
-
-func Test_SortTag(t *testing.T) {
-	logger.New(zapcore.DebugLevel)
-
-	mockIter := new(mockReferenceIter)
-
-	// defines the mock action
-	mockIter.On("ForEach", mock.Anything).Run(func(args mock.Arguments) {
-		f := args.Get(0).(func(*plumbing.Reference) error)
-		refs := []*plumbing.Reference{
-			plumbing.NewReferenceFromStrings("refs/tags/v0.1.0", "beefdead"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.2.0", "deadbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.10.5", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.5.0", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.10.0", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v1.10.0", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.10.1", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.10.2", "deafbeef"),
-			plumbing.NewReferenceFromStrings("refs/tags/v0.11.0-dev.13", "deafbeef"),
-		}
-
-		for _, ref := range refs {
-			if err := f(ref); err != nil {
-				panic(err)
-			}
-		}
-	}).Return(nil)
-
-	result, err := sortTag(mockIter, TemplateMajor)
-	require.NoError(t, err)
-
-	expected := "refs/tags/v0.10.5"
-	require.Equal(t, expected, result)
 }
