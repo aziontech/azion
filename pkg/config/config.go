@@ -21,5 +21,9 @@ func Dir() (string, error) {
 		return "", err
 	}
 
+	if len(pathDir) > 0 {
+		home = ""
+	}
+
 	return filepath.Join(home, pathDir), nil
 }
