@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 )
 
@@ -60,12 +61,18 @@ func Test_Validate(t *testing.T) {
 }
 
 func Test_Save(t *testing.T) {
+	config.SetPath("/tmp/testazion")
+
 	t.Run("save token to disk", func(t *testing.T) {
-		token := &Token{
-			out:      os.Stdout,
-			filepath: "/tmp/azion/credentials",
-			token:    "TeST",
+		token, err := New(&Config{
+			Out: os.Stdout,
+		})
+		token.token = "TeST"
+
+		if err != nil {
+			t.Fatalf("New() = %v; want nil", err)
 		}
+
 		if err := token.Save(); err != nil {
 			t.Fatalf("Save() = %v; want nil", err)
 		}
