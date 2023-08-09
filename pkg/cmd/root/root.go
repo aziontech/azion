@@ -6,10 +6,12 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -29,6 +31,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
 		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			logger.LogLevel(f.Logger)
 			err := doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
 				token:  tokenFlag,
@@ -63,6 +66,8 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	//set template for -v flag
 	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
+
+	rootCmd.AddCommand(initcmd.NewCmd(f))
 
 	return rootCmd
 }
