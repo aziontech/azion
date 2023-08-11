@@ -390,7 +390,7 @@ func (cmd *InitCmd) organizeJsonFile(options *contracts.AzionApplicationOptions,
 		return msg.ErrorUnmarshalAzionFile
 	}
 	options.Name = info.Name
-	options.Type = info.TypeLang
+	options.Template = info.TypeLang
 	options.Mode = info.Mode
 
 	data, err := json.MarshalIndent(options, "", "  ")

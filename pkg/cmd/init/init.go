@@ -121,7 +121,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
-	if !c.Flags().Changed("template") {
+	if !c.Flags().Changed("template") || !c.Flags().Changed("mode") {
 		err = cmd.selectVulcanTemplates(info)
 		if err != nil {
 			return err
@@ -133,10 +133,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return initSimple(cmd, path, info, c)
 	case "static":
 		return initStatic(cmd, info, options, c)
-	}
-
-	if (!c.Flags().Changed("mode") || !c.Flags().Changed("template")) && info.Template != "nextjs" {
-		return msg.ErrorModeNotSent
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
