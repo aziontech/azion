@@ -135,7 +135,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return initStatic(cmd, info, options, c)
 	}
 
-	if (!c.Flags().Changed("mode") || !c.Flags().Changed("template")) && info.Template != "nextjs" {
+	if (info.Mode == "" || info.Template == "") && info.Template != "nextjs" {
 		return msg.ErrorModeNotSent
 	}
 

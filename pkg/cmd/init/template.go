@@ -19,6 +19,7 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 		Name:      info.Name,
 		Env:       "production",
 		Type:      info.Template,
+		Mode:      info.Mode,
 		VersionID: "",
 	}
 	azionJson.Function.Name = "__DEFAULT__"

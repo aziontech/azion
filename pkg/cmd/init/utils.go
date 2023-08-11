@@ -1,6 +1,7 @@
 package init
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -85,6 +86,9 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	modeSplit := strings.Split(answer, " ")
 	template = modeSplit[0]
 	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
+
+	fmt.Println(template)
+	fmt.Println(mode)
 
 	info.Template = template
 	info.Mode = mode
