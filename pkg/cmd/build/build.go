@@ -17,7 +17,6 @@ import (
 type BuildCmd struct {
 	Io                  *iostreams.IOStreams
 	WriteFile           func(filename string, data []byte, perm fs.FileMode) error
-	CommandRunner       func(cmd string, envvars []string) (string, int, error)
 	CommandRunnerStream func(out io.Writer, cmd string, envvars []string) error
 	FileReader          func(path string) ([]byte, error)
 	ConfigRelativePath  string
@@ -54,9 +53,6 @@ func newBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	return &BuildCmd{
 		Io:         f.IOStreams,
 		FileReader: os.ReadFile,
-		CommandRunner: func(cmd string, envs []string) (string, int, error) {
-			return utils.RunCommandWithOutput(envs, cmd)
-		},
 		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
 			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
