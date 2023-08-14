@@ -121,13 +121,6 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
-	if !c.Flags().Changed("template") {
-		err = cmd.selectVulcanTemplates(info)
-		if err != nil {
-			return err
-		}
-	}
-
 	switch info.Template {
 	case "simple":
 		return initSimple(cmd, path, info, c)
@@ -135,8 +128,11 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return initStatic(cmd, info, options, c)
 	}
 
-	if (info.Mode == "" || info.Template == "") && info.Template != "nextjs" {
-		return msg.ErrorModeNotSent
+	if !c.Flags().Changed("template") || !c.Flags().Changed("mode") {
+		err = cmd.selectVulcanTemplates(info)
+		if err != nil {
+			return err
+		}
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)

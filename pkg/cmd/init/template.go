@@ -18,7 +18,7 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 	azionJson := &contracts.AzionApplicationOptions{
 		Name:      info.Name,
 		Env:       "production",
-		Type:      info.Template,
+		Template:  info.Template,
 		Mode:      info.Mode,
 		VersionID: "",
 	}

@@ -37,7 +37,6 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 				config: configFlag,
 				token:  tokenFlag,
 			})
-
 			if err != nil {
 				return err
 			}
