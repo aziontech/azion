@@ -41,18 +41,18 @@ var successResponseApp string = `
 }
 `
 
-func TestPublishCmd(t *testing.T) {
+func TestDeployCmd(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	t.Run("without azion.json", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(nil)
 
-		publishCmd := NewDeployCmd(f)
+		deployCmd := NewDeployCmd(f)
 
-		publishCmd.FileReader = func(path string) ([]byte, error) {
+		deployCmd.FileReader = func(path string) ([]byte, error) {
 			return nil, os.ErrNotExist
 		}
 
-		cmd := NewCobraCmd(publishCmd)
+		cmd := NewCobraCmd(deployCmd)
 
 		cmd.SetArgs([]string{""})
 
