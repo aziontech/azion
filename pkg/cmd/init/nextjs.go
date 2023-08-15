@@ -17,10 +17,8 @@ func InitNextjs(info *InitInfo, cmd *InitCmd) error {
     - Requirements:
         - Tools: npm
     [ Usage ]
-    	- Build Command: npm run build
-    	- Publish Command: npm run deploy
-    [ Notes ]
-        - Node 16x or higher`) //nolint:all
+    	- Build Command: azion build
+    	- Deploy Command: azion deploy`) //nolint:all
 
 	return nil
 }
