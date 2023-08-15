@@ -17,7 +17,7 @@ func initStatic(cmd *InitCmd, info *InitInfo, options *contracts.AzionApplicatio
 	}
 
 	if shouldFetchTemplates {
-		if info.YesOption {
+		if info.GlobalFlagAll {
 			info.Name = thoth.GenerateName()
 		} else {
 			if !c.Flags().Changed("name") {

@@ -28,8 +28,7 @@ type InitInfo struct {
 	Template       string
 	Mode           string
 	PathWorkingDir string
-	YesOption      bool
-	NoOption       bool
+	GlobalFlagAll  bool
 }
 
 type InitCmd struct {
@@ -74,7 +73,7 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 	}
 }
 
-func NewCobraCmd(init *InitCmd) *cobra.Command {
+func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
@@ -91,6 +90,7 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 		$ azion init --name "thisisatest" --template hexo --mode deliver
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			info.GlobalFlagAll = f.GlobalFlagAll
 			return init.run(info, options, cmd)
 		},
 	}
@@ -98,21 +98,16 @@ func NewCobraCmd(init *InitCmd) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
 	cobraCmd.Flags().StringVar(&info.Template, "template", "", msg.EdgeApplicationsInitFlagTemplate)
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagMode)
-	cobraCmd.Flags().BoolVarP(&info.YesOption, "yes", "y", false, msg.EdgeApplicationsInitFlagYes)
-	cobraCmd.Flags().BoolVarP(&info.NoOption, "no", "n", false, msg.EdgeApplicationsInitFlagNo)
 
 	return cobraCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewInitCmd(f))
+	return NewCobraCmd(NewInitCmd(f), f)
 }
 
 func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
 	logger.Debug("Running init subcommand from edge_applications command tree")
-	if info.YesOption && info.NoOption {
-		return msg.ErrorYesAndNoOptions
-	}
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
@@ -141,7 +136,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	}
 
 	if shouldFetchTemplates {
-		if info.YesOption {
+		if info.GlobalFlagAll {
 			info.Name = thoth.GenerateName()
 		} else {
 			if !c.Flags().Changed("name") {
