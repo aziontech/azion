@@ -90,5 +90,4 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	info.Mode = mode
 
 	return nil
-
 }
