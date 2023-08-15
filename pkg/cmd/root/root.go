@@ -8,6 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/root"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
+	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
@@ -69,6 +70,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rootCmd.AddCommand(initcmd.NewCmd(f))
 	rootCmd.AddCommand(deploycmd.NewCmd(f))
+	rootCmd.AddCommand(buildCmd.NewCmd(f))
 
 	return rootCmd
 }

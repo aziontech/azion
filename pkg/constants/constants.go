@@ -6,3 +6,7 @@ var (
 	AuthURL       string
 	StorageApiURL string
 )
+
+const (
+	PathAzionJson = "/azion/azion.json"
+)
