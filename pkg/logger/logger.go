@@ -13,15 +13,20 @@ var (
 )
 
 type Logger struct {
-	Debug bool
-	Quiet bool
+	Debug    bool
+	Silent   bool
+	LogLevel string
 }
 
 func LogLevel(logger Logger) {
 	switch {
 	case logger.Debug:
 		New(zapcore.DebugLevel)
-	case logger.Quiet:
+	case logger.Silent:
+		New(zapcore.ErrorLevel)
+	case "debug" == logger.LogLevel:
+		New(zapcore.DebugLevel)
+	case "error" == logger.LogLevel:
 		New(zapcore.ErrorLevel)
 	default:
 		New(zapcore.InfoLevel)
