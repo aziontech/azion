@@ -8,7 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/schollz/progressbar/v3"
+	"github.com/maxwelbm/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
 )
