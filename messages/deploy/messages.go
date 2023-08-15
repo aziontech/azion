@@ -24,5 +24,5 @@ var (
 	EdgeApplicationsPublishFlagHelp                    = "Displays more information about the publish subcommand"
 	EdgeApplicationsPublishPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
 	UploadStart                                        = "Uploading static files\n"
-	UploadSuccessful                                   = "Upload completed successfully!\n"
+	UploadSuccessful                                   = "\nUpload completed successfully!\n"
 )
