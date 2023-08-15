@@ -60,7 +60,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
-	github.com/maxwelbm/progressbar/v3 v3.0.0-20230815193721-6e5e8767abb8
+	github.com/maxwelbm/progressbar/v3 v3.0.0-20230815201815-365eaab7b63a
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
