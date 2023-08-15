@@ -45,7 +45,7 @@ clean: ## delete additional files
 
 .PHONY: lint
 lint: get-lint-deps ## running GoLint
-	@ $(GOBIN)/golangci-lint run ./...
+	@ $(GOBIN)/golangci-lint run ./... --verbose
 
 
 .PHONY: dev
