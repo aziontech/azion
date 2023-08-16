@@ -4,6 +4,9 @@ import (
 	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 )
 
 func adapter(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
@@ -21,7 +24,8 @@ func adapter(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		return nil
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return utils.ErrorWritingAzionJsonFile
 	}
 
 	return err

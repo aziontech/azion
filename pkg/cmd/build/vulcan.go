@@ -6,6 +6,9 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 )
 
 func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, path string) error {
@@ -28,7 +31,8 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, path string)
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
-		return nil
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return utils.ErrorWritingAzionJsonFile
 	}
 
 	return nil
