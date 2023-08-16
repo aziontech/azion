@@ -2,13 +2,13 @@ package deploy
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/schollz/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
 )
@@ -35,6 +35,13 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadStart)
 
 	currentFile := 0
+	bar := progressbar.NewOptions(
+		totalFiles,
+		progressbar.OptionSetDescription("Uploading files"),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetWriter(cmd.F.IOStreams.Out),
+		progressbar.OptionClearOnFinish(),
+	)
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -58,11 +65,8 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 				return err
 			}
 
-			percentage := float64(currentFile+1) * 100 / float64(totalFiles)
-			progress := int(percentage / 10)
-			bar := strings.Repeat("#", progress) + strings.Repeat(".", 10-progress)
-			logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf("\033[2K\r[%v] %v %v", bar, percentage, path))
 			currentFile++
+			bar.Set(currentFile)
 		}
 		return nil
 	}); err != nil {
