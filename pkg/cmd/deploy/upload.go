@@ -66,7 +66,10 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 			}
 
 			currentFile++
-			bar.Set(currentFile)
+			err = bar.Set(currentFile)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}); err != nil {
