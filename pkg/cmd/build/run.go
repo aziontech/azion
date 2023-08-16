@@ -4,11 +4,8 @@ import (
 	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
-	"github.com/aziontech/azion-cli/pkg/concat"
-	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
 
@@ -31,24 +28,9 @@ func (cmd *BuildCmd) run() error {
 func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	var err error
 
-	pathAzionJson := concat.String(path, constants.PathAzionJson)
-	file, err := cmd.FileReader(pathAzionJson)
+	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
-		logger.Debug("Error while reading azion.json file", zap.Error(err))
-		return msg.ErrorOpeningAzionFile
-	}
-
-	typeLang := gjson.Get(string(file), "type")
-	mode := gjson.Get(string(file), "mode")
-
-	if typeLang.String() == "simple" {
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
-		return nil
-	}
-
-	if typeLang.String() == "static" {
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
-		return nil
+		return err
 	}
 
 	err = checkArgsJson(cmd)
@@ -56,12 +38,29 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		return err
 	}
 
-	if typeLang.String() != "nextjs" {
-		return vulcan(cmd, typeLang.String(), mode.String())
+	if conf.Template == "simple" {
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
+		return nil
 	}
 
-	if typeLang.String() == "nextjs" {
-		return adapter(cmd, path, pathAzionJson, file)
+	if conf.Template == "static" {
+		versionID := cmd.VersionID()
+		conf.VersionID = versionID
+
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			return nil
+		}
+		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
+		return nil
+	}
+
+	if conf.Template != "nextjs" {
+		return vulcan(cmd, conf, path)
+	}
+
+	if conf.Template == "nextjs" {
+		return adapter(cmd, conf)
 	}
 
 	return utils.ErrorUnsupportedType

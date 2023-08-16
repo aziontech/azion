@@ -6,8 +6,9 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
+	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
-	initCmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
@@ -67,7 +68,8 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	//set template for -v flag
 	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 
-	rootCmd.AddCommand(initCmd.NewCmd(f))
+	rootCmd.AddCommand(initcmd.NewCmd(f))
+	rootCmd.AddCommand(deploycmd.NewCmd(f))
 	rootCmd.AddCommand(buildCmd.NewCmd(f))
 
 	return rootCmd

@@ -69,6 +69,7 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 
 	newLineSplit := strings.Split(output, "\n")
 	newLineSplit[len(newLineSplit)-1] = "nextjs (faststore)"
+	newLineSplit = append(newLineSplit, "static (azion)")
 
 	answer := ""
 	template := ""
