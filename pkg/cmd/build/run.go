@@ -33,19 +33,26 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		return err
 	}
 
+	err = checkArgsJson(cmd)
+	if err != nil {
+		return err
+	}
+
 	if conf.Template == "simple" {
 		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
 		return nil
 	}
 
 	if conf.Template == "static" {
+		versionID := cmd.VersionID()
+		conf.VersionID = versionID
+
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			return nil
+		}
 		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
 		return nil
-	}
-
-	err = checkArgsJson(cmd)
-	if err != nil {
-		return err
 	}
 
 	if conf.Template != "nextjs" {
