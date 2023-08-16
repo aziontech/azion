@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"context"
-	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,7 +11,7 @@ import (
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_applications/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -85,16 +84,15 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
 	// Run build command
-	// build := cmd.BuildCmd(f)
-	// err := build.Run()
-	// if err != nil {
-	// 	logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-	// 	return err
-	// }
+	build := cmd.BuildCmd(f)
+	err := build.Run()
+	if err != nil {
+		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+		return err
+	}
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 
