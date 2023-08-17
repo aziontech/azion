@@ -61,6 +61,10 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	//Global flags
 	rootCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
 	rootCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
+	rootCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
+	rootCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
+	rootCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
+	rootCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "debug", msg.RootLogDebug)
 
 	//other flags
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)

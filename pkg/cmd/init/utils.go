@@ -9,20 +9,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func yesNoFlagToResponse(info *InitInfo) bool {
-	if info.YesOption {
-		return info.YesOption
-	}
-
-	return false
-}
-
 func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
 	var err error
 	var shouldFetchTemplates bool
 	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
-		if info.NoOption || info.YesOption {
-			shouldFetchTemplates = yesNoFlagToResponse(info)
+		if info.GlobalFlagAll {
+			shouldFetchTemplates = info.GlobalFlagAll
 		} else {
 			prompt := &survey.Confirm{
 				Message: "This project was already configured. Do you want to override the previous configuration?",
