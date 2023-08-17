@@ -214,8 +214,15 @@ func (cmd *PublishCmd) run(f *cmdutil.Factory) error {
 				return err
 			}
 
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
-				logger.Debug("Error while uploading file to storage api", zap.Error(err))
+			fileOptions := contracts.FileOps{
+				Path:        fileString,
+				MimeType:    mimeType.MediaType(),
+				FileContent: fileContent,
+				VersionID:   versionID,
+			}
+
+			if err = clientUpload.Upload(context.Background(), &fileOptions); err != nil {
+				logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 				return err
 			}
 
@@ -866,7 +873,14 @@ func publishStatic(cmd *PublishCmd, f *cmdutil.Factory) error {
 				return err
 			}
 
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
+			fileOptions := contracts.FileOps{
+				Path:        fileString,
+				MimeType:    mimeType.MediaType(),
+				FileContent: fileContent,
+				VersionID:   versionID,
+			}
+
+			if err = clientUpload.Upload(context.Background(), &fileOptions); err != nil {
 				logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 				return err
 			}

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
-	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
@@ -64,7 +64,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
 	rootCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
 	rootCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
-	rootCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "debug", msg.RootLogDebug)
+	rootCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogDebug)
 
 	//other flags
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)

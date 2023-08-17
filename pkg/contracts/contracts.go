@@ -1,5 +1,14 @@
 package contracts
 
+import "os"
+
+type FileOps struct {
+	Path        string
+	MimeType    string
+	FileContent *os.File
+	VersionID   string
+}
+
 type ListOptions struct {
 	Details  bool
 	OrderBy  string
