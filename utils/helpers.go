@@ -338,3 +338,7 @@ func TruncateString(str string) string {
 	}
 	return str
 }
+
+func IsEmpty(str string) bool {
+	return len(str) < 1
+}
