@@ -30,7 +30,7 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 	}
 
 	// Try to analyze as full date (yyyy-mm-dd) or (dd/mm/yyyy)
-	formats := []string{"2006-01-02", "02/01/2006"}
+	formats := []string{"2006-01-02", "02/01/2006", "2006-01-02T00:00"}
 	for _, format := range formats {
 		if expirationDate, err := time.Parse(format, expirationString); err == nil {
 			if expirationDate.After(currentDate) {

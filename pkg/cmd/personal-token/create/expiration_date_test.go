@@ -44,6 +44,10 @@ func TestParseExpirationDate(t *testing.T) {
 			want: time.Date(2008, 11, 04, 0, 0, 0, 0, &time.Location{}),
 		},
 		{
+			name: "Format DB - T", args: args{currentDate, "2008-11-04T00:00"},
+			want: time.Date(2008, 11, 04, 0, 0, 0, 0, &time.Location{}),
+		},
+		{
 			name: "Incorrect format", args: args{currentDate, "2008-11"},
 			want: time.Time{}, wantErr: true,
 		},
