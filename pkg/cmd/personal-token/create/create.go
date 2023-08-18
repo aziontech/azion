@@ -3,9 +3,10 @@ package create
 import (
 	"context"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
 	"os"
 	"time"
+
+	"github.com/MakeNowJust/heredoc"
 
 	msg "github.com/aziontech/azion-cli/messages/personal-token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
@@ -32,8 +33,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion personal_token create --name "luffy biruta" --expiration "9m" 
-        $ azion personal_token create -n "drink coffe" -x "9d" 
+        $ azion personal_token create --name "ranking of kings" --expiration "9m" 
+        $ azion personal_token create --name "sakura" --expiration "9m" 
+        $ azion personal_token create --name "luffy biruta" --expiration "9m" --description "gear five"
         $ azion personal_token create --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -86,9 +88,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&fields.Name, "name", "n", "", msg.CreateFlagName)
-	flags.StringVarP(&fields.ExpiresAt, "expiration", "x", "", msg.CreateFlagExpiresAt)
-	flags.StringVarP(&fields.Description, "description", "", "", msg.CreateFlagDescription)
+	flags.StringVar(&fields.Name, "name", "", msg.CreateFlagName)
+	flags.StringVar(&fields.ExpiresAt, "expiration", "", msg.CreateFlagExpiresAt)
+	flags.StringVar(&fields.Description, "description", "", msg.CreateFlagDescription)
 	flags.StringVar(&fields.Path, "in", "", msg.CreateFlagIn)
 	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
 
