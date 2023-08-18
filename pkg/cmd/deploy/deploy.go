@@ -72,7 +72,7 @@ func NewCobraCmd(publish *DeployCmd) *cobra.Command {
 		},
 	}
 	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
-	publishCmd.Flags().StringVar(&Path, "path", "public", msg.EdgeApplicationPublishPathFlag)
+	publishCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationPublishPathFlag)
 	return publishCmd
 }
 
@@ -96,13 +96,8 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	var pathStatic string = ".edge/statics"
+	var pathStatic string
 	conf.Function.File = ".edge/worker.js"
-
-	if conf.Template == "nextjs" {
-		pathStatic = ".vercel/output/static"
-		conf.Function.File = "./out/worker.js"
-	}
 
 	switch conf.Template {
 	// legacy type - will be removed once Framework Adapter is fully substituted by Vulcan
@@ -110,6 +105,12 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 		pathStatic = ".vercel/output/static"
 		conf.Function.File = "./out/worker.js"
 	case "static":
+		pathStatic = "./dist"
+	default:
+		pathStatic = ".edge/statics"
+	}
+
+	if Path != "" {
 		pathStatic = Path
 	}
 

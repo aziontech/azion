@@ -1,12 +1,12 @@
 package deploy
 
 import (
-	"context"
 	"os"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/schollz/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
@@ -19,6 +19,7 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
+			logger.Debug("File that caused the error: " + pathStatic)
 			return err
 		}
 		if !info.IsDir() {
@@ -34,7 +35,16 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadStart)
 
-	currentFile := 0
+	noOfWorkers := 5
+	var currentFile int64
+	jobs := make(chan contracts.FileOps, totalFiles)
+	results := make(chan error, noOfWorkers)
+
+	// Create worker goroutines
+	for i := 1; i <= noOfWorkers; i++ {
+		go worker(i, jobs, results, &currentFile, clientUpload)
+	}
+
 	bar := progressbar.NewOptions(
 		totalFiles,
 		progressbar.OptionSetDescription("Uploading files"),
@@ -59,24 +69,35 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 				logger.Debug("Error while matching file path", zap.Error(err))
 				return err
 			}
-
-			if err = clientUpload.Upload(context.Background(), versionID, fileString, mimeType.MediaType(), fileContent); err != nil {
-				logger.Debug("Error while uploading file to storage api", zap.Error(err))
-				return err
+			fileOptions := contracts.FileOps{
+				Path:        fileString,
+				MimeType:    mimeType.MediaType(),
+				FileContent: fileContent,
+				VersionID:   versionID,
 			}
 
-			currentFile++
-			err = bar.Set(currentFile)
-			if err != nil {
-				return err
-			}
+			jobs <- fileOptions
 		}
 		return nil
 	}); err != nil {
 		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
+	close(jobs)
+	// Check for errors from workers
+	for a := 1; a <= totalFiles; a++ {
+		result := <-results
+		if result != nil {
+			return result
+		}
+		err := bar.Set(int(currentFile))
+		if err != nil {
+			return err
+		}
+	}
 
+	// All jobs are processed, no more values will be sent on results:
+	close(results)
 	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadSuccessful)
 
 	return nil
