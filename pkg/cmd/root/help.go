@@ -150,7 +150,7 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	helpEntries = append(helpEntries, helpEntry{
 		Title: color.New(styleTitle).Sprint("LEARN MORE"),
-		Body:  color.New(styleBody).Sprint("\nUse 'azioncli <command> <subcommand> --help' for more information about a command"),
+		Body:  color.New(styleBody).Sprint("\nUse 'azion <command> <subcommand> --help' for more information about a command"),
 	})
 
 	out := command.OutOrStdout()
