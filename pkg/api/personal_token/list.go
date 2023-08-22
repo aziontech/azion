@@ -11,7 +11,7 @@ import (
 )
 
 func (c *Client) List(ctx context.Context) ([]sdk.PersonalTokenResponseGet, error) {
-	logger.Debug("List Environment Variables")
+	logger.Debug("List Personal Tokens")
 
 	resp, httpResp, err := c.apiClient.PersonalTokenApi.ListPersonalToken(ctx).Execute()
 	if err != nil {
