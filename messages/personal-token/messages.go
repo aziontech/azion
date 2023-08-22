@@ -17,4 +17,10 @@ var (
 	CreateFlagIn           = "Path to a JSON file containing the attributes of the personal token that will be created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created personal token with ID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
+
+	// [ list ]
+	ListUsage            = "list [flags]"
+	ListShortDescription = "Displays your personal token in a list"
+	ListLongDescription  = "Displays all your personal token in a list"
+	ListHelpFlag         = "Displays more information about the list subcommand"
 )
