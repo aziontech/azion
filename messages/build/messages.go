@@ -7,7 +7,7 @@ var (
 	EdgeApplicationsBuildRunningCmd       = "Running build step command:\n\n"
 	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
-	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build subcommand"
+	EdgeApplicationsBuildFlagHelp         = "Displays more information about the build command"
 	EdgeApplicationsBuildSimple           = "Skipping build step. Build isn't applied to the type 'simple'\n"
 	EdgeApplicationsBuildStatic           = "Skipping build step. Build isn't applied to the type 'static'\n"
 	EdgeApplicationsBuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
