@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-		$ azioncli personal_token delete --id 7a187044-4a00-4a4a-93ed-d230900421f3
+		$ azion personal_token delete --id 7a187044-4a00-4a4a-93ed-d230900421f3
 		$ azioncli personal_token delete -i 7a187044-4a00-4a4a-93ed-d230900421f3
 		`),
 
