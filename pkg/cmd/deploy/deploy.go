@@ -57,11 +57,11 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	}
 }
 
-func NewCobraCmd(publish *DeployCmd) *cobra.Command {
-	publishCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsPublishUsage,
-		Short:         msg.EdgeApplicationsPublishShortDescription,
-		Long:          msg.EdgeApplicationsPublishLongDescription,
+func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
+	deployCmd := &cobra.Command{
+		Use:           msg.DeployUsage,
+		Short:         msg.DeployShortDescription,
+		Long:          msg.DeployLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -69,12 +69,12 @@ func NewCobraCmd(publish *DeployCmd) *cobra.Command {
         $ azion deploy --path dist/static
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.F)
+			return deploy.run(deploy.F)
 		},
 	}
-	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
-	publishCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationPublishPathFlag)
-	return publishCmd
+	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
+	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	return deployCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -148,9 +148,9 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainName))
-	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, "https://"+domainName))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 
 	return nil
 }

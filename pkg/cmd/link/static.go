@@ -36,9 +36,13 @@ func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicatio
 		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful+"\n", info.Name))
 	}
 
-	logger.FInfo(cmd.Io.Out, `  [ General Instructions ]
+	logger.FInfo(cmd.Io.Out, `	[ General Instructions ]
+    - Requirements:
+        - Tools: npm
     [ Usage ]
-    - Publish Command: publish page static`)
+    	- Dev Command: azion dev
+    	- Build Command: azion build
+    	- Deploy Command: azion deploy`) //nolint:all`)
 
 	return nil
 }

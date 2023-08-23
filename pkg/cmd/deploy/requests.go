@@ -21,13 +21,13 @@ import (
 func (cmd *DeployCmd) doFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.Id == 0 {
 		//Create New function
-		PublishId, err := cmd.createFunction(client, ctx, conf)
+		DeployId, err := cmd.createFunction(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while creating edge functions", zap.Error(err))
 			return err
 		}
 
-		conf.Function.Id = PublishId
+		conf.Function.Id = DeployId
 	} else {
 		//Update existing function
 		_, err := cmd.updateFunction(client, ctx, conf)
@@ -160,7 +160,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		logger.Debug("Error while creating edge function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
 	return response.GetId(), nil
 }
 
@@ -210,7 +210,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeFunctionUpdate, response.GetName(), conf.Function.Id))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionUpdate, response.GetName(), conf.Function.Id))
 	return response.GetId(), nil
 }
 
@@ -226,7 +226,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	if err != nil {
 		return 0, 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
 	reqUpApp.SetApplicationAcceleration(true)
@@ -261,7 +261,7 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	if err != nil {
 		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
 	return nil
 }
 
@@ -286,7 +286,7 @@ func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) err
 		return err
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishOutputCachePurge)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployOutputCachePurge)
 	return nil
 }
 
@@ -305,7 +305,7 @@ func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, c
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainCreate, conf.Name, domain.GetId()))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, domain.GetId()))
 	return domain, nil
 }
 
@@ -322,7 +322,7 @@ func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, c
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainUpdate, conf.Name, domain.GetId()))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, domain.GetId()))
 	return domain, nil
 }
 
@@ -363,13 +363,13 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, ctx context.C
 		logger.Debug("Error while creating cache settings for Nextjs application", zap.Error(err))
 		return err
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsCacheSettingsSuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template)
 	if err != nil {
 		logger.Debug("Error while creating rules engine for Nextjs application", zap.Error(err))
 		return err
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsRulesEngineSuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
 
 	return nil
 }
