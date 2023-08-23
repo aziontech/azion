@@ -17,9 +17,9 @@ func InitNextjs(info *LinkInfo, cmd *LinkCmd) error {
     - Requirements:
         - Tools: npm
     [ Usage ]
-	   - Dev Command: azion dev
-       - Build Command: azion build
-       - Deploy Command: azion deploy`) //nolint:all
+	- Dev Command: azion dev
+        - Build Command: azion build
+        - Deploy Command: azion deploy`) //nolint:all
 
 	return nil
 }
