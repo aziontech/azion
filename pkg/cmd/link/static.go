@@ -3,7 +3,7 @@ package link
 import (
 	"fmt"
 
-	msg "github.com/aziontech/azion-cli/messages/init"
+	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	thoth "github.com/aziontech/go-thoth"
@@ -21,7 +21,7 @@ func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicatio
 			info.Name = thoth.GenerateName()
 		} else {
 			if !c.Flags().Changed("name") {
-				projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
+				projName, err := askForInput(msg.LinkProjectQuestion, thoth.GenerateName())
 				if err != nil {
 					return err
 				}
@@ -33,7 +33,7 @@ func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicatio
 			return err
 		}
 
-		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful+"\n", info.Name))
 	}
 
 	logger.FInfo(cmd.Io.Out, `  [ General Instructions ]

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	msg "github.com/aziontech/azion-cli/messages/init"
+	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -47,7 +47,7 @@ func initSimple(cmd *LinkCmd, path string, info *LinkInfo, c *cobra.Command) err
 			return utils.ErrorInternalServerError
 		}
 
-		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful+"\n", info.Name))
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful+"\n", info.Name))
 	}
 
 	return nil
