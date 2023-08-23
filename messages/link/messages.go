@@ -2,7 +2,7 @@ package link
 
 var (
 
-	//init cmd
+	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
 	EdgeApplicationsLinkShortDescription  = "Links a project to Azion"
 	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application type to link a Project on the Azion’s platform"
