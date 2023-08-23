@@ -70,7 +70,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	return nil
 }
 
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (string, error) {
 	var domain apidom.DomainResponse
 	var err error
 
@@ -79,7 +79,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		domain, err = cmd.createDomain(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while creating domain", zap.Error(err))
-			return err
+			return "", err
 		}
 		conf.Domain.Id = domain.GetId()
 		newDomain = true
@@ -88,7 +88,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		domain, err = cmd.updateDomain(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while updating domain", zap.Error(err))
-			return err
+			return "", err
 		}
 	}
 
@@ -98,10 +98,11 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		err := cmd.purgeDomains(cmd.F, domainReturnedName)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
-			return err
+			return "", err
 		}
 	}
-	return nil
+
+	return domainReturnedName[0], nil
 }
 
 func (cmd *DeployCmd) doOrigin(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {

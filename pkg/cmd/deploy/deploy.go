@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -132,7 +133,7 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
-	err = cmd.doDomain(clidom, ctx, conf)
+	domainName, err := cmd.doDomain(clidom, ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -146,6 +147,10 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
+
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishSuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsPublishOutputDomainSuccess, "https://"+domainName))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.EdgeApplicationsPublishPropagation)
 
 	return nil
 }
