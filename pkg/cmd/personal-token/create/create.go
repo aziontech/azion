@@ -41,10 +41,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.Request{}
 
-			if utils.IsEmpty(fields.Name) || utils.IsEmpty(fields.ExpiresAt) {
-				return msg.ErrorMandatoryCreateFlags
-			}
-
 			if cmd.Flags().Changed("in") {
 				var (
 					file *os.File
@@ -63,6 +59,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
+
+				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("expiration") {
+					return msg.ErrorMandatoryCreateFlags
+				}
+
 				request.SetName(fields.Name)
 				date, err := ParseExpirationDate(time.Now(), fields.ExpiresAt)
 				if err != nil {

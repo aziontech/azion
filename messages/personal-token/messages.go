@@ -18,6 +18,12 @@ var (
 	CreateOutputSuccess    = "Created personal token with ID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 
+	// [ list ]
+	ListUsage            = "list [flags]"
+	ListShortDescription = "Displays your personal token in a list"
+	ListLongDescription  = "Displays all your personal token in a list"
+	ListHelpFlag         = "Displays more information about the list subcommand"
+
 	// [ delete ]
 	DeleteOutputSuccess    = "Personal token %v was successfully deleted\n"
 	DeleteHelpFlag         = "Displays more information about the delete subcommand"
