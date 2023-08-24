@@ -86,7 +86,7 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion init
 		$ azion init --help
 		$ azion init --name "thisisatest" --template nextjs
-		$ azioncli edge_applications init --name "thisisatest" --type static
+		$ azion init --name "thisisatest" --template static
 		$ azion init --name "thisisatest" --template hexo --mode deliver
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {

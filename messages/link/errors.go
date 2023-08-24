@@ -1,4 +1,4 @@
-package init
+package link
 
 import "errors"
 
@@ -12,7 +12,6 @@ var (
 	ErrorInstallVulcan                 = errors.New("Failed to install Vulcan: %s")
 	ErrorOpeningConfigFile             = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorUnmarshalConfigFile           = errors.New("Failed to unmarshal the config.json file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
-	ErrFailedToRunInitCommand          = errors.New("Failed to run the init step command. Verify if the command is correct and check the output above for more details. Try the 'azioncli edge_applications build' command again or contact Azion's support")
 	ErrorGetAllTags                    = errors.New("Failed returning all Reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
 	ErrorIterateAllTags                = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 	ErrorOpeningAzionFile              = errors.New("Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
@@ -20,4 +19,5 @@ var (
 	ErrorNpmNotInstalled               = errors.New("Failed to open the NPM package Manager. Visit the website 'https://nodejs.org/en/download/' and follow the instructions to install the Node.js JavaScript runtime environment in your operating system. Node.js installation includes the NPM package manager")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
+	ErrReadEnvFile                     = errors.New("Failed to read the webdev.env file. Verify if the file is corrupted or changed or run the 'azioncli edge_applications publish' command again")
 )

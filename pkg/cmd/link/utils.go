@@ -1,6 +1,7 @@
-package init
+package link
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -9,7 +10,20 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
+func shouldConfigure(cmd *LinkCmd, info *LinkInfo) (bool, error) {
+	var shouldConfigure bool
+	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
+	prompt := &survey.Confirm{
+		Message: msg,
+	}
+	err := survey.AskOne(prompt, &shouldConfigure)
+	if err != nil {
+		return false, err
+	}
+	return shouldConfigure, nil
+}
+
+func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 	var err error
 	var shouldFetchTemplates bool
 	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
@@ -52,7 +66,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	return userInput, nil
 }
 
-func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
+func (cmd *LinkCmd) selectVulcanTemplates(info *LinkInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.1.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {

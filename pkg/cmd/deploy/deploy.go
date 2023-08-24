@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -56,24 +57,24 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	}
 }
 
-func NewCobraCmd(publish *DeployCmd) *cobra.Command {
-	publishCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsPublishUsage,
-		Short:         msg.EdgeApplicationsPublishShortDescription,
-		Long:          msg.EdgeApplicationsPublishLongDescription,
+func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
+	deployCmd := &cobra.Command{
+		Use:           msg.DeployUsage,
+		Short:         msg.DeployShortDescription,
+		Long:          msg.DeployLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli deploy --help
-        $ azioncli deploy --path dist/static
+        $ azion deploy --help
+        $ azion deploy --path dist/static
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.F)
+			return deploy.run(deploy.F)
 		},
 	}
-	publishCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsPublishFlagHelp)
-	publishCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationPublishPathFlag)
-	return publishCmd
+	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
+	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	return deployCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -132,7 +133,7 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
-	err = cmd.doDomain(clidom, ctx, conf)
+	domainName, err := cmd.doDomain(clidom, ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -146,6 +147,10 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
+
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, "https://"+domainName))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 
 	return nil
 }
