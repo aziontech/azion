@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/personal-token"
 	"github.com/aziontech/azion-cli/pkg/cmd/personal-token/create"
+	"github.com/aziontech/azion-cli/pkg/cmd/personal-token/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/personal-token/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -23,6 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.AddCommand(create.NewCmd(f))
 	cmd.AddCommand(list.NewCmd(f))
+	cmd.AddCommand(delete.NewCmd(f))
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
 }
