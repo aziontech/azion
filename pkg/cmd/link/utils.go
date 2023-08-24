@@ -11,6 +11,9 @@ import (
 )
 
 func shouldConfigure(cmd *LinkCmd, info *LinkInfo) (bool, error) {
+	if info.GlobalFlagAll {
+		return true, nil
+	}
 	var shouldConfigure bool
 	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
 	prompt := &survey.Confirm{

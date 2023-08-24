@@ -15,7 +15,7 @@ func worker(wID int, jobs <-chan contracts.FileOps, results chan<- error, curren
 
 	for job := range jobs {
 		if err := clientUpload.Upload(context.Background(), &job); err != nil {
-			logger.Debug("Error while uploading file to storage api", zap.Error(err))
+			logger.Debug("Error while worker tried to upload file to storage api", zap.Error(err))
 			results <- err
 			return
 		}

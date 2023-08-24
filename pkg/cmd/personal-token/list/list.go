@@ -60,7 +60,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 	tbl.WithWriter(f.IOStreams.Out)
 
 	if details {
-		tbl = table.New("ID", "NAME", "CREATED", "EXPIRESAT", "DESCRIPTION")
+		tbl = table.New("ID", "NAME", "CREATED", "EXPIRES AT", "DESCRIPTION")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
