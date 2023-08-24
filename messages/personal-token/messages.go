@@ -17,4 +17,12 @@ var (
 	CreateFlagIn           = "Path to a JSON file containing the attributes of the personal token that will be created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created personal token with ID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
+
+	// [ delete ]
+	DeleteOutputSuccess    = "Personal token %v was successfully deleted\n"
+	DeleteHelpFlag         = "Displays more information about the delete subcommand"
+	DeleteUsage            = "delete [flags]"
+	DeleteShortDescription = "Deletes a personal token"
+	DeleteLongDescription  = "Deletes a personal token based on its UUID"
+	FlagID                 = "Unique identifier for a personal_token. The '--id' flag is mandatory"
 )
