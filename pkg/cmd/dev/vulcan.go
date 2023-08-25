@@ -9,7 +9,7 @@ import (
 )
 
 func vulcan(cmd *DevCmd) error {
-	const command string = "npx --yes edge-functions@1.3.0 run"
+	const command string = "npx --yes edge-functions@1.4.0 dev"
 
 	err := runCommand(cmd, command)
 	if err != nil {
