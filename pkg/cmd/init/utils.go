@@ -54,7 +54,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.1.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.3.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
