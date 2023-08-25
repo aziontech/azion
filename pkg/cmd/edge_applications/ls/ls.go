@@ -57,7 +57,7 @@ func NewCobraCmd(ls *LsCmd) *cobra.Command {
 
 func (cmd *LsCmd) run(cobraCmd *cobra.Command) error {
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.1.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.3.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
