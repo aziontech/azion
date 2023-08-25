@@ -66,7 +66,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azion deploy --help
-        $ azion deploy --path dist/static
+        $ azion deploy --path dist/storage
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.run(deploy.F)
