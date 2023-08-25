@@ -108,7 +108,7 @@ func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
 	case "static":
 		pathStatic = "./dist"
 	default:
-		pathStatic = ".edge/statics"
+		pathStatic = ".edge/storage"
 	}
 
 	if Path != "" {
