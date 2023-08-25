@@ -12,7 +12,7 @@ import (
 )
 
 func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, path string) error {
-	const command string = "npx --yes edge-functions@1.3.0 build --preset %s --mode %s"
+	const command string = "npx --yes edge-functions@1.4.0 build --preset %s --mode %s"
 
 	err := runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
 	if err != nil {
