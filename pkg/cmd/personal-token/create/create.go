@@ -17,9 +17,9 @@ import (
 )
 
 type Fields struct {
-	Name        string
-	ExpiresAt   string
-	Description string
+	Name        string `json:"name,omitempty"`
+	ExpiresAt   string `json:"expires_at,omitempty"`
+	Description string `json:"description,omitempty"`
 	Path        string
 }
 
@@ -37,6 +37,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion personal_token create --name "sakura" --expiration "9m" 
         $ azion personal_token create --name "luffy biruta" --expiration "9m" --description "gear five"
         $ azion personal_token create --in "create.json"
+        $ json example "create.json": 
+        {   
+            "name": "One day token",
+            "expires_at": "9m",
+            "description": "example"
+        }
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.Request{}
@@ -46,6 +52,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					file *os.File
 					err  error
 				)
+
 				if fields.Path == "-" {
 					file = os.Stdin
 				} else {
@@ -54,24 +61,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
 					}
 				}
-				err = cmdutil.UnmarshallJsonFromReader(file, &request)
+
+				err = cmdutil.UnmarshallJsonFromReader(file, &fields)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-			} else {
 
-				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("expiration") {
-					return msg.ErrorMandatoryCreateFlags
-				}
-
-				request.SetName(fields.Name)
-				date, err := ParseExpirationDate(time.Now(), fields.ExpiresAt)
-				if err != nil {
-					return err
-				}
-				request.SetExpiresAt(date)
-				request.SetDescription(fields.Description)
 			}
+
+			if utils.IsEmpty(fields.Name) || utils.IsEmpty(fields.ExpiresAt) {
+				return msg.ErrorMandatoryCreateFlags
+			}
+
+			request.SetName(fields.Name)
+
+			date, err := ParseExpirationDate(time.Now(), fields.ExpiresAt)
+			if err != nil {
+				return err
+			}
+
+			request.SetExpiresAt(date)
+			request.SetDescription(fields.Description)
 
 			response, err := api.NewClient(
 				f.HttpClient,
