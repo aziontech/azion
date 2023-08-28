@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.61.0
+	github.com/aziontech/azionapi-go-sdk v0.87.0
 	github.com/fatih/color v1.13.0
 	github.com/go-faker/faker/v4 v4.1.0
 	github.com/go-git/go-git/v5 v5.4.2
@@ -71,7 +71,6 @@ require (
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
