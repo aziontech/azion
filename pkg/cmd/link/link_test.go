@@ -45,7 +45,7 @@ func TestCobraCmd(t *testing.T) {
 		linkCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
 			return &git.Repository{}, nil
 		}
-		linkCmd.ShouldConfigure = func(cmd *LinkCmd, info *LinkInfo) (bool, error) {
+		linkCmd.ShouldConfigure = func(info *LinkInfo) (bool, error) {
 			return true, nil
 		}
 
@@ -86,7 +86,7 @@ func TestCobraCmd(t *testing.T) {
 		linkCmd.GitPlainClone = func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error) {
 			return &git.Repository{}, nil
 		}
-		linkCmd.ShouldConfigure = func(cmd *LinkCmd, info *LinkInfo) (bool, error) {
+		linkCmd.ShouldConfigure = func(info *LinkInfo) (bool, error) {
 			return true, nil
 		}
 

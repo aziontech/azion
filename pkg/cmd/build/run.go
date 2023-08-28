@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
@@ -11,13 +12,8 @@ import (
 
 func (cmd *BuildCmd) run() error {
 	logger.Debug("Running build subcommand from edge_applications command tree")
-	path, err := cmd.GetWorkDir()
-	if err != nil {
-		logger.Debug("Error while getting working directory", zap.Error(err))
-		return err
-	}
 
-	err = RunBuildCmdLine(cmd, path)
+	err := RunBuildCmdLine(cmd)
 	if err != nil {
 		return err
 	}
@@ -25,7 +21,7 @@ func (cmd *BuildCmd) run() error {
 	return nil
 }
 
-func RunBuildCmdLine(cmd *BuildCmd, path string) error {
+func RunBuildCmdLine(cmd *BuildCmd) error {
 	var err error
 
 	conf, err := cmd.GetAzionJsonContent()
@@ -33,7 +29,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 		return err
 	}
 
-	err = checkArgsJson(cmd)
+	err = checkArgsJson(cmd, conf)
 	if err != nil {
 		return err
 	}
@@ -56,7 +52,7 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	}
 
 	if conf.Template != "nextjs" {
-		return vulcan(cmd, conf, path)
+		return vulcan(cmd, conf)
 	}
 
 	if conf.Template == "nextjs" {
@@ -66,15 +62,10 @@ func RunBuildCmdLine(cmd *BuildCmd, path string) error {
 	return utils.ErrorUnsupportedType
 }
 
-func checkArgsJson(cmd *BuildCmd) error {
-	workDirPath, err := cmd.GetWorkDir()
-	if err != nil {
-		logger.Debug("Error while getting working directory", zap.Error(err))
-		return utils.ErrorInternalServerError
-	}
+func checkArgsJson(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 
-	workDirPath += "/azion/args.json"
-	_, err = cmd.FileReader(workDirPath)
+	workDirPath := conf.ProjectRoot + "/azion/args.json"
+	_, err := cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
 			logger.Debug("Error while trying to create args.json file", zap.Error(err))
