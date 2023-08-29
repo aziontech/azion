@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, path string) error {
+func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 	const command string = "npx --yes edge-functions@1.4.0 build --preset %s --mode %s"
 
 	err := runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
@@ -19,7 +19,7 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, path string)
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
 
-	envPath := path + "/.edge/.env"
+	envPath := conf.ProjectRoot + "/.edge/.env"
 	fileEnv, err := cmd.FileReader(envPath)
 	if err != nil {
 		return msg.ErrorEnvFileVulcan

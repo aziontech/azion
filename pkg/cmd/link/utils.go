@@ -10,8 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldConfigure(cmd *LinkCmd, info *LinkInfo) (bool, error) {
-	if info.GlobalFlagAll {
+func shouldConfigure(info *LinkInfo) (bool, error) {
+	if info.GlobalFlagAll || info.Auto {
 		return true, nil
 	}
 	var shouldConfigure bool
@@ -26,12 +26,27 @@ func shouldConfigure(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 	return shouldConfigure, nil
 }
 
+func shouldDevDeploy(info *LinkInfo, msg string) (bool, error) {
+	if info.GlobalFlagAll {
+		return true, nil
+	}
+	var shouldConfigure bool
+	prompt := &survey.Confirm{
+		Message: msg,
+	}
+	err := survey.AskOne(prompt, &shouldConfigure)
+	if err != nil {
+		return false, err
+	}
+	return shouldConfigure, nil
+}
+
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 	var err error
 	var shouldFetchTemplates bool
 	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
-		if info.GlobalFlagAll {
-			shouldFetchTemplates = info.GlobalFlagAll
+		if info.GlobalFlagAll || info.Auto {
+			shouldFetchTemplates = true
 		} else {
 			prompt := &survey.Confirm{
 				Message: "This project was already configured. Do you want to override the previous configuration?",
@@ -69,7 +84,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	return userInput, nil
 }
 
-func (cmd *LinkCmd) selectVulcanTemplates(info *LinkInfo) error {
+func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.4.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
@@ -77,14 +92,13 @@ func (cmd *LinkCmd) selectVulcanTemplates(info *LinkInfo) error {
 	}
 
 	newLineSplit := strings.Split(output, "\n")
-	newLineSplit[len(newLineSplit)-1] = "nextjs (faststore)"
-	newLineSplit = append(newLineSplit, "static (azion)")
+	newLineSplit[len(newLineSplit)-1] = "static (azion)"
 
 	answer := ""
 	template := ""
 	mode := ""
 	prompt := &survey.Select{
-		Message: "Choose a template:",
+		Message: "Choose a mode:",
 		Options: newLineSplit,
 	}
 	err = survey.AskOne(prompt, &answer)
@@ -98,6 +112,19 @@ func (cmd *LinkCmd) selectVulcanTemplates(info *LinkInfo) error {
 
 	info.Template = template
 	info.Mode = mode
+
+	return nil
+}
+
+func yarnInstall(cmd *LinkCmd) error {
+
+	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
+
+	err := cmd.CommandRunInteractive(cmd.F, []string{}, "yarn install")
+	if err != nil {
+		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
+		return msg.ErrorDeps
+	}
 
 	return nil
 }

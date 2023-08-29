@@ -16,11 +16,12 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 	}
 
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:      info.Name,
-		Env:       "production",
-		Template:  info.Template,
-		Mode:      info.Mode,
-		VersionID: "",
+		Name:        info.Name,
+		Env:         "production",
+		Template:    info.Template,
+		Mode:        info.Mode,
+		VersionID:   "",
+		ProjectRoot: info.PathWorkingDir,
 	}
 	azionJson.Function.Name = "__DEFAULT__"
 	azionJson.Function.File = "./out/worker.js"

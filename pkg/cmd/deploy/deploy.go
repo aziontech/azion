@@ -69,7 +69,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
         $ azion deploy --path dist/storage
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return deploy.run(deploy.F)
+			return deploy.Run(deploy.F)
 		},
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
@@ -81,7 +81,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) run(f *cmdutil.Factory) error {
+func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
 	// Run build command
