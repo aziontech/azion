@@ -1,7 +1,6 @@
 package init
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -9,22 +8,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
-
-func shouldConfigure(info *InitInfo) (bool, error) {
-	if info.GlobalFlagAll {
-		return true, nil
-	}
-	var shouldConfigure bool
-	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
-}
 
 func shouldDevDeploy(info *InitInfo, msg string) (bool, error) {
 	if info.GlobalFlagAll {

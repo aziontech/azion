@@ -115,3 +115,16 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 
 	return nil
 }
+
+func yarnInstall(cmd *LinkCmd) error {
+
+	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
+
+	err := cmd.CommandRunInteractive(cmd.F, []string{}, "yarn install")
+	if err != nil {
+		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
+		return msg.ErrorDeps
+	}
+
+	return nil
+}

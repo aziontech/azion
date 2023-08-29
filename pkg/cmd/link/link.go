@@ -31,27 +31,28 @@ type LinkInfo struct {
 }
 
 type LinkCmd struct {
-	Io              *iostreams.IOStreams
-	GetWorkDir      func() (string, error)
-	FileReader      func(path string) ([]byte, error)
-	LookPath        func(bin string) (string, error)
-	IsDirEmpty      func(dirpath string) (bool, error)
-	CleanDir        func(dirpath string) error
-	WriteFile       func(filename string, data []byte, perm fs.FileMode) error
-	OpenFile        func(name string) (*os.File, error)
-	RemoveAll       func(path string) error
-	Rename          func(oldpath string, newpath string) error
-	CreateTempDir   func(dir string, pattern string) (string, error)
-	EnvLoader       func(path string) ([]string, error)
-	Stat            func(path string) (fs.FileInfo, error)
-	Mkdir           func(path string, perm os.FileMode) error
-	GitPlainClone   func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
-	CommandRunner   func(cmd string, envvars []string) (string, int, error)
-	ShouldConfigure func(info *LinkInfo) (bool, error)
-	ShouldDevDeploy func(info *LinkInfo, msg string) (bool, error)
-	DeployCmd       func(f *cmdutil.Factory) *deploy.DeployCmd
-	DevCmd          func(f *cmdutil.Factory) *dev.DevCmd
-	F               *cmdutil.Factory
+	Io                    *iostreams.IOStreams
+	GetWorkDir            func() (string, error)
+	FileReader            func(path string) ([]byte, error)
+	LookPath              func(bin string) (string, error)
+	IsDirEmpty            func(dirpath string) (bool, error)
+	CleanDir              func(dirpath string) error
+	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
+	OpenFile              func(name string) (*os.File, error)
+	RemoveAll             func(path string) error
+	Rename                func(oldpath string, newpath string) error
+	CreateTempDir         func(dir string, pattern string) (string, error)
+	EnvLoader             func(path string) ([]string, error)
+	Stat                  func(path string) (fs.FileInfo, error)
+	Mkdir                 func(path string, perm os.FileMode) error
+	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
+	CommandRunner         func(cmd string, envvars []string) (string, int, error)
+	CommandRunInteractive func(f *cmdutil.Factory, envVars []string, comm string) error
+	ShouldConfigure       func(info *LinkInfo) (bool, error)
+	ShouldDevDeploy       func(info *LinkInfo, msg string) (bool, error)
+	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
+	F                     *cmdutil.Factory
 }
 
 func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
@@ -78,6 +79,9 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		DeployCmd:       deploy.NewDeployCmd,
 		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envvars, cmd)
+		},
+		CommandRunInteractive: func(f *cmdutil.Factory, envVars []string, comm string) error {
+			return utils.CommandRunInteractive(f, envVars, comm)
 		},
 	}
 }
@@ -181,11 +185,22 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				return err
 			}
 			if shouldDev {
-				logger.Debug("Running dev command from link command")
+				shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+				if err != err {
+					return err
+				}
 
-				// Run build command
+				if shouldYarn {
+					err = yarnInstall(cmd)
+					if err != nil {
+						logger.Debug("Failed to install project dependencies")
+						return err
+					}
+				}
+
+				logger.Debug("Running dev command from link command")
 				dev := cmd.DevCmd(cmd.F)
-				err := dev.Run(cmd.F)
+				err = dev.Run(cmd.F)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err
@@ -199,11 +214,22 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				return err
 			}
 			if shouldDeploy {
-				logger.Debug("Running deploy command from link command")
+				shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project")
+				if err != err {
+					return err
+				}
 
-				// Run build command
+				if shouldYarn {
+					err = yarnInstall(cmd)
+					if err != nil {
+						logger.Debug("Failed to install project dependencies")
+						return err
+					}
+				}
+
+				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err := deploy.Run(cmd.F)
+				err = deploy.Run(cmd.F)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err
@@ -214,11 +240,6 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 			}
 		}
 
-	}
-
-	err = InitNextjs(info, cmd)
-	if err != nil {
-		return err
 	}
 
 	return nil
