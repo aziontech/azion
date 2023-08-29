@@ -3,7 +3,7 @@ package build
 var (
 	EdgeApplicationsBuildUsage            = "build [flags]"
 	EdgeApplicationsBuildShortDescription = "Builds an Edge Application"
-	EdgeApplicationsBuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Computing Platform"
+	EdgeApplicationsBuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Platform"
 	EdgeApplicationsBuildRunningCmd       = "Running build step command:\n\n"
 	EdgeApplicationsBuildStart            = "Building your Edge Application. This process may take a few minutes\n"
 	EdgeApplicationsBuildSuccessful       = "Your Edge Application was built successfully\n"
