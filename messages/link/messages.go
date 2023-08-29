@@ -20,5 +20,5 @@ var (
 	EdgeApplicationsLinkNameNotSentStatic = "The project name was not sent by the --name flag; By default, when --name is not given, the working directory is used\n"
 	LinkDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	LinkDeployCommand                     = "If you want to deploy your project later, run 'azion deploy'\n"
-	LinkFlagAuto                          = "If sent, all questions that would stop the flow of the command will be answered with 'no'"
+	LinkFlagAuto                          = "If sent, the entire flow of the command will be run without interruptions"
 )
