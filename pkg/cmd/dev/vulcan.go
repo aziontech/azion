@@ -23,8 +23,6 @@ func runCommand(cmd *DevCmd, command string) error {
 	logger.Debug("Running vulcan run command")
 	logger.Debug(fmt.Sprintf("$ %s\n", command))
 
-	logger.FInfo(cmd.Io.Out, msg.RunningDevCommand)
-
 	err := cmd.CommandRunnerStream(cmd.Io.Out, command, []string{})
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))

@@ -30,6 +30,7 @@ type AzionApplicationOptions struct {
 	Mode        string                   `json:"mode"`
 	Env         string                   `json:"env"`
 	VersionID   string                   `json:"version-id"`
+	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`

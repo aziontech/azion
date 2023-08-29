@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
+	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/personal-token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
+	"github.com/aziontech/azion-cli/pkg/logger"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -64,6 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				err = cmdutil.UnmarshallJsonFromReader(file, &fields)
 				if err != nil {
+					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
 

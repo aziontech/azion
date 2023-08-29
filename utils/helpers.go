@@ -13,8 +13,11 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/tidwall/gjson"
+	"go.uber.org/zap"
 )
 
 const shell = "/bin/sh"
@@ -94,6 +97,20 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
+func CommandRunInteractive(f *cmdutil.Factory, envVars []string, comm string) error {
+
+	cmd := exec.Command(shell, "-c", comm)
+	cmd.Stdin = f.IOStreams.In
+	cmd.Stdout = f.IOStreams.Out
+	cmd.Stderr = f.IOStreams.Err
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // RunCommandStreamOutput executes the provived command while streaming its logs (stdout+stderr) directly to terminal
 func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error {
 	command := exec.Command(shell, "-c", comm)
@@ -162,18 +179,21 @@ func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
 
 	_, err = os.Stat(path + "/azion/azion.json")
 	if err != nil {
+		logger.Debug("Error reading stats of azion.json file", zap.Error(err))
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
 	jsonConf := path + "/azion/azion.json"
 	file, err := os.ReadFile(jsonConf)
 	if err != nil {
+		logger.Debug("Error reading azion.json file", zap.Error(err))
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
 	conf := &contracts.AzionApplicationOptions{}
 	err = json.Unmarshal(file, &conf)
 	if err != nil {
+		logger.Debug("Error reading unmarshalling azion.json file", zap.Error(err))
 		return nil, ErrorUnmarshalAzionJsonFile
 	}
 

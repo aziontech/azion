@@ -21,7 +21,7 @@ type DevCmd struct {
 	F                   *cmdutil.Factory
 }
 
-func NewDeployCmd(f *cmdutil.Factory) *DevCmd {
+func NewDevCmd(f *cmdutil.Factory) *DevCmd {
 	return &DevCmd{
 		F:        f,
 		Io:       f.IOStreams,
@@ -32,7 +32,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DevCmd {
 	}
 }
 
-func NewCobraCmd(publish *DevCmd) *cobra.Command {
+func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd := &cobra.Command{
 		Use:           msg.DevUsage,
 		Short:         msg.DevShortDescription,
@@ -44,7 +44,7 @@ func NewCobraCmd(publish *DevCmd) *cobra.Command {
         $ azion dev --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return publish.run(publish.F)
+			return dev.Run(dev.F)
 		},
 	}
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
@@ -52,10 +52,10 @@ func NewCobraCmd(publish *DevCmd) *cobra.Command {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewDeployCmd(f))
+	return NewCobraCmd(NewDevCmd(f))
 }
 
-func (cmd *DevCmd) run(f *cmdutil.Factory) error {
+func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running dev command")
 
 	// Run build command
