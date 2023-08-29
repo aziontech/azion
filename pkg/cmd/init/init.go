@@ -52,7 +52,6 @@ type InitCmd struct {
 	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
 	CommandRunInteractive func(f *cmdutil.Factory, envVars []string, comm string) error
-	ShouldConfigure       func(info *InitInfo) (bool, error)
 	ShouldDevDeploy       func(info *InitInfo, msg string) (bool, error)
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
@@ -77,7 +76,6 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 		Stat:            os.Stat,
 		Mkdir:           os.MkdirAll,
 		GitPlainClone:   git.PlainClone,
-		ShouldConfigure: shouldConfigure,
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
 		DeployCmd:       deploy.NewDeployCmd,
@@ -182,17 +180,23 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 	if shouldDev {
-		logger.Debug("Running dev command from init command")
 
-		err = yarnInstall(cmd)
-		if err != nil {
-			logger.Debug("Failed to install project dependencies")
+		shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+		if err != err {
 			return err
 		}
 
-		// Run build command
+		if shouldYarn {
+			err = yarnInstall(cmd)
+			if err != nil {
+				logger.Debug("Failed to install project dependencies")
+				return err
+			}
+		}
+
+		logger.Debug("Running dev command from init command")
 		dev := cmd.DevCmd(cmd.F)
-		err := dev.Run(cmd.F)
+		err = dev.Run(cmd.F)
 		if err != nil {
 			logger.Debug("Error while running dev command called by init command", zap.Error(err))
 			return err
@@ -206,17 +210,22 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 	if shouldDeploy {
-		logger.Debug("Running deploy command from init command")
-
-		err = yarnInstall(cmd)
-		if err != nil {
-			logger.Debug("Failed to install project dependencies")
+		shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
+		if err != err {
 			return err
 		}
 
-		// Run build command
+		if shouldYarn {
+			err = yarnInstall(cmd)
+			if err != nil {
+				logger.Debug("Failed to install project dependencies")
+				return err
+			}
+		}
+
+		logger.Debug("Running deploy command from init command")
 		deploy := cmd.DeployCmd(cmd.F)
-		err := deploy.Run(cmd.F)
+		err = deploy.Run(cmd.F)
 		if err != nil {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err
