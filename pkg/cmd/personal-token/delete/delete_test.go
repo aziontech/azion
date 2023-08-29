@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
+	"github.com/aziontech/azion-cli/utils"
 )
 
 func TestNewCmd(t *testing.T) {
@@ -21,9 +22,10 @@ func TestNewCmd(t *testing.T) {
 		args   []string
 		mock   func() *httpmock.Registry
 		output string
+		err    error
 	}{
 		{
-			name: "delete personal token by id",
+			name: "Delete personal token by id",
 			args: []string{"--id", "5c9c1854-45dd-11ee-be56-0242ac120002"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
@@ -34,9 +36,10 @@ func TestNewCmd(t *testing.T) {
 				return &mock
 			},
 			output: fmt.Sprintf(msg.DeleteOutputSuccess, "5c9c1854-45dd-11ee-be56-0242ac120002"),
+			err:    nil,
 		},
 		{
-			name: "delete personal tokens that is not found",
+			name: "Delete personal tokens that is not found",
 			args: []string{"--id", "5c9c1854-45dd-11ee-be56-0242ac120002"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
@@ -46,6 +49,24 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
+		},
+		{
+			name: "not informed flag",
+			args: []string{},
+			mock: func() *httpmock.Registry {
+				mock := httpmock.Registry{}
+				return &mock
+			},
+			err: msg.ErrorMissingIDArgumentDelete,
+		},
+		{
+			name: "Informed flag is an empty",
+			args: []string{"--id", ""},
+			mock: func() *httpmock.Registry {
+				mock := httpmock.Registry{}
+				return &mock
+			},
+			err: utils.ErrorArgumentIsEmpty,
 		},
 	}
 
@@ -58,7 +79,7 @@ func TestNewCmd(t *testing.T) {
 			_, err := cmd.ExecuteC()
 
 			if err != nil {
-				assert.Error(t, err)
+				assert.ErrorIs(t, err, tt.err)
 			}
 
 			assert.Equal(t, tt.output, out.String())
