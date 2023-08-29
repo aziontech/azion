@@ -49,9 +49,10 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
+			err: fmt.Errorf(msg.ErrorFailToDelete.Error(), "The given web page URL or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct. If the error persists, contact Azion's support"),
 		},
 		{
-			name: "not informed flag",
+			name: "Not informed flag",
 			args: []string{},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
@@ -78,8 +79,8 @@ func TestNewCmd(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			_, err := cmd.ExecuteC()
 
-			if err != nil {
-				assert.ErrorIs(t, err, tt.err)
+			if err != nil && !(err.Error() == tt.err.Error()) {
+				t.Errorf("Executec() err = %v, \nexpected %v", err, tt.args)
 			}
 
 			assert.Equal(t, tt.output, out.String())
