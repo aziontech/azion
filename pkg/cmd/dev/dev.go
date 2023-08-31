@@ -15,10 +15,11 @@ import (
 )
 
 type DevCmd struct {
-	Io                  *iostreams.IOStreams
-	CommandRunnerStream func(out io.Writer, cmd string, envvars []string) error
-	BuildCmd            func(f *cmdutil.Factory) *build.BuildCmd
-	F                   *cmdutil.Factory
+	Io                    *iostreams.IOStreams
+	CommandRunnerStream   func(out io.Writer, cmd string, envvars []string) error
+	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
+	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
+	F                     *cmdutil.Factory
 }
 
 func NewDevCmd(f *cmdutil.Factory) *DevCmd {
@@ -26,8 +27,8 @@ func NewDevCmd(f *cmdutil.Factory) *DevCmd {
 		F:        f,
 		Io:       f.IOStreams,
 		BuildCmd: build.NewBuildCmd,
-		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
-			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
+		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+			return utils.CommandRunInteractive(f, comm)
 		},
 	}
 }
@@ -66,7 +67,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = vulcan(cmd)
+	err = vulcan(f, cmd)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/schollz/progressbar/v3"
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
+func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, versionID string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -52,10 +53,16 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 		progressbar.OptionSetWriter(cmd.F.IOStreams.Out),
 		progressbar.OptionClearOnFinish(),
 	)
+
+	if f.Silent {
+		bar = nil
+	}
+
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+
 		if !info.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
@@ -84,15 +91,19 @@ func (cmd *DeployCmd) uploadFiles(pathStatic string, versionID string) error {
 		return err
 	}
 	close(jobs)
+
 	// Check for errors from workers
 	for a := 1; a <= totalFiles; a++ {
 		result := <-results
 		if result != nil {
 			return result
 		}
-		err := bar.Set(int(currentFile))
-		if err != nil {
-			return err
+
+		if bar != nil {
+			err := bar.Set(int(currentFile))
+			if err != nil {
+				return err
+			}
 		}
 	}
 

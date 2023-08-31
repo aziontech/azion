@@ -47,7 +47,7 @@ type LinkCmd struct {
 	Mkdir                 func(path string, perm os.FileMode) error
 	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
-	CommandRunInteractive func(f *cmdutil.Factory, envVars []string, comm string) error
+	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) (bool, error)
 	ShouldDevDeploy       func(info *LinkInfo, msg string) (bool, error)
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
@@ -80,8 +80,8 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envvars, cmd)
 		},
-		CommandRunInteractive: func(f *cmdutil.Factory, envVars []string, comm string) error {
-			return utils.CommandRunInteractive(f, envVars, comm)
+		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+			return utils.CommandRunInteractive(f, comm)
 		},
 	}
 }
