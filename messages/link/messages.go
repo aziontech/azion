@@ -5,10 +5,10 @@ var (
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
 	EdgeApplicationsLinkShortDescription  = "Links a project to Azion"
-	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application type to link a Project on the Azion’s platform"
+	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project on the Azion’s platform"
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
 	EdgeApplicationsLinkFlagName          = "The Edge application's name"
-	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's type"
+	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's preset"
 	EdgeApplicationsLinkFlagMode          = "The Edge Application's mode"
 	WebAppLinkCmdSuccess                  = "Template successfully fetched and configured\n\n"
 	LinkGettingTemplates                  = "Getting templates available"
