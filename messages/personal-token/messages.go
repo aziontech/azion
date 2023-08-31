@@ -14,7 +14,7 @@ var (
 	CreateFlagName         = "The personal token's name. It's required if the --in flag is not informed."
 	CreateFlagExpiresAt    = "The personal token's expiration. It's required if the --in flag is not informed."
 	CreateFlagDescription  = "The personal token's description"
-	CreateFlagIn           = "Path to a JSON file containing the attributes of the personal token that being created; you can use - for reading from stdin"
+	CreateFlagIn           = "Path to a JSON file containing the attributes of the personal token being created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created personal token with ID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 
