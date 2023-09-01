@@ -86,7 +86,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 
 func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.4.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	template = modeSplit[0]
 	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
 
-	info.Template = template
+	info.Preset = template
 	info.Mode = mode
 
 	return nil

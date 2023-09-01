@@ -23,7 +23,7 @@ import (
 
 type LinkInfo struct {
 	Name           string
-	Template       string
+	Preset         string
 	Mode           string
 	PathWorkingDir string
 	GlobalFlagAll  bool
@@ -98,9 +98,10 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azion link
 		$ azion link --help
-		$ azion link --name "thisisatest" --template nextjs
-		$ azion link --name "thisisatest" --template static
-		$ azion link --name "thisisatest" --template hexo --mode deliver
+		$ azion link --name "thisisatest" --preset hexo --mode deliver
+		$ azion link --preset astro --mode deliver
+		$ azion link --name "thisisatest" --preset nextjs
+		$ azion link --name "thisisatest" --preset static
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
@@ -109,7 +110,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsLinkFlagName)
-	cobraCmd.Flags().StringVar(&info.Template, "template", "", msg.EdgeApplicationsLinkFlagTemplate)
+	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", msg.EdgeApplicationsLinkFlagTemplate)
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 
@@ -138,7 +139,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 		return nil
 	}
 
-	switch info.Template {
+	switch info.Preset {
 	case "simple":
 		return initSimple(cmd, path, info, c)
 	case "static":
@@ -166,7 +167,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 			}
 		}
 
-		if !c.Flags().Changed("template") || !c.Flags().Changed("mode") {
+		if !c.Flags().Changed("preset") || !c.Flags().Changed("mode") {
 			err = cmd.selectVulcanMode(info)
 			if err != nil {
 				return err

@@ -70,19 +70,18 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
-	err := cmd.CommandRunInteractive(cmd.F, []string{}, "npx --yes edge-functions@1.4.0 init --name "+info.Name)
+	err := cmd.CommandRunInteractive(cmd.F, []string{}, "npx --yes edge-functions@1.5.0 init --name "+info.Name)
 	if err != nil {
 		return err
 	}
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.4.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
 
 	newLineSplit := strings.Split(output, "\n")
-	newLineSplit[len(newLineSplit)-1] = "nextjs (faststore)"
-	newLineSplit = append(newLineSplit, "static (azion)")
+	newLineSplit[len(newLineSplit)-1] = "static (azion)"
 
 	answer := ""
 	template := ""

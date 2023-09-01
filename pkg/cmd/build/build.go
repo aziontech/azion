@@ -15,6 +15,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Preset string
+var Mode string
+
 type BuildCmd struct {
 	Io                    *iostreams.IOStreams
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
@@ -36,9 +39,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsBuildUsage,
-		Short:         msg.EdgeApplicationsBuildShortDescription,
-		Long:          msg.EdgeApplicationsBuildLongDescription,
+		Use:           msg.BuildUsage,
+		Short:         msg.BuildShortDescription,
+		Long:          msg.BuildLongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example:       heredoc.Doc("\n$ azion build\n"),
@@ -47,7 +50,9 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 		},
 	}
 
-	buildCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsBuildFlagHelp)
+	buildCmd.Flags().BoolP("help", "h", false, msg.BuildFlagHelp)
+	buildCmd.Flags().StringVar(&Preset, "preset", "", msg.FlagTemplate)
+	buildCmd.Flags().StringVar(&Mode, "mode", "", msg.FlagMode)
 
 	return buildCmd
 }

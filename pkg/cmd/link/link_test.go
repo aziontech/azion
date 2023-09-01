@@ -51,7 +51,7 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(linkCmd, f)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--template", "simple"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--preset", "simple"})
 
 		in := bytes.NewBuffer(nil)
 		in.WriteString("yes\n")
@@ -92,7 +92,7 @@ func TestCobraCmd(t *testing.T) {
 
 		cmd := NewCobraCmd(linkCmd, f)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--template", "static"})
+		cmd.SetArgs([]string{"--name", "SUUPA_DOOPA", "--preset", "static"})
 
 		in := bytes.NewBufferString("yes\n")
 		f.IOStreams.In = io.NopCloser(in)
