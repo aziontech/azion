@@ -12,5 +12,5 @@ var (
 	RootConfigFlag  = "Sets the Azion configuration folder for the current command only, without changing persistent settings."
 	RootYesFlag     = "Answers all yes/no interactions automatically with yes"
 	TokenSavedIn    = "Token saved in %v\n"
-	TokenUsedIn     = "This token will be used by default when calling any command"
+	TokenUsedIn     = "This token will be used by default with all commands"
 )

@@ -12,7 +12,7 @@ var (
 	ErrorInstallVulcan                 = errors.New("Failed to install Vulcan: %s")
 	ErrorOpeningConfigFile             = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorUnmarshalConfigFile           = errors.New("Failed to unmarshal the config.json file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
-	ErrorGetAllTags                    = errors.New("Failed returning all Reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
+	ErrorGetAllTags                    = errors.New("Failed to return all reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
 	ErrorIterateAllTags                = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 	ErrorOpeningAzionFile              = errors.New("Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorUnmarshalAzionFile            = errors.New("Failed to unmarshal the azion.json file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
