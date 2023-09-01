@@ -106,10 +106,9 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 }
 
 func yarnInstall(cmd *InitCmd) error {
-
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
 
-	err := cmd.CommandRunInteractive(cmd.F, []string{}, "yarn install")
+	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps

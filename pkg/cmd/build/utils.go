@@ -14,7 +14,7 @@ func runCommand(cmd *BuildCmd, command string) error {
 	logger.FInfo(cmd.Io.Out, msg.BuildRunningCmd)
 	logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
-	err := cmd.CommandRunInteractive(cmd.f, []string{}, command)
+	err := cmd.CommandRunInteractive(cmd.f, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrFailedToRunBuildCommand

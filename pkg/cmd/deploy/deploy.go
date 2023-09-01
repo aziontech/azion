@@ -120,7 +120,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	err = cmd.uploadFiles(pathStatic, conf.VersionID)
+	err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
 	if err != nil {
 		return err
 	}
