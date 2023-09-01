@@ -29,12 +29,10 @@ var (
 )
 
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
-	version := version.BinVersion
-
 	rootCmd := &cobra.Command{
 		Use:     msg.RootUsage,
-		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version)),
-		Version: version,
+		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version.BinVersion)),
+		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			logger.LogLevel(f.Logger)
 			err := doPreCommandCheck(cmd, f, PreCmd{
@@ -73,7 +71,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 
 	//set template for -v flag
-	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
+	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
 
 	rootCmd.AddCommand(initcmd.NewCmd(f))
 	rootCmd.AddCommand(deploycmd.NewCmd(f))
