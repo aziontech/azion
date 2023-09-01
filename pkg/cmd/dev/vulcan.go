@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *DevCmd) error {
+func vulcan(f *cmdutil.Factory, cmd *DevCmd) error {
 	const command string = "npx --yes edge-functions@1.5.0 dev"
 
 	err := runCommand(f, cmd, command)
