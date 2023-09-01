@@ -31,7 +31,7 @@ func initSimple(cmd *LinkCmd, path string, info *LinkInfo, c *cobra.Command) err
 		}
 
 		options.Name = info.Name
-		options.Type = info.Template
+		options.Type = info.Preset
 		options.Domain.Name = "__DEFAULT__"
 		options.Application.Name = "__DEFAULT__"
 

@@ -29,13 +29,21 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 		return err
 	}
 
+	if Preset != "" {
+		conf.Template = Preset
+	}
+
+	if Mode != "" {
+		conf.Mode = Mode
+	}
+
 	err = checkArgsJson(cmd, conf)
 	if err != nil {
 		return err
 	}
 
 	if conf.Template == "simple" {
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
+		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
 		return nil
 	}
 
@@ -47,7 +55,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 		if err != nil {
 			return nil
 		}
-		logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSimple)
+		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
 		return nil
 	}
 

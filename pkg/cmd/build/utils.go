@@ -9,9 +9,9 @@ import (
 )
 
 func runCommand(cmd *BuildCmd, command string) error {
-	logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildStart)
+	logger.FInfo(cmd.Io.Out, msg.BuildStart)
 
-	logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildRunningCmd)
+	logger.FInfo(cmd.Io.Out, msg.BuildRunningCmd)
 	logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
 
 	err := cmd.CommandRunInteractive(cmd.f, command)
@@ -20,6 +20,6 @@ func runCommand(cmd *BuildCmd, command string) error {
 		return msg.ErrFailedToRunBuildCommand
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.EdgeApplicationsBuildSuccessful)
+	logger.FInfo(cmd.Io.Out, msg.BuildSuccessful)
 	return nil
 }
