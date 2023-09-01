@@ -97,18 +97,18 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	return string(out), exitCode, err
 }
 
-func CommandRunInteractive(f *cmdutil.Factory, envVars []string, comm string) error {
-
+// CommandRunInteractive runs a command interactively.
+func CommandRunInteractive(f *cmdutil.Factory, comm string) error {
 	cmd := exec.Command(shell, "-c", comm)
-	cmd.Stdin = f.IOStreams.In
-	cmd.Stdout = f.IOStreams.Out
-	cmd.Stderr = f.IOStreams.Err
-	err := cmd.Run()
-	if err != nil {
-		return err
+
+	if !f.Silent {
+		cmd.Stdin = f.IOStreams.In
+		cmd.Stdout = f.IOStreams.Out
 	}
 
-	return nil
+	cmd.Stderr = f.IOStreams.Err
+
+	return cmd.Run()
 }
 
 // RunCommandStreamOutput executes the provived command while streaming its logs (stdout+stderr) directly to terminal

@@ -8,6 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/personal-token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +29,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("id") {
 				return msg.ErrorMissingIDArgumentDelete
+			}
+
+			if utils.IsEmpty(id) {
+				return utils.ErrorArgumentIsEmpty
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

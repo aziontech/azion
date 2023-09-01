@@ -70,7 +70,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
-	err := cmd.CommandRunInteractive(cmd.F, []string{}, "npx --yes edge-functions@1.4.0 init --name "+info.Name)
+	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.4.0 init --name "+info.Name)
 	if err != nil {
 		return err
 	}
@@ -107,10 +107,9 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 }
 
 func yarnInstall(cmd *InitCmd) error {
-
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
 
-	err := cmd.CommandRunInteractive(cmd.F, []string{}, "yarn install")
+	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
