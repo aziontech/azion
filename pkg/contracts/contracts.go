@@ -1,5 +1,14 @@
 package contracts
 
+import "os"
+
+type FileOps struct {
+	Path        string
+	MimeType    string
+	FileContent *os.File
+	VersionID   string
+}
+
 type ListOptions struct {
 	Details  bool
 	OrderBy  string
@@ -17,10 +26,11 @@ type DescribeOptions struct {
 type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
-	Type        string                   `json:"type"`
+	Template    string                   `json:"template"`
 	Mode        string                   `json:"mode"`
 	Env         string                   `json:"env"`
 	VersionID   string                   `json:"version-id"`
+	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`

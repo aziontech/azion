@@ -38,7 +38,7 @@ var (
 	ErrorArgsFlag       = errors.New("Failed to read the args file. Verify if the file name and its path are correct and the file's content has a valid JSON format")
 	ErrorParseArgs      = errors.New("Failed to parse JSON args. Verify if the file's content has a valid JSON format")
 
-	ErrorGetAllTags       = errors.New("Failed returning all Reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
+	ErrorGetAllTags       = errors.New("Failed to return all Reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
 	ErrorIterateAllTags   = errors.New("Failed to iterate over Git reference. Verify the credentials to access your Git repository and try again. If the error persists, contact Azion support.")
 	ErrorWritingWebdevEnv = errors.New("Failed to write 'webdev.env' file. Verify if the file is writable and/or you have access to it, if the data format is JSON, or fix the content according to the JSON format specification at https://www.json.org/json-en.html")
 
