@@ -26,7 +26,8 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
-		return err
+		logger.Debug("Error while building your project", zap.Error(err))
+		return msg.ErrorBuilding
 	}
 
 	if Preset != "" {

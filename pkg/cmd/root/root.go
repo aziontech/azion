@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/root"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
@@ -31,6 +33,7 @@ var (
 func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:     msg.RootUsage,
+		Long:    msg.RootDescription,
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version.BinVersion)),
 		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -44,6 +47,11 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 			return nil
 		},
+		Example: heredoc.Doc(`
+		$ azion
+		$ azion -t azionb43a9554776zeg05b11cb1declkbabcc9la
+		$ azion -h
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
@@ -79,6 +87,7 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 	rootCmd.AddCommand(devcmd.NewCmd(f))
 	rootCmd.AddCommand(linkcmd.NewCmd(f))
 	rootCmd.AddCommand(personal_token.NewCmd(f))
+	rootCmd.AddCommand(completion.NewCmd(f))
 
 	return rootCmd
 }

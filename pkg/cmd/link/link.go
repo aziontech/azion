@@ -186,12 +186,12 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				return err
 			}
 			if shouldDev {
-				shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+				shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 				if err != err {
 					return err
 				}
 
-				if shouldYarn {
+				if shouldDeps {
 					err = yarnInstall(cmd)
 					if err != nil {
 						logger.Debug("Failed to install project dependencies")

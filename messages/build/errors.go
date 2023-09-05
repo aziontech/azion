@@ -3,6 +3,7 @@ package build
 import "errors"
 
 var (
+	ErrorBuilding              = errors.New("Failed to build your project. Make sure you have initialized your project by running the init or link commands. For more information run 'azion build --debug' or contact Azion's support")
 	ErrorVulcanExecute         = errors.New("Error executing Vulcan: %s")
 	EdgeApplicationsOutputErr  = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azioncli-template and try again")
 	ErrFailedToRunBuildCommand = errors.New("Failed to run the build command. Verify if the command is correct and check the output above for more details. Run the 'azion build' command again or contact Azion's support")
