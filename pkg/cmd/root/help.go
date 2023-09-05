@@ -53,6 +53,11 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 		return
 	}
 
+	// in case root command is run only with --token flag, we only show the token being saved
+	if command.Flags().Changed("token") {
+		return
+	}
+
 	var (
 		baseCommands   []string
 		subcmdCommands []string
