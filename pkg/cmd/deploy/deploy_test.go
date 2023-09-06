@@ -58,7 +58,7 @@ func TestDeployCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.EqualError(t, err, "Failed to build your project. Make sure you have initialized your project by running the init or link commands. For more information run 'azion build --debug' or contact Azion's support")
+		require.EqualError(t, err, "Failed to build your resource. Azion configuration not found. Make sure you are in the root directory of your local repository and have already initialized or linked your resource with the commands 'azion init' or 'azion link'")
 	})
 
 	t.Run("failed to create application", func(t *testing.T) {
