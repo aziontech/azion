@@ -120,17 +120,3 @@ func depsInstall(cmd *InitCmd, packageManager string) error {
 
 	return nil
 }
-
-func getPackageManager() (string, error) {
-	opts := []string{"npm", "yarn"}
-	answer := ""
-	prompt := &survey.Select{
-		Message: "Choose a package manager:",
-		Options: opts,
-	}
-	err := survey.AskOne(prompt, &answer)
-	if err != nil {
-		return "", err
-	}
-	return answer, nil
-}

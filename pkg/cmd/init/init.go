@@ -182,7 +182,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		}
 
 		if shouldDeps {
-			answer, err := getPackageManager()
+			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
 			}
@@ -215,7 +215,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		}
 
 		if shouldDeps {
-			answer, err := getPackageManager()
+			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
 			}

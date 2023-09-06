@@ -191,7 +191,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				}
 
 				if shouldDeps {
-					answer, err := getPackageManager()
+					answer, err := utils.GetPackageManager()
 					if err != nil {
 						return err
 					}
@@ -224,7 +224,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				}
 
 				if shouldYarn {
-					answer, err := getPackageManager()
+					answer, err := utils.GetPackageManager()
 					if err != nil {
 						return err
 					}
