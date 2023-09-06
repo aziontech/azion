@@ -119,7 +119,7 @@ func (cmd *RootCmd) Run() error {
 	init := cmd.InitCmd(cmd.F)
 	err := init.Run(info)
 	if err != nil {
-		logger.Debug("Error while running build command called by dev command", zap.Error(err))
+		logger.Debug("Error while running init command called by root command", zap.Error(err))
 		return err
 	}
 
