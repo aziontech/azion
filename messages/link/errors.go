@@ -20,4 +20,5 @@ var (
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrReadEnvFile                     = errors.New("Failed to read the webdev.env file. Verify if the file is corrupted or changed or run the 'azioncli edge_applications publish' command again")
+	ErrorDeps                          = errors.New("Failed to install project dependencies")
 )
