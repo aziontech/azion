@@ -119,15 +119,28 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	return nil
 }
 
-func yarnInstall(cmd *LinkCmd) error {
-
+func depsInstall(cmd *LinkCmd, packageManager string) error {
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
-
-	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
+	command := fmt.Sprintf("%s install", packageManager)
+	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
 	}
 
 	return nil
+}
+
+func getPackageManager() (string, error) {
+	opts := []string{"npm", "yarn"}
+	answer := ""
+	prompt := &survey.Select{
+		Message: "Choose a package manager:",
+		Options: opts,
+	}
+	err := survey.AskOne(prompt, &answer)
+	if err != nil {
+		return "", err
+	}
+	return answer, nil
 }
