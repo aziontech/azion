@@ -11,7 +11,7 @@ import (
 )
 
 // worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
-func worker(wID int, jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client) {
+func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client) {
 
 	for job := range jobs {
 		if err := clientUpload.Upload(context.Background(), &job); err != nil {
