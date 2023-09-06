@@ -4,7 +4,7 @@ var (
 
 	//init cmd
 	EdgeApplicationsInitUsage = `init [flags]`
-	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
+	EdgeApplicationsInitShortDescription  = "Initializes a project from a template"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application on the Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge application's name"

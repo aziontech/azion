@@ -3,7 +3,7 @@ package deploy
 var (
 	// deploy cmd
 	DeployUsage                       = "deploy"
-	DeployShortDescription            = "Deploys an Edge Application on the Azion platform"
+	DeployShortDescription            = "Deploys a project on the Azion platform"
 	DeployLongDescription             = "Deploys an Edge Application based on the Azion’s Platform"
 	DeploySuccessful                  = "Your Edge Application was deployed successfully\n"
 	SimpleDeploySuccessful            = "Your Simple Edge Application was deployed successfully\n"

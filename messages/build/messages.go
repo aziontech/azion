@@ -2,7 +2,7 @@ package build
 
 var (
 	BuildUsage            = "build [flags]"
-	BuildShortDescription = "Builds an Edge Application"
+	BuildShortDescription = "Builds a project"
 	BuildLongDescription  = "Builds your Edge Application to run on Azion’s Edge Computing Platform"
 	BuildRunningCmd       = "Running build step command:\n\n"
 	BuildStart            = "Building your Edge Application. This process may take a few minutes\n"
