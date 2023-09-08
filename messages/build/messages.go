@@ -6,7 +6,7 @@ var (
 	BuildLongDescription  = "Builds your edge application to run on Azion’s Edge Computing Platform"
 	BuildRunningCmd       = "Running build step command:\n\n"
 	BuildStart            = "Building your edge application. This process may take a few minutes\n"
-	BuildSuccessful       = "Your edge Application was built successfully\n"
+	BuildSuccessful       = "Your edge application was built successfully\n"
 	BuildFlagHelp         = "Displays more information about the build command"
 	BuildSimple           = "Skipping build step. Build isn't applied to the type 'simple'\n"
 	BuildStatic           = "Skipping build step. Build isn't applied to the type 'static'\n"
