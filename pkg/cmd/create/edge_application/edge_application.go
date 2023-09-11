@@ -116,7 +116,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				applicationAcceleration, err := strconv.ParseBool(fields.ApplicationAcceleration)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
-					return utils.ErrorParseBoolToString
+					return utils.ErrorConvertingStringToBool
 				}
 				request.SetApplicationAcceleration(applicationAcceleration)
 			}
