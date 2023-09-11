@@ -1,6 +1,6 @@
 # Azion CLI
 [![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](https://github.com/aziontech/azion-cli/wiki/azioncli)
+[![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](https://github.com/aziontech/azion-cli/wiki/azion)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aziontech/azion-cli)](https://goreportcard.com/report/github.com/aziontech/azion-cli)
 
 
@@ -9,26 +9,30 @@ The Azion CLI (command-line interface) is an open source tool that enables you t
 The developer friendly way to interact with Azion!
 
 ## Quick links
-* [Downloading](#downloading)
-* [Building](#building)
-* [Setup Autocomplete](#setup-autocomplete)
-* [How to Use](#How-to-Use)
-* [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azioncli)
-* [Contributing](CONTRIBUTING.md)
-* [Code of Conduct](CODE_OF_CONDUCT.md)
-* [License](#License)
+
+- [Downloading](#downloading)
+- [Building](#building)
+- [Setup Autocomplete](#setup-autocomplete)
+- [How to Use](#How-to-Use)
+- [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azion)
+- [Contributing](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [License](#License)
 
 
 ## Downloading
 
-There are two ways to download and use `azioncli`
-The first, is the regular way of cloning this repository and [building](#building) the project manually. 
-However, `azioncli` is also available as `homebrew`, `rpm`, `deb` and `apk` packages. 
+>**Attention**: if you've downloaded `azioncli` in an older version than 1.0.0, it's highly recommended to uninstall it before downloading `azion` cli.
+
+There are two ways to download and use the `azion` CLI.
+The first, is the regular way of cloning this repository and [building](#building) the project manually.
+However, `azion` is also available as `homebrew`, `rpm`, `deb` and `apk` packages.
 
 To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://github.com/aziontech/azion-cli/releases) page, and download the desired package. 
 
-To download azioncli through Homebrew, use the following:
-* `brew install aziontech/tap/azioncli`
+To download azion CLI through Homebrew, run:
+
+- `brew install aziontech/tap/azioncli`
 
 
 ## Building Locally
@@ -41,27 +45,33 @@ $ make build
 $ make cross-build
 ```
 
+---
+
 ## Setup Autocomplete
 
-> Please verify if you have autocomplete enabled globally, otherwise the autocomplete for cli will not work
+> Please verify if you have autocomplete enabled globally, otherwise the autocomplete for cli won't work
 
 ## Dependencies zsh
 
 You need to install zsh-autosuggestions
 
-MacOs
+MacOs:
+
 ```shell
 brew install zsh-autosuggestions
 ```
-Linux
+
+Linux:
+
 ```shell
 git clone https://github.com/zsh-users/zsh-autosuggestions \${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 ```
 
-### **Installing autocomplete for azioncli only**
-----
+---
 
-### **MacOs** / **Linux**
+## Installing autocomplete for azion cli only
+
+### MacOs / Linux
 
 Run
 ```shell
@@ -72,14 +82,16 @@ Then run
 echo "source <(azioncli completion zsh); compdef _azioncli azioncli" >> ~/.zshrc
 ```
 
-If you uninstall azioncli, please edit your `~/.zshrc` file and remove the line `source <(azioncli completion zsh); compdef _azioncli azioncli`
+If you uninstall azion cli, please edit your `~/.zshrc` file and remove the line `source <(azioncli completion zsh); compdef _azioncli azioncli`
 
+---
 
-### **Installing autocomplete globally**
-----
+## Installing autocomplete globally
+
 ### MacOs
 
-Run
+Run:
+
 ```shell
 echo "autoload -U compinit; compinit" >> ~/.zshrc 
 ```
@@ -106,50 +118,53 @@ plugins=(zsh-autosuggestions)
 
 If you have other plugins, just add zsh-zutosuggestions to the end.
 
+> Whether you chose to activate autocomplete globally or for azion cli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
 
-> Whether you chose to activate autocomplete globally or for azioncli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
-
-## Dependencies bash
+### Dependencies bash
 
 You need to install bash-completion
 
-MacOs
+MacOs:
 
 ```shell
 brew install bash-completion
 ```
 
-Centos/RHEL 7
+Centos/RHEL 7:
 
 ```shell
 yum install bash-completion bash-completion-extras
 ```
 
-Debian/Ubuntu
+Debian/Ubuntu:
 
 ```shell
 apt-get install bash-completion
 ```
 
-Alpine
+Alpine:
 
 ```shell
 apk add bash-completion
 ```
 
-### **Installing autocomplete for azioncli only**
-----
-### **MacOs** / **Linux**
+---
 
-Run
+## Installing autocomplete for azion cli only
+### MacOs / Linux
+
+Run:
+
 ```shell
 echo "source <(azioncli completion bash)" >> ~/.bashrc 
 ```
-If you uninstall azioncli, please edit your `~/.bashrc` file and remove the line `source <(azioncli completion bash)`
 
-### **Installing autocomplete globally**
-----
-### **MacOS**
+If you uninstall azion cli, please edit your `~/.bashrc` file and remove the line `source <(azioncli completion bash)`
+
+---
+
+## Installing autocomplete globally
+### MacOS
 
 Open your `~/.bashrc` file, and add the following content to it
 ```shell
@@ -157,88 +172,117 @@ BREW_PREFIX=$(brew --prefix)
 [[ -r "${BREW_PREFIX}/etc/profile.d/bash_completion.sh" ]] && . ${BREW_PREFIX}/etc/profile.d/bash_completion.sh
 ```
 
-### **Linux**
+#### Linux
 
-Run
+Run:
+
 ```shell
 echo "source /etc/profile.d/bash_completion.sh" >> ~/.bashrc
 ```
-----
 
-> Whether you chose to activate autocomplete globally or for azioncli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
+> Whether you chose to activate autocomplete globally or for azion cli only, the steps of each section should only be run once. After that, autocomplete will work every time you open a new terminal.
 
-## Dependencies fish
-Run the command below once
+---
+### Dependencies fish
+
+Run the command below once:
+
 ```shell
 echo "azioncli completion fish | source" >> ~/.config/fish/config.fish
 ```
-If you uninstall azioncli, please edit your `~/.config/fish/config.fish` file and remove the line `azioncli completion fish | source`
+
+If you uninstall azion cli, please edit your `~/.config/fish/config.fish` file and remove the line `azioncli completion fish | source`
 
 ## How to Use
 
-In order to perform network operations it is *mandatory* to provide an authentication token
+In order to perform network operations it is *mandatory* to provide an authentication token.
 
-You can provide token in two ways.
-* Using azion-cli configure command (this command saves the token in a configuration file for further use):
-$ azioncli configure -t <authentication token>
+You can provide token in two ways:
 
-OR
+- Using azion-cli token command (this command saves the token in a configuration file for further use):
+$ azion -t <authentication token>
 
-* Using environment variable (in this way the token will be cleared when the terminal is closed):
+- Using environment variable (in this way the token will be cleared when the terminal is closed):
 $ export AZIONCLI_TOKEN=<authentication token>
 
 
-You can just run `azioncli` and see it's options
+You can just run `azion -h` and see it's options
 
-```text
-$ azioncli
-Interact easily with Azion services
+```sh
+$ azion -h
 
-USAGE
-  azioncli [flags]
+DESCRIPTION
+  The Azion Command Line Interface is a unified tool to manage your Azion projects and resources
 
-API COMMANDS
-  edge_functions: Manages your Azion account's Edge Functions
-  edge_services: Manages your Azion account's Edge Services
+SYNOPSIS
+  azion <command> <subcommand> [flags]
 
-ADDITIONAL COMMANDS
-  configure:     Configure parameters and credentials
-  help:          Help about any command
-  version:       Returns the binary version
+EXAMPLES
+  $ azion
+  $ azion -t azionxxxxxx
+  $ azion --debug
+  $ azion -h
+  
 
-FLAGS
-  -h, --help      help for azioncli
-  -v, --verbose   Makes azioncli verbose during the operation
-      --version   version for azioncli
+AVAILABLE COMMANDS
+  build          Builds an edge application locally
+  deploy         Deploys an application on the Azion platform
+  dev            Starts a local development server
+  help           Help about any command
+  init           Initializes an edge application from a template
+  link           Links a local application to an Azion edge application
+  personal_token Manages the personal tokens configured on the Azion platform
+
+LOCAL OPTIONS
+  -c, --config string      Sets the Azion configuration folder for the current command only, without changing persistent settings.
+  -d, --debug              Displays log at a debug level
+  -h, --help               Displays more information about the Azion CLI
+  -l, --log-level string   Displays log at a debug level (default "info")
+  -s, --silent             Silences log completely; mostly used for automation purposes
+  -t, --token string       Saves a given personal token locally to authorize CLI commands
+  -v, --version            version for azion
+  -y, --yes                Answers all yes/no interactions automatically with yes
+  
 
 LEARN MORE
-  Use 'azioncli <command> <subcommand> --help' for more information about a command
+  
+  Use 'azion <command> <subcommand> --help' for more information about a command
 ```
 
-For each subcommand use the `-h|--help` flag to learn more about it:
+For each command or subcommand use the `-h|--help` flag to learn more about it:
 
-```text
-$ ./bin/azioncli edge_functions --help
-You can create, update, delete, list and describe your Azion account's Edge Functions
+```sh
+$ azion dev --help
+Azion CLI 1.0.0
 
-USAGE
-  azioncli edge_functions [flags]
+DESCRIPTION
+  Start a development server locally
 
-COMMANDS
-  create:     Create a new Edge Function
-  delete:     Deletes an Edge Function
-  describe:   Describes an Edge Function
-  list:       Lists your account's Edge Functions
-  update:     Updates an Edge Function
+SYNOPSIS
+  azion dev [flags]
 
-FLAGS
-  -h, --help   help for edge_functions
+EXAMPLES
+         
+  $ azion dev
+  $ azion dev --help
+  
 
-INHERITED FLAGS
-  -v, --verbose   Makes azioncli verbose during the operation
+LOCAL OPTIONS
+  -h, --help   Displays more information about the dev command
+  
+
+GLOBAL OPTIONS
+  -c, --config string      Sets the Azion configuration folder for the current command only, without changing persistent settings.
+  -d, --debug              Displays log at a debug level
+  -l, --log-level string   Displays log at a debug level (default "info")
+  -s, --silent             Silences log completely; mostly used for automation purposes
+  -t, --token string       Saves a given personal token locally to authorize CLI commands
+  -y, --yes                Answers all yes/no interactions automatically with yes
+  
 
 LEARN MORE
-  Use 'azioncli <command> <subcommand> --help' for more information about a command
+  
+  Use 'azion <command> <subcommand> --help' for more information about a command
 ```
 
 ## License
