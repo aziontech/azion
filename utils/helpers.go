@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -362,4 +363,18 @@ func TruncateString(str string) string {
 // IsEmpty returns true when the string is empty
 func IsEmpty(str string) bool {
 	return len(str) < 1
+}
+
+func GetPackageManager() (string, error) {
+	opts := []string{"npm", "yarn"}
+	answer := ""
+	prompt := &survey.Select{
+		Message: "Choose a package manager:",
+		Options: opts,
+	}
+	err := survey.AskOne(prompt, &answer)
+	if err != nil {
+		return "", err
+	}
+	return answer, nil
 }

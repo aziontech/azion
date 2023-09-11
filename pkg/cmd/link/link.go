@@ -105,7 +105,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
-			return link.run(info, options, cmd)
+			return link.run(info, options)
 		},
 	}
 
@@ -121,8 +121,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewLinkCmd(f), f)
 }
 
-func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
-	logger.Debug("Running link subcommand from edge_applications command tree")
+func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptions) error {
+	logger.Debug("Running link command")
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
@@ -141,9 +141,9 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 
 	switch info.Preset {
 	case "simple":
-		return initSimple(cmd, path, info, c)
+		return initSimple(cmd, path, info)
 	case "static":
-		return initStatic(cmd, info, options, c)
+		return initStatic(cmd, info, options)
 	}
 
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
@@ -153,21 +153,20 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 
 	if shouldFetchTemplates {
 		// Checks for global --yes flag and that name flag was not sent
-		if info.GlobalFlagAll && !c.Flags().Changed("name") {
+		if (info.GlobalFlagAll || info.Auto) && info.Name == "" {
 			info.Name = thoth.GenerateName()
 		} else {
 			// if name was not sent we ask for input, otherwise info.Name already has the value
-			if !c.Flags().Changed("name") {
+			if info.Name == "" {
 				projName, err := askForInput(msg.LinkProjectQuestion, thoth.GenerateName())
 				if err != nil {
 					return err
 				}
-
 				info.Name = projName
 			}
 		}
 
-		if !c.Flags().Changed("preset") || !c.Flags().Changed("mode") {
+		if info.Preset == "" || info.Mode == "" {
 			err = cmd.selectVulcanMode(info)
 			if err != nil {
 				return err
@@ -186,16 +185,20 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				return err
 			}
 			if shouldDev {
-				shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+				shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 				if err != err {
 					return err
 				}
 
-				if shouldYarn {
-					err = yarnInstall(cmd)
+				if shouldDeps {
+					answer, err := utils.GetPackageManager()
 					if err != nil {
-						logger.Debug("Failed to install project dependencies")
 						return err
+					}
+					err = depsInstall(cmd, answer)
+					if err != nil {
+						logger.Debug("Error while installing project dependencies", zap.Error(err))
+						return msg.ErrorDeps
 					}
 				}
 
@@ -221,10 +224,14 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				}
 
 				if shouldYarn {
-					err = yarnInstall(cmd)
+					answer, err := utils.GetPackageManager()
 					if err != nil {
-						logger.Debug("Failed to install project dependencies")
 						return err
+					}
+					err = depsInstall(cmd, answer)
+					if err != nil {
+						logger.Debug("Error while installing project dependencies", zap.Error(err))
+						return msg.ErrorDeps
 					}
 				}
 

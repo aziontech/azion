@@ -11,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -90,7 +89,6 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 }
 
 func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
-	options := &contracts.AzionApplicationOptions{}
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
 		Use:           msg.EdgeApplicationsInitUsage,
@@ -108,7 +106,7 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
-			return init.run(info, options, cmd)
+			return init.Run(info)
 		},
 	}
 
@@ -122,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewInitCmd(f), f)
 }
 
-func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
+func (cmd *InitCmd) Run(info *InitInfo) error {
 	logger.Debug("Running init command")
 
 	path, err := cmd.GetWorkDir()
@@ -134,17 +132,17 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 
 	switch info.Template {
 	case "simple":
-		return initSimple(cmd, path, info, c)
+		return initSimple(cmd, path, info)
 	case "static":
-		return initStatic(cmd, info, options, c)
+		return initStatic(cmd, info)
 	}
 
 	// Checks for global --yes flag and that name flag was not sent
-	if info.GlobalFlagAll && !c.Flags().Changed("name") {
+	if info.GlobalFlagAll && info.Name == "" {
 		info.Name = thoth.GenerateName()
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
-		if !c.Flags().Changed("name") {
+		if info.Name == "" {
 			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
@@ -154,11 +152,9 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		}
 	}
 
-	if !c.Flags().Changed("template") || !c.Flags().Changed("mode") {
-		err = cmd.selectVulcanTemplates(info)
-		if err != nil {
-			return err
-		}
+	err = cmd.selectVulcanTemplates(info)
+	if err != nil {
+		return err
 	}
 
 	info.PathWorkingDir = info.PathWorkingDir + "/" + info.Name
@@ -172,7 +168,7 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 	err = cmd.ChangeDir(info.PathWorkingDir)
 	if err != nil {
 		logger.Debug("Error while changing to new working directory", zap.Error(err))
-		return msg.ErrorDeps
+		return msg.ErrorWorkingDir
 	}
 
 	shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
@@ -180,17 +176,20 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 	if shouldDev {
-
-		shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 		if err != err {
 			return err
 		}
 
-		if shouldYarn {
-			err = yarnInstall(cmd)
+		if shouldDeps {
+			answer, err := utils.GetPackageManager()
 			if err != nil {
-				logger.Debug("Failed to install project dependencies")
 				return err
+			}
+			err = depsInstall(cmd, answer)
+			if err != nil {
+				logger.Debug("Error while installing project dependencies", zap.Error(err))
+				return msg.ErrorDeps
 			}
 		}
 
@@ -210,13 +209,17 @@ func (cmd *InitCmd) run(info *InitInfo, options *contracts.AzionApplicationOptio
 		return err
 	}
 	if shouldDeploy {
-		shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
+		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
 		if err != err {
 			return err
 		}
 
-		if shouldYarn {
-			err = yarnInstall(cmd)
+		if shouldDeps {
+			answer, err := utils.GetPackageManager()
+			if err != nil {
+				return err
+			}
+			err = depsInstall(cmd, answer)
 			if err != nil {
 				logger.Debug("Failed to install project dependencies")
 				return err

@@ -11,7 +11,7 @@ var (
 	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's preset"
 	EdgeApplicationsLinkFlagMode          = "The Edge Application's mode"
 	WebAppLinkCmdSuccess                  = "Template successfully fetched and configured\n\n"
-	LinkGettingTemplates                  = "Getting templates available"
+	LinkGettingTemplates                  = "Getting templates available\n"
 	LinkProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your project's name: "
 	EdgeApplicationsLinkFlagHelp          = "Displays more information about the link command"
 	EdgeApplicationsLinkSuccessful        = "Your project %s was linked successfully\n"
