@@ -1,17 +1,17 @@
 package edge_applications
 
 var (
-
 	//used by more than one cmd
 	FlagId      = "Unique identifier of the Edge Application"
 	FileWritten = "File successfully written to: %s\n"
 
-	//edge_applications cmd
+	// [ edge_applications ]
 	Usage            = "edge_applications"
 	ShortDescription = "Creates Edge Applications on Azion's platform"
 	LongDescription  = "Build your Edge applications in minutes without the need to manage infrastructure or security"
+	FlagIn           = "Path to a JSON file containing the attributes of the edge application being created; you can use - for reading from stdin"
+	OutputSuccess    = "Created edge application with ID %s\n"
 	FlagHelp         = "Displays more information about the edge_application command"
-	AutoDetectec     = "Auto-detected Project Settings (%s)\n"
 
 	//build cmd
 	BuildUsage            = "build [flags]"

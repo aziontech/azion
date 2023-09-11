@@ -44,4 +44,5 @@ var (
 	ErrorCommandNotFound            = errors.New("Command '%s' not found")
 	ErrorGetAssetsNamesAzioncli     = errors.New("Failed to fetch the assets names from azioncli")
 	ErrorArgumentIsEmpty            = errors.New("Argument is empty")
+	ErrorParseBoolToString          = errors.New("Failed parse bool to string")
 )

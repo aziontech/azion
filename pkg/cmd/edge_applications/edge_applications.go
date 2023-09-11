@@ -14,9 +14,9 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edge_applicationsCmd := &cobra.Command{
-		Use:   msg.EdgeApplicationsUsage,
-		Short: msg.EdgeApplicationsShortDescription,
-		Long:  msg.EdgeApplicationsLongDescription,
+		Use:   msg.Usage,
+		Short: msg.ShortDescription,
+		Long:  msg.LongDescription,
 		Example: heredoc.Doc(`
 		$ azioncli edge_applications --help
         `),
@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edge_applicationsCmd.AddCommand(update.NewCmd(f))
 	edge_applicationsCmd.AddCommand(ls.NewCmd(f))
 
-	edge_applicationsCmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsFlagHelp)
+	edge_applicationsCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return edge_applicationsCmd
 }

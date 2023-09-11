@@ -19,9 +19,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsListUsage,
-		Short:         msg.EdgeApplicationsListShortDescription,
-		Long:          msg.EdgeApplicationsListLongDescription,
+		Use:           msg.ListUsage,
+		Short:         msg.ListShortDescription,
+		Long:          msg.ListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		    $ azioncli edge_applications list --details
@@ -53,7 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationsListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }
 

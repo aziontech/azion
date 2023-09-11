@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var application_id string
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.EdgeApplicationDescribeUsage,
-		Short:         msg.EdgeApplicationDescribeShortDescription,
-		Long:          msg.EdgeApplicationDescribeLongDescription,
+		Use:           msg.DescribeUsage,
+		Short:         msg.DescribeShortDescription,
+		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.EdgeApplicationFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedApp[:])
 				if err != nil {
@@ -66,10 +66,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&application_id, "application-id", "a", "", msg.EdgeApplicationFlagId)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeApplicationDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeApplicationDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationDescribeHelpFlag)
+	cmd.Flags().StringVarP(&application_id, "application-id", "a", "", msg.FlagId)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
 }

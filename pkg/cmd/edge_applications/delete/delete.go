@@ -41,9 +41,9 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	var application_id int64
 	cmd := &cobra.Command{
-		Use:           msg.EdgeApplicationDeleteUsage,
-		Short:         msg.EdgeApplicationDeleteShortDescription,
-		Long:          msg.EdgeApplicationDeleteLongDescription,
+		Use:           msg.DeleteUsage,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -55,9 +55,9 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&application_id, "application-id", "a", 0, msg.EdgeApplicationFlagId)
-	cmd.Flags().BoolP("cascade", "c", true, msg.EdgeApplicationFlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeApplicationDeleteHelpFlag)
+	cmd.Flags().Int64VarP(&application_id, "application-id", "a", 0, msg.FlagId)
+	cmd.Flags().BoolP("cascade", "c", true, msg.FlagId)
+	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cmd
 }
@@ -86,7 +86,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		}
 
 		if azionJson.Function.Id == 0 {
-			fmt.Fprintf(del.f.IOStreams.Out, msg.EdgeApplicationDeleteMissingFunction)
+			fmt.Fprintf(del.f.IOStreams.Out, msg.DeleteMissingFunction)
 		} else {
 			err = clientfunc.Delete(ctx, azionJson.Function.Id)
 			if err != nil {
@@ -94,7 +94,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 			}
 		}
 
-		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.EdgeApplicationDeleteCascadeSuccess)
+		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.DeleteCascadeSuccess)
 
 		err = del.UpdateJson(del)
 		if err != nil {
@@ -117,7 +117,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	}
 
 	out := del.f.IOStreams.Out
-	fmt.Fprintf(out, msg.EdgeApplicationDeleteOutputSuccess, application_id)
+	fmt.Fprintf(out, msg.DeleteOutputSuccess, application_id)
 
 	return nil
 }
