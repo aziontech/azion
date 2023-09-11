@@ -9,11 +9,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-func initSimple(cmd *LinkCmd, path string, info *LinkInfo, c *cobra.Command) error {
+func initSimple(cmd *LinkCmd, path string, info *LinkInfo) error {
 	var err error
 	var shouldFetchTemplates bool
 	options := &contracts.AzionApplicationSimple{}

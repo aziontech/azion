@@ -3,7 +3,7 @@ package init
 var (
 
 	//init cmd
-	EdgeApplicationsInitUsage = `init [flags]`
+	EdgeApplicationsInitUsage             = `init [flags]`
 	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application"
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application on the Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
@@ -14,7 +14,8 @@ var (
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This project was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess                  = "Template successfully fetched and configured\n\n"
-	InitGettingTemplates                  = "Getting modes available"
+	InitGettingTemplates                  = "Getting modes available\n"
+	InitGettingVulcan                     = "Getting templates available\n"
 	InitProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your project's name: "
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init command"
 	EdgeApplicationsInitSuccessful        = "Your project %s was initialized successfully\n"

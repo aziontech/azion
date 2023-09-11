@@ -43,7 +43,7 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, version
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go worker(i, jobs, results, &currentFile, clientUpload)
+		go worker(jobs, results, &currentFile, clientUpload)
 	}
 
 	bar := progressbar.NewOptions(

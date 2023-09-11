@@ -1,6 +1,7 @@
 package init
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -68,47 +69,50 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
-	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
+	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
 
 	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.5.0 init --name "+info.Name)
 	if err != nil {
 		return err
 	}
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
-	if err != nil {
-		return err
+	if info.Template == "" || info.Mode == "" {
+		output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+		if err != nil {
+			return err
+		}
+
+		newLineSplit := strings.Split(output, "\n")
+		newLineSplit[len(newLineSplit)-1] = "static (azion)"
+
+		answer := ""
+		template := ""
+		mode := ""
+		prompt := &survey.Select{
+			Message: "Choose a mode:",
+			Options: newLineSplit,
+		}
+		err = survey.AskOne(prompt, &answer)
+		if err != nil {
+			return err
+		}
+
+		modeSplit := strings.Split(answer, " ")
+		template = modeSplit[0]
+		mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
+
+		info.Template = template
+		info.Mode = mode
+
 	}
-
-	newLineSplit := strings.Split(output, "\n")
-	newLineSplit[len(newLineSplit)-1] = "static (azion)"
-
-	answer := ""
-	template := ""
-	mode := ""
-	prompt := &survey.Select{
-		Message: "Choose a mode:",
-		Options: newLineSplit,
-	}
-	err = survey.AskOne(prompt, &answer)
-	if err != nil {
-		return err
-	}
-
-	modeSplit := strings.Split(answer, " ")
-	template = modeSplit[0]
-	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
-
-	info.Template = template
-	info.Mode = mode
 
 	return nil
 }
 
-func yarnInstall(cmd *InitCmd) error {
+func depsInstall(cmd *InitCmd, packageManager string) error {
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
-
-	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
+	command := fmt.Sprintf("%s install", packageManager)
+	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
