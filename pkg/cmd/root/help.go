@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	msg "github.com/aziontech/azion-cli/messages/general"
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/text"
 	"github.com/fatih/color"
@@ -98,16 +100,22 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 		longText = command.Short
 	}
 
-	helpEntries := []helpEntry{}
-	if longText != "" {
-		helpEntries = append(helpEntries, helpEntry{"", longText})
-	}
-
 	styleTitle := color.Bold
 	styleBody := color.FgHiWhite
 
+	helpEntries := []helpEntry{}
+
+	helpEntries = append(helpEntries, helpEntry{"", color.New(color.Bold).Sprint(fmt.Sprintf(msg.CliVersion, version.BinVersion))})
+
+	if longText != "" {
+		helpEntries = append(helpEntries, helpEntry{
+			Title: color.New(styleTitle).Sprint("DESCRIPTION"),
+			Body:  color.New(styleBody).Sprint(longText),
+		})
+	}
+
 	helpEntries = append(helpEntries, helpEntry{
-		Title: color.New(styleTitle).Sprint("USAGE"),
+		Title: color.New(styleTitle).Sprint("SYNOPSIS"),
 		Body:  color.New(styleBody).Sprint(command.UseLine()),
 	})
 
@@ -120,14 +128,14 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	if len(baseCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{
-			Title: color.New(styleTitle).Sprint("COMMANDS"),
+			Title: color.New(styleTitle).Sprint("AVAILABLE COMMANDS"),
 			Body:  color.New(styleBody).Sprint(strings.Join(baseCommands, "\n")),
 		})
 	}
 
 	if len(subcmdCommands) > 0 {
 		helpEntries = append(helpEntries, helpEntry{
-			Title: color.New(styleTitle).Sprint("SUBCOMMANDS"),
+			Title: color.New(styleTitle).Sprint("AVAILABLE SUBCOMMANDS"),
 			Body:  color.New(styleBody).Sprint(strings.Join(subcmdCommands, "\n")),
 		})
 	}
@@ -135,7 +143,7 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	flagUsages := command.LocalFlags().FlagUsages()
 	if flagUsages != "" {
 		helpEntries = append(helpEntries, helpEntry{
-			Title: color.New(styleTitle).Sprint("FLAGS"),
+			Title: color.New(styleTitle).Sprint("LOCAL OPTIONS"),
 			Body:  color.New(styleBody).Sprint(dedent(flagUsages)),
 		})
 	}
@@ -143,7 +151,7 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 	inheritedFlagUsages := command.InheritedFlags().FlagUsages()
 	if inheritedFlagUsages != "" {
 		helpEntries = append(helpEntries, helpEntry{
-			Title: color.New(styleTitle).Sprint("INHERITED FLAGS"),
+			Title: color.New(styleTitle).Sprint("GLOBAL OPTIONS"),
 			Body:  color.New(styleBody).Sprint(dedent(inheritedFlagUsages)),
 		})
 	}

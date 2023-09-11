@@ -1,8 +1,8 @@
 package root
 
 var (
-	RootUsage       = "azion <command> <subcommand> [flags]\n azion [flags]\n\t"
-	RootDescription = "Azion CLI %s"
+	RootUsage       = "azion <command> <subcommand> [flags]"
+	RootDescription = "The Azion Command Line Interface is a unified tool to manage your Azion projects and resources"
 	RootHelpFlag    = "Displays more information about the Azion CLI"
 	RootDoNotUpdate = "Do not receive update notification"
 	RootLogDebug    = "Displays log at a debug level"

@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/root"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
@@ -21,16 +23,34 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
+
+type RootCmd struct {
+	F       *cmdutil.Factory
+	InitCmd func(f *cmdutil.Factory) *initcmd.InitCmd
+}
+
+func NewRootCmd(f *cmdutil.Factory) *RootCmd {
+	return &RootCmd{
+		F:       f,
+		InitCmd: initcmd.NewInitCmd,
+	}
+}
 
 var (
 	tokenFlag  string
 	configFlag string
 )
 
-func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
-	rootCmd := &cobra.Command{
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewRootCmd(f), f)
+}
+
+func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
+	cobraCmd := &cobra.Command{
 		Use:     msg.RootUsage,
+		Long:    msg.RootDescription,
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version.BinVersion)),
 		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -44,43 +64,66 @@ func NewRootCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 			return nil
 		},
+		Example: heredoc.Doc(`
+		$ azion
+		$ azion -t azionb43a9554776zeg05b11cb1declkbabcc9la
+		$ azion --debug
+		$ azion -h
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
+			if cmd.Flags().Changed("token") {
+				return nil
+			}
+			return rootCmd.Run()
 		},
 		SilenceErrors: true, // Silence errors, so the help message won't be shown on flag error
 		SilenceUsage:  true, // Silence usage on error
 	}
 
-	rootCmd.SetIn(f.IOStreams.In)
-	rootCmd.SetOut(f.IOStreams.Out)
-	rootCmd.SetErr(f.IOStreams.Err)
+	cobraCmd.SetIn(f.IOStreams.In)
+	cobraCmd.SetOut(f.IOStreams.Out)
+	cobraCmd.SetErr(f.IOStreams.Err)
 
-	rootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+	cobraCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		rootHelpFunc(f, cmd, args)
 	})
 
 	//Global flags
-	rootCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
-	rootCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
-	rootCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
-	rootCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
-	rootCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
-	rootCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogDebug)
+	cobraCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
+	cobraCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
+	cobraCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
+	cobraCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
+	cobraCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
+	cobraCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogDebug)
 
 	//other flags
-	rootCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 
 	//set template for -v flag
-	rootCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n")) // TODO: Change to version.BinVersion once 1.0 is released
+	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
-	rootCmd.AddCommand(initcmd.NewCmd(f))
-	rootCmd.AddCommand(deploycmd.NewCmd(f))
-	rootCmd.AddCommand(buildCmd.NewCmd(f))
-	rootCmd.AddCommand(devcmd.NewCmd(f))
-	rootCmd.AddCommand(linkcmd.NewCmd(f))
-	rootCmd.AddCommand(personal_token.NewCmd(f))
+	cobraCmd.AddCommand(initcmd.NewCmd(f))
+	cobraCmd.AddCommand(deploycmd.NewCmd(f))
+	cobraCmd.AddCommand(buildCmd.NewCmd(f))
+	cobraCmd.AddCommand(devcmd.NewCmd(f))
+	cobraCmd.AddCommand(linkcmd.NewCmd(f))
+	cobraCmd.AddCommand(personal_token.NewCmd(f))
+	cobraCmd.AddCommand(completion.NewCmd(f))
 
-	return rootCmd
+	return cobraCmd
+}
+
+func (cmd *RootCmd) Run() error {
+	logger.Debug("Running root command")
+	info := &initcmd.InitInfo{}
+	init := cmd.InitCmd(cmd.F)
+	err := init.Run(info)
+	if err != nil {
+		logger.Debug("Error while running init command called by root command", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func Execute() {
@@ -103,7 +146,7 @@ func Execute() {
 		Config:     viper.GetViper(),
 	}
 
-	cmd := NewRootCmd(factory)
+	cmd := NewCmd(factory)
 
 	cobra.CheckErr(cmd.Execute())
 }

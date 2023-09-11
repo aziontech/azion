@@ -35,7 +35,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps) error {
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, fileOps.VersionID).XAzionStaticPath(fileOps.Path).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while uploading file to storage api", zap.Error(err))
+		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

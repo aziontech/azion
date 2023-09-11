@@ -58,7 +58,7 @@ func TestDeployCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.EqualError(t, err, "Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
+		require.EqualError(t, err, "Failed to build your resource. Azion configuration not found. Make sure you are in the root directory of your local repository and have already initialized or linked your resource with the commands 'azion init' or 'azion link'")
 	})
 
 	t.Run("failed to create application", func(t *testing.T) {
