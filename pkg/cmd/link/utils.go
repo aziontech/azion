@@ -89,7 +89,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return nil
 	}
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	template := ""
 	mode := ""
 	prompt := &survey.Select{
-		Message: "Choose a mode:",
+		Message: "Choose a preset and mode:",
 		Options: newLineSplit,
 	}
 	err = survey.AskOne(prompt, &answer)

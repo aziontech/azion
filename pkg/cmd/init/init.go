@@ -152,12 +152,12 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		}
 	}
 
+	info.PathWorkingDir = info.PathWorkingDir + "/" + info.Name
+
 	err = cmd.selectVulcanTemplates(info)
 	if err != nil {
 		return err
 	}
-
-	info.PathWorkingDir = info.PathWorkingDir + "/" + info.Name
 
 	if err = cmd.createTemplateAzion(info); err != nil {
 		return err
