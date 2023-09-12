@@ -161,10 +161,8 @@ LEARN MORE
 
 ### Autocompletion
 
-It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocompletion)
+It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocompletion).
 
 ## License
 
 This project is licensed under the terms of the [MIT](LICENSE) license.
-
-
