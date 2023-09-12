@@ -42,7 +42,7 @@ To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://gith
 To download azion CLI through Homebrew, run:
 
 ```sh
-brew install aziontech/tap/azioncli
+brew install aziontech/tap/azion
 ``````
 
 ## Building Locally
@@ -78,86 +78,9 @@ $ azion -t <authentication token>
 $ export AZIONCLI_TOKEN=<authentication token>
 ```
 
-### Help
+### Commands
 
-You can just run `azion -h` and see it's options
-
-```sh
-$ azion -h
-
-DESCRIPTION
-  The Azion Command Line Interface is a unified tool to manage your Azion projects and resources
-
-SYNOPSIS
-  azion <command> <subcommand> [flags]
-
-EXAMPLES
-  $ azion
-  $ azion -t azionxxxxxx
-  $ azion --debug
-  $ azion -h
-  
-
-AVAILABLE COMMANDS
-  build          Builds an edge application locally
-  deploy         Deploys an application on the Azion platform
-  dev            Starts a local development server
-  help           Help about any command
-  init           Initializes an edge application from a template
-  link           Links a local application to an Azion edge application
-  personal_token Manages the personal tokens configured on the Azion platform
-
-LOCAL OPTIONS
-  -c, --config string      Sets the Azion configuration folder for the current command only, without changing persistent settings.
-  -d, --debug              Displays log at a debug level
-  -h, --help               Displays more information about the Azion CLI
-  -l, --log-level string   Displays log at a debug level (default "info")
-  -s, --silent             Silences log completely; mostly used for automation purposes
-  -t, --token string       Saves a given personal token locally to authorize CLI commands
-  -v, --version            version for azion
-  -y, --yes                Answers all yes/no interactions automatically with yes
-  
-
-LEARN MORE
-  
-  Use 'azion <command> <subcommand> --help' for more information about a command
-```
-
-For each command or subcommand use the `-h|--help` flag to learn more about it:
-
-```sh
-$ azion dev --help
-Azion CLI 1.0.0
-
-DESCRIPTION
-  Start a development server locally
-
-SYNOPSIS
-  azion dev [flags]
-
-EXAMPLES
-         
-  $ azion dev
-  $ azion dev --help
-  
-
-LOCAL OPTIONS
-  -h, --help   Displays more information about the dev command
-  
-
-GLOBAL OPTIONS
-  -c, --config string      Sets the Azion configuration folder for the current command only, without changing persistent settings.
-  -d, --debug              Displays log at a debug level
-  -l, --log-level string   Displays log at a debug level (default "info")
-  -s, --silent             Silences log completely; mostly used for automation purposes
-  -t, --token string       Saves a given personal token locally to authorize CLI commands
-  -y, --yes                Answers all yes/no interactions automatically with yes
-  
-
-LEARN MORE
-  
-  Use 'azion <command> <subcommand> --help' for more information about a command
-```
+Check all reference documentation for the available [commands](https://github.com/aziontech/azion-cli/wiki/azion).
 
 ### Autocomplete
 
