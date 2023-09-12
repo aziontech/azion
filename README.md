@@ -159,7 +159,7 @@ LEARN MORE
   Use 'azion <command> <subcommand> --help' for more information about a command
 ```
 
-### Autocompletion
+### Autocomplete
 
 It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocompletion).
 
