@@ -27,4 +27,5 @@ var (
 	InitDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	InitDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	InitInstallDeps                       = "Installing application dependencies"
+  ModeAutomatic                         = "\nMode %s was chosen automatically, as it is the only option available for %s\n"
 )

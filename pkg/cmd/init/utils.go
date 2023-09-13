@@ -2,11 +2,13 @@ package init
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
@@ -71,39 +73,50 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
 
-	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.5.0 init --name "+info.Name)
+	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.6.0 init --name "+info.Name)
 	if err != nil {
 		return err
 	}
 
 	if info.Template == "" || info.Mode == "" {
-		output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+		output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 		if err != nil {
 			return err
 		}
 
 		newLineSplit := strings.Split(output, "\n")
-		newLineSplit[len(newLineSplit)-1] = "static (azion)"
-
-		answer := ""
-		template := ""
-		mode := ""
-		prompt := &survey.Select{
-			Message: "Choose a mode:",
-			Options: newLineSplit,
-		}
-		err = survey.AskOne(prompt, &answer)
+		preset, err := getVulcanEnvInfo(info)
 		if err != nil {
 			return err
 		}
 
-		modeSplit := strings.Split(answer, " ")
-		template = modeSplit[0]
-		mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
+		var modes []string
 
-		info.Template = template
-		info.Mode = mode
+		for _, line := range newLineSplit {
+			if strings.Contains(strings.ToLower(line), strings.ToLower(preset)) {
+				modeSplit := strings.Split(line, " ")
+				modes = append(modes, strings.ToLower(strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)))
+			}
+		}
 
+		answer := ""
+		if len(modes) > 1 {
+			prompt := &survey.Select{
+				Message: "Choose a mode:",
+				Options: modes,
+			}
+			err = survey.AskOne(prompt, &answer)
+			if err != nil {
+				return err
+			}
+			info.Template = preset
+			info.Mode = answer
+			return nil
+		}
+
+		info.Template = preset
+		info.Mode = strings.ToLower(modes[0])
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, modes[0], preset))
 	}
 
 	return nil
@@ -119,4 +132,16 @@ func depsInstall(cmd *InitCmd, packageManager string) error {
 	}
 
 	return nil
+}
+
+func getVulcanEnvInfo(info *InitInfo) (string, error) {
+	err := godotenv.Load(info.PathWorkingDir + "/.vulcan")
+	if err != nil {
+		logger.Debug("Error loading .vulcan file", zap.Error(err))
+		return "", err
+	}
+
+	// Access environment variables
+	preset := os.Getenv("preset")
+	return preset, nil
 }
