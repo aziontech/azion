@@ -1,13 +1,11 @@
-package edgeapplications
+package edge_applications
 
 import (
 	"context"
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -62,10 +60,6 @@ type RulesEngineResponse interface {
 	GetIsActive() bool
 	GetOrder() int64
 	GetName() string
-}
-
-type Client struct {
-	apiClient *sdk.APIClient
 }
 
 type CreateRequest struct {
@@ -146,22 +140,6 @@ type DeviceGroupsResponse interface {
 	GetUserAgent() string
 }
 
-func NewClient(c *http.Client, url string, token string) *Client {
-	conf := sdk.NewConfiguration()
-	conf.HTTPClient = c
-	conf.AddDefaultHeader("Authorization", "token "+token)
-	conf.AddDefaultHeader("Accept", "application/json;version=3")
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = sdk.ServerConfigurations{
-		{URL: url},
-	}
-	conf.HTTPClient.Timeout = 30 * time.Second
-
-	return &Client{
-		apiClient: sdk.NewAPIClient(conf),
-	}
-}
-
 func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
 	logger.Debug("Get Edge Application")
 	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdGet(ctx, id)
@@ -176,22 +154,6 @@ func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, e
 	}
 
 	return &res.Results, nil
-}
-
-func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicationsResponse, error) {
-	logger.Debug("Create Edge Application")
-	request := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsPost(ctx).CreateApplicationRequest(req.CreateApplicationRequest)
-
-	edgeApplicationsResponse, httpResp, err := request.Execute()
-	if err != nil {
-		logger.Debug("Error while creating an edge application", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return &edgeApplicationsResponse.Results, nil
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
