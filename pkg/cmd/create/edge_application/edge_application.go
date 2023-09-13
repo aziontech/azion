@@ -90,7 +90,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				qs := []*survey.Question{
 					{
 						Name:      "name",
-						Prompt:    &survey.Input{Message: "What is the name on Edge Application? required!"},
+						Prompt:    &survey.Input{Message: "What is the name of the Edge Application?"},
 						Validate:  survey.Required,
 						Transform: survey.Title,
 					},
