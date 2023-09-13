@@ -26,6 +26,7 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 		if fileInfo.Size() == 0 {
 			logger.Debug("\nSkipping upload of empty file: " + job.Path)
 			results <- nil
+			atomic.AddInt64(currentFile, 1)
 			return
 		}
 
