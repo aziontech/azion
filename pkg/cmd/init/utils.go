@@ -114,9 +114,14 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 			return nil
 		}
 
+		var mds string = ""
+		if len(modes) > 0 {
+			mds = modes[0]
+		}
+
 		info.Template = preset
-		info.Mode = strings.ToLower(modes[0])
-		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, modes[0], preset))
+		info.Mode = strings.ToLower(mds)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
 	}
 
 	return nil
