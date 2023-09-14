@@ -6,6 +6,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -89,7 +90,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return nil
 	}
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner(constants.NpxVulcan+"presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}

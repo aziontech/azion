@@ -8,5 +8,6 @@ var (
 )
 
 const (
-	PathAzionJson = "/azion/azion.json"
+	PathAzionJson        = "/azion/azion.json"
+	NpxVulcan     string = "npx --yes edge-functions@1.7.0 "
 )

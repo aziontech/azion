@@ -7,6 +7,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
@@ -45,7 +46,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
 
-	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.6.0 init --name "+info.Name)
+	err := cmd.CommandRunInteractive(cmd.F, constants.NpxVulcan+"init --name "+info.Name)
 	if err != nil {
 		return err
 	}
@@ -55,7 +56,7 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return err
 	}
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner(constants.NpxVulcan+"presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}

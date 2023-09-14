@@ -8,6 +8,7 @@ import (
 	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/fatih/color"
@@ -57,7 +58,7 @@ func NewCobraCmd(ls *LsCmd) *cobra.Command {
 
 func (cmd *LsCmd) run(cobraCmd *cobra.Command) error {
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.CommandRunner(constants.NpxVulcan+"presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}

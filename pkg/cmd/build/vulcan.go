@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -12,7 +13,7 @@ import (
 )
 
 func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
-	const command string = "npx --yes edge-functions@1.6.0 build --preset %s --mode %s"
+	const command string = constants.NpxVulcan + "build --preset %s --mode %s"
 
 	err := runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
 	if err != nil {

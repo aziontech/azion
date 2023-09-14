@@ -5,12 +5,13 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
 
 func vulcan(f *cmdutil.Factory, cmd *DevCmd) error {
-	const command string = "npx --yes edge-functions@1.6.0 dev"
+	const command string = constants.NpxVulcan + "dev"
 
 	err := runCommand(f, cmd, command)
 	if err != nil {
