@@ -87,7 +87,7 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	}
 
 	if len(modes) < 1 {
-		logger.Debug("No mode was found for the selected model", zap.Error(err))
+		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
 		return msg.ErrorModeNotFound
 	}
 
