@@ -111,8 +111,6 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
-	cobraCmd.Flags().StringVar(&info.Template, "template", "", msg.EdgeApplicationsInitFlagTemplate)
-	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsInitFlagMode)
 	return cobraCmd
 }
 
@@ -129,13 +127,6 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		return err
 	}
 	info.PathWorkingDir = path
-
-	switch info.Template {
-	case "simple":
-		return initSimple(cmd, path, info)
-	case "static":
-		return initStatic(cmd, info)
-	}
 
 	// Checks for global --yes flag and that name flag was not sent
 	if info.GlobalFlagAll && info.Name == "" {

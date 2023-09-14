@@ -22,4 +22,5 @@ var (
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
 	ErrorWorkingDir                    = errors.New("Failed to change current working directory")
+	ErrorModeNotFound                  = errors.New("No mode was found for the selected template. For more information, run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
 )
