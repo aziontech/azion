@@ -1,7 +1,6 @@
 package init
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -51,16 +50,17 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return err
 	}
 
+	preset, err := getVulcanEnvInfo(info)
+	if err != nil {
+		return err
+	}
+
 	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
 
 	newLineSplit := strings.Split(output, "\n")
-	preset, err := getVulcanEnvInfo(info)
-	if err != nil {
-		return err
-	}
 
 	var modes []string
 
@@ -86,11 +86,12 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return nil
 	}
 
-	var mds string = ""
-	if len(modes) > 0 {
+	if len(modes) < 1 {
 		logger.Debug("No mode was found for the selected model", zap.Error(err))
-		return errors.New("No mode was found for the selected template. For more information, run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
+		return msg.ErrorModeNotFound
 	}
+
+	var mds string = modes[0]
 
 	info.Template = preset
 	info.Mode = strings.ToLower(mds)
