@@ -8,8 +8,6 @@ var (
 	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application on the Azion’s platform"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The edge application's name"
-	EdgeApplicationsInitFlagTemplate      = "The edge application's preset. Example: astro"
-	EdgeApplicationsInitFlagMode          = "The edge application's mode. Accepted values: compute or deliver)"
 	EdgeApplicationsInitFlagYes           = "Answers all yes/no interactions automatically with yes"
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This application was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
@@ -27,5 +25,5 @@ var (
 	InitDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	InitDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	InitInstallDeps                       = "Installing application dependencies"
-  ModeAutomatic                         = "\nMode %s was chosen automatically, as it is the only option available for %s\n"
+	ModeAutomatic                         = "\nMode %s was chosen automatically, as it is the only option available for %s\n"
 )
