@@ -99,10 +99,6 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azion init
 		$ azion init --help
-		$ azion init --name "thisisatest" --template nextjs
-		$ azion init --name "thisisatest" --template static
-		$ azion init --name "thisisatest" --template hexo --mode deliver
-		$ azion init --name "thisisatest" --template hexo --mode deliver --auto
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll

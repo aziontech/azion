@@ -88,8 +88,10 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	if info.Preset == "nextjs" {
 		return nil
 	}
+
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.6.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+
+	output, err := cmd.CommandRunner(cmd.F, "npx --yes --loglevel=error --no-update-notifier edge-functions@1.7.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}

@@ -704,7 +704,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${uri}")
 	criteria[0][0].SetOperator("starts_with")
-	if typeLang == "nextjs" {
+	if typeLang == "Next" {
 		criteria[0][0].SetInputValue("/_next/static")
 	} else {
 		criteria[0][0].SetInputValue("/")
