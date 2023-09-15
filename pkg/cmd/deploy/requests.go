@@ -364,7 +364,7 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, ctx context.C
 		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
-	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template)
+	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template, conf.Mode)
 	if err != nil {
 		logger.Debug("Error while creating rules engine for Nextjs application", zap.Error(err))
 		return err

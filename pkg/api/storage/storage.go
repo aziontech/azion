@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
@@ -31,7 +30,6 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps) error {
-	c.apiClient.GetConfig().DefaultHeader["Content-Disposition"] = fmt.Sprintf("attachment; filename=\"%s\"", fileOps.Path)
 	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, fileOps.VersionID).XAzionStaticPath(fileOps.Path).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {

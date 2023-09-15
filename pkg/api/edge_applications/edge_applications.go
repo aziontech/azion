@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -687,7 +688,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 	return resp.Results, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string) error {
 	logger.Debug("Create Rules Engine Next Application")
 	req := CreateRulesEngineRequest{}
 	req.SetName("cache policy")
@@ -704,7 +705,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${uri}")
 	criteria[0][0].SetOperator("starts_with")
-	if typeLang == "nextjs" {
+	if typeLang == "Next" && strings.ToLower(mode) == "compute" {
 		criteria[0][0].SetInputValue("/_next/static")
 	} else {
 		criteria[0][0].SetInputValue("/")
