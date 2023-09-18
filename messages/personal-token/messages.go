@@ -3,7 +3,7 @@ package personal_token
 var (
 	// [ personal_token ]
 	Usage            = "personal_token"
-	ShortDescription = "The \"Personal Token\" command is a security and authentication feature that allows users to generate unique individual tokens"
+	ShortDescription = "Manages the personal tokens configured on the Azion platform"
 	LongDescription  = "The \"Personal Token\" command is a security and authentication feature that allows users to generate unique individual tokens. These tokens are used to authenticate and authorize actions in systems"
 	FlagHelp         = "Displays more information about the personal_token command"
 

@@ -1,11 +1,14 @@
 package init
 
 import (
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
@@ -24,34 +27,6 @@ func shouldDevDeploy(info *InitInfo, msg string) (bool, error) {
 	return shouldConfigure, nil
 }
 
-func shouldFetch(cmd *InitCmd, info *InitInfo) (bool, error) {
-	var err error
-	var shouldFetchTemplates bool
-	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
-		if info.GlobalFlagAll {
-			shouldFetchTemplates = info.GlobalFlagAll
-		} else {
-			prompt := &survey.Confirm{
-				Message: "This project was already configured. Do you want to override the previous configuration?",
-			}
-			err := survey.AskOne(prompt, &shouldFetchTemplates)
-			if err != nil {
-				return false, err
-			}
-		}
-
-		if shouldFetchTemplates {
-			err = cmd.CleanDir("./azion")
-			if err != nil {
-				logger.Debug("Error while trying to clean azion directory", zap.Error(err))
-				return false, err
-			}
-		}
-		return shouldFetchTemplates, nil
-	}
-	return true, nil
-}
-
 func askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{
@@ -68,51 +43,83 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
-	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
+	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
 
-	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.5.0 init --name "+info.Name)
+	err := cmd.CommandRunInteractive(cmd.F, "npx --yes edge-functions@1.7.0 init --name "+info.Name)
 	if err != nil {
 		return err
 	}
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	preset, err := getVulcanEnvInfo(info)
+	if err != nil {
+		return err
+	}
+
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.7.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
 
 	newLineSplit := strings.Split(output, "\n")
-	newLineSplit[len(newLineSplit)-1] = "static (azion)"
+
+	var modes []string
+
+	for _, line := range newLineSplit {
+		if strings.Contains(strings.ToLower(line), strings.ToLower(preset)) {
+			modeSplit := strings.Split(line, " ")
+			modes = append(modes, strings.ToLower(strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)))
+		}
+	}
 
 	answer := ""
-	template := ""
-	mode := ""
-	prompt := &survey.Select{
-		Message: "Choose a mode:",
-		Options: newLineSplit,
-	}
-	err = survey.AskOne(prompt, &answer)
-	if err != nil {
-		return err
+	if len(modes) > 1 {
+		prompt := &survey.Select{
+			Message: "Choose a mode:",
+			Options: modes,
+		}
+		err = survey.AskOne(prompt, &answer)
+		if err != nil {
+			return err
+		}
+		info.Template = preset
+		info.Mode = answer
+		return nil
 	}
 
-	modeSplit := strings.Split(answer, " ")
-	template = modeSplit[0]
-	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
+	if len(modes) < 1 {
+		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
+		return msg.ErrorModeNotFound
+	}
 
-	info.Template = template
-	info.Mode = mode
+	var mds string = modes[0]
+
+	info.Template = preset
+	info.Mode = strings.ToLower(mds)
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
 
 	return nil
 }
 
-func yarnInstall(cmd *InitCmd) error {
+func depsInstall(cmd *InitCmd, packageManager string) error {
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
-
-	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
+	command := fmt.Sprintf("%s install", packageManager)
+	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
 	}
 
 	return nil
+}
+
+func getVulcanEnvInfo(info *InitInfo) (string, error) {
+	err := godotenv.Load(info.PathWorkingDir + "/.vulcan")
+	if err != nil {
+		logger.Debug("Error loading .vulcan file", zap.Error(err))
+		return "", err
+	}
+
+	// Access environment variables
+	preset := os.Getenv("preset")
+	return preset, nil
 }

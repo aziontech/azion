@@ -23,7 +23,7 @@ func TestNewCmd(t *testing.T) {
 		err    error
 	}{
 		{
-			name: "Create new personal token with success",
+			name: "Create personal token with success",
 			args: []string{"--name", "sakura", "--expiration", "9m", "--description", "example"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}

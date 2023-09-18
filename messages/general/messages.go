@@ -8,4 +8,5 @@ var (
 	ApiListFlagPage     = "Returns a page of the list according to its number"
 	ApiListFlagPageSize = "Defines how many items should be returned per page"
 	ApiListFlagFilter   = "Filters items by their name"
+	CliVersion          = "Azion CLI %s"
 )

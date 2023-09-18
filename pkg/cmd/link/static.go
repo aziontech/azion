@@ -7,10 +7,9 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/spf13/cobra"
 )
 
-func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicationOptions, c *cobra.Command) error {
+func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicationOptions) error {
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
@@ -20,7 +19,7 @@ func initStatic(cmd *LinkCmd, info *LinkInfo, options *contracts.AzionApplicatio
 		if info.GlobalFlagAll {
 			info.Name = thoth.GenerateName()
 		} else {
-			if !c.Flags().Changed("name") {
+			if info.Name == "" {
 				projName, err := askForInput(msg.LinkProjectQuestion, thoth.GenerateName())
 				if err != nil {
 					return err

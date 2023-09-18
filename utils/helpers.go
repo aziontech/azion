@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -95,6 +97,32 @@ func RunCommandWithOutput(envVars []string, comm string) (string, int, error) {
 	exitCode := command.ProcessState.ExitCode()
 
 	return string(out), exitCode, err
+}
+
+// CommandRunInteractive runs a command interactively.
+func CommandRunInteractiveWithOutput(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+	cmd := exec.Command(shell, "-c", comm)
+	if len(envVars) > 0 {
+		cmd.Env = os.Environ()
+		cmd.Env = append(cmd.Env, envVars...)
+	}
+	var stdoutBuffer bytes.Buffer
+
+	if !f.Silent {
+		cmd.Stdin = f.IOStreams.In
+		cmd.Stdout = &stdoutBuffer
+	}
+
+	cmd.Stderr = f.IOStreams.Err
+
+	err := cmd.Run()
+	if err != nil {
+		return "", err
+	}
+
+	output := stdoutBuffer.String()
+
+	return output, nil
 }
 
 // CommandRunInteractive runs a command interactively.
@@ -362,4 +390,18 @@ func TruncateString(str string) string {
 // IsEmpty returns true when the string is empty
 func IsEmpty(str string) bool {
 	return len(str) < 1
+}
+
+func GetPackageManager() (string, error) {
+	opts := []string{"npm", "yarn"}
+	answer := ""
+	prompt := &survey.Select{
+		Message: "Choose a package manager:",
+		Options: opts,
+	}
+	err := survey.AskOne(prompt, &answer)
+	if err != nil {
+		return "", err
+	}
+	return answer, nil
 }

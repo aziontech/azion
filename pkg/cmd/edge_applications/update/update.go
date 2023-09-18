@@ -40,9 +40,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeApplicationUpdateUsage,
-		Short:         msg.EdgeApplicationUpdateShortDescription,
-		Long:          msg.EdgeApplicationUpdateLongDescription,
+		Use:           msg.UpdateUsage,
+		Short:         msg.UpdateShortDescription,
+		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -201,32 +201,32 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.Id, "application-id", "a", 0, msg.EdgeApplicationFlagId)
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeApplicationUpdateFlagName)
-	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.EdgeApplicationUpdateFlagDeliveryProtocol)
-	flags.Int64Var(&fields.HttpPort, "http-port", 80, msg.EdgeApplicationUpdateFlagHttpPort)
-	flags.Int64Var(&fields.HttpsPort, "https-port", 443, msg.EdgeApplicationUpdateFlagHttpsPort)
-	flags.StringVar(&fields.MinimumTlsVersion, "min-tsl-ver", "", msg.EdgeApplicationUpdateFlagMinimumTlsVersion)
-	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.EdgeApplicationUpdateFlagApplicationAcceleration)
-	flags.StringVar(&fields.Caching, "caching", "", msg.EdgeApplicationUpdateFlagCaching)
-	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.EdgeApplicationUpdateFlagDeviceDetection)
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.EdgeApplicationUpdateFlagEdgeFirewall)
-	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.EdgeApplicationUpdateFlagEdgeFunctions)
-	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", msg.EdgeApplicationUpdateFlagImageOptimization)
-	flags.StringVar(&fields.L2Caching, "l2-caching", "", msg.EdgeApplicationUpdateFlagL2Caching)
-	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.EdgeApplicationUpdateFlagLoadBalancer)
-	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.EdgeApplicationUpdateRawLogs)
-	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.EdgeApplicationUpdateWebApplicationFirewall)
-	flags.StringVar(&fields.InPath, "in", "", msg.EdgeApplicationUpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeApplicationUpdateHelpFlag)
+	flags.Int64VarP(&fields.Id, "application-id", "a", 0, msg.FlagId)
+	flags.StringVar(&fields.Name, "name", "", msg.UpdateFlagName)
+	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.UpdateFlagDeliveryProtocol)
+	flags.Int64Var(&fields.HttpPort, "http-port", 80, msg.UpdateFlagHttpPort)
+	flags.Int64Var(&fields.HttpsPort, "https-port", 443, msg.UpdateFlagHttpsPort)
+	flags.StringVar(&fields.MinimumTlsVersion, "min-tsl-ver", "", msg.UpdateFlagMinimumTlsVersion)
+	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.UpdateFlagApplicationAcceleration)
+	flags.StringVar(&fields.Caching, "caching", "", msg.UpdateFlagCaching)
+	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.UpdateFlagDeviceDetection)
+	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.UpdateFlagEdgeFirewall)
+	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.UpdateFlagEdgeFunctions)
+	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", msg.UpdateFlagImageOptimization)
+	flags.StringVar(&fields.L2Caching, "l2-caching", "", msg.UpdateFlagL2Caching)
+	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.UpdateFlagLoadBalancer)
+	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.UpdateRawLogs)
+	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.UpdateWebApplicationFirewall)
+	flags.StringVar(&fields.InPath, "in", "", msg.UpdateFlagIn)
+	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
 	return cmd
 }
 
 func returnAnyField(cmd *cobra.Command) bool {
 	anyFlagChanged := false
 	cmd.Flags().Visit(func(flag *pflag.Flag) {
-    if flag.Changed && flag.Name != "application-id" && flag.Shorthand != "a" { 			
-      anyFlagChanged = true
+		if flag.Changed && flag.Name != "application-id" && flag.Shorthand != "a" {
+			anyFlagChanged = true
 		}
 	})
 	return anyFlagChanged

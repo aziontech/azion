@@ -85,8 +85,13 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
+	if info.Preset == "nextjs" {
+		return nil
+	}
+
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.5.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+
+	output, err := cmd.CommandRunner(cmd.F, "npx --yes --loglevel=error --no-update-notifier edge-functions@1.7.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
@@ -98,7 +103,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	template := ""
 	mode := ""
 	prompt := &survey.Select{
-		Message: "Choose a mode:",
+		Message: "Choose a preset and mode:",
 		Options: newLineSplit,
 	}
 	err = survey.AskOne(prompt, &answer)
@@ -116,11 +121,10 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	return nil
 }
 
-func yarnInstall(cmd *LinkCmd) error {
-
+func depsInstall(cmd *LinkCmd, packageManager string) error {
 	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
-
-	err := cmd.CommandRunInteractive(cmd.F, "yarn install")
+	command := fmt.Sprintf("%s install", packageManager)
+	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps

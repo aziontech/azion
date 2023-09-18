@@ -23,6 +23,7 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 		VersionID:   "",
 		ProjectRoot: info.PathWorkingDir,
 	}
+
 	azionJson.Function.Name = "__DEFAULT__"
 	azionJson.Function.File = "./out/worker.js"
 	azionJson.Function.Args = "./azion/args.json"

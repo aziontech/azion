@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -106,13 +107,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		pathStatic = ".vercel/output/static"
 		conf.Function.File = "./out/worker.js"
 	case "static":
-		pathStatic = "./dist"
+		pathStatic = "dist"
 	default:
 		pathStatic = ".edge/storage"
 	}
 
 	if Path != "" {
-		pathStatic = Path
+		modified := strings.Replace(Path, "./", "", -1)
+		pathStatic = modified
 	}
 
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

@@ -75,5 +75,28 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
       - '^test:'
+      - '^chore'
+      - 'merge conflict'
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+      - go mod tidy
+  groups:
+    - title: "Breaking Changes"
+      regexp: "^.*breaking[(\\w)]*:+.*$"
+      order: 0
+    - title: 'New Features'
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 10
+    - title: 'Bug Fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 20
+    - title: 'Security Updates'
+      regexp: '^.*?sec(\([[:word:]]+\))??!?:.+$'
+      order: 30
+    - title: 'Documentation Updates'
+      regexp: ^.*?doc(\([[:word:]]+\))??!?:.+$
+      order: 40
+    - title: Other Work
+      order: 999
