@@ -76,7 +76,6 @@ changelog:
   filters:
     exclude:
       - '^test:'
-      - '^chore'
       - 'merge conflict'
       - Merge pull request
       - Merge remote-tracking branch
@@ -89,14 +88,17 @@ changelog:
     - title: 'New Features'
       regexp: "^.*feat[(\\w)]*:+.*$"
       order: 10
+    - title: 'Improvements'
+      regexp: "^.*chore[(\\w)]*:+.*$"
+      order: 20
     - title: 'Bug Fixes'
       regexp: "^.*fix[(\\w)]*:+.*$"
-      order: 20
+      order: 30
     - title: 'Security Updates'
       regexp: '^.*?sec(\([[:word:]]+\))??!?:.+$'
-      order: 30
+      order: 40
     - title: 'Documentation Updates'
       regexp: ^.*?doc(\([[:word:]]+\))??!?:.+$
-      order: 40
+      order: 50
     - title: Other Work
       order: 999
