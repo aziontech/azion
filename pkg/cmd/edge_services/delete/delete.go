@@ -24,7 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services delete --service-id 1234
+        $ azion edge_services delete --service-id 1234
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {

@@ -34,9 +34,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli device_groups update --application-id 1673635839 --group-id 12312 --user-agent "(Mobile|iP(hone|od)|BlackBerry|IEMobile)"
-        $ azioncli device_groups update -a 1673635839 -g 12312 --name "updated name"
-        $ azioncli device_groups update -a 1673635839 -g 12312 --in "update.json"
+        $ azion device_groups update --application-id 1673635839 --group-id 12312 --user-agent "(Mobile|iP(hone|od)|BlackBerry|IEMobile)"
+        $ azion device_groups update -a 1673635839 -g 12312 --name "updated name"
+        $ azion device_groups update -a 1673635839 -g 12312 --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("in") && (!cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("group-id")) {

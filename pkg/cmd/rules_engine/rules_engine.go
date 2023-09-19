@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.RulesEngineShortDescription,
 		Long:  msg.RulesEngineLongDescription,
 		Example: heredoc.Doc(`
-		$ azioncli rules_engine --help
+		$ azion rules_engine --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

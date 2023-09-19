@@ -47,8 +47,8 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_applications delete --application-id 1234
-		$ azioncli edge_applications delete --cascade
+		$ azion edge_applications delete --application-id 1234
+		$ azion edge_applications delete --cascade
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return delete.run(cmd, application_id)

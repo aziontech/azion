@@ -59,7 +59,7 @@ var (
 	PublishSuccessful               = "Your Edge Application was published successfully\n"
 	SimplePublishSuccessful         = "Your Simple Edge Application was published successfully\n"
 	PublishOutputDomainSuccess      = "\nTo visualize your application access the domain: %v\n"
-	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
+	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	PublishOutputCachePurge         = "Domain cache was purged\n"
 	PublishOutputEdgeFunctionCreate = "Created Edge Function %v with ID %v\n"
 	PublishOutputEdgeFunctionUpdate = "Updated Edge Function %v with ID %v\n"
@@ -95,7 +95,7 @@ var (
 	DeleteLongDescription  = "Removes an Edge Application from the Edge Applications library based on its given ID"
 	DeleteOutputSuccess    = "Edge Application %d was successfully deleted\n"
 	DeleteHelpFlag         = "Displays more information about the delete subcommand"
-	DeleteCascadeFlag      = "Deletes all resources created through the command azioncli edge_applications publish"
+	DeleteCascadeFlag      = "Deletes all resources created through the command azion edge_applications publish"
 	DeleteMissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion"
 	DeleteCascadeSuccess   = "Cascade delete carried out successfully"
 
