@@ -1,4 +1,4 @@
-package edge_application
+package edge_applications
 
 import (
 	"fmt"
