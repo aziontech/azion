@@ -53,7 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
             "origin_type": "single_origin",
             "address": "www.new.api",
             "origin_protocol_policy": "preserve",
-            "host_header": "www.new.api",
+            "host_header": "${host}",
             "browser_cache_settings": "override",
             "browser_cache_settings_maximum_ttl": 20,
             "cdn_cache_settings": "honor",
@@ -100,7 +100,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				err := survey.Ask(qs, &answers)
 				if err != nil {
-					return err
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
 				}
 
 				fields.Name = answers.Name

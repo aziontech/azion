@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			)
 
 			if err := PrintTable(client, f, details); err != nil {
-				return fmt.Errorf(msg.ErrorGet.Error(), err)
+				return fmt.Errorf(msg.ErrorList.Error(), err)
 			}
 			return nil
 		},
