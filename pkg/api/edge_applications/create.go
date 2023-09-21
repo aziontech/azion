@@ -25,7 +25,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeApplicatio
 				logger.Debug("Error while reading body of the http response", zap.Error(err))
 				return nil, utils.ErrorPerStatusCode(httpResp, err)
 			}
-			logger.Debug("", zap.Any("Body", body))
+			logger.Debug("", zap.Any("Body", string(body)))
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
