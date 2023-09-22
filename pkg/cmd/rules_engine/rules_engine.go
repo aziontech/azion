@@ -4,7 +4,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/create"
-	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/rules_engine/template"
@@ -28,7 +27,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	rulesEngineCmd.AddCommand(list.NewCmd(f))
 	rulesEngineCmd.AddCommand(describe.NewCmd(f))
-	rulesEngineCmd.AddCommand(delete.NewCmd(f))
 	rulesEngineCmd.AddCommand(update.NewCmd(f))
 	rulesEngineCmd.AddCommand(create.NewCmd(f))
 	rulesEngineCmd.AddCommand(template.NewCmd(f))
