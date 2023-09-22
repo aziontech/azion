@@ -1,21 +1,25 @@
-package delete
+package edgeapplication
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
+	"go.uber.org/zap"
 )
 
 type DeleteCmd struct {
@@ -41,23 +45,23 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	var application_id int64
 	cmd := &cobra.Command{
-		Use:           msg.DeleteUsage,
-		Short:         msg.DeleteShortDescription,
-		Long:          msg.DeleteLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_applications delete --application-id 1234
-		$ azioncli edge_applications delete --cascade
+		$ azion delete edge-application --id 1234
+		$ azion delete edge-application --cascade
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return delete.run(cmd, application_id)
 		},
 	}
 
-	cmd.Flags().Int64VarP(&application_id, "application-id", "a", 0, msg.FlagId)
-	cmd.Flags().BoolP("cascade", "c", true, msg.FlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
+	cmd.Flags().Int64Var(&application_id, "id", 0, msg.FlagId)
+	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
 }
@@ -86,7 +90,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		}
 
 		if azionJson.Function.Id == 0 {
-			fmt.Fprintf(del.f.IOStreams.Out, msg.DeleteMissingFunction)
+			fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
 		} else {
 			err = clientfunc.Delete(ctx, azionJson.Function.Id)
 			if err != nil {
@@ -94,7 +98,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 			}
 		}
 
-		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.DeleteCascadeSuccess)
+		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.CascadeSuccess)
 
 		err = del.UpdateJson(del)
 		if err != nil {
@@ -105,8 +109,30 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 
 	}
 
-	if !cmd.Flags().Changed("application-id") {
-		return msg.ErrorMissingApplicationIdArgument
+	if !cmd.Flags().Changed("id") {
+		qs := []*survey.Question{
+			{
+				Name:     "id",
+				Prompt:   &survey.Input{Message: "What is the id of the Edge Application you wish to delete?"},
+				Validate: survey.Required,
+			},
+		}
+
+		answer := ""
+
+		err := survey.Ask(qs, &answer)
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+
+		num, err := strconv.ParseInt(answer, 10, 64)
+		if err != nil {
+			logger.Debug("Error while converting answer to int64", zap.Error(err))
+			return msg.ErrorConvertId
+		}
+
+		application_id = num
 	}
 
 	client := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
@@ -117,7 +143,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	}
 
 	out := del.f.IOStreams.Out
-	fmt.Fprintf(out, msg.DeleteOutputSuccess, application_id)
+	fmt.Fprintf(out, msg.OutputSuccess, application_id)
 
 	return nil
 }

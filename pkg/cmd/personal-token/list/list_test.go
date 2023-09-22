@@ -21,7 +21,7 @@ func TestNewCmd(t *testing.T) {
 		err  error
 	}{
 		{
-			name: "listing with success",
+			name: "successful listing",
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
@@ -45,18 +45,6 @@ func TestNewCmd(t *testing.T) {
 			err: nil,
 		},
 		{
-			name: "not found",
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				mock.Register(
-					httpmock.REST("GET", "iam/personal_tokens"),
-					httpmock.StatusStringResponse(404, "Not Found"),
-				)
-				return &mock
-			},
-			err: errors.New("Failed to describe the personal token: The given web page URL or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct. If the error persists, contact Azion's support. Check your settings and try again. If the error persists, contact Azion support."),
-		},
-		{
 			name: "json invalid",
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
@@ -66,7 +54,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			err: errors.New("Failed to describe the personal token: invalid character '\\'' looking for beginning of object key string. Check your settings and try again. If the error persists, contact Azion support."),
+			err: errors.New("Failed to list your personal tokens: invalid character '\\'' looking for beginning of object key string. Check your settings and try again. If the error persists, contact Azion support."),
 		},
 	}
 

@@ -23,7 +23,6 @@ func (cmd *DeployCmd) doFunction(client *api.Client, ctx context.Context, conf *
 		//Create New function
 		DeployId, err := cmd.createFunction(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while creating edge functions", zap.Error(err))
 			return err
 		}
 
@@ -32,7 +31,6 @@ func (cmd *DeployCmd) doFunction(client *api.Client, ctx context.Context, conf *
 		//Update existing function
 		_, err := cmd.updateFunction(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while updating edge functions", zap.Error(err))
 			return err
 		}
 	}
@@ -121,6 +119,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	if conf.Template == "static" {
 		code, err := cmd.applyTemplate(conf)
 		if err != nil {
+			logger.Debug("Error while working with function template file", zap.Error(err))
 			return 0, err
 		}
 		reqCre.SetCode(code)
@@ -170,6 +169,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 	if conf.Template == "static" {
 		code, err := cmd.applyTemplate(conf)
 		if err != nil {
+			logger.Debug("Error while working with function template file", zap.Error(err))
 			return 0, err
 		}
 		reqUpd.SetCode(code)

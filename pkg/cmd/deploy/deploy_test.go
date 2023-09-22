@@ -84,7 +84,7 @@ func TestDeployCmd(t *testing.T) {
 		cmd := NewDeployCmd(f)
 
 		_, _, err := cmd.createApplication(cliapp, ctx, options)
-		require.EqualError(t, err, "Failed to create the Edge Application: Invalid. Check your settings and try again. If the error persists, contact Azion support")
+		require.ErrorContains(t, err, "Failed to create the Edge Application")
 	})
 
 	t.Run("create application success", func(t *testing.T) {

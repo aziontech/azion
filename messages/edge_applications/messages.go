@@ -89,16 +89,6 @@ var (
 	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe command"
 
-	//delete cmd
-	DeleteUsage            = "delete --application-id <application_id> [flags]"
-	DeleteShortDescription = "Removes an Edge Application"
-	DeleteLongDescription  = "Removes an Edge Application from the Edge Applications library based on its given ID"
-	DeleteOutputSuccess    = "Edge Application %d was successfully deleted\n"
-	DeleteHelpFlag         = "Displays more information about the delete subcommand"
-	DeleteCascadeFlag      = "Deletes all resources created through the command azioncli edge_applications publish"
-	DeleteMissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion"
-	DeleteCascadeSuccess   = "Cascade delete carried out successfully"
-
 	//update cmd
 	UpdateUsage                       = "update --application-id <application_id> [flags]"
 	UpdateShortDescription            = "Modifies an Edge Application"
