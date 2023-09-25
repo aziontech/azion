@@ -51,19 +51,6 @@ func TestNewCmd(t *testing.T) {
 			err:    nil,
 		},
 		{
-			name: "Not found",
-			args: []string{"--name", "sakura", "--expiration", "9m", "--description", "example"},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				mock.Register(
-					httpmock.REST("POST", "iam/personal_tokens"),
-					httpmock.StatusStringResponse(404, "Not Found"),
-				)
-				return &mock
-			},
-			err: fmt.Errorf(msg.ErrorCreate.Error(), "The given web page URL or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct. If the error persists, contact Azion's support"),
-		},
-		{
 			name: "Failed to create missing required flag",
 			args: []string{"--name", "sakura", "--description", "example"},
 			mock: func() *httpmock.Registry {

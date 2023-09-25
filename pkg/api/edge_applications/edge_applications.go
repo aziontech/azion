@@ -3,6 +3,7 @@ package edge_applications
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -216,10 +217,18 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while deleting an edge application", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting an edge application", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
+
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
