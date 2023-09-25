@@ -42,9 +42,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli origins create --application-id 1673635839 --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
-        $ azioncli origins create --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-        $ azioncli origins create --application-id 1673635839 --in "create.json"
+        $ azion origins create --application-id 1673635839 --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
+        $ azion origins create --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+        $ azion origins create --application-id 1673635839 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateOriginsRequest{}

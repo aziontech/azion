@@ -29,9 +29,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azioncli variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
-      $ azioncli variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --format json
-      $ azioncli variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --out "./tmp/test.json" --format json
+      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
+      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --format json
+      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --out "./tmp/test.json" --format json
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("variable-id") {

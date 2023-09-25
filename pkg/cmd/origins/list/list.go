@@ -26,9 +26,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.OriginsListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-        $ azioncli origins list -a 16736354321
-        $ azioncli origins list --application-id 16736354321
-        $ azioncli origins list --application-id 16736354321 --details
+        $ azion origins list -a 16736354321
+        $ azion origins list --application-id 16736354321
+        $ azion origins list --application-id 16736354321 --details
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {

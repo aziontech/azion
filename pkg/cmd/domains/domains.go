@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.DomainsUsage,
 		Short: msg.DomainsShortDescription,
 		Long:  msg.DomainsLongDescription, Example: heredoc.Doc(`
-		$ azioncli domains --help
+		$ azion domains --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

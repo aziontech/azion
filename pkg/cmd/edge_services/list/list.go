@@ -27,11 +27,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_services list [--details]
-		$ azioncli edge_services list --order_by "id"
-		$ azioncli edge_services list --page 1  
-		$ azioncli edge_services list --page_size 5
-		$ azioncli edge_services list --sort "asc" 
+		$ azion edge_services list [--details]
+		$ azion edge_services list --order_by "id"
+		$ azion edge_services list --page 1  
+		$ azion edge_services list --page_size 5
+		$ azion edge_services list --sort "asc" 
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := requests.CreateClient(f)

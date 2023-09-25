@@ -27,11 +27,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_functions list --details
-		$ azioncli edge_functions list --order_by "id"
-		$ azioncli edge_functions list --page 1  
-		$ azioncli edge_functions list --page_size 5
-		$ azioncli edge_functions list --sort "asc" 
+		$ azion edge_functions list --details
+		$ azion edge_functions list --order_by "id"
+		$ azion edge_functions list --page 1  
+		$ azion edge_functions list --page_size 5
+		$ azion edge_functions list --sort "asc" 
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page

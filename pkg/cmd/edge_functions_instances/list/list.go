@@ -25,12 +25,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.EdgeFunctionsInstancesListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-		    $ azioncli edge_functions_instances list --application-id 1234123423 --details
-		    $ azioncli edge_functions_instances list --application-id 1234123423 --order_by "id"
-		    $ azioncli edge_functions_instances list --application-id 1234123423 --page 1  
-		    $ azioncli edge_functions_instances list --application-id 1234123423 --page_size 5
-		    $ azioncli edge_functions_instances list -a 1234123423 --sort "asc" 
- 			$ azioncli edge_functions_instances list -a 1234123423" 	
+		    $ azion edge_functions_instances list --application-id 1234123423 --details
+		    $ azion edge_functions_instances list --application-id 1234123423 --order_by "id"
+		    $ azion edge_functions_instances list --application-id 1234123423 --page 1  
+		    $ azion edge_functions_instances list --application-id 1234123423 --page_size 5
+		    $ azion edge_functions_instances list -a 1234123423 --sort "asc" 
+ 			$ azion edge_functions_instances list -a 1234123423" 	
 		`),
 
 		RunE: func(cmd *cobra.Command, args []string) error {

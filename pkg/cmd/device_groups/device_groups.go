@@ -18,7 +18,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.DeviceGroupsShortDescription,
 		Long:  msg.DeviceGroupsLongDescription,
 		Example: heredoc.Doc(`
-		$ azioncli device_groups --help
+		$ azion device_groups --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
