@@ -59,7 +59,7 @@ var (
 	PublishSuccessful               = "Your Edge Application was published successfully\n"
 	SimplePublishSuccessful         = "Your Simple Edge Application was published successfully\n"
 	PublishOutputDomainSuccess      = "\nTo visualize your application access the domain: %v\n"
-	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
+	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	PublishOutputCachePurge         = "Domain cache was purged\n"
 	PublishOutputEdgeFunctionCreate = "Created Edge Function %v with ID %v\n"
 	PublishOutputEdgeFunctionUpdate = "Updated Edge Function %v with ID %v\n"

@@ -31,8 +31,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli rules_engine create -a 1679423488 --phase "response" --in ./file.json
-        $ azioncli rules_engine create --application-id 1679423488 -p "request" --in file.json
+        $ azion rules_engine create -a 1679423488 --phase "response" --in ./file.json
+        $ azion rules_engine create --application-id 1679423488 -p "request" --in file.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("in") {
