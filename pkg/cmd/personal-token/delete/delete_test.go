@@ -49,7 +49,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			err: fmt.Errorf(msg.ErrorFailToDelete.Error(), "The given web page URL or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct. If the error persists, contact Azion's support"),
+			err: fmt.Errorf(msg.ErrorFailToDelete.Error(), utils.ErrorNotFound404),
 		},
 		{
 			name: "Not informed flag",

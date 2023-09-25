@@ -1,11 +1,12 @@
-package delete
+package edgeapplication
 
 import (
 	"encoding/json"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -27,7 +28,7 @@ func TestCreate(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "1234"})
+		cmd.SetArgs([]string{"--id", "1234"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -35,7 +36,7 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, "Edge Application 1234 was successfully deleted\n", stdout.String())
 	})
 
-	t.Run("delete application that is not found", func(t *testing.T) {
+	t.Run("delete application - not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -47,7 +48,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1234"})
+		cmd.SetArgs([]string{"--id", "1234"})
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
@@ -95,7 +96,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCobraCmd(del)
 
-		cmd.SetArgs([]string{"-c"})
+		cmd.SetArgs([]string{"--cascade"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
