@@ -50,10 +50,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli cache_settings create -a 1673635839 --name "cachesettingstest"
-        $ azioncli cache_settings create -a 1673635839 --name "cachesettingswithfields" --browser-cache-settings honor --cdn-cache-settings honor --cache-by-query-string ignore 
-        $ azioncli cache_settings create -a 1673635839 --in "create.json"
-		$ azioncli cache_settings create -a 1674767911 --name "cachesettingswithfieldsthruflags" --browser-cache-settings override --browser-cache-settings-maximum-ttl 60  --cdn-cache-settings honor --cnd-cache-settings-maximum-ttl 60 --cache-by-query-string ignore --cache-by-query-string whitelist --query-string-fields "heyyy,yoooo" --adaptive-delivery-action ignore --cache-by-cookies blacklist --cookie-names "nem,vem" --enable-caching-for-options false --enable-caching-for-post false --enable-caching-string-sort false --l2-caching-enabled true --slice-configuration-enabled false --slice-l2-caching-enabled false
+        $ azion cache_settings create -a 1673635839 --name "cachesettingstest"
+        $ azion cache_settings create -a 1673635839 --name "cachesettingswithfields" --browser-cache-settings honor --cdn-cache-settings honor --cache-by-query-string ignore 
+        $ azion cache_settings create -a 1673635839 --in "create.json"
+		$ azion cache_settings create -a 1674767911 --name "cachesettingswithfieldsthruflags" --browser-cache-settings override --browser-cache-settings-maximum-ttl 60  --cdn-cache-settings honor --cnd-cache-settings-maximum-ttl 60 --cache-by-query-string ignore --cache-by-query-string whitelist --query-string-fields "heyyy,yoooo" --adaptive-delivery-action ignore --cache-by-cookies blacklist --cookie-names "nem,vem" --enable-caching-for-options false --enable-caching-for-post false --enable-caching-string-sort false --l2-caching-enabled true --slice-configuration-enabled false --slice-l2-caching-enabled false
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

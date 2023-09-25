@@ -21,8 +21,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		  $ azioncli origins delete --application-id 1673635839 --origin-key 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
-		  $ azioncli origins delete -a 1673635839 -o 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
+		  $ azion origins delete --application-id 1673635839 --origin-key 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
+		  $ azion origins delete -a 1673635839 -o 03a6e7bf-8e26-49c7-a66e-ab8eaa425086
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-key") {

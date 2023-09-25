@@ -33,9 +33,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azioncli device_groups describe --application-id 1673635839 --group-id 31223
-      $ azioncli device_groups describe -a 1673635839 -g 31223 --format json
-      $ azioncli device_groups describe --application-id 1673635839 --group-id 31223 --out "./tmp/test.json"
+      $ azion device_groups describe --application-id 1673635839 --group-id 31223
+      $ azion device_groups describe -a 1673635839 -g 31223 --format json
+      $ azion device_groups describe --application-id 1673635839 --group-id 31223 --out "./tmp/test.json"
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("group-id") {

@@ -46,10 +46,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_applications update --application-id 1234 --name 'Hello'
-		$ azioncli edge_applications update -a 9123 --active true
-		$ azioncli edge_applications update -a 9123 --active false
-		$ azioncli edge_applications update --in "update.json"
+		$ azion edge_applications update --application-id 1234 --name 'Hello'
+		$ azion edge_applications update -a 9123 --active true
+		$ azion edge_applications update -a 9123 --active false
+		$ azion edge_applications update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either function-id or in path should be passed

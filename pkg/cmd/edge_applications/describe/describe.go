@@ -26,9 +26,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_applications describe --application-id 4312
-        $ azioncli edge_applications describe --application-id 1337 --out "./tmp/test.json" --format json
-        $ azioncli edge_applications describe --application-id 1337 --format json
+        $ azion edge_applications describe --application-id 4312
+        $ azion edge_applications describe --application-id 1337 --out "./tmp/test.json" --format json
+        $ azion edge_applications describe --application-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
