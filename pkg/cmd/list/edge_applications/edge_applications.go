@@ -33,26 +33,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion list edge-application --page_size 5
 		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			var numberPage int64 = opts.Page
-
 			client := api.NewClient(f.HttpClient,
 				f.Config.GetString("api_url"),
 				f.Config.GetString("token"),
 			)
 
-			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
-				for {
-					pages, err := PrintTable(client, f, opts, &numberPage)
-					if numberPage > pages && err == nil {
-						return nil
-					}
-					if err != nil {
-						return fmt.Errorf(msg.ErrorGetAll.Error(), err)
-					}
-				}
-			}
-
-			if _, err := PrintTable(client, f, opts, &numberPage); err != nil {
+			if err := PrintTable(client, f, opts); err != nil {
 				return fmt.Errorf(msg.ErrorGetAll.Error(), err)
 			}
 			return nil
@@ -67,50 +53,54 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) (int64, error) {
+func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	c := context.Background()
 
-	resp, err := client.List(c, opts)
-	if err != nil {
-		return 0, err
+	for {
+		resp, err := client.List(c, opts)
+		if err != nil {
+			return err
+		}
+
+		tbl := table.New("ID", "NAME", "ACTIVE")
+		tbl.WithWriter(f.IOStreams.Out)
+
+		if opts.Details {
+			tbl = table.New("ID", "NAME", "DEBUG RULES", "LAST EDITOR", "LAST MODIFIED", "ACTIVE")
+		}
+
+		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
+		columnFmt := color.New(color.FgGreen).SprintfFunc()
+		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+		for _, v := range resp.Results {
+			tbl.AddRow(
+				v.Id,
+				utils.TruncateString(v.Name),
+				v.DebugRules,
+				v.LastEditor,
+				v.LastModified,
+				v.Active,
+			)
+		}
+
+		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
+		tbl.CalculateWidths([]string{})
+
+		// print the header only in the first flow
+		if opts.Page == 1 {
+			tbl.PrintHeader(format)
+		}
+
+		for _, row := range tbl.GetRows() {
+			tbl.PrintRow(format, row)
+		}
+
+		if opts.Page >= resp.TotalPages {
+			break
+		}
+		opts.Page++
 	}
 
-	tbl := table.New("ID", "NAME", "ACTIVE")
-	tbl.WithWriter(f.IOStreams.Out)
-
-	if opts.Details {
-		tbl = table.New("ID", "NAME", "DEBUG RULES", "LAST EDITOR", "LAST MODIFIED", "ACTIVE")
-	}
-
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgGreen).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-	for _, v := range resp.Results {
-		tbl.AddRow(
-			v.Id,
-			utils.TruncateString(v.Name),
-			v.DebugRules,
-			v.LastEditor,
-			v.LastModified,
-			v.Active,
-		)
-	}
-
-	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
-
-	// print the header only in the first flow
-	if *numberPage == 1 {
-		tbl.PrintHeader(format)
-	}
-
-	for _, row := range tbl.GetRows() {
-		tbl.PrintRow(format, row)
-	}
-
-	*numberPage += 1
-	opts.Page = *numberPage
-
-	return resp.TotalPages, nil
+	return nil
 }
