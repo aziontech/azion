@@ -72,7 +72,7 @@ var (
 	PublishInputAddress             = "Please inform an address to be used in the origin of this application: "
 	RulesEngineSuccessful           = "Created Rules Engine for web application\n"
 	PublishFlagHelp                 = "Displays more information about the publish subcommand"
-	PublishPropagation              = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
+	PublishPropagation              = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 
 	//CRUD
 	//list cmd
