@@ -141,22 +141,6 @@ type DeviceGroupsResponse interface {
 	GetUserAgent() string
 }
 
-func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
-	logger.Debug("Get Edge Application")
-	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdGet(ctx, id)
-
-	res, httpResp, err := req.Execute()
-	if err != nil {
-		logger.Debug("Error while getting an edge application", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return &res.Results, nil
-}
-
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
 	logger.Debug("Update Edge Application")
 	str := strconv.FormatInt(req.Id, 10)
