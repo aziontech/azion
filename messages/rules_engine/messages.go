@@ -10,12 +10,6 @@ var (
 	RulesEngineFlagId   = "Unique identifier for a rule in Rules Engine. The '--rule-id' flag is required"
 	RulesEnginePhase    = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
-	//list cmd
-	RulesEngineListUsage            = "list [flags]"
-	RulesEngineListShortDescription = "Displays the rules related to a specific edge application."
-	RulesEngineListLongDescription  = "Displays the rules related to a specific edge application, informed through the '--application-id' flag"
-	RulesEngineListHelpFlag         = "Displays more information about the list subcommand"
-
 	//describe cmd
 	RulesEngineDescribeUsage            = "describe --application-id <application_id> --phase <phase> --rule-id <rule_id> [flags]"
 	RulesEngineDescribeShortDescription = "Returns the information related to the rule in Rules Engine"
