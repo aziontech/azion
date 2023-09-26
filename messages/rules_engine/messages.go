@@ -19,16 +19,6 @@ var (
 	RulesEngineDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	RulesEngineFileWritten              = "File successfully written to: %s\n"
 
-	// [ delete ]
-	RulesEngineDeleteUsage             = "delete [flags]"
-	RulesEngineDeleteShortDescription  = "Deletes a rule in Rules Engine"
-	RulesEngineDeleteLongDescription   = "Deletes a rule in Rules Engine based on the given '--rule-id', '--application-id', and '--phase'"
-	RulesEngineDeleteOutputSuccess     = "Rule %d was successfully deleted\n"
-	RulesEngineDeleteFlagApplicationID = "Unique identifier for an edge application"
-	RulesEngineDeleteFlagRuleID        = "The Rule Engine's rule unique identifier"
-	RulesEngineDeleteFlagPhase         = "The phase is either 'request' or 'response'"
-	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
-
 	// [ Update ]
 	RulesEngineUpdateUsage                 = "update [flags]"
 	RulesEngineUpdateShortDescription      = "Updates a rule in Rules Engine"

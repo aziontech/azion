@@ -3,7 +3,7 @@ package rules_engine
 import "errors"
 
 var (
-	ErrorMandatoryFlags         = errors.New("One or more required flags are missing. You must provide the --application-id, --rules-id, and --phase flags. Run the command 'azioncli rules_engine <subcommand> --help' to display more information and try again.")
+	ErrorGetRulesEngines        = errors.New("Failed to list your rules in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorGetRulesEngine         = errors.New("Failed to describe the rule in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorMissingArgumentsDelete = errors.New("Required flags are missing. You must supply the --application-id, --phase, and --rule-id flags as arguments. Run 'azion <command> <subcommand> --help' command to display more information and try again.")
 	ErrorFailToDelete           = errors.New("Failed to delete the rule in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support.")
