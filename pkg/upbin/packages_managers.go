@@ -190,7 +190,7 @@ func packageManagerExists(command string) bool {
 }
 
 func installPackageManager(manager string) error {
-	_, _, err := utils.RunCommandWithOutput([]string{}, "brew upgrade azioncli")
+	_, _, err := utils.RunCommandWithOutput([]string{}, "brew upgrade azion")
 	if err != nil {
 		return err
 	}

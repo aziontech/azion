@@ -17,7 +17,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Use:   msg.OriginsUsage,
 		Short: msg.OriginsShortDescription,
 		Long:  msg.OriginsLongDescription, Example: heredoc.Doc(`
-		$ azioncli origins --help
+		$ azion origins --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

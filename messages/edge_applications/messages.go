@@ -59,7 +59,7 @@ var (
 	PublishSuccessful               = "Your Edge Application was published successfully\n"
 	SimplePublishSuccessful         = "Your Simple Edge Application was published successfully\n"
 	PublishOutputDomainSuccess      = "\nTo visualize your application access the domain: %v\n"
-	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
+	PublishDomainHint               = "You may now edit your domain and add your own cnames. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	PublishOutputCachePurge         = "Domain cache was purged\n"
 	PublishOutputEdgeFunctionCreate = "Created Edge Function %v with ID %v\n"
 	PublishOutputEdgeFunctionUpdate = "Updated Edge Function %v with ID %v\n"
@@ -72,7 +72,7 @@ var (
 	PublishInputAddress             = "Please inform an address to be used in the origin of this application: "
 	RulesEngineSuccessful           = "Created Rules Engine for web application\n"
 	PublishFlagHelp                 = "Displays more information about the publish subcommand"
-	PublishPropagation              = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
+	PublishPropagation              = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 
 	//CRUD
 	//list cmd

@@ -18,7 +18,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.EdgeFuncInstanceShortDescription,
 		Long:  msg.EdgeFuncInstanceLongDescription,
 		Example: heredoc.Doc(`
-		$ azioncli edge_functions_instances --help
+		$ azion edge_functions_instances --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

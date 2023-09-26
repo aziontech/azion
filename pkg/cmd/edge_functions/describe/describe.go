@@ -26,10 +26,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_functions describe --function-id 4312
-        $ azioncli edge_functions describe --function-id 1337 --with-code
-        $ azioncli edge_functions describe --function-id 1337 --out "./tmp/test.json" --format json
-        $ azioncli edge_functions describe --function-id 1337 --format json
+        $ azion edge_functions describe --function-id 4312
+        $ azion edge_functions describe --function-id 1337 --with-code
+        $ azion edge_functions describe --function-id 1337 --out "./tmp/test.json" --format json
+        $ azion edge_functions describe --function-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {

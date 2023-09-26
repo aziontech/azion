@@ -31,8 +31,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
+<<<<<<< HEAD:pkg/cmd/list/rule_engine/rule_engine.go
 		$ azion list rule-engine -application-id 1673635839 --phase request
 		$ azion list rule-engine --application-id 1673635839 --phase response --details
+=======
+		$ azion rules_engine list -a 1673635839 -p request
+		$ azion rules_engine list --application-id 1673635839 --phase response --details
+>>>>>>> dev:pkg/cmd/rules_engine/list/list.go
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
