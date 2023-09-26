@@ -440,10 +440,12 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	logger.Debug("Get Rules Engine")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
+			logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+			logger.Debug("Headers", zap.Any("http", httpResp.Header))
+			logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
