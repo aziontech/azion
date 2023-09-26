@@ -21,8 +21,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-		$ azioncli variables delete --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
-		$ azioncli variables delete -v 7a187044-4a00-4a4a-93ed-d230900421f3
+		$ azion variables delete --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
+		$ azion variables delete -v 7a187044-4a00-4a4a-93ed-d230900421f3
 		`),
 
 		RunE: func(cmd *cobra.Command, args []string) error {

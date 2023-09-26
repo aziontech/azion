@@ -42,8 +42,8 @@ func NewCobraCmd(tempCmd *TemplateCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli rules_engine template
-		$ azioncli rules_engine template --out /path/to/your/file.json
+		$ azion rules_engine template
+		$ azion rules_engine template --out /path/to/your/file.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 

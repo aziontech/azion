@@ -27,9 +27,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli domains describe --domain-id 4312
-        $ azioncli domains describe --domain-id 1337 --out "./tmp/test.json" --format json
-        $ azioncli domains describe --domain-id 1337 --format json
+        $ azion domains describe --domain-id 4312
+        $ azion domains describe --domain-id 1337 --out "./tmp/test.json" --format json
+        $ azion domains describe --domain-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("domain-id") {

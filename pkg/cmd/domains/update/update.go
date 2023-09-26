@@ -35,13 +35,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli domains update --domain-id 1234 --name 'Hello'
-		$ azioncli domains update --domain-id 1234 --application-id 4321
-		$ azioncli domains update --domain-id 1234 --cnames www.testhere.com,www.pudim.com
-		$ azioncli domains update -d 9123 --cname-access-only true
-		$ azioncli domains update -d 9123 --cname-access-only false
-		$ azioncli domains update -d 9123 --application-id 192837
-		$ azioncli domains update --in "update.json"
+		$ azion domains update --domain-id 1234 --name 'Hello'
+		$ azion domains update --domain-id 1234 --application-id 4321
+		$ azion domains update --domain-id 1234 --cnames www.testhere.com,www.pudim.com
+		$ azion domains update -d 9123 --cname-access-only true
+		$ azion domains update -d 9123 --cname-access-only false
+		$ azion domains update -d 9123 --application-id 192837
+		$ azion domains update --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either domain-id or in path should be passed

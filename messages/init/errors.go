@@ -3,7 +3,7 @@ package init
 import "errors"
 
 var (
-	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azioncli-template and try again")
+	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azion-template and try again")
 
 	ErrorVulcanExecute                 = errors.New("Error executing Vulcan: %s")
 	ErrorModeNotSent                   = errors.New("You must send the --mode flag when --template is not nextjs/simple/static")

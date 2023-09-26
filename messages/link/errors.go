@@ -3,7 +3,7 @@ package link
 import "errors"
 
 var (
-	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azioncli-template and try again")
+	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azion-template and try again")
 
 	ErrorVulcanExecute                 = errors.New("Error executing Vulcan: %s")
 	ErrorModeNotSent                   = errors.New("You must send the --mode flag when --template is not nextjs/simple/static")
@@ -19,6 +19,6 @@ var (
 	ErrorNpmNotInstalled               = errors.New("Failed to open the NPM package Manager. Visit the website 'https://nodejs.org/en/download/' and follow the instructions to install the Node.js JavaScript runtime environment in your operating system. Node.js installation includes the NPM package manager")
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
-	ErrReadEnvFile                     = errors.New("Failed to read the webdev.env file. Verify if the file is corrupted or changed or run the 'azioncli edge_applications publish' command again")
+	ErrReadEnvFile                     = errors.New("Failed to read the webdev.env file. Verify if the file is corrupted or changed or run the 'azion edge_applications publish' command again")
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
 )

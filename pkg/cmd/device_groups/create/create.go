@@ -3,8 +3,9 @@ package create
 import (
 	"context"
 	"fmt"
-	"github.com/MakeNowJust/heredoc"
 	"os"
+
+	"github.com/MakeNowJust/heredoc"
 
 	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -31,9 +32,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli device_groups create --application-id 1673635839 --name "asdf" --user-agent "httpbin.org"
-        $ azioncli device_groups create -a 1673635839 --name "asdf" --user-agent "httpbin.org"
-        $ azioncli device_groups create -a 1673635839 --in "create.json"
+        $ azion device_groups create --application-id 1673635839 --name "asdf" --user-agent "httpbin.org"
+        $ azion device_groups create -a 1673635839 --name "asdf" --user-agent "httpbin.org"
+        $ azion device_groups create -a 1673635839 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateDeviceGroupsRequest{}
