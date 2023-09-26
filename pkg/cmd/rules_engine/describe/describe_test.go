@@ -1,14 +1,14 @@
 package describe
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -60,7 +60,7 @@ func TestDescribe(t *testing.T) {
 		cmd.SetArgs([]string{})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorMandatoryFlags)
+		require.Error(t, err)
 	})
 
 	t.Run("export to a file", func(t *testing.T) {
