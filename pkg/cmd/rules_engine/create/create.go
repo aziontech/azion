@@ -3,7 +3,6 @@ package create
 import (
 	"context"
 	"fmt"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
@@ -20,18 +19,6 @@ type Fields struct {
 	ApplicationID int64
 	Phase         string
 	Path          string
-}
-
-type Request struct {
-	Name        string                      `json:"name"`
-	Description string                      `json:"description,omitempty"`
-	Criteria    [][]sdk.RulesEngineCriteria `json:"criteria"`
-	Behaviors   []Behaviors                 `json:"behaviors"`
-}
-
-type Behaviors struct {
-	Name   string `json:"name"`
-	Target string `json:"target"`
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
