@@ -83,10 +83,6 @@ type RulesEngineResponse interface {
 	GetName() string
 }
 
-type CreateRequest struct {
-	sdk.CreateApplicationRequest
-}
-
 type UpdateRequest struct {
 	sdk.ApplicationUpdateRequest
 	Id int64
@@ -99,11 +95,6 @@ type UpdateInstanceRequest struct {
 type CreateInstanceRequest struct {
 	sdk.ApplicationCreateInstanceRequest
 	ApplicationId int64
-}
-
-type EdgeApplicationsResponse interface {
-	GetId() int64
-	GetName() string
 }
 
 type UpdateRulesEngineRequest struct {
@@ -252,29 +243,6 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	}
 
 	return nil
-}
-
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.GetApplicationsResponse, error) {
-	logger.Debug("List Edge Application")
-	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
-	}
-
-	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsAPI.EdgeApplicationsGet(ctx).
-		OrderBy(opts.OrderBy).
-		Page(opts.Page).
-		PageSize(opts.PageSize).
-		Sort(opts.Sort).Execute()
-
-	if err != nil {
-		logger.Debug("Error while listing edge applications", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return &sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return resp, nil
 }
 
 func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
