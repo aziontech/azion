@@ -10,7 +10,7 @@ var (
 	FlagPhase             = "The phase of your Rule Engine (request/response)"
 	HelpFlag              = "Displays more information about the delete rule-engine subcommand"
 
-	Usage            = "rule-engine"
+	Usage            = "rules-engine"
 	ShortDescription = "Deletes a rule in Rules Engine"
 	LongDescription  = "Deletes a rule in Rules Engine based on the given '--rule-id', '--application-id', and '--phase'"
 )

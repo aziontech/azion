@@ -1,7 +1,7 @@
 package rulesengine
 
 var (
-	Usage            = "rule-engine"
+	Usage            = "rules-engine"
 	ShortDescription = "Returns the information related to the rule in Rules Engine"
 	LongDescription  = "Returns the information related to the rule in Rules Engine, informed through the flag '--rule-id' in detail"
 	FileWritten      = "File successfully written to: %s\n"
