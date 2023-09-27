@@ -103,8 +103,8 @@ func format(cmd *cobra.Command, rules api.RulesEngineResponse) ([]byte, error) {
 	tbl.AddRow("")
 	tbl.AddRow("Behaviours: ")
 	for _, b := range rules.GetBehaviors() {
-		tbl.AddRow("  Name: ", b.GetName())
-		tbl.AddRow("  Target: ", b.GetTarget())
+		tbl.AddRow("  Name: ", b.RulesEngineBehaviorString.Name)
+		tbl.AddRow("  Target: ", b.RulesEngineBehaviorString.Target)
 		tbl.AddRow("")
 	}
 	tbl.AddRow("Criteria: ")

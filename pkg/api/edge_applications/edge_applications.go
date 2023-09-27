@@ -3,6 +3,7 @@ package edge_applications
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -499,7 +500,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	var behString sdk.RulesEngineBehaviorString
 	behString.SetName("run_function")
-	behString.SetTarget(string(idFunc))
+	behString.SetTarget(fmt.Sprintf("%d", idFunc))
 
 	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 		RulesEngineBehaviorString: &behString,
@@ -731,7 +732,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	var behStringCache sdk.RulesEngineBehaviorString
 	behStringCache.SetName("set_cache_policy")
-	behStringCache.SetTarget(string(cacheId))
+	behStringCache.SetTarget(fmt.Sprintf("%d", cacheId))
 
 	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 		RulesEngineBehaviorString: &behStringCache,

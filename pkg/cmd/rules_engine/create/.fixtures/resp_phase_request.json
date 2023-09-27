@@ -6,8 +6,8 @@
         "description": "Are you approaching me?",
         "behaviors": [
             {
-                "name": "deliver",
-                "target": null
+                "target": "run_function",
+                "name": "delivera"
             }
         ],
         "criteria": [
