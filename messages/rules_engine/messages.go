@@ -10,12 +10,6 @@ var (
 	RulesEngineFlagId   = "Unique identifier for a rule in Rules Engine. The '--rule-id' flag is required"
 	RulesEnginePhase    = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
-	//list cmd
-	RulesEngineListUsage            = "list [flags]"
-	RulesEngineListShortDescription = "Displays the rules related to a specific edge application."
-	RulesEngineListLongDescription  = "Displays the rules related to a specific edge application, informed through the '--application-id' flag"
-	RulesEngineListHelpFlag         = "Displays more information about the list subcommand"
-
 	//describe cmd
 	RulesEngineDescribeUsage            = "describe --application-id <application_id> --phase <phase> --rule-id <rule_id> [flags]"
 	RulesEngineDescribeShortDescription = "Returns the information related to the rule in Rules Engine"
@@ -24,16 +18,6 @@ var (
 	RulesEngineDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	RulesEngineDescribeHelpFlag         = "Displays more information about the describe subcommand"
 	RulesEngineFileWritten              = "File successfully written to: %s\n"
-
-	// [ delete ]
-	RulesEngineDeleteUsage             = "delete [flags]"
-	RulesEngineDeleteShortDescription  = "Deletes a rule in Rules Engine"
-	RulesEngineDeleteLongDescription   = "Deletes a rule in Rules Engine based on the given '--rule-id', '--application-id', and '--phase'"
-	RulesEngineDeleteOutputSuccess     = "Rule %d was successfully deleted\n"
-	RulesEngineDeleteFlagApplicationID = "Unique identifier for an edge application"
-	RulesEngineDeleteFlagRuleID        = "The Rule Engine's rule unique identifier"
-	RulesEngineDeleteFlagPhase         = "The phase is either 'request' or 'response'"
-	RulesEngineDeleteHelpFlag          = "Displays more information about the delete subcommand"
 
 	// [ Update ]
 	RulesEngineUpdateUsage                 = "update [flags]"

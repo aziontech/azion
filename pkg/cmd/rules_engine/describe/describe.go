@@ -39,9 +39,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
       $ azion rules_engine describe --application-id 1673635839 --rule-id 31223 --phase request --out "./tmp/test.json" --format json
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {
-				return msg.ErrorMandatoryFlags
-			}
+			// if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {
+			// 	return msg.ErrorMandatoryFlags
+			// }
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
