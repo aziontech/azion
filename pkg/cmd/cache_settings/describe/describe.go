@@ -32,9 +32,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli cache_settings describe --application-id 1673635839 --cache-settings-id 107313
-        $ azioncli cache_settings describe --application-id 1673635839 --cache-settings-id 107313 --format json
-        $ azioncli cache_settings describe --application-id 1673635839 --cache-settings-id 107313 --out "./tmp/test.json" --format json
+        $ azion cache_settings describe --application-id 1673635839 --cache-settings-id 107313
+        $ azion cache_settings describe --application-id 1673635839 --cache-settings-id 107313 --format json
+        $ azion cache_settings describe --application-id 1673635839 --cache-settings-id 107313 --out "./tmp/test.json" --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("cache-settings-id") {
@@ -79,7 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, strResp api.CacheSettingsResponse) ([]byte, error) {
+func format(cmd *cobra.Command, strResp api.GetCacheSettingsResponse) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err

@@ -42,7 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli edge_services update --service-id 1234 --name 'Hello'
+        $ azion edge_services update --service-id 1234 --name 'Hello'
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either id parameter or in path should be passed

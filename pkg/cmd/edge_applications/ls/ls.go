@@ -44,8 +44,8 @@ func NewCobraCmd(ls *LsCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli edge_applications ls
-		$ azioncli edge_applications ls --help
+		$ azion edge_applications ls
+		$ azion edge_applications ls --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return ls.run(cmd)

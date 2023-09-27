@@ -10,8 +10,10 @@ import (
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
+	"github.com/aziontech/azion-cli/pkg/cmd/create"
+	"github.com/aziontech/azion-cli/pkg/cmd/delete"
+	"github.com/aziontech/azion-cli/pkg/cmd/list"
 
-	// "github.com/aziontech/azion-cli/pkg/cmd/create"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
@@ -112,8 +114,10 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(linkcmd.NewCmd(f))
 	cobraCmd.AddCommand(personal_token.NewCmd(f))
 	cobraCmd.AddCommand(completion.NewCmd(f))
-	// cobraCmd.AddCommand(create.NewCmd(f))
 	cobraCmd.AddCommand(describe.NewCmd(f))
+	cobraCmd.AddCommand(create.NewCmd(f))
+	cobraCmd.AddCommand(list.NewCmd(f))
+	cobraCmd.AddCommand(delete.NewCmd(f))
 
 	return cobraCmd
 }

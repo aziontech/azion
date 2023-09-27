@@ -1,0 +1,35 @@
+{
+    "count": 2,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+        "previous": null,
+        "next": "https://stage-api.azion.net/edge_applications?page=2&page_size=2"
+    },
+    "results": [
+        {
+            "id": 1679423488,
+            "name": "bobobobobobo d",
+            "active": true,
+            "debug_rules": false,
+            "last_editor": "maxwelbm@hotmail.com",
+            "last_modified": "2023-04-04T02:41:43.852939Z",
+            "origins": [
+                {
+                    "name": "Create Origin",
+                    "origin_type": "single_origin",
+                    "origin_id": "c58e6ed3-01d1-44bd-9c4f-7ea967999c25"
+                }
+            ]
+        },
+        {
+            "id": 1679423491,
+            "name": "asdfasd",
+            "active": true,
+            "debug_rules": false,
+            "last_editor": "maxwelbm@hotmail.com",
+            "last_modified": "2023-03-21T18:21:16.734791Z",
+            "origins": []
+        }
+    ]
+}

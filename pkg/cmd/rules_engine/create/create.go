@@ -31,8 +31,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli rules_engine create -a 1679423488 --phase "response" --in ./file.json
-        $ azioncli rules_engine create --application-id 1679423488 -p "request" --in file.json
+        $ azion rules_engine create -a 1679423488 --phase "response" --in ./file.json
+        $ azion rules_engine create --application-id 1679423488 -p "request" --in file.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("in") {
@@ -40,6 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			request := api.CreateRulesEngineRequest{}
+
 			var (
 				file *os.File
 				err  error
@@ -52,6 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
 				}
 			}
+
 			err = cmdutil.UnmarshallJsonFromReader(file, &request)
 			if err != nil {
 				return utils.ErrorUnmarshalReader
@@ -63,6 +65,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.CreateRulesEngine(context.Background(), fields.ApplicationID, fields.Phase, &request)
+
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 			}
@@ -113,7 +116,7 @@ func validateRequest(request api.CreateRulesEngineRequest) error {
 	}
 
 	for _, item := range request.GetBehaviors() {
-		if item.Name == "" {
+		if item.RulesEngineBehaviorString.Name == "" {
 			return msg.ErrorNameBehaviorsEmpty
 		}
 	}

@@ -12,7 +12,7 @@ import (
 func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
 	logger.Debug("Get Edge Application")
 
-	res, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsApi.
+	res, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsAPI.
 		EdgeApplicationsIdGet(ctx, id).Execute()
 
 	fmt.Println("res: ", res)

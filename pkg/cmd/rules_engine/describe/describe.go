@@ -34,14 +34,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azioncli rules_engine describe --application-id 1673635839 --rule-id 31223 --phase request
-      $ azioncli rules_engine describe --application-id 1673635839 --rule-id 31223 --phase response --format json
-      $ azioncli rules_engine describe --application-id 1673635839 --rule-id 31223 --phase request --out "./tmp/test.json" --format json
+      $ azion rules_engine describe --application-id 1673635839 --rule-id 31223 --phase request
+      $ azion rules_engine describe --application-id 1673635839 --rule-id 31223 --phase response --format json
+      $ azion rules_engine describe --application-id 1673635839 --rule-id 31223 --phase request --out "./tmp/test.json" --format json
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {
-				return msg.ErrorMandatoryFlags
-			}
+			// if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") {
+			// 	return msg.ErrorMandatoryFlags
+			// }
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
@@ -103,8 +103,8 @@ func format(cmd *cobra.Command, rules api.RulesEngineResponse) ([]byte, error) {
 	tbl.AddRow("")
 	tbl.AddRow("Behaviours: ")
 	for _, b := range rules.GetBehaviors() {
-		tbl.AddRow("  Name: ", b.GetName())
-		tbl.AddRow("  Target: ", b.GetTarget())
+		tbl.AddRow("  Name: ", b.RulesEngineBehaviorString.Name)
+		tbl.AddRow("  Target: ", b.RulesEngineBehaviorString.Target)
 		tbl.AddRow("")
 	}
 	tbl.AddRow("Criteria: ")

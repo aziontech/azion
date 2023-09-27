@@ -3,6 +3,8 @@ package edge_applications
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -29,7 +31,25 @@ type CacheSettingsResponse interface {
 	GetEnableCachingForPost() bool
 	GetL2CachingEnabled() bool
 	GetAdaptiveDeliveryAction() string
-	GetDeviceGroup() []string
+	GetDeviceGroup() []int32
+}
+
+type GetCacheSettingsResponse interface {
+	GetId() int64
+	GetName() string
+	GetBrowserCacheSettings() string
+	GetBrowserCacheSettingsMaximumTtl() int64
+	GetCdnCacheSettingsMaximumTtl() int64
+	GetCdnCacheSettings() string
+	GetCacheByQueryString() string
+	GetQueryStringFields() []string
+	GetEnableQueryStringSort() bool
+	GetCacheByCookies() string
+	GetCookieNames() []*string
+	GetEnableCachingForPost() bool
+	GetL2CachingEnabled() bool
+	GetAdaptiveDeliveryAction() string
+	GetDeviceGroup() []int32
 }
 
 type EdgeApplicationResponse interface {
@@ -56,15 +76,11 @@ type RulesEngineResponse interface {
 	GetId() int64
 	GetPhase() string
 	GetDescription() string
-	GetBehaviors() []sdk.RulesEngineResultResponseBehaviors
+	GetBehaviors() []sdk.RulesEngineBehaviorEntry
 	GetCriteria() [][]sdk.RulesEngineCriteria
 	GetIsActive() bool
 	GetOrder() int64
 	GetName() string
-}
-
-type CreateRequest struct {
-	sdk.CreateApplicationRequest
 }
 
 type UpdateRequest struct {
@@ -79,11 +95,6 @@ type UpdateInstanceRequest struct {
 type CreateInstanceRequest struct {
 	sdk.ApplicationCreateInstanceRequest
 	ApplicationId int64
-}
-
-type EdgeApplicationsResponse interface {
-	GetId() int64
-	GetName() string
 }
 
 type UpdateRulesEngineRequest struct {
@@ -144,7 +155,7 @@ type DeviceGroupsResponse interface {
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
 	logger.Debug("Update Edge Application")
 	str := strconv.FormatInt(req.Id, 10)
-	request := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdPatch(ctx, str).ApplicationUpdateRequest(req.ApplicationUpdateRequest)
+	request := c.apiClient.EdgeApplicationsMainSettingsAPI.EdgeApplicationsIdPatch(ctx, str).ApplicationUpdateRequest(req.ApplicationUpdateRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -160,7 +171,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 
 func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID string, instanceID string) (FunctionsInstancesResponse, error) {
 	logger.Debug("Update Instance")
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, appID, instanceID).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
+	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdPatch(ctx, appID, instanceID).ApplicationUpdateInstanceRequest(req.ApplicationUpdateInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -179,7 +190,7 @@ func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceR
 	args := make(map[string]interface{})
 	req.SetArgs(args)
 
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, req.ApplicationId).ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest)
+	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, req.ApplicationId).ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -196,46 +207,31 @@ func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceR
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Edge Application")
 	str := strconv.FormatInt(id, 10)
-	req := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsIdDelete(ctx, str)
+	req := c.apiClient.EdgeApplicationsMainSettingsAPI.EdgeApplicationsIdDelete(ctx, str)
 
 	httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while deleting an edge application", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting an edge application", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
+
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.GetApplicationsResponse, error) {
-	logger.Debug("List Edge Application")
-	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
-	}
-
-	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsApi.EdgeApplicationsGet(ctx).
-		OrderBy(opts.OrderBy).
-		Page(opts.Page).
-		PageSize(opts.PageSize).
-		Sort(opts.Sort).Execute()
-
-	if err != nil {
-		logger.Debug("Error while listing edge applications", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return &sdk.GetApplicationsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return resp, nil
-}
-
 func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
 	logger.Debug("Get Origin")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting an origin", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -255,7 +251,7 @@ func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int6
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
 	logger.Debug("List Origins")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
 		logger.Debug("Error while listing origins", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -268,7 +264,7 @@ func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, e
 
 func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (OriginsResponse, error) {
 	logger.Debug("Create Origins")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
 		logger.Debug("Error while creating an origin", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -281,7 +277,7 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 
 func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
 	logger.Debug("Update Origins")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
 	if err != nil {
 		logger.Debug("Error while updating an origin", zap.Error(err))
@@ -295,7 +291,7 @@ func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, ori
 
 func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, originKey string) error {
 	logger.Debug("Delete Origins")
-	httpResp, err := c.apiClient.EdgeApplicationsOriginsApi.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting an origin", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -308,7 +304,7 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 
 func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
 	logger.Debug("Create Cache Settings")
-	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
+	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -324,7 +320,7 @@ func (c *Client) CreateCacheSettings(ctx context.Context, req *CreateCacheSettin
 
 func (c *Client) UpdateCacheSettings(ctx context.Context, req *UpdateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
 	logger.Debug("Update Cache Settings")
-	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
+	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationId, req.Id).ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -344,7 +340,7 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -361,9 +357,9 @@ func (c *Client) ListCacheSettings(ctx context.Context, opts *contracts.ListOpti
 	return resp, nil
 }
 
-func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (CacheSettingsResponse, error) {
+func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (GetCacheSettingsResponse, error) {
 	logger.Debug("Get Cache Settings")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting a cache setting", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -377,7 +373,7 @@ func (c *Client) GetCacheSettings(ctx context.Context, edgeApplicationID, cacheS
 
 func (c *Client) DeleteCacheSettings(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
 	logger.Debug("Delete Cache Settings")
-	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(ctx, edgeApplicationID, cacheSettingsID).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting a cache setting", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -394,7 +390,7 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, edgeApplicationID, phase).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, edgeApplicationID, phase).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -413,12 +409,14 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 
 func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID int64, phase string) (RulesEngineResponse, error) {
 	logger.Debug("Get Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
+			logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
+			logger.Debug("Headers", zap.Any("http", httpResp.Header))
+			logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
@@ -426,7 +424,7 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 
 func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64, phase string, ruleID int64) error {
 	logger.Debug("Delete Rules Engine")
-	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting a rule in rules engine", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -439,7 +437,7 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64,
 
 func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesEngineRequest, idFunc int64) (EdgeApplicationsResponse, error) {
 	logger.Debug("Update Rules Engine Publish")
-	request := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, req.IdApplication, "request")
+	request := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, req.IdApplication, "request")
 
 	edgeApplicationRules, httpResp, err := request.Execute()
 	if err != nil {
@@ -452,12 +450,19 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	idRule := edgeApplicationRules.Results[0].Id
 
-	b := make([]sdk.RulesEngineBehavior, 1)
-	b[0].SetName("run_function")
-	b[0].SetTarget(idFunc)
-	req.SetBehaviors(b)
+	behaviors := make([]sdk.RulesEngineBehaviorEntry, 1)
 
-	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.IdApplication, "request", idRule).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
+	var behString sdk.RulesEngineBehaviorString
+	behString.SetName("run_function")
+	behString.SetTarget(fmt.Sprintf("%d", idFunc))
+
+	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+		RulesEngineBehaviorString: &behString,
+	})
+
+	req.SetBehaviors(behaviors)
+
+	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.IdApplication, "request", idRule).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -473,7 +478,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.IdApplication, req.Phase, req.Id).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
+	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.IdApplication, req.Phase, req.Id).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -490,7 +495,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
@@ -509,7 +514,7 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.
 		EdgeApplicationsEdgeApplicationIdFunctionsInstancesGet(ctx, edgeApplicationID).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -528,7 +533,7 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 
 func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
 	logger.Debug("Delete Edge Function Instance")
-	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
+	req := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdDelete(ctx, appID, funcID)
 
 	httpResp, err := req.Execute()
 	if err != nil {
@@ -544,7 +549,7 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 
 func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
 	logger.Debug("Create Edge Function Instance")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
 		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
 	if err != nil {
 		logger.Debug("Error while creating an edge function instance", zap.Error(err))
@@ -558,7 +563,7 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstanc
 
 func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID int64) (FunctionsInstancesResponse, error) {
 	logger.Debug("Get Edge Function Instance")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesApi.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdGet(ctx, edgeApplicationID, instanceID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesFunctionsInstancesIdGet(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting an edge function instance", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -574,7 +579,7 @@ func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptio
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.
 		EdgeApplicationsEdgeApplicationIdDeviceGroupsGet(ctx, edgeApplicationID).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -592,7 +597,7 @@ func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptio
 
 func (c *Client) DeleteDeviceGroup(ctx context.Context, appID int64, groupID int64) error {
 	logger.Debug("Delete Device Group")
-	req := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdDelete(ctx, appID, groupID)
+	req := c.apiClient.EdgeApplicationsDeviceGroupsAPI.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdDelete(ctx, appID, groupID)
 
 	httpResp, err := req.Execute()
 	if err != nil {
@@ -608,7 +613,7 @@ func (c *Client) DeleteDeviceGroup(ctx context.Context, appID int64, groupID int
 
 func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID int64) (DeviceGroupsResponse, error) {
 	logger.Debug("Get Device Groups")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdGet(ctx, edgeApplicationID, groupID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdGet(ctx, edgeApplicationID, groupID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting a device group", zap.Error(err))
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
@@ -621,7 +626,7 @@ func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID
 
 func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchDeviceGroupsRequest, appID int64, groupID int64) (DeviceGroupsResponse, error) {
 	logger.Debug("Update Device Group")
-	request := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdPatch(ctx, appID, groupID).PatchDeviceGroupsRequest(req)
+	request := c.apiClient.EdgeApplicationsDeviceGroupsAPI.EdgeApplicationsEdgeApplicationIdDeviceGroupsDeviceGroupIdPatch(ctx, appID, groupID).PatchDeviceGroupsRequest(req)
 
 	deviceGroup, httpResp, err := request.Execute()
 	if err != nil {
@@ -637,7 +642,7 @@ func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchDeviceGroup
 
 func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroupsRequest, applicationID int64) (DeviceGroupsResponse, error) {
 	logger.Debug("Create Device Groups")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsApi.EdgeApplicationsEdgeApplicationIdDeviceGroupsPost(ctx, applicationID).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.EdgeApplicationsEdgeApplicationIdDeviceGroupsPost(ctx, applicationID).
 		CreateDeviceGroupsRequest(req.CreateDeviceGroupsRequest).Execute()
 	if err != nil {
 		logger.Debug("Error while creating a device group", zap.Error(err))
@@ -658,7 +663,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 	req.SetCdnCacheSettings("override")
 	req.SetCdnCacheSettingsMaximumTtl(31536000)
 
-	request := c.apiClient.EdgeApplicationsCacheSettingsApi.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
+	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
 
 	resp, httpResp, err := request.Execute()
 	if err != nil {
@@ -676,10 +681,18 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	logger.Debug("Create Rules Engine Next Application")
 	req := CreateRulesEngineRequest{}
 	req.SetName("cache policy")
-	behavior := make([]sdk.RulesEngineBehavior, 1)
-	behavior[0].SetName("set_cache_policy")
-	behavior[0].SetTarget(cacheId)
-	req.SetBehaviors(behavior)
+
+	behaviors := make([]sdk.RulesEngineBehaviorEntry, 1)
+
+	var behStringCache sdk.RulesEngineBehaviorString
+	behStringCache.SetName("set_cache_policy")
+	behStringCache.SetTarget(fmt.Sprintf("%d", cacheId))
+
+	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+		RulesEngineBehaviorString: &behStringCache,
+	})
+
+	req.SetBehaviors(behaviors)
 
 	criteria := make([][]sdk.RulesEngineCriteria, 1)
 	for i := 0; i < 1; i++ {
@@ -697,7 +710,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	req.SetCriteria(criteria)
 
-	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.
+	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
@@ -710,9 +723,17 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	req.SetName("enable gzip")
 
-	behavior[0].SetName("enable_gzip")
-	behavior[0].SetTarget("")
-	req.SetBehaviors(behavior)
+	behaviorsGZIP := make([]sdk.RulesEngineBehaviorEntry, 1)
+
+	var behString sdk.RulesEngineBehaviorString
+	behString.SetName("enable_gzip")
+	behString.SetTarget("")
+
+	behaviorsGZIP = append(behaviorsGZIP, sdk.RulesEngineBehaviorEntry{
+		RulesEngineBehaviorString: &behString,
+	})
+
+	req.SetBehaviors(behaviorsGZIP)
 
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${request_uri}")
@@ -720,7 +741,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetInputValue("")
 	req.SetCriteria(criteria)
 
-	_, httpResp, err = c.apiClient.EdgeApplicationsRulesEngineApi.
+	_, httpResp, err = c.apiClient.EdgeApplicationsRulesEngineAPI.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
