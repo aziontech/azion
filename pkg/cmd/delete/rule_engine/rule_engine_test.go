@@ -1,12 +1,13 @@
-package delete
+package ruleengine
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/rules_engine"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
+
+	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -25,11 +26,11 @@ func TestCreate(t *testing.T) {
 
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "4321", "--phase", "request", "--rule-id", "1234"})
+		cmd.SetArgs([]string{"--application-id", "4321", "--phase", "request", "--id", "1234"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf(msg.RulesEngineDeleteOutputSuccess, 1234), stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.DeleteOutputSuccess, 1234), stdout.String())
 	})
 
 	t.Run("delete rules engine that is not found", func(t *testing.T) {

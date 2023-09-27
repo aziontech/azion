@@ -2,8 +2,9 @@ package list
 
 import (
 	"context"
-	"github.com/aziontech/azion-cli/utils"
 	"strings"
+
+	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
@@ -26,8 +27,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli variables list --details
-		$ azioncli variables list
+		$ azion variables list --details
+		$ azion variables list
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

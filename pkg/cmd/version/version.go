@@ -17,7 +17,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.VersionShortDescription,
 		Long:  msg.VersionLongDescription,
 		Example: heredoc.Doc(`
-		$ azioncli version
+		$ azion version
         `),
 		Run: func(cmd *cobra.Command, args []string) {
 			color.New(color.Bold).Fprintln(f.IOStreams.Out, "Azion CLI "+BinVersion+"\n")
