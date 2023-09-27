@@ -12,9 +12,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   msg.Usage,
 		Short: msg.ShortDescription,
-		Long:  msg.LongDescription, 
+		Long:  msg.LongDescription,
 		Example: heredoc.Doc(`
 		$ azion describe --help
+		$ azion describe edge-application
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
