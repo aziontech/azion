@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	table "github.com/MaxwelMazur/tablecli"
 	"io"
 
 	"go.uber.org/zap"
@@ -78,6 +79,20 @@ func FInfo(w io.Writer, message string) {
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
 		fmt.Fprintf(w, message) // nolint:all
+	}
+}
+
+func PrintHeader(table table.Table, format string) {
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		table.PrintHeader(format)
+	}
+}
+
+func PrintRow(table table.Table, format string, row []string) {
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		table.PrintRow(format, row)
 	}
 }
 

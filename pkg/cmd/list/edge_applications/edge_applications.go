@@ -3,6 +3,7 @@ package edge_applications
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"strings"
 
 	"github.com/fatih/color"
@@ -89,11 +90,11 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		// print the header only in the first flow
 		if opts.Page == 1 {
-			tbl.PrintHeader(format)
+			logger.PrintHeader(tbl, format)
 		}
 
 		for _, row := range tbl.GetRows() {
-			tbl.PrintRow(format, row)
+			logger.PrintRow(tbl, format, row)
 		}
 
 		if opts.Page >= resp.TotalPages {

@@ -31,13 +31,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-<<<<<<< HEAD:pkg/cmd/list/rule_engine/rule_engine.go
 		$ azion list rule-engine -application-id 1673635839 --phase request
 		$ azion list rule-engine --application-id 1673635839 --phase response --details
-=======
-		$ azion rules_engine list -a 1673635839 -p request
-		$ azion rules_engine list --application-id 1673635839 --phase response --details
->>>>>>> dev:pkg/cmd/rules_engine/list/list.go
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -100,21 +95,15 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-	if cmd.Flags().Changed("details") {
-		for _, v := range rules.Results {
-			tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
-		}
-	} else {
-		for _, v := range rules.Results {
-			tbl.AddRow(v.Id, v.Name)
-		}
+	for _, v := range rules.Results {
+		tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
-	tbl.PrintHeader(format)
+	logger.PrintHeader(tbl, format)
 	for _, row := range tbl.GetRows() {
-		tbl.PrintRow(format, row)
+		logger.PrintRow(tbl, format, row)
 	}
 
 	f.IOStreams.Out = table.DefaultWriter
