@@ -144,8 +144,16 @@ func format(cmd *cobra.Command, rules api.RulesEngineResponse) ([]byte, error) {
 	tbl.AddRow("")
 	tbl.AddRow("Behaviours: ")
 	for _, b := range rules.GetBehaviors() {
-		tbl.AddRow("  Name: ", b.RulesEngineBehaviorString.Name)
-		tbl.AddRow("  Target: ", b.RulesEngineBehaviorString.Target)
+		if b.RulesEngineBehaviorString != nil {
+			tbl.AddRow("  Name: ", b.RulesEngineBehaviorString.GetName())
+			tbl.AddRow("  Target: ", b.RulesEngineBehaviorString.GetTarget())
+		} else {
+			tbl.AddRow("  Name: ", b.RulesEngineBehaviorObject.GetName())
+			tbl.AddRow("  Target: ")
+			tbl.AddRow("     Captured Array: ", b.RulesEngineBehaviorObject.Target.GetCapturedArray())
+			tbl.AddRow("     Regex: ", b.RulesEngineBehaviorObject.Target.GetRegex())
+			tbl.AddRow("     Subject: ", b.RulesEngineBehaviorObject.Target.GetSubject())
+		}
 		tbl.AddRow("")
 	}
 	tbl.AddRow("Criteria: ")
