@@ -26,9 +26,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azioncli describe edge_applications --application-id 4312
-        $ azioncli describe edge_applications --application-id 1337 --out "./tmp/test.json"
-        $ azioncli describe edge_applications --application-id 1337 --format json
+        $ azion describe edge-application --id 4312
+        $ azion describe edge-application --id 1337 --out "./tmp/test.json"
+        $ azion describe edge-application --id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 
@@ -72,7 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
+	cmd.Flags().StringVar(&applicationID, "id", "", msg.FlagId)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
