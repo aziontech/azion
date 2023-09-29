@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 
-			if !cmd.Flags().Changed("application-id") {
+			if !cmd.Flags().Changed("id") {
 				answer, err := utils.AskInput(msg.AskInputApplicationID)
 				if err != nil {
 					return err

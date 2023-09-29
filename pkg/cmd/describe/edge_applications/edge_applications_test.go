@@ -26,13 +26,10 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--application-id", "1232132135"})
+		cmd.SetArgs([]string{"--id", "1232132135"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-
-		require.NoError(t, err)
-
 	})
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
@@ -46,7 +43,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--application-id", "1234"})
+		cmd.SetArgs([]string{"--id", "1234"})
 
 		err := cmd.Execute()
 
@@ -84,7 +81,7 @@ func TestDescribe(t *testing.T) {
 
 		path := "./out.json"
 
-		cmd.SetArgs([]string{"--application-id", "123", "--out", path})
+		cmd.SetArgs([]string{"--id", "123", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {
