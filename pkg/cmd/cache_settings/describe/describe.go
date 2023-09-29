@@ -79,7 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, strResp api.CacheSettingsResponse) ([]byte, error) {
+func format(cmd *cobra.Command, strResp api.GetCacheSettingsResponse) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err

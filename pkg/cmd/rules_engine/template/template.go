@@ -49,14 +49,16 @@ func NewCobraCmd(tempCmd *TemplateCmd) *cobra.Command {
 
 			template.SetName("NewRulesEngine")
 
-			beh := sdk.RulesEngineBehavior{}
-			beh.SetName("run-function")
-			beh.SetTarget(0)
+			behaviors := []sdk.RulesEngineBehaviorEntry{
+				{
+					RulesEngineBehaviorString: &sdk.RulesEngineBehaviorString{
+						Name:   "run_function",
+						Target: "0",
+					},
+				},
+			}
 
-			b := make([]sdk.RulesEngineBehavior, 1)
-			b[0].SetName("run_function")
-			b[0].SetTarget(0)
-			template.SetBehaviors(b)
+			template.SetBehaviors(behaviors)
 
 			c := make([][]sdk.RulesEngineCriteria, 1)
 			for i := 0; i < 1; i++ {

@@ -14,7 +14,7 @@ import (
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.GetApplicationsResponse, error) {
 	logger.Debug("List Edge Application")
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsApi.
+	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsAPI.
 		EdgeApplicationsGet(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
 
 	if err != nil {
