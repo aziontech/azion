@@ -11,7 +11,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/rule_engine"
+	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -31,13 +31,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-<<<<<<< HEAD:pkg/cmd/list/rule_engine/rule_engine.go
-		$ azion list rule-engine -application-id 1673635839 --phase request
-		$ azion list rule-engine --application-id 1673635839 --phase response --details
-=======
-		$ azion rules_engine list -a 1673635839 -p request
-		$ azion rules_engine list --application-id 1673635839 --phase response --details
->>>>>>> dev:pkg/cmd/rules_engine/list/list.go
+		$ azion list rules-engine -application-id 1673635839 --phase request
+		$ azion list rules-engine --application-id 1673635839 --phase response --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 

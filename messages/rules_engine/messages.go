@@ -10,15 +10,6 @@ var (
 	RulesEngineFlagId   = "Unique identifier for a rule in Rules Engine. The '--rule-id' flag is required"
 	RulesEnginePhase    = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
-	//describe cmd
-	RulesEngineDescribeUsage            = "describe --application-id <application_id> --phase <phase> --rule-id <rule_id> [flags]"
-	RulesEngineDescribeShortDescription = "Returns the information related to the rule in Rules Engine"
-	RulesEngineDescribeLongDescription  = "Returns the information related to the rule in Rules Engine, informed through the flag '--rule-id' in detail"
-	RulesEngineDescribeFlagOut          = "Exports the output of the subcommand 'describe' to the given file path <file_path/file_name.ext>"
-	RulesEngineDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
-	RulesEngineDescribeHelpFlag         = "Displays more information about the describe subcommand"
-	RulesEngineFileWritten              = "File successfully written to: %s\n"
-
 	// [ Update ]
 	RulesEngineUpdateUsage                 = "update [flags]"
 	RulesEngineUpdateShortDescription      = "Updates a rule in Rules Engine"
