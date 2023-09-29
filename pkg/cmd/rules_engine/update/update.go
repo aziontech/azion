@@ -110,7 +110,7 @@ func validateRequest(request api.UpdateRulesEngineRequest) error {
 
 	if request.GetBehaviors() != nil {
 		for _, item := range request.GetBehaviors() {
-			if item.Name == "" {
+			if item.RulesEngineBehaviorString.Name == "" {
 				return msg.ErrorNameBehaviorsEmpty
 			}
 		}
