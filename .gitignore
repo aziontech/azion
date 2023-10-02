@@ -19,3 +19,5 @@ package.json
 cover
 completions
 .idea/
+
+*.orig
