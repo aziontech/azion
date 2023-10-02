@@ -2,6 +2,7 @@ package edge_functions
 
 import (
 	"context"
+	"io"
 	"net/http"
 	"time"
 
@@ -109,10 +110,17 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating an edge function", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating an edge function", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -125,10 +133,17 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating an edge function", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating an edge function", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
