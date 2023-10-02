@@ -51,7 +51,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 func (c *Client) List(ctx context.Context) ([]VariableResponse, error) {
 	logger.Debug("List Environment Variables")
 
-	resp, httpResp, err := c.apiClient.VariablesApi.ApiVariablesList(ctx).Execute()
+	resp, httpResp, err := c.apiClient.VariablesAPI.ApiVariablesList(ctx).Execute()
 
 	if err != nil {
 		logger.Debug("Error while listing variables", zap.Error(err))
@@ -73,7 +73,7 @@ func (c *Client) List(ctx context.Context) ([]VariableResponse, error) {
 func (c *Client) Delete(ctx context.Context, id string) error {
 	logger.Debug("Delete Environment Variable")
 
-	req := c.apiClient.VariablesApi.ApiVariablesDestroy(ctx, id)
+	req := c.apiClient.VariablesAPI.ApiVariablesDestroy(ctx, id)
 
 	httpResp, err := req.Execute()
 
@@ -91,7 +91,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (VariableResponse, error) {
 	logger.Debug("Update Environment Variable")
 
-	request := c.apiClient.VariablesApi.ApiVariablesUpdate(ctx, req.Uuid).VariableCreate(req.VariableCreate)
+	request := c.apiClient.VariablesAPI.ApiVariablesUpdate(ctx, req.Uuid).VariableCreate(req.VariableCreate)
 
 	variablesResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -108,7 +108,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (VariableRespon
 func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 	logger.Debug("Get Environment Variable")
 
-	req := c.apiClient.VariablesApi.ApiVariablesRetrieve(ctx, id)
+	req := c.apiClient.VariablesAPI.ApiVariablesRetrieve(ctx, id)
 	res, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while getting a variable", zap.Error(err))
@@ -127,7 +127,7 @@ type CreateRequest struct {
 func (c *Client) Create(ctx context.Context, strReq CreateRequest) (VariableResponse, error) {
 	logger.Debug("Create Environment Variable")
 
-	request := c.apiClient.VariablesApi.ApiVariablesCreate(ctx).VariableCreate(strReq.VariableCreate)
+	request := c.apiClient.VariablesAPI.ApiVariablesCreate(ctx).VariableCreate(strReq.VariableCreate)
 	response, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a variable", zap.Error(err))

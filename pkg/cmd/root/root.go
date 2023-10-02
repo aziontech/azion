@@ -13,8 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
+  "github.com/aziontech/azion-cli/pkg/cmd/describe"
 
-	// "github.com/aziontech/azion-cli/pkg/cmd/create"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
@@ -119,6 +119,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(list.NewCmd(f))
 	cobraCmd.AddCommand(delete.NewCmd(f))
 	cobraCmd.AddCommand(update.NewCmd(f))
+	cobraCmd.AddCommand(describe.NewCmd(f))
 
 	return cobraCmd
 }

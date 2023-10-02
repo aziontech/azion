@@ -1,11 +1,10 @@
-package ruleengine
+package rulesengine
 
 import (
 	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
@@ -27,13 +26,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion delete rule-engine --id 1234 --application-id 99887766 --phase request
-		$ azion delete rule-engine
+		$ azion delete rules-engine --id 1234 --application-id 99887766 --phase request
+		$ azion delete rules-engine
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("id") {
+			if !cmd.Flags().Changed("rule-id") {
 
-				answer, err := askInput(msg.AskInputRulesId)
+				answer, err := utils.AskInput(msg.AskInputRulesId)
 				if err != nil {
 					return err
 				}
@@ -49,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := askInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(msg.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -65,7 +64,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("phase") {
 
-				answer, err := askInput(msg.AskInputPhase)
+				answer, err := utils.AskInput(msg.AskInputPhase)
 				if err != nil {
 					return err
 				}
@@ -89,30 +88,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&rule_id, "id", 0, msg.FlagRuleID)
+	cmd.Flags().Int64Var(&rule_id, "rule-id", 0, msg.FlagRuleID)
 	cmd.Flags().Int64Var(&app_id, "application-id", 0, msg.FlagAppID)
 	cmd.Flags().StringVar(&phase, "phase", "", msg.FlagPhase)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
-}
-
-func askInput(msg string) (string, error) {
-	qs := []*survey.Question{
-		{
-			Name:     "id",
-			Prompt:   &survey.Input{Message: msg},
-			Validate: survey.Required,
-		},
-	}
-
-	answer := ""
-
-	err := survey.Ask(qs, &answer)
-	if err != nil {
-		logger.Debug("Error while parsing answer", zap.Error(err))
-		return "", utils.ErrorParseResponse
-	}
-
-	return answer, nil
 }
