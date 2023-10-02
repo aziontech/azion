@@ -11,7 +11,7 @@ import (
 
 func (c *Client) Delete(ctx context.Context, edgeApplicationID int64, phase string, ruleID int64) error {
 	logger.Debug("Delete Rules Engine")
-	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineApi.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while deleting a rule engine", zap.Error(err))

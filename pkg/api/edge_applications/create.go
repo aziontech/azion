@@ -43,7 +43,7 @@ type CreateRequest struct {
 func (c *Client) Create(ctx context.Context, req *CreateRequest,
 ) (EdgeApplicationsResponse, error) {
 	logger.Debug("Create Edge Application")
-	request := c.apiClient.EdgeApplicationsMainSettingsApi.
+	request := c.apiClient.EdgeApplicationsMainSettingsAPI.
 		EdgeApplicationsPost(ctx).CreateApplicationRequest(req.CreateApplicationRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()

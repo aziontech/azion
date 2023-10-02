@@ -7,7 +7,7 @@
         "behaviors": [
             {
                 "name": "deliver",
-                "target": null
+                "target": ""
             }
         ],
         "criteria": [

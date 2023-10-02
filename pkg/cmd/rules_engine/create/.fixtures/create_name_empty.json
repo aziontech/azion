@@ -13,7 +13,8 @@
     ],
     "behaviors": [
         {
-            "name": "deliver"
+            "name": "deliver",
+            "target": ""
         }
     ]
 }
