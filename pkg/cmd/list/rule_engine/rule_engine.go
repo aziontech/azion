@@ -95,21 +95,15 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-	if cmd.Flags().Changed("details") {
-		for _, v := range rules.Results {
-			tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
-		}
-	} else {
-		for _, v := range rules.Results {
-			tbl.AddRow(v.Id, v.Name)
-		}
+	for _, v := range rules.Results {
+		tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
-	tbl.PrintHeader(format)
+	logger.PrintHeader(tbl, format)
 	for _, row := range tbl.GetRows() {
-		tbl.PrintRow(format, row)
+		logger.PrintRow(tbl, format, row)
 	}
 
 	f.IOStreams.Out = table.DefaultWriter
