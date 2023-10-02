@@ -69,15 +69,11 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		newLineSplit = newLineSplit[:len(newLineSplit)-1]
 	}
 
-	var modes []string
-
-	modes = append(modes, newLineSplit...)
-
 	answer := ""
-	if len(modes) > 1 {
+	if len(newLineSplit) > 1 {
 		prompt := &survey.Select{
 			Message: "Choose a mode:",
-			Options: modes,
+			Options: newLineSplit,
 		}
 		err = survey.AskOne(prompt, &answer)
 		if err != nil {
@@ -88,12 +84,12 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return nil
 	}
 
-	if len(modes) < 1 {
+	if len(newLineSplit) < 1 {
 		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
 		return msg.ErrorModeNotFound
 	}
 
-	var mds string = modes[0]
+	var mds string = newLineSplit[0]
 
 	info.Template = preset
 	info.Mode = strings.ToLower(mds)
