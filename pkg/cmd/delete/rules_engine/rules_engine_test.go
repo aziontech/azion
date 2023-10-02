@@ -1,4 +1,4 @@
-package ruleengine
+package rulesengine
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func TestCreate(t *testing.T) {
 
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "4321", "--phase", "request", "--id", "1234"})
+		cmd.SetArgs([]string{"--application-id", "4321", "--phase", "request", "--rule-id", "1234"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestCreate(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-d", "1234"})
+		cmd.SetArgs([]string{"--rule-id", "1234", "--application-id", "4321", "--phase", "response"})
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)

@@ -2,10 +2,8 @@ package template
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/rules_engine"
@@ -81,7 +79,7 @@ func NewCobraCmd(tempCmd *TemplateCmd) *cobra.Command {
 				return msg.ErrorWriteTemplate
 			}
 
-			fmt.Fprintf(tempCmd.f.IOStreams.Out, msg.RulesEngineFileWritten, filepath.Clean(out))
+			// fmt.Fprintf(tempCmd.f.IOStreams.Out, msg.RulesEngineFileWritten, filepath.Clean(out))
 
 			return nil
 		},

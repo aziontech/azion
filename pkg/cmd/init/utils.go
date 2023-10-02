@@ -55,27 +55,25 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return err
 	}
 
-	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.7.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	if preset == strings.ToLower("vite") {
+		preset = "vue"
+	}
+
+	output, _, err := cmd.CommandRunner("npx --yes edge-functions@1.7.0 presets ls --preset "+preset, []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
 
 	newLineSplit := strings.Split(output, "\n")
-
-	var modes []string
-
-	for _, line := range newLineSplit {
-		if strings.Contains(strings.ToLower(line), strings.ToLower(preset)) {
-			modeSplit := strings.Split(line, " ")
-			modes = append(modes, strings.ToLower(strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)))
-		}
+	if newLineSplit[len(newLineSplit)-1] == "" {
+		newLineSplit = newLineSplit[:len(newLineSplit)-1]
 	}
 
 	answer := ""
-	if len(modes) > 1 {
+	if len(newLineSplit) > 1 {
 		prompt := &survey.Select{
 			Message: "Choose a mode:",
-			Options: modes,
+			Options: newLineSplit,
 		}
 		err = survey.AskOne(prompt, &answer)
 		if err != nil {
@@ -86,12 +84,12 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		return nil
 	}
 
-	if len(modes) < 1 {
+	if len(newLineSplit) < 1 {
 		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
 		return msg.ErrorModeNotFound
 	}
 
-	var mds string = modes[0]
+	var mds string = newLineSplit[0]
 
 	info.Template = preset
 	info.Mode = strings.ToLower(mds)

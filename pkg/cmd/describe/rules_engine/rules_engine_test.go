@@ -1,4 +1,4 @@
-package describe
+package rulesengine
 
 import (
 	"log"
@@ -27,7 +27,7 @@ func TestDescribe(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request"})
+		cmd.SetArgs([]string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "request"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -75,7 +75,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 		path := "./out.json"
-		cmd.SetArgs([]string{"-a", "1678743802", "-r", "173617", "-p", "request", "--out", path})
+		cmd.SetArgs([]string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "request", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {

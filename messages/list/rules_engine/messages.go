@@ -2,7 +2,7 @@ package ruleengine
 
 var (
 	//list cmd
-	RulesEngineListUsage            = "rule-engine"
+	RulesEngineListUsage            = "rules-engine"
 	RulesEngineListShortDescription = "Displays the rules related to a specific edge application."
 	RulesEngineListLongDescription  = "Displays the rules related to a specific edge application, informed through the '--application-id' flag"
 	RulesEngineListHelpFlag         = "Displays more information about the list rule-engine command"

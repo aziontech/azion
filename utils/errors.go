@@ -24,7 +24,7 @@ var (
 	ErrorInvalidToken               = errors.New("The provided token is invalid. You must create a new token and configure it to use with the CLI. Manage your personal tokens on RTM using the Account Menu > Personal Tokens and configure the new token with the command 'azion -t <new_token>'")
 	ErrorToken401                   = errors.New("The token doesn't exist or has expired. Manage your personal tokens on RTM using the Account Menu > Personal Tokens and configure a valid token with the command 'azion -t <my_token>'")
 	ErrorForbidden403               = errors.New("You do not have the permissions to access the API. Make sure the feature is enabled in your profile")
-	ErrorNotFound404                = errors.New("The given ID or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct.")
+	ErrorNotFound404                = errors.New("The given ID or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct")
 	ErrorFetchingTemplates          = errors.New("Failed to fetch templates from the Azion's GitHub remote repository. Verify the connectivity to the repository https://github.com/aziontech/azioncli-template and try again")
 	ErrorMovingFiles                = errors.New("Failed to initialize your project with the Azion template. Please verify if you have write permissions to this directory")
 	ErrorUnsupportedType            = errors.New("The project type isn’t supported. Modify the project to a valid type nextjs and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")

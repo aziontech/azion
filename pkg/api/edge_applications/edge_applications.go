@@ -159,10 +159,17 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating an edge application", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating an edge application", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -194,10 +201,17 @@ func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceR
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating an edge function instance", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating an edge function instance", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -266,10 +280,17 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	logger.Debug("Create Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating an origin", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating an origin", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
@@ -397,11 +418,18 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 		Sort(opts.Sort).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing rules in rules engines", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return &sdk.RulesEngineResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while listing rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil
@@ -412,10 +440,15 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdGet(ctx, edgeApplicationID, phase, rulesID).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while getting a rule in rules engine", zap.Error(err))
-			logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-			logger.Debug("Headers", zap.Any("http", httpResp.Header))
-			logger.Debug("Response body", zap.Any("http", httpResp.Body))
+			logger.Debug("Error while describing a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -426,10 +459,17 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64,
 	logger.Debug("Delete Rules Engine")
 	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
 	if err != nil {
-		logger.Debug("Error while deleting a rule in rules engine", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
@@ -450,7 +490,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	idRule := edgeApplicationRules.Results[0].Id
 
-	behaviors := make([]sdk.RulesEngineBehaviorEntry, 1)
+	behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
 	var behString sdk.RulesEngineBehaviorString
 	behString.SetName("run_function")
@@ -466,10 +506,17 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a rule in rules engine [run-function step]", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -482,11 +529,17 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a rule in rules engine", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 	}
 
 	return &edgeApplicationsResponse.Results, nil
@@ -499,11 +552,17 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, phase).
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating a rule in rules engine", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 	}
 	return &resp.Results, nil
 }
@@ -667,10 +726,17 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 
 	resp, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating a cache setting", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return nil, utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -682,7 +748,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	req := CreateRulesEngineRequest{}
 	req.SetName("cache policy")
 
-	behaviors := make([]sdk.RulesEngineBehaviorEntry, 1)
+	behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
 	var behStringCache sdk.RulesEngineBehaviorString
 	behStringCache.SetName("set_cache_policy")
@@ -714,16 +780,24 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
+		logger.Debug("", zap.Any("Error", err.Error()))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	req.SetName("enable gzip")
 
-	behaviorsGZIP := make([]sdk.RulesEngineBehaviorEntry, 1)
+	behaviorsGZIP := make([]sdk.RulesEngineBehaviorEntry, 0)
 
 	var behString sdk.RulesEngineBehaviorString
 	behString.SetName("enable_gzip")
@@ -745,11 +819,17 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while creating a rules engine", zap.Error(err))
+			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+			logger.Debug("", zap.Any("Headers", httpResp.Header))
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				logger.Debug("Error while reading body of the http response", zap.Error(err))
+				return utils.ErrorPerStatusCode(httpResp, err)
+			}
+			logger.Debug("", zap.Any("Body", string(body)))
+		}
 	}
 
 	return nil
