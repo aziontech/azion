@@ -2,8 +2,10 @@ package logger
 
 import (
 	"fmt"
-	table "github.com/MaxwelMazur/tablecli"
 	"io"
+
+	table "github.com/MaxwelMazur/tablecli"
+	"github.com/fatih/color"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -110,4 +112,19 @@ func Debug(message string, fields ...zap.Field) {
 
 func Error(message string, fields ...zap.Field) {
 	log.Error(message, fields...)
+}
+
+func LogSuccess(w io.Writer, message string) {
+	formatSuccess := color.New(color.FgGreen).SprintfFunc()
+	FInfo(w, formatSuccess("✅ %s\n", message))
+}
+
+func LogWarning(w io.Writer, message string) {
+	formatWarning := color.New(color.FgYellow).SprintfFunc()
+	FInfo(w, formatWarning("⚠️ %s\n", message))
+}
+
+func LogError(w io.Writer, message string) {
+	formatError := color.New(color.FgRed).SprintfFunc()
+	FInfo(w, formatError("🐛 %s\n", message))
 }
