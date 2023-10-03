@@ -11,10 +11,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
+	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
-	describe "github.com/aziontech/azion-cli/pkg/cmd/describe"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link"
@@ -58,7 +58,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		Long:    msg.RootDescription,
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version.BinVersion)),
 		Version: version.BinVersion,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			logger.LogLevel(f.Logger)
 			err := doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
@@ -75,7 +75,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion --debug
 		$ azion -h
 		`),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if cmd.Flags().Changed("token") {
 				return nil
 			}
@@ -93,7 +93,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		rootHelpFunc(f, cmd, args)
 	})
 
-	//Global flags
+	// Global flags
 	cobraCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
 	cobraCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
 	cobraCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
@@ -101,10 +101,10 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
 	cobraCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogDebug)
 
-	//other flags
+	// other flags
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 
-	//set template for -v flag
+	// set template for -v flag
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
 	cobraCmd.AddCommand(initcmd.NewCmd(f))
@@ -114,6 +114,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(linkcmd.NewCmd(f))
 	cobraCmd.AddCommand(personal_token.NewCmd(f))
 	cobraCmd.AddCommand(completion.NewCmd(f))
+	cobraCmd.AddCommand(describe.NewCmd(f))
 	cobraCmd.AddCommand(create.NewCmd(f))
 	cobraCmd.AddCommand(list.NewCmd(f))
 	cobraCmd.AddCommand(delete.NewCmd(f))
