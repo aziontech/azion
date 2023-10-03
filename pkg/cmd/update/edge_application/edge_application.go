@@ -56,7 +56,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update edge-application --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// either function-id or in path should be passed
 			if !cmd.Flags().Changed("id") && !cmd.Flags().Changed("in") {
 				qs := []*survey.Question{
 					{
