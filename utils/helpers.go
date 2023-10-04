@@ -421,6 +421,8 @@ func AskInput(msg string) (string, error) {
 }
 
 func LogAndRewindBody(httpResp *http.Response) error {
+	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+	logger.Debug("", zap.Any("Headers", httpResp.Header))
 	bodyBytes, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		logger.Debug("Error while reading body of the http response", zap.Error(err))

@@ -74,8 +74,6 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while creating a domain", zap.Error(err))
-			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
-			logger.Debug("", zap.Any("Headers", httpResp.Header))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -96,8 +94,6 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating a domain", zap.Error(err))
-			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
-			logger.Debug("", zap.Any("Headers", httpResp.Header))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err

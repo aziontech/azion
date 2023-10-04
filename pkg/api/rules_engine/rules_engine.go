@@ -14,8 +14,6 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID int64, phase stri
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while deleting a rule engine", zap.Error(err))
-			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
-			logger.Debug("", zap.Any("Headers", httpResp.Header))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err

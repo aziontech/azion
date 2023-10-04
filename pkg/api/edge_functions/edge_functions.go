@@ -111,8 +111,6 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while creating an edge function", zap.Error(err))
-			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
-			logger.Debug("", zap.Any("Headers", httpResp.Header))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -132,8 +130,6 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating an edge function", zap.Error(err))
-			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
-			logger.Debug("", zap.Any("Headers", httpResp.Header))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
