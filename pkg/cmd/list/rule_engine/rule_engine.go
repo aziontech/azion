@@ -31,7 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-		$ azion list rules-engine -application-id 1673635839 --phase request
+		$ azion list rules-engine --application-id 1673635839 --phase request
 		$ azion list rules-engine --application-id 1673635839 --phase response --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {

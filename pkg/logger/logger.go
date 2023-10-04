@@ -2,8 +2,9 @@ package logger
 
 import (
 	"fmt"
-	table "github.com/MaxwelMazur/tablecli"
 	"io"
+
+	table "github.com/MaxwelMazur/tablecli"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
