@@ -14,7 +14,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
-  "github.com/aziontech/azion-cli/pkg/cmd/describe"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"

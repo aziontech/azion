@@ -1,6 +1,7 @@
 package rules_engine
 
 import (
+	"bytes"
 	"context"
 	"io"
 
@@ -17,12 +18,16 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID int64, phase stri
 			logger.Debug("Error while deleting a rule engine", zap.Error(err))
 			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 			logger.Debug("", zap.Any("Headers", httpResp.Header))
-			body, err := io.ReadAll(httpResp.Body)
+			bodyBytes, err := io.ReadAll(httpResp.Body)
 			if err != nil {
 				logger.Debug("Error while reading body of the http response", zap.Error(err))
 				return utils.ErrorPerStatusCode(httpResp, err)
 			}
-			logger.Debug("", zap.Any("Body", string(body)))
+			// Convert the body bytes to string
+			bodyString := string(bodyBytes)
+			logger.Debug("", zap.Any("Body", bodyString))
+			// Rewind the response body to the beginning
+			httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}

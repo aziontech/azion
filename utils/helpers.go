@@ -328,7 +328,7 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 
-	return fmt.Errorf("%s", responseBody)
+	return fmt.Errorf("%s", string(responseBody))
 }
 
 func checkNoProduct(body string) error {

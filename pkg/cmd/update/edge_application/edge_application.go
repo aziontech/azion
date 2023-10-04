@@ -211,6 +211,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
+				fmt.Println(err.Error())
 				return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err.Error())
 			}
 

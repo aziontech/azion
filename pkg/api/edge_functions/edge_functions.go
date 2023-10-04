@@ -1,6 +1,7 @@
 package edge_functions
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -114,12 +115,16 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 			logger.Debug("Error while creating an edge function", zap.Error(err))
 			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 			logger.Debug("", zap.Any("Headers", httpResp.Header))
-			body, err := io.ReadAll(httpResp.Body)
+			bodyBytes, err := io.ReadAll(httpResp.Body)
 			if err != nil {
 				logger.Debug("Error while reading body of the http response", zap.Error(err))
 				return nil, utils.ErrorPerStatusCode(httpResp, err)
 			}
-			logger.Debug("", zap.Any("Body", string(body)))
+			// Convert the body bytes to string
+			bodyString := string(bodyBytes)
+			logger.Debug("", zap.Any("Body", bodyString))
+			// Rewind the response body to the beginning
+			httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -137,12 +142,16 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 			logger.Debug("Error while updating an edge function", zap.Error(err))
 			logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 			logger.Debug("", zap.Any("Headers", httpResp.Header))
-			body, err := io.ReadAll(httpResp.Body)
+			bodyBytes, err := io.ReadAll(httpResp.Body)
 			if err != nil {
 				logger.Debug("Error while reading body of the http response", zap.Error(err))
 				return nil, utils.ErrorPerStatusCode(httpResp, err)
 			}
-			logger.Debug("", zap.Any("Body", string(body)))
+			// Convert the body bytes to string
+			bodyString := string(bodyBytes)
+			logger.Debug("", zap.Any("Body", bodyString))
+			// Rewind the response body to the beginning
+			httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
