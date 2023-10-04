@@ -419,3 +419,20 @@ func AskInput(msg string) (string, error) {
 
 	return answer, nil
 }
+
+func LogAndRewindBody(httpResp *http.Response) error {
+	bodyBytes, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		logger.Debug("Error while reading body of the http response", zap.Error(err))
+		return ErrorPerStatusCode(httpResp, err)
+	}
+
+	// Convert the body bytes to string
+	bodyString := string(bodyBytes)
+	logger.Debug("", zap.Any("Body", bodyString))
+
+	// Rewind the response body to the beginning
+	httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return nil
+}
