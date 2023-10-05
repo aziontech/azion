@@ -120,7 +120,6 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(list.NewCmd(f))
 	cobraCmd.AddCommand(delete.NewCmd(f))
 	cobraCmd.AddCommand(update.NewCmd(f))
-	cobraCmd.AddCommand(describe.NewCmd(f))
 
 	return cobraCmd
 }
