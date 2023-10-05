@@ -59,7 +59,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update rules_engine --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			validateUserInput(cmd, fields)
+			if err := validateUserInput(cmd, fields); err != nil {
+				return err
+			}
 
 			request := RulesEngineRequest{}
 
