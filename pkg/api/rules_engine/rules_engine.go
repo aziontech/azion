@@ -10,6 +10,13 @@ import (
 	"go.uber.org/zap"
 )
 
+type UpdateRulesEngineRequest struct {
+	sdk.PatchRulesEngineRequest
+	ApplicationID int64
+	RulesID       int64
+	Phase         string
+}
+
 type RulesEngineResponse interface {
 	GetId() int64
 	GetPhase() string
@@ -35,6 +42,25 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID int64, phase stri
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
+}
+
+func (c *Client) Update(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
+	logger.Debug("Update Rules Engine")
+	requestUpdate := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdPatch(ctx, req.ApplicationID, req.Phase, req.RulesID).PatchRulesEngineRequest(req.PatchRulesEngineRequest)
+
+	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return &edgeApplicationsResponse.Results, nil
 }
 
 func (c *Client) Create(ctx context.Context, edgeApplicationID int64, phase string, req sdk.CreateRulesEngineRequest) (RulesEngineResponse, error) {

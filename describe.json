@@ -1,0 +1,24 @@
+{
+ "behaviors": [
+  {
+   "name": "run_function",
+   "target": "10371"
+  }
+ ],
+ "criteria": [
+  [
+   {
+    "conditional": "if",
+    "input_value": "/",
+    "operator": "starts_with",
+    "variable": "${uri}"
+   }
+  ]
+ ],
+ "description": "",
+ "id": 182599,
+ "is_active": true,
+ "name": "Default Rule 2",
+ "order": 1,
+ "phase": "default"
+}
