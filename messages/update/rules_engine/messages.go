@@ -16,5 +16,5 @@ var (
 	AskInputApplicationID = "What is the ID of the Edge Application that the Rule Engine will be connected to?"
 	AskInputRulesID       = "What is the ID of the rules engine to which it will be updated?"
 	AskInputPhase         = "What is the phase of your rule engine? (request/response)"
-	AskInputPathFile      = "What is the path of the json to create the rules engine?"
+	AskInputPathFile      = "What is the path of the json to update the rules engine?"
 )
