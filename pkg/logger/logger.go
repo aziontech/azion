@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 
+	table "github.com/MaxwelMazur/tablecli"
+	"github.com/fatih/color"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -81,6 +84,20 @@ func FInfo(w io.Writer, message string) {
 	}
 }
 
+func PrintHeader(table table.Table, format string) {
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		table.PrintHeader(format)
+	}
+}
+
+func PrintRow(table table.Table, format string, row []string) {
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		table.PrintRow(format, row)
+	}
+}
+
 func Info(message string, fields ...zap.Field) {
 	log.Info(message, fields...)
 }
@@ -95,4 +112,19 @@ func Debug(message string, fields ...zap.Field) {
 
 func Error(message string, fields ...zap.Field) {
 	log.Error(message, fields...)
+}
+
+func LogSuccess(w io.Writer, message string) {
+	formatSuccess := color.New(color.FgGreen).SprintfFunc()
+	FInfo(w, formatSuccess("✅ %s\n", message))
+}
+
+func LogWarning(w io.Writer, message string) {
+	formatWarning := color.New(color.FgYellow).SprintfFunc()
+	FInfo(w, formatWarning("⚠️ %s\n", message))
+}
+
+func LogError(w io.Writer, message string) {
+	formatError := color.New(color.FgRed).SprintfFunc()
+	FInfo(w, formatError("🐛 %s\n", message))
 }

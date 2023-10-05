@@ -8,7 +8,7 @@ var (
 	DeploySuccessful                  = "Your edge application was deployed successfully\n"
 	SimpleDeploySuccessful            = "Your simple edge application was deployed successfully\n"
 	DeployOutputDomainSuccess         = "\nTo visualize your application access the domain: %v\n"
-	EdgeApplicationDeployDomainHint   = "You may now edit your domain and add your own cnames. To do this you may run 'azioncli domain update' command and also configure your DNS\n"
+	EdgeApplicationDeployDomainHint   = "You may now edit your domain and add your own cnames. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	DeployOutputCachePurge            = "Domain cache was purged\n"
 	DeployOutputEdgeFunctionCreate    = "Created edge function %v with ID %v\n"
 	DeployOutputEdgeFunctionUpdate    = "Updated edge function %v with ID %v\n"
@@ -21,7 +21,7 @@ var (
 	DeployInputAddress                = "Please inform an address to be used in the origin of this application: "
 	RulesEngineSuccessful             = "Created rules engine for web application\n"
 	DeployFlagHelp                    = "Displays more information about the deploy command"
-	DeployPropagation                 = "Content is being propagated to all Azion POPs and it might take a few minutes for all edges to be up to date\n"
+	DeployPropagation                 = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
 )

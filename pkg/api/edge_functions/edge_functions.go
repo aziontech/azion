@@ -109,10 +109,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating an edge function", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating an edge function", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -125,10 +128,13 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating an edge function", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating an edge function", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

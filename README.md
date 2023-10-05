@@ -20,7 +20,7 @@ The developer-friendly way to interact with Azion!
 
 - [Downloading](#downloading)
 - [Building](#building)
-- [Setup Autocomplete](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocompletion)
+- [Setup Autocomplete](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocomplete)
 - [How to Use](#How-to-Use)
 - [Commands Reference](https://github.com/aziontech/azion-cli/wiki/azion)
 - [Contributing](CONTRIBUTING.md)
@@ -84,7 +84,7 @@ Check all reference documentation for the available [commands](https://github.co
 
 ### Autocomplete
 
-It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocompletion).
+It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocomplete).
 
 ## License
 

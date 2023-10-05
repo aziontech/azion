@@ -328,7 +328,7 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 
-	return fmt.Errorf("%s", responseBody)
+	return fmt.Errorf("%s", string(responseBody))
 }
 
 func checkNoProduct(body string) error {
@@ -374,12 +374,6 @@ func CreateVersionID() string {
 	return time.Now().Format("20060102150405")
 }
 
-func AskForInput(in io.ReadCloser, out io.Writer, message string) (response string) {
-	fmt.Fprintf(out, "%s: ", message)
-	fmt.Fscanln(in, &response)
-	return response
-}
-
 func TruncateString(str string) string {
 	if len(str) > 30 {
 		return str[:30] + "..."
@@ -404,4 +398,43 @@ func GetPackageManager() (string, error) {
 		return "", err
 	}
 	return answer, nil
+}
+
+func AskInput(msg string) (string, error) {
+	qs := []*survey.Question{
+		{
+			Name:     "id",
+			Prompt:   &survey.Input{Message: msg},
+			Validate: survey.Required,
+		},
+	}
+
+	answer := ""
+
+	err := survey.Ask(qs, &answer)
+	if err != nil {
+		logger.Debug("Error while parsing answer", zap.Error(err))
+		return "", ErrorParseResponse
+	}
+
+	return answer, nil
+}
+
+func LogAndRewindBody(httpResp *http.Response) error {
+	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+	logger.Debug("", zap.Any("Headers", httpResp.Header))
+	bodyBytes, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		logger.Debug("Error while reading body of the http response", zap.Error(err))
+		return ErrorPerStatusCode(httpResp, err)
+	}
+
+	// Convert the body bytes to string
+	bodyString := string(bodyBytes)
+	logger.Debug("", zap.Any("Body", bodyString))
+
+	// Rewind the response body to the beginning
+	httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return nil
 }

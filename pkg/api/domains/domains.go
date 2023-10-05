@@ -72,10 +72,13 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating a domain", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while creating a domain", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &domainsResponse.Results, nil
@@ -89,10 +92,13 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 	domainsResponse, httpResp, err := request.Execute()
 
 	if err != nil {
-		logger.Debug("Error while updating a domain", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating a domain", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

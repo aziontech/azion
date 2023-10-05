@@ -32,8 +32,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azioncli rules_engine update --rule-id 1234 --application-id 1673635839 --phase request --in ruleengine.json"
-		$ azioncli rules_engine update --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
+		$ azion rules_engine update --rule-id 1234 --application-id 1673635839 --phase request --in ruleengine.json"
+		$ azion rules_engine update --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("phase") || !cmd.Flags().Changed("rule-id") || !cmd.Flags().Changed("in") {
@@ -110,7 +110,7 @@ func validateRequest(request api.UpdateRulesEngineRequest) error {
 
 	if request.GetBehaviors() != nil {
 		for _, item := range request.GetBehaviors() {
-			if item.Name == "" {
+			if item.RulesEngineBehaviorString.Name == "" {
 				return msg.ErrorNameBehaviorsEmpty
 			}
 		}
