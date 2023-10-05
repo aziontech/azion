@@ -1,0 +1,20 @@
+{
+    "name": "New Rule 534322",
+    "description": "muda muda muda muda muda",
+    "criteria": [
+        [
+            {
+                "conditional": "",
+                "variable": "${uri}",
+                "operator": "starts_with",
+                "input_value": "/"
+            }
+        ]
+    ],
+    "behaviors": [
+        {
+            "name": "deliver",
+            "target": ""
+        }
+    ]
+}
