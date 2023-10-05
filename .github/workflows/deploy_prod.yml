@@ -83,3 +83,37 @@ jobs:
           STORAGE_URL: https://storage-api.azion.com
           AUTH_URL: https://sso.azion.com/api/user/me
           TEMPLATE_BRANCH: main
+
+  notify_deployment_completed:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: aziontech/azion-github-actions
+          token: ${{ secrets.GLOBAL_TOKEN }}
+          path: ./azion-github-actions
+
+      - uses: ./azion-github-actions/actions/send-slack-message-webhook
+        with:
+          WEBHOOK_URL: ${{ secrets.RTM_ERRORS_WEBHOOK_URL }}
+          message: "Deployment completed - ${{ github.repository}}"
+
+  send_changelog:
+    needs: notify_deployment_completed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: aziontech/azion-github-actions
+          token: ${{ secrets.GLOBAL_TOKEN }}
+          path: ./azion-github-actions
+
+
+      - id: get_pr_info
+        uses: ./azion-github-actions/actions/get-pull-request-information
+      - uses: ./azion-github-actions/actions/send-slack-message-webhook
+        with:
+          WEBHOOK_URL: ${{ secrets.SWE_DEPLOY_WEBHOOK_URL }}
+          parser: "pr_description_parser"
+          message: "${{ steps.get_pr_info.outputs.pr_title }}\n${{ steps.get_pr_info.outputs.pr_body }}"
