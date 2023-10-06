@@ -28,7 +28,6 @@ type Fields struct {
 	MinimumTLSVersion       string
 	Active                  string
 	ApplicationAcceleration string
-	Caching                 string
 	DeviceDetection         string
 	EdgeFirewall            string
 	EdgeFunctions           string
@@ -97,6 +96,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
+					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
@@ -129,14 +129,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.Active)
 					}
 					request.SetApplicationAcceleration(converted)
-				}
-
-				if cmd.Flags().Changed("caching") {
-					converted, err := strconv.ParseBool(fields.Caching)
-					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorCachingFlag, fields.Active)
-					}
-					request.SetCaching(converted)
 				}
 
 				if cmd.Flags().Changed("device-detection") {
@@ -211,7 +203,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				fmt.Println(err.Error())
 				return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err.Error())
 			}
 
@@ -229,7 +220,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&fields.HTTPSPort, "https-port", 443, msg.FlagHttpsPort)
 	flags.StringVar(&fields.MinimumTLSVersion, "min-tsl-ver", "", msg.FlagMinimumTlsVersion)
 	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
-	flags.StringVar(&fields.Caching, "caching", "", msg.FlagCaching)
 	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.FlagDeviceDetection)
 	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagEdgeFirewall)
 	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.FlagEdgeFunctions)
