@@ -97,6 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				err = cmdutil.UnmarshallJsonFromReader(file, &request)
 				if err != nil {
+					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
@@ -211,7 +212,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				fmt.Println(err.Error())
 				return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err.Error())
 			}
 
