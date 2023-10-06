@@ -8,7 +8,6 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/describe"
-	"github.com/aziontech/azion-cli/pkg/cmd/domains/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -26,7 +25,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	edge_applicationsCmd.AddCommand(list.NewCmd(f))
 	edge_applicationsCmd.AddCommand(create.NewCmd(f))
 	edge_applicationsCmd.AddCommand(describe.NewCmd(f))
 	edge_applicationsCmd.AddCommand(delete.NewCmd(f))

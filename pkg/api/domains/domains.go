@@ -119,11 +119,14 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing domains", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return &sdk.DomainResponseWithResults{}, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while updating a domain", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil

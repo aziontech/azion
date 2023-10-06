@@ -10,12 +10,6 @@ var (
 	DomainFlagDigitalCertificateId = "Unique identifier of the Digital Certificate; this value is either an integer or null"
 	ApplicationFlagId              = "Unique identifier for an edge application used by this domain.. The '--application-id' flag is mandatory"
 
-	//list cmd
-	DomainsListUsage            = "list [flags]"
-	DomainsListShortDescription = "Displays your domains"
-	DomainsListLongDescription  = "Displays all your domain references to your edge locations"
-	DomainsListHelpFlag         = "Displays more information about the list subcommand"
-
 	//create cmd
 	DomainsCreateUsage                    = "create [flags]"
 	DomainsCreateShortDescription         = "Creates a new domain"
