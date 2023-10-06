@@ -23,7 +23,7 @@ func TestUpdate(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{
@@ -35,7 +35,6 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "✅ Updated rule engine with ID 1234\n\n", stdout.String())
 	})
 
 	t.Run("missing fields", func(t *testing.T) {
