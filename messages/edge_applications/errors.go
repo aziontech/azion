@@ -62,6 +62,7 @@ var (
 	ErrorMissingApplicationIdJson    = errors.New("Application ID is missing from azion.json. Please initialize and publish your project first before using cascade delete")
 	ErrorMissingAzionJson            = errors.New("Azion.json file is missing. Please initialize and publish your project first before using cascade delete")
 	ErrorFailedUpdateAzionJson       = errors.New("Failed to update azion.json file to remove IDs of deleted resource")
+	ErrorNameInUse                   = errors.New("The name you've selected is already in use by another resource. Please choose a different name. Run 'azion list [resource]' to see all your resources")
 
 	ErrorNoFieldInformed    = errors.New("Inform at least one field to be updated. It is not possible to update an edge application without specifying the fields that will be updated. Run ‘azion edge_applications update --help’ to display more information and try again.  If the error persists, contact Azion support.")
 	ErrorCreateVersionID    = errors.New("Failed to create the VersionID. The VersionID is generated based on the files in your working directory. Check the files in your working directory and try again. If the error persists, contact Azion support")

@@ -327,6 +327,9 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	if err := checkOrderField(string(responseBody)); err != nil {
 		return err
 	}
+	if err := checkNameInUse(string(responseBody)); err != nil {
+		return err
+	}
 
 	return fmt.Errorf("%s", string(responseBody))
 }
@@ -350,6 +353,13 @@ func checkOriginlessCacheSettings(body string) error {
 func checkTlsVersion(body string) error {
 	if strings.Contains(body, "minimum_tls_version") {
 		return msg.ErrorMinTlsVersion
+	}
+	return nil
+}
+
+func checkNameInUse(body string) error {
+	if strings.Contains(body, "name_already_in_use") {
+		return msg.ErrorNameInUse
 	}
 	return nil
 }
