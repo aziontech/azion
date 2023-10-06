@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	// msg "github.com/aziontech/azion-cli/messages/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -352,14 +352,14 @@ func checkOriginlessCacheSettings(body string) error {
 
 func checkTlsVersion(body string) error {
 	if strings.Contains(body, "minimum_tls_version") {
-		return msg.ErrorMinTlsVersion
+		return ErrorMinTlsVersion
 	}
 	return nil
 }
 
 func checkNameInUse(body string) error {
 	if strings.Contains(body, "name_already_in_use") {
-		return msg.ErrorNameInUse
+		return ErrorNameInUse
 	}
 	return nil
 }
