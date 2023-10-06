@@ -7,7 +7,6 @@ var (
 	ErrorActiveFlag              = errors.New("Invalid --active flag provided. The flag must have  'true' or 'false' values. Run the command 'azion domains <subcommand> --help' to display more information and try again.")
 	ErrorMissingDomainIdArgument = errors.New("The flag '--domain-id' must be informed. Please, inform the correct id and try again or run the command ‘azion domains <subcommand> --help’ to display more information and try again. ")
 	ErrorCreateDomain            = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorGetDomains              = errors.New("Failed to list your domains. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorUpdateDomain            = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support.")
 
 	//used by more than one cmd

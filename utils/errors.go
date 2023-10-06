@@ -45,4 +45,6 @@ var (
 	ErrorGetAssetsNamesAzioncli     = errors.New("Failed to fetch the assets names from azion")
 	ErrorArgumentIsEmpty            = errors.New("Argument is empty")
 	ErrorParseResponse              = errors.New("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support")
+	ErrorMinTlsVersion              = errors.New("This is not a valid TLS Version. Run azion edge_applications <subcommand> --help for more information")
+	ErrorNameInUse                  = errors.New("The name you've selected is already in use by another resource. Please choose a different name. Run 'azion list [resource]' to see all your resources")
 )
