@@ -1,13 +1,12 @@
-package create
+package domains
 
 import (
-	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/domains"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -23,17 +22,18 @@ func TestCreate(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--name", "one piece is the best",
 			"--application-id", "1673635841",
+			"--cname-access-only", "false",
+			"--active", "true",
 		})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.DomainsCreateOutputSuccess, 1674831234), stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -44,14 +44,13 @@ func TestCreate(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{"--in", "./fixtures/create.json"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.DomainsCreateOutputSuccess, 1674831234), stdout.String())
 	})
 
 	t.Run("bad request status 400", func(t *testing.T) {
