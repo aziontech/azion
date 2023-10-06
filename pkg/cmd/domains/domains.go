@@ -4,9 +4,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/domains"
 
+	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/domains/update"
+	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
