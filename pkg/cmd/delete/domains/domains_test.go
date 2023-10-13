@@ -1,9 +1,10 @@
-package delete
+package domains
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
-	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -32,7 +33,7 @@ func TestCreate(t *testing.T) {
 		assert.Equal(t, "Domain 1234 was successfully deleted\n", stdout.String())
 	})
 
-	t.Run("delete domain that is not found", func(t *testing.T) {
+	t.Run("delete domain - not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -44,7 +45,7 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-d", "1234"})
+		cmd.SetArgs([]string{"--domain-id", "1234"})
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
