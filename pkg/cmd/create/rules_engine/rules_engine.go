@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/rules_engine"
@@ -211,13 +210,11 @@ func dtoStructRequest(request sdk.CreateRulesEngineRequest) sdk.CreateRulesEngin
 		} else {
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
-				fmt.Println("STRING")
 				behaviorString.SetName(v.RulesEngineBehaviorString.Name)
 				behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
 				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 					RulesEngineBehaviorString: &behaviorString,
 				})
-				spew.Dump(behaviors)
 			}
 		}
 
