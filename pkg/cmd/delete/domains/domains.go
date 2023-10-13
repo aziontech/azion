@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/domains"
 	api "github.com/aziontech/azion-cli/pkg/api/domains"
@@ -30,20 +29,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("domain-id") {
-				qs := []*survey.Question{
-					{
-						Name:     "id",
-						Prompt:   &survey.Input{Message: "What is the id of the Domain you wish to delete?"},
-						Validate: survey.Required,
-					},
-				}
 
-				answer := ""
-
-				err := survey.Ask(qs, &answer)
+				answer, err := utils.AskInput(msg.AskDeleteInput)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
 
 				num, err := strconv.ParseInt(answer, 10, 64)
