@@ -157,7 +157,7 @@ func validateRequest(request sdk.CreateRulesEngineRequest) error {
 
 			}
 		}
-		if item.RulesEngineBehaviorObject != nil && item.RulesEngineBehaviorObject.Target.CapturedArray == nil {
+		if item.RulesEngineBehaviorObject != nil && (item.RulesEngineBehaviorObject.Target.CapturedArray == nil || item.RulesEngineBehaviorObject.Target.Regex == nil || item.RulesEngineBehaviorObject.Target.Subject == nil) {
 			if item.RulesEngineBehaviorObject.Name == "" {
 				return msg.ErrorNameBehaviorsEmpty
 			}
