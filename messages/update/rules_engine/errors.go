@@ -9,7 +9,7 @@ var (
 	ErrorVariableEmpty        = errors.New("The variable field shouldn't be empty")
 	ErrorOperatorEmpty        = errors.New("The operator field shouldn't be empty")
 	ErrorInputValueEmpty      = errors.New("The input value field shouldn't be empty")
-	ErrorNameBehaviorsEmpty   = errors.New("The behaviors name field shouldn't be empty")
+	ErrorNameBehaviorsEmpty   = errors.New("The behavior name field cannot be empty")
 	ErrorStructCriteriaNil    = errors.New("You must inform a criteria")
 	ErrorStructBehaviorsNil   = errors.New("You must inform a behavior")
 	ErrorConvertApplicationID = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list edge-application' command to check your application ID")
