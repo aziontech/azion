@@ -36,7 +36,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azion update rules-engine -h"
 		$ azion update rules-engine --rule-id 1234 --application-id 1673635839 --phase request --in ruleengine.json"
-		$ azion update rules-engine --application-id 1673635839 --rule-id 1234 --phase request --in ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateUserInput(cmd, fields); err != nil {
