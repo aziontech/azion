@@ -3,10 +3,8 @@ package edge_applications
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
@@ -17,33 +15,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-type Fields struct {
-	Name                           string `json:"name"`
-	ApplicationAcceleration        string `json:"application_acceleration,omitempty"`
-	DeliveryProtocol               string `json:"delivery_protocol,omitempty"`
-	OriginType                     string `json:"origin_type,omitempty"`
-	Address                        string `json:"address,omitempty"`
-	OriginProtocolPolicy           string `json:"origin_protocol_policy,omitempty"`
-	HostHeader                     string `json:"host_header,omitempty"`
-	BrowserCacheSettings           string `json:"browser_cache_settings,omitempty"`
-	CdnCacheSettings               string `json:"cdn_cache_settings,omitempty"`
-	BrowserCacheSettingsMaximumTtl int64  `json:"browser_cache_settings_maximum_ttl,omitempty"`
-	CdnCacheSettingsMaximumTtl     int64  `json:"cdn_cache_settings_maximum_ttl,omitempty"`
-	Path                           string
-}
-
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	fields := &Fields{}
-
-	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		Example: heredoc.Doc(`
+const example = `
         $ azion create --name "naruno"
         $ azion create edge_applications --in create.json
         $ json example "create.json": 
@@ -59,117 +34,130 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
             "cdn_cache_settings": "honor",
             "cdn_cache_settings_maximum_ttl": 60
         }
-        `),
+        `
+
+type Fields struct {
+	Name                           string
+	ApplicationAcceleration        string
+	DeliveryProtocol               string
+	OriginType                     string
+	Address                        string
+	OriginProtocolPolicy           string
+	HostHeader                     string
+	BrowserCacheSettings           string
+	CdnCacheSettings               string
+	BrowserCacheSettingsMaximumTtl int64
+	CdnCacheSettingsMaximumTtl     int64
+	Path                           string
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	fields := &Fields{}
+
+	cmd := &cobra.Command{
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		Example:       heredoc.Doc(example),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateRequest{}
 
 			if cmd.Flags().Changed("in") {
-				var (
-					file *os.File
-					err  error
-				)
-
-				if fields.Path == "-" {
-					file = os.Stdin
-				} else {
-					file, err = os.Open(fields.Path)
-					if err != nil {
-						return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
-					}
-				}
-
-				err = cmdutil.UnmarshallJsonFromReader(file, &fields)
+				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-
-			}
-
-			if utils.IsEmpty(fields.Name) {
-				qs := []*survey.Question{
-					{
-						Name:      "name",
-						Prompt:    &survey.Input{Message: "What is the name of the Edge Application?"},
-						Validate:  survey.Required,
-						Transform: survey.Title,
-					},
-				}
-
-				answers := struct{ Name string }{}
-
-				err := survey.Ask(qs, &answers)
+			} else {
+				err := createRequestFromFlags(fields, &request)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
-
-				fields.Name = answers.Name
-			}
-
-			if utils.IsEmpty(fields.Name) {
-				return msg.ErrorMandatoryCreateFlags
-			}
-
-			request.SetName(fields.Name)
-
-			if !utils.IsEmpty(fields.ApplicationAcceleration) {
-				applicationAcceleration, err := strconv.ParseBool(fields.ApplicationAcceleration)
-				if err != nil {
-					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
-					return utils.ErrorConvertingStringToBool
-				}
-				request.SetApplicationAcceleration(applicationAcceleration)
-			}
-
-			if !utils.IsEmpty(fields.DeliveryProtocol) {
-				request.SetDeliveryProtocol(fields.DeliveryProtocol)
-			}
-
-			if !utils.IsEmpty(fields.DeliveryProtocol) {
-				request.SetOriginType(fields.OriginType)
-			}
-
-			if !utils.IsEmpty(fields.Address) {
-				request.SetAddress(fields.Address)
-			}
-
-			if !utils.IsEmpty(fields.OriginProtocolPolicy) {
-				request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
-			}
-
-			if !utils.IsEmpty(fields.BrowserCacheSettings) {
-				request.SetBrowserCacheSettings(fields.BrowserCacheSettings)
-			}
-
-			if !utils.IsEmpty(fields.CdnCacheSettings) {
-				request.SetCdnCacheSettings(fields.CdnCacheSettings)
-			}
-
-			if fields.BrowserCacheSettingsMaximumTtl <= 0 {
-				request.SetBrowserCacheSettingsMaximumTtl(fields.BrowserCacheSettingsMaximumTtl)
-			}
-
-			if fields.CdnCacheSettingsMaximumTtl <= 0 {
-				request.SetCdnCacheSettingsMaximumTtl(fields.CdnCacheSettingsMaximumTtl)
 			}
 
 			response, err := api.NewClient(
-				f.HttpClient,
-				f.Config.GetString("api_url"),
-				f.Config.GetString("token"),
+				f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
 			).Create(context.Background(), &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
 			}
 
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
 
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
+	addFlags(flags, fields)
+
+	return cmd
+}
+
+func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
+	if utils.IsEmpty(fields.Name) {
+		answers, err := utils.AskInput("What is the name of the Edge Application?")
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+
+		fields.Name = answers
+	}
+
+	if utils.IsEmpty(fields.Name) {
+		return msg.ErrorMandatoryCreateFlags
+	}
+
+	request.SetName(fields.Name)
+
+	if !utils.IsEmpty(fields.ApplicationAcceleration) {
+		applicationAcceleration, err := strconv.ParseBool(fields.ApplicationAcceleration)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+		request.SetApplicationAcceleration(applicationAcceleration)
+	}
+
+	if !utils.IsEmpty(fields.DeliveryProtocol) {
+		request.SetDeliveryProtocol(fields.DeliveryProtocol)
+	}
+
+	if !utils.IsEmpty(fields.DeliveryProtocol) {
+		request.SetOriginType(fields.OriginType)
+	}
+
+	if !utils.IsEmpty(fields.Address) {
+		request.SetAddress(fields.Address)
+	}
+
+	if !utils.IsEmpty(fields.OriginProtocolPolicy) {
+		request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+	}
+
+	if !utils.IsEmpty(fields.BrowserCacheSettings) {
+		request.SetBrowserCacheSettings(fields.BrowserCacheSettings)
+	}
+
+	if !utils.IsEmpty(fields.CdnCacheSettings) {
+		request.SetCdnCacheSettings(fields.CdnCacheSettings)
+	}
+
+	if fields.BrowserCacheSettingsMaximumTtl <= 0 {
+		request.SetBrowserCacheSettingsMaximumTtl(fields.BrowserCacheSettingsMaximumTtl)
+	}
+
+	if fields.CdnCacheSettingsMaximumTtl <= 0 {
+		request.SetCdnCacheSettingsMaximumTtl(fields.CdnCacheSettingsMaximumTtl)
+	}
+
+	return nil
+}
+
+func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.ApplicationAcceleration, "ApplicationAcceleration", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.DeliveryProtocol, "DeliveryProtocol", "", msg.FlagDeliveryProtocol)
@@ -183,6 +171,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
-
-	return cmd
 }
