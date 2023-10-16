@@ -87,7 +87,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					fields.Name = answer
 				}
 
-				fmt.Println("fields: ", fields.CnameAccessOnly)
 				cnameAccessOnly, err := strconv.ParseBool(fields.CnameAccessOnly)
 				if err != nil {
 					return fmt.Errorf("%w: %q", msg.ErrorCnameAccessOnlyFlag, fields.CnameAccessOnly)
