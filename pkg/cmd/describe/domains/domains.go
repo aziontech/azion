@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion describe domains --domain-id 1337 --out "./tmp/test.json" --format json
         $ azion describe domains --domain-id 1337 --format json
         `),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			if !cmd.Flags().Changed("domain-id") {
 				answer, err := utils.AskInput(msg.AskInputDomainID)
 				if err != nil {
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			domain, err := client.Get(ctx, domainID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetDomain.Error(), err)
+				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
 
 			out := f.IOStreams.Out
