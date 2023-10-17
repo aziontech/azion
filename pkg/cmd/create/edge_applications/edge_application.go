@@ -19,8 +19,8 @@ import (
 )
 
 const example = `
-        $ azion create --name "naruno"
-        $ azion create edge_applications --in create.json
+        $ azion create edge-applications --name "naruno"
+        $ azion create edge-applications --in create.json
         $ json example "create.json": 
         {
             "name": "New Edge Application",

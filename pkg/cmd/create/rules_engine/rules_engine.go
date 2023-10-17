@@ -25,25 +25,6 @@ type Fields struct {
 	Path          string
 }
 
-type CreateRulesEngineRequest struct {
-	Name        string                     `json:"name"`
-	Description *string                    `json:"description,omitempty"`
-	Criteria    [][]RulesEngineCriteria    `json:"criteria"`
-	Behaviors   []RulesEngineBehaviorEntry `json:"behaviors"`
-}
-
-type RulesEngineCriteria struct {
-	Conditional string  `json:"conditional"`
-	Variable    string  `json:"variable"`
-	Operator    string  `json:"operator"`
-	InputValue  *string `json:"input_value,omitempty"`
-}
-
-type RulesEngineBehaviorEntry struct {
-	Name   string `json:"name"`
-	Target string `json:"target"`
-}
-
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
@@ -90,7 +71,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.Path = answer
 			}
 
-			request := CreateRulesEngineRequest{}
+			request := api.CreateRulesEngineRequest{}
 
 			var (
 				file *os.File
@@ -110,7 +91,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorUnmarshalReader
 			}
 
-			reqSdk := dtoStructRequest(request)
+			reqSdk := dtoStructRequest(request.CreateRulesEngineRequest)
 
 			if err := validateRequest(reqSdk); err != nil {
 				return err
@@ -170,19 +151,23 @@ func validateRequest(request sdk.CreateRulesEngineRequest) error {
 	}
 
 	for _, item := range request.GetBehaviors() {
-		if item.RulesEngineBehaviorString == nil {
-			return msg.ErrorNameBehaviorsEmpty
-		}
+		if item.RulesEngineBehaviorString != nil {
+			if item.RulesEngineBehaviorString.Name == "" {
+				return msg.ErrorNameBehaviorsEmpty
 
-		if item.RulesEngineBehaviorString.Name == "" {
-			return msg.ErrorNameBehaviorsEmpty
+			}
+		}
+		if item.RulesEngineBehaviorObject != nil && (item.RulesEngineBehaviorObject.Target.CapturedArray == nil || item.RulesEngineBehaviorObject.Target.Regex == nil || item.RulesEngineBehaviorObject.Target.Subject == nil) {
+			if item.RulesEngineBehaviorObject.Name == "" {
+				return msg.ErrorNameBehaviorsEmpty
+			}
 		}
 	}
 
 	return nil
 }
 
-func dtoStructRequest(request CreateRulesEngineRequest) sdk.CreateRulesEngineRequest {
+func dtoStructRequest(request sdk.CreateRulesEngineRequest) sdk.CreateRulesEngineRequest {
 	var req sdk.CreateRulesEngineRequest
 
 	req.Name = request.Name
@@ -207,14 +192,32 @@ func dtoStructRequest(request CreateRulesEngineRequest) sdk.CreateRulesEngineReq
 	req.Criteria = rulesEngineCriteria
 	var behaviors []sdk.RulesEngineBehaviorEntry
 	for _, v := range request.Behaviors {
-		var behaviorString sdk.RulesEngineBehaviorString
+		if v.RulesEngineBehaviorObject != nil {
+			if v.RulesEngineBehaviorObject.Target.CapturedArray != nil && v.RulesEngineBehaviorObject.Target.Regex != nil && v.RulesEngineBehaviorObject.Target.Subject != nil {
+				var behaviorObject sdk.RulesEngineBehaviorObject
+				behaviorObject.SetName(v.RulesEngineBehaviorObject.Name)
+				behaviorObject.SetTarget(v.RulesEngineBehaviorObject.Target)
+				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+					RulesEngineBehaviorObject: &behaviorObject,
+				})
+			} else {
+				var behaviorString sdk.RulesEngineBehaviorString
+				behaviorString.SetName(v.RulesEngineBehaviorObject.Name)
+				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+					RulesEngineBehaviorString: &behaviorString,
+				})
+			}
+		} else {
+			if v.RulesEngineBehaviorString != nil {
+				var behaviorString sdk.RulesEngineBehaviorString
+				behaviorString.SetName(v.RulesEngineBehaviorString.Name)
+				behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
+				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+					RulesEngineBehaviorString: &behaviorString,
+				})
+			}
+		}
 
-		behaviorString.SetName(v.Name)
-		behaviorString.SetTarget(v.Target)
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behaviorString,
-		})
 	}
 
 	req.Behaviors = behaviors
