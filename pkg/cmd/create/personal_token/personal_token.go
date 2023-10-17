@@ -103,7 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetUuid())
+			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetKey())
 
 			return nil
 		},
