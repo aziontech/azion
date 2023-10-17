@@ -44,8 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create --name "naruno"
-        $ azion create edge_applications --in create.json
+        $ azion create edge-application --name "naruno"
+        $ azion create edge-application --in create.json
         $ json example "create.json": 
         {
             "name": "New Edge Application",
