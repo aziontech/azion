@@ -63,6 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
 				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
+				return nil
 			}
 
 			logger.FInfo(out, string(formattedFuction[:]))

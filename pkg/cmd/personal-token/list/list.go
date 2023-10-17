@@ -13,6 +13,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/personal-token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -78,10 +79,10 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
-	tbl.PrintHeader(format)
+	logger.PrintHeader(tbl, format)
 
 	for _, row := range tbl.GetRows() {
-		tbl.PrintRow(format, row)
+		logger.PrintRow(tbl, format, row)
 	}
 
 	return nil
