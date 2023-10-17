@@ -9,7 +9,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_settings"
-	msgapp "github.com/aziontech/azion-cli/messages/edge_applications"
+	// msgapp "github.com/aziontech/azion-cli/messages/edge_applications"
 
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
@@ -85,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				str := strconv.FormatInt(fields.ApplicationID, 10)
 				application, err := client.Get(ctx, str)
 				if err != nil {
-					return fmt.Errorf(msgapp.ErrorGetApplication.Error(), err)
+					return err
 				}
 
 				if (request.GetEnableCachingForOptions() || request.GetEnableCachingForPost() || request.GetEnableQueryStringSort()) && !application.GetApplicationAcceleration() {
@@ -103,7 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				str := strconv.FormatInt(fields.ApplicationID, 10)
 				application, err := client.Get(ctx, str)
 				if err != nil {
-					return fmt.Errorf(msgapp.ErrorGetApplication.Error(), err)
+					return err
 				}
 
 				if cmd.Flags().Changed("name") {

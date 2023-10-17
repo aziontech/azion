@@ -1,7 +1,6 @@
 {
   "active": true,
   "application_acceleration": false,
-  "caching": true,
   "delivery_protocol": "http,https",
   "device_detection": false,
   "edge_firewall": false,

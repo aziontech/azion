@@ -8,7 +8,6 @@
     "minimum_tls_version": "",
     "debug_rules": false,
     "application_acceleration": false,
-    "caching": true,
     "device_detection": false,
     "edge_firewall": false,
     "edge_functions": false,

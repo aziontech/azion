@@ -116,7 +116,7 @@ func Error(message string, fields ...zap.Field) {
 
 func LogSuccess(w io.Writer, message string) {
 	formatSuccess := color.New(color.FgGreen).SprintfFunc()
-	FInfo(w, formatSuccess("✅ %s\n", message))
+	FInfo(w, formatSuccess("🚀 %s\n", message))
 }
 
 func LogWarning(w io.Writer, message string) {
