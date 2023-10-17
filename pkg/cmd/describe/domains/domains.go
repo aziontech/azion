@@ -66,6 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return nil
 			}
 
+			logger.FInfo(out, string(formattedFuction[:]))
 			return nil
 		},
 	}
