@@ -33,7 +33,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "azionf423494d7adbfabd60cb5f3e5f2b84301a7\n"),
+			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "super-secret-token\n"),
 			err:    nil,
 		},
 		{
@@ -47,7 +47,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "azionf423494d7adbfabd60cb5f3e5f2b84301a7\n"),
+			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "super-secret-token\n"),
 			err:    nil,
 		},
 		{
