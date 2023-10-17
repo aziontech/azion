@@ -1,4 +1,4 @@
-package create
+package personaltoken
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/personal-token"
+	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
@@ -35,11 +35,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion personal_token create --name "ranking of kings" --expiration "9m" 
-        $ azion personal_token create --name "sakura" --expiration "9m" 
-        $ azion personal_token create --name "luffy biruta" --expiration "9m" --description "gear five"
-        $ azion personal_token create --in "create.json"
-        $ json example "create.json": 
+        $ azion create personal-token --name "ranking of kings" --expiration "9m" 
+        $ azion create personal-token --name "sakura" --expiration "9m" 
+        $ azion create personal-token --name "strawhat" --expiration "9m" --description "gear five"
+        $ azion create personal-token --in "create.json"
+        $ "create.json" example: 
         {   
             "name": "One day token",
             "expires_at": "9m",
@@ -70,32 +70,40 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 
-			}
+			} else {
+				if !cmd.Flags().Changed("name") {
+					answer, err := utils.AskInput(msg.AskInputName)
+					if err != nil {
+						return err
+					}
 
-			if utils.IsEmpty(fields.Name) || utils.IsEmpty(fields.ExpiresAt) {
-				return msg.ErrorMandatoryCreateFlags
-			}
+					fields.Name = answer
+				}
+				if !cmd.Flags().Changed("expiration") {
+					answer, err := utils.AskInput(msg.AskInputExpiration)
+					if err != nil {
+						return err
+					}
 
-			request.SetName(fields.Name)
+					fields.ExpiresAt = answer
+				}
+			}
 
 			date, err := ParseExpirationDate(time.Now(), fields.ExpiresAt)
 			if err != nil {
 				return err
 			}
 
+			request.SetName(fields.Name)
 			request.SetExpiresAt(date)
 			request.SetDescription(fields.Description)
 
-			response, err := api.NewClient(
-				f.HttpClient,
-				f.Config.GetString("api_url"),
-				f.Config.GetString("token"),
-			).Create(context.Background(), &request)
+			response, err := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token")).Create(context.Background(), &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetKey()))
+			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetUuid())
 
 			return nil
 		},

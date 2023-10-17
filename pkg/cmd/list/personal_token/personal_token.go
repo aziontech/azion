@@ -1,4 +1,4 @@
-package list
+package personaltoken
 
 import (
 	"context"
@@ -10,10 +10,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
 	"github.com/aziontech/azion-cli/messages/general"
-	msg "github.com/aziontech/azion-cli/messages/personal-token"
+	msg "github.com/aziontech/azion-cli/messages/list/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -22,13 +21,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var details bool
 
 	cmd := &cobra.Command{
-		Use:           msg.ListUsage,
-		Short:         msg.ListShortDescription,
-		Long:          msg.ListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-        $ azion personal_token list 
-        $ azion personal_token list --details
+        $ azion list personal-token  
+        $ azion list personal-token --details
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient,
@@ -45,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVar(&details, "details", false, general.ApiListFlagDetails)
-	flags.BoolP("help", "h", false, msg.ListHelpFlag)
+	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 
@@ -57,11 +56,11 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 		return err
 	}
 
-	tbl := table.New("ID", "NAME", "DESCRIPTION")
+	tbl := table.New("ID", "NAME", "EXPIRES AT")
 	tbl.WithWriter(f.IOStreams.Out)
 
 	if details {
-		tbl = table.New("ID", "NAME", "CREATED", "EXPIRES AT", "DESCRIPTION")
+		tbl = table.New("ID", "NAME", "EXPIRES AT", "CREATED AT", "DESCRIPTION")
 	}
 
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -72,17 +71,17 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 		tbl.AddRow(
 			*v.Uuid,
 			utils.TruncateString(*v.Name),
-			*v.Created,
 			*v.ExpiresAt,
+			*v.Created,
 			utils.TruncateString(*v.Description.Get()))
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
-	logger.PrintHeader(tbl, format)
+	tbl.PrintHeader(format)
 
 	for _, row := range tbl.GetRows() {
-		logger.PrintRow(tbl, format, row)
+		tbl.PrintRow(format, row)
 	}
 
 	return nil

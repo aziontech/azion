@@ -1,10 +1,10 @@
-package create
+package personaltoken
 
 import (
 	"fmt"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/personal-token"
+	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -33,7 +33,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "super-secret-token\n"),
+			output: fmt.Sprintf(msg.CreateOutputSuccess, "5b8934cf-3561-4b48-aceb-7ba52a227b6c"),
 			err:    nil,
 		},
 		{
@@ -47,35 +47,8 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf("🚀 "+msg.CreateOutputSuccess, "super-secret-token\n"),
+			output: fmt.Sprintf(msg.CreateOutputSuccess, "5b8934cf-3561-4b48-aceb-7ba52a227b6c"),
 			err:    nil,
-		},
-		{
-			name: "Failed to create missing required flag",
-			args: []string{"--name", "sakura", "--description", "example"},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				return &mock
-			},
-			err: msg.ErrorMandatoryCreateFlags,
-		},
-		{
-			name: "Failed to create argument empty",
-			args: []string{"--name", "", "--expiration", "9m", "--description", "example"},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				return &mock
-			},
-			err: msg.ErrorMandatoryCreateFlags,
-		},
-		{
-			name: "Missing expiration field in json structure passed by --in flag",
-			args: []string{"--in", "./fixtures/structure_without_expiration_field.json"},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				return &mock
-			},
-			err: msg.ErrorMandatoryCreateFlags,
 		},
 		{
 			name: "Failure to create expiration date with invalid format",
