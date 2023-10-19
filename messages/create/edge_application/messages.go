@@ -20,6 +20,9 @@ var (
 	FlagOriginProtocolPolicy           = "define rules governing how data is handled when communicating with the origin"
 	FlagBrowserCacheSettings           = "Browser cache settings. Can be used to control the behavior of the browser cache in relation to application or website resources"
 	FlagCdnCacheSettings               = "Cache settings of a Content Distribution Network (CDN). It can be used to specify how resources are cached on the CDN servers."
+	FlagDebugRules                     = "enable rules debug"
+	FlagSupportedCiphers               = "FlagSupportedCiphers is for an encryption algorithm used to encrypt plain text into cipher text"
+	FlagWebsocket                      = "enable websocket"
 	FlagBrowserCacheSettingsMaximumTtl = "The maximum time to live (TTL) of cached resources in the browser. It can be used to set a time limit for how long resources can be cached in the browser."
 	FlagCdnCacheSettingsMaximumTtl     = "Maximum time to live (TTL) of cached resources in the CDN. It can be used to set a time limit for how long resources can be cached on the CDN servers."
 )

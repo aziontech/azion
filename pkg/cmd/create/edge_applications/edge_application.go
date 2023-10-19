@@ -50,6 +50,9 @@ type Fields struct {
 	CdnCacheSettings               string
 	BrowserCacheSettingsMaximumTtl int64
 	CdnCacheSettingsMaximumTtl     int64
+	DebugRules                     string
+	SupportedCiphers               string
+	Websocket                      string
 	Path                           string
 }
 
@@ -139,6 +142,30 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 		request.SetHttp3(http3)
 	}
 
+	if !utils.IsEmpty(fields.DebugRules) {
+		debugRules, err := strconv.ParseBool(fields.DebugRules)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.DebugRules+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		request.SetDebugRules(debugRules)
+	}
+
+	if !utils.IsEmpty(fields.SupportedCiphers) {
+		request.SetSupportedCiphers(fields.SupportedCiphers)
+	}
+
+	if !utils.IsEmpty(fields.Websocket) {
+		websocket, err := strconv.ParseBool(fields.Websocket)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.Websocket+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		request.SetWebsocket(websocket)
+	}
+
 	if !utils.IsEmpty(fields.HttpPort) {
 		request.SetHttpPort(fields.HttpPort)
 	}
@@ -191,6 +218,9 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.BrowserCacheSettings, "browser-cache-settings", "", msg.FlagBrowserCacheSettings)
 	flags.Int64Var(&fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaximumTtl)
 	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
+	flags.StringVar(&fields.DebugRules, "debug-rules", "", msg.FlagDebugRules)
+	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
+	flags.StringVar(&fields.Websocket, "websocket", "", msg.FlagWebsocket)
 	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
 	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
