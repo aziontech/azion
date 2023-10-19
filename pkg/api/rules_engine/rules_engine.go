@@ -17,6 +17,10 @@ type UpdateRulesEngineRequest struct {
 	Phase         string
 }
 
+type CreateRulesEngineRequest struct {
+	sdk.CreateRulesEngineRequest
+}
+
 type RulesEngineResponse interface {
 	GetId() int64
 	GetPhase() string

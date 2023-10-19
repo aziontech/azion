@@ -448,3 +448,22 @@ func LogAndRewindBody(httpResp *http.Response) error {
 
 	return nil
 }
+
+func FlagINUnmarshalFileJSON(path string, request interface{}) error {
+	var (
+		file *os.File
+		err  error
+	)
+
+	if path == "-" {
+		file = os.Stdin
+	} else {
+		file, err = os.Open(path)
+		if err != nil {
+			return fmt.Errorf("%w: %s", ErrorOpeningFile, path)
+		}
+		defer file.Close()
+	}
+
+	return cmdutil.UnmarshallJsonFromReader(file, &request)
+}
