@@ -98,7 +98,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	addFlags(flags, fields)
 
-	// http_port
 	return cmd
 }
 
