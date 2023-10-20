@@ -43,14 +43,13 @@ brews:
       zsh_completion.install "completions/azion.zsh" => "_azion"
       fish_completion.install "completions/azion.fish"    
     test: |
-      system "#{bin}/azion --version"  
+      system "#{bin}/azion" "--version"  
 
 nfpms:
   - id: packages
     license: MIT
     maintainer: Azion Technologies <https://github.com/aziontech> 
     package_name: azion
-    maintainer: aziontech
     homepage: https://github.com/aziontech/azion-cli
     bindir: /usr/local/bin
     formats:
