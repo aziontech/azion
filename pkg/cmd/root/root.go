@@ -19,7 +19,6 @@ import (
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link"
-	personal_token "github.com/aziontech/azion-cli/pkg/cmd/personal-token"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
@@ -113,7 +112,6 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(buildCmd.NewCmd(f))
 	cobraCmd.AddCommand(devcmd.NewCmd(f))
 	cobraCmd.AddCommand(linkcmd.NewCmd(f))
-	cobraCmd.AddCommand(personal_token.NewCmd(f))
 	cobraCmd.AddCommand(completion.NewCmd(f))
 	cobraCmd.AddCommand(describe.NewCmd(f))
 	cobraCmd.AddCommand(create.NewCmd(f))
