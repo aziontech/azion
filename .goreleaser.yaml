@@ -43,7 +43,7 @@ brews:
       zsh_completion.install "completions/azion.zsh" => "_azion"
       fish_completion.install "completions/azion.fish"    
     test: |
-      system "#{bin}/azion" "--version"  
+      system "#{bin}/azion" "git--version"  
 
 nfpms:
   - id: packages
