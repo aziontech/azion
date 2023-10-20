@@ -14,5 +14,5 @@ var (
 	OutputSuccess            = "Created domain with ID %d\n"
 	HelpFlag                 = "Displays more information about the create subcommand"
 	AskInputApplicationID    = "What is the ID of the Edge Application that the Rule Engine will be connected to?"
-	AskInputName             = "What will the domain name be?"
+	AskInputName             = "What is the name of the Domain?"
 )

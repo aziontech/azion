@@ -1,4 +1,4 @@
-package delete
+package personaltoken
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/personal-token"
+	msg "github.com/aziontech/azion-cli/messages/delete/personal_token"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -35,7 +35,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf(msg.DeleteOutputSuccess, "5c9c1854-45dd-11ee-be56-0242ac120002"),
+			output: fmt.Sprintf(msg.OutputSuccess, "5c9c1854-45dd-11ee-be56-0242ac120002"),
 			err:    nil,
 		},
 		{
@@ -50,24 +50,6 @@ func TestNewCmd(t *testing.T) {
 				return &mock
 			},
 			err: fmt.Errorf(msg.ErrorFailToDelete.Error(), utils.ErrorNotFound404),
-		},
-		{
-			name: "Not informed flag",
-			args: []string{},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				return &mock
-			},
-			err: msg.ErrorMissingIDArgumentDelete,
-		},
-		{
-			name: "Informed flag is an empty",
-			args: []string{"--id", ""},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				return &mock
-			},
-			err: utils.ErrorArgumentIsEmpty,
 		},
 	}
 

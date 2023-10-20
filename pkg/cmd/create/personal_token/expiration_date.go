@@ -1,8 +1,10 @@
-package create
+package personaltoken
 
 import (
 	"fmt"
 	"time"
+
+	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 )
 
 // ParseExpirationDate parses a string representation of an expiration date and returns a time.Time value representing the expiration date.
@@ -16,6 +18,10 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 		'w': 7 * 24 * time.Hour,
 		'm': 30 * 24 * time.Hour,  // Using an approximate value for months
 		'y': 365 * 24 * time.Hour, // Using an approximate value for years
+	}
+
+	if len(expirationString) < 1 {
+		return time.Now(), msg.ErrorMissingExpiration
 	}
 
 	// If the string contains a suffix, it is a range format
