@@ -10,7 +10,6 @@ var (
 	OutputSuccess    = "Created edge application with ID %d\n"
 
 	FlagName                           = "Edge application name created"
-	FlagApplicationAcceleration        = "Used for application acceleration, enable or disable"
 	FlagDeliveryProtocol               = "specify whether the data should be delivered via HTTP, HTTPS, FTP or another communication protocol."
 	FlagHttp3                          = "flag to enable http3"
 	FlagHttpPort                       = "flag to settings your http port custom"

@@ -38,7 +38,6 @@ const example = `
 
 type Fields struct {
 	Name                           string
-	ApplicationAcceleration        string
 	DeliveryProtocol               string
 	Http3                          string
 	HttpPort                       string
@@ -117,15 +116,6 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 	}
 
 	request.SetName(fields.Name)
-
-	if !utils.IsEmpty(fields.ApplicationAcceleration) {
-		applicationAcceleration, err := strconv.ParseBool(fields.ApplicationAcceleration)
-		if err != nil {
-			logger.Debug("Error while parsing <"+fields.ApplicationAcceleration+"> ", zap.Error(err))
-			return utils.ErrorConvertingStringToBool
-		}
-		request.SetApplicationAcceleration(applicationAcceleration)
-	}
 
 	if !utils.IsEmpty(fields.DeliveryProtocol) {
 		request.SetDeliveryProtocol(fields.DeliveryProtocol)
@@ -206,7 +196,6 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
 	flags.StringVar(&fields.Http3, "http3", "", msg.FlagHttp3)
 	flags.StringVar(&fields.HttpPort, "http-port", "", msg.FlagHttpPort)
