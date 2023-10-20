@@ -50,7 +50,6 @@ nfpms:
     license: MIT
     maintainer: Azion Technologies <https://github.com/aziontech> 
     package_name: azion
-    maintainer: aziontech
     homepage: https://github.com/aziontech/azion-cli
     bindir: /usr/local/bin
     formats:
