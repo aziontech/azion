@@ -40,6 +40,8 @@ type Fields struct {
 	Name                           string
 	ApplicationAcceleration        string
 	DeliveryProtocol               string
+	Http3                          string
+	HttpPort                       string
 	OriginType                     string
 	Address                        string
 	OriginProtocolPolicy           string
@@ -48,6 +50,9 @@ type Fields struct {
 	CdnCacheSettings               string
 	BrowserCacheSettingsMaximumTtl int64
 	CdnCacheSettingsMaximumTtl     int64
+	DebugRules                     string
+	SupportedCiphers               string
+	Websocket                      string
 	Path                           string
 }
 
@@ -116,7 +121,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 	if !utils.IsEmpty(fields.ApplicationAcceleration) {
 		applicationAcceleration, err := strconv.ParseBool(fields.ApplicationAcceleration)
 		if err != nil {
-			logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
+			logger.Debug("Error while parsing <"+fields.ApplicationAcceleration+"> ", zap.Error(err))
 			return utils.ErrorConvertingStringToBool
 		}
 		request.SetApplicationAcceleration(applicationAcceleration)
@@ -124,6 +129,44 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	if !utils.IsEmpty(fields.DeliveryProtocol) {
 		request.SetDeliveryProtocol(fields.DeliveryProtocol)
+	}
+
+	if !utils.IsEmpty(fields.Http3) {
+		http3, err := strconv.ParseBool(fields.Http3)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.Http3+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		request.SetHttp3(http3)
+	}
+
+	if !utils.IsEmpty(fields.DebugRules) {
+		debugRules, err := strconv.ParseBool(fields.DebugRules)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.DebugRules+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		request.SetDebugRules(debugRules)
+	}
+
+	if !utils.IsEmpty(fields.SupportedCiphers) {
+		request.SetSupportedCiphers(fields.SupportedCiphers)
+	}
+
+	if !utils.IsEmpty(fields.Websocket) {
+		websocket, err := strconv.ParseBool(fields.Websocket)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.Websocket+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		request.SetWebsocket(websocket)
+	}
+
+	if !utils.IsEmpty(fields.HttpPort) {
+		request.SetHttpPort(fields.HttpPort)
 	}
 
 	if !utils.IsEmpty(fields.DeliveryProtocol) {
@@ -136,6 +179,10 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	if !utils.IsEmpty(fields.OriginProtocolPolicy) {
 		request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+	}
+
+	if !utils.IsEmpty(fields.HostHeader) {
+		request.SetHostHeader(fields.HostHeader)
 	}
 
 	if !utils.IsEmpty(fields.BrowserCacheSettings) {
@@ -161,14 +208,19 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
+	flags.StringVar(&fields.Http3, "http3", "", msg.FlagHttp3)
+	flags.StringVar(&fields.HttpPort, "http-port", "", msg.FlagHttpPort)
 	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
 	flags.StringVar(&fields.Address, "address", "", msg.FlagAddress)
 	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)
+	flags.StringVar(&fields.HostHeader, "host-header", "", msg.FlagHostHeader)
 	flags.StringVar(&fields.BrowserCacheSettings, "browser-cache-settings", "", msg.FlagBrowserCacheSettings)
-	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
 	flags.Int64Var(&fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaximumTtl)
-	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximumTtl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
-
+	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
+	flags.StringVar(&fields.DebugRules, "debug-rules", "", msg.FlagDebugRules)
+	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
+	flags.StringVar(&fields.Websocket, "websocket", "", msg.FlagWebsocket)
+	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
 	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }
