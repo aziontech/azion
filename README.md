@@ -66,7 +66,7 @@ In order to perform network operations it is *mandatory* to provide [an authenti
 
 You can provide the token in two ways:
 
-- Using `azion-cli token [tokenvalue]` command, which saves the token in a configuration file for further use:
+- Using `azion -t [tokenvalue]` command, which saves the token in a configuration file for further use:
 
 ```
 $ azion -t <authentication token>
