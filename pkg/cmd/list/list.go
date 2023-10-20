@@ -5,6 +5,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/list"
 	domains "github.com/aziontech/azion-cli/pkg/cmd/list/domains"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/list/edge_applications"
+	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -27,6 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(rule.NewCmd(f))
 	cmd.AddCommand(domains.NewCmd(f))
+	cmd.AddCommand(token.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

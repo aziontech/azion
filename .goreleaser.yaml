@@ -16,6 +16,7 @@ builds:
       - darwin
     goarch:
       - amd64
+      - arm64
 
 archives:
   - files:
@@ -29,22 +30,25 @@ before:
 brews:
   - name: azion
     homepage: https://github.com/aziontech/azion-cli
-    description: The developer friendly way to interact with Azion
+    description: Interact in a developer friendly way with Azion
     license: "MIT"
     dependencies:
       - name: jq
-    tap:
+    repository:
       owner: aziontech
       name: homebrew-tap
     install: |
       bin.install "azion"
       bash_completion.install "completions/azion.bash" => "azion"
       zsh_completion.install "completions/azion.zsh" => "_azion"
-      fish_completion.install "completions/azion.fish"      
+      fish_completion.install "completions/azion.fish"    
+    test: |
+      system "#{bin}/azion --version"  
 
 nfpms:
   - id: packages
     license: MIT
+    maintainer: Azion Technologies <https://github.com/aziontech> 
     package_name: azion
     maintainer: aziontech
     homepage: https://github.com/aziontech/azion-cli
