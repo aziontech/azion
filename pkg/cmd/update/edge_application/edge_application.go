@@ -3,7 +3,6 @@ package edge_application
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -82,19 +81,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRequest{}
 			if cmd.Flags().Changed("in") {
-				var (
-					file *os.File
-					err  error
-				)
-				if fields.InPath == "-" {
-					file = os.Stdin
-				} else {
-					file, err = os.Open(fields.InPath)
-					if err != nil {
-						return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.InPath)
-					}
-				}
-				err = cmdutil.UnmarshallJsonFromReader(file, &request)
+				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
