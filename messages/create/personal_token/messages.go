@@ -2,7 +2,7 @@ package personaltoken
 
 var (
 	CreateUsage            = "personal-token"
-	CreateShortDescription = "Creates a new personal token"
+	CreateShortDescription = "Creates a personal token"
 	CreateLongDescription  = "Creates a personal token to be used for authentication and security"
 	CreateFlagName         = "The personal token's name"
 	CreateFlagExpiresAt    = "The personal token's expiration"

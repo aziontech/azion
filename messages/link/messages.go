@@ -4,7 +4,7 @@ var (
 
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
-	EdgeApplicationsLinkShortDescription  = "Links a local application to an Azion edge application"
+	EdgeApplicationsLinkShortDescription  = "Links a local repo or project folder to an existing application on Azion"
 	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project on the Azion’s platform"
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
 	EdgeApplicationsLinkFlagName          = "The Edge application's name"
