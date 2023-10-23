@@ -3,7 +3,7 @@ package build
 var (
 	BuildUsage            = "build [flags]"
 	BuildShortDescription = "Builds an edge application locally"
-	BuildLongDescription  = "Builds your edge application to run on Azion’s Edge Computing Platform"
+	BuildLongDescription  = "Builds an edge application locally to run on Azion’s Edge Computing Platform"
 	BuildRunningCmd       = "Running build step command:\n\n"
 	BuildStart            = "Building your edge application. This process may take a few minutes\n"
 	BuildSuccessful       = "Your edge application was built successfully\n"

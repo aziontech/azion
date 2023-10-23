@@ -2,7 +2,7 @@ package describe
 
 var (
 	Usage            = "describe"
-	ShortDescription = "Returns the information related to a resource"
-	LongDescription  = "Returns the information related to a resource based on the given identification information"
+	ShortDescription = "Displays information related to a service or resource"
+	LongDescription  = "Displays information related to a service or resource based on a given ID"
 	FlagHelp         = "Displays more information about the describe command"
 )
