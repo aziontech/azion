@@ -2,8 +2,8 @@ package rules_engine
 
 var (
 	Usage                 = "rules-engine [flags]"
-	ShortDescription      = "Creates a new rule in Rules Engine"
-	LongDescription       = "Creates a new rule in Rules Engine based on given attributes to be used in edge applications"
+	ShortDescription      = "Creates a rule in Rules Engine"
+	LongDescription       = "Creates a rule in Rules Engine based on given attributes to be used in edge applications"
 	FlagEdgeApplicationID = "Unique identifier for an edge application"
 	FlagName              = "The rule name"
 	FlagPhase             = "The phase is either 'request' or 'response'"
