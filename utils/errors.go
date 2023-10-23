@@ -47,4 +47,5 @@ var (
 	ErrorParseResponse              = errors.New("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support")
 	ErrorMinTlsVersion              = errors.New("This is not a valid TLS Version. Run azion edge_applications <subcommand> --help for more information")
 	ErrorNameInUse                  = errors.New("The name you've selected is already in use by another resource. Please choose a different name. Run 'azion list [resource]' to see all your resources")
+	ErrorCancelledContextInput      = errors.New("Execution interrupted by the user. All interactions of this flow were lost.")
 )
