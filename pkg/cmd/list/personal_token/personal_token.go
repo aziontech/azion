@@ -69,12 +69,18 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, v := range resp {
+		var description string
+		if v.Description.Get() != nil {
+			description = *v.Description.Get()
+		}
+
 		tbl.AddRow(
 			*v.Uuid,
 			utils.TruncateString(*v.Name),
 			*v.ExpiresAt,
 			*v.Created,
-			utils.TruncateString(*v.Description.Get()))
+			utils.TruncateString(description),
+		)
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"

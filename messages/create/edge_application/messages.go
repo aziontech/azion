@@ -25,4 +25,5 @@ var (
 	FlagWebsocket                      = "Allows you to establish the WebSocket communication protocol between your origin and your users under the reverse proxy architecture."
 	FlagBrowserCacheSettingsMaximumTtl = "Defines the maximum time to live (TTL) of cached resources in the browser. It can be used to set a time limit for how long resources can be cached in the browser."
 	FlagCdnCacheSettingsMaximumTtl     = "Defines the maximum time to live (TTL) of cached resources in the CDN. It can be used to set a time limit for how long resources can be cached on the CDN servers."
+
 )
