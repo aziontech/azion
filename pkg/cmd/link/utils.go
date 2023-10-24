@@ -7,6 +7,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vul "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap"
 )
 
@@ -91,7 +92,9 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
-	output, err := cmd.CommandRunner(cmd.F, "npx --yes --loglevel=error --no-update-notifier edge-functions@1.7.0 presets ls", []string{"CLEAN_OUTPUT_MODE=true"})
+	command := vul.Command("--loglevel=error --no-update-notifier", "presets ls")
+
+	output, err := cmd.CommandRunner(cmd.F, command, []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
