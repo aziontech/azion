@@ -14,7 +14,8 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
-	// msg "github.com/aziontech/azion-cli/messages/edge_applications"
+	"github.com/AlecAivazis/survey/v2/terminal"
+
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -422,7 +423,10 @@ func AskInput(msg string) (string, error) {
 	answer := ""
 
 	err := survey.Ask(qs, &answer)
-	if err != nil {
+	if err == terminal.InterruptErr {
+		logger.Error(ErrorCancelledContextInput.Error())
+		os.Exit(0)
+	} else if err != nil {
 		logger.Debug("Error while parsing answer", zap.Error(err))
 		return "", ErrorParseResponse
 	}
