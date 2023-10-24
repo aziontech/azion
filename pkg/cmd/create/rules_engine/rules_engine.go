@@ -3,7 +3,6 @@ package rules_engine
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
@@ -73,21 +72,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.CreateRulesEngineRequest{}
 
-			var (
-				file *os.File
-				err  error
-			)
-			if fields.Path == "-" {
-				file = os.Stdin
-			} else {
-				file, err = os.Open(fields.Path)
-				if err != nil {
-					return fmt.Errorf("%w: %s", utils.ErrorOpeningFile, fields.Path)
-				}
-			}
-
-			err = cmdutil.UnmarshallJsonFromReader(file, &request)
+			err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
 			if err != nil {
+				logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 				return utils.ErrorUnmarshalReader
 			}
 
