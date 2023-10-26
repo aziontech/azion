@@ -7,6 +7,7 @@ import (
 var (
 	//Generic errors that can be used by any package
 	ErrorConvertingStringToBool     = errors.New("The given data isn’t a boolean type value. Provide a valid boolean type in the command’s flag value and try again. Use the flags -h or --help with a command or subcommand to display more information and try again")
+	ErrorConvertingStringToInt      = errors.New("The given data isn’t a integer type value. Provide a valid integer type in the command’s flag value and try again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorHandlingFile               = errors.New("The file name doesn’t exist or is invalid. Provide a valid and/or existing path and file name. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorEmptyFile                  = errors.New("The file’s content is empty. Provide a path and file with valid content and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorOpeningFile                = errors.New("Failed to open a file. Verify if the path and file exists and/or the file is corrupted and try the command again")
