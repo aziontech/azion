@@ -42,7 +42,7 @@ To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://gith
 To download azion CLI through Homebrew, run:
 
 ```sh
-brew install aziontech/tap/azion
+brew install azion
 ``````
 
 ## Building Locally
