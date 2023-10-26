@@ -1,7 +1,7 @@
 package edge_application
 
 var (
-	Usage                       = "edge-application --id <application_id> [flags]"
+	Usage                       = "edge-application"
 	ShortDescription            = "Modifies an edge application"
 	LongDescription             = "Modifies an edge application's name, activity status, and other attributes based on the given ID"
 	FlagID                      = "The edge application's id"

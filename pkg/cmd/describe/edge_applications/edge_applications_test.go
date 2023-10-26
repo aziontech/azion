@@ -1,14 +1,15 @@
 package edge_applications
 
 import (
+	"net/http"
+	"os"
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
-	"net/http"
-	"os"
-	"testing"
 )
 
 func TestDescribe(t *testing.T) {
@@ -26,7 +27,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--id", "1232132135"})
+		cmd.SetArgs([]string{"--application-id", "1232132135"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -43,7 +44,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--id", "1234"})
+		cmd.SetArgs([]string{"--application-id", "1234"})
 
 		err := cmd.Execute()
 
@@ -81,7 +82,7 @@ func TestDescribe(t *testing.T) {
 
 		path := "./out.json"
 
-		cmd.SetArgs([]string{"--id", "123", "--out", path})
+		cmd.SetArgs([]string{"--application-id", "123", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {

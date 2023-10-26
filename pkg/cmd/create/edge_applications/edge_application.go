@@ -19,9 +19,9 @@ import (
 )
 
 const example = `
-        $ azion create edge-applications --name "naruno"
-        $ azion create edge-applications --in create.json
-        $ json example "create.json": 
+        $ azion create edge-application --name "naruno"
+        $ azion create edge-application --in create.json
+        $ json example to be used with '--in flag' "create.json": 
         {
             "name": "New Edge Application",
             "delivery_protocol": "http",

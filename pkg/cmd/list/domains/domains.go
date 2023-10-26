@@ -20,13 +20,13 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.DomainsListUsage,
-		Short:         msg.DomainsListShortDescription,
-		Long:          msg.DomainsListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
-		$ azion list domains
-		$ azion list domains --details
+		$ azion list domain
+		$ azion list domain --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, opts); err != nil {
@@ -37,7 +37,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.DomainsListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 

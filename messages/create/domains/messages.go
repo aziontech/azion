@@ -1,7 +1,7 @@
 package domains
 
 var (
-	Usage                    = "domains [flags]"
+	Usage                    = "domain"
 	ShortDescription         = "Creates a new domain"
 	LongDescription          = "Creates a domain based on given attributes to be used with edge applications"
 	FlagName                 = "The domain's name"
