@@ -21,6 +21,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setting up a secure repository
+        run: git config --global --add safe.directory /__w/azion/azion
+
       - name: Build & Test
         run: |
           echo "Building and testing"
