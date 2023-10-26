@@ -83,7 +83,7 @@ sec: get-gosec-deps ## running GoSec
 .PHONY: get-gosec-deps
 get-gosec-deps:
 	@ cd $(GOPATH); \
-		$(GO) install -u github.com/securego/gosec/cmd/gosec
+		$(GO) install github.com/securego/gosec/cmd/gosec
 		
 .PHONY : build
 build: ## build application
