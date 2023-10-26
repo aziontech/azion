@@ -223,7 +223,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func returnAnyField(cmd *cobra.Command) bool {
 	anyFlagChanged := false
 	cmd.Flags().Visit(func(flag *pflag.Flag) {
-		if flag.Changed && flag.Name != "id" {
+		if flag.Changed && flag.Name != "application-id" {
 			anyFlagChanged = true
 		}
 	})
