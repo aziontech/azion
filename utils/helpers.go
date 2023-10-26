@@ -393,8 +393,41 @@ func TruncateString(str string) string {
 }
 
 // IsEmpty returns true when the string is empty
-func IsEmpty(str string) bool {
-	return len(str) < 1
+func IsEmpty(value interface{}) bool {
+	if value == nil {
+		return true
+	}
+
+	switch v := value.(type) {
+	case string:
+		return v == ""
+	case []int:
+		return len(v) == 0
+	case []string:
+		return len(v) == 0
+	case map[string]int:
+		return len(v) == 0
+	case map[string]string:
+		return len(v) == 0
+	case *string:
+		return v == nil || *v == ""
+	case *int:
+		return v == nil
+	case *bool:
+		return v == nil
+	case *float64:
+		return v == nil
+	case *[]int:
+		return v == nil || len(*v) == 0
+	case *[]string:
+		return v == nil || len(*v) == 0
+	case *map[string]int:
+		return v == nil || len(*v) == 0
+	case *map[string]string:
+		return v == nil || len(*v) == 0
+	}
+
+	return false
 }
 
 func GetPackageManager() (string, error) {
