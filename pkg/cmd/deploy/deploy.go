@@ -13,6 +13,7 @@ import (
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -120,6 +121,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	cliori := apiori.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
 	err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
@@ -139,7 +141,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if err != nil {
 		return err
 	}
-	err = cmd.doOrigin(cliapp, ctx, conf)
+	err = cmd.doOrigin(cliapp, cliori, ctx, conf)
 	if err != nil {
 		return err
 	}
