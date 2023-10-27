@@ -27,24 +27,6 @@ before:
     - chmod +x ./scripts/completions.sh
     - ./scripts/completions.sh
 
-brews:
-  - name: azion
-    homepage: https://github.com/aziontech/azion-cli
-    description: Interact in a developer friendly way with Azion
-    license: "MIT"
-    dependencies:
-      - name: jq
-    repository:
-      owner: aziontech
-      name: homebrew-tap
-    install: |
-      bin.install "azion"
-      bash_completion.install "completions/azion.bash" => "azion"
-      zsh_completion.install "completions/azion.zsh" => "_azion"
-      fish_completion.install "completions/azion.fish"    
-    test: |
-      system "#{bin}/azion", "--version"  
-
 nfpms:
   - id: packages
     license: MIT
