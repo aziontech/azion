@@ -1,7 +1,7 @@
 package domains
 
 var (
-	Usage            = "domains"
+	Usage            = "domain"
 	ShortDescription = "Removes a domain"
 	LongDescription  = "Removes a domain from the Domains library based on a given ID"
 	OutputSuccess    = "Domain %d was successfully deleted\n"

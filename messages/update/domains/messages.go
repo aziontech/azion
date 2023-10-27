@@ -1,7 +1,7 @@
 package domains
 
 var (
-	Usage                    = "domains --domain-id <domain_id> [flags]"
+	Usage                    = "domain"
 	ShortDescription         = "Updates a domain"
 	LongDescription          = "Updates a domain's name and other attributes based on a given ID"
 	FlagDomainID             = "The '--domain-id'"

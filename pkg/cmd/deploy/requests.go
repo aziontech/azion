@@ -9,6 +9,7 @@ import (
 	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -103,9 +104,9 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return domainReturnedName[0], nil
 }
 
-func (cmd *DeployCmd) doOrigin(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientorigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Origin.Id == 0 {
-		err := cmd.createAppRequirements(client, ctx, conf)
+		err := cmd.createAppRequirements(client, clientorigin, ctx, conf)
 		if err != nil {
 			return err
 		}
@@ -335,8 +336,8 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 	return
 }
 
-func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	reqOrigin := apiapp.CreateOriginsRequest{}
+func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+	reqOrigin := apiori.CreateOriginsRequest{}
 	var addresses []string
 	if len(conf.Origin.Address) > 0 {
 		address := prepareAddresses(conf.Origin.Address)
@@ -348,7 +349,7 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, ctx context.C
 	}
 	reqOrigin.SetName(conf.Name)
 	reqOrigin.SetHostHeader("${host}")
-	origin, err := client.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+	origin, err := clientorigin.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
 	if err != nil {
 		logger.Debug("Error while creating origin", zap.Error(err))
 		return err

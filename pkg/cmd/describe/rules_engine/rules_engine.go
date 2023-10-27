@@ -37,7 +37,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azion describe rules-engine  --application-id 1673635839 --rule-id 31223 --phase request
+      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase request
       $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase response --format json
       $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase request --out "./tmp/test.json"
     `),
