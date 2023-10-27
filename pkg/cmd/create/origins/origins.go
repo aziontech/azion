@@ -8,7 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	api "github.com/aziontech/azion-cli/pkg/api/origins"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example:       heredoc.Doc(example),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := api.CreateOriginsRequest{}
+			request := api.Request{}
 
 			if cmd.Flags().Changed("in") {
 				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
@@ -60,7 +60,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			response, err := client.CreateOrigins(context.Background(), fields.ApplicationID, &request)
+			response, err := client.Create(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
 				return fmt.Errorf(errorCreateOrigins, err)
 			}
@@ -85,7 +85,7 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 	return
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateOriginsRequest) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
 	if !cmd.Flags().Changed("application-id") {
 		answers, err := utils.AskInput("What is the ID of the Edge Application?")
 		if err != nil {
