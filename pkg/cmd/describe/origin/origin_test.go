@@ -1,12 +1,13 @@
-package describe
+package origins
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"

@@ -48,7 +48,7 @@ type OriginsResponse interface {
 	GetName() string
 }
 
-func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
+func (c *Client) Get(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
 	logger.Debug("Get Origin")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
