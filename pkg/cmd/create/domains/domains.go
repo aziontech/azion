@@ -37,9 +37,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create domains --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
-        $ azion create domains --name withargs --application-id 1231 --active true
-        $ azion create domains --in "create.json"
+        $ azion create domain --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
+        $ azion create domain --name withargs --application-id 1231 --active true
+        $ azion create domain --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := new(api.CreateRequest)

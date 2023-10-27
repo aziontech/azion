@@ -1,7 +1,7 @@
 package domains
 
 var (
-	Usage            = "domains --domain-id <domain_id> [flags]"
+	Usage            = "domain"
 	ShortDescription = "Returns the domain data"
 	LongDescription  = "Displays information about the domain via a given ID to show the application’s attributes in detail"
 	FlagOut          = "Exports the output to the given <file_path/file_name.ext>"

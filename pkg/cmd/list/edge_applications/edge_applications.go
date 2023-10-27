@@ -3,8 +3,9 @@ package edge_applications
 import (
 	"context"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"strings"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
 
 	"github.com/fatih/color"
 
@@ -23,9 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.ListUsage,
-		Short:         msg.ListShortDescription,
-		Long:          msg.ListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion list edge-application
@@ -50,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&opts.Page, "page", 1, general.ApiListFlagPage)
 	flags.Int64Var(&opts.PageSize, "page_size", 10, general.ApiListFlagPageSize)
 	flags.BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	flags.BoolP("help", "h", false, msg.ListHelpFlag)
+	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 

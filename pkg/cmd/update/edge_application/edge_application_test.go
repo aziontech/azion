@@ -28,7 +28,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--id", "1337", "--name", "ATUALIZANDO"})
+		cmd.SetArgs([]string{"--application-id", "1337", "--name", "ATUALIZANDO"})
 
 		err := cmd.Execute()
 
@@ -46,7 +46,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--id", "1234", "--active", "unactive"})
+		cmd.SetArgs([]string{"--application-id", "1234", "--active", "unactive"})
 
 		err := cmd.Execute()
 
@@ -83,7 +83,7 @@ func TestUpdate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--id", "1337"})
+		cmd.SetArgs([]string{"--application-id", "1337"})
 		err := cmd.Execute()
 		require.ErrorContains(t, err, msg.ErrorNoFieldInformed.Error(), nil)
 	})
