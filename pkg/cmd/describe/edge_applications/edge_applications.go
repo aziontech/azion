@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/describe/edge_applications"
@@ -13,7 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -26,13 +27,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion describe edge-application --id 4312
-        $ azion describe edge-application --id 1337 --out "./tmp/test.json"
-        $ azion describe edge-application --id 1337 --format json
+        $ azion describe edge-application --application-id 4312
+        $ azion describe edge-application --application-id 1337 --out "./tmp/test.json"
+        $ azion describe edge-application --application-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 
-			if !cmd.Flags().Changed("id") {
+			if !cmd.Flags().Changed("application-id") {
 				answer, err := utils.AskInput(msg.AskInputApplicationID)
 				if err != nil {
 					return err
@@ -72,7 +73,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&applicationID, "id", "", msg.FlagId)
+	cmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)

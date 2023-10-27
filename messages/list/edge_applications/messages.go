@@ -1,8 +1,8 @@
 package edge_applications
 
 var (
-	ListUsage            = "edge-application [flags]"
-	ListShortDescription = "Displays your edge applications in a list"
-	ListLongDescription  = "Displays all your edge applications in a list"
-	ListHelpFlag         = "Displays more information about the list command"
+	Usage            = "edge-application"
+	ShortDescription = "Displays your edge applications in a list"
+	LongDescription  = "Displays all your edge applications in a list"
+	HelpFlag         = "Displays more information about the list command"
 )

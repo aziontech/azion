@@ -24,9 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.ListUsage,
-		Short:         msg.ListShortDescription,
-		Long:          msg.ListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion list edge-application
@@ -35,10 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion list edge-application --page-size 5
 		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			client := api.NewClient(f.HttpClient,
-				f.Config.GetString("api_url"),
-				f.Config.GetString("token"),
-			)
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			if err := PrintTable(cmd, client, f, opts); err != nil {
 				return fmt.Errorf(msg.ErrorGetAll.Error(), err)
@@ -51,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&opts.Page, "page", 1, general.ApiListFlagPage)
 	flags.Int64Var(&opts.PageSize, "page-size", 10, general.ApiListFlagPageSize)
 	flags.BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	flags.BoolP("help", "h", false, msg.ListHelpFlag)
+	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 
@@ -68,7 +65,7 @@ func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts
 		tbl.WithWriter(f.IOStreams.Out)
 
 		if opts.Details {
-			tbl = table.New("ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES")
+		  tbl = table.New("ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES")
 		}
 
 		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()

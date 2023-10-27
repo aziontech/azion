@@ -10,7 +10,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/origins"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/spf13/cobra"
