@@ -58,10 +58,13 @@ func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 	request := c.apiClient.DomainsApi.GetDomain(ctx, id)
 	res, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while getting a domain", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while describing a domain", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &res.Results, nil
@@ -139,7 +142,13 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	httpResp, err := req.Execute()
 	if err != nil {
-		logger.Error("error", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while updating an origin", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 

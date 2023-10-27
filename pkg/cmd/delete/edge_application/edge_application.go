@@ -113,7 +113,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		qs := []*survey.Question{
 			{
 				Name:     "id",
-				Prompt:   &survey.Input{Message: "What is the id of the Edge Application you wish to delete?"},
+				Prompt:   &survey.Input{Message: msg.AskInput},
 				Validate: survey.Required,
 			},
 		}
