@@ -24,14 +24,14 @@ import (
 )
 
 var exemplo string = heredoc.Doc(`
-	$ azion origins describe --application-id 1673635839 --origin-id 31223
-	$ azion origins describe --application-id 1673635839 --origin-id 31223--format json
-	$ azion origins describe --application-id 1673635839 --origin-id 31223--out "./tmp/test.json" --format json
+	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000
+	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --format json
+	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --out "./tmp/test.json" --format json
 	`)
 
 var (
 	applicationID int64
-	originID      int64
+	originKey     int64
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -60,7 +60,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				applicationID = int64(appID)
 			}
 
-			if !cmd.Flags().Changed("origin-id") {
+			if !cmd.Flags().Changed("origin-key") {
 				answers, err := utils.AskInput("What is the ID of the Origin?")
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
@@ -73,12 +73,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorConvertingStringToInt
 				}
 
-				originID = int64(oriID)
+				originKey = int64(oriID)
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			origin, err := client.Get(ctx, applicationID, originID)
+			origin, err := client.Get(ctx, applicationID, originKey)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
@@ -107,7 +107,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.FlagApplicationID)
-	cmd.Flags().Int64VarP(&originID, "origin-id", "o", 0, msg.FlagOriginID)
+	cmd.Flags().Int64VarP(&originKey, "origin-key", "o", 0, msg.FlagOriginID)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
@@ -128,6 +128,7 @@ func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
 	tbl.AddRow("Origin ID: ", origin.OriginId)
+	tbl.AddRow("Origin Key: ", origin.OriginKey)
 	tbl.AddRow("Name: ", origin.Name)
 	tbl.AddRow("Origin Type: ", origin.OriginType)
 	tbl.AddRow("Addresses: ", origin.Addresses)
