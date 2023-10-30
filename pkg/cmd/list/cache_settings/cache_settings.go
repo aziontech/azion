@@ -30,8 +30,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion list cache-setting --application-id 16736354321 list
-        $ azion list cache-setting --application-id 16736354321 list --details
+		$ azion list cache-setting --application-id 16736354321
+		$ azion list cache-setting --application-id 16736354321 --details
         `),
 
 		RunE: func(cmd *cobra.Command, args []string) error {
