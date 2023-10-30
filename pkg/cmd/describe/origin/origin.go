@@ -31,7 +31,7 @@ var exemplo string = heredoc.Doc(`
 
 var (
 	applicationID int64
-	originKey     int64
+	originKey     string
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -67,13 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorParseResponse
 				}
 
-				oriID, err := strconv.Atoi(answers)
-				if err != nil {
-					logger.Debug("Error while parsing string to integer", zap.Error(err))
-					return utils.ErrorConvertingStringToInt
-				}
-
-				originKey = int64(oriID)
+				originKey = answers
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -106,8 +100,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.FlagApplicationID)
-	cmd.Flags().Int64VarP(&originKey, "origin-key", "o", 0, msg.FlagOriginID)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
