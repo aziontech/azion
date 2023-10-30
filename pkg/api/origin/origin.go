@@ -34,7 +34,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-type CreateOriginsRequest struct {
+type CreateRequest struct {
 	sdk.CreateOriginsRequest
 }
 
@@ -87,7 +87,7 @@ func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, e
 	return resp, nil
 }
 
-func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (Response, error) {
+func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req *CreateRequest) (Response, error) {
 	logger.Debug("Create Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
