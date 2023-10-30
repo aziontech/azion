@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion list edge-application
 		$ azion list edge-application --details
 		$ azion list edge-application --page 1 
-		$ azion list edge-application --page_size 5
+		$ azion list edge-application --page-size 5
 		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
