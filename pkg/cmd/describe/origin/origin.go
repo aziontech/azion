@@ -1,20 +1,22 @@
-package describe
+package origin
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 
-	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/origins"
+	msg "github.com/aziontech/azion-cli/messages/describe/origin"
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
@@ -22,30 +24,48 @@ import (
 
 var (
 	applicationID int64
-	originID      int64
+	originKey     string
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.OriginsDescribeUsage,
-		Short:         msg.OriginsDescribeShortDescription,
-		Long:          msg.OriginsDescribeLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example: heredoc.Doc(`
-      $ azion origins describe --application-id 1673635839 --origin-id 31223
-      $ azion origins describe --application-id 1673635839 --origin-id 31223--format json
-      $ azion origins describe --application-id 1673635839 --origin-id 31223--out "./tmp/test.json" --format json
-    `),
+		Example:       msg.Example,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("origin-id") {
-				return msg.ErrorMissingArguments
+			if !cmd.Flags().Changed("application-id") {
+				answers, err := utils.AskInput(msg.AskAppID)
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				appID, err := strconv.Atoi(answers)
+				if err != nil {
+					logger.Debug("Error while parsing string to integer", zap.Error(err))
+					return utils.ErrorConvertingStringToInt
+				}
+
+				applicationID = int64(appID)
+			}
+
+			if !cmd.Flags().Changed("origin-key") {
+				answers, err := utils.AskInput(msg.AskOriginKey)
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				originKey = answers
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			origin, err := client.GetOrigin(ctx, applicationID, originID)
+			origin, err := client.Get(ctx, applicationID, originKey)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
@@ -73,11 +93,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.OriginsDescribeFlagApplicationID)
-	cmd.Flags().Int64VarP(&originID, "origin-id", "o", 0, msg.OriginsDescribeFlagOriginID)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.OriginsDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.OriginsDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.OriginsDescribeHelpFlag)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
 }
@@ -95,6 +115,7 @@ func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
 	tbl.AddRow("Origin ID: ", origin.OriginId)
+	tbl.AddRow("Origin Key: ", origin.OriginKey)
 	tbl.AddRow("Name: ", origin.Name)
 	tbl.AddRow("Origin Type: ", origin.OriginType)
 	tbl.AddRow("Addresses: ", origin.Addresses)

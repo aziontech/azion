@@ -1,12 +1,14 @@
-package describe
+package origin
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -19,23 +21,24 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.REST("GET", "edge_applications/123423424/origins/0000000-00000000-00a0a00s0as0-000000"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "123423424", "-o", "88144"})
+		cmd.SetArgs([]string{"--application-id", "123423424", "--origin-key", "0000000-00000000-00a0a00s0as0-000000"})
 
 		err := cmd.Execute()
+		fmt.Println("err: ", err)
 		require.NoError(t, err)
 	})
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/123423424/origin"),
+			httpmock.REST("GET", "edge_applications/123423424/origin/0000000-00000000-00a0a00s0as0-000000"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
@@ -46,17 +49,17 @@ func TestDescribe(t *testing.T) {
 		err := cmd.Execute()
 		require.Error(t, err)
 	})
-
+	//
 	t.Run("no id sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.REST("GET", "edge_applications/123423424/origins/0000000-00000000-00a0a00s0as0-000000"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "123423424", "-o", "88149"})
+		cmd.SetArgs([]string{"--application-id", "123423424", "--origin-key", "0000000-00000000-00a0a00s0as0-000000"})
 
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -66,7 +69,7 @@ func TestDescribe(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.REST("GET", "edge_applications/123423424/origins/0000000-00000000-00a0a00s0as0-000000"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 
@@ -74,7 +77,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 		path := "./out.json"
-		cmd.SetArgs([]string{"-a", "123423424", "-o", "88144", "--out", path})
+		cmd.SetArgs([]string{"--application-id", "123423424", "--origin-key", "0000000-00000000-00a0a00s0as0-000000", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {
@@ -91,7 +94,7 @@ func TestDescribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, `File successfully written to: out.json
-`, stdout.String())
+		require.Equal(t, "File successfully written to: out.json\n", stdout.String())
+
 	})
 }
