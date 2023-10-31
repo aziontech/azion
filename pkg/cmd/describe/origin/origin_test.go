@@ -1,4 +1,4 @@
-package origins
+package origin
 
 import (
 	"fmt"

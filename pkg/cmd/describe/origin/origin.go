@@ -1,4 +1,4 @@
-package origins
+package origin
 
 import (
 	"context"
@@ -10,7 +10,6 @@ import (
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 
-	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/describe/origin"
 
@@ -22,12 +21,6 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
-
-var exemplo string = heredoc.Doc(`
-	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000
-	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --format json
-	$ azion origins describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --out "./tmp/test.json" --format json
-	`)
 
 var (
 	applicationID int64
@@ -42,10 +35,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       exemplo,
+		Example:       msg.Example,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answers, err := utils.AskInput("What is the ID of the Edge Application?")
+				answers, err := utils.AskInput(msg.AskAppID)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
@@ -61,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answers, err := utils.AskInput("What is the ID of the Origin?")
+				answers, err := utils.AskInput(msg.AskOriginKey)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
