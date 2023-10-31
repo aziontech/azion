@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.17
+go 1.20
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58

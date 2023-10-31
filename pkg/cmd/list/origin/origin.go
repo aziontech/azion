@@ -76,10 +76,10 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		tbl := table.New("ID", "NAME")
+		tbl := table.New("ORIGIN KEY", "NAME")
 		tbl.WithWriter(f.IOStreams.Out)
 		if opts.Details {
-			tbl = table.New("ID", "NAME", "ORIGIN KEY", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
+			tbl = table.New("ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
 		}
 
 		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
@@ -88,9 +88,9 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		for _, v := range resp.Results {
 			tbl.AddRow(
-				v.OriginId,
-				utils.TruncateString(v.Name),
 				v.OriginKey,
+				utils.TruncateString(v.Name),
+				v.OriginId,
 				v.OriginType,
 				v.OriginPath,
 				v.Addresses,

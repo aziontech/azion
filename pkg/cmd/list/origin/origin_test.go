@@ -29,7 +29,7 @@ func TestList(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID     NAME            \n88144  Default Origin  \n91799  Create Origin   \n", stdout.String())
+		assert.Equal(t, "ORIGIN KEY                            NAME            \n0cee30cd-1743-4202-b0dd-da9b636a6035  Default Origin  \ne4f0761b-d2ac-4168-aa4b-f525d08396fd  Create Origin   \n", stdout.String())
 	})
 
 	t.Run("no itens", func(t *testing.T) {
@@ -47,6 +47,6 @@ func TestList(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID     NAME            \n", stdout.String())
+		assert.Equal(t, "ORIGIN KEY                            NAME            \n", stdout.String())
 	})
 }
