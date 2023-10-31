@@ -23,6 +23,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setting up a secure repository
+        run: git config --global --add safe.directory /__w/azion/azion
+
       - name: Bump version and push tag
         id: tag_ver
         uses: anothrNick/github-tag-action@1.37.0

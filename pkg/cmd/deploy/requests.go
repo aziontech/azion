@@ -337,7 +337,7 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 }
 
 func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	reqOrigin := apiori.CreateOriginsRequest{}
+	reqOrigin := apiori.CreateRequest{}
 	var addresses []string
 	if len(conf.Origin.Address) > 0 {
 		address := prepareAddresses(conf.Origin.Address)
@@ -349,7 +349,7 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin 
 	}
 	reqOrigin.SetName(conf.Name)
 	reqOrigin.SetHostHeader("${host}")
-	origin, err := clientorigin.CreateOrigins(ctx, conf.Application.Id, &reqOrigin)
+	origin, err := clientorigin.Create(ctx, conf.Application.Id, &reqOrigin)
 	if err != nil {
 		logger.Debug("Error while creating origin", zap.Error(err))
 		return err

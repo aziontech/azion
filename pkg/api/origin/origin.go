@@ -2,7 +2,6 @@ package origin
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -34,23 +33,26 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-type CreateOriginsRequest struct {
+type CreateRequest struct {
 	sdk.CreateOriginsRequest
 }
 
-type UpdateOriginsRequest struct {
+type UpdateRequest struct {
 	sdk.PatchOriginsRequest
 }
 
-type OriginsResponse interface {
+type Response interface {
 	GetOriginKey() string
 	GetOriginId() int64
 	GetName() string
 }
 
-func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
+func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey string) (sdk.OriginsResultResponse, error) {
 	logger.Debug("Get Origin")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
+		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyGet(ctx, edgeApplicationID, originKey).Execute()
+
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while describing an origin", zap.Error(err))
@@ -61,14 +63,8 @@ func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int6
 		}
 		return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	if len(resp.Results) > 0 {
-		for _, result := range resp.Results {
-			if result.OriginId == originID {
-				return result, nil
-			}
-		}
-	}
-	return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
+
+	return resp.Results, nil
 }
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
@@ -87,7 +83,7 @@ func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, e
 	return resp, nil
 }
 
-func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req *CreateRequest) (Response, error) {
 	logger.Debug("Create Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
@@ -103,7 +99,7 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	return &resp.Results, nil
 }
 
-func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Update(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateRequest) (Response, error) {
 	logger.Debug("Update Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
