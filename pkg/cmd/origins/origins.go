@@ -22,9 +22,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	originsCmd.AddCommand(list.NewCmd(f))
-	originsCmd.AddCommand(describe.NewCmd(f))
-	originsCmd.AddCommand(create.NewCmd(f))
-	originsCmd.AddCommand(update.NewCmd(f))
 	originsCmd.AddCommand(delete.NewCmd(f))
 	originsCmd.Flags().BoolP("help", "h", false, msg.OriginsFlagHelp)
 	return originsCmd

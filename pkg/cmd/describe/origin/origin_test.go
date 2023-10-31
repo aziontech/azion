@@ -1,7 +1,6 @@
 package origin
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +30,6 @@ func TestDescribe(t *testing.T) {
 		cmd.SetArgs([]string{"--application-id", "123423424", "--origin-key", "0000000-00000000-00a0a00s0as0-000000"})
 
 		err := cmd.Execute()
-		fmt.Println("err: ", err)
 		require.NoError(t, err)
 	})
 	t.Run("not found", func(t *testing.T) {
@@ -45,6 +43,7 @@ func TestDescribe(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
+		cmd.SetArgs([]string{"--application-id", "123423424", "--origin-key", "0000000-00000000-00a0a00s0as0-000000"})
 
 		err := cmd.Execute()
 		require.Error(t, err)
