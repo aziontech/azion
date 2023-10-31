@@ -45,7 +45,6 @@ var (
 	ErrorGetAssetsNamesAzioncli     = errors.New("Failed to fetch the assets names from azion")
 	ErrorArgumentIsEmpty            = errors.New("Argument is empty")
 	ErrorParseResponse              = errors.New("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support")
-	ErrorConvertingStringToInt      = errors.New("The given data isn’t a integer type value. Provide a valid integer type in the command’s flag value and try again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorMinTlsVersion              = errors.New("This is not a valid TLS Version. Run azion edge_applications <subcommand> --help for more information")
 	ErrorNameInUse                  = errors.New("The name you've selected is already in use by another resource. Please choose a different name. Run 'azion list [resource]' to see all your resources")
 	ErrorCancelledContextInput      = errors.New("Execution interrupted by the user. All interactions of this flow were lost.")
