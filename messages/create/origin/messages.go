@@ -22,7 +22,7 @@ const (
 	FlagHelp                 = "Displays more information about the create subcommand"
 
 	// [ ask ]
-	AskAppID      = "What is the ID of the Edge Application?"
+	AskAppID      = "What is the ID of the Edge Application this origin is linked to?"
 	AskName       = "What is the Name of the Origin?"
 	AskAddresses  = "What is the Addresses of the Origin?"
 	AskHostHeader = "What is the Host Header of the Origin?"
