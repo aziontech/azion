@@ -13,7 +13,7 @@ var (
 	HelpFlag          = "Displays more information about the describe subcommand"
 
 	AskAppID     = "What is the ID of the Edge Application this origin is linked to?"
-	AskOriginKey = "What is the ID of the Origin?"
+	AskOriginKey = "What is the Key of the Origin?"
 
 	Example string = heredoc.Doc(`
 	$ azion origin describe --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000

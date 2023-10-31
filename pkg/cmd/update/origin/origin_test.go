@@ -1,11 +1,12 @@
-package update
+package origin
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -15,7 +16,7 @@ import (
 
 func TestUpdate(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("update origins", func(t *testing.T) {
+	t.Run("update origin", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

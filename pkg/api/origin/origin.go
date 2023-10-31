@@ -33,15 +33,15 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-type CreateOriginsRequest struct {
+type CreateRequest struct {
 	sdk.CreateOriginsRequest
 }
 
-type UpdateOriginsRequest struct {
+type UpdateRequest struct {
 	sdk.PatchOriginsRequest
 }
 
-type OriginsResponse interface {
+type Response interface {
 	GetOriginKey() string
 	GetOriginId() int64
 	GetName() string
@@ -83,7 +83,7 @@ func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, e
 	return resp, nil
 }
 
-func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req *CreateRequest) (Response, error) {
 	logger.Debug("Create Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	return &resp.Results, nil
 }
 
-func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Update(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateRequest) (Response, error) {
 	logger.Debug("Update Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
