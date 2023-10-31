@@ -65,7 +65,7 @@ func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts
 		tbl.WithWriter(f.IOStreams.Out)
 
 		if opts.Details {
-		  tbl = table.New("ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES")
+			tbl = table.New("ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES")
 		}
 
 		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()

@@ -8,10 +8,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/describe/domains"
+	msg "github.com/aziontech/azion-cli/messages/describe/domain"
 	"github.com/fatih/color"
 
-	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"

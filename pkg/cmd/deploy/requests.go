@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domains"
+	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"

@@ -1,4 +1,4 @@
-package domains
+package domain
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/domains"
-	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	msg "github.com/aziontech/azion-cli/messages/list/domain"
+	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -90,6 +90,11 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		if opts.Page >= resp.TotalPages {
 			break
 		}
+
+		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
+			break
+		}
+
 		opts.Page++
 	}
 
