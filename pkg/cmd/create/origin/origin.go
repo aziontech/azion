@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 
 	msg "github.com/aziontech/azion-cli/messages/create/origin"
+
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -51,7 +52,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example:       heredoc.Doc(example),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateRequest{}
-
 			if cmd.Flags().Changed("in") {
 				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
 				if err != nil {
@@ -94,6 +94,7 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateRequest) error {
 	if !cmd.Flags().Changed("application-id") {
 		answers, err := utils.AskInput(msg.AskAppID)
+
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
