@@ -19,4 +19,6 @@ var (
 	FlagIn                   = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
 	FlagHelp                 = "Displays more information about the update subcommand"
 	OutputSuccess            = "Updated origin with ID %s\n"
+	AskAppID                 = "What is the ID of the Edge Application this origin is linked to?"
+	AskOriginKey             = "What is the key of the Origin?"
 )

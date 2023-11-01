@@ -51,8 +51,35 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.UpdateRequest{}
+
+			if !cmd.Flags().Changed("application-id") {
+				answers, err := utils.AskInput(msg.AskAppID)
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				applicationID, err := strconv.Atoi(answers)
+				if err != nil {
+					logger.Debug("Error while parsing string to integer", zap.Error(err))
+					return utils.ErrorConvertingStringToInt
+				}
+
+				fields.ApplicationID = int64(applicationID)
+			}
+
+			if !cmd.Flags().Changed("origin-key") {
+				answers, err := utils.AskInput(msg.AskOriginKey)
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				fields.OriginKey = answers
+			}
+
 			if cmd.Flags().Changed("in") {
-				if err := utils.FlagINUnmarshalFileJSON(fields.Path, request); err != nil {
+				if err := utils.FlagINUnmarshalFileJSON(fields.Path, &request); err != nil {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
@@ -67,7 +94,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.OutputSuccess, response.GetOriginKey())
+
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetOriginKey()))
 			return nil
 		},
 	}
@@ -87,32 +115,6 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 }
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.UpdateRequest) error {
-	if !cmd.Flags().Changed("application-id") {
-		answers, err := utils.AskInput("What is the ID of the Edge Application?")
-		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
-		}
-
-		applicationID, err := strconv.Atoi(answers)
-		if err != nil {
-			logger.Debug("Error while parsing string to integer", zap.Error(err))
-			return utils.ErrorConvertingStringToInt
-		}
-
-		fields.ApplicationID = int64(applicationID)
-	}
-
-	if !cmd.Flags().Changed("origin-key") {
-		answers, err := utils.AskInput("What is the Origin Key of the Origin?")
-		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
-		}
-
-		fields.OriginKey = answers
-	}
-
 	if cmd.Flags().Changed("name") {
 		request.SetName(fields.Name)
 	}
@@ -156,8 +158,8 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVarP(&fields.OriginKey, "origin-key", "o", "", msg.FlagOriginKey)
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.FlagEdgeApplicationId)
+	flags.StringVar(&fields.OriginKey, "origin-key", "", msg.FlagOriginKey)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
 	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, msg.FlagAddresses)
