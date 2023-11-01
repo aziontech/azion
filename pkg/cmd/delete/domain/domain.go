@@ -1,4 +1,4 @@
-package domains
+package domain
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/domains"
-	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	msg "github.com/aziontech/azion-cli/messages/delete/domain"
+	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"

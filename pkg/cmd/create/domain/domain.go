@@ -1,4 +1,4 @@
-package domains
+package domain
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/domains"
-	api "github.com/aziontech/azion-cli/pkg/api/domains"
+	msg "github.com/aziontech/azion-cli/messages/create/domain"
+	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"

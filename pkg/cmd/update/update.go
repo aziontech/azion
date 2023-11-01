@@ -3,7 +3,7 @@ package update
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/update"
-	domains "github.com/aziontech/azion-cli/pkg/cmd/update/domains"
+	domain "github.com/aziontech/azion-cli/pkg/cmd/update/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/update/edge_application"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/update/origin"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.AddCommand(edgeApplication.NewCmd(f))
 	cmd.AddCommand(rulesEngine.NewCmd(f))
-	cmd.AddCommand(domains.NewCmd(f))
+	cmd.AddCommand(domain.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
