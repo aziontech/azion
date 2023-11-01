@@ -53,7 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request := api.UpdateRequest{}
 
 			if !cmd.Flags().Changed("application-id") {
-				answers, err := utils.AskInput("What is the ID of the Edge Application?")
+				answers, err := utils.AskInput(msg.AskAppID)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
@@ -69,7 +69,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answers, err := utils.AskInput("What is the Origin Key of the Origin?")
+				answers, err := utils.AskInput(msg.AskOriginKey)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
