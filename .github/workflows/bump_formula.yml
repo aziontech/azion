@@ -1,0 +1,27 @@
+name: Bump Homebrew formula
+
+on:
+  push:
+    tags: '*'
+    branches:
+        - workflow-and-vulcan
+
+jobs:
+    test_ver:
+        name: test version print
+        runs-on: ubuntu-latest
+        steps:
+            - name: Capture git describe output
+              id: describe
+              run: |
+                echo "::set-output name=tag::$(git describe --tags)"
+            - name: Use git describe output
+              run: echo ${{ steps.describe.outputs.tag }}
+#   homebrew:
+#     name: Bump Homebrew formula
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: dawidd6/action-homebrew-bump-formula@v3
+#         with:
+#           token: ${{secrets.RELEASE_GITHUB_TOKEN}}
+#           formula: azion
