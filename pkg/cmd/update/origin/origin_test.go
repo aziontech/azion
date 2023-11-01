@@ -1,14 +1,12 @@
 package origin
 
 import (
-	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -37,7 +35,7 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.OriginsUpdateOutputSuccess, "03a6e7bf-8e26-49c7-a66e-ab8eaa425086"), stdout.String())
+		require.Equal(t, "🚀 Updated origin with ID 03a6e7bf-8e26-49c7-a66e-ab8eaa425086\n\n", stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
@@ -85,6 +83,6 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.OriginsUpdateOutputSuccess, "03a6e7bf-8e26-49c7-a66e-ab8eaa425086"), stdout.String())
+		require.Equal(t, "🚀 Updated origin with ID 03a6e7bf-8e26-49c7-a66e-ab8eaa425086\n\n", stdout.String())
 	})
 }

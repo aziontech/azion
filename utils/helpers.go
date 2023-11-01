@@ -486,6 +486,8 @@ func LogAndRewindBody(httpResp *http.Response) error {
 	return nil
 }
 
+// FlagINUnmarshalFileJSON
+// request interface{} always as a pointer
 func FlagINUnmarshalFileJSON(path string, request interface{}) error {
 	var (
 		file *os.File
