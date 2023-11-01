@@ -13,8 +13,7 @@ jobs:
         steps:
             - name: Capture git describe output
               id: describe
-              run: |
-                echo "::set-output name=tag::$(git describe --tags)"
+              run: echo "MY_VARIABLE=$(git describe --tags)" >> $GITHUB_ENV
             - name: Use git describe output
               run: echo ${{ steps.describe.outputs.tag }}
 #   homebrew:
