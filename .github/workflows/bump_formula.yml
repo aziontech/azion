@@ -11,11 +11,19 @@ jobs:
         name: test version print
         runs-on: ubuntu-latest
         steps:
+            - name: Checkout code
+              id: checkout
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0         
+            - name: Setting up a secure repository
+              run: git config --global --add safe.directory /__w/azion/azion
             - name: Capture git describe output
               id: describe
               run: echo "MY_VARIABLE=$(git describe --tags)" >> $GITHUB_ENV
             - name: Use git describe output
               run: echo ${{ steps.describe.outputs.tag }}
+              
 #   homebrew:
 #     name: Bump Homebrew formula
 #     runs-on: ubuntu-latest
