@@ -51,7 +51,7 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion delete edge-application --id 1234
+		$ azion delete edge-application --application-id 1234
 		$ azion delete edge-application --cascade
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -59,7 +59,7 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&application_id, "id", 0, msg.FlagId)
+	cmd.Flags().Int64Var(&application_id, "application-id", 0, msg.FlagId)
 	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
@@ -109,11 +109,11 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 
 	}
 
-	if !cmd.Flags().Changed("id") {
+	if !cmd.Flags().Changed("application-id") {
 		qs := []*survey.Question{
 			{
 				Name:     "id",
-				Prompt:   &survey.Input{Message: "What is the id of the Edge Application you wish to delete?"},
+				Prompt:   &survey.Input{Message: msg.AskInput},
 				Validate: survey.Required,
 			},
 		}

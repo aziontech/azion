@@ -19,9 +19,9 @@ import (
 )
 
 const example = `
-        $ azion create edge-applications --name "naruno"
-        $ azion create edge-applications --in create.json
-        $ json example "create.json": 
+        $ azion create edge-application --name "naruno"
+        $ azion create edge-application --in create.json
+        $ json example to be used with '--in flag' "create.json": 
         {
             "name": "New Edge Application",
             "delivery_protocol": "http",
@@ -41,6 +41,7 @@ type Fields struct {
 	DeliveryProtocol               string
 	Http3                          string
 	HttpPort                       string
+	HttpsPort                      string
 	OriginType                     string
 	Address                        string
 	OriginProtocolPolicy           string
@@ -159,6 +160,10 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 		request.SetHttpPort(fields.HttpPort)
 	}
 
+	if !utils.IsEmpty(fields.HttpsPort) {
+		request.SetHttpsPort(fields.HttpsPort)
+	}
+
 	if !utils.IsEmpty(fields.DeliveryProtocol) {
 		request.SetOriginType(fields.OriginType)
 	}
@@ -199,6 +204,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
 	flags.StringVar(&fields.Http3, "http3", "", msg.FlagHttp3)
 	flags.StringVar(&fields.HttpPort, "http-port", "", msg.FlagHttpPort)
+	flags.StringVar(&fields.HttpsPort, "https-port", "", msg.FlagHttpsPort)
 	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
 	flags.StringVar(&fields.Address, "address", "", msg.FlagAddress)
 	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)

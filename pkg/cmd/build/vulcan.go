@@ -7,12 +7,13 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vul "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
 func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
-	const command string = "npx --yes edge-functions@1.7.0 build --preset %s --mode %s"
+	command := vul.Command("", "build --preset %s --mode %s")
 
 	err := runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
 	if err != nil {

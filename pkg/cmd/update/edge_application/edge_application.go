@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update edge-application --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("id") && !cmd.Flags().Changed("in") {
+			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("in") {
 				qs := []*survey.Question{
 					{
 						Name:      "id",
@@ -200,7 +200,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.ID, "id", 0, msg.FlagID)
+	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
 	flags.Int64Var(&fields.HTTPPort, "http-port", 80, msg.FlagHttpPort)
@@ -223,7 +223,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func returnAnyField(cmd *cobra.Command) bool {
 	anyFlagChanged := false
 	cmd.Flags().Visit(func(flag *pflag.Flag) {
-		if flag.Changed && flag.Name != "id" {
+		if flag.Changed && flag.Name != "application-id" {
 			anyFlagChanged = true
 		}
 	})

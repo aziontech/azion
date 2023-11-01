@@ -1,7 +1,7 @@
 package edge_applications
 
 var (
-	Usage            = "edge-application --application-id <application_id> [flags]"
+	Usage            = "edge-application"
 	ShortDescription = "Returns the Edge Application data"
 	LongDescription  = "Displays information about the Edge Application via a given ID to show the application’s attributes in detail"
 	FlagOut          = "Exports the output to the given <file_path/file_name.ext>"

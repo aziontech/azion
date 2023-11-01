@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.17
+      image: golang:1.20
     env:
       CGO_ENABLED: 0 # Statically linked
 
@@ -22,6 +22,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Setting up a secure repository
+        run: git config --global --add safe.directory /__w/azion/azion
 
       - name: Bump version and push tag
         id: tag_ver

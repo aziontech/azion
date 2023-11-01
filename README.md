@@ -42,7 +42,7 @@ To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://gith
 To download azion CLI through Homebrew, run:
 
 ```sh
-brew install aziontech/tap/azion
+brew install azion
 ``````
 
 ## Building Locally
@@ -85,6 +85,16 @@ Check all reference documentation for the available [commands](https://github.co
 ### Autocomplete
 
 It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocomplete).
+
+### Go Lang Update Policy
+
+Our update policy for the Go language aims to ensure that all developers benefit from new features, bug fixes and improvements. To this end, we have adopted the practice of maintaining our project at [Release](https://go.dev/doc/devel/release) - 1 (Go 1.21 -1).
+
+By following this approach, we prioritize the stability and consistency of the project, while keeping up to date with the latest language updates. As new versions of Go are released, we will evaluate and adopt the new "[Release](https://go.dev/doc/devel/release)" version, after having sufficient time to test and validate compatibility with our existing code.
+
+This way, our developers can take advantage of the new features, bug fixes and improvements made available by the Go community, while minimizing the possible impacts that sudden updates could have on our project.
+
+We appreciate the understanding and collaboration of all developers who follow our update policy. Together, we guarantee a stable and up-to-date development environment for our Go project. 
 
 ## License
 

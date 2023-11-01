@@ -93,3 +93,68 @@ func TestCobraCmd(t *testing.T) {
 		require.Equal(t, `'edge_domain' is not a valid option for 'order_by'`, err.Error())
 	})
 }
+
+func TestIsEmpty(t *testing.T) {
+	type args struct {
+		value interface{}
+	}
+
+	var str *string
+	var num *int
+
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "string",
+			args: args{
+				value: "string",
+			},
+			want: false,
+		},
+		{
+			name: "string empty",
+			args: args{
+				value: "",
+			},
+			want: true,
+		},
+		{
+			name: "string empty pointer",
+			args: args{
+				value: str,
+			},
+			want: true,
+		},
+		{
+			name: "int",
+			args: args{
+				value: 1,
+			},
+			want: false,
+		},
+		{
+			name: "int number zero",
+			args: args{
+				value: 0,
+			},
+			want: false,
+		},
+		{
+			name: "int pointer",
+			args: args{
+				value: num,
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := IsEmpty(tt.args.value); got != tt.want {
+				t.Errorf("IsEmpty() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
