@@ -86,20 +86,11 @@ jobs:
           STORAGE_URL: https://storage-api.azion.com
           AUTH_URL: https://sso.azion.com/api/user/me
           TEMPLATE_BRANCH: main
-
-  bump_brew_formula:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Bump Homebrew formula
-      uses: dawidd6/action-homebrew-bump-formula@v3
-      with:
-        token: ${{secrets.RELEASE_GITHUB_TOKEN}}
-        formula: azion
-
+          
+      - uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.RELEASE_GITHUB_TOKEN}}
+          formula: azion
+          tag: ${{ env.BIN_VERSION }}
 
 
