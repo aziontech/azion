@@ -17,6 +17,13 @@ jobs:
       CGO_ENABLED: 0 # Statically linked
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setting up a secure repository
+        run: git config --global --add safe.directory /__w/azion/azion
 
       - id: binversion 
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT
