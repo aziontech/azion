@@ -32,6 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-    - run: echo `${{needs.build.outputs.binver}}
+    - run: echo ${{needs.build.outputs.binver}}
 
 
