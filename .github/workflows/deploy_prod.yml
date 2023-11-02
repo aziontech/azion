@@ -75,6 +75,9 @@ jobs:
 
       - id: binversion 
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT
+
+      - name: set bin version to github env 
+        run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
           
 
       - uses: goreleaser/goreleaser-action@v2
