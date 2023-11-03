@@ -2,6 +2,7 @@ package list
 
 import (
 	"github.com/MakeNowJust/heredoc"
+	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_settings"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/list/edge_applications"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
@@ -31,6 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(domain.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
+	cmd.AddCommand(cache.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
