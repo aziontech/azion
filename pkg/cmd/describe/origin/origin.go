@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/messages/describe/origin"
+	msg "github.com/aziontech/azion-cli/pkg/messages/describe/origin"
 	"path/filepath"
 	"strconv"
 
@@ -29,15 +29,15 @@ var (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           origin.Usage,
-		Short:         origin.ShortDescription,
-		Long:          origin.LongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       origin.Example,
+		Example:       msg.Example,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answers, err := utils.AskInput(origin.AskAppID)
+				answers, err := utils.AskInput(msg.AskAppID)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
@@ -53,7 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answers, err := utils.AskInput(origin.AskOriginKey)
+				answers, err := utils.AskInput(msg.AskOriginKey)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
@@ -66,7 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			origin, err := client.Get(ctx, applicationID, originKey)
 			if err != nil {
-				return fmt.Errorf(origin.ErrorGetOrigin.Error(), err)
+				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -80,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, origin.OriginsFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, msg.OriginsFileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -92,11 +92,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, origin.FlagApplicationID)
-	cmd.Flags().StringVar(&originKey, "origin-key", "", origin.FlagOriginKey)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", origin.FlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", origin.FlagFormat)
-	cmd.Flags().BoolP("help", "h", false, origin.HelpFlag)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
 }

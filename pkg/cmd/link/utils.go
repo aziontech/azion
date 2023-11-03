@@ -2,7 +2,7 @@ package link
 
 import (
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/messages/init"
+	msg "github.com/aziontech/azion-cli/pkg/messages/init"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -90,7 +90,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return nil
 	}
 
-	logger.FInfo(cmd.Io.Out, init.InitGettingTemplates)
+	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
 	command := vul.Command("--loglevel=error --no-update-notifier", "presets ls")
 
@@ -125,12 +125,12 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 }
 
 func depsInstall(cmd *LinkCmd, packageManager string) error {
-	logger.FInfo(cmd.Io.Out, init.InitInstallDeps)
+	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
-		return init.ErrorDeps
+		return msg.ErrorDeps
 	}
 
 	return nil
