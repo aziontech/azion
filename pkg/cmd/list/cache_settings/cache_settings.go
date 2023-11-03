@@ -50,21 +50,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				edgeApplicationID = num
 			}
 
-			var numberPage int64 = opts.Page
-			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page-size") {
-				for {
-					pages, err := PrintTable(cmd, f, opts, &numberPage)
-					if numberPage > pages && err == nil {
-						return nil
-					}
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			if _, err := PrintTable(cmd, f, opts, &numberPage); err != nil {
-				return err
+			if err := PrintTable(cmd, f, opts); err != nil {
+				return msg.ErrorGetCaches
 			}
 			return nil
 		},
@@ -76,44 +63,53 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int64) (int64, error) {
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	applications, err := client.ListCacheSettings(ctx, opts, edgeApplicationID)
-	if err != nil {
-		return 0, msg.ErrorGetCaches
-	}
-
-	tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")
-	tbl.WithWriter(f.IOStreams.Out)
-	if cmd.Flags().Changed("details") {
-		tbl = table.New("ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST")
-	}
-
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgGreen).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-
-	for _, v := range applications.Results {
-		if cmd.Flags().Changed("details") {
-			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings, v.CdnCacheSettings, v.CacheByCookies, v.EnableCachingForPost)
-		} else {
-			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings)
+	for {
+		cache, err := client.ListCacheSettings(ctx, opts, edgeApplicationID)
+		if err != nil {
+			return msg.ErrorGetCaches
 		}
+
+		tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")
+		tbl.WithWriter(f.IOStreams.Out)
+
+		if cmd.Flags().Changed("details") {
+			tbl = table.New("ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST")
+		}
+
+		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
+		columnFmt := color.New(color.FgGreen).SprintfFunc()
+		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+		for _, v := range cache.Results {
+			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings, v.CdnCacheSettings, v.CacheByCookies, v.EnableCachingForPost)
+		}
+
+		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
+		tbl.CalculateWidths([]string{})
+
+		// print the header only in the first flow
+		if opts.Page == 1 {
+			logger.PrintHeader(tbl, format)
+		}
+
+		for _, row := range tbl.GetRows() {
+			logger.PrintRow(tbl, format, row)
+		}
+
+		if opts.Page >= cache.TotalPages {
+			break
+		}
+
+		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
+			break
+		}
+
+		opts.Page++
 	}
 
-	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
-	if *numberPage == 1 {
-		tbl.PrintHeader(format)
-	}
-
-	for _, row := range tbl.GetRows() {
-		tbl.PrintRow(format, row)
-	}
-
-	*numberPage += 1
-	opts.Page = *numberPage
-	return applications.TotalPages, nil
+	return nil
 }
