@@ -123,7 +123,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a domain", zap.Error(err))
+			logger.Debug("Error while listing domains", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -143,7 +143,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating an origin", zap.Error(err))
+			logger.Debug("Error while deleting a domain", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
