@@ -3,11 +3,11 @@ package update
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/device_groups"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -28,9 +28,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.DeviceGroupsUpdateUsage,
-		Short:         msg.DeviceGroupsUpdateShortDescription,
-		Long:          msg.DeviceGroupsUpdateLongDescription,
+		Use:           device_groups.DeviceGroupsUpdateUsage,
+		Short:         device_groups.DeviceGroupsUpdateShortDescription,
+		Long:          device_groups.DeviceGroupsUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -40,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("in") && (!cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("group-id")) {
-				return msg.ErrorMandatoryFlagsUpdate
+				return device_groups.ErrorMandatoryFlagsUpdate
 			}
 
 			request := sdk.PatchDeviceGroupsRequest{}
@@ -63,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("group-id") {
-					return msg.ErrorMandatoryFlagsUpdate
+					return device_groups.ErrorMandatoryFlagsUpdate
 				}
 				if cmd.Flags().Changed("name") {
 					request.SetName(fields.Name)
@@ -78,19 +78,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.UpdateDeviceGroup(context.Background(), request, fields.ApplicationID, fields.GroupID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateDeviceGroups.Error(), err)
+				return fmt.Errorf(device_groups.ErrorUpdateDeviceGroups.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.DeviceGroupsUpdateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, device_groups.DeviceGroupsUpdateOutputSuccess, response.GetId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.ApplicationFlagId)
-	flags.Int64VarP(&fields.GroupID, "group-id", "g", 0, msg.DeviceGroupFlagId)
-	flags.StringVar(&fields.Name, "name", "", msg.DeviceGroupsUpdateFlagName)
-	flags.StringVar(&fields.UserAgent, "user-agent", "", msg.DeviceGroupsUpdateFlagUserAgent)
-	flags.StringVar(&fields.Path, "in", "", msg.DeviceGroupsUpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.DeviceGroupsFlagHelp)
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, device_groups.ApplicationFlagId)
+	flags.Int64VarP(&fields.GroupID, "group-id", "g", 0, device_groups.DeviceGroupFlagId)
+	flags.StringVar(&fields.Name, "name", "", device_groups.DeviceGroupsUpdateFlagName)
+	flags.StringVar(&fields.UserAgent, "user-agent", "", device_groups.DeviceGroupsUpdateFlagUserAgent)
+	flags.StringVar(&fields.Path, "in", "", device_groups.DeviceGroupsUpdateFlagIn)
+	flags.BoolP("help", "h", false, device_groups.DeviceGroupsFlagHelp)
 	return cmd
 }

@@ -1,13 +1,13 @@
 package edge_application
 
 import (
+	msg "github.com/aziontech/azion-cli/pkg/messages/update/edge_application"
 	"net/http"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/update/edge_application"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"

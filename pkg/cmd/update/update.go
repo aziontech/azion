@@ -2,11 +2,11 @@ package update
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/update"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/update/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/update/edge_application"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/update/origin"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
+	msg "github.com/aziontech/azion-cli/pkg/messages/update"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"

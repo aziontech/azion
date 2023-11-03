@@ -2,14 +2,14 @@ package list
 
 import (
 	"context"
+	"github.com/aziontech/azion-cli/pkg/messages/general"
+	msg "github.com/aziontech/azion-cli/pkg/messages/variables"
 	"strings"
 
 	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	"github.com/aziontech/azion-cli/messages/general"
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"

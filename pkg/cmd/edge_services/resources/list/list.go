@@ -3,10 +3,10 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -22,9 +22,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           msg.EdgeServiceResourceListUsage,
-		Short:         msg.EdgeServiceResourceListShortDescription,
-		Long:          msg.EdgeServiceResourceListLongDescription,
+		Use:           edgeservices.EdgeServiceResourceListUsage,
+		Short:         edgeservices.EdgeServiceResourceListShortDescription,
+		Long:          edgeservices.EdgeServiceResourceListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return msg.ErrorMissingServiceIdArgument
+				return edgeservices.ErrorMissingServiceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -49,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(listCmd, opts)
 	listCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, "Unique identifier of the Edge Service")
-	listCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceListFlagHelp)
+	listCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceResourceListFlagHelp)
 
 	return listCmd
 }
@@ -72,7 +72,7 @@ func listAllResources(client *sdk.APIClient, out io.Writer, opts *contracts.List
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorGetResources.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorGetResources.Error(), message)
 	}
 
 	resources := resp.Resources

@@ -3,6 +3,7 @@ package ruleengine
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/list/rules_engine"
 	"strconv"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -26,9 +26,9 @@ var phase string
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.RulesEngineListUsage,
-		Short:         msg.RulesEngineListShortDescription,
-		Long:          msg.RulesEngineListLongDescription,
+		Use:           ruleengine.RulesEngineListUsage,
+		Short:         ruleengine.RulesEngineListShortDescription,
+		Long:          ruleengine.RulesEngineListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion list rules-engine --application-id 1673635839 --phase request
@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(ruleengine.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
+					return ruleengine.ErrorConvertIdApplication
 				}
 
 				edgeApplicationID = num
@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("phase") {
 
-				answer, err := utils.AskInput(msg.AskInputPhase)
+				answer, err := utils.AskInput(ruleengine.AskInputPhase)
 				if err != nil {
 					return err
 				}
@@ -63,16 +63,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetRulesEngines.Error(), err)
+				return fmt.Errorf(ruleengine.ErrorGetRulesEngines.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
-	cmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
-	cmd.Flags().StringVar(&phase, "phase", "request", msg.RulesEnginePhase)
+	cmd.Flags().BoolP("help", "h", false, ruleengine.RulesEngineListHelpFlag)
+	cmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, ruleengine.ApplicationFlagId)
+	cmd.Flags().StringVar(&phase, "phase", "request", ruleengine.RulesEnginePhase)
 	return cmd
 }
 

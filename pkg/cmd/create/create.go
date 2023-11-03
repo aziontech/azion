@@ -2,13 +2,13 @@ package create
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/create"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/create/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/edge_applications"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/create/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/create"
 	"github.com/spf13/cobra"
 )
 

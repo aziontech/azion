@@ -2,8 +2,8 @@ package build
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/build"
 
-	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -27,7 +27,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		logger.Debug("Error while building your project", zap.Error(err))
-		return msg.ErrorBuilding
+		return build.ErrorBuilding
 	}
 
 	if Preset != "" {
@@ -44,7 +44,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 	}
 
 	if conf.Template == "simple" {
-		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
+		logger.FInfo(cmd.Io.Out, build.BuildSimple)
 		return nil
 	}
 
@@ -56,7 +56,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 		if err != nil {
 			return nil
 		}
-		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
+		logger.FInfo(cmd.Io.Out, build.BuildSimple)
 		return nil
 	}
 

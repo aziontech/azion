@@ -2,8 +2,8 @@ package dev
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/dev"
 
-	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"

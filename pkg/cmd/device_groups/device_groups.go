@@ -2,13 +2,13 @@ package device_groups
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/device_groups/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/device_groups"
 	"github.com/spf13/cobra"
 )
 

@@ -2,13 +2,13 @@ package domain
 
 import (
 	"context"
+	"github.com/aziontech/azion-cli/pkg/messages/list/domain"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,9 +20,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           domain.Usage,
+		Short:         domain.ShortDescription,
+		Long:          domain.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion list domain
@@ -30,14 +30,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return msg.ErrorGetDomains
+				return domain.ErrorGetDomains
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().BoolP("help", "h", false, domain.HelpFlag)
 	return cmd
 }
 

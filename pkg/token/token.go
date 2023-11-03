@@ -2,12 +2,11 @@ package token
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/root"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
-
-	msg "github.com/aziontech/azion-cli/messages/root"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/constants"

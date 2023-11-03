@@ -3,13 +3,13 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/origins"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/origins"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -21,9 +21,9 @@ var edgeApplicationID int64 = 0
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.OriginsListUsage,
-		Short:         msg.OriginsListShortDescription,
-		Long:          msg.OriginsListLongDescription,
+		Use:           origins.OriginsListUsage,
+		Short:         origins.OriginsListShortDescription,
+		Long:          origins.OriginsListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
         $ azion origins list -a 16736354321
@@ -32,11 +32,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				return msg.ErrorMissingApplicationIDArgument
+				return origins.ErrorMissingApplicationIDArgument
 			}
 
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
+				return fmt.Errorf(origins.ErrorGetOrigins.Error(), err)
 			}
 			return nil
 		},
@@ -44,8 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	flags := cmd.Flags()
-	flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.OriginsListFlagEdgeApplicationID)
-	flags.BoolP("help", "h", false, msg.OriginsListHelpFlag)
+	flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, origins.OriginsListFlagEdgeApplicationID)
+	flags.BoolP("help", "h", false, origins.OriginsListHelpFlag)
 	return cmd
 }
 
@@ -55,7 +55,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	response, err := client.ListOrigins(ctx, opts, edgeApplicationID)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
+		return fmt.Errorf(origins.ErrorGetOrigins.Error(), err)
 	}
 
 	tbl := table.New("ID", "NAME")

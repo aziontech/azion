@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/describe/rules_engine"
 	"path/filepath"
 	"strconv"
 
@@ -12,8 +13,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/describe/rules_engine"
-
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -31,9 +30,9 @@ var (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           rulesengine.Usage,
+		Short:         rulesengine.ShortDescription,
+		Long:          rulesengine.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -44,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("rule-id") {
 
-				answer, err := utils.AskInput(msg.AskInputRulesId)
+				answer, err := utils.AskInput(rulesengine.AskInputRulesId)
 				if err != nil {
 					return err
 				}
@@ -52,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
+					return rulesengine.ErrorConvertIdRule
 				}
 
 				ruleID = num
@@ -60,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(rulesengine.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -68,7 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
+					return rulesengine.ErrorConvertIdRule
 				}
 
 				applicationID = num
@@ -76,7 +75,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("phase") {
 
-				answer, err := utils.AskInput(msg.AskInputPhase)
+				answer, err := utils.AskInput(rulesengine.AskInputPhase)
 				if err != nil {
 					return err
 				}
@@ -88,7 +87,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			rules, err := client.GetRulesEngine(ctx, applicationID, ruleID, phase)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
+				return fmt.Errorf(rulesengine.ErrorGetRulesEngine.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -102,7 +101,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, rulesengine.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -114,12 +113,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, rulesengine.FlagAppID)
+	cmd.Flags().Int64Var(&ruleID, "rule-id", 0, rulesengine.FlagRuleID)
+	cmd.Flags().StringVar(&phase, "phase", "request", rulesengine.FlagPhase)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", rulesengine.DescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", rulesengine.DescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, rulesengine.HelpFlag)
 
 	return cmd
 }

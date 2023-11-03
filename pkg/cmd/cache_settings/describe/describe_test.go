@@ -2,6 +2,7 @@ package describe
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -60,7 +60,7 @@ func TestDescribe(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorMissingArguments)
+		require.ErrorIs(t, err, cache_settings.ErrorMissingArguments)
 	})
 
 	t.Run("export to a file", func(t *testing.T) {
@@ -92,6 +92,6 @@ func TestDescribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsFileWritten, path), stdout.String())
+		require.Equal(t, fmt.Sprintf(cache_settings.CacheSettingsFileWritten, path), stdout.String())
 	})
 }

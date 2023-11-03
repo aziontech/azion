@@ -2,8 +2,8 @@ package init
 
 import (
 	"encoding/json"
+	msg "github.com/aziontech/azion-cli/pkg/messages/init"
 
-	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 )

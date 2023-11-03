@@ -2,13 +2,13 @@ package edge_functions_instances
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions_instances/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"github.com/spf13/cobra"
 )
 

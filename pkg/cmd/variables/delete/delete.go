@@ -3,9 +3,9 @@ package delete
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/variables"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -15,9 +15,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var variable_id string
 
 	deleteCmd := &cobra.Command{
-		Use:           msg.DeleteUsage,
-		Short:         msg.DeleteShortDescription,
-		Long:          msg.DeleteLongDescription,
+		Use:           variables.DeleteUsage,
+		Short:         variables.DeleteShortDescription,
+		Long:          variables.DeleteLongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("variable-id") {
-				return msg.ErrorMissingVariableIdArgumentDelete
+				return variables.ErrorMissingVariableIdArgumentDelete
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -37,17 +37,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			err := client.Delete(ctx, variable_id)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
+				return fmt.Errorf(variables.ErrorFailToDeleteVariable.Error(), err)
 			}
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.DeleteOutputSuccess, variable_id)
+			fmt.Fprintf(out, variables.DeleteOutputSuccess, variable_id)
 
 			return nil
 		},
 	}
 
-	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", msg.FlagVariableID)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
+	deleteCmd.Flags().StringVarP(&variable_id, "variable-id", "v", "", variables.FlagVariableID)
+	deleteCmd.Flags().BoolP("help", "h", false, variables.DeleteHelpFlag)
 
 	return deleteCmd
 }

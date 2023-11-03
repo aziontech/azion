@@ -2,9 +2,9 @@ package personaltoken
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/create/personal_token"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"

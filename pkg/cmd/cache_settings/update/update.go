@@ -3,12 +3,12 @@ package update
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	// msgapp "github.com/aziontech/azion-cli/messages/edge_applications"
 
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -45,9 +45,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.CacheSettingsUpdateUsage,
-		Short:         msg.CacheSettingsUpdateShortDescription,
-		Long:          msg.CacheSettingsUpdateLongDescription,
+		Use:           cache_settings.CacheSettingsUpdateUsage,
+		Short:         cache_settings.CacheSettingsUpdateShortDescription,
+		Long:          cache_settings.CacheSettingsUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -62,7 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if cmd.Flags().Changed("in") {
 				if !cmd.Flags().Changed("application-id") { // flags requireds
-					return msg.ErrorMandatoryUpdateInFlags
+					return cache_settings.ErrorMandatoryUpdateInFlags
 				}
 				var (
 					file *os.File
@@ -89,12 +89,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 
 				if (request.GetEnableCachingForOptions() || request.GetEnableCachingForPost() || request.GetEnableQueryStringSort()) && !application.GetApplicationAcceleration() {
-					return msg.ErrorApplicationAccelerationNotEnabled
+					return cache_settings.ErrorApplicationAccelerationNotEnabled
 				}
 
 			} else {
 				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("cache-settings-id") { // flags requireds
-					return msg.ErrorMandatoryUpdateFlags
+					return cache_settings.ErrorMandatoryUpdateFlags
 				}
 
 				request.Id = fields.CacheSettingsID
@@ -112,7 +112,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				if cmd.Flags().Changed("browser-cache-settings") {
 					if fields.browser_cache_settings == "override" && !cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
-						return msg.ErrorBrowserMaximumTtlNotSent
+						return cache_settings.ErrorBrowserMaximumTtlNotSent
 					}
 					request.SetBrowserCacheSettings(fields.browser_cache_settings)
 				}
@@ -160,10 +160,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("enable-caching-for-options") {
 					cachingOptions, err := strconv.ParseBool(fields.enable_caching_for_options)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enable_caching_for_options)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorCachingForOptionsFlag, fields.enable_caching_for_options)
 					}
 					if cachingOptions && !application.GetApplicationAcceleration() {
-						return msg.ErrorApplicationAccelerationNotEnabled
+						return cache_settings.ErrorApplicationAccelerationNotEnabled
 					}
 					request.SetEnableCachingForPost(cachingOptions)
 				}
@@ -171,10 +171,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("enable-caching-for-post") {
 					cachingPost, err := strconv.ParseBool(fields.enable_caching_for_post)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enable_caching_for_post)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorCachingForPostFlag, fields.enable_caching_for_post)
 					}
 					if cachingPost && !application.GetApplicationAcceleration() {
-						return msg.ErrorApplicationAccelerationNotEnabled
+						return cache_settings.ErrorApplicationAccelerationNotEnabled
 					}
 					request.SetEnableCachingForPost(cachingPost)
 				}
@@ -182,10 +182,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("enable-caching-string-sort") {
 					stringSort, err := strconv.ParseBool(fields.enable_query_string_sort)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enable_query_string_sort)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorCachingStringSortFlag, fields.enable_query_string_sort)
 					}
 					if stringSort && !application.GetApplicationAcceleration() {
-						return msg.ErrorApplicationAccelerationNotEnabled
+						return cache_settings.ErrorApplicationAccelerationNotEnabled
 					}
 					request.SetEnableQueryStringSort(stringSort)
 				}
@@ -193,7 +193,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("slice-configuration-enabled") {
 					sliceEnable, err := strconv.ParseBool(fields.is_slice_configuration_enabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorSliceConfigurationFlag, fields.is_slice_configuration_enabled)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorSliceConfigurationFlag, fields.is_slice_configuration_enabled)
 					}
 					request.SetIsSliceConfigurationEnabled(sliceEnable)
 					request.SetIsSliceEdgeCachingEnabled(true) //Edge Cache is mandatory in this case
@@ -202,7 +202,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("slice-l2-caching-enabled") {
 					sliceEnable, err := strconv.ParseBool(fields.is_slice_l2_caching_enabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorSliceL2CachingFlag, fields.is_slice_l2_caching_enabled)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorSliceL2CachingFlag, fields.is_slice_l2_caching_enabled)
 					}
 					request.SetIsSliceL2CachingEnabled(sliceEnable)
 				}
@@ -210,7 +210,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("l2-caching-enabled") {
 					lsEnable, err := strconv.ParseBool(fields.l2_caching_enabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorL2CachingEnabledFlag, fields.l2_caching_enabled)
+						return fmt.Errorf("%w: %q", cache_settings.ErrorL2CachingEnabledFlag, fields.l2_caching_enabled)
 					}
 					request.SetIsSliceConfigurationEnabled(lsEnable)
 				}
@@ -218,34 +218,34 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			response, err := client.UpdateCacheSettings(context.Background(), &request, fields.ApplicationID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
+				return fmt.Errorf(cache_settings.ErrorCreateCacheSettings.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.CacheSettingsUpdateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, cache_settings.CacheSettingsUpdateOutputSuccess, response.GetId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.CacheSettingsCreateFlagEdgeApplicationId)
-	flags.Int64VarP(&fields.CacheSettingsID, "cache-settings-id", "c", 0, msg.CacheSettingsId)
-	flags.StringVar(&fields.Name, "name", "", msg.CacheSettingsCreateFlagName)
-	flags.StringVar(&fields.browser_cache_settings, "browser-cache-settings", "honor", msg.CacheSettingsCreateFlagBrowserCacheSettings)
-	flags.StringSliceVar(&fields.query_string_fields, "query-string-fields", []string{}, msg.CacheSettingsCreateFlagQueryStringFields)
-	flags.StringSliceVar(&fields.cookie_names, "cookie-names", []string{}, msg.CacheSettingsCreateFlagCookieNames)
-	flags.StringVar(&fields.cache_by_cookies, "cache-by-cookies", "ignore", msg.CacheSettingsCreateFlagCacheByCookies)
-	flags.StringVar(&fields.cache_by_query_string, "cache-by-query-string", "ignore", msg.CacheSettingsCreateFlagCacheByQueryString)
-	flags.StringVar(&fields.cdn_cache_settings, "cdn-cache-settings", "honor", msg.CacheSettingsCreateFlagCdnCacheSettings)
-	flags.StringVar(&fields.enable_caching_for_options, "enable-caching-for-options", "false", msg.CacheSettingsCreateFlagCachingForOptions)
-	flags.StringVar(&fields.enable_caching_for_post, "enable-caching-for-post", "", msg.CacheSettingsCreateFlagCachingForPost)
-	flags.StringVar(&fields.enable_query_string_sort, "enable-caching-string-sort", "", msg.CacheSettingsCreateFlagCachingStringSort)
-	flags.StringVar(&fields.is_slice_configuration_enabled, "slice-configuration-enabled", "", msg.CacheSettingsCreateFlagSliceConfigurationEnabled)
-	flags.StringVar(&fields.is_slice_l2_caching_enabled, "slice-l2-caching-enabled", "", msg.CacheSettingsCreateFlagSliceL2CachingEnabled)
-	flags.StringVar(&fields.l2_caching_enabled, "l2-caching-enabled", "", msg.CacheSettingsCreateFlagL2CachingEnabled)
-	flags.Int64Var(&fields.slice_configuration_range, "slice-configuration-range", 0, msg.CacheSettingsCreateFlagSliceConfigurationRange)
-	flags.Int64Var(&fields.cdn_cache_settings_maximum_ttl, "cnd-cache-settings-maximum-ttl", 60, msg.CacheSettingsCreateFlagCdnCacheSettingsMaxTtl)
-	flags.Int64Var(&fields.browser_cache_settings_maximum_ttl, "browser-cache-settings-maximum-ttl", 0, msg.CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl)
-	flags.StringVar(&fields.adaptive_delivery_action, "adaptive-delivery-action", "ignore", msg.CacheSettingsCreateFlagAdaptiveDeliveryAction)
-	flags.StringVar(&fields.Path, "in", "", msg.CacheSettingsCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.CacheSettingsCreateHelpFlag)
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, cache_settings.CacheSettingsCreateFlagEdgeApplicationId)
+	flags.Int64VarP(&fields.CacheSettingsID, "cache-settings-id", "c", 0, cache_settings.CacheSettingsId)
+	flags.StringVar(&fields.Name, "name", "", cache_settings.CacheSettingsCreateFlagName)
+	flags.StringVar(&fields.browser_cache_settings, "browser-cache-settings", "honor", cache_settings.CacheSettingsCreateFlagBrowserCacheSettings)
+	flags.StringSliceVar(&fields.query_string_fields, "query-string-fields", []string{}, cache_settings.CacheSettingsCreateFlagQueryStringFields)
+	flags.StringSliceVar(&fields.cookie_names, "cookie-names", []string{}, cache_settings.CacheSettingsCreateFlagCookieNames)
+	flags.StringVar(&fields.cache_by_cookies, "cache-by-cookies", "ignore", cache_settings.CacheSettingsCreateFlagCacheByCookies)
+	flags.StringVar(&fields.cache_by_query_string, "cache-by-query-string", "ignore", cache_settings.CacheSettingsCreateFlagCacheByQueryString)
+	flags.StringVar(&fields.cdn_cache_settings, "cdn-cache-settings", "honor", cache_settings.CacheSettingsCreateFlagCdnCacheSettings)
+	flags.StringVar(&fields.enable_caching_for_options, "enable-caching-for-options", "false", cache_settings.CacheSettingsCreateFlagCachingForOptions)
+	flags.StringVar(&fields.enable_caching_for_post, "enable-caching-for-post", "", cache_settings.CacheSettingsCreateFlagCachingForPost)
+	flags.StringVar(&fields.enable_query_string_sort, "enable-caching-string-sort", "", cache_settings.CacheSettingsCreateFlagCachingStringSort)
+	flags.StringVar(&fields.is_slice_configuration_enabled, "slice-configuration-enabled", "", cache_settings.CacheSettingsCreateFlagSliceConfigurationEnabled)
+	flags.StringVar(&fields.is_slice_l2_caching_enabled, "slice-l2-caching-enabled", "", cache_settings.CacheSettingsCreateFlagSliceL2CachingEnabled)
+	flags.StringVar(&fields.l2_caching_enabled, "l2-caching-enabled", "", cache_settings.CacheSettingsCreateFlagL2CachingEnabled)
+	flags.Int64Var(&fields.slice_configuration_range, "slice-configuration-range", 0, cache_settings.CacheSettingsCreateFlagSliceConfigurationRange)
+	flags.Int64Var(&fields.cdn_cache_settings_maximum_ttl, "cnd-cache-settings-maximum-ttl", 60, cache_settings.CacheSettingsCreateFlagCdnCacheSettingsMaxTtl)
+	flags.Int64Var(&fields.browser_cache_settings_maximum_ttl, "browser-cache-settings-maximum-ttl", 0, cache_settings.CacheSettingsCreateFlagBrowserCacheSettingsMaxTtl)
+	flags.StringVar(&fields.adaptive_delivery_action, "adaptive-delivery-action", "ignore", cache_settings.CacheSettingsCreateFlagAdaptiveDeliveryAction)
+	flags.StringVar(&fields.Path, "in", "", cache_settings.CacheSettingsCreateFlagIn)
+	flags.BoolP("help", "h", false, cache_settings.CacheSettingsCreateHelpFlag)
 	return cmd
 }

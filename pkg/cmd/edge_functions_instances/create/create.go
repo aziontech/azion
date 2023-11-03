@@ -3,10 +3,10 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -25,9 +25,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFuncInstanceCreateUsage,
-		Short:         msg.EdgeFuncInstanceCreateShortDescription,
-		Long:          msg.EdgeFuncInstanceCreateLongDescription,
+		Use:           edge_functions_instances.EdgeFuncInstanceCreateUsage,
+		Short:         edge_functions_instances.EdgeFuncInstanceCreateShortDescription,
+		Long:          edge_functions_instances.EdgeFuncInstanceCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -56,7 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("function-id") || !cmd.Flags().Changed("name") {
-					return msg.ErrorMandatoryCreateFlags
+					return edge_functions_instances.ErrorMandatoryCreateFlags
 				}
 				request.SetName(fields.Name)
 				request.SetEdgeFunctionId(fields.EdgeFunctionId)
@@ -66,19 +66,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.CreateFuncInstances(context.Background(), &request, fields.ApplicationID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreate.Error(), err)
+				return fmt.Errorf(edge_functions_instances.ErrorCreate.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.EdgeFuncInstanceCreateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, edge_functions_instances.EdgeFuncInstanceCreateOutputSuccess, response.GetId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.EdgeFuncInstanceCreateFlagEdgeApplicationId)
-	flags.Int64VarP(&fields.EdgeFunctionId, "function-id", "f", 0, msg.EdgeFuncInstanceCreateFlagEdgeFunctionID)
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFuncInstanceCreateFlagName)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFuncInstanceCreateFlagArgs)
-	flags.StringVar(&fields.Path, "in", "", msg.EdgeFuncInstanceCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFuncInstanceCreateHelpFlag)
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, edge_functions_instances.EdgeFuncInstanceCreateFlagEdgeApplicationId)
+	flags.Int64VarP(&fields.EdgeFunctionId, "function-id", "f", 0, edge_functions_instances.EdgeFuncInstanceCreateFlagEdgeFunctionID)
+	flags.StringVar(&fields.Name, "name", "", edge_functions_instances.EdgeFuncInstanceCreateFlagName)
+	flags.StringVar(&fields.Args, "args", "", edge_functions_instances.EdgeFuncInstanceCreateFlagArgs)
+	flags.StringVar(&fields.Path, "in", "", edge_functions_instances.EdgeFuncInstanceCreateFlagIn)
+	flags.BoolP("help", "h", false, edge_functions_instances.EdgeFuncInstanceCreateHelpFlag)
 	return cmd
 }

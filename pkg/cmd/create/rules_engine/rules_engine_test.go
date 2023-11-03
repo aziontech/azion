@@ -2,12 +2,12 @@ package rules_engine
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/create/rules_engine"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/create/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -35,7 +35,7 @@ func TestNewCmd(t *testing.T) {
 				url:    "edge_applications/1679423488/rules_engine/request/rules",
 				path:   "./fixtures/resp_phase_request.json",
 			},
-			wantOut:   fmt.Sprintf(msg.OutputSuccess, 210543),
+			wantOut:   fmt.Sprintf(rules_engine.OutputSuccess, 210543),
 			wantError: nil,
 			err:       false,
 		},
@@ -47,7 +47,7 @@ func TestNewCmd(t *testing.T) {
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
 				path:   "./fixtures/resp_phase_response.json",
 			},
-			wantOut:   fmt.Sprintf(msg.OutputSuccess, 210544),
+			wantOut:   fmt.Sprintf(rules_engine.OutputSuccess, 210544),
 			wantError: nil,
 			err:       false,
 		},
@@ -59,7 +59,7 @@ func TestNewCmd(t *testing.T) {
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
 				path:   "./fixtures/resp_phase_response.json",
 			},
-			wantError: msg.ErrorNameEmpty,
+			wantError: rules_engine.ErrorNameEmpty,
 			err:       true,
 		},
 		{
@@ -70,7 +70,7 @@ func TestNewCmd(t *testing.T) {
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
 				path:   "./fixtures/resp_phase_response.json",
 			},
-			wantError: msg.ErrorConditionalEmpty,
+			wantError: rules_engine.ErrorConditionalEmpty,
 			err:       true,
 		},
 	}

@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/describe/edge_applications"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/describe/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -21,9 +21,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var applicationID string
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           edge_applications.Usage,
+		Short:         edge_applications.ShortDescription,
+		Long:          edge_applications.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApplicationID)
+				answer, err := utils.AskInput(edge_applications.AskInputApplicationID)
 				if err != nil {
 					return err
 				}
@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			application, err := client.Get(ctx, applicationID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
+				return fmt.Errorf(edge_applications.ErrorGetApplication.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -61,7 +61,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, edge_applications.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedApp[:])
 				if err != nil {
@@ -73,10 +73,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().StringVar(&applicationID, "application-id", "", edge_applications.FlagId)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", edge_applications.FlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", edge_applications.FlagFormat)
+	cmd.Flags().BoolP("help", "h", false, edge_applications.HelpFlag)
 
 	return cmd
 }

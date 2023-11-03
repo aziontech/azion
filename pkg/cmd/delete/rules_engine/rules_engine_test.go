@@ -2,12 +2,12 @@ package rulesengine
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/delete/rules_engine"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"

@@ -3,6 +3,8 @@ package edge_applications
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/general"
+	"github.com/aziontech/azion-cli/pkg/messages/list/edge_applications"
 	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -11,8 +13,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	"github.com/aziontech/azion-cli/messages/general"
-	msg "github.com/aziontech/azion-cli/messages/list/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -24,9 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           edge_applications.Usage,
+		Short:         edge_applications.ShortDescription,
+		Long:          edge_applications.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion list edge-application
@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			if err := PrintTable(cmd, client, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetAll.Error(), err)
+				return fmt.Errorf(edge_applications.ErrorGetAll.Error(), err)
 			}
 			return nil
 		},
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&opts.Page, "page", 1, general.ApiListFlagPage)
 	flags.Int64Var(&opts.PageSize, "page-size", 10, general.ApiListFlagPageSize)
 	flags.BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	flags.BoolP("help", "h", false, msg.HelpFlag)
+	flags.BoolP("help", "h", false, edge_applications.HelpFlag)
 	return cmd
 }
 

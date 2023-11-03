@@ -3,6 +3,7 @@ package create
 import (
 	"bytes"
 	"encoding/json"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 	"net/http"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeservices"
 	"github.com/stretchr/testify/require"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 )
 
 var responseBody = `

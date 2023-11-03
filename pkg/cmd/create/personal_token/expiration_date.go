@@ -2,9 +2,8 @@ package personaltoken
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/create/personal_token"
 	"time"
-
-	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 )
 
 // ParseExpirationDate parses a string representation of an expiration date and returns a time.Time value representing the expiration date.

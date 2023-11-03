@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions"
 	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -30,9 +30,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionUpdateUsage,
-		Short:         msg.EdgeFunctionUpdateShortDescription,
-		Long:          msg.EdgeFunctionUpdateLongDescription,
+		Use:           edgefunctions.EdgeFunctionUpdateUsage,
+		Short:         edgefunctions.EdgeFunctionUpdateShortDescription,
+		Long:          edgefunctions.EdgeFunctionUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either function-id or in path should be passed
 			if !cmd.Flags().Changed("function-id") && !cmd.Flags().Changed("in") {
-				return msg.ErrorMissingFunctionIdArgument
+				return edgefunctions.ErrorMissingFunctionIdArgument
 			}
 
 			request := api.UpdateRequest{}
@@ -74,7 +74,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("active") {
 					active, err := strconv.ParseBool(fields.Active)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorActiveFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edgefunctions.ErrorActiveFlag, fields.Active)
 					}
 					request.SetActive(active)
 				}
@@ -82,7 +82,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("code") {
 					code, err := os.ReadFile(fields.Code)
 					if err != nil {
-						return fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
+						return fmt.Errorf("%s: %w", edgefunctions.ErrorCodeFlag, err)
 					}
 					request.SetCode(string(code))
 				}
@@ -90,11 +90,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("args") {
 					marshalledArgs, err := os.ReadFile(fields.Args)
 					if err != nil {
-						return fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+						return fmt.Errorf("%s: %w", edgefunctions.ErrorArgsFlag, err)
 					}
 					args := make(map[string]interface{})
 					if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-						return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+						return fmt.Errorf("%s: %w", edgefunctions.ErrorParseArgs, err)
 					}
 					request.SetJsonArgs(args)
 				}
@@ -110,7 +110,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
+				return fmt.Errorf(edgefunctions.ErrorUpdateFunction.Error(), err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Edge Function with ID %v\n", response.GetId())
@@ -120,13 +120,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.Id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFunctionUpdateFlagName)
-	flags.StringVar(&fields.Code, "code", "", msg.EdgeFunctionUpdateFlagCode)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionUpdateFlagArgs)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionUpdateFlagActive)
-	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionUpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFunctionUpdateHelpFlag)
+	flags.Int64VarP(&fields.Id, "function-id", "f", 0, edgefunctions.EdgeFunctionFlagId)
+	flags.StringVar(&fields.Name, "name", "", edgefunctions.EdgeFunctionUpdateFlagName)
+	flags.StringVar(&fields.Code, "code", "", edgefunctions.EdgeFunctionUpdateFlagCode)
+	flags.StringVar(&fields.Args, "args", "", edgefunctions.EdgeFunctionUpdateFlagArgs)
+	flags.StringVar(&fields.Active, "active", "", edgefunctions.EdgeFunctionUpdateFlagActive)
+	flags.StringVar(&fields.InPath, "in", "", edgefunctions.EdgeFunctionUpdateFlagIn)
+	flags.BoolP("help", "h", false, edgefunctions.EdgeFunctionUpdateHelpFlag)
 
 	return cmd
 }

@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -22,9 +22,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	// describeCmd represents the describe command
 	describeCmd := &cobra.Command{
-		Use:           msg.EdgeServiceDescribeUsage,
-		Short:         msg.EdgeServiceDescribeShortDescription,
-		Long:          msg.EdgeServiceDescribeLongDescription,
+		Use:           edgeservices.EdgeServiceDescribeUsage,
+		Short:         edgeservices.EdgeServiceDescribeShortDescription,
+		Long:          edgeservices.EdgeServiceDescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return msg.ErrorMissingServiceIdArgument
+				return edgeservices.ErrorMissingServiceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			withVariables, err := cmd.Flags().GetBool("with-variables")
 			if err != nil {
-				return msg.ErrorWithVariablesFlag
+				return edgeservices.ErrorWithVariablesFlag
 			}
 
 			service, err := describeService(client, service_id, withVariables)
@@ -63,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.EdgeServiceFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, edgeservices.EdgeServiceFileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedService[:])
 				if err != nil {
@@ -75,11 +75,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		},
 	}
-	describeCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, msg.EdgeServiceFlagId)
-	describeCmd.Flags().Bool("with-variables", false, msg.EdgeServiceDescribeFlagWithVariable)
-	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeServiceFlagOut)
-	describeCmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeServiceFlagFormat)
-	describeCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceDescribeHelpFlag)
+	describeCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, edgeservices.EdgeServiceFlagId)
+	describeCmd.Flags().Bool("with-variables", false, edgeservices.EdgeServiceDescribeFlagWithVariable)
+	describeCmd.Flags().StringVar(&opts.OutPath, "out", "", edgeservices.EdgeServiceFlagOut)
+	describeCmd.Flags().StringVar(&opts.Format, "format", "", edgeservices.EdgeServiceFlagFormat)
+	describeCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceDescribeHelpFlag)
 
 	return describeCmd
 
@@ -93,7 +93,7 @@ func describeService(client *sdk.APIClient, service_id int64, withVariables bool
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return nil, fmt.Errorf(msg.ErrorGetSerivce.Error(), message)
+		return nil, fmt.Errorf(edgeservices.ErrorGetSerivce.Error(), message)
 	}
 	return &resp, nil
 }

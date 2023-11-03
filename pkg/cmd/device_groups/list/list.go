@@ -3,13 +3,13 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/device_groups"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var edgeApplicationID int64 = 0
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.DeviceGroupsListUsage,
-		Short:         msg.DeviceGroupsListShortDescription,
-		Long:          msg.DeviceGroupsListLongDescription,
+		Use:           device_groups.DeviceGroupsListUsage,
+		Short:         device_groups.DeviceGroupsListShortDescription,
+		Long:          device_groups.DeviceGroupsListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
         $ azion device_groups list -a 16736354321
@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
 			if !cmd.Flags().Changed("application-id") {
-				return msg.ErrorMissingApplicationIDArgument
+				return device_groups.ErrorMissingApplicationIDArgument
 			}
 			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
 				for {
@@ -45,13 +45,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if err != nil {
-						return fmt.Errorf(msg.ErrorListDeviceGroups.Error(), err)
+						return fmt.Errorf(device_groups.ErrorListDeviceGroups.Error(), err)
 					}
 				}
 			}
 
 			if _, err := PrintTable(cmd, f, opts, &edgeApplicationID, &numberPage); err != nil {
-				return fmt.Errorf(msg.ErrorGetDeviceGroups.Error(), err)
+				return fmt.Errorf(device_groups.ErrorGetDeviceGroups.Error(), err)
 			}
 			return nil
 		},
@@ -59,8 +59,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	flags := cmd.Flags()
-	flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.DeviceGroupsListFlagEdgeApplicationID)
-	flags.BoolP("help", "h", false, msg.DeviceGroupsListHelpFlag)
+	flags.Int64VarP(&edgeApplicationID, "application-id", "a", 0, device_groups.DeviceGroupsListFlagEdgeApplicationID)
+	flags.BoolP("help", "h", false, device_groups.DeviceGroupsListHelpFlag)
 	return cmd
 }
 
@@ -70,7 +70,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	applications, err := client.DeviceGroupsList(ctx, opts, *edgeApplicationID)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorGetDeviceGroups.Error(), err)
+		return 0, fmt.Errorf(device_groups.ErrorGetDeviceGroups.Error(), err)
 	}
 
 	tbl := table.New("ID", "NAME")

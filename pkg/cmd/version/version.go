@@ -2,8 +2,8 @@ package version
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/version"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )

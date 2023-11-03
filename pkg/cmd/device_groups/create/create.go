@@ -3,11 +3,11 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/device_groups"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -26,9 +26,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.DeviceGroupsCreateUsage,
-		Short:         msg.DeviceGroupsCreateShortDescription,
-		Long:          msg.DeviceGroupsCreateLongDescription,
+		Use:           device_groups.DeviceGroupsCreateUsage,
+		Short:         device_groups.DeviceGroupsCreateShortDescription,
+		Long:          device_groups.DeviceGroupsCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -58,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			} else {
 				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("name") ||
 					!cmd.Flags().Changed("user-agent") { // flags requireds
-					return msg.ErrorMandatoryCreateFlags
+					return device_groups.ErrorMandatoryCreateFlags
 				}
 
 				request.SetName(fields.Name)
@@ -68,18 +68,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.CreateDeviceGroups(context.Background(), &request, fields.ApplicationID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateDeviceGroups.Error(), err)
+				return fmt.Errorf(device_groups.ErrorCreateDeviceGroups.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.DeviceGroupsCreateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, device_groups.DeviceGroupsCreateOutputSuccess, response.GetId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.DeviceGroupsCreateFlagEdgeApplicationId)
-	flags.StringVar(&fields.Name, "name", "", msg.DeviceGroupsCreateFlagName)
-	flags.StringVar(&fields.UserAgent, "user-agent", "", msg.DeviceGroupsCreateFlagUserAgent)
-	flags.StringVar(&fields.Path, "in", "", msg.DeviceGroupsCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.DeviceGroupsFlagHelp)
+	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, device_groups.DeviceGroupsCreateFlagEdgeApplicationId)
+	flags.StringVar(&fields.Name, "name", "", device_groups.DeviceGroupsCreateFlagName)
+	flags.StringVar(&fields.UserAgent, "user-agent", "", device_groups.DeviceGroupsCreateFlagUserAgent)
+	flags.StringVar(&fields.Path, "in", "", device_groups.DeviceGroupsCreateFlagIn)
+	flags.BoolP("help", "h", false, device_groups.DeviceGroupsFlagHelp)
 	return cmd
 }

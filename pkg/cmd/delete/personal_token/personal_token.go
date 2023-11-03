@@ -3,9 +3,9 @@ package personaltoken
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/personal_token"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -16,9 +16,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var id string
 
 	deleteCmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           personaltoken.Usage,
+		Short:         personaltoken.ShortDescription,
+		Long:          personaltoken.LongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
@@ -27,7 +27,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("id") {
-				answer, err := utils.AskInput(msg.AskDeleteInput)
+				answer, err := utils.AskInput(personaltoken.AskDeleteInput)
 				if err != nil {
 					return err
 				}
@@ -43,18 +43,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err := client.Delete(context.Background(), id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				return fmt.Errorf(personaltoken.ErrorFailToDelete.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.OutputSuccess, id)
+			fmt.Fprintf(out, personaltoken.OutputSuccess, id)
 
 			return nil
 		},
 	}
 
-	deleteCmd.Flags().StringVar(&id, "id", "", msg.FlagID)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	deleteCmd.Flags().StringVar(&id, "id", "", personaltoken.FlagID)
+	deleteCmd.Flags().BoolP("help", "h", false, personaltoken.HelpFlag)
 
 	return deleteCmd
 }

@@ -3,10 +3,10 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -21,9 +21,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// listCmd represents the list command
 	listCmd := &cobra.Command{
-		Use:           msg.EdgeServiceListUsage,
-		Short:         msg.EdgeServiceListShortDescription,
-		Long:          msg.EdgeServiceListLongDescription,
+		Use:           edgeservices.EdgeServiceListUsage,
+		Short:         edgeservices.EdgeServiceListShortDescription,
+		Long:          edgeservices.EdgeServiceListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(listCmd, opts)
-	listCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceListFlagHelp)
+	listCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceListFlagHelp)
 
 	return listCmd
 }
@@ -70,7 +70,7 @@ func listAllServices(client *sdk.APIClient, out io.Writer, opts *contracts.ListO
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorGetServices.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorGetServices.Error(), message)
 	}
 
 	services := resp.Services

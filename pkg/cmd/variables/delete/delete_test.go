@@ -1,9 +1,9 @@
 package delete
 
 import (
+	msg "github.com/aziontech/azion-cli/pkg/messages/variables"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"

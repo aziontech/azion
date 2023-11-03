@@ -3,12 +3,12 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/variables"
 	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -27,9 +27,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.CreateUsage,
-		Short:         msg.CreateShortDescription,
-		Long:          msg.CreateLongDescription,
+		Use:           variables.CreateUsage,
+		Short:         variables.CreateShortDescription,
+		Long:          variables.CreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -59,13 +59,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			} else {
 				// required flags
 				if !cmd.Flags().Changed("key") || !cmd.Flags().Changed("value") {
-					return msg.ErrorMandatoryCreateFlags
+					return variables.ErrorMandatoryCreateFlags
 				}
 
 				if cmd.Flags().Changed("secret") {
 					secret, err := strconv.ParseBool(fields.Secret)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorSecretFlag, fields.Secret)
+						return fmt.Errorf("%w: %q", variables.ErrorSecretFlag, fields.Secret)
 					}
 					request.SetSecret(secret)
 				}
@@ -77,18 +77,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateItem.Error(), err)
+				return fmt.Errorf(variables.ErrorCreateItem.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetUuid())
+			fmt.Fprintf(f.IOStreams.Out, variables.CreateOutputSuccess, response.GetUuid())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&fields.Key, "key", "", msg.CreateFlagKey)
-	flags.StringVar(&fields.Value, "value", "", msg.CreateFlagValue)
-	flags.StringVar(&fields.Secret, "secret", "", msg.CreateFlagSecret)
-	flags.StringVar(&fields.Path, "in", "", msg.CreateFlagIn)
-	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
+	flags.StringVar(&fields.Key, "key", "", variables.CreateFlagKey)
+	flags.StringVar(&fields.Value, "value", "", variables.CreateFlagValue)
+	flags.StringVar(&fields.Secret, "secret", "", variables.CreateFlagSecret)
+	flags.StringVar(&fields.Path, "in", "", variables.CreateFlagIn)
+	flags.BoolP("help", "h", false, variables.CreateHelpFlag)
 	return cmd
 }

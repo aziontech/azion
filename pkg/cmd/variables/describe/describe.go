@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/variables"
 	"path/filepath"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/variables"
-
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -23,9 +22,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var variableID string
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.DescribeUsage,
-		Short:         msg.DescribeShortDescription,
-		Long:          msg.DescribeLongDescription,
+		Use:           variables.DescribeUsage,
+		Short:         variables.DescribeShortDescription,
+		Long:          variables.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -35,14 +34,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("variable-id") {
-				return msg.ErrorMissingArguments
+				return variables.ErrorMissingArguments
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
 			variable, err := client.Get(ctx, variableID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetItem.Error(), err)
+				return fmt.Errorf(variables.ErrorGetItem.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -56,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, variables.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -68,10 +67,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&variableID, "variable-id", "v", "", msg.FlagVariableID)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
-	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
+	cmd.Flags().StringVarP(&variableID, "variable-id", "v", "", variables.FlagVariableID)
+	cmd.Flags().StringVar(&opts.Format, "format", "", variables.DescribeFlagFormat)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", variables.DescribeFlagOut)
+	cmd.Flags().BoolP("help", "h", false, variables.DescribeHelpFlag)
 
 	return cmd
 }

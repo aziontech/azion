@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
-
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -26,9 +25,9 @@ var (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.CacheSettingsDescribeUsage,
-		Short:         msg.CacheSettingsDescribeShortDescription,
-		Long:          msg.CacheSettingsDescribeLongDescription,
+		Use:           cache_settings.CacheSettingsDescribeUsage,
+		Short:         cache_settings.CacheSettingsDescribeShortDescription,
+		Long:          cache_settings.CacheSettingsDescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -38,14 +37,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("cache-settings-id") {
-				return msg.ErrorMissingArguments
+				return cache_settings.ErrorMissingArguments
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
 			resp, err := client.GetCacheSettings(ctx, applicationID, cacheSettingsID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetCache.Error(), err)
+				return fmt.Errorf(cache_settings.ErrorGetCache.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -59,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.CacheSettingsFileWritten, opts.OutPath)
+				fmt.Fprintf(out, cache_settings.CacheSettingsFileWritten, opts.OutPath)
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -71,11 +70,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.CacheSettingsDescribeFlagApplicationID)
-	cmd.Flags().Int64VarP(&cacheSettingsID, "cache-settings-id", "c", 0, msg.CacheSettingsDescribeFlagCacheSettingsID)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.CacheSettingsDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.CacheSettingsDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.CacheSettingsDescribeHelpFlag)
+	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, cache_settings.CacheSettingsDescribeFlagApplicationID)
+	cmd.Flags().Int64VarP(&cacheSettingsID, "cache-settings-id", "c", 0, cache_settings.CacheSettingsDescribeFlagCacheSettingsID)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", cache_settings.CacheSettingsDescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", cache_settings.CacheSettingsDescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, cache_settings.CacheSettingsDescribeHelpFlag)
 	return cmd
 }
 

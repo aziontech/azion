@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions"
 	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -29,9 +29,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionCreateUsage,
-		Short:         msg.EdgeFunctionCreateShortDescription,
-		Long:          msg.EdgeFunctionCreateLongDescription,
+		Use:           edgefunctions.EdgeFunctionCreateUsage,
+		Short:         edgefunctions.EdgeFunctionCreateShortDescription,
+		Long:          edgefunctions.EdgeFunctionCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -62,29 +62,29 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("active") || !cmd.Flags().Changed("code") || !cmd.Flags().Changed("name") {
-					return msg.ErrorMandatoryCreateFlags
+					return edgefunctions.ErrorMandatoryCreateFlags
 				}
 				isActive, err := strconv.ParseBool(fields.Active)
 				if err != nil {
-					return fmt.Errorf("%w: %s", msg.ErrorActiveFlag, fields.Active)
+					return fmt.Errorf("%w: %s", edgefunctions.ErrorActiveFlag, fields.Active)
 				}
 				request.SetActive(isActive)
 
 				code, err := os.ReadFile(fields.Code)
 				if err != nil {
-					return fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
+					return fmt.Errorf("%s: %w", edgefunctions.ErrorCodeFlag, err)
 				}
 				request.SetCode(string(code))
 
 				if cmd.Flags().Changed("args") {
 					marshalledArgs, err := os.ReadFile(fields.Args)
 					if err != nil {
-						return fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+						return fmt.Errorf("%s: %w", edgefunctions.ErrorArgsFlag, err)
 					}
 
 					args := make(map[string]interface{})
 					if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-						return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+						return fmt.Errorf("%s: %w", edgefunctions.ErrorParseArgs, err)
 					}
 					request.SetJsonArgs(args)
 				}
@@ -99,10 +99,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Create(ctx, request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
+				return fmt.Errorf(edgefunctions.ErrorCreateFunction.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.EdgeFunctionCreateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, edgefunctions.EdgeFunctionCreateOutputSuccess, response.GetId())
 
 			return nil
 		},
@@ -110,12 +110,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFunctionCreateFlagName)
-	flags.StringVar(&fields.Code, "code", "", msg.EdgeFunctionCreateFlagCode)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionCreateFlagActive)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionCreateFlagArgs)
-	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFunctionCreateHelpFlag)
+	flags.StringVar(&fields.Name, "name", "", edgefunctions.EdgeFunctionCreateFlagName)
+	flags.StringVar(&fields.Code, "code", "", edgefunctions.EdgeFunctionCreateFlagCode)
+	flags.StringVar(&fields.Active, "active", "", edgefunctions.EdgeFunctionCreateFlagActive)
+	flags.StringVar(&fields.Args, "args", "", edgefunctions.EdgeFunctionCreateFlagArgs)
+	flags.StringVar(&fields.InPath, "in", "", edgefunctions.EdgeFunctionCreateFlagIn)
+	flags.BoolP("help", "h", false, edgefunctions.EdgeFunctionCreateHelpFlag)
 
 	return cmd
 }

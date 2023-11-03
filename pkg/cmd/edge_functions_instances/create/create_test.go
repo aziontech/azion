@@ -3,11 +3,10 @@ package create
 import (
 	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
-
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"

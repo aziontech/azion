@@ -3,11 +3,11 @@ package update
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -28,9 +28,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFuncInstanceUpdateUsage,
-		Short:         msg.EdgeFuncInstanceUpdateShortDescription,
-		Long:          msg.EdgeFuncInstanceUpdateLongDescription,
+		Use:           edge_functions_instances.EdgeFuncInstanceUpdateUsage,
+		Short:         edge_functions_instances.EdgeFuncInstanceUpdateShortDescription,
+		Long:          edge_functions_instances.EdgeFuncInstanceUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -40,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if cmd.Flags().Changed("in") && (!cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("instance-id")) {
-				return msg.ErrorMandatoryUpdateFlagsIn
+				return edge_functions_instances.ErrorMandatoryUpdateFlagsIn
 			}
 			request := api.UpdateInstanceRequest{}
 			if cmd.Flags().Changed("in") {
@@ -62,7 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("application-id") || !cmd.Flags().Changed("instance-id") || !cmd.Flags().Changed("function-id") {
-					return msg.ErrorMandatoryUpdateFlags
+					return edge_functions_instances.ErrorMandatoryUpdateFlags
 				}
 				if cmd.Flags().Changed("name") {
 					request.SetName(fields.Name)
@@ -78,20 +78,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.UpdateInstance(context.Background(), &request, fields.ApplicationID, fields.InstanceID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateFuncInstance.Error(), err)
+				return fmt.Errorf(edge_functions_instances.ErrorUpdateFuncInstance.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.EdgeFuncInstanceUpdateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, edge_functions_instances.EdgeFuncInstanceUpdateOutputSuccess, response.GetId())
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&fields.ApplicationID, "application-id", "a", "0", msg.EdgeFuncInstanceUpdateFlagEdgeApplicationId)
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFuncInstanceUpdateFlagName)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFuncInstanceUpdateFlagArgs)
-	flags.Int64VarP(&fields.FunctionID, "function-id", "f", 0, msg.EdgeFuncInstanceUpdateFlagFunctionID)
-	flags.StringVarP(&fields.InstanceID, "instance-id", "i", "0", msg.EdgeFuncInstanceUpdateFlagInstanceID)
-	flags.StringVar(&fields.Path, "in", "", msg.EdgeFuncInstanceUpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFuncInstanceUpdateHelpFlag)
+	flags.StringVarP(&fields.ApplicationID, "application-id", "a", "0", edge_functions_instances.EdgeFuncInstanceUpdateFlagEdgeApplicationId)
+	flags.StringVar(&fields.Name, "name", "", edge_functions_instances.EdgeFuncInstanceUpdateFlagName)
+	flags.StringVar(&fields.Args, "args", "", edge_functions_instances.EdgeFuncInstanceUpdateFlagArgs)
+	flags.Int64VarP(&fields.FunctionID, "function-id", "f", 0, edge_functions_instances.EdgeFuncInstanceUpdateFlagFunctionID)
+	flags.StringVarP(&fields.InstanceID, "instance-id", "i", "0", edge_functions_instances.EdgeFuncInstanceUpdateFlagInstanceID)
+	flags.StringVar(&fields.Path, "in", "", edge_functions_instances.EdgeFuncInstanceUpdateFlagIn)
+	flags.BoolP("help", "h", false, edge_functions_instances.EdgeFuncInstanceUpdateHelpFlag)
 	return cmd
 }

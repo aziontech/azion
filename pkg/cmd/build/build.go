@@ -1,13 +1,12 @@
 package build
 
 import (
+	msg "github.com/aziontech/azion-cli/pkg/messages/build"
 	"io"
 	"io/fs"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/build"
-
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"

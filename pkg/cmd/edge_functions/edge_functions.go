@@ -1,13 +1,13 @@
 package edge_functions
 
 import (
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/create"
 	del "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_functions"
 	"github.com/spf13/cobra"
 )
 

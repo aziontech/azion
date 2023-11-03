@@ -3,13 +3,13 @@ package deploy
 import (
 	"context"
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/deploy"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"

@@ -2,12 +2,12 @@ package personaltoken
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/personal_token"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/personal_token"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -35,7 +35,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: fmt.Sprintf(msg.OutputSuccess, "5c9c1854-45dd-11ee-be56-0242ac120002"),
+			output: fmt.Sprintf(personaltoken.OutputSuccess, "5c9c1854-45dd-11ee-be56-0242ac120002"),
 			err:    nil,
 		},
 		{
@@ -49,7 +49,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			err: fmt.Errorf(msg.ErrorFailToDelete.Error(), utils.ErrorNotFound404),
+			err: fmt.Errorf(personaltoken.ErrorFailToDelete.Error(), utils.ErrorNotFound404),
 		},
 	}
 

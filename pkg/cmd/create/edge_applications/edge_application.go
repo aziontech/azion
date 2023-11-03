@@ -3,12 +3,12 @@ package edge_applications
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/create/edge_application"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/edge_application"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
@@ -60,9 +60,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           edge_application.Usage,
+		Short:         edge_application.ShortDescription,
+		Long:          edge_application.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(example),
@@ -86,10 +86,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
 			).Create(context.Background(), &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreate.Error(), err)
+				return fmt.Errorf(edge_application.ErrorCreate.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(edge_application.OutputSuccess, response.GetId()))
 
 			return nil
 		},
@@ -113,7 +113,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 	}
 
 	if utils.IsEmpty(fields.Name) {
-		return msg.ErrorMandatoryCreateFlags
+		return edge_application.ErrorMandatoryCreateFlags
 	}
 
 	request.SetName(fields.Name)
@@ -200,22 +200,22 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
-	flags.StringVar(&fields.Http3, "http3", "", msg.FlagHttp3)
-	flags.StringVar(&fields.HttpPort, "http-port", "", msg.FlagHttpPort)
-	flags.StringVar(&fields.HttpsPort, "https-port", "", msg.FlagHttpsPort)
-	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
-	flags.StringVar(&fields.Address, "address", "", msg.FlagAddress)
-	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)
-	flags.StringVar(&fields.HostHeader, "host-header", "", msg.FlagHostHeader)
-	flags.StringVar(&fields.BrowserCacheSettings, "browser-cache-settings", "", msg.FlagBrowserCacheSettings)
-	flags.Int64Var(&fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaximumTtl)
-	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
-	flags.StringVar(&fields.DebugRules, "debug-rules", "", msg.FlagDebugRules)
-	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
-	flags.StringVar(&fields.Websocket, "websocket", "", msg.FlagWebsocket)
-	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.StringVar(&fields.Name, "name", "", edge_application.FlagName)
+	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", edge_application.FlagDeliveryProtocol)
+	flags.StringVar(&fields.Http3, "http3", "", edge_application.FlagHttp3)
+	flags.StringVar(&fields.HttpPort, "http-port", "", edge_application.FlagHttpPort)
+	flags.StringVar(&fields.HttpsPort, "https-port", "", edge_application.FlagHttpsPort)
+	flags.StringVar(&fields.OriginType, "origin-type", "", edge_application.FlagOriginType)
+	flags.StringVar(&fields.Address, "address", "", edge_application.FlagAddress)
+	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", edge_application.FlagOriginProtocolPolicy)
+	flags.StringVar(&fields.HostHeader, "host-header", "", edge_application.FlagHostHeader)
+	flags.StringVar(&fields.BrowserCacheSettings, "browser-cache-settings", "", edge_application.FlagBrowserCacheSettings)
+	flags.Int64Var(&fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, edge_application.FlagBrowserCacheSettingsMaximumTtl)
+	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", edge_application.FlagCdnCacheSettings)
+	flags.StringVar(&fields.DebugRules, "debug-rules", "", edge_application.FlagDebugRules)
+	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", edge_application.FlagSupportedCiphers)
+	flags.StringVar(&fields.Websocket, "websocket", "", edge_application.FlagWebsocket)
+	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, edge_application.FlagCdnCacheSettingsMaximumTtl)
+	flags.StringVar(&fields.Path, "in", "", edge_application.FlagIn)
+	flags.BoolP("help", "h", false, edge_application.FlagHelp)
 }

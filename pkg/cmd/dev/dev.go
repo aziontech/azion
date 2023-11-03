@@ -1,10 +1,10 @@
 package dev
 
 import (
+	msg "github.com/aziontech/azion-cli/pkg/messages/dev"
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"

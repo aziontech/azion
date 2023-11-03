@@ -3,10 +3,10 @@ package domain
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/domain"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -18,9 +18,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var domain_id int64
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           domain.Usage,
+		Short:         domain.ShortDescription,
+		Long:          domain.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -30,7 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("domain-id") {
 
-				answer, err := utils.AskInput(msg.AskDeleteInput)
+				answer, err := utils.AskInput(domain.AskDeleteInput)
 				if err != nil {
 					return err
 				}
@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertId
+					return domain.ErrorConvertId
 				}
 
 				domain_id = num
@@ -50,18 +50,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err := client.Delete(ctx, domain_id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
+				return fmt.Errorf(domain.ErrorFailToDeleteDomain.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.OutputSuccess, domain_id)
+			fmt.Fprintf(out, domain.OutputSuccess, domain_id)
 
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&domain_id, "domain-id", 0, msg.FlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().Int64Var(&domain_id, "domain-id", 0, domain.FlagId)
+	cmd.Flags().BoolP("help", "h", false, domain.HelpFlag)
 
 	return cmd
 }

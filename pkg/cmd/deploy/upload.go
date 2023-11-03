@@ -1,10 +1,10 @@
 package deploy
 
 import (
+	msg "github.com/aziontech/azion-cli/pkg/messages/deploy"
 	"os"
 	"strings"
 
-	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"

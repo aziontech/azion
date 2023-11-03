@@ -3,10 +3,10 @@ package delete
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -23,9 +23,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           msg.EdgeServiceResourceDeleteUsage,
-		Short:         msg.EdgeServiceResourceDeleteShortDescription,
-		Long:          msg.EdgeServiceResourceDeleteLongDescription,
+		Use:           edgeservices.EdgeServiceResourceDeleteUsage,
+		Short:         edgeservices.EdgeServiceResourceDeleteShortDescription,
+		Long:          edgeservices.EdgeServiceResourceDeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") || !cmd.Flags().Changed("resource-id") {
-				return msg.ErrorMissingResourceIdArgument
+				return edgeservices.ErrorMissingResourceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -49,9 +49,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deleteCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, msg.EdgeServiceFlagId)
-	deleteCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, msg.EdgeServiceResourceFlagId)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceDeleteFlagHelp)
+	deleteCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, edgeservices.EdgeServiceFlagId)
+	deleteCmd.Flags().Int64VarP(&fields.ResourceId, "resource-id", "r", 0, edgeservices.EdgeServiceResourceFlagId)
+	deleteCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceResourceDeleteFlagHelp)
 
 	return deleteCmd
 }
@@ -64,11 +64,11 @@ func deleteResource(client *sdk.APIClient, out io.Writer, service_id int64, reso
 	httpResp, err := api.DeleteResource(c, service_id, resource_id).Execute()
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
-		return fmt.Errorf(msg.ErrorDeleteResource.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorDeleteResource.Error(), message)
 	}
 
 	if httpResp.StatusCode == 204 {
-		fmt.Fprintf(out, msg.EdgeServiceResourceDeleteOutputSuccess, resource_id)
+		fmt.Fprintf(out, edgeservices.EdgeServiceResourceDeleteOutputSuccess, resource_id)
 	}
 
 	return nil

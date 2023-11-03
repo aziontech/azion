@@ -2,11 +2,11 @@ package root
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/root"
 	"net/http"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/root"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"github.com/aziontech/azion-cli/pkg/cmd/create"

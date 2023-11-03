@@ -3,11 +3,11 @@ package edge_application
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/update/edge_application"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/update/edge_application"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -42,9 +42,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           edge_application.Usage,
+		Short:         edge_application.ShortDescription,
+		Long:          edge_application.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -76,7 +76,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !returnAnyField(cmd) {
-				return msg.ErrorNoFieldInformed
+				return edge_application.ErrorNoFieldInformed
 			}
 
 			request := api.UpdateRequest{}
@@ -113,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("application-acceleration") {
 					converted, err := strconv.ParseBool(fields.ApplicationAcceleration)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorApplicationAccelerationFlag, fields.Active)
 					}
 					request.SetApplicationAcceleration(converted)
 				}
@@ -121,7 +121,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("device-detection") {
 					converted, err := strconv.ParseBool(fields.DeviceDetection)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorDeviceDetectionFlag, fields.Active)
 					}
 					request.SetDeviceDetection(converted)
 				}
@@ -129,7 +129,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-firewall") {
 					converted, err := strconv.ParseBool(fields.EdgeFirewall)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorEdgeFirewallFlag, fields.Active)
 					}
 					request.SetEdgeFirewall(converted)
 				}
@@ -137,7 +137,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-functions") {
 					converted, err := strconv.ParseBool(fields.EdgeFunctions)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorEdgeFunctionsFlag, fields.Active)
 					}
 					request.SetEdgeFunctions(converted)
 				}
@@ -145,7 +145,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("image-optimization") {
 					converted, err := strconv.ParseBool(fields.ImageOptimization)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorImageOptimizationFlag, fields.Active)
 					}
 					request.SetImageOptimization(converted)
 				}
@@ -153,7 +153,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("l2-caching") {
 					converted, err := strconv.ParseBool(fields.L2Caching)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorL2CachingFlag, fields.Active)
 					}
 					request.SetL2Caching(converted)
 				}
@@ -161,7 +161,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("load-balancer") {
 					converted, err := strconv.ParseBool(fields.LoadBalancer)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorLoadBalancerFlag, fields.Active)
 					}
 					request.SetLoadBalancer(converted)
 				}
@@ -169,7 +169,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("raw-logs") {
 					converted, err := strconv.ParseBool(fields.RawLogs)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", edge_application.ErrorRawLogsFlag, fields.Active)
 					}
 					request.SetRawLogs(converted)
 				}
@@ -177,7 +177,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("webapp-firewall") {
 					converted, err := strconv.ParseBool(fields.WebApplicationFirewall)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorWebApplicationFirewallFlag, fields.WebApplicationFirewall)
+						return fmt.Errorf("%w: %q", edge_application.ErrorWebApplicationFirewallFlag, fields.WebApplicationFirewall)
 					}
 					request.SetWebApplicationFirewall(converted)
 				}
@@ -190,33 +190,33 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err.Error())
+				return fmt.Errorf(edge_application.ErrorUpdateApplication.Error(), err.Error())
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(edge_application.OutputSuccess, response.GetId()))
 
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
-	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
-	flags.Int64Var(&fields.HTTPPort, "http-port", 80, msg.FlagHttpPort)
-	flags.Int64Var(&fields.HTTPSPort, "https-port", 443, msg.FlagHttpsPort)
-	flags.StringVar(&fields.MinimumTLSVersion, "min-tsl-ver", "", msg.FlagMinimumTlsVersion)
-	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
-	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.FlagDeviceDetection)
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagEdgeFirewall)
-	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.FlagEdgeFunctions)
-	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", msg.FlagImageOptimization)
-	flags.StringVar(&fields.L2Caching, "l2-caching", "", msg.FlagL2Caching)
-	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.FlagLoadBalancer)
-	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.RawLogs)
-	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.WebApplicationFirewall)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.HelpFlag)
+	flags.Int64Var(&fields.ID, "application-id", 0, edge_application.FlagID)
+	flags.StringVar(&fields.Name, "name", "", edge_application.FlagName)
+	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", edge_application.FlagDeliveryProtocol)
+	flags.Int64Var(&fields.HTTPPort, "http-port", 80, edge_application.FlagHttpPort)
+	flags.Int64Var(&fields.HTTPSPort, "https-port", 443, edge_application.FlagHttpsPort)
+	flags.StringVar(&fields.MinimumTLSVersion, "min-tsl-ver", "", edge_application.FlagMinimumTlsVersion)
+	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", edge_application.FlagApplicationAcceleration)
+	flags.StringVar(&fields.DeviceDetection, "device-detection", "", edge_application.FlagDeviceDetection)
+	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", edge_application.FlagEdgeFirewall)
+	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", edge_application.FlagEdgeFunctions)
+	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", edge_application.FlagImageOptimization)
+	flags.StringVar(&fields.L2Caching, "l2-caching", "", edge_application.FlagL2Caching)
+	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", edge_application.FlagLoadBalancer)
+	flags.StringVar(&fields.RawLogs, "raw-logs", "", edge_application.RawLogs)
+	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", edge_application.WebApplicationFirewall)
+	flags.StringVar(&fields.InPath, "in", "", edge_application.FlagIn)
+	flags.BoolP("help", "h", false, edge_application.HelpFlag)
 	return cmd
 }
 

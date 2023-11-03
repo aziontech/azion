@@ -3,13 +3,13 @@ package update
 import (
 	"bytes"
 	"encoding/json"
+	errmsg "github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
 
-	errmsg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"

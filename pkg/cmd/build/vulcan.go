@@ -2,9 +2,9 @@ package build
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/build"
 	"strings"
 
-	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"

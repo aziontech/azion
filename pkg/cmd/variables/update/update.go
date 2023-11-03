@@ -3,11 +3,11 @@ package update
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/variables"
 	"os"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -26,9 +26,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.UpdateUsage,
-		Short:         msg.UpdateShortDescription,
-		Long:          msg.UpdateLongDescription,
+		Use:           variables.UpdateUsage,
+		Short:         variables.UpdateShortDescription,
+		Long:          variables.UpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -39,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either function-id or in path should be passed
 			if (!cmd.Flags().Changed("variable-id") || !cmd.Flags().Changed("key") || !cmd.Flags().Changed("value") || !cmd.Flags().Changed("secret")) && !cmd.Flags().Changed("in") {
-				return msg.ErrorMissingVariableIdArgument
+				return variables.ErrorMissingVariableIdArgument
 			}
 
 			request := api.UpdateRequest{}
@@ -64,7 +64,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			} else {
 				secret, err := strconv.ParseBool(fields.Secret)
 				if err != nil {
-					return fmt.Errorf("%w: %q", msg.ErrorSecretFlag, fields.Secret)
+					return fmt.Errorf("%w: %q", variables.ErrorSecretFlag, fields.Secret)
 				}
 				request.SetSecret(secret)
 				request.SetKey(fields.Key)
@@ -79,7 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateVariable.Error(), err)
+				return fmt.Errorf(variables.ErrorUpdateVariable.Error(), err)
 			}
 
 			fmt.Fprintf(f.IOStreams.Out, "Updated Variable with ID %s\n", response.GetUuid())
@@ -89,12 +89,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVarP(&fields.Id, "variable-id", "v", "0", msg.FlagVariableID)
-	flags.StringVar(&fields.Key, "key", "", msg.UpdateFlagKey)
-	flags.StringVar(&fields.Value, "value", "", msg.UpdateFlagValue)
-	flags.StringVar(&fields.Secret, "secret", "", msg.UpdateFlagSecret)
-	flags.StringVar(&fields.InPath, "in", "", msg.UpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
+	flags.StringVarP(&fields.Id, "variable-id", "v", "0", variables.FlagVariableID)
+	flags.StringVar(&fields.Key, "key", "", variables.UpdateFlagKey)
+	flags.StringVar(&fields.Value, "value", "", variables.UpdateFlagValue)
+	flags.StringVar(&fields.Secret, "secret", "", variables.UpdateFlagSecret)
+	flags.StringVar(&fields.InPath, "in", "", variables.UpdateFlagIn)
+	flags.BoolP("help", "h", false, variables.UpdateHelpFlag)
 
 	return cmd
 }

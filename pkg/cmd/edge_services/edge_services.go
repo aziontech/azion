@@ -2,7 +2,6 @@ package edge_services
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/describe"
@@ -10,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"github.com/spf13/cobra"
 )
 

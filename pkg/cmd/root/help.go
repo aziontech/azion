@@ -3,9 +3,9 @@ package root
 import (
 	"bytes"
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/general"
 	"strings"
 
-	msg "github.com/aziontech/azion-cli/messages/general"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/text"

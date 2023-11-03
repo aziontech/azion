@@ -3,13 +3,13 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	var edgeApplicationID int64 = 0
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionsInstancesListUsage,
-		Short:         msg.EdgeFunctionsInstancesListLongDescription,
-		Long:          msg.EdgeFunctionsInstancesListLongDescription,
+		Use:           edge_functions_instances.EdgeFunctionsInstancesListUsage,
+		Short:         edge_functions_instances.EdgeFunctionsInstancesListLongDescription,
+		Long:          edge_functions_instances.EdgeFunctionsInstancesListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
 		    $ azion edge_functions_instances list --application-id 1234123423 --details
@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
 			if !cmd.Flags().Changed("application-id") {
-				return msg.ErrorMandatoryListFlags
+				return edge_functions_instances.ErrorMandatoryListFlags
 			}
 			if !cmd.Flags().Changed("page") && !cmd.Flags().Changed("page_size") {
 				for {
@@ -45,21 +45,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if err != nil {
-						return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+						return fmt.Errorf(edge_functions_instances.ErrorGetFunctions.Error(), err)
 					}
 				}
 			}
 
 			if _, err := PrintTable(cmd, f, opts, &numberPage, edgeApplicationID); err != nil {
-				return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+				return fmt.Errorf(edge_functions_instances.ErrorGetFunctions.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().Int64VarP(&edgeApplicationID, "application-id", "a", 0, msg.EdgeApplicationFlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionsInstancesListHelpFlag)
+	cmd.Flags().Int64VarP(&edgeApplicationID, "application-id", "a", 0, edge_functions_instances.EdgeApplicationFlagId)
+	cmd.Flags().BoolP("help", "h", false, edge_functions_instances.EdgeFunctionsInstancesListHelpFlag)
 	return cmd
 }
 
@@ -69,7 +69,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	applications, err := client.EdgeFuncInstancesList(ctx, opts, edgeApplicationID)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+		return 0, fmt.Errorf(edge_functions_instances.ErrorGetFunctions.Error(), err)
 	}
 
 	tbl := table.New("ID", "NAME")

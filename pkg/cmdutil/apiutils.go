@@ -1,8 +1,8 @@
 package cmdutil
 
 import (
-	msg "github.com/aziontech/azion-cli/messages/general"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	msg "github.com/aziontech/azion-cli/pkg/messages/general"
 	"github.com/spf13/cobra"
 )
 

@@ -3,12 +3,12 @@ package rules_engine
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/create/rules_engine"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -28,9 +28,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           rules_engine.Usage,
+		Short:         rules_engine.ShortDescription,
+		Long:          rules_engine.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(rules_engine.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -46,14 +46,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
+					return rules_engine.ErrorConvertIdApplication
 				}
 
 				fields.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
-				answer, err := utils.AskInput(msg.AskInputPhase)
+				answer, err := utils.AskInput(rules_engine.AskInputPhase)
 				if err != nil {
 					return err
 				}
@@ -62,7 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("in") {
-				answer, err := utils.AskInput(msg.AskInputPathFile)
+				answer, err := utils.AskInput(rules_engine.AskInputPathFile)
 				if err != nil {
 					return err
 				}
@@ -88,65 +88,65 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Create(context.Background(), fields.ApplicationID, fields.Phase, reqSdk)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
+				return fmt.Errorf(rules_engine.ErrorCreateRulesEngine.Error(), err)
 			}
 
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(rules_engine.OutputSuccess, response.GetId()))
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
-	flags.StringVar(&fields.Phase, "phase", "", msg.FlagPhase)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.HelpFlag)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, rules_engine.FlagEdgeApplicationID)
+	flags.StringVar(&fields.Phase, "phase", "", rules_engine.FlagPhase)
+	flags.StringVar(&fields.Path, "in", "", rules_engine.FlagIn)
+	flags.BoolP("help", "h", false, rules_engine.HelpFlag)
 	return cmd
 }
 
 func validateRequest(request sdk.CreateRulesEngineRequest) error {
 	if request.GetName() == "" {
-		return msg.ErrorNameEmpty
+		return rules_engine.ErrorNameEmpty
 	}
 
 	if request.GetCriteria() == nil {
-		return msg.ErrorStructCriteriaNil
+		return rules_engine.ErrorStructCriteriaNil
 	}
 
 	for _, itemCriteria := range request.GetCriteria() {
 		for _, item := range itemCriteria {
 			if item.Conditional == "" {
-				return msg.ErrorConditionalEmpty
+				return rules_engine.ErrorConditionalEmpty
 			}
 
 			if item.Variable == "" {
-				return msg.ErrorVariableEmpty
+				return rules_engine.ErrorVariableEmpty
 			}
 
 			if item.Operator == "" {
-				return msg.ErrorOperatorEmpty
+				return rules_engine.ErrorOperatorEmpty
 			}
 
 			if item.InputValue == nil {
-				return msg.ErrorInputValueEmpty
+				return rules_engine.ErrorInputValueEmpty
 			}
 		}
 	}
 
 	if request.GetBehaviors() == nil {
-		return msg.ErrorStructBehaviorsNil
+		return rules_engine.ErrorStructBehaviorsNil
 	}
 
 	for _, item := range request.GetBehaviors() {
 		if item.RulesEngineBehaviorString != nil {
 			if item.RulesEngineBehaviorString.Name == "" {
-				return msg.ErrorNameBehaviorsEmpty
+				return rules_engine.ErrorNameBehaviorsEmpty
 
 			}
 		}
 		if item.RulesEngineBehaviorObject != nil && (item.RulesEngineBehaviorObject.Target.CapturedArray == nil || item.RulesEngineBehaviorObject.Target.Regex == nil || item.RulesEngineBehaviorObject.Target.Subject == nil) {
 			if item.RulesEngineBehaviorObject.Name == "" {
-				return msg.ErrorNameBehaviorsEmpty
+				return rules_engine.ErrorNameBehaviorsEmpty
 			}
 		}
 	}

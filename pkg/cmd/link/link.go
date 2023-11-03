@@ -2,12 +2,12 @@ package link
 
 import (
 	"fmt"
+	link2 "github.com/aziontech/azion-cli/pkg/messages/link"
 	"io/fs"
 	"os"
 	"os/exec"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -90,9 +90,9 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	options := &contracts.AzionApplicationOptions{}
 	info := &LinkInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsLinkUsage,
-		Short:         msg.EdgeApplicationsLinkShortDescription,
-		Long:          msg.EdgeApplicationsLinkLongDescription,
+		Use:           link2.EdgeApplicationsLinkUsage,
+		Short:         link2.EdgeApplicationsLinkShortDescription,
+		Long:          link2.EdgeApplicationsLinkLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -109,10 +109,10 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsLinkFlagName)
-	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", msg.EdgeApplicationsLinkFlagTemplate)
-	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
-	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
+	cobraCmd.Flags().StringVar(&info.Name, "name", "", link2.EdgeApplicationsLinkFlagName)
+	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", link2.EdgeApplicationsLinkFlagTemplate)
+	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", link2.EdgeApplicationsLinkFlagMode)
+	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, link2.LinkFlagAuto)
 
 	return cobraCmd
 }
@@ -158,7 +158,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 		} else {
 			// if name was not sent we ask for input, otherwise info.Name already has the value
 			if info.Name == "" {
-				projName, err := askForInput(msg.LinkProjectQuestion, thoth.GenerateName())
+				projName, err := askForInput(link2.LinkProjectQuestion, thoth.GenerateName())
 				if err != nil {
 					return err
 				}
@@ -177,7 +177,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 			return err
 		}
 
-		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
+		logger.FInfo(cmd.Io.Out, link2.WebAppLinkCmdSuccess)
 
 		if !info.Auto {
 			shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
@@ -198,7 +198,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 					err = depsInstall(cmd, answer)
 					if err != nil {
 						logger.Debug("Error while installing project dependencies", zap.Error(err))
-						return msg.ErrorDeps
+						return link2.ErrorDeps
 					}
 				}
 
@@ -210,7 +210,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
+				logger.FInfo(cmd.Io.Out, link2.LinkDevCommand)
 			}
 
 			shouldDeploy, err := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
@@ -231,7 +231,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 					err = depsInstall(cmd, answer)
 					if err != nil {
 						logger.Debug("Error while installing project dependencies", zap.Error(err))
-						return msg.ErrorDeps
+						return link2.ErrorDeps
 					}
 				}
 
@@ -243,8 +243,8 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDeployCommand)
-				logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name))
+				logger.FInfo(cmd.Io.Out, link2.LinkDeployCommand)
+				logger.FInfo(cmd.Io.Out, fmt.Sprintf(link2.EdgeApplicationsLinkSuccessful, info.Name))
 			}
 		}
 

@@ -3,10 +3,10 @@ package origin
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/origin"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -19,9 +19,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var applicationID int64
 	var originKey string
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           origin.Usage,
+		Short:         origin.ShortDescription,
+		Long:          origin.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -30,20 +30,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApp)
+				answer, err := utils.AskInput(origin.AskInputApp)
 				if err != nil {
 					return err
 				}
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApp
+					return origin.ErrorConvertIdApp
 				}
 				applicationID = num
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answer, err := utils.AskInput(msg.AskInputOri)
+				answer, err := utils.AskInput(origin.AskInputOri)
 				if err != nil {
 					return err
 				}
@@ -55,16 +55,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err := client.DeleteOrigins(ctx, applicationID, originKey)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				return fmt.Errorf(origin.ErrorFailToDelete.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, originKey))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(origin.OutputSuccess, originKey))
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
-	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, origin.FlagApplicationID)
+	cmd.Flags().StringVar(&originKey, "origin-key", "", origin.FlagOriginKey)
+	cmd.Flags().BoolP("help", "h", false, origin.HelpFlag)
 	return cmd
 }

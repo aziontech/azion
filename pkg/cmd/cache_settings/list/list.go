@@ -2,13 +2,13 @@ package list
 
 import (
 	"context"
+	"github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,9 +20,9 @@ var edgeApplicationID int64
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.CacheSettingsListUsage,
-		Short:         msg.CacheSettingsListShortDescription,
-		Long:          msg.CacheSettingsListLongDescription,
+		Use:           cache_settings.CacheSettingsListUsage,
+		Short:         cache_settings.CacheSettingsListShortDescription,
+		Long:          cache_settings.CacheSettingsListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -35,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				return msg.ErrorMandatoryListFlags
+				return cache_settings.ErrorMandatoryListFlags
 			}
 
 			var numberPage int64 = opts.Page
@@ -46,13 +46,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if err != nil {
-						return msg.ErrorGetCache
+						return cache_settings.ErrorGetCache
 					}
 				}
 			}
 
 			if _, err := PrintTable(cmd, f, opts, &numberPage); err != nil {
-				return msg.ErrorGetCache
+				return cache_settings.ErrorGetCache
 			}
 			return nil
 		},
@@ -60,7 +60,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().Int64VarP(&edgeApplicationID, "application-id", "a", 0, "")
-	cmd.Flags().BoolP("help", "h", false, msg.CacheSettingsFlagHelp)
+	cmd.Flags().BoolP("help", "h", false, cache_settings.CacheSettingsFlagHelp)
 	return cmd
 }
 
@@ -70,7 +70,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	applications, err := client.ListCacheSettings(ctx, opts, edgeApplicationID)
 	if err != nil {
-		return 0, msg.ErrorGetCache
+		return 0, cache_settings.ErrorGetCache
 	}
 
 	tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")

@@ -3,10 +3,10 @@ package rulesengine
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/rules_engine"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var app_id int64
 	var phase string
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           rulesengine.Usage,
+		Short:         rulesengine.ShortDescription,
+		Long:          rulesengine.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("rule-id") {
 
-				answer, err := utils.AskInput(msg.AskInputRulesId)
+				answer, err := utils.AskInput(rulesengine.AskInputRulesId)
 				if err != nil {
 					return err
 				}
@@ -40,7 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
+					return rulesengine.ErrorConvertIdRule
 				}
 
 				rule_id = num
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(rulesengine.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -56,7 +56,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
+					return rulesengine.ErrorConvertIdRule
 				}
 
 				app_id = num
@@ -64,7 +64,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			if !cmd.Flags().Changed("phase") {
 
-				answer, err := utils.AskInput(msg.AskInputPhase)
+				answer, err := utils.AskInput(rulesengine.AskInputPhase)
 				if err != nil {
 					return err
 				}
@@ -78,20 +78,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			err := client.Delete(ctx, app_id, phase, rule_id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				return fmt.Errorf(rulesengine.ErrorFailToDelete.Error(), err)
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.DeleteOutputSuccess, rule_id)
+			fmt.Fprintf(out, rulesengine.DeleteOutputSuccess, rule_id)
 
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&rule_id, "rule-id", 0, msg.FlagRuleID)
-	cmd.Flags().Int64Var(&app_id, "application-id", 0, msg.FlagAppID)
-	cmd.Flags().StringVar(&phase, "phase", "", msg.FlagPhase)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().Int64Var(&rule_id, "rule-id", 0, rulesengine.FlagRuleID)
+	cmd.Flags().Int64Var(&app_id, "application-id", 0, rulesengine.FlagAppID)
+	cmd.Flags().StringVar(&phase, "phase", "", rulesengine.FlagPhase)
+	cmd.Flags().BoolP("help", "h", false, rulesengine.HelpFlag)
 
 	return cmd
 }

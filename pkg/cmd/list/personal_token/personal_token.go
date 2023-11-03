@@ -3,14 +3,14 @@ package personaltoken
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/general"
+	"github.com/aziontech/azion-cli/pkg/messages/list/personal_token"
 	"strings"
 
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	"github.com/aziontech/azion-cli/messages/general"
-	msg "github.com/aziontech/azion-cli/messages/list/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -22,9 +22,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var details bool
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           personaltoken.Usage,
+		Short:         personaltoken.ShortDescription,
+		Long:          personaltoken.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
         $ azion list personal-token  
@@ -37,7 +37,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			)
 
 			if err := PrintTable(client, f, details); err != nil {
-				return fmt.Errorf(msg.ErrorList.Error(), err)
+				return fmt.Errorf(personaltoken.ErrorList.Error(), err)
 			}
 			return nil
 		},
@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolVar(&details, "details", false, general.ApiListFlagDetails)
-	flags.BoolP("help", "h", false, msg.HelpFlag)
+	flags.BoolP("help", "h", false, personaltoken.HelpFlag)
 	return cmd
 }
 

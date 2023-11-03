@@ -3,13 +3,13 @@ package personaltoken
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/create/personal_token"
 	"os"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
@@ -29,9 +29,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.CreateUsage,
-		Short:         msg.CreateShortDescription,
-		Long:          msg.CreateLongDescription,
+		Use:           personaltoken.CreateUsage,
+		Short:         personaltoken.CreateShortDescription,
+		Long:          personaltoken.CreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -72,7 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			} else {
 				if !cmd.Flags().Changed("name") {
-					answer, err := utils.AskInput(msg.AskInputName)
+					answer, err := utils.AskInput(personaltoken.AskInputName)
 					if err != nil {
 						return err
 					}
@@ -80,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					fields.Name = answer
 				}
 				if !cmd.Flags().Changed("expiration") {
-					answer, err := utils.AskInput(msg.AskInputExpiration)
+					answer, err := utils.AskInput(personaltoken.AskInputExpiration)
 					if err != nil {
 						return err
 					}
@@ -100,21 +100,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			response, err := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token")).Create(context.Background(), &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreate.Error(), err)
+				return fmt.Errorf(personaltoken.ErrorCreate.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetKey())
+			fmt.Fprintf(f.IOStreams.Out, personaltoken.CreateOutputSuccess, response.GetKey())
 
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&fields.Name, "name", "", msg.CreateFlagName)
-	flags.StringVar(&fields.ExpiresAt, "expiration", "", msg.CreateFlagExpiresAt)
-	flags.StringVar(&fields.Description, "description", "", msg.CreateFlagDescription)
-	flags.StringVar(&fields.Path, "in", "", msg.CreateFlagIn)
-	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
+	flags.StringVar(&fields.Name, "name", "", personaltoken.CreateFlagName)
+	flags.StringVar(&fields.ExpiresAt, "expiration", "", personaltoken.CreateFlagExpiresAt)
+	flags.StringVar(&fields.Description, "description", "", personaltoken.CreateFlagDescription)
+	flags.StringVar(&fields.Path, "in", "", personaltoken.CreateFlagIn)
+	flags.BoolP("help", "h", false, personaltoken.CreateHelpFlag)
 
 	return cmd
 }

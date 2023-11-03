@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionDescribeUsage,
-		Short:         msg.EdgeFunctionDescribeShortDescription,
-		Long:          msg.EdgeFunctionDescribeLongDescription,
+		Use:           edgefunctions.EdgeFunctionDescribeUsage,
+		Short:         edgefunctions.EdgeFunctionDescribeShortDescription,
+		Long:          edgefunctions.EdgeFunctionDescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				return msg.ErrorMissingFunctionIdArgument
+				return edgefunctions.ErrorMissingFunctionIdArgument
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -41,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			function, err := client.Get(ctx, function_id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetFunction.Error(), err)
+				return fmt.Errorf(edgefunctions.ErrorGetFunction.Error(), err)
 			}
 
 			out := f.IOStreams.Out
@@ -55,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.EdgeFunctionFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, edgefunctions.EdgeFunctionFileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -67,11 +67,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	cmd.Flags().Bool("with-code", false, msg.EdgeFunctionDescribeFlagWithCode)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeFunctionDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeFunctionDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDescribeHelpFlag)
+	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, edgefunctions.EdgeFunctionFlagId)
+	cmd.Flags().Bool("with-code", false, edgefunctions.EdgeFunctionDescribeFlagWithCode)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", edgefunctions.EdgeFunctionDescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", edgefunctions.EdgeFunctionDescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, edgefunctions.EdgeFunctionDescribeHelpFlag)
 
 	return cmd
 }

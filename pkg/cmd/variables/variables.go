@@ -2,13 +2,13 @@ package variables
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/variables/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/variables"
 	"github.com/spf13/cobra"
 )
 

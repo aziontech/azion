@@ -3,6 +3,7 @@ package link
 import (
 	"bytes"
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/link"
 	"io"
 	"io/fs"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/go-git/go-git/v5"

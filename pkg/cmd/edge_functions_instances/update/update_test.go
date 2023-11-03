@@ -3,11 +3,11 @@ package update
 import (
 	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions_instances"
 	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -35,7 +35,7 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.EdgeFuncInstanceUpdateOutputSuccess, 9810), stdout.String())
+		require.Equal(t, fmt.Sprintf(edge_functions_instances.EdgeFuncInstanceUpdateOutputSuccess, 9810), stdout.String())
 	})
 
 	t.Run("missing flags", func(t *testing.T) {
@@ -45,7 +45,7 @@ func TestUpdate(t *testing.T) {
 		cmd := NewCmd(f)
 		err := cmd.Execute()
 
-		require.ErrorIs(t, err, msg.ErrorMandatoryUpdateFlags)
+		require.ErrorIs(t, err, edge_functions_instances.ErrorMandatoryUpdateFlags)
 	})
 
 	t.Run("update with file", func(t *testing.T) {
@@ -68,6 +68,6 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.EdgeFuncInstanceUpdateOutputSuccess, 9810), stdout.String())
+		require.Equal(t, fmt.Sprintf(edge_functions_instances.EdgeFuncInstanceUpdateOutputSuccess, 9810), stdout.String())
 	})
 }

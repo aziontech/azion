@@ -2,13 +2,13 @@ package resources
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/resources/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"github.com/spf13/cobra"
 )
 

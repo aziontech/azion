@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/describe/domain"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/describe/domain"
 	"github.com/fatih/color"
 
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
@@ -23,9 +23,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var domainID string
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           domain.Usage,
+		Short:         domain.ShortDescription,
+		Long:          domain.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -35,7 +35,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if !cmd.Flags().Changed("domain-id") {
-				answer, err := utils.AskInput(msg.AskInputDomainID)
+				answer, err := utils.AskInput(domain.AskInputDomainID)
 				if err != nil {
 					return err
 				}
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			ctx := context.Background()
 			domain, err := client.Get(ctx, domainID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
+				return fmt.Errorf(domain.ErrorGetDomain.Error(), err.Error())
 			}
 
 			out := f.IOStreams.Out
@@ -62,7 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
+				logger.LogSuccess(out, fmt.Sprintf(domain.FileWritten, filepath.Clean(opts.OutPath)))
 				return nil
 			}
 
@@ -71,10 +71,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&domainID, "domain-id", "", msg.FlagDomainID)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().StringVar(&domainID, "domain-id", "", domain.FlagDomainID)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", domain.FlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", domain.FlagFormat)
+	cmd.Flags().BoolP("help", "h", false, domain.HelpFlag)
 
 	return cmd
 }

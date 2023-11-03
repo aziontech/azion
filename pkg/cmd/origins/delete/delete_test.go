@@ -3,10 +3,10 @@ package delete
 import (
 	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	msg "github.com/aziontech/azion-cli/pkg/messages/origins"
 	"go.uber.org/zap/zapcore"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"

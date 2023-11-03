@@ -2,10 +2,10 @@ package origins
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/origins"
 	"github.com/aziontech/azion-cli/pkg/cmd/origins/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/origins/list"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/origins"
 	"github.com/spf13/cobra"
 )
 

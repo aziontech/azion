@@ -3,11 +3,11 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 	"os"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -24,9 +24,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	createCmd := &cobra.Command{
-		Use:           msg.EdgeServiceCreateUsage,
-		Short:         msg.EdgeServiceCreateShortDescription,
-		Long:          msg.EdgeServiceCreateLongDescription,
+		Use:           edgeservices.EdgeServiceCreateUsage,
+		Short:         edgeservices.EdgeServiceCreateShortDescription,
+		Long:          edgeservices.EdgeServiceCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -57,11 +57,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("name") {
-					return msg.ErrorMandatoryName
+					return edgeservices.ErrorMandatoryName
 				}
 				name, err := cmd.Flags().GetString("name")
 				if err != nil {
-					return msg.ErrorInvalidNameFlag
+					return edgeservices.ErrorInvalidNameFlag
 				}
 				serviceRequest.SetName(name)
 
@@ -79,9 +79,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	createCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceCreateFlagName)
-	createCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceCreateFlagIn)
-	createCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceCreateFlagHelp)
+	createCmd.Flags().StringVar(&fields.Name, "name", "", edgeservices.EdgeServiceCreateFlagName)
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", edgeservices.EdgeServiceCreateFlagIn)
+	createCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceCreateFlagHelp)
 
 	return createCmd
 }
@@ -94,10 +94,10 @@ func createNewService(client *sdk.APIClient, out io.Writer, request sdk.CreateSe
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorCreateService.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorCreateService.Error(), message)
 	}
 
-	fmt.Fprintf(out, msg.EdgeServiceCreateOutputSuccess, resp.Id)
+	fmt.Fprintf(out, edgeservices.EdgeServiceCreateOutputSuccess, resp.Id)
 
 	return nil
 }

@@ -3,10 +3,10 @@ package delete
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -18,9 +18,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var service_id int64
 	// deleteCmd represents the delete command
 	deleteCmd := &cobra.Command{
-		Use:           msg.EdgeServiceDeleteUsage,
-		Short:         msg.EdgeServiceDeleteShortDescription,
-		Long:          msg.EdgeServiceDeleteLongDescription,
+		Use:           edgeservices.EdgeServiceDeleteUsage,
+		Short:         edgeservices.EdgeServiceDeleteShortDescription,
+		Long:          edgeservices.EdgeServiceDeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -28,7 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return msg.ErrorMissingServiceIdArgument
+				return edgeservices.ErrorMissingServiceIdArgument
 			}
 
 			client, err := requests.CreateClient(f)
@@ -44,8 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, msg.EdgeServiceFlagId)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceDeleteFlagHelp)
+	deleteCmd.Flags().Int64VarP(&service_id, "service-id", "s", 0, edgeservices.EdgeServiceFlagId)
+	deleteCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceDeleteFlagHelp)
 
 	return deleteCmd
 }
@@ -60,11 +60,11 @@ func deleteService(client *sdk.APIClient, out io.Writer, service_id int64) error
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorDeleteService.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorDeleteService.Error(), message)
 	}
 
 	if httpResp.StatusCode == 204 {
-		fmt.Fprintf(out, msg.EdgeServiceDeleteOutputSuccess, service_id)
+		fmt.Fprintf(out, edgeservices.EdgeServiceDeleteOutputSuccess, service_id)
 	}
 
 	return nil

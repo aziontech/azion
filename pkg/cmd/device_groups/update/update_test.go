@@ -3,11 +3,11 @@ package update
 import (
 	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/messages/device_groups"
 	"go.uber.org/zap/zapcore"
 	"net/http"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/device_groups"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -35,7 +35,7 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.DeviceGroupsUpdateOutputSuccess, 1234), stdout.String())
+		require.Equal(t, fmt.Sprintf(device_groups.DeviceGroupsUpdateOutputSuccess, 1234), stdout.String())
 	})
 
 	t.Run("missing flags", func(t *testing.T) {
@@ -57,7 +57,7 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.ErrorIs(t, err, msg.ErrorMandatoryFlagsUpdate)
+		require.ErrorIs(t, err, device_groups.ErrorMandatoryFlagsUpdate)
 	})
 
 	t.Run("update with file", func(t *testing.T) {
@@ -80,6 +80,6 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.DeviceGroupsUpdateOutputSuccess, 1234), stdout.String())
+		require.Equal(t, fmt.Sprintf(device_groups.DeviceGroupsUpdateOutputSuccess, 1234), stdout.String())
 	})
 }

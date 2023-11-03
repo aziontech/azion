@@ -3,10 +3,10 @@ package list
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_functions"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -21,9 +21,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionListUsage,
-		Short:         msg.EdgeFunctionListShortDescription,
-		Long:          msg.EdgeFunctionListLongDescription,
+		Use:           edgefunctions.EdgeFunctionListUsage,
+		Short:         edgefunctions.EdgeFunctionListShortDescription,
+		Long:          edgefunctions.EdgeFunctionListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -42,20 +42,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return nil
 					}
 					if err != nil {
-						return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+						return fmt.Errorf(edgefunctions.ErrorGetFunctions.Error(), err)
 					}
 				}
 			}
 
 			if _, err := PrintTable(f, opts, &numberPage); err != nil {
-				return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+				return fmt.Errorf(edgefunctions.ErrorGetFunctions.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, edgefunctions.EdgeFunctionListHelpFlag)
 	return cmd
 }
 
@@ -69,7 +69,7 @@ func PrintTable(f *cmdutil.Factory, opts *contracts.ListOptions, numberPage *int
 
 	functions, pages, err := client.List(ctx, opts)
 	if err != nil {
-		return 0, fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
+		return 0, fmt.Errorf(edgefunctions.ErrorGetFunctions.Error(), err)
 	}
 
 	if opts.Details {

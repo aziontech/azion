@@ -3,10 +3,10 @@ package create
 import (
 	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 	"go.uber.org/zap/zapcore"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -52,7 +52,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
+		require.Equal(t, fmt.Sprintf(cache_settings.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -78,7 +78,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
+		require.Equal(t, fmt.Sprintf(cache_settings.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
 	})
 
 	t.Run("no acceleration error --in flag", func(t *testing.T) {
@@ -103,7 +103,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorApplicationAccelerationNotEnabled)
+		require.ErrorIs(t, err, cache_settings.ErrorApplicationAccelerationNotEnabled)
 	})
 
 	t.Run("no acceleration error with args", func(t *testing.T) {
@@ -143,7 +143,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorApplicationAccelerationNotEnabled)
+		require.ErrorIs(t, err, cache_settings.ErrorApplicationAccelerationNotEnabled)
 	})
 
 	t.Run("override but no ttl", func(t *testing.T) {
@@ -182,7 +182,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorBrowserMaximumTtlNotSent)
+		require.ErrorIs(t, err, cache_settings.ErrorBrowserMaximumTtlNotSent)
 	})
 
 	t.Run("no acceleration error with args", func(t *testing.T) {
@@ -222,7 +222,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorApplicationAccelerationNotEnabled)
+		require.ErrorIs(t, err, cache_settings.ErrorApplicationAccelerationNotEnabled)
 	})
 
 	t.Run("wrong l2 boolean var", func(t *testing.T) {
@@ -262,7 +262,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorSliceL2CachingFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorSliceL2CachingFlag)
 	})
 
 	t.Run("wrong caching for options boolean var", func(t *testing.T) {
@@ -302,7 +302,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorCachingForOptionsFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorCachingForOptionsFlag)
 	})
 
 	t.Run("wrong caching for post boolean var", func(t *testing.T) {
@@ -342,7 +342,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorCachingForPostFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorCachingForPostFlag)
 	})
 
 	t.Run("wrong caching string sort boolean var", func(t *testing.T) {
@@ -382,7 +382,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorCachingStringSortFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorCachingStringSortFlag)
 	})
 
 	t.Run("wrong slice configuration enabled boolean var", func(t *testing.T) {
@@ -422,7 +422,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorSliceConfigurationFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorSliceConfigurationFlag)
 	})
 
 	t.Run("wrong slice l2 caching enabled boolean var", func(t *testing.T) {
@@ -462,7 +462,7 @@ func TestCreate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorSliceL2CachingFlag)
+		require.ErrorIs(t, err, cache_settings.ErrorSliceL2CachingFlag)
 	})
 
 	t.Run("error unmarshall", func(t *testing.T) {

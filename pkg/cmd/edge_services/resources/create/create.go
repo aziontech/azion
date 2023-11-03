@@ -3,12 +3,12 @@ package create
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 	"os"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -32,9 +32,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	// createCmd represents the create command
 	createCmd := &cobra.Command{
-		Use:           msg.EdgeServiceResourceCreateUsage,
-		Short:         msg.EdgeServiceResourceCreateShortDescription,
-		Long:          msg.EdgeServiceResourceCreateLongDescription,
+		Use:           edgeservices.EdgeServiceResourceCreateUsage,
+		Short:         edgeservices.EdgeServiceResourceCreateShortDescription,
+		Long:          edgeservices.EdgeServiceResourceCreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("service-id") {
-				return msg.ErrorMissingServiceIdArgument
+				return edgeservices.ErrorMissingServiceIdArgument
 			}
 
 			request := sdk.CreateResourceRequest{}
@@ -68,7 +68,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("content-file") || !cmd.Flags().Changed("content-type") {
-					return msg.ErrorMandatoryFlagsResource
+					return edgeservices.ErrorMandatoryFlagsResource
 				}
 
 				replacer := strings.NewReplacer("shellscript", "Shell Script", "text", "Text", "install", "Install", "reload", "Reload", "uninstall", "Uninstall")
@@ -93,7 +93,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				contentTypeConverted := replacer.Replace(contentType)
 				if contentTypeConverted == SHELL_SCRIPT {
 					if trigger == "" {
-						return msg.ErrorInvalidResourceTrigger
+						return edgeservices.ErrorInvalidResourceTrigger
 					}
 				}
 				request.SetContentType(contentTypeConverted)
@@ -128,13 +128,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	createCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, msg.EdgeServiceFlagId)
-	createCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceResourceCreateFlagName)
-	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", msg.EdgeServiceResourceCreateFlagTrigger)
-	createCmd.Flags().StringVar(&fields.ContentType, "content-type", "", msg.EdgeServiceResourceCreateFlagContentType)
-	createCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", msg.EdgeServiceResourceCreateFlagContentFile)
-	createCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceResourceCreateFlagIn)
-	createCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceResourceCreateFlagHelp)
+	createCmd.Flags().Int64VarP(&fields.ServiceId, "service-id", "s", 0, edgeservices.EdgeServiceFlagId)
+	createCmd.Flags().StringVar(&fields.Name, "name", "", edgeservices.EdgeServiceResourceCreateFlagName)
+	createCmd.Flags().StringVar(&fields.Trigger, "trigger", "", edgeservices.EdgeServiceResourceCreateFlagTrigger)
+	createCmd.Flags().StringVar(&fields.ContentType, "content-type", "", edgeservices.EdgeServiceResourceCreateFlagContentType)
+	createCmd.Flags().StringVar(&fields.ContentFile, "content-file", "", edgeservices.EdgeServiceResourceCreateFlagContentFile)
+	createCmd.Flags().StringVar(&fields.InPath, "in", "", edgeservices.EdgeServiceResourceCreateFlagIn)
+	createCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceResourceCreateFlagHelp)
 
 	return createCmd
 }
@@ -147,10 +147,10 @@ func createNewResource(client *sdk.APIClient, out io.Writer, service_id int64, r
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorCreateResource.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorCreateResource.Error(), message)
 	}
 
-	fmt.Fprintf(out, msg.EdgeServiceResourceCreateOutputSuccess, resp.Id)
+	fmt.Fprintf(out, edgeservices.EdgeServiceResourceCreateOutputSuccess, resp.Id)
 
 	return nil
 }

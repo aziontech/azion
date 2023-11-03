@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/edge_services"
 	"io"
 	"os"
 	"regexp"
@@ -11,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_services"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_services/requests"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -36,9 +36,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 	// listCmd represents the list command
 	updateCmd := &cobra.Command{
-		Use:           msg.EdgeServiceUpdateUsage,
-		Short:         msg.EdgeServiceUpdateShortDescription,
-		Long:          msg.EdgeServiceUpdateLongDescription,
+		Use:           edgeservices.EdgeServiceUpdateUsage,
+		Short:         edgeservices.EdgeServiceUpdateShortDescription,
+		Long:          edgeservices.EdgeServiceUpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// either id parameter or in path should be passed
 			if !cmd.Flags().Changed("service-id") && !cmd.Flags().Changed("in") {
-				return msg.ErrorMissingArgumentUpdate
+				return edgeservices.ErrorMissingArgumentUpdate
 			}
 
 			request := UpdateRequestService{}
@@ -144,12 +144,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 	}
-	updateCmd.Flags().Int64VarP(&fields.Id, "service-id", "s", 0, msg.EdgeServiceFlagId)
-	updateCmd.Flags().StringVar(&fields.Name, "name", "", msg.EdgeServiceUpdateFlagName)
-	updateCmd.Flags().StringVar(&fields.Active, "active", "", msg.EdgeServiceUpdateFlagActive)
-	updateCmd.Flags().StringVar(&fields.Variables, "variables-file", "", msg.EdgeServiceUpdateFlagVariables)
-	updateCmd.Flags().StringVar(&fields.InPath, "in", "", msg.EdgeServiceUpdateFlagIn)
-	updateCmd.Flags().BoolP("help", "h", false, msg.EdgeServiceUpdateFlagHelp)
+	updateCmd.Flags().Int64VarP(&fields.Id, "service-id", "s", 0, edgeservices.EdgeServiceFlagId)
+	updateCmd.Flags().StringVar(&fields.Name, "name", "", edgeservices.EdgeServiceUpdateFlagName)
+	updateCmd.Flags().StringVar(&fields.Active, "active", "", edgeservices.EdgeServiceUpdateFlagActive)
+	updateCmd.Flags().StringVar(&fields.Variables, "variables-file", "", edgeservices.EdgeServiceUpdateFlagVariables)
+	updateCmd.Flags().StringVar(&fields.InPath, "in", "", edgeservices.EdgeServiceUpdateFlagIn)
+	updateCmd.Flags().BoolP("help", "h", false, edgeservices.EdgeServiceUpdateFlagHelp)
 
 	return updateCmd
 }
@@ -162,10 +162,10 @@ func updateService(client *sdk.APIClient, out io.Writer, id int64, cmd *cobra.Co
 	if err != nil {
 		message := utils.ErrorPerStatusCode(httpResp, err)
 
-		return fmt.Errorf(msg.ErrorUpdateService.Error(), message)
+		return fmt.Errorf(edgeservices.ErrorUpdateService.Error(), message)
 	}
 
-	fmt.Fprintf(out, msg.EdgeServiceUpdateOutputSuccess, resp.Id)
+	fmt.Fprintf(out, edgeservices.EdgeServiceUpdateOutputSuccess, resp.Id)
 
 	return nil
 }

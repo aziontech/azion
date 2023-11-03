@@ -3,6 +3,7 @@ package origin
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/list/origin"
 	"strconv"
 	"strings"
 
@@ -11,7 +12,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -25,9 +25,9 @@ var edgeApplicationID int64 = 0
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.OriginsListUsage,
-		Short:         msg.OriginsListShortDescription,
-		Long:          msg.OriginsListLongDescription,
+		Use:           origin.OriginsListUsage,
+		Short:         origin.OriginsListShortDescription,
+		Long:          origin.OriginsListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
         $ azion origins list -a 16736354321
@@ -37,7 +37,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(origin.AskInputApplicationId)
 				if err != nil {
 					return err
 				}
@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
+					return origin.ErrorConvertIdApplication
 				}
 
 				edgeApplicationID = num
@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			if err := PrintTable(client, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
+				return fmt.Errorf(origin.ErrorGetOrigins.Error(), err)
 			}
 			return nil
 		},
@@ -62,8 +62,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	flags := cmd.Flags()
-	flags.Int64Var(&edgeApplicationID, "application-id", 0, msg.OriginsListFlagEdgeApplicationID)
-	flags.BoolP("help", "h", false, msg.OriginsListHelpFlag)
+	flags.Int64Var(&edgeApplicationID, "application-id", 0, origin.OriginsListFlagEdgeApplicationID)
+	flags.BoolP("help", "h", false, origin.OriginsListHelpFlag)
 	return cmd
 }
 

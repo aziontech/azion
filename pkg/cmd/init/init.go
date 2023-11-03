@@ -2,12 +2,12 @@ package init
 
 import (
 	"fmt"
+	init2 "github.com/aziontech/azion-cli/pkg/messages/init"
 	"io/fs"
 	"os"
 	"os/exec"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -91,9 +91,9 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 	info := &InitInfo{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsInitUsage,
-		Short:         msg.EdgeApplicationsInitShortDescription,
-		Long:          msg.EdgeApplicationsInitLongDescription,
+		Use:           init2.EdgeApplicationsInitUsage,
+		Short:         init2.EdgeApplicationsInitShortDescription,
+		Long:          init2.EdgeApplicationsInitLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -107,7 +107,7 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
+	cobraCmd.Flags().StringVar(&info.Name, "name", "", init2.EdgeApplicationsInitFlagName)
 	return cobraCmd
 }
 
@@ -131,7 +131,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
 		if info.Name == "" {
-			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
+			projName, err := askForInput(init2.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
 			}
@@ -151,12 +151,12 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		return err
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.WebAppInitCmdSuccess)
+	logger.FInfo(cmd.Io.Out, init2.WebAppInitCmdSuccess)
 
 	err = cmd.ChangeDir(info.PathWorkingDir)
 	if err != nil {
 		logger.Debug("Error while changing to new working directory", zap.Error(err))
-		return msg.ErrorWorkingDir
+		return init2.ErrorWorkingDir
 	}
 
 	shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
@@ -177,7 +177,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 			err = depsInstall(cmd, answer)
 			if err != nil {
 				logger.Debug("Error while installing project dependencies", zap.Error(err))
-				return msg.ErrorDeps
+				return init2.ErrorDeps
 			}
 		}
 
@@ -189,7 +189,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 			return err
 		}
 	} else {
-		logger.FInfo(cmd.Io.Out, msg.InitDevCommand)
+		logger.FInfo(cmd.Io.Out, init2.InitDevCommand)
 	}
 
 	shouldDeploy, err := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
@@ -222,8 +222,8 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 			return err
 		}
 	} else {
-		logger.FInfo(cmd.Io.Out, msg.InitDeployCommand)
-		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, info.Name))
+		logger.FInfo(cmd.Io.Out, init2.InitDeployCommand)
+		logger.FInfo(cmd.Io.Out, fmt.Sprintf(init2.EdgeApplicationsInitSuccessful, info.Name))
 	}
 
 	return nil

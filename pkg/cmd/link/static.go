@@ -2,8 +2,8 @@ package link
 
 import (
 	"fmt"
+	msg "github.com/aziontech/azion-cli/pkg/messages/link"
 
-	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	thoth "github.com/aziontech/go-thoth"

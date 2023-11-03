@@ -2,11 +2,11 @@ package init
 
 import (
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/init"
 	"os"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/joho/godotenv"
@@ -44,7 +44,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
-	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
+	logger.FInfo(cmd.Io.Out, init.InitGettingVulcan)
 
 	command := vul.Command("", "init --name "+info.Name)
 
@@ -90,25 +90,25 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 
 	if len(newLineSplit) < 1 {
 		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
-		return msg.ErrorModeNotFound
+		return init.ErrorModeNotFound
 	}
 
 	var mds string = newLineSplit[0]
 
 	info.Template = preset
 	info.Mode = strings.ToLower(mds)
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf(init.ModeAutomatic, mds, preset))
 
 	return nil
 }
 
 func depsInstall(cmd *InitCmd, packageManager string) error {
-	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
+	logger.FInfo(cmd.Io.Out, init.InitInstallDeps)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
-		return msg.ErrorDeps
+		return init.ErrorDeps
 	}
 
 	return nil

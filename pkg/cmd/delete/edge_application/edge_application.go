@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/delete/edge_application"
 	"os"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -45,9 +45,9 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	var application_id int64
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           edgeapplication.Usage,
+		Short:         edgeapplication.ShortDescription,
+		Long:          edgeapplication.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -59,9 +59,9 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&application_id, "application-id", 0, msg.FlagId)
-	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().Int64Var(&application_id, "application-id", 0, edgeapplication.FlagId)
+	cmd.Flags().Bool("cascade", true, edgeapplication.CascadeFlag)
+	cmd.Flags().BoolP("help", "h", false, edgeapplication.HelpFlag)
 
 	return cmd
 }
@@ -73,32 +73,32 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		azionJson, err := del.GetAzion()
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				return msg.ErrorMissingAzionJson
+				return edgeapplication.ErrorMissingAzionJson
 			} else {
 				return err //message with error
 			}
 		}
 		if azionJson.Application.Id == 0 {
-			return msg.ErrorMissingApplicationIdJson
+			return edgeapplication.ErrorMissingApplicationIdJson
 		}
 		clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
 		clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
 
 		err = clientapp.Delete(ctx, azionJson.Application.Id)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+			return fmt.Errorf(edgeapplication.ErrorFailToDeleteApplication.Error(), err)
 		}
 
 		if azionJson.Function.Id == 0 {
-			fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
+			fmt.Fprintf(del.f.IOStreams.Out, edgeapplication.MissingFunction)
 		} else {
 			err = clientfunc.Delete(ctx, azionJson.Function.Id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+				return fmt.Errorf(edgeapplication.ErrorFailToDeleteApplication.Error(), err)
 			}
 		}
 
-		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.CascadeSuccess)
+		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", edgeapplication.CascadeSuccess)
 
 		err = del.UpdateJson(del)
 		if err != nil {
@@ -113,7 +113,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		qs := []*survey.Question{
 			{
 				Name:     "id",
-				Prompt:   &survey.Input{Message: msg.AskInput},
+				Prompt:   &survey.Input{Message: edgeapplication.AskInput},
 				Validate: survey.Required,
 			},
 		}
@@ -129,7 +129,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		num, err := strconv.ParseInt(answer, 10, 64)
 		if err != nil {
 			logger.Debug("Error while converting answer to int64", zap.Error(err))
-			return msg.ErrorConvertId
+			return edgeapplication.ErrorConvertId
 		}
 
 		application_id = num
@@ -139,11 +139,11 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 
 	err := client.Delete(ctx, application_id)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+		return fmt.Errorf(edgeapplication.ErrorFailToDeleteApplication.Error(), err)
 	}
 
 	out := del.f.IOStreams.Out
-	fmt.Fprintf(out, msg.OutputSuccess, application_id)
+	fmt.Fprintf(out, edgeapplication.OutputSuccess, application_id)
 
 	return nil
 }
@@ -160,17 +160,17 @@ func updateAzionJson(cmd *DeleteCmd) error {
 	}
 	jsonReplaceFunc, err := sjson.Set(string(byteAzionJson), "function.id", 0)
 	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
+		return edgeapplication.ErrorFailedUpdateAzionJson
 	}
 
 	jsonReplaceApp, err := sjson.Set(jsonReplaceFunc, "application.id", 0)
 	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
+		return edgeapplication.ErrorFailedUpdateAzionJson
 	}
 
 	jsonReplaceDomain, err := sjson.Set(jsonReplaceApp, "domain.id", 0)
 	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
+		return edgeapplication.ErrorFailedUpdateAzionJson
 	}
 
 	err = os.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)

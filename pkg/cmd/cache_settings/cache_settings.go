@@ -2,13 +2,13 @@ package cache_settings
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/cache_settings/update"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/cache_settings"
 	"github.com/spf13/cobra"
 )
 

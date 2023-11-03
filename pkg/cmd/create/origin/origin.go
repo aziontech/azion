@@ -3,6 +3,7 @@ package origin
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/create/origin"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
@@ -10,8 +11,6 @@ import (
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/logger"
-
-	msg "github.com/aziontech/azion-cli/messages/create/origin"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -44,9 +43,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           origin.Usage,
+		Short:         origin.ShortDescription,
+		Long:          origin.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(example),
@@ -68,9 +67,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateOrigins, err)
+				return fmt.Errorf(origin.ErrorCreateOrigins, err)
 			}
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetOriginId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(origin.OutputSuccess, response.GetOriginId()))
 
 			return nil
 		},
@@ -93,7 +92,7 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateRequest) error {
 	if !cmd.Flags().Changed("application-id") {
-		answers, err := utils.AskInput(msg.AskAppID)
+		answers, err := utils.AskInput(origin.AskAppID)
 
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
@@ -110,7 +109,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	}
 
 	if !cmd.Flags().Changed("name") {
-		answers, err := utils.AskInput(msg.AskName)
+		answers, err := utils.AskInput(origin.AskName)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
@@ -120,7 +119,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	}
 
 	if !cmd.Flags().Changed("addresses") {
-		answers, err := utils.AskInput(msg.AskAddresses)
+		answers, err := utils.AskInput(origin.AskAddresses)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
@@ -130,7 +129,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	}
 
 	if !cmd.Flags().Changed("host-header") {
-		answers, err := utils.AskInput(msg.AskHostHeader)
+		answers, err := utils.AskInput(origin.AskHostHeader)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
@@ -158,7 +157,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	if cmd.Flags().Changed("hmac-authentication") {
 		hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorHmacAuthenticationFlag)
+			return fmt.Errorf(origin.ErrorHmacAuthenticationFlag)
 		}
 		request.SetHmacAuthentication(hmacAuth)
 	}
@@ -179,17 +178,17 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
-	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
-	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, msg.FlagAddresses)
-	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)
-	flags.StringVar(&fields.HostHeader, "host-header", "", msg.FlagHostHeader)
-	flags.StringVar(&fields.OriginPath, "origin-path", "", msg.FlagOriginPath)
-	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", msg.FlagHmacAuthentication)
-	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.FlagHmacRegionName)
-	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
-	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, origin.FlagEdgeApplicationID)
+	flags.StringVar(&fields.Name, "name", "", origin.FlagName)
+	flags.StringVar(&fields.OriginType, "origin-type", "", origin.FlagOriginType)
+	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, origin.FlagAddresses)
+	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", origin.FlagOriginProtocolPolicy)
+	flags.StringVar(&fields.HostHeader, "host-header", "", origin.FlagHostHeader)
+	flags.StringVar(&fields.OriginPath, "origin-path", "", origin.FlagOriginPath)
+	flags.StringVar(&fields.HmacAuthentication, "hmac-authentication", "", origin.FlagHmacAuthentication)
+	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", origin.FlagHmacRegionName)
+	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", origin.FlagHmacAccessKey)
+	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", origin.FlagHmacSecretKey)
+	flags.StringVar(&fields.Path, "in", "", origin.FlagIn)
+	flags.BoolP("help", "h", false, origin.FlagHelp)
 }

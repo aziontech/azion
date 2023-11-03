@@ -3,10 +3,10 @@ package domain
 import (
 	"context"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/messages/update/domain"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/update/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -30,9 +30,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Use:           domain.Usage,
+		Short:         domain.ShortDescription,
+		Long:          domain.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -55,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			} else {
 				if !cmd.Flags().Changed("domain-id") {
-					answer, err := utils.AskInput(msg.AskInputDomainID)
+					answer, err := utils.AskInput(domain.AskInputDomainID)
 					if err != nil {
 						return err
 					}
@@ -63,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					num, err := strconv.ParseInt(answer, 10, 64)
 					if err != nil {
 						logger.Debug("Error while converting answer to int64", zap.Error(err))
-						return msg.ErrorConvertDomainID
+						return domain.ErrorConvertDomainID
 					}
 
 					fields.DomainID = num
@@ -89,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					} else {
 						n, err := strconv.ParseInt(fields.DigitalCertificate, 10, 64)
 						if err != nil {
-							return msg.ErrorDigitalCertificateFlag
+							return domain.ErrorDigitalCertificateFlag
 						}
 						request.SetDigitalCertificateId(n)
 					}
@@ -98,7 +98,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("cname-access-only") {
 					active, err := strconv.ParseBool(fields.CnameAccessOnly)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorActiveFlag, fields.CnameAccessOnly)
+						return fmt.Errorf("%w: %q", domain.ErrorActiveFlag, fields.CnameAccessOnly)
 					}
 					request.SetCnameAccessOnly(active)
 				}
@@ -106,7 +106,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("active") {
 					active, err := strconv.ParseBool(fields.Active)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorActiveFlag, fields.Active)
+						return fmt.Errorf("%w: %q", domain.ErrorActiveFlag, fields.Active)
 					}
 					request.SetIsActive(active)
 				}
@@ -119,24 +119,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			response, err := client.Update(ctx, &request)
 
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
+				return fmt.Errorf(domain.ErrorUpdateDomain.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(domain.OutputSuccess, response.GetId()))
 			return nil
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.DomainID, "domain-id", 0, msg.FlagDomainID)
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagApplicationID)
-	flags.StringVar(&fields.DigitalCertificate, "digital-certificate-id", "", msg.FlagDigitalCertificateID)
-	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.FlagCnames)
-	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
-	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "", msg.FlagCnameAccessOnly)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.HelpFlag)
+	flags.Int64Var(&fields.DomainID, "domain-id", 0, domain.FlagDomainID)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, domain.FlagApplicationID)
+	flags.StringVar(&fields.DigitalCertificate, "digital-certificate-id", "", domain.FlagDigitalCertificateID)
+	flags.StringVar(&fields.Name, "name", "", domain.FlagName)
+	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, domain.FlagCnames)
+	flags.StringVar(&fields.Active, "active", "", domain.FlagActive)
+	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "", domain.FlagCnameAccessOnly)
+	flags.StringVar(&fields.InPath, "in", "", domain.FlagIn)
+	flags.BoolP("help", "h", false, domain.HelpFlag)
 
 	return cmd
 }

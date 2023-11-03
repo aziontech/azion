@@ -2,13 +2,13 @@ package delete
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/delete/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/delete/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/delete/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	msg "github.com/aziontech/azion-cli/pkg/messages/delete"
 	"github.com/spf13/cobra"
 )
 
