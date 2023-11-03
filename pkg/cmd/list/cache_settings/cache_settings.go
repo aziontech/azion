@@ -11,7 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/list/cache_settings"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -68,7 +68,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	ctx := context.Background()
 
 	for {
-		cache, err := client.ListCacheSettings(ctx, opts, edgeApplicationID)
+		cache, err := client.List(ctx, opts, edgeApplicationID)
 		if err != nil {
 			return msg.ErrorGetCaches
 		}
