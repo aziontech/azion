@@ -131,7 +131,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.cacheByQueryString, "cache-by-query-string", "ignore", msg.CreateFlagCacheByQueryString)
 	flags.StringVar(&fields.cdnCacheSettings, "cdn-cache-settings", "honor", msg.CreateFlagCdnCacheSettings)
 	flags.StringVar(&fields.enableCachingForOptions, "enable-caching-for-options", "false", msg.CreateFlagCachingForOptions)
-	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.CreateFlagCachingForPost)
+	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.CreateFlagCachingForPostEnabled)
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.CreateFlagCachingStringSort)
 	flags.StringVar(&fields.isSliceConfigurationEnabled, "slice-configuration-enabled", "", msg.CreateFlagSliceConfigurationEnabled)
 	flags.StringVar(&fields.isSliceL2CachingEnabled, "slice-l2-caching-enabled", "", msg.CreateFlagSliceL2CachingEnabled)

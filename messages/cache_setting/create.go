@@ -17,7 +17,7 @@ const (
 	CreateFlagCdnCacheSettings           = "Configures the amount of time Azion's Edge Applications take to cache the content. It can either Honor Origin Cache Headers or Override Cache Settings"
 	CreateFlagCachingForOptions          = "Whether caching for options is active or not"
 	CreateFlagCachingStringSort          = "Whether caching string sort is active or not"
-	CreateFlagCachingForPost             = "Whether caching for post is active or not"
+	CreateFlagCachingForPostEnabled      = "Whether caching for post is active or not"
 	CreateFlagSliceConfigurationEnabled  = "Whether slice configuration is active or not"
 	CreateFlagSliceL2CachingEnabled      = "Whether slice L2 caching is active or not"
 	CreateFlagSliceEdgeCachingEnabled    = "Whether slice edge caching is active or not"

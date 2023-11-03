@@ -19,9 +19,10 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest, applicationId i
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -37,9 +38,10 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationId i
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -62,9 +64,10 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 
 	if err != nil {
 		logger.Debug("Error while listing cache settings", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return nil, err
+		}
 		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -77,9 +80,10 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return nil, err
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
@@ -92,9 +96,10 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID 
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return err
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
