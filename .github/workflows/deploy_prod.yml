@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: golang:1.20
+    outputs:
+      binver: ${{ steps.binversion.outputs.BIN_VERSION }}
     env:
       CGO_ENABLED: 0 # Statically linked
 
@@ -71,7 +73,10 @@ jobs:
               dist/$distro/$arch/ s3://azion-downloads/$distro/$arch/; \
           done < BUILD
 
-      - name: set bin_version environment variable 
+      - id: binversion 
+        run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT
+
+      - name: set bin version to github env 
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
           
 
@@ -86,11 +91,16 @@ jobs:
           STORAGE_URL: https://storage-api.azion.com
           AUTH_URL: https://sso.azion.com/api/user/me
           TEMPLATE_BRANCH: main
-          
+
+  bump_formula:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - uses: dawidd6/action-homebrew-bump-formula@v3
         with:
           token: ${{secrets.RELEASE_GITHUB_TOKEN}}
           formula: azion
-          tag: ${{ env.BIN_VERSION }}
+          tag: ${{needs.build.outputs.binver}}
+
 
 

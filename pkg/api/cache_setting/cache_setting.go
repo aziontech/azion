@@ -23,6 +23,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest, applicationId i
 		if err != nil {
 			return nil, err
 		}
+
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -42,6 +43,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationId i
 		if err != nil {
 			return nil, err
 		}
+
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -84,6 +86,7 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int
 		if err != nil {
 			return nil, err
 		}
+
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
@@ -100,6 +103,7 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID 
 		if err != nil {
 			return err
 		}
+
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
