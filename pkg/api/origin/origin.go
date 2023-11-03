@@ -2,7 +2,6 @@ package origin
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 
@@ -34,54 +33,57 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-type CreateOriginsRequest struct {
+type CreateRequest struct {
 	sdk.CreateOriginsRequest
 }
 
-type UpdateOriginsRequest struct {
+type UpdateRequest struct {
 	sdk.PatchOriginsRequest
 }
 
-type OriginsResponse interface {
+type Response interface {
 	GetOriginKey() string
 	GetOriginId() int64
 	GetName() string
 }
 
-func (c *Client) GetOrigin(ctx context.Context, edgeApplicationID, originID int64) (sdk.OriginsResultResponse, error) {
+func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey string) (sdk.OriginsResultResponse, error) {
 	logger.Debug("Get Origin")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
+		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyGet(ctx, edgeApplicationID, originKey).Execute()
+
 	if err != nil {
-		logger.Debug("Error while getting an origin", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
-	}
-	if len(resp.Results) > 0 {
-		for _, result := range resp.Results {
-			if result.OriginId == originID {
-				return result, nil
+		if httpResp != nil {
+			logger.Debug("Error while describing an origin", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return sdk.OriginsResultResponse{}, err
 			}
 		}
+		return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(&http.Response{Status: "404 Not Found", StatusCode: http.StatusNotFound}, errors.New("404 Not Found"))
+
+	return resp.Results, nil
 }
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
 	logger.Debug("List Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
-		logger.Debug("Error while listing origins", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return &sdk.OriginsResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while listing your origins", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return resp, nil
 }
 
-func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req *CreateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req *CreateRequest) (Response, error) {
 	logger.Debug("Create Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
@@ -97,15 +99,18 @@ func (c *Client) CreateOrigins(ctx context.Context, edgeApplicationID int64, req
 	return &resp.Results, nil
 }
 
-func (c *Client) UpdateOrigins(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateOriginsRequest) (OriginsResponse, error) {
+func (c *Client) Update(ctx context.Context, edgeApplicationID int64, originKey string, req *UpdateRequest) (Response, error) {
 	logger.Debug("Update Origins")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while updating an origin", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while updating an origin", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return &resp.Results, nil
@@ -115,10 +120,13 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 	logger.Debug("Delete Origins")
 	httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
 	if err != nil {
-		logger.Debug("Error while deleting an origin", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting an origin", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

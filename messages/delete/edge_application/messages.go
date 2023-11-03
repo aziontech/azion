@@ -10,4 +10,5 @@ var (
 	MissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion"
 	CascadeSuccess   = "Cascade delete carried out successfully"
 	FlagId           = "Unique identifier of the edge application"
+	AskInput         = "What is the id of the Edge Application you wish to delete?"
 )
