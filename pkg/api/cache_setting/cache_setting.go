@@ -94,10 +94,13 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID 
 		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
-		logger.Debug("Error while deleting a cache setting", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting a cache setting", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

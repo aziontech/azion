@@ -18,7 +18,7 @@ var (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           msg.CacheSettingsDeleteUsage,
+		Use:           msg.Usage,
 		Short:         msg.CacheSettingsDeleteShortDescription,
 		Long:          msg.CacheSettingsDeleteLongDescription,
 		SilenceUsage:  true,
