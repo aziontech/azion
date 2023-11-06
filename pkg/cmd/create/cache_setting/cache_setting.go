@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.CreateUsage,
+		Use:           msg.Usage,
 		Short:         msg.CreateShortDescription,
 		Long:          msg.CreateLongDescription,
 		SilenceUsage:  true,
@@ -62,7 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request := api.CreateRequest{}
 
 			if !cmd.Flags().Changed("application-id") {
-				answers, err := utils.AskInput(msg.CreateAskAppID)
+				answers, err := utils.AskInput(msg.CreateAskInputApplicationID)
 
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
@@ -87,7 +87,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			} else {
 				if !cmd.Flags().Changed("name") {
-					answers, err := utils.AskInput(msg.CreateAskName)
+					answers, err := utils.AskInput(msg.CreateAskInputName)
 					if err != nil {
 						logger.Debug("Error while parsing answer", zap.Error(err))
 						return utils.ErrorParseResponse
