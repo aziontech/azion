@@ -8,8 +8,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
+	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/spf13/cobra"
@@ -68,7 +68,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	applications, err := client.ListCacheSettings(ctx, opts, edgeApplicationID)
+	applications, err := client.List(ctx, opts, edgeApplicationID)
 	if err != nil {
 		return 0, msg.ErrorGetCache
 	}

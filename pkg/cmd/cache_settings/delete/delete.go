@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
+	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +32,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMissingArguments
 			}
 			if err := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token")).
-				DeleteCacheSettings(context.Background(), applicationID, cacheSettingsID); err != nil {
+				Delete(context.Background(), applicationID, cacheSettingsID); err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 			fmt.Fprintf(f.IOStreams.Out, msg.CacheSettingsDeleteOutputSuccess, cacheSettingsID)
