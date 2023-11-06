@@ -3,7 +3,7 @@ package list
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list"
-	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_settings"
+	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/list/edge_applications"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
