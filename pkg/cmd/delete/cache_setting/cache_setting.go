@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -23,8 +23,8 @@ var (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.CacheSettingsDeleteShortDescription,
-		Long:          msg.CacheSettingsDeleteLongDescription,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApplicationID)
+				answer, err := utils.AskInput(msg.DeleteFlagApplicationID)
 				if err != nil {
 					return err
 				}
@@ -71,13 +71,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.CacheSettingsDeleteOutputSuccess, cacheSettingsID)
+			fmt.Fprintf(f.IOStreams.Out, msg.DeleteOutputSuccess, cacheSettingsID)
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.CacheSettingsDeleteFlagApplicationID)
-	cmd.Flags().Int64Var(&cacheSettingsID, "cache-settings-id", 0, msg.CacheSettingsDeleteFlagCacheSettingsID)
-	cmd.Flags().BoolP("help", "h", false, msg.CacheSettingsDeleteHelpFlag)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DeleteFlagApplicationID)
+	cmd.Flags().Int64Var(&cacheSettingsID, "cache-settings-id", 0, msg.DeleteFlagCacheSettingsID)
+	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 	return cmd
 }
