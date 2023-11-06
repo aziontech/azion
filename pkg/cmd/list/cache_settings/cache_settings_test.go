@@ -1,4 +1,4 @@
-package cachesettings
+package cachesetting
 
 import (
 	"testing"
