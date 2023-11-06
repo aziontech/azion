@@ -7,7 +7,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, fmt.Sprintf(msg.CacheSettingsDeleteOutputSuccess, 107313), stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.DeleteOutputSuccess, 107313), stdout.String())
 	})
 
 	t.Run("delete that is not found", func(t *testing.T) {
