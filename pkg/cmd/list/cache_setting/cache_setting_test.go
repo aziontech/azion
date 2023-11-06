@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"

@@ -1,4 +1,4 @@
-package cache_settings
+package cachesetting
 
 import (
 	"errors"
