@@ -1,4 +1,4 @@
-package list
+package edgefunction
 
 import (
 	"testing"

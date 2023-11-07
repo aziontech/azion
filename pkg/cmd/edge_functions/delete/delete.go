@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -14,9 +14,9 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionDeleteUsage,
-		Short:         msg.EdgeFunctionDeleteShortDescription,
-		Long:          msg.EdgeFunctionDeleteLongDescription,
+		Use:           msg.DeleteUsage,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -37,14 +37,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.EdgeFunctionDeleteOutputSuccess, function_id)
+			fmt.Fprintf(out, msg.DeleteOutputSuccess, function_id)
 
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDeleteHelpFlag)
+	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.FlagId)
+	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cmd
 }

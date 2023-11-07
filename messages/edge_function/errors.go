@@ -1,4 +1,4 @@
-package edgefunctions
+package edgefunction
 
 import "errors"
 
@@ -13,6 +13,6 @@ var (
 	ErrorMissingFunctionIdArgumentDelete = errors.New("A required flag is missing. You must provide a function_id as an argument. Run the command 'azion edge_functions <subcommand> --help' to display more information and try again")
 	ErrorFailToDeleteFunction            = errors.New("Failed to delete the Edge Function: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorGetFunction                     = errors.New("Failed to get the Edge Function: %s. Check your settings and try again. If the error persists, contact Azion support")
-	ErrorGetFunctions                    = errors.New("Failed to get the Edge Functions: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorGetFunctions                    = errors.New("Failed to list the Edge Functions: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateFunction                  = errors.New("Failed to update the Edge Function: %s. Check your settings and try again. If the error persists, contact Azion support")
 )
