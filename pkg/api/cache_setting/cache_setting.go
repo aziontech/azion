@@ -30,11 +30,11 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest, applicationId i
 	return cacheResponse.Results, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationId int64) (Response, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationID, cacheSettingID int64) (Response, error) {
 	logger.Debug("Update Cache Settings")
 
 	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationId, req.Id).
+		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationID, cacheSettingID).
 		ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
