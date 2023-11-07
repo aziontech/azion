@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.DeleteFlagApplicationID)
+				answer, err := utils.AskInput(msg.DeleteAskInputCacheID)
 				if err != nil {
 					return err
 				}
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("cache-settings-id") {
-				answer, err := utils.AskInput(msg.AskInputCacheID)
+				answer, err := utils.AskInput(msg.DeleteAskInputCacheID)
 				if err != nil {
 					return err
 				}
