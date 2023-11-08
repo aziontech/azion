@@ -3,6 +3,7 @@ package delete
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
+	cache "github.com/aziontech/azion-cli/pkg/cmd/delete/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/delete/origin"
@@ -29,6 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(domain.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
+	cmd.AddCommand(cache.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

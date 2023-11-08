@@ -1,12 +1,11 @@
-package create
+package cachesetting
 
 import (
-	"fmt"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
@@ -24,14 +23,15 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -52,7 +52,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
+		require.Equal(t, "🚀 Updated a Cache Settings configuration with ID 115255\n\n", stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -73,12 +73,13 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/create.json",
+			"--cache-setting-id", "112233",
+			"--in", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsCreateOutputSuccess, 115255), stdout.String())
+		require.Equal(t, "🚀 Updated a Cache Settings configuration with ID 115255\n\n", stdout.String())
 	})
 
 	t.Run("no acceleration error --in flag", func(t *testing.T) {
@@ -90,7 +91,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -99,7 +100,8 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/create.json",
+			"--cache-setting-id", "112233",
+			"--in", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
@@ -115,7 +117,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -123,7 +125,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -155,7 +158,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -163,7 +166,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -194,7 +198,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -202,7 +206,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -234,7 +239,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -242,7 +247,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -274,7 +280,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -282,7 +288,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -314,7 +321,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -322,7 +329,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -354,7 +362,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -362,7 +370,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -394,7 +403,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -402,7 +411,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -434,7 +444,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -442,7 +452,8 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
-			"-a", "1673635841",
+			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--name", "fmaiswaybetter",
 			"--adaptive-delivery-action", "ignore",
 			"--browser-cache-settings", "override",
@@ -474,7 +485,7 @@ func TestCreate(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1673635841/cache_settings"),
+			httpmock.REST("PATCH", "edge_applications/1673635841/cache_settings/112233"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -483,6 +494,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
+			"--cache-setting-id", "112233",
 			"--in", "./fixtures/error",
 		})
 

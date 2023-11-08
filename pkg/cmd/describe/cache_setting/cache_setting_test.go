@@ -1,4 +1,4 @@
-package describe
+package cachesetting
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -29,7 +29,7 @@ func TestDescribe(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-a", "1673635839", "-c", "107313"})
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--cache-setting-id", "107313"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -50,19 +50,6 @@ func TestDescribe(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("no id sent", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/123423424/cache_settings/122149"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
-		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorMissingArguments)
-	})
-
 	t.Run("export to a file", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
@@ -75,7 +62,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 		path := "out.json"
-		cmd.SetArgs([]string{"-a", "1673635839", "-c", "107313", "--out", path})
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--cache-setting-id", "107313", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {
@@ -92,6 +79,6 @@ func TestDescribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, fmt.Sprintf(msg.CacheSettingsFileWritten, path), stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.FileWritten, path), stdout.String())
 	})
 }

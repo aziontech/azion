@@ -1,8 +1,7 @@
-package origin
+package cachesetting
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -11,8 +10,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/origin"
-	api "github.com/aziontech/azion-cli/pkg/api/origin"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
+	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,23 +19,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var edgeApplicationID int64 = 0
+var edgeApplicationID int64
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.OriginsListUsage,
-		Short:         msg.OriginsListShortDescription,
-		Long:          msg.OriginsListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ListShortDescription,
+		Long:          msg.ListLongDescription,
 		SilenceUsage:  true,
-		SilenceErrors: true, Example: heredoc.Doc(`
-        $ azion list origin  --application-id 16736354321
-        $ azion list origin  --application-id 16736354321 --details
+		SilenceErrors: true,
+		Example: heredoc.Doc(`
+		$ azion list cache-setting --application-id 16736354321
+		$ azion list cache-setting --application-id 16736354321 --details
         `),
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(msg.ListAskInputApplicationID)
 				if err != nil {
 					return err
 				}
@@ -50,51 +50,42 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				edgeApplicationID = num
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-
-			if err := PrintTable(client, f, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
+			if err := PrintTable(cmd, f, opts); err != nil {
+				return msg.ErrorGetCaches
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	flags := cmd.Flags()
-	flags.Int64Var(&edgeApplicationID, "application-id", 0, msg.OriginsListFlagEdgeApplicationID)
-	flags.BoolP("help", "h", false, msg.OriginsListHelpFlag)
+	cmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }
 
-func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-	c := context.Background()
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	ctx := context.Background()
 
 	for {
-		resp, err := client.ListOrigins(c, opts, edgeApplicationID)
+		cache, err := client.List(ctx, opts, edgeApplicationID)
 		if err != nil {
-			return err
+			return msg.ErrorGetCaches
 		}
 
-		tbl := table.New("ORIGIN KEY", "NAME")
+		tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")
 		tbl.WithWriter(f.IOStreams.Out)
-		if opts.Details {
-			tbl = table.New("ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
+
+		if cmd.Flags().Changed("details") {
+			tbl = table.New("ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST")
 		}
 
 		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgGreen).SprintfFunc()
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-		for _, v := range resp.Results {
-			tbl.AddRow(
-				v.OriginKey,
-				utils.TruncateString(v.Name),
-				v.OriginId,
-				v.OriginType,
-				v.OriginPath,
-				v.Addresses,
-				v.ConnectionTimeout,
-			)
+		for _, v := range cache.Results {
+			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings, v.CdnCacheSettings, v.CacheByCookies, v.EnableCachingForPost)
 		}
 
 		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
@@ -109,9 +100,14 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 			logger.PrintRow(tbl, format, row)
 		}
 
-		if opts.Page >= resp.TotalPages {
+		if opts.Page >= cache.TotalPages {
 			break
 		}
+
+		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
+			break
+		}
+
 		opts.Page++
 	}
 

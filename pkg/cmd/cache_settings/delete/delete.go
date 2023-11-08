@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
+	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -18,9 +18,9 @@ var (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           msg.CacheSettingsDeleteUsage,
-		Short:         msg.CacheSettingsDeleteShortDescription,
-		Long:          msg.CacheSettingsDeleteLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -32,16 +32,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMissingArguments
 			}
 			if err := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token")).
-				DeleteCacheSettings(context.Background(), applicationID, cacheSettingsID); err != nil {
+				Delete(context.Background(), applicationID, cacheSettingsID); err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
-			fmt.Fprintf(f.IOStreams.Out, msg.CacheSettingsDeleteOutputSuccess, cacheSettingsID)
+			fmt.Fprintf(f.IOStreams.Out, msg.DeleteOutputSuccess, cacheSettingsID)
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.CacheSettingsDeleteFlagApplicationID)
-	cmd.Flags().Int64VarP(&cacheSettingsID, "cache-settings-id", "c", 0, msg.CacheSettingsDeleteFlagCacheSettingsID)
-	cmd.Flags().BoolP("help", "h", false, msg.CacheSettingsDeleteHelpFlag)
+	cmd.Flags().Int64VarP(&applicationID, "application-id", "a", 0, msg.DeleteFlagApplicationID)
+	cmd.Flags().Int64VarP(&cacheSettingsID, "cache-settings-id", "c", 0, msg.DeleteFlagCacheSettingsID)
+	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 	return cmd
 }

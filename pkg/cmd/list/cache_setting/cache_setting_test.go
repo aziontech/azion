@@ -1,4 +1,4 @@
-package list
+package cachesetting
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_settings"
+	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +26,7 @@ func TestList(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1673635839"})
+		cmd.SetArgs([]string{"--application-id", "1673635839"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestList(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1673635839", "--page", "1"})
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "1"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestList(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1673635839", "--page", "3"})
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "3"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestList(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1673635839"})
+		cmd.SetArgs([]string{"--application-id", "1673635839"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestList(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-a", "1673635839"})
+		cmd.SetArgs([]string{"--application-id", "1673635839"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err, msg.ErrorGetCache)

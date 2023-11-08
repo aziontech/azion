@@ -2,6 +2,7 @@ package edge_applications
 
 import (
 	"context"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
