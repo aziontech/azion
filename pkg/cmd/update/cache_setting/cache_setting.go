@@ -22,6 +22,7 @@ import (
 
 type Fields struct {
 	ApplicationID                  int64
+	CacheSettingID                 int64
 	Name                           string
 	browserCacheSettings           string
 	adaptiveDeliveryAction         string
@@ -47,19 +48,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.CreateShortDescription,
-		Long:          msg.CreateLongDescription,
+		Short:         msg.UpdateShortDescription,
+		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create cache-setting --application-id 1673635839 --name "phototypesetting"
-        $ azion create cache-setting --application-id 1673635839 --in "create.json"
+        $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --name "phototypesetting"
+        $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-			request := api.CreateRequest{}
+			request := api.UpdateRequest{}
 
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.CreateAskInputApplicationID)
@@ -78,24 +79,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.ApplicationID = int64(applicationID)
 			}
 
+			if !cmd.Flags().Changed("cache-setting-id") {
+				answers, err := utils.AskInput(msg.UpdateAskInputCacheSettingID)
+
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				cacheSettingID, err := strconv.Atoi(answers)
+				if err != nil {
+					logger.Debug("Error while parsing string to integer", zap.Error(err))
+					return utils.ErrorConvertingStringToInt
+				}
+
+				fields.CacheSettingID = int64(cacheSettingID)
+			}
+
 			if cmd.Flags().Changed("in") {
 				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-
 			} else {
-				if !cmd.Flags().Changed("name") {
-					answers, err := utils.AskInput(msg.CreateAskInputName)
-					if err != nil {
-						logger.Debug("Error while parsing answer", zap.Error(err))
-						return utils.ErrorParseResponse
-					}
-
-					fields.Name = answers
-				}
-
 				err := createRequestFromFlags(cmd, fields, &request)
 				if err != nil {
 					return err
@@ -106,12 +113,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			response, err := client.Create(context.Background(), &request, fields.ApplicationID)
+			response, err := client.Update(context.Background(), &request, fields.ApplicationID, fields.CacheSettingID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.UpdateOutputSuccess, response.GetId()))
 			return nil
 		},
 	}
@@ -123,6 +130,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	flags.Int64Var(&fields.CacheSettingID, "cache-setting-id", 0, msg.FlagCacheSettingID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.browserCacheSettings, "browser-cache-settings", "honor", msg.FlagBrowserCacheSettings)
 	flags.StringSliceVar(&fields.queryStringFields, "query-string-fields", []string{}, msg.FlagQueryStringFields)
@@ -144,7 +152,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.CreateRequest) error {
+func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.UpdateRequest) error {
 	ctx := context.Background()
 	str := strconv.FormatInt(fields.ApplicationID, 10)
 	application, err := client.Get(ctx, str)
@@ -161,7 +169,7 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 	return nil
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateRequest) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.UpdateRequest) error {
 	request.SetName(fields.Name)
 	if cmd.Flags().Changed("browser-cache-settings") {
 		if fields.browserCacheSettings == "override" && !cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {

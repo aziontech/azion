@@ -8,7 +8,6 @@ type CreateRequest struct {
 
 type UpdateRequest struct {
 	sdk.ApplicationCachePatchRequest
-	Id int64
 }
 
 type Response interface {
