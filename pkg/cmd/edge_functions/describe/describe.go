@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
@@ -20,9 +20,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionDescribeUsage,
-		Short:         msg.EdgeFunctionDescribeShortDescription,
-		Long:          msg.EdgeFunctionDescribeLongDescription,
+		Use:           msg.DescribeUsage,
+		Short:         msg.DescribeShortDescription,
+		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -55,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.EdgeFunctionFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -67,11 +67,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	cmd.Flags().Bool("with-code", false, msg.EdgeFunctionDescribeFlagWithCode)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeFunctionDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeFunctionDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDescribeHelpFlag)
+	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.FlagId)
+	cmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
 }

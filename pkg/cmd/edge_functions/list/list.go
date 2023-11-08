@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/printer"
@@ -21,9 +21,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionListUsage,
-		Short:         msg.EdgeFunctionListShortDescription,
-		Long:          msg.EdgeFunctionListLongDescription,
+		Use:           msg.ListUsage,
+		Short:         msg.ListShortDescription,
+		Long:          msg.ListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -55,7 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }
 

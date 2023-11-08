@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -29,9 +29,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionCreateUsage,
-		Short:         msg.EdgeFunctionCreateShortDescription,
-		Long:          msg.EdgeFunctionCreateLongDescription,
+		Use:           msg.CreateUsage,
+		Short:         msg.CreateShortDescription,
+		Long:          msg.CreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -102,7 +102,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.EdgeFunctionCreateOutputSuccess, response.GetId())
+			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetId())
 
 			return nil
 		},
@@ -110,12 +110,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFunctionCreateFlagName)
-	flags.StringVar(&fields.Code, "code", "", msg.EdgeFunctionCreateFlagCode)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionCreateFlagActive)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionCreateFlagArgs)
-	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionCreateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFunctionCreateHelpFlag)
+	flags.StringVar(&fields.Name, "name", "", msg.CreateFlagName)
+	flags.StringVar(&fields.Code, "code", "", msg.CreateFlagCode)
+	flags.StringVar(&fields.Active, "active", "", msg.CreateFlagActive)
+	flags.StringVar(&fields.Args, "args", "", msg.CreateFlagArgs)
+	flags.StringVar(&fields.InPath, "in", "", msg.CreateFlagIn)
+	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
 
 	return cmd
 }

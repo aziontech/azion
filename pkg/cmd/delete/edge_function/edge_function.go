@@ -1,14 +1,18 @@
-package delete
+package edgefunction
 
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -20,11 +24,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion edge_functions delete --function-id 1234
+        $ azion delete edge-function --function-id 1234
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				return msg.ErrorMissingFunctionIdArgumentDelete
+				answer, err := utils.AskInput(msg.DeleteAskInputFunctionID)
+				if err != nil {
+					return err
+				}
+
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdFunction
+				}
+
+				function_id = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -43,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.FlagId)
+	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagId)
 	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cmd
