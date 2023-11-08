@@ -13,6 +13,9 @@ var (
 	CreateAskInputApplicationID   = "What is the ID of the edge application this cache setting will be linked to?"
 	UpdateAskInputCacheSettingID  = "What is the ID of the Cache Setting you wish to update?"
 	AskInputCacheID               = "What is the ID of the cache setting you wish to delete?"
+	DeleteAskInputCacheID         = "What is the ID of the cache setting you wish to delete?"
+	DescribeAskInputCacheID       = "What is the ID of the cache setting you wish to describe?"
+	DescibeAskInputApplicationID  = "What is the ID of the edge application the cache settings is linked to?"
 
 	// [ list ]
 	ListShortDescription = "Displays your Cache Settings configurations"
@@ -32,7 +35,6 @@ var (
 	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d\n"
 
 	// [ describe ]
-	DescribeUsage               = "describe --application-id <application_id> --cache-settings-id <cache-settings-id> [flags]"
 	DescribeShortDescription    = "Returns information about a specific Cache Settings configuration"
 	DescribeLongDescription     = "Returns information about a specific Cache Settings configuration, based on a given ID, in details"
 	DescribeFlagApplicationID   = "Unique identifier for an edge application. The '--application-id' flag is required"

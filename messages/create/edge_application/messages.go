@@ -11,7 +11,7 @@ var (
 
 	FlagName                           = "Edge application's name"
 	FlagApplicationAcceleration        = "Used for application acceleration, enable or disable"
-	FlagDeliveryProtocol               = "Specify whether the data should be delivered via HTTP, HTTPS, FTP or another communication protocol."
+	FlagDeliveryProtocol               = "Specify whether the data should be delivered via HTTP or HTTPS."
 	FlagHttp3                          = "Flag to enable HTTP3"
 	FlagOriginType                     = "Type of the origin. Possible values: 'single_origin'(default value), 'load_balancer' or 'live_ingest'."
 	FlagHttpPort                       = "Flag to set the HTTP port or ports your application will use. 80 as default."
