@@ -21,7 +21,7 @@ jobs:
           PERSONAL_ACCESS_TOKEN : ${{ secrets.CLA_TOKEN }}
         with:
           path-to-signatures: 'signatures/version1/cla.json'
-          path-to-document: 'https://github.com/aziontech/azion-cli/blob/master/CLA.md'
+          path-to-document: 'https://github.com/aziontech/azion/blob/main/CLA.md'
           # branch should not be protected
           branch: 'main'
           allowlist: user1,bot*
