@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/manifoldco/promptui"
 	"io"
 	"net/http"
 	"os"
@@ -505,4 +506,18 @@ func FlagINUnmarshalFileJSON(path string, request interface{}) error {
 	}
 
 	return cmdutil.UnmarshallJsonFromReader(file, &request)
+}
+
+func Select(label string, items []string) (string, error) {
+	prompt := promptui.Select{
+		Label: label,
+		Items: items,
+	}
+
+	_, result, err := prompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	return result, nil
 }

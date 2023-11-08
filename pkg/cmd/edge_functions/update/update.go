@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -126,7 +126,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionUpdateFlagArgs)
 	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionUpdateFlagActive)
 	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionUpdateFlagIn)
-	flags.BoolP("help", "h", false, msg.EdgeFunctionUpdateHelpFlag)
+	flags.BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd
 }

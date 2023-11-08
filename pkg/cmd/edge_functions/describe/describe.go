@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"

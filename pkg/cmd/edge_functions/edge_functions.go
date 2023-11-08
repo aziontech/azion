@@ -1,8 +1,7 @@
 package edge_functions
 
 import (
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/create"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	del "github.com/aziontech/azion-cli/pkg/cmd/edge_functions/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/edge_functions/list"
@@ -13,7 +12,7 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edgeFunctionsCmd := &cobra.Command{
-		Use:   msg.EdgeFunctionUsage,
+		Use:   "cache-setting",
 		Short: msg.EdgeFunctionShortDescription,
 		Long:  msg.EdgeFunctionLongDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -21,7 +20,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	edgeFunctionsCmd.AddCommand(create.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(del.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(update.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(describe.NewCmd(f))

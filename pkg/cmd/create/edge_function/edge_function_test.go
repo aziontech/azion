@@ -1,4 +1,4 @@
-package create
+package edgefunction
 
 import (
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -33,6 +33,8 @@ var successResponse string = `
 func TestCreate(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	t.Run("create new edge function", func(t *testing.T) {
+		t.Parallel()
+
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -44,25 +46,27 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		code, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
-		_, _ = code.WriteString("function iiih() { return 'gambeta';}")
+		code, _ := os.CreateTemp(t.TempDir(), "func*.js")
+		_, _ = code.WriteString("function which() { return 'gambit';}")
 
 		args, _ := os.CreateTemp(t.TempDir(), "args*.json")
-		_, _ = args.WriteString(`{"best_sweet": "dorayaki"}`)
+		_, _ = args.WriteString(`{"best_sweet": "yakitori"}`)
 
-		cmd.SetArgs([]string{"--name", "SUUPA_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name()})
+		cmd.SetArgs([]string{"--name", "SUPAN_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name()})
 
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "Created Edge Function with ID 1337\n", stdout.String())
+		require.Equal(t, "🚀 Created Edge Function with ID 1337\n\n", stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
+		t.Parallel()
+
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions"),
+			httpmock.REST("POST", "edge_function"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, "Invalid"),
 		)
 
@@ -70,9 +74,9 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		file, _ := os.CreateTemp(t.TempDir(), "myfunc*.js")
+		file, _ := os.CreateTemp(t.TempDir(), "func*.js")
 		t.TempDir()
-		cmd.SetArgs([]string{"--name", "BIRL", "--active", "true", "--initiator-type", "edge_birl", "--code", file.Name()})
+		cmd.SetArgs([]string{"--name", "BIRD", "--active", "true", "--initiator-type", "edge_bird", "--code", file.Name()})
 
 		err := cmd.Execute()
 
@@ -80,6 +84,8 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("create with file", func(t *testing.T) {
+		t.Parallel()
+
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -91,11 +97,13 @@ func TestCreate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--in", "./fixtures/create.json"})
+		file, _ := os.CreateTemp(t.TempDir(), "func*.js")
+		t.TempDir()
+		cmd.SetArgs([]string{"--name", "BIRD", "--active", "true", "--code", file.Name(), "--in", "./fixtures/create.json"})
 
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "Created Edge Function with ID 1337\n", stdout.String())
+		require.Equal(t, "🚀 Created Edge Function with ID 1337\n\n", stdout.String())
 	})
 }

@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -27,11 +27,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion edge_functions list --details
-		$ azion edge_functions list --order_by "id"
-		$ azion edge_functions list --page 1  
-		$ azion edge_functions list --page_size 5
-		$ azion edge_functions list --sort "asc" 
+		$ azion edge_function list --details
+		$ azion edge_function list --order_by "id"
+		$ azion edge_function list --page 1  
+		$ azion edge_function list --page_size 5
+		$ azion edge_function list --sort "asc" 
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var numberPage int64 = opts.Page
