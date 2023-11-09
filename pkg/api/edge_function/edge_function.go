@@ -6,6 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 	"go.uber.org/zap"
 )
 
@@ -34,10 +35,13 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	httpResp, err := request.Execute()
 
 	if err != nil {
-		logger.Debug("Error while deleting an edge function", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		if httpResp != nil {
+			logger.Debug("Error while deleting an edge function", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -86,8 +90,11 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionRe
 	return edgeFuncResponse.Results, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeFunctionResponse, int64, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.ListEdgeFunctionResponse, error) {
 	logger.Debug("List Edge Functions")
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
 	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
@@ -96,18 +103,15 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) ([]EdgeF
 		Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing edge functions", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, 0, utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while listing the edge functions", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	var result []EdgeFunctionResponse
-
-	for i := range resp.GetResults() {
-		result = append(result, &resp.GetResults()[i])
-	}
-
-	return result, *resp.TotalPages, nil
+	return resp, nil
 }

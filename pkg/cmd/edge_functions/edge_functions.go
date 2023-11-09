@@ -22,6 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	edgeFunctionsCmd.AddCommand(create.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(update.NewCmd(f))
 	edgeFunctionsCmd.AddCommand(describe.NewCmd(f))
+	edgeFunctionsCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	edgeFunctionsCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
