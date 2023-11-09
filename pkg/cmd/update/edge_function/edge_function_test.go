@@ -1,11 +1,12 @@
-package update
+package edgefunction
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -50,7 +51,7 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
 	})
 
 	t.Run("update code and args", func(t *testing.T) {
@@ -76,7 +77,7 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
@@ -109,11 +110,11 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--in", "./fixtures/update.json"})
+		cmd.SetArgs([]string{"--function-id", "1337", "--in", "./fixtures/update.json"})
 
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "Updated Edge Function with ID 1337\n", stdout.String())
+		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
 	})
 }
