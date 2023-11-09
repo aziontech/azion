@@ -7,7 +7,7 @@ var (
 
 	CacheSettingsShortDescription = "Cache Settings allows you to manage existing cache configurations and create new ones"
 	CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
-	CacheSettingsFlagHelp         = "Displays more information about the cache_settings command"
+	CreateFlagHelp                = "Displays more information about the create cache-setting command"
 	CacheSettingsId               = "Unique identifier for a Cache Settings configuration"
 	ListAskInputApplicationID     = "What is the ID of the edge application the cache settings are linked to?"
 	CreateAskInputApplicationID   = "What is the ID of the edge application this cache setting will be linked to?"
@@ -20,7 +20,7 @@ var (
 	// [ list ]
 	ListShortDescription = "Displays your Cache Settings configurations"
 	ListLongDescription  = "Displays your Cache Settings configurations on the Azion platform"
-	ListHelpFlag         = "Displays more information about the list subcommand"
+	ListHelpFlag         = "Displays more information about the list cache-setting command"
 
 	// [ create ]
 	CreateShortDescription = "Creates a new Cache Settings configuration"
@@ -33,6 +33,7 @@ var (
 	UpdateShortDescription = "Updates a Cache Settings configuration"
 	UpdateLongDescription  = "Updates a Cache Settings configuration based on given attributes to be used in edge applications"
 	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d\n"
+	UpdateFlagHelp         = "Displays more information about the update cache-setting command"
 
 	// [ describe ]
 	DescribeShortDescription    = "Returns information about a specific Cache Settings configuration"
@@ -41,7 +42,7 @@ var (
 	DescribeFlagCacheSettingsID = "Unique identifier for a Cache Settings configuration. The '--cache-settings-id' flag is required"
 	DescribeFlagOut             = "Exports the output to the given <file_path/file_name.ext>"
 	DescribeFlagFormat          = "Changes the output format passing the json value to the flag"
-	DescribeHelpFlag            = "Displays more information about the describe subcommand"
+	DescribeHelpFlag            = "Displays more information about the describe cache-setting command"
 
 	// [ delete ]
 	DeleteShortDescription    = "Deletes a Cache Settings configuration"
@@ -49,7 +50,7 @@ var (
 	DeleteOutputSuccess       = "Caches settings configuration %d was successfully deleted\n"
 	DeleteFlagApplicationID   = "Unique identifier for an edge application"
 	DeleteFlagCacheSettingsID = "The Cache Settings configuration key unique identifier"
-	DeleteHelpFlag            = "Displays more information about the delete subcommand"
+	DeleteHelpFlag            = "Displays more information about the delete cache-setting command"
 
 	// [ flags ]
 	FlagEdgeApplicationID          = "Unique identifier for an edge application"
@@ -72,5 +73,4 @@ var (
 	FlagCdnCacheSettingsMaxTtl     = "Informs CDN Cache Settings configuration maximum TTL"
 	FlagBrowserCacheSettingsMaxTtl = "Informs Browser Cache Settings configuration maximum TTL"
 	FlagAdaptiveDeliveryAction     = "Informs the Cache Settings configuration adaptive delivery action."
-	FlagHelp                       = "Displays more information about the cache setting subcommand"
 )
