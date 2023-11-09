@@ -149,7 +149,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.Int64Var(&fields.browserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaxTtl)
 	flags.StringVar(&fields.adaptiveDeliveryAction, "adaptive-delivery-action", "ignore", msg.FlagAdaptiveDeliveryAction)
 	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
 
 func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.UpdateRequest) error {
