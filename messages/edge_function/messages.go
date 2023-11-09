@@ -33,13 +33,13 @@ var (
 	DeleteAskInputFunctionID = "What is the ID of the edge function you wish to delete?"
 
 	//describe cmd
-	DescribeUsage            = "describe --function-id <function_id> [flags]"
-	DescribeShortDescription = "Returns the Edge Function data"
-	DescribeLongDescription  = "Displays information about the Edge Function via a given ID to show the function’s attributes in detail"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
-	DescribeFlagWithCode     = "Displays the Edge Function's code; disabled by default"
-	DescribeHelpFlag         = "Displays more information about the describe edge-function command"
+	DescribeShortDescription   = "Returns the Edge Function data"
+	DescribeLongDescription    = "Displays information about the Edge Function via a given ID to show the function’s attributes in detail"
+	DescribeFlagOut            = "Exports the output to the given <file_path/file_name.ext>"
+	DescribeFlagFormat         = "Changes the output format passing the json value to the flag"
+	DescribeFlagWithCode       = "Displays the Edge Function's code; disabled by default"
+	DescribeHelpFlag           = "Displays more information about the describe edge-function command"
+	DescribeAskInputFunctionID = "What is the ID of the edge function you wish to describe?"
 
 	//list cmd
 	ListUsage            = "list [flags]"
