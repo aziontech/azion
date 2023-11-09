@@ -8,7 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
