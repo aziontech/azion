@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
         id: tag_ver
         uses: anothrNick/github-tag-action@1.37.0
         env:
-          RELEASE_BRANCHES: master
+          RELEASE_BRANCHES: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Refresh git

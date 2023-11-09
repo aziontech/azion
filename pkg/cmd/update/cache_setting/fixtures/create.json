@@ -1,0 +1,23 @@
+{
+    "name": "thename",
+    "browser_cache_settings": "honor",
+    "browser_cache_settings_maximum_ttl": 0,
+    "cdn_cache_settings": "honor",
+    "cdn_cache_settings_maximum_ttl": 60,
+    "cache_by_query_string": "ignore",
+    "query_string_fields": ["aa"],
+    "enable_query_string_sort": true,
+    "cache_by_cookies": "ignore",
+    "cookie_names": ["aa"],
+    "adaptive_delivery_action": "ignore",
+    "device_group": [],
+    "enable_caching_for_post": true,
+    "l2_caching_enabled": false,
+    "is_slice_configuration_enabled": false,
+    "is_slice_edge_caching_enabled": false,
+    "is_slice_l2_caching_enabled": false,
+    "slice_configuration_range": null,
+    "enable_caching_for_options": true,
+    "enable_stale_cache": true,
+    "l2_region": null
+}

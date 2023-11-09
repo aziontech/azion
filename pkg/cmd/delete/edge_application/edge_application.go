@@ -11,7 +11,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	fun "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	fun "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"

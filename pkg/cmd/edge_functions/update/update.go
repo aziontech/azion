@@ -9,7 +9,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -30,9 +30,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionUpdateUsage,
-		Short:         msg.EdgeFunctionUpdateShortDescription,
-		Long:          msg.EdgeFunctionUpdateLongDescription,
+		Use:           msg.UpdateUsage,
+		Short:         msg.UpdateShortDescription,
+		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -120,12 +120,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.Id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	flags.StringVar(&fields.Name, "name", "", msg.EdgeFunctionUpdateFlagName)
-	flags.StringVar(&fields.Code, "code", "", msg.EdgeFunctionUpdateFlagCode)
-	flags.StringVar(&fields.Args, "args", "", msg.EdgeFunctionUpdateFlagArgs)
-	flags.StringVar(&fields.Active, "active", "", msg.EdgeFunctionUpdateFlagActive)
-	flags.StringVar(&fields.InPath, "in", "", msg.EdgeFunctionUpdateFlagIn)
+	flags.Int64VarP(&fields.Id, "function-id", "f", 0, msg.FlagID)
+	flags.StringVar(&fields.Name, "name", "", msg.UpdateFlagName)
+	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
+	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)
+	flags.StringVar(&fields.Active, "active", "", msg.UpdateFlagActive)
+	flags.StringVar(&fields.InPath, "in", "", msg.UpdateFlagIn)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd

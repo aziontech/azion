@@ -1,9 +1,10 @@
-package delete
+package edgefunction
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
-	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"

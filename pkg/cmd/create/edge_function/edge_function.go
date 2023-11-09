@@ -4,17 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
-	"os"
-	"strconv"
 )
 
 type Fields struct {

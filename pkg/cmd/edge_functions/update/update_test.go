@@ -1,11 +1,12 @@
 package update
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"

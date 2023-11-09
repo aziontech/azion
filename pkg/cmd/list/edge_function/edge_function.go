@@ -1,28 +1,25 @@
-package cachesetting
+package edgefunction
 
 import (
 	"context"
-	"strconv"
+	"fmt"
 	"strings"
 
-	"github.com/fatih/color"
-	"go.uber.org/zap"
-
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/cache_setting"
-	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-)
 
-var edgeApplicationID int64
+	table "github.com/MaxwelMazur/tablecli"
+	"github.com/fatih/color"
+)
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
+
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ListShortDescription,
@@ -30,35 +27,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion list cache-setting --application-id 16736354321
-		$ azion list cache-setting --application-id 16736354321 --details
-        `),
-
+		$ azion list edge-function --details
+		$ azion list edge-function --order_by "id"
+		$ azion list edge-function --page 1  
+		$ azion list edge-function --page_size 5
+		$ azion list edge-function --sort "asc" 
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.ListAskInputApplicationID)
-				if err != nil {
-					return err
-				}
-
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
-				}
-
-				edgeApplicationID = num
-			}
 
 			if err := PrintTable(cmd, f, opts); err != nil {
-				return msg.ErrorGetCaches
+				return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }
@@ -68,24 +52,24 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	ctx := context.Background()
 
 	for {
-		cache, err := client.List(ctx, opts, edgeApplicationID)
+		functions, err := client.List(ctx, opts)
 		if err != nil {
-			return msg.ErrorGetCaches
+			return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 		}
 
-		tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")
+		tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
 		tbl.WithWriter(f.IOStreams.Out)
 
-		if cmd.Flags().Changed("details") {
-			tbl = table.New("ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST")
+		if opts.Details {
+			tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
 		}
 
 		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
 		columnFmt := color.New(color.FgGreen).SprintfFunc()
 		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
-		for _, v := range cache.Results {
-			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings, v.CdnCacheSettings, v.CacheByCookies, v.EnableCachingForPost)
+		for _, v := range functions.Results {
+			tbl.AddRow(v.GetId(), v.GetName(), v.GetLanguage(), v.GetActive(), v.GetLastEditor(), v.GetModified(), v.GetReferenceCount(), v.GetInitiatorType())
 		}
 
 		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
@@ -100,7 +84,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			logger.PrintRow(tbl, format, row)
 		}
 
-		if opts.Page >= cache.TotalPages {
+		if opts.Page >= *functions.TotalPages {
 			break
 		}
 

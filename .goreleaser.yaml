@@ -83,7 +83,7 @@ changelog:
       regexp: '^.*?sec(\([[:word:]]+\))??!?:.+$'
       order: 40
     - title: 'Documentation Updates'
-      regexp: ^.*?doc(\([[:word:]]+\))??!?:.+$
+      regexp: ^.*?docs(\([[:word:]]+\))??!?:.+$
       order: 50
     - title: Other Work
       order: 999
