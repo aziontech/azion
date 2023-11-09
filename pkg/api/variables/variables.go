@@ -22,6 +22,14 @@ type UpdateRequest struct {
 	Uuid string
 }
 
+
+// VariableCreateRequest struct for VariableCreateRequest
+type VariableCreateRequest struct {
+	Key    string `json:"key"`
+	Value  string `json:"value"`
+	Secret *bool  `json:"secret,omitempty"`
+}
+
 type VariableResponse interface {
 	GetUuid() string
 	GetKey() string
@@ -123,6 +131,23 @@ func (c *Client) Get(ctx context.Context, id string) (VariableResponse, error) {
 type CreateRequest struct {
 	sdk.VariableCreate
 }
+
+
+// SetKey sets field value
+func (o *VariableCreateRequest) SetKey(v string) {
+	o.Key = v
+}
+
+// SetValue sets field value
+func (o *VariableCreateRequest) SetValue(v string) {
+	o.Value = v
+}
+
+// SetSecret sets field value
+func (o *VariableCreateRequest) SetSecret(v bool) {
+	o.Secret = &v
+}
+
 
 func (c *Client) Create(ctx context.Context, strReq CreateRequest) (VariableResponse, error) {
 	logger.Debug("Create Environment Variable")

@@ -2,7 +2,7 @@ package variables
 
 var (
 	// [ variables ]
-	Usage            = "variables"
+	Usage            = "variable"
 	ShortDescription = "Manages your environment variables and secrets on the Azion's platform"
 	LongDescription  = "Manages your environment variables and secrets to be used inside edge functions on the Azion's platform"
 	FlagHelp         = "Displays more information about the variables command"
@@ -51,6 +51,6 @@ var (
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."
 	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
-	CreateOutputSuccess    = "Created variable with UUID %s\n"
+	CreateOutputSuccess    = "Created variable with UUID %s"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 )
