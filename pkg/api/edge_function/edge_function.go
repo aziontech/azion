@@ -2,69 +2,14 @@ package edgefunction
 
 import (
 	"context"
-	"net/http"
-	"time"
 
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
 	"go.uber.org/zap"
 )
 
 const javascript = "javascript"
-
-type Client struct {
-	apiClient *sdk.APIClient
-}
-
-type CreateRequest struct {
-	sdk.CreateEdgeFunctionRequest
-}
-
-func NewCreateRequest() *CreateRequest {
-	return &CreateRequest{}
-}
-
-type UpdateRequest struct {
-	sdk.PatchEdgeFunctionRequest
-	Id int64
-}
-
-func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{Id: id}
-}
-
-type EdgeFunctionResponse interface {
-	GetId() int64
-	GetName() string
-	GetActive() bool
-	GetLanguage() string
-	GetReferenceCount() int64
-	GetModified() string
-	GetInitiatorType() string
-	GetLastEditor() string
-	GetFunctionToRun() string
-	GetJsonArgs() interface{}
-	GetCode() string
-}
-
-func NewClient(c *http.Client, url string, token string) *Client {
-	conf := sdk.NewConfiguration()
-	conf.HTTPClient = c
-	conf.AddDefaultHeader("Authorization", "token "+token)
-	conf.AddDefaultHeader("Accept", "application/json;version=3")
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = sdk.ServerConfigurations{
-		{URL: url},
-	}
-	conf.HTTPClient.Timeout = 30 * time.Second
-
-	return &Client{
-		apiClient: sdk.NewAPIClient(conf),
-	}
-}
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	logger.Debug("Get Edge Function")
