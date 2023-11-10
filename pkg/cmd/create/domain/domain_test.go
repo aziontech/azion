@@ -47,7 +47,7 @@ func TestCreate(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--in", "./fixtures/create.json"})
+		cmd.SetArgs([]string{"--file", "./fixtures/create.json"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)

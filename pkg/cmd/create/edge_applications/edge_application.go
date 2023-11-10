@@ -20,8 +20,8 @@ import (
 
 const example = `
         $ azion create edge-application --name "naruno"
-        $ azion create edge-application --in create.json
-        $ json example to be used with '--in flag' "create.json": 
+        $ azion create edge-application --file create.json
+        $ json example to be used with '--file flag' "create.json": 
         {
             "name": "New Edge Application",
             "delivery_protocol": "http",
@@ -69,8 +69,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateRequest{}
 
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -216,6 +216,6 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
 	flags.StringVar(&fields.Websocket, "websocket", "", msg.FlagWebsocket)
 	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }

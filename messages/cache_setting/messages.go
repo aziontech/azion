@@ -56,7 +56,7 @@ var (
 	FlagEdgeApplicationID          = "Unique identifier for an edge application"
 	FlagCacheSettingID             = "Unique identifier for an cache setting"
 	FlagName                       = "The Cache Settings configuration name"
-	FlagIn                         = "Path to a JSON file containing the attributes of the Cache Settings configuration that will be created; you can use - for reading from stdin"
+	FlagFile                       = "Path to a JSON file containing the attributes of the Cache Settings configuration that will be created; you can use - for reading from stdin"
 	FlagBrowserCacheSettings       = "Configures the amount of time that the content is cached in the web browser"
 	FlagQueryStringFields          = "Gives a list of query strings parameters to be considered in the Cache Settings configuration, that will segregate the cache to the same URL"
 	FlagCookieNames                = "Distinguishes objects in the Azion cache by name/value of cookies"

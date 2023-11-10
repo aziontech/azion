@@ -77,7 +77,7 @@ func TestUpdate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
 			"--origin-key", "03a6e7bf-8e26-49c7-a66e-ab8eaa425086",
-			"--in", "./fixtures/update.json",
+			"--file", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()

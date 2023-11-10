@@ -1,4 +1,4 @@
-package edge_application
+package edgeapplication
 
 import "errors"
 
@@ -15,4 +15,5 @@ var (
 	ErrorRawLogsFlag                 = errors.New("Invalid --raw-logs flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update edge-application --help' to display more information and try again")
 	ErrorWebApplicationFirewallFlag  = errors.New("Invalid --webapp-firewall flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update edge-application --help' to display more information and try again")
 	ErrorNoFieldInformed             = errors.New("Inform at least one field to be updated. It's not possible to update an edge application without specifying the fields that will be updated. Run ‘azion update edge-application --help’ to display more information and try again.  If the error persists, contact Azion support.")
+	ErrorConvertIdApplication        = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list edge-application' command to check your application ID")
 )

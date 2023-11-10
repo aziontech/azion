@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/update/edge_application"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -54,25 +53,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update edge-application --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("in") {
-				qs := []*survey.Question{
-					{
-						Name:      "id",
-						Prompt:    &survey.Input{Message: "What is the id of the Edge Application?"},
-						Validate:  survey.Required,
-						Transform: survey.Title,
-					},
-				}
+			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("file") {
 
-				answers := struct{ ID int64 }{}
-
-				err := survey.Ask(qs, &answers)
+				answer, err := utils.AskInput(msg.AskInputApplicationId)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
 
-				fields.ID = answers.ID
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdApplication
+				}
+
+				fields.ID = num
 			}
 
 			if !returnAnyField(cmd) {
@@ -80,8 +74,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			request := api.UpdateRequest{}
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -215,7 +209,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.FlagLoadBalancer)
 	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.RawLogs)
 	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.WebApplicationFirewall)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.InPath, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }

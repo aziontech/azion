@@ -38,7 +38,7 @@ func TestNewCmd(t *testing.T) {
 		},
 		{
 			name: "Create new personal token with json file using --in flag",
-			args: []string{"--in", "./fixtures/complete_structure.json"},
+			args: []string{"--file", "./fixtures/complete_structure.json"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
