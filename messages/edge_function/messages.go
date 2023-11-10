@@ -26,7 +26,7 @@ var (
 	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
 	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeFlagWithCode     = "Displays the Edge Function's code; disabled by default"
-	DescribeHelpFlag         = "Displays more information about the describe command"
+	DescribeHelpFlag         = "Displays more information about the describe edge-function command"
 
 	//list cmd
 	ListUsage            = "list [flags]"
