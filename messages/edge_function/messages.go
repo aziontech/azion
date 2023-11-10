@@ -32,7 +32,7 @@ var (
 	ListUsage            = "list [flags]"
 	ListShortDescription = "Displays your account's Edge Functions"
 	ListLongDescription  = "Displays all functions in the user account’s Edge Functions library"
-	ListHelpFlag         = "Displays more information about the list subcommand"
+	ListHelpFlag         = "Displays more information about the list edge-function command"
 
 	//update cmd
 	UpdateUsage            = "update --function-id <function_id> [flags]"
