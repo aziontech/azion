@@ -30,7 +30,7 @@ func TestUpdate(t *testing.T) {
 			"--application-id", "1673635839",
 			"--phase", "request",
 			"--rule-id", "1234",
-			"--in", "./fixtures/update.json",
+			"--file", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
@@ -52,7 +52,7 @@ func TestUpdate(t *testing.T) {
 			"--application-id", "1673635839",
 			"--rule-id", "1234",
 			"--phase", "request",
-			"--in", "./fixtures/missing.json",
+			"--file", "./fixtures/missing.json",
 		})
 
 		err := cmd.Execute()

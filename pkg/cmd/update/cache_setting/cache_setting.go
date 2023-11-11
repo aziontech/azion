@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --name "phototypesetting"
-        $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --in "create.json"
+        $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -96,8 +96,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.CacheSettingID = int64(cacheSettingID)
 			}
 
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -148,7 +148,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.Int64Var(&fields.cdnCacheSettingsMaximumTtl, "cnd-cache-settings-maximum-ttl", 60, msg.FlagCdnCacheSettingsMaxTtl)
 	flags.Int64Var(&fields.browserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaxTtl)
 	flags.StringVar(&fields.adaptiveDeliveryAction, "adaptive-delivery-action", "ignore", msg.FlagAdaptiveDeliveryAction)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
 

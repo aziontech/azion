@@ -5,7 +5,7 @@ var (
 	Usage            = "edge-application"
 	ShortDescription = "Creates an edge application on Azion's platform"
 	LongDescription  = "Creates an edge application without the need to manage infrastructure or security"
-	FlagIn           = "Path to a JSON file containing the attributes of the edge application being created; you can use - for reading from stdin"
+	FlagFile         = "Path to a JSON file containing the attributes of the edge application being created; you can use - for reading from stdin"
 	FlagHelp         = "Displays more information about the edge_application command"
 	OutputSuccess    = "Created edge application with ID %d\n"
 

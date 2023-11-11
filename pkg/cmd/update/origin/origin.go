@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
         $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-        $ azion update origin --in "update.json"
+        $ azion update origin --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.UpdateRequest{}
@@ -78,8 +78,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.OriginKey = answers
 			}
 
-			if cmd.Flags().Changed("in") {
-				if err := utils.FlagINUnmarshalFileJSON(fields.Path, &request); err != nil {
+			if cmd.Flags().Changed("file") {
+				if err := utils.FlagFileUnmarshalJSON(fields.Path, &request); err != nil {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
@@ -170,6 +170,6 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.FlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }

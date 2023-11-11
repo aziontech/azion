@@ -29,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 	}{
 		{
 			name: "success phase request",
-			args: []string{"--application-id", "1679423488", "--phase", "request", "--in", "./fixtures/create.json"},
+			args: []string{"--application-id", "1679423488", "--phase", "request", "--file", "./fixtures/create.json"},
 			mock: apiMock{
 				method: "POST",
 				url:    "edge_applications/1679423488/rules_engine/request/rules",
@@ -41,7 +41,7 @@ func TestNewCmd(t *testing.T) {
 		},
 		{
 			name: "success phase response",
-			args: []string{"--application-id", "1679423488", "--phase", "response", "--in", "./fixtures/create.json"},
+			args: []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create.json"},
 			mock: apiMock{
 				method: "POST",
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
@@ -53,7 +53,7 @@ func TestNewCmd(t *testing.T) {
 		},
 		{
 			name: "error name empty",
-			args: []string{"--application-id", "1679423488", "--phase", "response", "--in", "./fixtures/create_name_empty.json"},
+			args: []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_name_empty.json"},
 			mock: apiMock{
 				method: "POST",
 				url:    "edge_applications/1679423488/rules_engine/response/rules",
@@ -64,7 +64,7 @@ func TestNewCmd(t *testing.T) {
 		},
 		{
 			name: "error conditional empty",
-			args: []string{"--application-id", "1679423488", "--phase", "response", "--in", "./fixtures/create_conditional_empty.json"},
+			args: []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_conditional_empty.json"},
 			mock: apiMock{
 				method: "POST",
 				url:    "edge_applications/1679423488/rules_engine/response/rules",

@@ -22,7 +22,7 @@ import (
 
 var example = `
 	$ azion create origins --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-	$ azion create origins --application-id 1673635839 --in "create.json"
+	$ azion create origins --application-id 1673635839 --file "create.json"
 `
 
 type Fields struct {
@@ -52,8 +52,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example:       heredoc.Doc(example),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.CreateRequest{}
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -190,6 +190,6 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.FlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }

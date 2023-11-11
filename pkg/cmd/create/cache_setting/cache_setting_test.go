@@ -73,7 +73,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/create.json",
+			"--file", "./fixtures/create.json",
 		})
 
 		err := cmd.Execute()
@@ -81,7 +81,7 @@ func TestCreate(t *testing.T) {
 		require.Equal(t, "🚀 Created Cache Settings configuration with ID 115255\n\n", stdout.String())
 	})
 
-	t.Run("no acceleration error --in flag", func(t *testing.T) {
+	t.Run("no acceleration error --file flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -99,7 +99,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/create.json",
+			"--file", "./fixtures/create.json",
 		})
 
 		err := cmd.Execute()
@@ -483,7 +483,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/error",
+			"--file", "./fixtures/error",
 		})
 
 		err := cmd.Execute()

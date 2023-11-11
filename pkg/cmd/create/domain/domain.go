@@ -39,12 +39,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create domain --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
         $ azion create domain --name withargs --application-id 1231 --active true
-        $ azion create domain --in "create.json"
+        $ azion create domain --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := new(api.CreateRequest)
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -120,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.IntVar(&fields.DigitalCertificateID, "digital-certificate-id", 0, msg.FlagDigitalCertificateID)
 	flags.IntVar(&fields.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.IsActive, "active", "true", msg.FlagIsActive)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
