@@ -28,7 +28,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := utils.AskInput(msg.DeleteAskInputFunctionID)
+				answer, err := utils.AskInput(msg.AskEdgeFunctionID)
 				if err != nil {
 					return err
 				}
@@ -58,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagId)
+	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagID)
 	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cmd
