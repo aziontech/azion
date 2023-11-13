@@ -142,10 +142,17 @@ func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
 
 	flagUsages := command.LocalFlags().FlagUsages()
 	if flagUsages != "" {
-		helpEntries = append(helpEntries, helpEntry{
-			Title: color.New(styleTitle).Sprint("LOCAL OPTIONS"),
-			Body:  color.New(styleBody).Sprint(dedent(flagUsages)),
-		})
+		if isRootCmd(command) {
+			helpEntries = append(helpEntries, helpEntry{
+				Title: color.New(styleTitle).Sprint("GLOBAL OPTIONS"),
+				Body:  color.New(styleBody).Sprint(dedent(flagUsages)),
+			})
+		} else {
+			helpEntries = append(helpEntries, helpEntry{
+				Title: color.New(styleTitle).Sprint("LOCAL OPTIONS"),
+				Body:  color.New(styleBody).Sprint(dedent(flagUsages)),
+			})
+		}
 	}
 
 	inheritedFlagUsages := command.InheritedFlags().FlagUsages()
