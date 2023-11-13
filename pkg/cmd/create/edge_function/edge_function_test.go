@@ -1,11 +1,12 @@
 package edgefunction
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -99,7 +100,7 @@ func TestCreate(t *testing.T) {
 
 		file, _ := os.CreateTemp(t.TempDir(), "func*.js")
 		t.TempDir()
-		cmd.SetArgs([]string{"--name", "BIRD", "--active", "true", "--code", file.Name(), "--in", "./fixtures/create.json"})
+		cmd.SetArgs([]string{"--name", "BIRD", "--active", "true", "--code", file.Name(), "--file", "./fixtures/create.json"})
 
 		err := cmd.Execute()
 

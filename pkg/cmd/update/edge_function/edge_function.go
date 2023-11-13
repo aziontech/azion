@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.UpdateUsage,
+		Use:           msg.Usage,
 		Short:         msg.UpdateShortDescription,
 		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
@@ -67,7 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRequest{}
 
-			if cmd.Flags().Changed("in") {
+			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
@@ -142,6 +142,6 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
 	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)
 	flags.StringVar(&fields.Active, "active", "", msg.UpdateFlagActive)
-	flags.StringVar(&fields.InPath, "in", "", msg.UpdateFlagIn)
+	flags.StringVar(&fields.InPath, "file", "", msg.UpdateFlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
 }
