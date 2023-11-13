@@ -50,7 +50,7 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
-			"--in", "./fixtures/create.json",
+			"--file", "./fixtures/create.json",
 		})
 
 		err := cmd.Execute()

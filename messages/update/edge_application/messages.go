@@ -1,4 +1,4 @@
-package edge_application
+package edgeapplication
 
 var (
 	Usage                       = "edge-application"
@@ -20,7 +20,8 @@ var (
 	FlagLoadBalancer            = "Whether the edge application has Load Balancer active or not"
 	RawLogs                     = "Whether the edge application has Raw Logs active or not"
 	WebApplicationFirewall      = "Whether the edge application has Web Application Firewall active or not"
-	FlagIn                      = "Given path and JSON file to automatically update the edge application attributes; you can use - for reading from stdin"
+	FlagFile                    = "Given path and JSON file to automatically update the edge application attributes; you can use - for reading from stdin"
 	OutputSuccess               = "Updated edge application with ID %d\n"
-	HelpFlag                    = "Displays more information about the update subcommand"
+	HelpFlag                    = "Displays more information about the update edge-application command"
+	AskInputApplicationId       = "What is the ID of the edge application you wish to update?"
 )
