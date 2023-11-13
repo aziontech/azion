@@ -68,7 +68,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			request := api.UpdateRequest{}
 
 			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
@@ -137,7 +137,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.Int64Var(&fields.ID, "function-id", 0, msg.FlagId)
+	flags.Int64Var(&fields.ID, "function-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.UpdateFlagName)
 	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
 	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)
