@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := utils.AskInput(msg.DeleteAskInputFunctionID)
+				answer, err := utils.AskInput(msg.AskEdgeFunctionID)
 				if err != nil {
 					return err
 				}
@@ -97,7 +97,6 @@ func serializeToJson(data interface{}) string {
 }
 
 func format(cmd *cobra.Command, function api.EdgeFunctionResponse) ([]byte, error) {
-
 	var b bytes.Buffer
 
 	format, err := cmd.Flags().GetString("format")

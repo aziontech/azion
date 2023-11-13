@@ -78,7 +78,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}

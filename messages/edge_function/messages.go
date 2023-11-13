@@ -58,5 +58,5 @@ var (
 	AskName           = "What is the Name of the edge function?"
 	AskCode           = "What is the Code Path  of the edge function?"
 	AskActive         = "Does activating the edge function?"
-	AskEdgeFunctionID = "What is the ID of the edge function you wish to delete?"
+	AskEdgeFunctionID = "What is the ID of the edge function?"
 )
