@@ -82,7 +82,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--in", "./fixtures/update.json"})
+		cmd.SetArgs([]string{"--file", "./fixtures/update.json"})
 
 		err := cmd.Execute()
 
