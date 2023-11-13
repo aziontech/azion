@@ -71,9 +71,9 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	return edgeFuncResponse.Results, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeFunctionResponse, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (EdgeFunctionResponse, error) {
 	logger.Debug("Update Edge Function")
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, req.Id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {

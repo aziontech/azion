@@ -204,9 +204,8 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqUpd.Id = conf.Function.Id
 	reqUpd.SetJsonArgs(args)
-	response, err := client.Update(ctx, &reqUpd)
+	response, err := client.Update(ctx, &reqUpd, conf.Function.Id)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}

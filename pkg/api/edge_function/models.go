@@ -14,11 +14,10 @@ func NewCreateRequest() *CreateRequest {
 
 type UpdateRequest struct {
 	sdk.PatchEdgeFunctionRequest
-	Id int64
 }
 
-func NewUpdateRequest(id int64) *UpdateRequest {
-	return &UpdateRequest{Id: id}
+func NewUpdateRequest() *UpdateRequest {
+	return &UpdateRequest{}
 }
 
 type EdgeFunctionResponse interface {
