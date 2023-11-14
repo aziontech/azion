@@ -47,7 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azion update edge-application --application-id 1234 --name 'Hello'
-		$ azion update edge-application --application-id "update.json"
+		$ azion update edge-application --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("file") {
