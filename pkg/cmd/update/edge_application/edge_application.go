@@ -24,7 +24,6 @@ type Fields struct {
 	HTTPPort                int64
 	HTTPSPort               int64
 	MinimumTLSVersion       string
-	Active                  string
 	ApplicationAcceleration string
 	DeviceDetection         string
 	EdgeFirewall            string
@@ -47,10 +46,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update edge-application --id 1234 --name 'Hello'
-		$ azion update edge-application --id 9123 --active true
-		$ azion update edge-application --id 9123 --active false
-		$ azion update edge-application --in "update.json"
+		$ azion update edge-application --application-id 1234 --name 'Hello'
+		$ azion update edge-application --application-id "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("file") {
@@ -107,7 +104,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("application-acceleration") {
 					converted, err := strconv.ParseBool(fields.ApplicationAcceleration)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.ApplicationAcceleration)
 					}
 					request.SetApplicationAcceleration(converted)
 				}
@@ -115,7 +112,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("device-detection") {
 					converted, err := strconv.ParseBool(fields.DeviceDetection)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.DeviceDetection)
 					}
 					request.SetDeviceDetection(converted)
 				}
@@ -123,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-firewall") {
 					converted, err := strconv.ParseBool(fields.EdgeFirewall)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.EdgeFirewall)
 					}
 					request.SetEdgeFirewall(converted)
 				}
@@ -131,7 +128,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-functions") {
 					converted, err := strconv.ParseBool(fields.EdgeFunctions)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.EdgeFunctions)
 					}
 					request.SetEdgeFunctions(converted)
 				}
@@ -139,7 +136,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("image-optimization") {
 					converted, err := strconv.ParseBool(fields.ImageOptimization)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.ImageOptimization)
 					}
 					request.SetImageOptimization(converted)
 				}
@@ -147,7 +144,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("l2-caching") {
 					converted, err := strconv.ParseBool(fields.L2Caching)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.L2Caching)
 					}
 					request.SetL2Caching(converted)
 				}
@@ -155,7 +152,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("load-balancer") {
 					converted, err := strconv.ParseBool(fields.LoadBalancer)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.LoadBalancer)
 					}
 					request.SetLoadBalancer(converted)
 				}
@@ -163,7 +160,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("raw-logs") {
 					converted, err := strconv.ParseBool(fields.RawLogs)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.RawLogs)
 					}
 					request.SetRawLogs(converted)
 				}
