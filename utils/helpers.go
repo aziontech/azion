@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/manifoldco/promptui"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/manifoldco/promptui"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
@@ -468,6 +469,29 @@ func AskInput(msg string) (string, error) {
 	return answer, nil
 }
 
+func AskPassword(msg string) (string, error) {
+	qs := []*survey.Question{
+		{
+			Name:     "id",
+			Prompt:   &survey.Password{Message: msg},
+			Validate: survey.Required,
+		},
+	}
+
+	answer := ""
+
+	err := survey.Ask(qs, &answer)
+	if err == terminal.InterruptErr {
+		logger.Error(ErrorCancelledContextInput.Error())
+		os.Exit(0)
+	} else if err != nil {
+		logger.Debug("Error while parsing answer", zap.Error(err))
+		return "", ErrorParseResponse
+	}
+
+	return answer, nil
+}
+
 func LogAndRewindBody(httpResp *http.Response) error {
 	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 	logger.Debug("", zap.Any("Headers", httpResp.Header))
@@ -520,4 +544,12 @@ func Select(label string, items []string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func Concat(strs ...string) string {
+	var sb strings.Builder
+	for i := 0; i < len(strs); i++ {
+		sb.WriteString(strs[i])
+	}
+	return sb.String()
 }

@@ -3,10 +3,13 @@ package root
 import (
 	"fmt"
 
+	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
 )
 
@@ -64,9 +67,19 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 			return utils.ErrorInvalidToken
 		}
 
-		if err := t.Save(); err != nil {
+		strToken := token.Settings{Token: configureToken}
+		bStrToken, err := toml.Marshal(strToken)
+		if err != nil {
 			return err
 		}
+
+		filePath, err := t.Save(bStrToken)
+		if err != nil {
+			return err
+		}
+
+		logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
+		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn)
 	}
 
 	return nil
