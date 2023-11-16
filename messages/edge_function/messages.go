@@ -16,7 +16,7 @@ var (
 	DeleteShortDescription = "Removes an Edge Function"
 	DeleteLongDescription  = "Removes an Edge Function from the Edge Functions library based on its given ID"
 	DeleteOutputSuccess    = "Edge Function %d was successfully deleted\n"
-	DeleteHelpFlag         = "Displays more information about the delete subcommand"
+	DeleteHelpFlag         = "Displays more information about the delete edge-function command"
 
 	//describe cmd
 	DescribeShortDescription   = "Returns the Edge Function data"
@@ -45,13 +45,13 @@ var (
 	UpdateAskEdgeFunctionID = "What is the ID of the edge function you wish to update?"
 
 	// flags
-	FlagID     = "Unique identifier of the Edge Function"
-	FlagName   = "The Edge Function's name"
-	FlagCode   = "Path to the Edge Function's code"
-	FlagActive = "Whether the Edge Function is active or not"
-	FlagArgs   = "Path to the Edge Function's arguments JSON file"
-	FlagIn     = "Given file path to create an Edge Function; you can use - for reading from stdin"
-	FlagHelp   = "Displays more information about the edge function subcommand"
+	FlagID         = "Unique identifier of the Edge Function"
+	FlagName       = "The Edge Function's name"
+	FlagCode       = "Path to the Edge Function's code"
+	FlagActive     = "Whether the Edge Function is active or not"
+	FlagArgs       = "Path to the Edge Function's arguments JSON file"
+	FlagIn         = "Given file path to create an Edge Function; you can use - for reading from stdin"
+	CreateFlagHelp = "Displays more information about the create edge-function command"
 
 	// ask
 	AskName           = "What is the Name of the edge function?"
