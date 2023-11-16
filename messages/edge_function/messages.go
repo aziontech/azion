@@ -56,6 +56,6 @@ var (
 	// ask
 	AskName           = "What is the Name of the edge function?"
 	AskCode           = "What is the Code Path  of the edge function?"
-	AskActive         = "Does activating the edge function?"
+	AskActive         = "Edge Function active field"
 	AskEdgeFunctionID = "What is the ID of the edge function?"
 )
