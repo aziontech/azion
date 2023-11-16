@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create rules-engine --application-id 1679423488 --phase "response" --in ./file.json
+        $ azion create rules-engine --application-id 1679423488 --phase "response" --file ./file.json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
@@ -61,7 +61,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.Phase = answer
 			}
 
-			if !cmd.Flags().Changed("in") {
+			if !cmd.Flags().Changed("file") {
 				answer, err := utils.AskInput(msg.AskInputPathFile)
 				if err != nil {
 					return err
@@ -72,7 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.CreateRulesEngineRequest{}
 
-			err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 			if err != nil {
 				logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 				return utils.ErrorUnmarshalReader
@@ -99,7 +99,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	flags.StringVar(&fields.Phase, "phase", "", msg.FlagPhase)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }

@@ -1,9 +1,10 @@
 package cachesetting
 
 import (
+	"testing"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
-	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -74,7 +75,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
 			"--cache-setting-id", "112233",
-			"--in", "./fixtures/update.json",
+			"--file", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
@@ -101,7 +102,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
 			"--cache-setting-id", "112233",
-			"--in", "./fixtures/update.json",
+			"--file", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
@@ -495,7 +496,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635841",
 			"--cache-setting-id", "112233",
-			"--in", "./fixtures/error",
+			"--file", "./fixtures/error",
 		})
 
 		err := cmd.Execute()

@@ -34,8 +34,8 @@ func TestNewCmd(t *testing.T) {
 			output: "🚀 Created edge application with ID 1694434702\n\n",
 		},
 		{
-			name: "Creating the edge application with the --in flag",
-			args: []string{"--in", "./fixtures/body_request.json"},
+			name: "Creating the edge application with the --file flag",
+			args: []string{"--file", "./fixtures/body_request.json"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(

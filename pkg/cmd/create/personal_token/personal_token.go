@@ -38,7 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create personal-token --name "ranking of kings" --expiration "9m" 
         $ azion create personal-token --name "sakura" --expiration "9m" 
         $ azion create personal-token --name "strawhat" --expiration "9m" --description "gear five"
-        $ azion create personal-token --in "create.json"
+        $ azion create personal-token --file "create.json"
         $ "create.json" example: 
         {   
             "name": "One day token",
@@ -49,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.Request{}
 
-			if cmd.Flags().Changed("in") {
+			if cmd.Flags().Changed("file") {
 				var (
 					file *os.File
 					err  error
@@ -113,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Name, "name", "", msg.CreateFlagName)
 	flags.StringVar(&fields.ExpiresAt, "expiration", "", msg.CreateFlagExpiresAt)
 	flags.StringVar(&fields.Description, "description", "", msg.CreateFlagDescription)
-	flags.StringVar(&fields.Path, "in", "", msg.CreateFlagIn)
+	flags.StringVar(&fields.Path, "file", "", msg.CreateFlagFile)
 	flags.BoolP("help", "h", false, msg.CreateHelpFlag)
 
 	return cmd

@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azion update rules-engine -h"
-		$ azion update rules-engine --rule-id 1234 --application-id 1673635839 --phase request --in ruleengine.json"
+		$ azion update rules-engine --rule-id 1234 --application-id 1673635839 --phase request --file ruleengine.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := validateUserInput(cmd, fields); err != nil {
@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRulesEngineRequest{}
 
-			err := utils.FlagINUnmarshalFileJSON(fields.Path, &request)
+			err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 			if err != nil {
 				logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 				return utils.ErrorUnmarshalReader
@@ -71,10 +71,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64VarP(&fields.ApplicationID, "application-id", "a", 0, msg.FlagApplicationID)
-	flags.Int64VarP(&fields.RuleID, "rule-id", "r", 0, msg.FlagRulesEngineID)
-	flags.StringVarP(&fields.Phase, "phase", "p", "", msg.RulesEnginePhase)
-	flags.StringVar(&fields.Path, "in", "", msg.FlagIn)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagApplicationID)
+	flags.Int64Var(&fields.RuleID, "rule-id", 0, msg.FlagRulesEngineID)
+	flags.StringVar(&fields.Phase, "phase", "", msg.RulesEnginePhase)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
 }
@@ -218,7 +218,7 @@ func validateUserInput(cmd *cobra.Command, fields *Fields) error {
 		fields.Phase = answer
 	}
 
-	if !cmd.Flags().Changed("in") {
+	if !cmd.Flags().Changed("file") {
 		answer, err := utils.AskInput(msg.AskInputPathFile)
 		if err != nil {
 			return err

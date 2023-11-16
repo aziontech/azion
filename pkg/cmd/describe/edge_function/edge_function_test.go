@@ -1,11 +1,12 @@
-package describe
+package edgefunction
 
 import (
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -44,7 +45,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"-f", "123"})
+		cmd.SetArgs([]string{"--function-id", "123"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -106,7 +107,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 
 			cmd := NewCmd(f)
 
-			cmd.SetArgs([]string{"-f", "1234", "--with-code"})
+			cmd.SetArgs([]string{"--function-id", "1234", "--with-code"})
 
 			err := cmd.Execute()
 

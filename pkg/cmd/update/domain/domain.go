@@ -42,13 +42,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update domain --domain-id 9123 --cname-access-only true
 		$ azion update domain --domain-id 9123 --cname-access-only false
 		$ azion update domain --domain-id 9123 --application-id 192837
-		$ azion update domain --in "update.json"
+		$ azion update domain --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.UpdateRequest{}
 
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -135,7 +135,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.FlagCnames)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "", msg.FlagCnameAccessOnly)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.InPath, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd

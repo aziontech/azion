@@ -1,4 +1,4 @@
-package describe
+package edgefunction
 
 import (
 	"bytes"
@@ -6,34 +6,48 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/edge_functions"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var function_id int64
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.EdgeFunctionDescribeUsage,
-		Short:         msg.EdgeFunctionDescribeShortDescription,
-		Long:          msg.EdgeFunctionDescribeLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.DescribeShortDescription,
+		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion edge_functions describe --function-id 4312
-        $ azion edge_functions describe --function-id 1337 --with-code
-        $ azion edge_functions describe --function-id 1337 --out "./tmp/test.json" --format json
-        $ azion edge_functions describe --function-id 1337 --format json
+        $ azion describe edge-function --function-id 4312
+        $ azion describe edge-function --function-id 1337 --with-code
+        $ azion describe edge-function --function-id 1337 --out "./tmp/test.json" --format json
+        $ azion describe edge-function --function-id 1337 --format json
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				return msg.ErrorMissingFunctionIdArgument
+				answer, err := utils.AskInput(msg.AskEdgeFunctionID)
+				if err != nil {
+					return err
+				}
+
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdFunction
+				}
+
+				function_id = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -55,7 +69,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.EdgeFunctionFileWritten, filepath.Clean(opts.OutPath))
+				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -67,11 +81,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64VarP(&function_id, "function-id", "f", 0, msg.EdgeFunctionFlagId)
-	cmd.Flags().Bool("with-code", false, msg.EdgeFunctionDescribeFlagWithCode)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.EdgeFunctionDescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.EdgeFunctionDescribeFlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.EdgeFunctionDescribeHelpFlag)
+	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagID)
+	cmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
 }
@@ -83,7 +97,6 @@ func serializeToJson(data interface{}) string {
 }
 
 func format(cmd *cobra.Command, function api.EdgeFunctionResponse) ([]byte, error) {
-
 	var b bytes.Buffer
 
 	format, err := cmd.Flags().GetString("format")

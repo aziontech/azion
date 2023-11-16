@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/update/edge_application"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -25,7 +24,6 @@ type Fields struct {
 	HTTPPort                int64
 	HTTPSPort               int64
 	MinimumTLSVersion       string
-	Active                  string
 	ApplicationAcceleration string
 	DeviceDetection         string
 	EdgeFirewall            string
@@ -48,31 +46,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update edge-application --id 1234 --name 'Hello'
-		$ azion update edge-application --id 9123 --active true
-		$ azion update edge-application --id 9123 --active false
-		$ azion update edge-application --in "update.json"
+		$ azion update edge-application --application-id 1234 --name 'Hello'
+		$ azion update edge-application --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("in") {
-				qs := []*survey.Question{
-					{
-						Name:      "id",
-						Prompt:    &survey.Input{Message: "What is the id of the Edge Application?"},
-						Validate:  survey.Required,
-						Transform: survey.Title,
-					},
-				}
+			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("file") {
 
-				answers := struct{ ID int64 }{}
-
-				err := survey.Ask(qs, &answers)
+				answer, err := utils.AskInput(msg.AskInputApplicationId)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
 
-				fields.ID = answers.ID
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdApplication
+				}
+
+				fields.ID = num
 			}
 
 			if !returnAnyField(cmd) {
@@ -80,8 +71,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			request := api.UpdateRequest{}
-			if cmd.Flags().Changed("in") {
-				err := utils.FlagINUnmarshalFileJSON(fields.InPath, &request)
+			if cmd.Flags().Changed("file") {
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
@@ -113,7 +104,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("application-acceleration") {
 					converted, err := strconv.ParseBool(fields.ApplicationAcceleration)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.ApplicationAcceleration)
 					}
 					request.SetApplicationAcceleration(converted)
 				}
@@ -121,7 +112,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("device-detection") {
 					converted, err := strconv.ParseBool(fields.DeviceDetection)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.DeviceDetection)
 					}
 					request.SetDeviceDetection(converted)
 				}
@@ -129,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-firewall") {
 					converted, err := strconv.ParseBool(fields.EdgeFirewall)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.EdgeFirewall)
 					}
 					request.SetEdgeFirewall(converted)
 				}
@@ -137,7 +128,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("edge-functions") {
 					converted, err := strconv.ParseBool(fields.EdgeFunctions)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.EdgeFunctions)
 					}
 					request.SetEdgeFunctions(converted)
 				}
@@ -145,7 +136,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("image-optimization") {
 					converted, err := strconv.ParseBool(fields.ImageOptimization)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.ImageOptimization)
 					}
 					request.SetImageOptimization(converted)
 				}
@@ -153,7 +144,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("l2-caching") {
 					converted, err := strconv.ParseBool(fields.L2Caching)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.L2Caching)
 					}
 					request.SetL2Caching(converted)
 				}
@@ -161,7 +152,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("load-balancer") {
 					converted, err := strconv.ParseBool(fields.LoadBalancer)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.LoadBalancer)
 					}
 					request.SetLoadBalancer(converted)
 				}
@@ -169,7 +160,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if cmd.Flags().Changed("raw-logs") {
 					converted, err := strconv.ParseBool(fields.RawLogs)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.Active)
+						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.RawLogs)
 					}
 					request.SetRawLogs(converted)
 				}
@@ -215,7 +206,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.FlagLoadBalancer)
 	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.RawLogs)
 	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.WebApplicationFirewall)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
+	flags.StringVar(&fields.InPath, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }

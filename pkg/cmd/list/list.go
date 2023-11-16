@@ -6,6 +6,7 @@ import (
 	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/list/edge_applications"
+	function "github.com/aziontech/azion-cli/pkg/cmd/list/edge_function"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
@@ -33,6 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
+	cmd.AddCommand(function.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

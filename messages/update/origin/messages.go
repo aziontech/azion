@@ -16,7 +16,7 @@ var (
 	FlagHmacRegionName       = "Informs Hmac region name"
 	FlagHmacAccessKey        = "Informs Hmac Access Key"
 	FlagHmacSecretKey        = "Informs Hmac Secret Key"
-	FlagIn                   = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
+	FlagFile                 = "Path to a JSON file containing the attributes of the origin that will be updated; you can use - for reading from stdin"
 	FlagHelp                 = "Displays more information about the update subcommand"
 	OutputSuccess            = "Updated origin with ID %s\n"
 	AskAppID                 = "What is the ID of the Edge Application this origin is linked to?"

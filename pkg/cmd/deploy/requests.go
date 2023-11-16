@@ -8,7 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_functions"
+	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -204,9 +204,8 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqUpd.Id = conf.Function.Id
 	reqUpd.SetJsonArgs(args)
-	response, err := client.Update(ctx, &reqUpd)
+	response, err := client.Update(ctx, &reqUpd, conf.Function.Id)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
