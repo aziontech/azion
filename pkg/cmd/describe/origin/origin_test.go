@@ -16,7 +16,7 @@ import (
 
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("describe an domains", func(t *testing.T) {
+	t.Run("describe an origin", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

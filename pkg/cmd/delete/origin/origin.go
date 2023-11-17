@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/origin"
+	msg "github.com/aziontech/azion-cli/messages/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,8 +20,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var originKey string
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Short:         msg.DeleteShortDescription,
+		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -30,7 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApp)
+				answer, err := utils.AskInput(msg.DeleteAskInputApp)
 				if err != nil {
 					return err
 				}
@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answer, err := utils.AskInput(msg.AskInputOri)
+				answer, err := utils.AskInput(msg.DeleteAskInputOri)
 				if err != nil {
 					return err
 				}
@@ -58,13 +58,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, originKey))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.DeleteOutputSuccess, originKey))
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 	return cmd
 }
