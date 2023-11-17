@@ -21,8 +21,8 @@ import (
 )
 
 var example = `
-	$ azion create origins --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-	$ azion create origins --application-id 1673635839 --file "create.json"
+	$ azion create origin --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+	$ azion create origin --application-id 1673635839 --file "create.json"
 `
 
 type Fields struct {
