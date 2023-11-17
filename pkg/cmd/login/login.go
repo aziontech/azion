@@ -85,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			clientPersonalToken := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := clientPersonalToken.Create(context.Background(), &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorLogin)
+				return fmt.Errorf(msg.ErrorLogin, err.Error())
 			}
 
 			settings := token.Settings{
