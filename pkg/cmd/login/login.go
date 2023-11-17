@@ -16,6 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -72,6 +73,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if !tokenValid {
 				return fmt.Errorf(msg.ErrorTokenCreateInvalid)
 			}
+			viper.SetDefault("token", resp.Token)
 
 			date, err := cmdPersToken.ParseExpirationDate(time.Now(), "1m")
 			if err != nil {
