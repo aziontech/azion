@@ -8,11 +8,11 @@ const (
 	Success          = "successfully logged in"
 
 	// flags
-	FlagUsername = "Login user"
-	FlagPassword = "Password to log in"
+	FlagUsername = "Your email address"
+	FlagPassword = "Your password"
 	FlagHelp     = "Displays more information about the login command"
 
 	// Ask
-	AskUsername = "What is the username?"
-	AskPassword = "What is the user's password?"
+	AskUsername = "What is your email address?"
+	AskPassword = "What is your password?"
 )

@@ -1,5 +1,6 @@
 package login
 
 const (
-	ErrorCreate = "Failed to create the Personal Token: %s. Check your settings and try again. If the error persists, contact Azion support."
+	ErrorLogin              = "Failed to login"
+	ErrorTokenCreateInvalid = "The token was created, but it is invalid"
 )

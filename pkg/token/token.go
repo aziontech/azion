@@ -17,36 +17,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
-const settingsFilename = "settings.toml"
-
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
-type Token struct {
-	endpoint string
-	client   HTTPClient
-	filePath string
-	valid    bool
-	out      io.Writer
-}
-
-type Settings struct {
-	Token string
-	UUID  string
-}
-
-type Config struct {
-	Client HTTPClient
-	Out    io.Writer
-}
-
-type Response struct {
-	Token     string `json:"token"`
-	CreatedAt string `json:"created_at"`
-	ExpiresAt string `json:"expires_at"`
-}
-
 func New(c *Config) (*Token, error) {
 	dir, err := config.Dir()
 	if err != nil {
@@ -99,7 +69,6 @@ func (t *Token) Save(b []byte) (string, error) {
 
 	err = os.WriteFile(t.filePath, b, 0777)
 	if err != nil {
-		fmt.Println("err: ", err)
 		return "", err
 	}
 

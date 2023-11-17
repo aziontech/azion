@@ -3,7 +3,6 @@ package login
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"time"
 
@@ -71,7 +70,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !tokenValid {
-				return errors.New("token invalid")
+				return fmt.Errorf(msg.ErrorTokenCreateInvalid)
 			}
 
 			date, err := cmdPersToken.ParseExpirationDate(time.Now(), "1m")
@@ -86,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			clientPersonalToken := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := clientPersonalToken.Create(context.Background(), &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreate, err.Error())
+				return fmt.Errorf(msg.ErrorLogin)
 			}
 
 			settings := token.Settings{
