@@ -145,11 +145,7 @@ func Execute() {
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
 	}
 
-	tok, err := token.ReadSettings()
-	if err != nil {
-		logger.Debug("reading settings", zap.Error(err))
-	}
-
+	tok, _ := token.ReadSettings()
 	viper.SetEnvPrefix("AZIONCLI")
 	viper.AutomaticEnv()
 	viper.SetDefault("token", tok.Token)
