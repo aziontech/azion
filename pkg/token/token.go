@@ -105,45 +105,11 @@ func (t *Token) Create(b64 string) (*Response, error) {
 	return &result, nil
 }
 
-func ReadFromDisk() (string, error) {
-	dir, err := config.Dir()
-	if err != nil {
-		return "", fmt.Errorf("failed to get token dir: %w", err)
-	}
-
-	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
-	if err != nil {
-		return "", err
-	}
-
-	var settings Settings
-	err = toml.Unmarshal(fileData, &settings)
-	if err != nil {
-		return "", fmt.Errorf("failed parse byte to struct settings: %w", err)
-	}
-
-	return settings.Token, nil
-}
-
-func DeleteToken() error {
+func WriteSettings(settings Settings) error {
 	dir, err := config.Dir()
 	if err != nil {
 		return fmt.Errorf("failed to get token dir: %w", err)
 	}
-
-	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
-	if err != nil {
-		return err
-	}
-
-	var settings Settings
-	err = toml.Unmarshal(fileData, &settings)
-	if err != nil {
-		return fmt.Errorf("failed parse byte to struct settings: %w", err)
-	}
-
-	settings.Token = ""
-	settings.UUID = ""
 
 	b, err := toml.Marshal(settings)
 	if err != nil {
@@ -154,5 +120,25 @@ func DeleteToken() error {
 		return err
 	}
 
-	return err
+	return nil
+}
+
+func ReadSettings() (Settings, error) {
+	dir, err := config.Dir()
+	if err != nil {
+		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
+	}
+
+	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
+	if err != nil {
+		return Settings{}, err
+	}
+
+	var settings Settings
+	err = toml.Unmarshal(fileData, &settings)
+	if err != nil {
+		return Settings{}, fmt.Errorf("failed parse byte to struct settings: %w", err)
+	}
+
+	return settings, nil
 }

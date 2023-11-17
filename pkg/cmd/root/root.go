@@ -145,11 +145,14 @@ func Execute() {
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
 	}
 
-	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
-	tok, _ := token.ReadFromDisk()
+	tok, err := token.ReadSettings()
+	if err != nil {
+		logger.Debug("reading settings", zap.Error(err))
+	}
+
 	viper.SetEnvPrefix("AZIONCLI")
 	viper.AutomaticEnv()
-	viper.SetDefault("token", tok)
+	viper.SetDefault("token", tok.Token)
 	viper.SetDefault("api_url", constants.ApiURL)
 	viper.SetDefault("storage_url", constants.StorageApiURL)
 
