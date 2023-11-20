@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
+	"github.com/aziontech/azion-cli/pkg/cmd/logout"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
@@ -116,6 +117,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(completion.NewCmd(f))
 	cobraCmd.AddCommand(describe.NewCmd(f))
 	cobraCmd.AddCommand(login.NewCmd(f))
+	cobraCmd.AddCommand(logout.NewCmd(f))
 	cobraCmd.AddCommand(create.NewCmd(f))
 	cobraCmd.AddCommand(list.NewCmd(f))
 	cobraCmd.AddCommand(delete.NewCmd(f))
@@ -144,11 +146,10 @@ func Execute() {
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
 	}
 
-	// TODO: Ignoring errors since the file might not exist, maybe warn the user?
-	tok, _ := token.ReadFromDisk()
+	tok, _ := token.ReadSettings()
 	viper.SetEnvPrefix("AZIONCLI")
 	viper.AutomaticEnv()
-	viper.SetDefault("token", tok)
+	viper.SetDefault("token", tok.Token)
 	viper.SetDefault("api_url", constants.ApiURL)
 	viper.SetDefault("storage_url", constants.StorageApiURL)
 
