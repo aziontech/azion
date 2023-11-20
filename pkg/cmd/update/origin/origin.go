@@ -8,7 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/update/origin"
+	msg "github.com/aziontech/azion-cli/messages/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
@@ -40,8 +40,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Short:         msg.UpdateShortDescription,
+		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
@@ -95,7 +95,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetOriginKey()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()))
 			return nil
 		},
 	}
@@ -159,7 +159,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.OriginKey, "origin-key", "", msg.FlagOriginKey)
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
 	flags.StringSliceVar(&fields.Addresses, "addresses", []string{}, msg.FlagAddresses)
@@ -171,5 +171,5 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }

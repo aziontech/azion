@@ -40,44 +40,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create edge-function --name misfunction --code ./code/function.js --active false
         $ azion create edge-function --name with args --code ./code/function.js --args ./args.json --active true
-        $ azion create edge-function --in "create.json"
+        $ azion create edge-function --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()
 
-			if !cmd.Flags().Changed("name") {
-				answers, err := utils.AskInput(msg.AskName)
-
-				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
-				}
-
-				fields.Name = answers
-			}
-
-			if !cmd.Flags().Changed("code") {
-				answers, err := utils.AskInput(msg.AskCode)
-
-				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
-				}
-
-				fields.Code = answers
-			}
-
-			if !cmd.Flags().Changed("active") {
-				answers, err := utils.Select(msg.AskActive, []string{"true", "false"})
-				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
-				}
-
-				fields.Active = answers
-			}
-
-			if cmd.Flags().Changed("in") {
+			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
@@ -113,11 +81,44 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.FlagCode)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.Args, "args", "", msg.FlagArgs)
-	flags.StringVar(&fields.InPath, "in", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.StringVar(&fields.InPath, "file", "", msg.FlagIn)
+	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateRequest) error {
+
+	if !cmd.Flags().Changed("name") {
+		answers, err := utils.AskInput(msg.AskName)
+
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+
+		fields.Name = answers
+	}
+
+	if !cmd.Flags().Changed("code") {
+		answers, err := utils.AskInput(msg.AskCode)
+
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+
+		fields.Code = answers
+	}
+
+	if !cmd.Flags().Changed("active") {
+		answers, err := utils.Select(msg.AskActive, []string{"true", "false"})
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+
+		fields.Active = answers
+	}
+
 	isActive, err := strconv.ParseBool(fields.Active)
 	if err != nil {
 		return fmt.Errorf("%w: %s", msg.ErrorActiveFlag, fields.Active)

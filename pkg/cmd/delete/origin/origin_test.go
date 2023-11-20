@@ -14,7 +14,7 @@ import (
 
 func TestCreate(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("delete domain by id", func(t *testing.T) {
+	t.Run("delete origin by key", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

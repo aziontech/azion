@@ -110,7 +110,7 @@ func TestUpdate(t *testing.T) {
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--function-id", "1337", "--in", "./fixtures/update.json"})
+		cmd.SetArgs([]string{"--function-id", "1337", "--file", "./fixtures/update.json"})
 
 		err := cmd.Execute()
 

@@ -13,11 +13,10 @@ var (
 	CreateOutputSuccess    = "Created Edge Function with ID %d\n"
 
 	//delete cmd
-	DeleteUsage            = "delete --function-id <function_id> [flags]"
 	DeleteShortDescription = "Removes an Edge Function"
 	DeleteLongDescription  = "Removes an Edge Function from the Edge Functions library based on its given ID"
 	DeleteOutputSuccess    = "Edge Function %d was successfully deleted\n"
-	DeleteHelpFlag         = "Displays more information about the delete subcommand"
+	DeleteHelpFlag         = "Displays more information about the delete edge-function command"
 
 	//describe cmd
 	DescribeShortDescription   = "Returns the Edge Function data"
@@ -29,36 +28,34 @@ var (
 	DescribeAskInputFunctionID = "What is the ID of the edge function you wish to describe?"
 
 	//list cmd
-	ListUsage            = "list [flags]"
 	ListShortDescription = "Displays your account's Edge Functions"
 	ListLongDescription  = "Displays all functions in the user account’s Edge Functions library"
 	ListHelpFlag         = "Displays more information about the list edge-function command"
 
 	//update cmd
-	UpdateUsage             = "update --function-id <function_id> [flags]"
 	UpdateShortDescription  = "Modifies an Edge Function"
 	UpdateLongDescription   = "Modifies an Edge Function based on its ID to update its name, activity status, code path, and other attributes"
 	UpdateFlagName          = "The Edge Function's name"
 	UpdateFlagCode          = "Path and name to the file containing the Edge Function's code"
 	UpdateFlagActive        = "Whether the Edge Function should be active or not"
 	UpdateFlagArgs          = "Path and name of the JSON file containing the Edge Function's arguments"
-	UpdateFlagIn            = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
+	UpdateFlagFile          = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
 	UpdateOutputSuccess     = "Updated Edge Function with ID %d\n"
 	UpdateHelpFlag          = "Displays more information about the update edge-function command"
 	UpdateAskEdgeFunctionID = "What is the ID of the edge function you wish to update?"
 
 	// flags
-	FlagID     = "Unique identifier of the Edge Function"
-	FlagName   = "The Edge Function's name"
-	FlagCode   = "Path to the Edge Function's code"
-	FlagActive = "Whether the Edge Function is active or not"
-	FlagArgs   = "Path to the Edge Function's arguments JSON file"
-	FlagIn     = "Given file path to create an Edge Function; you can use - for reading from stdin"
-	FlagHelp   = "Displays more information about the edge function subcommand"
+	FlagID         = "Unique identifier of the Edge Function"
+	FlagName       = "The Edge Function's name"
+	FlagCode       = "Path to the Edge Function's code"
+	FlagActive     = "Whether the Edge Function is active or not"
+	FlagArgs       = "Path to the Edge Function's arguments JSON file"
+	FlagIn         = "Given file path to create an Edge Function; you can use - for reading from stdin"
+	CreateFlagHelp = "Displays more information about the create edge-function command"
 
 	// ask
 	AskName           = "What is the Name of the edge function?"
 	AskCode           = "What is the Code Path  of the edge function?"
-	AskActive         = "Does activating the edge function?"
+	AskActive         = "Select whether the edge function is active or not"
 	AskEdgeFunctionID = "What is the ID of the edge function?"
 )

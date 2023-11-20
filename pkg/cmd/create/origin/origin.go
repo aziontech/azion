@@ -11,7 +11,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/logger"
 
-	msg "github.com/aziontech/azion-cli/messages/create/origin"
+	msg "github.com/aziontech/azion-cli/messages/origin"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -21,8 +21,8 @@ import (
 )
 
 var example = `
-	$ azion create origins --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
-	$ azion create origins --application-id 1673635839 --file "create.json"
+	$ azion create origin --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+	$ azion create origin --application-id 1673635839 --file "create.json"
 `
 
 type Fields struct {
@@ -45,8 +45,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Short:         msg.CreateShortDescription,
+		Long:          msg.CreateLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(example),
@@ -68,9 +68,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateOrigins, err)
+				return fmt.Errorf(msg.ErrorCreateOrigins.Error(), err)
 			}
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetOriginId()))
+			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetOriginKey()))
 
 			return nil
 		},
@@ -158,7 +158,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	if cmd.Flags().Changed("hmac-authentication") {
 		hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorHmacAuthenticationFlag)
+			return msg.ErrorHmacAuthenticationFlag
 		}
 		request.SetHmacAuthentication(hmacAuth)
 	}
@@ -191,5 +191,5 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
