@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.94.0
+	github.com/aziontech/azionapi-go-sdk v0.110.0
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/joho/godotenv v1.5.1
