@@ -7,11 +7,12 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/MakeNowJust/heredoc"
 	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/describe/origin"
+	msg "github.com/aziontech/azion-cli/messages/origin"
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -31,11 +32,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.ShortDescription,
-		Long:          msg.LongDescription,
+		Short:         msg.DescribeShortDescription,
+		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       msg.Example,
+		Example: heredoc.Doc(`
+		$ azion describe origin --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000
+		$ azion describe origin --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --format json
+		$ azion describe origin --application-id 1673635839 --origin-key 0000000-00000000-00a0a00s0as0-000000 --out "./tmp/test.json"
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.AskAppID)
@@ -93,11 +98,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
+	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
+	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
 }

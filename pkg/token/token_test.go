@@ -7,9 +7,15 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/pelletier/go-toml/v2"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func Test_Validate(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
 	t.Run("invalid token", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
@@ -37,7 +43,7 @@ func Test_Validate(t *testing.T) {
 	t.Run("valid token", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("GET", "token"),
+			httpmock.REST("GET", "token/user/me"),
 			httpmock.StatusStringResponse(http.StatusOK, "{}"),
 		)
 
@@ -61,19 +67,28 @@ func Test_Validate(t *testing.T) {
 }
 
 func Test_Save(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
 	config.SetPath("/tmp/testazion")
 
 	t.Run("save token to disk", func(t *testing.T) {
 		token, err := New(&Config{
 			Out: os.Stdout,
 		})
-		token.token = "TeST"
 
 		if err != nil {
 			t.Fatalf("New() = %v; want nil", err)
 		}
 
-		if err := token.Save(); err != nil {
+		settings := Settings{
+			Token: "asdfdsafsdfasd",
+			UUID:  "asdfadsfads",
+		}
+
+		b, err := toml.Marshal(settings)
+		require.NoError(t, err)
+
+		if _, err := token.Save(b); err != nil {
 			t.Fatalf("Save() = %v; want nil", err)
 		}
 	})

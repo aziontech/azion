@@ -82,7 +82,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.Args, "args", "", msg.FlagArgs)
 	flags.StringVar(&fields.InPath, "file", "", msg.FlagIn)
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.CreateRequest) error {

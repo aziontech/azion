@@ -119,6 +119,11 @@ func LogSuccess(w io.Writer, message string) {
 	FInfo(w, formatSuccess("🚀 %s\n", message))
 }
 
+func LogSuccessBad(w io.Writer, message string) {
+	formatSuccess := color.New(color.FgBlue).SprintfFunc()
+	FInfo(w, formatSuccess("😥 %s\n", message))
+}
+
 func LogWarning(w io.Writer, message string) {
 	formatWarning := color.New(color.FgYellow).SprintfFunc()
 	FInfo(w, formatWarning("⚠️ %s\n", message))

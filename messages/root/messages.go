@@ -11,6 +11,6 @@ var (
 	RootTokenFlag   = "Saves a given personal token locally to authorize CLI commands"
 	RootConfigFlag  = "Sets the Azion configuration folder for the current command only, without changing persistent settings."
 	RootYesFlag     = "Answers all yes/no interactions automatically with yes"
-	TokenSavedIn    = "Token saved in %v\n"
+	TokenSavedIn    = "Token saved in %s\n"
 	TokenUsedIn     = "This token will be used by default with all commands"
 )
