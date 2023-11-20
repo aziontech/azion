@@ -11,7 +11,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	table "github.com/MaxwelMazur/tablecli"
-	msg "github.com/aziontech/azion-cli/messages/list/origin"
+	msg "github.com/aziontech/azion-cli/messages/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -25,9 +25,9 @@ var edgeApplicationID int64 = 0
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.OriginsListUsage,
-		Short:         msg.OriginsListShortDescription,
-		Long:          msg.OriginsListLongDescription,
+		Use:           msg.Usage,
+		Short:         msg.ListShortDescription,
+		Long:          msg.ListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true, Example: heredoc.Doc(`
         $ azion list origin  --application-id 16736354321
@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
 
-				answer, err := utils.AskInput(msg.AskInputApplicationId)
+				answer, err := utils.AskInput(msg.AskAppID)
 				if err != nil {
 					return err
 				}
@@ -61,8 +61,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	flags := cmd.Flags()
-	flags.Int64Var(&edgeApplicationID, "application-id", 0, msg.OriginsListFlagEdgeApplicationID)
-	flags.BoolP("help", "h", false, msg.OriginsListHelpFlag)
+	flags.Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	flags.BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }
 
