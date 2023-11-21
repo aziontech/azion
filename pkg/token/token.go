@@ -90,6 +90,14 @@ func (t *Token) Create(b64 string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if resp != nil {
+		logger.Debug("Error while create token", zap.Error(err))
+		err := utils.LogAndRewindBody(resp)
+		if err != nil {
+			return nil, err
+		}
+	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
