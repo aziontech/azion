@@ -89,7 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           API_URL: https://api.azionapi.net
           STORAGE_URL: https://storage-api.azion.com
-          AUTH_URL: https://sso.azion.com/api/user/me
+          AUTH_URL: https://sso.azion.com/api
           TEMPLATE_BRANCH: main
 
   bump_formula:
