@@ -106,7 +106,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			_, err = client.Save(byteSettings)
 			if err != nil {
-				logger.Debug("Erro save settings", zap.Error(err))
+				logger.Debug("Error when saving settings", zap.Error(err))
 				return err
 			}
 
