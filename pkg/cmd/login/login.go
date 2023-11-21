@@ -62,11 +62,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			resp, err := client.Create(b64(username, password))
 			if err != nil {
+				logger.Debug("Basic token creation error", zap.Error(err))
 				return err
 			}
 
 			tokenValid, err := client.Validate(&resp.Token)
 			if err != nil {
+				logger.Debug("token validation error", zap.Error(err))
 				return err
 			}
 
@@ -77,6 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			date, err := cmdPersToken.ParseExpirationDate(time.Now(), "1m")
 			if err != nil {
+				logger.Debug("expiration date format error", zap.Error(err))
 				return err
 			}
 
@@ -97,11 +100,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			byteSettings, err := toml.Marshal(settings)
 			if err != nil {
+				logger.Debug("Error toml marshal", zap.Error(err))
 				return err
 			}
 
 			_, err = client.Save(byteSettings)
 			if err != nil {
+				logger.Debug("Error when saving settings", zap.Error(err))
 				return err
 			}
 
