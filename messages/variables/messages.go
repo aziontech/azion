@@ -3,8 +3,8 @@ package variables
 var (
 	// [ variables ]
 	Usage            = "variables"
-	ShortDescription = "Manages your environment variables and secrets on the Azion's platform"
-	LongDescription  = "Manages your environment variables and secrets to be used inside edge functions on the Azion's platform"
+	ShortDescription = "Manages your environment variables and secrets"
+	LongDescription  = "Manages your environment variables and secrets to be used inside Edge Functions"
 	FlagHelp         = "Displays more information about the variables command"
 	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
@@ -45,8 +45,8 @@ var (
 
 	// [ create ]
 	CreateUsage            = "create [flags]"
-	CreateShortDescription = "Creates a new environment variable or secret on the Azion's platform"
-	CreateLongDescription  = "Creates a new environment variable or secret to be used inside edge functions on the Azion's platform"
+	CreateShortDescription = "Creates a new environment variable or secret"
+	CreateLongDescription  = "Creates a new environment variable or secret to be used inside Edge Functions"
 	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."

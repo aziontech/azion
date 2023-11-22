@@ -3,8 +3,8 @@ package login
 const (
 	// general
 	Usage            = "login"
-	ShortDescription = "Log in to your Azion account"
-	LongDescription  = "Log in to your Azion account and save a personal token locally to authorize CLI commands"
+	ShortDescription = "Logs in to your Azion account"
+	LongDescription  = "Logs in to your Azion account and save a Personal Token locally to authorize CLI commands"
 	Success          = "successfully logged in"
 
 	// flags

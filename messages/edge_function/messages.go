@@ -25,7 +25,7 @@ var (
 	DescribeFlagFormat         = "Changes the output format passing the json value to the flag"
 	DescribeFlagWithCode       = "Displays the Edge Function's code; disabled by default"
 	DescribeHelpFlag           = "Displays more information about the describe edge-function command"
-	DescribeAskInputFunctionID = "What is the ID of the edge function you wish to describe?"
+	DescribeAskInputFunctionID = "What is the ID of the Edge Function you wish to describe?"
 
 	//list cmd
 	ListShortDescription = "Displays your account's Edge Functions"
@@ -42,7 +42,7 @@ var (
 	UpdateFlagFile          = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
 	UpdateOutputSuccess     = "Updated Edge Function with ID %d\n"
 	UpdateHelpFlag          = "Displays more information about the update edge-function command"
-	UpdateAskEdgeFunctionID = "What is the ID of the edge function you wish to update?"
+	UpdateAskEdgeFunctionID = "What is the ID of the Edge Function you wish to update?"
 
 	// flags
 	FlagID         = "Unique identifier of the Edge Function"
@@ -54,8 +54,8 @@ var (
 	CreateFlagHelp = "Displays more information about the create edge-function command"
 
 	// ask
-	AskName           = "What is the Name of the edge function?"
-	AskCode           = "What is the Code Path  of the edge function?"
-	AskActive         = "Select whether the edge function is active or not"
-	AskEdgeFunctionID = "What is the ID of the edge function?"
+	AskName           = "What is the Name of the Edge Function?"
+	AskCode           = "What is the Code Path  of the Edge Function?"
+	AskActive         = "Select whether the Edge Function is active or not"
+	AskEdgeFunctionID = "What is the ID of the Edge Function?"
 )
