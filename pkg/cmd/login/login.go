@@ -36,9 +36,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			switch {
 			case strings.Contains(answer, "browser"):
-				browserLogin(f)
+				err := browserLogin(f)
+				if err != nil {
+					return err
+				}
 			case strings.Contains(answer, "terminal"):
-				terminalLogin(cmd, f)
+				err := terminalLogin(cmd, f)
+				if err != nil {
+					return err
+				}
 			default:
 				return msg.ErrorInvalidLogin
 			}
