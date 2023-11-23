@@ -15,4 +15,7 @@ const (
 	// Ask
 	AskUsername = "What is your email address?"
 	AskPassword = "What is your password?"
+
+	//browser
+	VisitMsg = "Please visit https://sso.azion.com/login?next=cli in case it did not open automatically\n"
 )
