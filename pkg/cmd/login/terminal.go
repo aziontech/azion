@@ -21,21 +21,21 @@ import (
 func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 
 	if !cmd.Flags().Changed("username") {
-		answers, err := utils.AskInput(msg.AskUsername)
+		answer, err := utils.AskInput(msg.AskUsername)
 		if err != nil {
 			return err
 		}
 
-		username = answers
+		username = answer
 	}
 
 	if !cmd.Flags().Changed("password") {
-		answers, err := utils.AskPassword(msg.AskPassword)
+		answer, err := utils.AskPassword(msg.AskPassword)
 		if err != nil {
 			return err
 		}
 
-		password = answers
+		password = answer
 	}
 
 	client, err := token.New(&token.Config{Client: f.HttpClient})
@@ -49,7 +49,7 @@ func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = validateToken(client)
+	err = validateToken(client, resp.Token)
 	if err != nil {
 		return err
 	}
@@ -74,11 +74,6 @@ func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 
 	tokenValue = response.GetKey()
 	uuid = response.GetUuid()
-
-	err = validateToken(client)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

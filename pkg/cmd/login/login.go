@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			err = validateToken(client)
+			err = validateToken(client, tokenValue)
 			if err != nil {
 				return err
 			}
@@ -104,8 +104,8 @@ func saveSettings(client *token.Token) error {
 	return nil
 }
 
-func validateToken(client *token.Token) error {
-	tokenValid, err := client.Validate(&tokenValue)
+func validateToken(client *token.Token, token string) error {
+	tokenValid, err := client.Validate(&token)
 	if err != nil {
 		logger.Debug("Error while validating the token", zap.Error(err))
 		return err
