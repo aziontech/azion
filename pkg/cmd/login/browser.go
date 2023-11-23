@@ -22,7 +22,7 @@ func browserLogin(f *cmdutil.Factory) error {
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		paramValue := r.URL.Query().Get("c")
-		io.WriteString(w, "You may now close this page and return to your terminal")
+		_, _ = io.WriteString(w, msg.BrowserMsg)
 		tokenValue = paramValue
 		cancel()
 	})
