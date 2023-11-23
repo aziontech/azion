@@ -14,4 +14,5 @@ type Factory struct {
 	Config     config.Config
 	logger.Logger
 	GlobalFlagAll bool
+	Version       string
 }
