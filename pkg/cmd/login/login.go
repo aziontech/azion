@@ -1,7 +1,6 @@
 package login
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -118,7 +117,7 @@ func validateToken(client *token.Token, token string) error {
 	}
 
 	if !tokenValid {
-		return fmt.Errorf(msg.ErrorTokenCreateInvalid)
+		return msg.ErrorTokenCreateInvalid
 	}
 
 	return nil

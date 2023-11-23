@@ -3,13 +3,13 @@ package login
 import (
 	"context"
 	"io"
-	"log"
 	"net/http"
 
 	msg "github.com/aziontech/azion-cli/messages/login"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/skratchdot/open-golang/open"
+	"go.uber.org/zap"
 )
 
 const (
@@ -35,7 +35,7 @@ func browserLogin(f *cmdutil.Factory) error {
 	go func() {
 		err := srv.ListenAndServe()
 		if err != http.ErrServerClosed {
-			log.Println(err)
+			logger.Error(msg.ErrorServerClosed.Error(), zap.Error(err))
 		}
 	}()
 

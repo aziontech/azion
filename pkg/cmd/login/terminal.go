@@ -69,7 +69,7 @@ func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 	clientPersonalToken := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	response, err := clientPersonalToken.Create(context.Background(), &request)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorLogin, err.Error())
+		return fmt.Errorf(msg.ErrorLogin.Error(), err.Error())
 	}
 
 	tokenValue = response.GetKey()
