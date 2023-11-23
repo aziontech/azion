@@ -79,7 +79,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func selectLoginMode() (string, error) {
 	answer := ""
 	prompt := &survey.Select{
-		Message: "Choose a mode:",
+		Message: "Choose a login method:",
 		Options: []string{"Log in via browser", "Log in via terminal"},
 	}
 	err := survey.AskOne(prompt, &answer)
