@@ -2,7 +2,7 @@ package origins
 
 var (
 	// [ origins ]
-	Usage = "Origin"
+	Usage = "origin"
 
 	// [create]
 	CreateShortDescription = "Creates a new Origin"
