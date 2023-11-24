@@ -9,7 +9,7 @@ var (
 	FlagHelp         = "Displays more information about the create edge-application command"
 	OutputSuccess    = "Created Edge Application with ID %d\n"
 
-	FlagName                           = "Edge application's name"
+	FlagName                           = "Edge Application's name"
 	FlagApplicationAcceleration        = "Used for Application Acceleration, enable or disable"
 	FlagDeliveryProtocol               = "Specify whether the data should be delivered via HTTP or HTTPS."
 	FlagHttp3                          = "Flag to enable HTTP3"
