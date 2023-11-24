@@ -3,7 +3,7 @@ package rulesengine
 var (
 	AskInputRulesId       = "What's the id of the Rules Engine you wish to delete?"
 	AskInputApplicationId = "What's the id of the Edge Application this rule is linked to?"
-	AskInputPhase         = "What's the phase of your rule engine? (request/response)"
+	AskInputPhase         = "What's the phase of your Rules Engine? (request/response)"
 	DeleteOutputSuccess   = "Rule Engine %d was successfully deleted\n"
 	FlagRuleID            = "Your Rules Engine's ID"
 	FlagAppID             = "Your Edge Application's ID"

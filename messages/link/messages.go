@@ -7,7 +7,7 @@ var (
 	EdgeApplicationsLinkShortDescription  = "Links a local repo or project folder to an existing application on Azion"
 	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project to an Azion Edge Application"
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
-	EdgeApplicationsLinkFlagName          = "The Edge application's name"
+	EdgeApplicationsLinkFlagName          = "The Edge Application's name"
 	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's template"
 	EdgeApplicationsLinkFlagMode          = "The Edge Application's mode"
 	WebAppLinkCmdSuccess                  = "Template successfully fetched and configured\n\n"

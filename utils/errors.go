@@ -33,7 +33,7 @@ var (
 	ErrorCleaningDirectory          = errors.New("Failed to clean the directory's contents because the directory is read-only and/or isn't accessible. Change the attributes of the directory to read/write and/or give access to it")
 	ErrorRunningCommand             = errors.New("Failed to run the command specified in the template (config.json)")
 	ErrorRunningCommandStream       = errors.New("Failed to run the command specified in the template (config.json): %s")
-	ErrorLoadingEnvVars             = errors.New("Failed to load the edge applications's environment variables. Verify if the environment variables exist and/or if their values are valid and try again")
+	ErrorLoadingEnvVars             = errors.New("Failed to load the Edge Applications's environment variables. Verify if the environment variables exist and/or if their values are valid and try again")
 	ErrorOpeningAzionJsonFile       = errors.New("Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if you have initialized your project, if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorUnmarshalAzionJsonFile     = errors.New("Failed to parse the given 'azion.json' file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorMarshalAzionJsonFile       = errors.New("Failed to encode the given 'azion.json' file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
