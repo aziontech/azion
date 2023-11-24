@@ -55,7 +55,7 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey str
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while describing an origin", zap.Error(err))
+			logger.Debug("Error while describing an Origin", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return sdk.OriginsResultResponse{}, err
@@ -88,7 +88,7 @@ func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req *Creat
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsPost(ctx, edgeApplicationID).CreateOriginsRequest(req.CreateOriginsRequest).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while creating an origin", zap.Error(err))
+			logger.Debug("Error while creating an Origin", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -105,7 +105,7 @@ func (c *Client) Update(ctx context.Context, edgeApplicationID int64, originKey 
 		EdgeApplicationsEdgeApplicationIdOriginsOriginKeyPatch(ctx, edgeApplicationID, originKey).PatchOriginsRequest(req.PatchOriginsRequest).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating an origin", zap.Error(err))
+			logger.Debug("Error while updating an Origin", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -121,7 +121,7 @@ func (c *Client) DeleteOrigins(ctx context.Context, edgeApplicationID int64, ori
 	httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsOriginKeyDelete(ctx, edgeApplicationID, originKey).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while deleting an origin", zap.Error(err))
+			logger.Debug("Error while deleting an Origin", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
