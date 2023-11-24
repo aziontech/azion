@@ -1,0 +1,18 @@
+{
+    "routes": {
+        "deliver": [
+            {
+                "from": "/public",
+                "to": "/.edge/storage/",
+                "priority": 1
+            }
+        ],
+        "compute": [
+            {
+                "from": "/",
+                "to": "/.edge/worker.js",
+                "priority": 2
+            }
+        ]
+    }
+}

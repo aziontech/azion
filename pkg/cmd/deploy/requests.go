@@ -104,16 +104,6 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return domainReturnedName[0], nil
 }
 
-func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientorigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	if conf.Origin.Id == 0 {
-		err := cmd.createAppRequirements(client, clientorigin, ctx, conf)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	reqCre := api.CreateRequest{}
 
@@ -335,7 +325,13 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 	return
 }
 
-func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+// doOrigin creates everything needed for the origin to work correctly
+func (cmd *DeployCmd) doOrigin(
+	client *apiapp.Client,
+	clientorigin *apiori.Client,
+	ctx context.Context,
+	conf *contracts.AzionApplicationOptions,
+) error {
 	reqOrigin := apiori.CreateRequest{}
 	var addresses []string
 	if len(conf.Origin.Address) > 0 {
@@ -358,15 +354,29 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin 
 	conf.Origin.Name = origin.GetName()
 	reqCache := apiapp.CreateCacheSettingsRequest{}
 	reqCache.SetName(conf.Name)
+
 	cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.Id)
 	if err != nil {
-		logger.Debug("Error while creating cache settings for Nextjs application", zap.Error(err))
+		logger.Debug("Error while creating cache settings", zap.Error(err))
 		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
-	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template, conf.Mode)
+
+	manifest, err := readManifest()
 	if err != nil {
-		logger.Debug("Error while creating rules engine for Nextjs application", zap.Error(err))
+		logger.Debug("Error while creating cache settings", zap.Error(err))
+		return err
+	}
+
+	reqRules := []apiapp.RequestsRulesEngine{}
+	reqRules = append(reqRules, prepareRequestCachePolicyRulesEngine(cache.GetId(), conf.Template, conf.Mode))
+	reqRules = append(reqRules, prepareRequestEnableGZipRulesEngine())
+	reqRules = append(reqRules, prepareRequestComputeRulesEngine(*manifest))
+	reqRules = append(reqRules, prepareRequestDeliverRulesEngine(*manifest))
+
+	err = client.SaveListRulesEngine(ctx, conf.Application.Id, reqRules)
+	if err != nil {
+		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)

@@ -38,10 +38,11 @@ type DeployCmd struct {
 	F                     *cmdutil.Factory
 }
 
-var InstanceId int64
-var Path string
-
-var DEFAULTORIGIN [1]string = [1]string{"www.example.com"}
+var (
+	InstanceId    int64
+	Path          string
+	DEFAULTORIGIN = [1]string{"www.example.com"}
+)
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
@@ -129,19 +130,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	if conf.Origin.Id == 0 {
+		err = cmd.doOrigin(cliapp, cliori, ctx, conf)
+		if err != nil {
+			return err
+		}
+	}
+
 	err = cmd.doFunction(client, ctx, conf)
 	if err != nil {
 		return err
 	}
+
 	err = cmd.doApplication(cliapp, ctx, conf)
 	if err != nil {
 		return err
 	}
+
 	domainName, err := cmd.doDomain(clidom, ctx, conf)
-	if err != nil {
-		return err
-	}
-	err = cmd.doOrigin(cliapp, cliori, ctx, conf)
 	if err != nil {
 		return err
 	}

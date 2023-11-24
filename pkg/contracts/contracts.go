@@ -26,8 +26,8 @@ type DescribeOptions struct {
 type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
-	Template    string                   `json:"template"`
-	Mode        string                   `json:"mode"`
+	Template    string                   `json:"template"` // framework: react, next, vue, angular and etc
+	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
 	VersionID   string                   `json:"version-id"`
 	ProjectRoot string                   `json:"project-root"`

@@ -526,6 +526,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 
 func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string) error {
 	logger.Debug("Create Rules Engine Next Application")
+
 	req := CreateRulesEngineRequest{}
 	req.SetName("cache policy")
 
@@ -549,6 +550,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${uri}")
 	criteria[0][0].SetOperator("starts_with")
+
 	if typeLang == "Next" && strings.ToLower(mode) == "compute" {
 		criteria[0][0].SetInputValue("/_next/static")
 	} else {
@@ -605,5 +607,33 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		}
 	}
 
+	return nil
+}
+
+type RequestsRulesEngine struct {
+	Request sdk.CreateRulesEngineRequest
+	Phase   string
+}
+
+func (c *Client) SaveListRulesEngine(
+	ctx context.Context,
+	edgeApplicationID int64,
+	reqs []RequestsRulesEngine,
+) error {
+	logger.Debug("Create Rules Engine")
+	for i := range reqs {
+		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
+			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, reqs[i].Phase).
+			CreateRulesEngineRequest(reqs[i].Request).Execute()
+		if err != nil {
+			if httpResp != nil {
+				logger.Debug("Error while updating a rules engine", zap.Error(err))
+				err := utils.LogAndRewindBody(httpResp)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
 	return nil
 }

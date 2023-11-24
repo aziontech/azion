@@ -131,6 +131,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
 		if info.Name == "" {
+
 			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
