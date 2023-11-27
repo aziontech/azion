@@ -130,6 +130,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	fmt.Println(">>> here")
 	if conf.Origin.Id == 0 {
 		err = cmd.doOrigin(cliapp, cliori, ctx, conf)
 		if err != nil {

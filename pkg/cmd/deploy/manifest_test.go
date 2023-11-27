@@ -1,25 +1,89 @@
 package deploy
 
-import "testing"
+import (
+	"github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"reflect"
+	"testing"
+)
 
-func Test_prepareRequestRuleEngine(t *testing.T) {
-	type args struct {
-		applicationID int64
-		cacheID       int64
-		template      string
-		mode          string
-	}
+func Test_readManifest(t *testing.T) {
 	tests := []struct {
 		name    string
-		args    args
+		want    *Manifest
+		path    string
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "success simple manifest",
+			path: "/fixtures/manifest1.json",
+			want: &Manifest{
+				Routes: Routes{
+					Deliver: []Deliver{
+						{
+							Variable:   "/public",
+							InputValue: "/.edge/storage/",
+							Priority:   1,
+						},
+					},
+					Compute: []Compute{
+						{
+							Variable:   "/",
+							InputValue: "/.edge/worker.js",
+							Priority:   2,
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := prepareRequestRuleEngine(tt.args.applicationID, tt.args.cacheID, tt.args.template, tt.args.mode); (err != nil) != tt.wantErr {
-				t.Errorf("prepareRequestRuleEngine() error = %v, wantErr %v", err, tt.wantErr)
+			manifestFilePath = tt.path
+			got, err := readManifest()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("readManifest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("readManifest() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_prepareRequestDeliverRulesEngine(t *testing.T) {
+	type args struct {
+		manifest Manifest
+	}
+
+	manifestFilePath = "/fixtures/manifest2.json"
+	manf, _ := readManifest()
+
+	tests := []struct {
+		name string
+		args args
+		want edge_applications.RequestsRulesEngine
+	}{
+		{
+			name: "success",
+			args: args{
+				manifest: *manf,
+			},
+			want: edge_applications.RequestsRulesEngine{
+				Request: sdk.CreateRulesEngineRequest{
+					Name: "",
+				},
+				Phase: "response",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := prepareRequestDeliverRulesEngine(tt.args.manifest); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("prepareRequestDeliverRulesEngine() = %v, want %v", got, tt.want)
 			}
 		})
 	}

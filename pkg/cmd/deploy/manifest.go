@@ -34,7 +34,7 @@ type Deliver struct {
 	Priority   int    `json:"priority"`
 }
 
-const manifestFilePath = "./edge/manifest.json"
+var manifestFilePath = "/.edge/manifest.json"
 
 func readManifest() (*Manifest, error) {
 	path, err := utils.GetWorkingDir()
@@ -56,80 +56,89 @@ func readManifest() (*Manifest, error) {
 	return &manifest, err
 }
 
-func prepareRequestDeliverRulesEngine(manifest Manifest) apiapp.RequestsRulesEngine {
-	req := apiapp.CreateRulesEngineRequest{}
-	req.SetName("deliver")
-
-	var beh sdk.RulesEngineBehaviorString
-	beh.SetName("deliver")
-	beh.SetTarget("")
-
-	req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-		{
-			RulesEngineBehaviorString: &beh,
-		},
-	})
-
+func prepareRequestDeliverRulesEngine(manifest Manifest) []apiapp.RequestsRulesEngine {
 	deliver := manifest.Routes.Deliver
 	cri := make([][]sdk.RulesEngineCriteria, len(deliver))
 
+	for i := 0; i < len(deliver); i++ {
+		cri[i] = make([]sdk.RulesEngineCriteria, len(deliver))
+	}
+
+	requestList := []apiapp.RequestsRulesEngine{}
+
 	for i, v := range deliver {
-		criteria := cri[0][i]
+		req := apiapp.CreateRulesEngineRequest{}
+		req.SetName("deliver")
 
-		if i == 0 {
-			criteria.SetConditional("if")
-		} else {
-			criteria.SetConditional("or")
-		}
+		var beh sdk.RulesEngineBehaviorString
+		beh.SetName("deliver")
+		beh.SetTarget("")
 
+		req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
+			{
+				RulesEngineBehaviorString: &beh,
+			},
+		})
+
+		var criteria sdk.RulesEngineCriteria
+
+		criteria.SetConditional("if")
 		criteria.SetOperator("starts_with")
 		criteria.SetVariable(v.Variable)
 		criteria.SetInputValue(utils.Concat(".edge/storage", v.InputValue))
-	}
-	req.SetCriteria(cri)
 
-	return apiapp.RequestsRulesEngine{
-		Request: req.CreateRulesEngineRequest,
-		Phase:   "response",
+		cri[i][i] = criteria
+		req.SetCriteria(cri)
+
+		requestList = append(requestList, apiapp.RequestsRulesEngine{
+			Request: req.CreateRulesEngineRequest,
+			Phase:   "response",
+		})
 	}
+
+	return requestList
 }
 
-func prepareRequestComputeRulesEngine(manifest Manifest) apiapp.RequestsRulesEngine {
-	req := apiapp.CreateRulesEngineRequest{}
-	req.SetName("compute")
-
-	var beh sdk.RulesEngineBehaviorString
-	beh.SetName("compute")
-	beh.SetTarget("")
-
-	req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-		{
-			RulesEngineBehaviorString: &beh,
-		},
-	})
-
+func prepareRequestComputeRulesEngine(manifest Manifest) []apiapp.RequestsRulesEngine {
 	compute := manifest.Routes.Compute
 	cri := make([][]sdk.RulesEngineCriteria, len(compute))
 
+	for i := 0; i < len(compute); i++ {
+		cri[i] = make([]sdk.RulesEngineCriteria, len(compute))
+	}
+
+	requestList := []apiapp.RequestsRulesEngine{}
+
 	for i, v := range compute {
-		criteria := cri[0][i]
+		req := apiapp.CreateRulesEngineRequest{}
+		req.SetName("compute")
 
-		if i == 0 {
-			criteria.SetConditional("if")
-		} else {
-			criteria.SetConditional("or")
-		}
+		var beh sdk.RulesEngineBehaviorString
+		beh.SetName("run_function")
+		beh.SetTarget("")
 
+		req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
+			{
+				RulesEngineBehaviorString: &beh,
+			},
+		})
+
+		var criteria sdk.RulesEngineCriteria
+		criteria.SetConditional("if")
 		criteria.SetOperator("starts_with")
-		criteria.SetVariable(v.Variable)
+		criteria.SetVariable("${uri}")
 		criteria.SetInputValue(utils.Concat(".edge/", v.InputValue))
-	}
-	req.SetCriteria(cri)
 
-	return apiapp.RequestsRulesEngine{
-		Request: req.CreateRulesEngineRequest,
-		Phase:   "response",
+		cri[i][i] = criteria
+
+		req.SetCriteria(cri)
+		requestList = append(requestList, apiapp.RequestsRulesEngine{
+			Request: req.CreateRulesEngineRequest,
+			Phase:   "response",
+		})
 	}
+
+	return requestList
 }
 
 func prepareRequestCachePolicyRulesEngine(cacheID int64, template, mode string) apiapp.RequestsRulesEngine {

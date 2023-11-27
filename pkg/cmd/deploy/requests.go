@@ -367,14 +367,9 @@ func (cmd *DeployCmd) doOrigin(
 		logger.Debug("Error while creating cache settings", zap.Error(err))
 		return err
 	}
+	fmt.Println(manifest)
 
-	reqRules := []apiapp.RequestsRulesEngine{}
-	reqRules = append(reqRules, prepareRequestCachePolicyRulesEngine(cache.GetId(), conf.Template, conf.Mode))
-	reqRules = append(reqRules, prepareRequestEnableGZipRulesEngine())
-	reqRules = append(reqRules, prepareRequestComputeRulesEngine(*manifest))
-	reqRules = append(reqRules, prepareRequestDeliverRulesEngine(*manifest))
-
-	err = client.SaveListRulesEngine(ctx, conf.Application.Id, reqRules)
+	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template, conf.Mode)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
