@@ -18,7 +18,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest, applicationId i
 		ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while creating a cache setting", zap.Error(err))
+		logger.Debug("Error while creating a Cache Setting", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
 		if err != nil {
 			return nil, err
@@ -38,7 +38,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationID, 
 		ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a cache setting", zap.Error(err))
+		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
 		if err != nil {
 			return nil, err
@@ -81,7 +81,7 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int
 		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting a cache setting", zap.Error(err))
+		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
 		if err != nil {
 			return nil, err
@@ -99,7 +99,7 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID 
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while deleting a cache setting", zap.Error(err))
+			logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err

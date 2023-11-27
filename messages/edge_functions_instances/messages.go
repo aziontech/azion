@@ -63,7 +63,7 @@ var (
 	EdgeFuncInstanceUpdateFlagName              = "The Edge Functions instance name"
 	EdgeFuncInstanceUpdateFlagArgs              = "The JSON args related to the Edge Functions instance being updated"
 	EdgeFuncInstanceUpdateFlagInstanceID        = "Unique identifier for an Edge Functions instance"
-	EdgeFuncInstanceUpdateFlagFunctionID        = "Edge function ID to be used in the Edge Functions instance"
+	EdgeFuncInstanceUpdateFlagFunctionID        = "Edge Function ID to be used in the Edge Functions instance"
 	EdgeFuncInstanceUpdateOutputSuccess         = "Updated Edge Functions instance with ID %d\n"
 	EdgeFuncInstanceUpdateHelpFlag              = "Displays more information about the update subcommand"
 )
