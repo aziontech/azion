@@ -116,7 +116,7 @@ func (t *Token) Create(b64 string) (*Response, error) {
 func WriteSettings(settings Settings) error {
 	dir, err := config.Dir()
 	if err != nil {
-		return fmt.Errorf("failed to get token dir: %w", err)
+		return err
 	}
 
 	b, err := toml.Marshal(settings)
@@ -125,7 +125,7 @@ func WriteSettings(settings Settings) error {
 	}
 
 	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
-		return err
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
 
 	return nil
