@@ -34,7 +34,7 @@ func TestCreate(t *testing.T) {
 		err := cmd.Execute()
 		require.NoError(t, err)
 
-		require.Equal(t, "🚀 Created origin with key 176fa5e2-a895-4862-9657-e2e37d9125a7\n\n", stdout.String())
+		require.Equal(t, "🚀 Created Origin with key 176fa5e2-a895-4862-9657-e2e37d9125a7\n\n", stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Created origin with key 176fa5e2-a895-4862-9657-e2e37d9125a7\n\n", stdout.String())
+		require.Equal(t, "🚀 Created Origin with key 176fa5e2-a895-4862-9657-e2e37d9125a7\n\n", stdout.String())
 	})
 
 	t.Run("bad request status 400", func(t *testing.T) {

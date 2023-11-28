@@ -70,7 +70,7 @@ the accepted format to define the variables is one <KEY>=<VALUE> per line`
 	//create cmd
 	EdgeServiceResourceCreateUsage            = "create --service-id <service_id> [flags]"
 	EdgeServiceResourceCreateShortDescription = "Makes a new Resource"
-	EdgeServiceResourceCreateLongDescription  = "Makes a new resource in the Azion Platform based on its file’s path, name, and type"
+	EdgeServiceResourceCreateLongDescription  = "Makes a new resource based on its file’s path, name, and type"
 	EdgeServiceResourceCreateFlagName         = "The Resource's path and name; mandatory"
 	EdgeServiceResourceCreateFlagTrigger      = "The Resource's trigger; <Install|Reload|Uninstall>"
 	EdgeServiceResourceCreateFlagContentType  = "The Resource's content-type; <shellscript|text>"

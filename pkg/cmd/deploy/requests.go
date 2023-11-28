@@ -42,7 +42,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	if conf.Application.Id == 0 {
 		applicationId, _, err := cmd.createApplication(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while creating edge application", zap.Error(err))
+			logger.Debug("Error while creating Edge Application", zap.Error(err))
 			return err
 		}
 		conf.Application.Id = applicationId
@@ -56,13 +56,13 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 		//TODO: Review what to do when user updates Function ID directly in azion.json
 		err = cmd.updateRulesEngine(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while updating rules engine", zap.Error(err))
+			logger.Debug("Error while updating Rules Engine", zap.Error(err))
 			return err
 		}
 	} else {
 		err := cmd.updateApplication(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while updating edge application", zap.Error(err))
+			logger.Debug("Error while updating Edge Application", zap.Error(err))
 			return err
 		}
 	}
@@ -128,7 +128,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		//Read code to upload
 		code, err := cmd.FileReader(conf.Function.File)
 		if err != nil {
-			logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+			logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 			return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 		}
 
@@ -157,7 +157,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		logger.Debug("Error while creating edge function", zap.Error(err))
+		logger.Debug("Error while creating Edge Function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
@@ -178,7 +178,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		//Read code to upload
 		code, err := cmd.FileReader(conf.Function.File)
 		if err != nil {
-			logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+			logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 			return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 		}
 
@@ -233,7 +233,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	reqUpApp.Id = application.GetId()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
-		logger.Debug("Error while setting up edge application", zap.Error(err))
+		logger.Debug("Error while setting up Edge Application", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
 	reqIns := apiapp.CreateInstanceRequest{}
@@ -242,7 +242,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	reqIns.ApplicationId = application.GetId()
 	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
-		logger.Debug("Error while creating edge function instance", zap.Error(err))
+		logger.Debug("Error while creating Edge Function instance", zap.Error(err))
 		return 0, 0, fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 	}
 	InstanceId = instance.GetId()
@@ -366,7 +366,7 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientorigin 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.Id, cache.GetId(), conf.Template, conf.Mode)
 	if err != nil {
-		logger.Debug("Error while creating rules engine for Nextjs application", zap.Error(err))
+		logger.Debug("Error while creating Rules Engine for Nextjs application", zap.Error(err))
 		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)

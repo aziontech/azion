@@ -15,5 +15,5 @@ var (
 
 	AskInputRulesId       = "What is the id of the Rule Engine you wish to describe?"
 	AskInputApplicationId = "What is the id of the Edge Application this Rule Engine is linked to?"
-	AskInputPhase         = "What is the phase of your rule engine? (request/response)"
+	AskInputPhase         = "What is the phase of your Rules Engine? (request/response)"
 )
