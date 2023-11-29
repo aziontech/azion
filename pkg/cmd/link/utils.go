@@ -12,17 +12,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldConfigure(info *LinkInfo) (bool, error) {
+func shouldConfigure(info *LinkInfo) bool {
 	if info.GlobalFlagAll || info.Auto {
-		return true, nil
+		return true
 	}
 	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
 	return helpers.Confirm(msg)
 }
 
-func shouldDevDeploy(info *LinkInfo, msg string) (bool, error) {
+func shouldDevDeploy(info *LinkInfo, msg string) bool {
 	if info.GlobalFlagAll {
-		return true, nil
+		return true
 	}
 	return helpers.Confirm(msg)
 }
@@ -34,7 +34,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
-			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration?")
+			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration?"), nil
 		}
 
 		if shouldFetchTemplates {

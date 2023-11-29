@@ -14,9 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldDevDeploy(info *InitInfo, msg string) (bool, error) {
+func shouldDevDeploy(info *InitInfo, msg string) bool {
 	if info.GlobalFlagAll {
-		return true, nil
+		return true
 	}
 	return helpers.Confirm(msg)
 }

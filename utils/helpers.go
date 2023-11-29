@@ -554,7 +554,7 @@ func Concat(strs ...string) string {
 	return sb.String()
 }
 
-func Confirm(msg string) (bool, error) {
+func Confirm(msg string) bool {
 	fmt.Printf("🤔 \x1b[32m%s (y\\N) \x1b[0m", msg)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
@@ -562,9 +562,9 @@ func Confirm(msg string) (bool, error) {
 
 	switch confirm {
 	case "y", "Y":
-		return true, nil
+		return true
 	case "n", "N":
-		return false, nil
+		return false
 	default:
 		fmt.Printf("\x1b[33m%s\x1b[0m", "⚠️ Invalid input. Please enter 'y' or 'n'.")
 		return Confirm(msg)

@@ -51,7 +51,7 @@ type InitCmd struct {
 	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
-	ShouldDevDeploy       func(info *InitInfo, msg string) (bool, error)
+	ShouldDevDeploy       func(info *InitInfo, msg string) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	ChangeDir             func(dir string) error
@@ -159,15 +159,10 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		return msg.ErrorWorkingDir
 	}
 
-	shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
-	if err != err {
-		return err
-	}
+	shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
+
 	if shouldDev {
-		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
-		if err != err {
-			return err
-		}
+		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 
 		if shouldDeps {
 			answer, err := utils.GetPackageManager()
@@ -192,12 +187,10 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		logger.FInfo(cmd.Io.Out, msg.InitDevCommand)
 	}
 
-	shouldDeploy, err := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
-	if err != err {
-		return err
-	}
+	shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
 	if shouldDeploy {
-		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
+
+		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
 		if err != err {
 			return err
 		}
