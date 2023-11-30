@@ -36,7 +36,7 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID int64, phase stri
 	httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesRuleIdDelete(ctx, edgeApplicationID, phase, ruleID).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while deleting a rule engine", zap.Error(err))
+			logger.Debug("Error while deleting a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRulesEngineRequest) (Rul
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -74,7 +74,7 @@ func (c *Client) Create(ctx context.Context, edgeApplicationID int64, phase stri
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err

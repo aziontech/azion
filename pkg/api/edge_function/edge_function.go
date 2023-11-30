@@ -19,7 +19,7 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 	res, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while getting an edge function", zap.Error(err))
+			logger.Debug("Error while getting an Edge Function", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -39,7 +39,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while deleting an edge function", zap.Error(err))
+			logger.Debug("Error while deleting an Edge Function", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
@@ -62,7 +62,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while creating an edge function", zap.Error(err))
+			logger.Debug("Error while creating an Edge Function", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -81,7 +81,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (Edge
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating an edge function", zap.Error(err))
+			logger.Debug("Error while updating an Edge Function", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
