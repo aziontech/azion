@@ -10,8 +10,10 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/manifoldco/promptui"
 
@@ -552,4 +554,20 @@ func Concat(strs ...string) string {
 		sb.WriteString(strs[i])
 	}
 	return sb.String()
+}
+
+func Format(input string) (int, error) {
+	numberString := ""
+	for _, char := range input {
+		if unicode.IsDigit(char) {
+			numberString += string(char)
+		}
+	}
+
+	number, err := strconv.Atoi(numberString)
+	if err != nil {
+		return 0, err
+	}
+
+	return number, nil
 }
