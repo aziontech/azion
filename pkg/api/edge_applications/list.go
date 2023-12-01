@@ -18,7 +18,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Ge
 		EdgeApplicationsGet(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing edge applications", zap.Error(err))
+		logger.Debug("Error while listing Edge Applications", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

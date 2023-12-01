@@ -5,7 +5,7 @@ var (
 	ShortDescription = "Updates a rule in Rules Engine"
 	LongDescription  = "Updates a rule in Rules Engine based on given attributes to be used in Edge Applications"
 
-	OutputSuccess    = "Updated rule engine with ID %d\n"
+	OutputSuccess    = "Updated Rules Engine with ID %d\n"
 	RulesEnginePhase = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
 	FlagApplicationID = "Unique identifier for the Edge Application that implements these rules. The '--application-id' flag is required"
@@ -15,6 +15,6 @@ var (
 
 	AskInputApplicationID = "What's the ID of the Edge Application that the Rule Engine will be connected to?"
 	AskInputRulesID       = "What's the ID of the Rules Engine to which it will be updated?"
-	AskInputPhase         = "What's the phase of your rule engine? (request/response)"
+	AskInputPhase         = "What's the phase of your Rules Engine? (request/response)"
 	AskInputPathFile      = "What's the path of the json to update the Rules Engine?"
 )

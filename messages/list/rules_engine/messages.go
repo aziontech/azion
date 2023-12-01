@@ -9,5 +9,5 @@ var (
 	ApplicationFlagId               = "Unique identifier for the Edge Application that implements these rules"
 	RulesEnginePhase                = "Rules Engine Phase (request/response)"
 	AskInputApplicationId           = "What is the id of the Edge Application the rule engines are linked to?"
-	AskInputPhase                   = "What is the phase of your rule engine? (request/response)"
+	AskInputPhase                   = "What is the phase of your Rules Engine? (request/response)"
 )

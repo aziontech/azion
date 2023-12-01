@@ -48,7 +48,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest,
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while creating an edge application", zap.Error(err))
+			logger.Debug("Error while creating an Edge Application", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
