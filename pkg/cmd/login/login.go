@@ -1,27 +1,22 @@
 package login
 
 import (
-	"context"
-	"encoding/base64"
-	"fmt"
-	"time"
+	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/login"
-	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
-	cmdPersToken "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
+var username, password, tokenValue, uuid string
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var username, password string
 
 	cmd := &cobra.Command{
 		Use:   msg.Usage,
@@ -33,26 +28,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if !cmd.Flags().Changed("username") {
-				answers, err := utils.AskInput(msg.AskUsername)
-
-				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
-				}
-
-				username = answers
+			answer, err := selectLoginMode()
+			if err != nil {
+				return err
 			}
 
-			if !cmd.Flags().Changed("password") {
-				answers, err := utils.AskPassword(msg.AskPassword)
-
+			switch {
+			case strings.Contains(answer, "browser"):
+				err := browserLogin(f)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
-
-				password = answers
+			case strings.Contains(answer, "terminal"):
+				err := terminalLogin(cmd, f)
+				if err != nil {
+					return err
+				}
+			default:
+				return msg.ErrorInvalidLogin
 			}
 
 			client, err := token.New(&token.Config{Client: f.HttpClient})
@@ -60,53 +53,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			resp, err := client.Create(b64(username, password))
+			err = validateToken(client, tokenValue)
 			if err != nil {
-				logger.Debug("Basic token creation error", zap.Error(err))
 				return err
 			}
 
-			tokenValid, err := client.Validate(&resp.Token)
+			err = saveSettings(client)
 			if err != nil {
-				logger.Debug("token validation error", zap.Error(err))
-				return err
-			}
-
-			if !tokenValid {
-				return fmt.Errorf(msg.ErrorTokenCreateInvalid)
-			}
-			viper.SetDefault("token", resp.Token)
-
-			date, err := cmdPersToken.ParseExpirationDate(time.Now(), "1m")
-			if err != nil {
-				logger.Debug("expiration date format error", zap.Error(err))
-				return err
-			}
-
-			request := api.Request{}
-			request.SetName(username)
-			request.SetExpiresAt(date)
-
-			clientPersonalToken := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			response, err := clientPersonalToken.Create(context.Background(), &request)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorLogin, err.Error())
-			}
-
-			settings := token.Settings{
-				UUID:  response.GetUuid(),
-				Token: response.GetKey(),
-			}
-
-			byteSettings, err := toml.Marshal(settings)
-			if err != nil {
-				logger.Debug("Error toml marshal", zap.Error(err))
-				return err
-			}
-
-			_, err = client.Save(byteSettings)
-			if err != nil {
-				logger.Debug("Error when saving settings", zap.Error(err))
 				return err
 			}
 
@@ -123,8 +76,49 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func b64(username, password string) string {
-	str := utils.Concat(username, ":", password)
-	b := []byte(str)
-	return base64.StdEncoding.EncodeToString(b)
+func selectLoginMode() (string, error) {
+	answer := ""
+	prompt := &survey.Select{
+		Message: "Choose a login method:",
+		Options: []string{"Log in via browser", "Log in via terminal"},
+	}
+	err := survey.AskOne(prompt, &answer)
+	if err != nil {
+		return "", err
+	}
+	return answer, nil
+}
+
+func saveSettings(client *token.Token) error {
+	settings := token.Settings{
+		UUID:  uuid,
+		Token: tokenValue,
+	}
+
+	byteSettings, err := toml.Marshal(settings)
+	if err != nil {
+		logger.Debug("Error while marshalling toml file", zap.Error(err))
+		return err
+	}
+
+	_, err = client.Save(byteSettings)
+	if err != nil {
+		logger.Debug("Error while saving settings", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func validateToken(client *token.Token, token string) error {
+	tokenValid, err := client.Validate(&token)
+	if err != nil {
+		logger.Debug("Error while validating the token", zap.Error(err))
+		return err
+	}
+
+	if !tokenValid {
+		return msg.ErrorTokenCreateInvalid
+	}
+
+	return nil
 }
