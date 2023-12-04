@@ -21,9 +21,10 @@ type Token struct {
 }
 
 type Settings struct {
-	Token           string
-	UUID            string
-	LastUpdateCheck time.Time
+	Token             string
+	UUID              string
+	LastUpdateCheck   time.Time
+	LastVulcanVersion string
 }
 
 type Config struct {
