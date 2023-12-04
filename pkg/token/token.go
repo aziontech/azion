@@ -125,7 +125,7 @@ func WriteSettings(settings Settings) error {
 	}
 
 	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
-		return err
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
 
 	return nil
