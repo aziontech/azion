@@ -3,7 +3,7 @@
 # Shell script for testing the md/azion/main.go link and build commands
 
 # Set the path to the main.go file
-main_go_path="../../../cmd/azion/main.go"
+main_go_path="cmd/azion/main.go"
 # Set the path to the expected folder after the link command
 expected_folder="azion"
 # Set the path to the expected folder after the build command
