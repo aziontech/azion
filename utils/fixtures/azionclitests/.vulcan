@@ -1,0 +1,3 @@
+preset=astro
+entry=./main.js
+mode=deliver
