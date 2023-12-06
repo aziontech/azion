@@ -137,7 +137,23 @@ func ReadSettings() (Settings, error) {
 		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
 	}
 
-	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
+	filePath := filepath.Join(dir, settingsFilename)
+
+	// Check if the file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// File does not exist, create it with default settings
+		defaultSettings := Settings{}
+
+		err := WriteSettings(defaultSettings)
+		if err != nil {
+			return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
+		}
+
+		return defaultSettings, nil
+	}
+
+	// Read the file
+	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		return Settings{}, err
 	}
