@@ -124,6 +124,11 @@ func WriteSettings(settings Settings) error {
 		return err
 	}
 
+	// Check if the directory exists, create it if not
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return fmt.Errorf("Error creating directory: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
 		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
