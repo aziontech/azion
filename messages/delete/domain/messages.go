@@ -7,5 +7,5 @@ var (
 	OutputSuccess    = "Domain %d was successfully deleted\n"
 	HelpFlag         = "Displays more information about the delete domain subcommand"
 	FlagId           = "Unique identifier of the Domain"
-	AskDeleteInput   = "What is the id of the Domain you wish to delete?"
+	AskDeleteInput   = "Enter the ID of the Domain you wish to delete:"
 )

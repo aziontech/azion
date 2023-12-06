@@ -9,5 +9,5 @@ var (
 	HelpFlag         = "Displays more information about the describe command"
 	FlagDomainID     = "Unique identifier of the Domain"
 	FileWritten      = "File successfully written to: %s\n"
-	AskInputDomainID = "What is the id of the Domain?"
+	AskInputDomainID = "Enter the Domain's ID:"
 )

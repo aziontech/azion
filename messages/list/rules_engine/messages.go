@@ -8,6 +8,6 @@ var (
 	RulesEngineListHelpFlag         = "Displays more information about the list rule-engine command"
 	ApplicationFlagId               = "Unique identifier for the Edge Application that implements these rules"
 	RulesEnginePhase                = "Rules Engine Phase (request/response)"
-	AskInputApplicationId           = "What is the id of the Edge Application the rule engines are linked to?"
-	AskInputPhase                   = "What is the phase of your Rules Engine? (request/response)"
+	AskInputApplicationId           = "Enter the ID of the Edge Application the Rules Engines are linked to:"
+	AskInputPhase                   = "Enter the Rules Engines' phase (request/response):"
 )
