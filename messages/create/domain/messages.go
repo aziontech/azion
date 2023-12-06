@@ -13,6 +13,6 @@ var (
 	FlagFile                 = "Path to a JSON file containing the attributes that will be updated; you can use - for reading from stdin"
 	OutputSuccess            = "Created Domain with ID %d\n"
 	HelpFlag                 = "Displays more information about the create domain command"
-	AskInputApplicationID    = "What is the ID of the Edge Application that the Domain will be connected to?"
-	AskInputName             = "What will the Domain name be?"
+	AskInputApplicationID    = "Enter the ID of the Edge Application that the Domain will be connected to:"
+	AskInputName             = "Enter the new Domain's name:"
 )
