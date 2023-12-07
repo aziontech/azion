@@ -199,6 +199,7 @@ func format(input string) (int, error) {
 		}
 	}
 
+	// to avoid converting errors
 	if numberString == "" {
 		numberString = "0"
 	}
