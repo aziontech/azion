@@ -23,7 +23,9 @@ func browserLogin(f *cmdutil.Factory) error {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		paramValue := r.URL.Query().Get("c")
 		_, _ = io.WriteString(w, msg.BrowserMsg)
-		tokenValue = paramValue
+		if paramValue != "" {
+			tokenValue = paramValue
+		}
 		cancel()
 	})
 
