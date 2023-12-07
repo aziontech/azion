@@ -124,8 +124,13 @@ func WriteSettings(settings Settings) error {
 		return err
 	}
 
+	// Check if the directory exists, create it if not
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return fmt.Errorf("Error creating directory: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
-		return err
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
 
 	return nil
@@ -137,7 +142,23 @@ func ReadSettings() (Settings, error) {
 		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
 	}
 
-	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
+	filePath := filepath.Join(dir, settingsFilename)
+
+	// Check if the file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// File does not exist, create it with default settings
+		defaultSettings := Settings{}
+
+		err := WriteSettings(defaultSettings)
+		if err != nil {
+			return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
+		}
+
+		return defaultSettings, nil
+	}
+
+	// Read the file
+	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		return Settings{}, err
 	}

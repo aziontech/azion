@@ -50,6 +50,7 @@ type InitCmd struct {
 	Mkdir                 func(path string, perm os.FileMode) error
 	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
+	CommandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldDevDeploy       func(info *InitInfo, msg string) (bool, error)
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
@@ -84,6 +85,9 @@ func NewInitCmd(f *cmdutil.Factory) *InitCmd {
 		},
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 			return utils.CommandRunInteractive(f, comm)
+		},
+		CommandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 	}
 }
