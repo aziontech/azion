@@ -199,6 +199,10 @@ func format(input string) (int, error) {
 		}
 	}
 
+	if numberString == "" {
+		numberString = "0"
+	}
+
 	number, err := strconv.Atoi(numberString)
 	if err != nil {
 		return 0, err
