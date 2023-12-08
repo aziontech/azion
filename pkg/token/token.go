@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -147,7 +148,9 @@ func ReadSettings() (Settings, error) {
 	// Check if the file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		// File does not exist, create it with default settings
-		defaultSettings := Settings{}
+		defaultSettings := Settings{
+			LastUpdateCheck: time.Now(),
+		}
 
 		err := WriteSettings(defaultSettings)
 		if err != nil {

@@ -221,6 +221,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	} else {
 		reqApp.SetName(conf.Application.Name)
 	}
+	// reqApp.SetDebugRules(false)
 	reqApp.SetDeliveryProtocol("http,https")
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
@@ -240,6 +241,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	reqIns.SetEdgeFunctionId(conf.Function.Id)
 	reqIns.SetName(conf.Name)
 	reqIns.ApplicationId = application.GetId()
+	logger.Debug(fmt.Sprint(conf.Function.Id))
 	instance, err := client.CreateInstancePublish(ctx, &reqIns)
 	if err != nil {
 		logger.Debug("Error while creating Edge Function instance", zap.Error(err))

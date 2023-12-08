@@ -7,6 +7,8 @@
 	  "https_port": 443,
 	  "minimum_tls_version": "",
 	  "active": true,
+	  "http3": false,
+	  "supported_ciphers": "TLSv1.3_2022",
 	  "debug_rules": false,
 	  "application_acceleration": false,
 	  "caching": true,

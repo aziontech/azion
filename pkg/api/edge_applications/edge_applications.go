@@ -144,6 +144,8 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating an Edge Application", zap.Error(err))
+			fmt.Println(err.Error())
+			fmt.Println("AQUI")
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
