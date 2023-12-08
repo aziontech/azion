@@ -25,6 +25,6 @@ var (
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
 	BucketInUse                       = "This bucket's name is already in use, please type another one"
-	AskInputName                      = "Your application's name:"
+	AskInputName                      = "Your bucket's name:"
 	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
 )
