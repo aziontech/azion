@@ -111,6 +111,7 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 }
 
 func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
+	logger.Debug("Verifying if an update is required")
 	config, err := token.ReadSettings()
 	if err != nil {
 		return err
@@ -146,6 +147,9 @@ func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
 		return nil
 	}
 
+	logger.Debug("Current version: " + cVersion)
+	logger.Debug("Latest version: " + msg.ReleasePage)
+
 	latestVersion, err := format(release.TagName)
 	if err != nil {
 		return err
@@ -155,7 +159,10 @@ func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
 		return err
 	}
 
-	if latestVersion >= currentVersion {
+	logger.Debug("Formatted current version: " + fmt.Sprint(currentVersion))
+	logger.Debug("Formatted latest version: " + fmt.Sprint(latestVersion))
+
+	if latestVersion > currentVersion {
 		err := showUpdateMessage(f)
 		if err != nil {
 			return err

@@ -14,6 +14,7 @@ import (
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
+	apistor "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -122,7 +123,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	cliori := apiori.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	apistor := apistor.NewClientStorage(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
 	ctx := context.Background()
+
+	err = cmd.doBucket(apistor, ctx, conf)
+	if err != nil {
+		return err
+	}
 
 	err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
 	if err != nil {

@@ -44,11 +44,6 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 	return nil
 }
 
-func checkNameUsed(name string) (bool, error) {
-
-	return true, nil
-}
-
 func askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{
