@@ -9,13 +9,13 @@ var (
 	CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
 	CreateFlagHelp                = "Displays more information about the create cache-setting command"
 	CacheSettingsId               = "Unique identifier for a Cache Settings configuration"
-	ListAskInputApplicationID     = "What is the ID of the Edge Application the Cache Settings are linked to?"
-	CreateAskInputApplicationID   = "What is the ID of the Edge Application this Cache Setting will be linked to?"
-	UpdateAskInputCacheSettingID  = "What is the ID of the Cache Setting you wish to update?"
-	AskInputCacheID               = "What is the ID of the Cache Setting you wish to delete?"
-	DeleteAskInputCacheID         = "What is the ID of the Cache Setting you wish to delete?"
-	DescribeAskInputCacheID       = "What is the ID of the Cache Setting you wish to describe?"
-	DescibeAskInputApplicationID  = "What is the ID of the Edge Application the Cache Settings is linked to?"
+	ListAskInputApplicationID     = "Enter the ID of the Edge Application the Cache Setting is linked to:"
+	CreateAskInputApplicationID   = "Enter the ID of the Edge Application the Cache Setting will be linked to:"
+	UpdateAskInputCacheSettingID  = "Enter the ID of the Cache Setting you wish to update:"
+	AskInputCacheID               = "Enter the ID of the Cache Setting you wish to delete:"
+	DeleteAskInputCacheID         = "Enter the ID of the Cache Setting you wish to delete:"
+	DescribeAskInputCacheID       = "Enter the ID of the Cache Setting you wish to describe:"
+	DescibeAskInputApplicationID  = "Enter the ID of the Edge Application the Cache Settings is linked to:"
 
 	// [ list ]
 	ListShortDescription = "Displays your Cache Settings configurations"
@@ -26,7 +26,7 @@ var (
 	CreateShortDescription = "Creates a new Cache Settings configuration"
 	CreateLongDescription  = "Creates a Cache Settings configuration based on given attributes to be used in Edge Applications"
 	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d\n"
-	CreateAskInputName     = "What is the Name of the Cache Setting?"
+	CreateAskInputName     = "Enter the new Cache Setting's name:"
 
 	// [ update ]
 	UpdateUsage            = "update [flags]"

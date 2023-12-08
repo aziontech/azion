@@ -10,6 +10,6 @@ var (
 	CreateFlagFile         = "Path to a JSON file containing the attributes of the Personal Token being created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created Personal Token: %s\n"
 	CreateHelpFlag         = "Displays more information about the 'create personal-token' subcommand"
-	AskInputName           = "What is the name of the Personal Token?"
-	AskInputExpiration     = "What is the expiration of the Personal Token?"
+	AskInputName           = "Enter the new Personal Token's name:"
+	AskInputExpiration     = "Enter the new Personal Token's expiration:"
 )

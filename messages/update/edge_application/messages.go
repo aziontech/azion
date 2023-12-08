@@ -23,5 +23,5 @@ var (
 	FlagFile                    = "Given path and JSON file to automatically update the Edge Application attributes; you can use - for reading from stdin"
 	OutputSuccess               = "Updated Edge Application with ID %d\n"
 	HelpFlag                    = "Displays more information about the update edge-application command"
-	AskInputApplicationId       = "What is the ID of the Edge Application you wish to update?"
+	AskInputApplicationId       = "Enter the ID of the Edge Application you wish to update:"
 )
