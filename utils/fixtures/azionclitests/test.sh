@@ -22,6 +22,8 @@ check_folder_exists() {
 
 # Check if the main.go file exists
 if [ -f "$main_go_path" ]; then
+    current_directory=$(pwd)
+    echo "Current Directory: $current_directory"
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto"
     go run "$main_go_path" link --preset astro --mode deliver --auto --debug
