@@ -148,7 +148,7 @@ func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
 	}
 
 	logger.Debug("Current version: " + cVersion)
-	logger.Debug("Latest version: " + msg.ReleasePage)
+	logger.Debug("Latest version: " + release.TagName)
 
 	latestVersion, err := format(release.TagName)
 	if err != nil {

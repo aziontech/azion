@@ -15,8 +15,8 @@ var (
 	DeleteLongDescription  = "Deletes an Origin from the Edge Applications library based on its given ID"
 	DeleteOutputSuccess    = "Origin %s was successfully deleted\n"
 	DeleteHelpFlag         = "Displays more information about the delete Origin command"
-	DeleteAskInputApp      = "What is the id of the Edge Application linked to this Origin?"
-	DeleteAskInputOri      = "What is the key of the Origin you wish to delete?"
+	DeleteAskInputApp      = "Enter the ID of the Edge Application linked to this Origin:"
+	DeleteAskInputOri      = "Enter the key of the Origin you wish to delete:"
 
 	// [describe]
 	DescribeShortDescription = "Returns information about a specific Origin"
@@ -29,7 +29,7 @@ var (
 	ListShortDescription      = "Displays your origins"
 	ListLongDescription       = "Displays all origins related to your applications"
 	ListHelpFlag              = "Displays more information about the list Origin command"
-	ListAskInputApplicationId = "What is the id of the Edge Application the origins are linked to?"
+	ListAskInputApplicationId = "Enter the ID of the Edge Application the Origins are linked to:"
 
 	// [update]
 	UpdateShortDescription      = "Updates an Origin"
@@ -39,11 +39,11 @@ var (
 	UpdateOutputSuccess         = "Updated Origin with key %s\n"
 
 	// [ ask ]
-	AskAppID      = "What is the ID of the Edge Application this Origin is linked to?"
-	AskName       = "What is the Name of the Origin?"
-	AskAddresses  = "What is the Addresses of the Origin?"
-	AskHostHeader = "What is the Host Header of the Origin?"
-	AskOriginKey  = "What is the Key of the Origin?"
+	AskAppID      = "Enter the ID of the Edge Application this Origin is linked to:"
+	AskName       = "Enter the new Origin's Name:"
+	AskAddresses  = "Enter the new Origin's Addresses:"
+	AskHostHeader = "Enter the new Origin's Host Header:"
+	AskOriginKey  = "Enter the Origin's Key:"
 
 	// [ flags ]
 	FlagEdgeApplicationID    = "Unique identifier for an Edge Application"
