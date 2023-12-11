@@ -3,7 +3,7 @@
 # Shell script for testing the md/azion/main.go link and build commands
 
 # Set the path to the main.go file
-main_go_path="cmd/azion/main.go"
+main_go_path="../../../cmd/azion/main.go"
 # Set the path to the expected folder after the link command
 expected_folder="azion"
 # Set the path to the expected folder after the build command
@@ -25,7 +25,7 @@ if [ -f "$main_go_path" ]; then
     current_directory=$(pwd)
     echo "Current Directory: $current_directory"
     # Run the link command with the specified options
-    echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto"
+    echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto --debug"
     go run "$main_go_path" link --preset astro --mode deliver --auto --debug
 
     # Check the exit status of the last command
@@ -35,7 +35,7 @@ if [ -f "$main_go_path" ]; then
 
         # Run the build command
         echo "Running cmd/azion/main.go build --debug"
-        go run "$main_go_path" build
+        go run "$main_go_path" build --debug
 
         # Check the exit status of the build command
         if [ $? -eq 0 ]; then
