@@ -29,7 +29,7 @@ if [ -f "$full_main_go_path" ]; then
     echo "Current Directory: $current_directory"
 
     cd utils/fixtures/azionclitests
-    yarn install
+    npm install
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto --debug"
     go run "$full_main_go_path" link --preset astro --mode deliver --auto --debug
