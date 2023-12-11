@@ -27,12 +27,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Change directory
-        run: |
-          cd utils/fixtures/azionclitests
-          # Run your commands or scripts in the desired directory
-          echo "Working in $(pwd)"
-
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 

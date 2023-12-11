@@ -2,8 +2,12 @@
 
 # Shell script for testing the md/azion/main.go link and build commands
 
+# save current directory
+current_directory=$(pwd)
 # Set the path to the main.go file
 main_go_path="cmd/azion/main.go"
+# Combine the current_directory and main_go_path
+full_main_go_path="${current_directory}/${main_go_path}"
 # Set the path to the expected folder after the link command
 expected_folder="azion"
 # Set the path to the expected folder after the build command
@@ -21,12 +25,13 @@ check_folder_exists() {
 }
 
 # Check if the main.go file exists
-if [ -f "$main_go_path" ]; then
-    current_directory=$(pwd)
+if [ -f "$full_main_go_path" ]; then
     echo "Current Directory: $current_directory"
+
+    cd utils/fixtures/azionclitests
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto --debug"
-    go run "$main_go_path" link --preset astro --mode deliver --auto --debug
+    go run "$full_main_go_path" link --preset astro --mode deliver --auto --debug
 
     # Check the exit status of the last command
     if [ $? -eq 0 ]; then
@@ -35,7 +40,7 @@ if [ -f "$main_go_path" ]; then
 
         # Run the build command
         echo "Running cmd/azion/main.go build --debug"
-        go run "$main_go_path" build --debug
+        go run "$full_main_go_path" build --debug
 
         # Check the exit status of the build command
         if [ $? -eq 0 ]; then
