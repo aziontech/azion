@@ -24,7 +24,7 @@ check_folder_exists() {
 if [ -f "$main_go_path" ]; then
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto"
-    go run "$main_go_path" link --preset astro --mode deliver --auto
+    go run "$main_go_path" link --preset astro --mode deliver --auto --debug
 
     # Check the exit status of the last command
     if [ $? -eq 0 ]; then
@@ -32,7 +32,7 @@ if [ -f "$main_go_path" ]; then
         check_folder_exists "$expected_folder"
 
         # Run the build command
-        echo "Running cmd/azion/main.go build"
+        echo "Running cmd/azion/main.go build --debug"
         go run "$main_go_path" build
 
         # Check the exit status of the build command
