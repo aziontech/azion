@@ -1,10 +1,10 @@
 name: Test Vulcan Functionalities
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - vulcantests
+  pull_request:
+    types: [opened, synchronize]
+    branches-ignore:
+      - main 
 
 jobs:
   build:
