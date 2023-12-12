@@ -13,8 +13,8 @@ const (
 	FlagHelp     = "Displays more information about the login command"
 
 	// Ask
-	AskUsername = "What is your email address?"
-	AskPassword = "What is your password?"
+	AskUsername = "Enter your email address:"
+	AskPassword = "Enter your password:"
 
 	//browser
 	VisitMsg   = "Please visit https://sso.azion.com/login?next=cli in case it did not open automatically\n"

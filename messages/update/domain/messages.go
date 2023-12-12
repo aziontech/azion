@@ -14,5 +14,5 @@ var (
 	OutputSuccess            = "Updated Domain with ID %d\n"
 	FlagActive               = "Whether the Domain should be active or not"
 	HelpFlag                 = "Displays more information about the update domains subcommand"
-	AskInputDomainID         = "What is the ID of the Domain?"
+	AskInputDomainID         = "Enter the Domain's ID:"
 )
