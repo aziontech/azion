@@ -35,10 +35,9 @@ if [ -f "$full_main_go_path" ]; then
     cp -r vulcan/examples/react-static ./ 
     cd react-static
 
-    cd react-static
     npm install
     # Run the link command with the specified options
-    echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto --debug"
+    echo "Running cmd/azion/main.go link --preset react --mode deliver --auto --debug"
     go run "$full_main_go_path" link --preset react --mode deliver --auto --debug
 
     # Check the exit status of the last command
