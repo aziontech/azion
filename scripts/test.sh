@@ -28,7 +28,14 @@ check_folder_exists() {
 if [ -f "$full_main_go_path" ]; then
     echo "Current Directory: $current_directory"
 
-    cd utils/fixtures/azionclitests
+    rm -rf vulcan
+    rm -rf react-static
+
+    git clone https://github.com/aziontech/vulcan.git
+    cp -r vulcan/examples/react-static ./ 
+    cd react-static
+
+    cd react-static
     npm install
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset astro --mode deliver --auto --debug"

@@ -32,4 +32,4 @@ jobs:
 
       - name: test vulcan
         run: |
-          bash ./utils/fixtures/azionclitests/test.sh
+          bash ./scripts/test.sh
