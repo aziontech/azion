@@ -248,6 +248,7 @@ func linuxUpdateMessage(f *cmdutil.Factory) error {
 		return msg.ErrorUnmarshalUserInfo
 	}
 
+	logger.FInfo(f.IOStreams.Out, msg.DownloadRelease)
 	switch osInfo.OS.Vendor {
 	case "debian":
 		logger.FInfo(f.IOStreams.Out, msg.DpkgUpdate)

@@ -1,0 +1,35 @@
+name: Test Vulcan Functionalities
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches-ignore:
+      - main 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: golang:1.21
+    env:
+      CGO_ENABLED: 0 # Statically linked
+
+    steps:
+      - name: Setting GIT
+        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setting up a secure repository
+        run: git config --global --add safe.directory /__w/azion/azion
+
+      - name: test vulcan
+        run: |
+          bash ./scripts/test.sh
