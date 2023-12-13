@@ -32,7 +32,7 @@ func New(c *Config) (*Token, error) {
 }
 
 func (t *Token) Validate(token *string) (bool, error) {
-	logger.Debug("validated token", zap.Any("Token", *token))
+	logger.Debug("Validate token", zap.Any("Token", *token))
 
 	req, err := http.NewRequest("GET", utils.Concat(t.endpoint, "/user/me"), nil)
 	if err != nil {
@@ -56,7 +56,7 @@ func (t *Token) Validate(token *string) (bool, error) {
 }
 
 func (t *Token) Save(b []byte) (string, error) {
-	logger.Debug("save token", zap.Any("byte", string(b)))
+	logger.Debug("Save token", zap.Any("byte", string(b)))
 	filePath, err := config.Dir()
 	if err != nil {
 		return "", err
@@ -76,7 +76,7 @@ func (t *Token) Save(b []byte) (string, error) {
 }
 
 func (t *Token) Create(b64 string) (*Response, error) {
-	logger.Debug("create token", zap.Any("base64", b64))
+	logger.Debug("Create token", zap.Any("base64", b64))
 	req, err := http.NewRequest(http.MethodPost, utils.Concat(t.endpoint, "/tokens"), nil)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (t *Token) Create(b64 string) (*Response, error) {
 	}
 
 	if resp != nil {
-		logger.Debug("Error while create token", zap.Error(err))
+		logger.Debug("Error while creating token", zap.Error(err))
 		err := utils.LogAndRewindBody(resp)
 		if err != nil {
 			return nil, err
@@ -116,7 +116,7 @@ func (t *Token) Create(b64 string) (*Response, error) {
 func WriteSettings(settings Settings) error {
 	dir, err := config.Dir()
 	if err != nil {
-		return fmt.Errorf("failed to get token dir: %w", err)
+		return fmt.Errorf("Failed to get token dir: %w", err)
 	}
 
 	b, err := toml.Marshal(settings)
@@ -124,8 +124,13 @@ func WriteSettings(settings Settings) error {
 		return err
 	}
 
+	// Check if the directory exists, create it if not
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return fmt.Errorf("Error creating directory: %w", err)
+	}
+
 	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
-		return err
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
 
 	return nil
@@ -137,7 +142,23 @@ func ReadSettings() (Settings, error) {
 		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
 	}
 
-	fileData, err := os.ReadFile(filepath.Join(dir, settingsFilename))
+	filePath := filepath.Join(dir, settingsFilename)
+
+	// Check if the file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// File does not exist, create it with default settings
+		defaultSettings := Settings{}
+
+		err := WriteSettings(defaultSettings)
+		if err != nil {
+			return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
+		}
+
+		return defaultSettings, nil
+	}
+
+	// Read the file
+	fileData, err := os.ReadFile(filePath)
 	if err != nil {
 		return Settings{}, err
 	}
@@ -145,7 +166,7 @@ func ReadSettings() (Settings, error) {
 	var settings Settings
 	err = toml.Unmarshal(fileData, &settings)
 	if err != nil {
-		return Settings{}, fmt.Errorf("failed parse byte to struct settings: %w", err)
+		return Settings{}, fmt.Errorf("Failed parse byte to struct settings: %w", err)
 	}
 
 	return settings, nil

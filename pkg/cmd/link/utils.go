@@ -7,6 +7,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/vulcan"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"
 	helpers "github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
@@ -67,6 +68,17 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	if info.Preset == "nextjs" {
 		return nil
+	}
+
+	// checking is vulcan major is correct
+	vulcanVer, err := cmd.CommandRunner(cmd.F, "npm show edge-functions version", []string{})
+	if err != nil {
+		return err
+	}
+
+	err = vulcan.CheckVulcanMajor(vulcanVer, cmd.F)
+	if err != nil {
+		return err
 	}
 
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)

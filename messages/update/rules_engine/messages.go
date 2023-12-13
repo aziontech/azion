@@ -13,8 +13,8 @@ var (
 	FlagFile          = "Path to a JSON file containing the attributes of the rule that will be updated; you can use - for reading from stdin"
 	FlagHelp          = "Displays more information about the Rules Engine command"
 
-	AskInputApplicationID = "What's the ID of the Edge Application that the Rule Engine will be connected to?"
-	AskInputRulesID       = "What's the ID of the Rules Engine to which it will be updated?"
-	AskInputPhase         = "What's the phase of your Rules Engine? (request/response)"
-	AskInputPathFile      = "What's the path of the json to update the Rules Engine?"
+	AskInputApplicationID = "Enter the ID of the Edge Application the Rules Engine will be connected to:"
+	AskInputRulesID       = "Enter the ID of the Rules Engine you wish to update:"
+	AskInputPhase         = "Enter the phase of your Rules Engine (request/response):"
+	AskInputPathFile      = "Enter the path of the json to update the Rules Engine:"
 )

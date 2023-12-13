@@ -10,8 +10,10 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/manifoldco/promptui"
 
@@ -569,4 +571,21 @@ func Confirm(msg string) bool {
 		fmt.Printf("\x1b[33m%s\x1b[0m", "⚠️ Invalid input. Please enter 'y' or 'n'.")
 		return Confirm(msg)
 	}
+}
+
+func Format(input string) (int, error) {
+	numberString := ""
+	for _, char := range input {
+		if unicode.IsDigit(char) {
+			numberString += string(char)
+		}
+	}
+
+	number, err := strconv.Atoi(numberString)
+	if err != nil {
+		return 0, err
+	}
+
+	return number, nil
+
 }

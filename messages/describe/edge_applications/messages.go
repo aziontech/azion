@@ -10,5 +10,5 @@ var (
 
 	FlagId                = "Unique identifier of the Edge Application"
 	FileWritten           = "File successfully written to: %s\n"
-	AskInputApplicationID = "What is the id of the Edge Application?"
+	AskInputApplicationID = "Enter the Edge Application's ID:"
 )
