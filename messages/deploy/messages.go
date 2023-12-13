@@ -18,6 +18,7 @@ var (
 	DeployOutputDomainUpdate          = "Updated domain %v with ID %v\n"
 	EdgeApplicationDeployPathFlag     = "Path to where your static files are stored"
 	CacheSettingsSuccessful           = "Created Cache Settings for edge application\n"
+	OriginsSuccessful                 = "Created Origin for edge application\n"
 	DeployInputAddress                = "Please inform an address to be used in the origin of this application: "
 	RulesEngineSuccessful             = "Created rules engine for edge application\n"
 	DeployFlagHelp                    = "Displays more information about the deploy command"

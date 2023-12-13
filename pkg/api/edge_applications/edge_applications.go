@@ -343,11 +343,12 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating a rules engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return nil, err
+			errLog := utils.LogAndRewindBody(httpResp)
+			if errLog != nil {
+				return &sdk.RulesEngineResultResponse{}, errLog
 			}
 		}
+		return &sdk.RulesEngineResultResponse{}, err
 	}
 	return &resp.Results, nil
 }
@@ -499,31 +500,6 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	return &resp.Results, nil
 }
 
-// this function creates the necessary cache settings for next applications to work correctly on the edge
-func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationId int64) (CacheSettingsResponse, error) {
-	logger.Debug("Create Cache Settings Next Application")
-	req.SetBrowserCacheSettings("override")
-	req.SetBrowserCacheSettingsMaximumTtl(31536000)
-	req.SetCdnCacheSettings("override")
-	req.SetCdnCacheSettingsMaximumTtl(31536000)
-
-	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
-
-	resp, httpResp, err := request.Execute()
-	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating a cache setting", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return resp.Results, nil
-}
-
 func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string) error {
 	logger.Debug("Create Rules Engine Next Application")
 
@@ -607,33 +583,5 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		}
 	}
 
-	return nil
-}
-
-type RequestsRulesEngine struct {
-	Request sdk.CreateRulesEngineRequest
-	Phase   string
-}
-
-func (c *Client) SaveListRulesEngine(
-	ctx context.Context,
-	edgeApplicationID int64,
-	reqs []RequestsRulesEngine,
-) error {
-	logger.Debug("Create Rules Engine")
-	for i := range reqs {
-		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
-			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, edgeApplicationID, reqs[i].Phase).
-			CreateRulesEngineRequest(reqs[i].Request).Execute()
-		if err != nil {
-			if httpResp != nil {
-				logger.Debug("Error while updating a rules engine", zap.Error(err))
-				err := utils.LogAndRewindBody(httpResp)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
 	return nil
 }

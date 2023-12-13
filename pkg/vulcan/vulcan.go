@@ -3,7 +3,7 @@ package vulcan
 import "fmt"
 
 const (
-	versionVulcan        = "2.0.0"
+	versionVulcan        = "2.2.0-stage.2"
 	installEdgeFunctions = "npx --yes %s edge-functions@%s %s"
 )
 

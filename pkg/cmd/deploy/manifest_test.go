@@ -1,88 +1,49 @@
 package deploy
 
 import (
-	"reflect"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/testutils"
 	"testing"
 )
 
-func Test_readManifest(t *testing.T) {
+func TestManifest_Interpreted(t *testing.T) {
+	f, _, _ := testutils.NewFactory(nil)
+
+	type args struct {
+		f       *cmdutil.Factory
+		cmd     func() *DeployCmd
+		conf    *contracts.AzionApplicationOptions
+		clients Clients
+	}
+
 	tests := []struct {
-		name    string
-		want    *Manifest
-		path    string
-		wantErr bool
+		name     string
+		manifest *Manifest
+		args     args
+		wantErr  bool
 	}{
 		{
-			name: "success simple manifest",
-			path: "/fixtures/manifest1.json",
-			want: &Manifest{
-				Routes: Routes{
-					Deliver: []Deliver{
-						{
-							Variable:   "/public",
-							InputValue: "/.edge/storage/",
-							Priority:   1,
-						},
-					},
-					Compute: []Compute{
-						{
-							Variable:   "/",
-							InputValue: "/.edge/worker.js",
-							Priority:   2,
-						},
-					},
+			name:     "case",
+			manifest: &Manifest{},
+			args: args{
+				f: f,
+				cmd: func() *DeployCmd {
+					deployCmd := NewDeployCmd(f)
+					return deployCmd
 				},
+				conf:    nil,
+				clients: NewClients(f),
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			manifestFilePath = tt.path
-			got, err := readManifest()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("readManifest() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("readManifest() = %v, want %v", got, tt.want)
+
+			if err := tt.manifest.Interpreted(tt.args.f, tt.args.cmd(), tt.args.conf, tt.args.clients); (err != nil) != tt.wantErr {
+				t.Errorf("Interpreted() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
-
-// func Test_prepareRequestDeliverRulesEngine(t *testing.T) {
-// 	type args struct {
-// 		manifest Manifest
-// 	}
-//
-// 	manifestFilePath = "/fixtures/manifest2.json"
-// 	manf, _ := readManifest()
-//
-// 	tests := []struct {
-// 		name string
-// 		args args
-// 		want edge_applications.RequestsRulesEngine
-// 	}{
-// 		{
-// 			name: "success",
-// 			args: args{
-// 				manifest: *manf,
-// 			},
-// 			want: edge_applications.RequestsRulesEngine{
-// 				Request: sdk.CreateRulesEngineRequest{
-// 					Name: "",
-// 				},
-// 				Phase: "response",
-// 			},
-// 		},
-// 	}
-//
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			if got := prepareRequestDeliverRulesEngine(tt.args.manifest); !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("prepareRequestDeliverRulesEngine() = %v, want %v", got, tt.want)
-// 			}
-// 		})
-// 	}
-// }

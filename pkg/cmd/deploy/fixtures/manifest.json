@@ -1,0 +1,29 @@
+{
+  "routes": [
+    {
+      "from": "/_next/static/",
+      "to": ".edge/storage",
+      "priority": 1,
+      "type": "deliver"
+    },
+    {
+      "from": "/_next/data/",
+      "to": ".edge/storage",
+      "priority": 2,
+      "type": "deliver"
+    },
+    {
+      "from": "\\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$",
+      "to": ".edge/storage",
+      "priority": 3,
+      "type": "deliver"
+    },
+    {
+      "from": "/",
+      "to": ".edge/worker.js",
+      "priority": 4,
+      "type": "compute"
+    }
+  ],
+  "fs": []
+}

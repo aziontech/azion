@@ -14,7 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, versionID string) error {
+var pathStatic = ".edge/storage"
+
+func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, versionID string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {

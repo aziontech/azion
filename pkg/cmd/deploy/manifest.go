@@ -1,48 +1,46 @@
 package deploy
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"go.uber.org/zap"
 	"os"
 	"strings"
 
-	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-
-	"github.com/aziontech/azion-cli/utils"
+	thoth "github.com/aziontech/go-thoth"
 )
 
 type Manifest struct {
-	Routes Routes `json:"routes"`
-	Fs     []any  `json:"fs"`
+	Routes []Routes `json:"routes"`
+	Fs     []any    `json:"fs"`
 }
 
 type Routes struct {
-	Deliver []Deliver `json:"deliver"`
-	Compute []Compute `json:"compute"`
-}
-
-type Compute struct {
-	Variable   string `json:"from"`
-	InputValue string `json:"to"`
-	Priority   int    `json:"priority"`
-}
-
-type Deliver struct {
-	Variable   string `json:"from"`
-	InputValue string `json:"to"`
-	Priority   int    `json:"priority"`
+	From     string `json:"from"`
+	To       string `json:"to"`
+	Priority int    `json:"priority"`
+	Type     string `json:"type"`
 }
 
 var manifestFilePath = "/.edge/manifest.json"
 
-func readManifest() (*Manifest, error) {
-	path, err := utils.GetWorkingDir()
+func readManifest(cmd *DeployCmd) (*Manifest, error) {
+	logger.Debug("read manifest")
+	pathWorkingDir, err := cmd.GetWorkDir()
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := os.ReadFile(utils.Concat(path, manifestFilePath))
+	b, err := os.ReadFile(utils.Concat(pathWorkingDir, manifestFilePath))
 	if err != nil {
 		return nil, err
 	}
@@ -56,154 +54,133 @@ func readManifest() (*Manifest, error) {
 	return &manifest, err
 }
 
-func prepareRequestDeliverRulesEngine(manifest Manifest) []apiapp.RequestsRulesEngine {
-	deliver := manifest.Routes.Deliver
-	cri := make([][]sdk.RulesEngineCriteria, len(deliver))
+// Interpreted TODO: better interpreted, removed flows edge application, domain
+func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *contracts.AzionApplicationOptions, clients Clients) error {
+	logger.Debug("Execute manifest")
+	ctx := context.Background()
 
-	for i := 0; i < len(deliver); i++ {
-		cri[i] = make([]sdk.RulesEngineCriteria, len(deliver))
+	err := cmd.uploadFiles(f, conf.VersionID)
+	if err != nil {
+		return err
 	}
 
-	requestList := []apiapp.RequestsRulesEngine{}
-
-	for i, v := range deliver {
-		req := apiapp.CreateRulesEngineRequest{}
-		req.SetName("deliver")
-
-		var beh sdk.RulesEngineBehaviorString
-		beh.SetName("deliver")
-		beh.SetTarget("")
-
-		req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-			{
-				RulesEngineBehaviorString: &beh,
-			},
-		})
-
-		var criteria sdk.RulesEngineCriteria
-
-		criteria.SetConditional("if")
-		criteria.SetOperator("starts_with")
-		criteria.SetVariable(v.Variable)
-		criteria.SetInputValue(utils.Concat(".edge/storage", v.InputValue))
-
-		cri[i][i] = criteria
-		req.SetCriteria(cri)
-
-		requestList = append(requestList, apiapp.RequestsRulesEngine{
-			Request: req.CreateRulesEngineRequest,
-			Phase:   "response",
-		})
+	err = cmd.doApplication(clients.EdgeApplication, ctx, conf)
+	if err != nil {
+		return err
 	}
 
-	return requestList
+	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	for _, route := range manifest.Routes {
+		if route.Type == "compute" {
+			conf.Function.File = ".edge/worker.js"
+			err := cmd.doFunction(clients.EdgeFunction, ctx, conf)
+			if err != nil {
+				return err
+			}
+
+			reqIns := apiEdgeApplications.CreateInstanceRequest{}
+			reqIns.SetEdgeFunctionId(conf.Function.ID)
+			reqIns.SetName(conf.Name)
+			reqIns.ApplicationId = conf.Application.ID
+			instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
+			if err != nil {
+				logger.Debug("Error while creating edge function instance", zap.Error(err))
+				return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
+			}
+			InstanceID = instance.GetId()
+
+			// TODO: Review what to do when user updates Function ID directly in azion.json
+			err = cmd.updateRulesEngine(clients.EdgeApplication, ctx, conf)
+			if err != nil {
+				logger.Debug("Error while updating rules engine", zap.Error(err))
+				return err
+			}
+		}
+
+		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
+		if err != nil {
+			logger.Debug("Error while creating origin", zap.Error(err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+		requestRules, err := requestRulesEngineManifest(conf.Origin.ID, InstanceID, route)
+		if err != nil {
+			return err
+		}
+
+		_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &requestRules)
+		if err != nil {
+			return err
+		}
+
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+	}
+
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, "https://"+domainName))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
+	return nil
 }
 
-func prepareRequestComputeRulesEngine(manifest Manifest) []apiapp.RequestsRulesEngine {
-	compute := manifest.Routes.Compute
-	cri := make([][]sdk.RulesEngineCriteria, len(compute))
+func requestRulesEngineManifest(originID, functionID int64, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
+	logger.Debug("Create Rules Engine set origin")
 
-	for i := 0; i < len(compute); i++ {
-		cri[i] = make([]sdk.RulesEngineCriteria, len(compute))
-	}
+	req := apiEdgeApplications.CreateRulesEngineRequest{}
+	req.SetName(fmt.Sprintf("rules_manifest_%s", thoth.GenerateName()))
 
-	requestList := []apiapp.RequestsRulesEngine{}
+	behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+	var behStringCache sdk.RulesEngineBehaviorString
 
-	for i, v := range compute {
-		req := apiapp.CreateRulesEngineRequest{}
-		req.SetName("compute")
-
-		var beh sdk.RulesEngineBehaviorString
-		beh.SetName("run_function")
-		beh.SetTarget("")
-
-		req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-			{
-				RulesEngineBehaviorString: &beh,
-			},
-		})
-
-		var criteria sdk.RulesEngineCriteria
-		criteria.SetConditional("if")
-		criteria.SetOperator("starts_with")
-		criteria.SetVariable("${uri}")
-		criteria.SetInputValue(utils.Concat(".edge/", v.InputValue))
-
-		cri[i][i] = criteria
-
-		req.SetCriteria(cri)
-		requestList = append(requestList, apiapp.RequestsRulesEngine{
-			Request: req.CreateRulesEngineRequest,
-			Phase:   "response",
-		})
-	}
-
-	return requestList
-}
-
-func prepareRequestCachePolicyRulesEngine(cacheID int64, template, mode string) apiapp.RequestsRulesEngine {
-	req := apiapp.CreateRulesEngineRequest{}
-	req.SetName("cache policy")
-
-	var beh sdk.RulesEngineBehaviorString
-	beh.SetName("set_cache_policy")
-	beh.SetTarget(fmt.Sprintf("%d", cacheID))
-
-	req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-		{
-			RulesEngineBehaviorString: &beh,
-		},
-	})
-
-	cri := make([][]sdk.RulesEngineCriteria, 1)
-	for i := 0; i < 1; i++ {
-		cri[i] = make([]sdk.RulesEngineCriteria, 1)
-	}
-
-	cri[0][0].SetConditional("if")
-	cri[0][0].SetVariable("${uri}")
-	cri[0][0].SetOperator("starts_with")
-
-	if template == "Next" && strings.ToLower(mode) == "compute" {
-		cri[0][0].SetInputValue("/_next/static")
+	if routes.Type == "compute" {
+		behStringCache.SetName("run_function")
+		behStringCache.SetTarget(fmt.Sprintf("%d", functionID))
 	} else {
-		cri[0][0].SetInputValue("/")
+		behStringCache.SetName("set_origin")
+		behStringCache.SetTarget(fmt.Sprintf("%d", originID))
 	}
-	req.SetCriteria(cri)
 
-	return apiapp.RequestsRulesEngine{
-		Request: req.CreateRulesEngineRequest,
-		Phase:   "request",
-	}
-}
-
-func prepareRequestEnableGZipRulesEngine() apiapp.RequestsRulesEngine {
-	req := apiapp.CreateRulesEngineRequest{}
-	req.SetName("enable gzip")
-
-	var beh sdk.RulesEngineBehaviorString
-	beh.SetName("enable_gzip")
-	beh.SetTarget("")
-
-	req.SetBehaviors([]sdk.RulesEngineBehaviorEntry{
-		{
-			RulesEngineBehaviorString: &beh,
-		},
+	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+		RulesEngineBehaviorString: &behStringCache,
 	})
 
-	cri := make([][]sdk.RulesEngineCriteria, 1)
+	req.SetBehaviors(behaviors)
+
+	criteria := make([][]sdk.RulesEngineCriteria, 1)
 	for i := 0; i < 1; i++ {
-		cri[i] = make([]sdk.RulesEngineCriteria, 1)
+		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
 	}
 
-	cri[0][0].SetConditional("if")
-	cri[0][0].SetVariable("${request_uri}")
-	cri[0][0].SetOperator("exists")
-	cri[0][0].SetInputValue("")
-	req.SetCriteria(cri)
-
-	return apiapp.RequestsRulesEngine{
-		Request: req.CreateRulesEngineRequest,
-		Phase:   "response",
+	operator, err := checkFieldFrom(routes.From)
+	if err != nil {
+		return req, err
 	}
+
+	criteria[0][0].SetConditional("if")
+	criteria[0][0].SetVariable("${uri}")
+	criteria[0][0].SetOperator(operator)
+	criteria[0][0].SetInputValue(routes.From)
+	req.SetCriteria(criteria)
+
+	return req, nil
+}
+
+func checkFieldFrom(from string) (string, error) {
+	if strings.HasPrefix(from, "/") {
+		startWith := "starts_with"
+		return startWith, nil
+	} else if strings.HasPrefix(from, "\\.") && strings.HasSuffix(from, "$") {
+		doesNotMatch := "does_not_match"
+		return doesNotMatch, nil
+	}
+
+	return "", errors.New("the value of 'from' not recognized")
 }
