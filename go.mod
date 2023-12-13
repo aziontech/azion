@@ -4,19 +4,18 @@ go 1.21
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.94.0
+	github.com/aziontech/azionapi-go-sdk v0.116.0
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/joho/godotenv v1.5.1
 	github.com/manifoldco/promptui v0.9.0
-	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.14.0
 	github.com/tidwall/gjson v1.14.3
 	github.com/tidwall/sjson v1.2.5
 	github.com/zRedShift/mimemagic v1.2.0
+	github.com/zcalusic/sysinfo v1.0.2
 	go.uber.org/zap v1.24.0
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -28,8 +27,8 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/zcalusic/sysinfo v1.0.2 // indirect
 	golang.org/x/term v0.6.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
 require (
