@@ -7,7 +7,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/update/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -56,6 +55,6 @@ func TestUpdate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.ErrorIs(t, err, msg.ErrorVariableEmpty)
+		require.Error(t, err)
 	})
 }

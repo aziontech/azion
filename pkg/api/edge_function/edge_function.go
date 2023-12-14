@@ -14,7 +14,7 @@ const javascript = "javascript"
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error) {
 	logger.Debug("Get Edge Function")
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdGet(ctx, id)
+	request := c.apiClient.EdgeFunctionsAPI.EdgeFunctionsIdGet(ctx, id)
 
 	res, httpResp, err := request.Execute()
 	if err != nil {
@@ -33,7 +33,7 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeFunctionResponse, error
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Edge Function")
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdDelete(ctx, id)
+	request := c.apiClient.EdgeFunctionsAPI.EdgeFunctionsIdDelete(ctx, id)
 
 	httpResp, err := request.Execute()
 
@@ -57,7 +57,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 	logger.Debug("Create Edge Function")
 	req.CreateEdgeFunctionRequest.SetLanguage(javascript)
 
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
+	request := c.apiClient.EdgeFunctionsAPI.EdgeFunctionsPost(ctx).CreateEdgeFunctionRequest(req.CreateEdgeFunctionRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (EdgeFunctionRe
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (EdgeFunctionResponse, error) {
 	logger.Debug("Update Edge Function")
-	request := c.apiClient.EdgeFunctionsApi.EdgeFunctionsIdPatch(ctx, id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
+	request := c.apiClient.EdgeFunctionsAPI.EdgeFunctionsIdPatch(ctx, id).PatchEdgeFunctionRequest(req.PatchEdgeFunctionRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Li
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	resp, httpResp, err := c.apiClient.EdgeFunctionsApi.EdgeFunctionsGet(ctx).
+	resp, httpResp, err := c.apiClient.EdgeFunctionsAPI.EdgeFunctionsGet(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).

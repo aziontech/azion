@@ -317,6 +317,9 @@ func checkStatusCode500Error(err error) error {
 // read the body of the response and returns a personalized error or the body if the error is not identified
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := io.ReadAll(httpResp.Body)
+	if err := checkBucketNameExists(string(responseBody)); err != nil {
+		return err
+	}
 	if err := checkNoProduct(string(responseBody)); err != nil {
 		return err
 	}
@@ -337,6 +340,13 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	}
 
 	return fmt.Errorf("%s", string(responseBody))
+}
+
+func checkBucketNameExists(body string) error {
+	if strings.Contains(body, "bucket name is already in use") {
+		return ErrorBucketInUse
+	}
+	return nil
 }
 
 func checkNoProduct(body string) error {

@@ -31,6 +31,7 @@ type AzionApplicationOptions struct {
 	Env         string                   `json:"env"`
 	VersionID   string                   `json:"version-id"`
 	ProjectRoot string                   `json:"project-root"`
+	BucketName  string                   `json:"bucket-name"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`

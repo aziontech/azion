@@ -17,28 +17,49 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var successResponseInstance string = `
+{
+	"results": {
+	  "edge_function_id": 123321,
+	  "name": "varejo",
+	  "args": {},
+	  "id": 101001
+	},
+	"schema_version": 3
+  }
+  `
+
 var successResponseApp string = `
 {
-	"results":{
-	   "id":666,
-	   "name":"New Edge Applicahvjgjhgjhhgtion",
-	   "delivery_protocol":"http",
-	   "http_port":80,
-	   "https_port":443,
-	   "minimum_tls_version":"",
-	   "active":true,
-	   "application_acceleration":false,
-	   "caching":true,
-	   "device_detection":false,
-	   "edge_firewall":false,
-	   "edge_functions":false,
-	   "image_optimization":false,
-	   "load_balancer":false,
-	   "raw_logs":false,
-	   "web_application_firewall":false
+	"results": {
+	  "id": 666,
+	  "name": "New Edge Application",
+	  "delivery_protocol": "http,https",
+	  "http_port": [
+		80
+	  ],
+	  "https_port": [
+		443
+	  ],
+	  "minimum_tls_version": "",
+	  "active": true,
+	  "debug_rules": false,
+	  "http3": false,
+	  "websocket": null,
+	  "supported_ciphers": "all",
+	  "application_acceleration": false,
+	  "caching": true,
+	  "device_detection": false,
+	  "edge_firewall": false,
+	  "edge_functions": false,
+	  "image_optimization": false,
+	  "l2_caching": false,
+	  "load_balancer": false,
+	  "raw_logs": false,
+	  "web_application_firewall": false
 	},
-	"schema_version":3
-}
+	"schema_version": 3
+  }
 `
 
 func TestDeployCmd(t *testing.T) {
@@ -109,7 +130,7 @@ func TestDeployCmd(t *testing.T) {
 
 		mock.Register(
 			httpmock.REST("POST", "edge_applications/666/functions_instances"),
-			httpmock.JSONFromString(successResponseApp),
+			httpmock.JSONFromString(successResponseInstance),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)

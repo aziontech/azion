@@ -41,6 +41,7 @@ var (
 	ErrorTimeoutAPICall             = errors.New("CLI's request has timed out during communication with Azion. Verify if it has completed successfully or wait some time and try the command again")
 	ErrorCreateFile                 = errors.New("Failed to create %s file")
 	ErrorProductNotOwned            = errors.New("This account does not own the following product")
+	ErrorBucketInUse                = errors.New("This bucket's name is already in use, please type another one")
 	ErrorUnknownSystem              = errors.New("Unknown system")
 	ErrorCommandNotFound            = errors.New("Command '%s' not found")
 	ErrorGetAssetsNamesAzioncli     = errors.New("Failed to fetch the assets names from azion")
