@@ -307,6 +307,9 @@ func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientOrigin 
 	reqOrigin.SetName(conf.Name)
 	reqOrigin.SetHostHeader("${host}")
 
+	reqOrigin.Bucket = &conf.Bucket
+	reqOrigin.Prefix = &conf.Prefix
+
 	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqOrigin)
 	if err != nil {
 		return err

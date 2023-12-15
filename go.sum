@@ -57,10 +57,10 @@ github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 h1:kFOfPq6dUM1hTo
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
-github.com/aziontech/azionapi-go-sdk v0.115.0 h1:JZDPmXFuIFz5LIrjQo3tGryWuDx7tR1MwaJIdYzY3tM=
-github.com/aziontech/azionapi-go-sdk v0.115.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
-github.com/aziontech/go-thoth v0.0.0-20230802141247-075da4bef661 h1:G/57gKhtVFDqmWmgBQvHmlzhgZYPySYtOCo0DCe0RJc=
-github.com/aziontech/go-thoth v0.0.0-20230802141247-075da4bef661/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
+github.com/aziontech/azionapi-go-sdk v0.117.0 h1:99ZzFwkDjxafuqYTIM0eQAelT0m8Be7r3F3FoqYt4Oo=
+github.com/aziontech/azionapi-go-sdk v0.117.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df h1:h4Ze+Zq3jMpKINpd6EXWWzNnImOcPeAKSFxetA5YOJs=
+github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
 github.com/benbjohnson/clock v1.1.0 h1:Q92kusRqC1XV2MjkWETPvjJVqKetz1OzxZB7mHJLju8=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/chzyer/logex v1.1.10 h1:Swpa1K6QvQznwJRcfTfQJmTE72DqScAa40E+fbHEXEE=

@@ -67,7 +67,7 @@ func (cmd *DeployCmd) applyTemplate(conf *contracts.AzionApplicationOptions) (st
 	data := struct {
 		VersionId string
 	}{
-		VersionId: conf.VersionID,
+		VersionId: conf.Prefix,
 	}
 
 	var result strings.Builder

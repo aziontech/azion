@@ -79,12 +79,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
-	//buildCmd := cmd.BuildCmd(f)
-	//err := buildCmd.Run()
-	//if err != nil {
-	//	logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-	//	return err
-	//}
+	buildCmd := cmd.BuildCmd(f)
+	err := buildCmd.Run()
+	if err != nil {
+		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+		return err
+	}
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {

@@ -4,7 +4,8 @@ go 1.20
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.115.0
+	github.com/aziontech/azionapi-go-sdk v0.117.0
+	github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/joho/godotenv v1.5.1
@@ -47,7 +48,6 @@ require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20210428141323-04723f9f07d7 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
-	github.com/aziontech/go-thoth v0.0.0-20230802141247-075da4bef661
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

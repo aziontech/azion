@@ -26,10 +26,11 @@ type DescribeOptions struct {
 type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
+	Bucket      string                   `json:"bucket"`
 	Template    string                   `json:"template"` // framework: react, next, vue, angular and etc
 	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
-	VersionID   string                   `json:"version-id"`
+	Prefix      string                   `json:"prefix"`
 	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`

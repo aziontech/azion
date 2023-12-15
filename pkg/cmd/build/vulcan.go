@@ -28,7 +28,7 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 	verIdSlice := strings.Split(string(fileEnv), "=")
 	versionID := verIdSlice[1]
 
-	conf.VersionID = versionID
+	conf.Prefix = versionID
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {

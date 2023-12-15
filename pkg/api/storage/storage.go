@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"github.com/aziontech/azionapi-go-sdk/storage"
 	"net/http"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
@@ -27,6 +28,42 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),
 	}
+}
+
+type ClientStorage struct {
+	apiClient *storage.APIClient
+}
+
+func NewClientStorage(c *http.Client, url string, token string) *ClientStorage {
+	conf := storage.NewConfiguration()
+	conf.AddDefaultHeader("Authorization", "Token "+token)
+	conf.UserAgent = "Azion_CLI/" + version.BinVersion
+	conf.Servers = storage.ServerConfigurations{
+		{URL: url},
+	}
+	return &ClientStorage{
+		apiClient: storage.NewAPIClient(conf),
+	}
+}
+
+func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
+	create := storage.BucketCreate{
+		Name:       name,
+		EdgeAccess: storage.READ_WRITE,
+	}
+	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create).Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while creating the project Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return nil
 }
 
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps) error {

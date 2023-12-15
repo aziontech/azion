@@ -20,7 +20,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		Env:         "production",
 		Template:    info.Preset,
 		Mode:        info.Mode,
-		VersionID:   "",
+		Prefix:      "",
 		ProjectRoot: info.PathWorkingDir,
 	}
 	azionJson.Function.Name = "__DEFAULT__"

@@ -20,7 +20,7 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 		Env:         "production",
 		Template:    info.Template,
 		Mode:        info.Mode,
-		VersionID:   "",
+		Prefix:      "",
 		ProjectRoot: info.PathWorkingDir,
 	}
 

@@ -13,7 +13,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"go.uber.org/zap"
-	"os"
 	"strings"
 
 	thoth "github.com/aziontech/go-thoth"
@@ -40,7 +39,7 @@ func readManifest(cmd *DeployCmd) (*Manifest, error) {
 		return nil, err
 	}
 
-	b, err := os.ReadFile(utils.Concat(pathWorkingDir, manifestFilePath))
+	b, err := cmd.FileReader(utils.Concat(pathWorkingDir, manifestFilePath))
 	if err != nil {
 		return nil, err
 	}
@@ -55,11 +54,11 @@ func readManifest(cmd *DeployCmd) (*Manifest, error) {
 }
 
 // Interpreted TODO: better interpreted, removed flows edge application, domain
-func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *contracts.AzionApplicationOptions, clients Clients) error {
+func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *contracts.AzionApplicationOptions, clients *Clients) error {
 	logger.Debug("Execute manifest")
 	ctx := context.Background()
 
-	err := cmd.uploadFiles(f, conf.VersionID)
+	err := cmd.uploadFiles(f, conf.Prefix)
 	if err != nil {
 		return err
 	}
@@ -70,6 +69,11 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	}
 
 	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
 	}
