@@ -27,10 +27,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			err = client.Delete(context.Background(), settings.UUID)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorLogout, err.Error())
+			if settings.UUID != "" {
+				client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+				err = client.Delete(context.Background(), settings.UUID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorLogout, err.Error())
+				}
 			}
 
 			settings.UUID = ""

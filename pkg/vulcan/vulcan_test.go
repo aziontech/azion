@@ -17,7 +17,7 @@ func TestCommand(t *testing.T) {
 			args: args{
 				params: "presets ls",
 			},
-			want: "npx --yes  edge-functions@2.0.0 presets ls",
+			want: "npx --yes  edge-functions@latest presets ls",
 		},
 		{
 			name: "with flags",
@@ -25,14 +25,14 @@ func TestCommand(t *testing.T) {
 				flags:  "--loglevel=error --no-update-notifier",
 				params: "presets ls",
 			},
-			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@2.0.0 presets ls",
+			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@latest presets ls",
 		},
 		{
 			name: "no params",
 			args: args{
 				flags: "--loglevel=error --no-update-notifier",
 			},
-			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@2.0.0 ",
+			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@latest ",
 		},
 	}
 	for _, tt := range tests {

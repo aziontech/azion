@@ -9,23 +9,16 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	helpers "github.com/aziontech/azion-cli/utils"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
-func shouldDevDeploy(info *InitInfo, msg string) (bool, error) {
+func shouldDevDeploy(info *InitInfo, msg string) bool {
 	if info.GlobalFlagAll {
-		return true, nil
+		return true
 	}
-	var shouldConfigure bool
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
+	return helpers.Confirm(msg)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {
@@ -45,11 +38,23 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
+
+	// checking if vulcan major is correct
+	vulcanVer, err := cmd.CommandRunnerOutput(cmd.F, "npm show edge-functions version", []string{})
+	if err != nil {
+		return err
+	}
+
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.F)
+	if err != nil {
+		return err
+	}
+
 	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
 
 	command := vul.Command("", "init --name "+info.Name)
 
-	err := cmd.CommandRunInteractive(cmd.F, command)
+	err = cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
 		return err
 	}

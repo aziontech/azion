@@ -13,7 +13,7 @@ var (
 	DescribeFlagOut    = "Exports the output of the command to the given file path <file_path/file_name.ext>"
 	DescribeFlagFormat = "Changes the output format passing the json value to the flag. Example '--format json'"
 
-	AskInputRulesId       = "What is the id of the Rule Engine you wish to describe?"
-	AskInputApplicationId = "What is the id of the Edge Application this Rule Engine is linked to?"
-	AskInputPhase         = "What is the phase of your rule engine? (request/response)"
+	AskInputRulesId       = "Enter the ID of the Rules Engine you wish to describe:"
+	AskInputApplicationId = "Enter the ID of the Edge Application this Rules Engine is linked to:"
+	AskInputPhase         = "Enter the phase of your Rules Engine (request/response):"
 )

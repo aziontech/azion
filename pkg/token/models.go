@@ -3,6 +3,7 @@ package token
 import (
 	"io"
 	"net/http"
+	"time"
 )
 
 const settingsFilename = "settings.toml"
@@ -20,8 +21,10 @@ type Token struct {
 }
 
 type Settings struct {
-	Token string
-	UUID  string
+	Token             string
+	UUID              string
+	LastUpdateCheck   time.Time
+	LastVulcanVersion string
 }
 
 type Config struct {

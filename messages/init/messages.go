@@ -4,10 +4,10 @@ var (
 
 	//init cmd
 	EdgeApplicationsInitUsage             = `init [flags]`
-	EdgeApplicationsInitShortDescription  = "Initializes an edge application from a starter template"
-	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application on the Azion’s platform"
+	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application from a starter template"
+	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application"
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
-	EdgeApplicationsInitFlagName          = "The edge application's name"
+	EdgeApplicationsInitFlagName          = "The Edge Application's name"
 	EdgeApplicationsInitFlagYes           = "Answers all yes/no interactions automatically with yes"
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This application was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "

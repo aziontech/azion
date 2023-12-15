@@ -13,5 +13,5 @@ var (
 	ErrorStructCriteriaNil    = errors.New("You must inform a criteria")
 	ErrorStructBehaviorsNil   = errors.New("You must inform a behavior")
 	ErrorConvertApplicationID = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list edge-application' command to check your application ID")
-	ErrorConvertRulesID       = errors.New("The rules engine ID you provided is invalid. The value must be an integer. You can run the 'azion list rules-engine' command to check your ID.")
+	ErrorConvertRulesID       = errors.New("The Rules Engine ID you provided is invalid. The value must be an integer. You can run the 'azion list rules-engine' command to check your ID.")
 )

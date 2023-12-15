@@ -40,7 +40,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	if conf.Application.ID == 0 {
 		applicationId, err := cmd.createApplication(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while creating edge application", zap.Error(err))
+			logger.Debug("Error while creating Edge Application", zap.Error(err))
 			return err
 		}
 		conf.Application.ID = applicationId
@@ -50,11 +50,10 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-
 	} else {
 		err := cmd.updateApplication(client, ctx, conf)
 		if err != nil {
-			logger.Debug("Error while updating edge application", zap.Error(err))
+			logger.Debug("Error while updating Edge Application", zap.Error(err))
 			return err
 		}
 	}
@@ -139,7 +138,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		logger.Debug("Error while creating edge function", zap.Error(err))
+		logger.Debug("Error while creating Edge Function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId()))

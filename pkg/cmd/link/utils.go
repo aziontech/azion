@@ -7,39 +7,25 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/vulcan"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	helpers "github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
-func shouldConfigure(info *LinkInfo) (bool, error) {
+func shouldConfigure(info *LinkInfo) bool {
 	if info.GlobalFlagAll || info.Auto {
-		return true, nil
+		return true
 	}
-	var shouldConfigure bool
 	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
+	return helpers.Confirm(msg)
 }
 
-func shouldDevDeploy(info *LinkInfo, msg string) (bool, error) {
+func shouldDevDeploy(info *LinkInfo, msg string) bool {
 	if info.GlobalFlagAll {
-		return true, nil
+		return true
 	}
-	var shouldConfigure bool
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
+	return helpers.Confirm(msg)
 }
 
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
@@ -49,13 +35,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
-			prompt := &survey.Confirm{
-				Message: "This project was already configured. Do you want to override the previous configuration?",
-			}
-			err := survey.AskOne(prompt, &shouldFetchTemplates)
-			if err != nil {
-				return false, err
-			}
+			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration?"), nil
 		}
 
 		if shouldFetchTemplates {
@@ -88,6 +68,17 @@ func askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	if info.Preset == "nextjs" {
 		return nil
+	}
+
+	// checking is vulcan major is correct
+	vulcanVer, err := cmd.CommandRunner(cmd.F, "npm show edge-functions version", []string{})
+	if err != nil {
+		return err
+	}
+
+	err = vulcan.CheckVulcanMajor(vulcanVer, cmd.F)
+	if err != nil {
+		return err
 	}
 
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)

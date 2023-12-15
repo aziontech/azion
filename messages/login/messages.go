@@ -3,8 +3,8 @@ package login
 const (
 	// general
 	Usage            = "login"
-	ShortDescription = "Log in to your Azion account"
-	LongDescription  = "Log in to your Azion account and save a personal token locally to authorize CLI commands"
+	ShortDescription = "Logs in to your Azion account"
+	LongDescription  = "Logs in to your Azion account and save a Personal Token locally to authorize CLI commands"
 	Success          = "successfully logged in"
 
 	// flags
@@ -13,6 +13,10 @@ const (
 	FlagHelp     = "Displays more information about the login command"
 
 	// Ask
-	AskUsername = "What is your email address?"
-	AskPassword = "What is your password?"
+	AskUsername = "Enter your email address:"
+	AskPassword = "Enter your password:"
+
+	//browser
+	VisitMsg   = "Please visit https://sso.azion.com/login?next=cli in case it did not open automatically\n"
+	BrowserMsg = "You may now close this page and return to your terminal"
 )

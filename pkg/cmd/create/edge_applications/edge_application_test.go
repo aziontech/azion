@@ -31,7 +31,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: "🚀 Created edge application with ID 1694434702\n\n",
+			output: "🚀 Created Edge Application with ID 1694434702\n\n",
 		},
 		{
 			name: "Creating the edge application with the --file flag",
@@ -44,7 +44,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: "🚀 Created edge application with ID 1694434702\n\n",
+			output: "🚀 Created Edge Application with ID 1694434702\n\n",
 		},
 	}
 	for _, tt := range tests {

@@ -15,7 +15,7 @@ func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, e
 		EdgeApplicationsIdGet(ctx, id).Execute()
 
 	if err != nil {
-		logger.Debug("Error while getting an edge application", zap.Error(err))
+		logger.Debug("Error while getting an Edge Application", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 

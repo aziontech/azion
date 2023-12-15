@@ -11,7 +11,7 @@ import (
 )
 
 func (cmd *BuildCmd) run() error {
-	logger.Debug("Running build subcommand from edge_applications command tree")
+	logger.Debug("Running build command")
 
 	err := RunBuildCmdLine(cmd)
 	if err != nil {
