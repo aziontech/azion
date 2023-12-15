@@ -28,7 +28,7 @@ func NewClients(f *cmdutil.Factory) *Clients {
 		EdgeApplication: apiEdgeApplications.NewClient(httpClient, apiURL, token),
 		Domain:          apiDomain.NewClient(httpClient, apiURL, token),
 		Origin:          apiOrigin.NewClient(httpClient, apiURL, token),
-		Bucket:          apiStorage.NewClientStorage(httpClient, "https://stage-api.azion.com", "azion6a25b8d66b05215640b496e73b1281a1811"),
+		Bucket:          apiStorage.NewClientStorage(httpClient, apiURL, token),
 		Storage:         apiStorage.NewClient(httpClient, apiURL, token),
 	}
 }
