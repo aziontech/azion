@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 	"errors"
+
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -40,7 +41,6 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 		return err
 	}
 
-	conf.Name = name
 	conf.Bucket = name
 	return nil
 }
