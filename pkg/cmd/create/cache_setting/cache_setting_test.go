@@ -45,14 +45,14 @@ func TestCreate(t *testing.T) {
 			"--enable-caching-for-options", "true",
 			"--enable-caching-for-post", "true",
 			"--enable-caching-string-sort", "true",
-			"--l2-caching-enabled", "true",
+			"--l2-caching-enabled", "false",
 			"--slice-configuration-enabled", "false",
 			"--slice-l2-caching-enabled", "false",
 		})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Created Cache Settings configuration with ID 115255\n\n", stdout.String())
+		require.Equal(t, "🚀 Created Cache Settings configuration with ID 138729\n\n", stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -78,7 +78,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Created Cache Settings configuration with ID 115255\n\n", stdout.String())
+		require.Equal(t, "🚀 Created Cache Settings configuration with ID 138729\n\n", stdout.String())
 	})
 
 	t.Run("no acceleration error --file flag", func(t *testing.T) {

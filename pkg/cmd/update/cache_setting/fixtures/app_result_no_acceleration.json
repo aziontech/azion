@@ -4,6 +4,8 @@
 	  "name": "ssass",
 	  "delivery_protocol": "http",
 	  "http_port": 80,
+		"http3": false,
+		"supported_ciphers": "",
 	  "https_port": 443,
 	  "minimum_tls_version": "",
 	  "active": true,

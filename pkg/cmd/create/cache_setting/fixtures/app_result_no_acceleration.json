@@ -1,5 +1,7 @@
 {
 	"results": {
+		"supported_ciphers": "asdf",
+		"http3":  false,
 	  "id": 1673635841,
 	  "name": "New Edge Application",
 	  "delivery_protocol": "http,https",

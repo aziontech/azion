@@ -1,10 +1,10 @@
 {
   "results": {
-    "id": 115255,
-    "name": "cachesettingswithfields",
-    "browser_cache_settings": "honor",
+    "id": 138729,
+    "name": "Default Cache Settings2233",
+    "browser_cache_settings": "override",
     "browser_cache_settings_maximum_ttl": 0,
-    "cdn_cache_settings": "honor",
+    "cdn_cache_settings": "override",
     "cdn_cache_settings_maximum_ttl": 60,
     "cache_by_query_string": "ignore",
     "query_string_fields": null,
@@ -18,7 +18,7 @@
     "is_slice_configuration_enabled": false,
     "is_slice_edge_caching_enabled": false,
     "is_slice_l2_caching_enabled": false,
-    "slice_configuration_range": null,
+    "slice_configuration_range": 1024,
     "enable_caching_for_options": false,
     "enable_stale_cache": true,
     "l2_region": null

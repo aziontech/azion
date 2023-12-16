@@ -1,6 +1,7 @@
 package rules_engine
 
 import (
+	"github.com/aziontech/azion-cli/utils"
 	"net/http"
 	"testing"
 
@@ -55,6 +56,6 @@ func TestUpdate(t *testing.T) {
 		})
 
 		err := cmd.Execute()
-		require.Error(t, err)
+		require.ErrorIs(t, err, utils.ErrorUnmarshalReader)
 	})
 }

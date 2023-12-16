@@ -19,6 +19,8 @@
 	  "image_optimization": true,
 	  "l2_caching": false,
 	  "load_balancer": false,
+		"http3": false,
+		"supported_ciphers": "",
 	  "raw_logs": false,
 	  "web_application_firewall": false
 	},

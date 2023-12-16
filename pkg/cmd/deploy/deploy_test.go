@@ -154,7 +154,8 @@ func TestDeployCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		options := &contracts.AzionApplicationOptions{
-			Name: "LovelyName",
+			Name:   "LovelyName",
+			Bucket: "LovelyName",
 		}
 
 		dat, _ := os.ReadFile("./fixtures/create_app.json")
@@ -168,6 +169,11 @@ func TestDeployCmd(t *testing.T) {
 		mock.Register(
 			httpmock.REST("POST", "domains"),
 			httpmock.JSONFromString(sucRespDomain),
+		)
+
+		mock.Register(
+			httpmock.REST("POST", "v4/storage/buckets"),
+			httpmock.JSONFromString(""),
 		)
 
 		mock.Register(
@@ -352,12 +358,12 @@ func TestDeployCmd(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/666"),
+			httpmock.REST("PATCH", "edge_applications/1697666970"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/666/functions_instances"),
+			httpmock.REST("POST", "edge_applications/1697666970/functions_instances"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 

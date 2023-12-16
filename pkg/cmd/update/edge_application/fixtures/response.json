@@ -1,7 +1,7 @@
 {
   "results": {
-    "id": 1337,
-    "name": "Edited Edge Application",
+    "id": 1665081615,
+    "name": "Update Edge Application",
     "delivery_protocol": "http,https",
     "http_port": 8008,
     "https_port": 9443,
@@ -17,9 +17,9 @@
     "edge_firewall": false,
     "edge_functions": true,
     "image_optimization": true,
-    "l2_caching": false,
     "load_balancer": false,
     "raw_logs": false,
+    "l2_caching": false,
     "web_application_firewall": false
   },
   "schema_version": 3
