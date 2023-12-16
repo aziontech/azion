@@ -63,90 +63,90 @@ var sucRespDomain string = `{
     "schema_version": 3
 }`
 
-var sucRespOrigin string = `{
-    "results": {
-        "origin_id": 116207,
-        "origin_key": "35e3a635-2227-4bb6-976c-5e8c8fa58a67",
-        "name": "Create Origin22",
-        "origin_type": "single_origin",
-        "addresses": [
-            {
-                "address": "httpbin.org",
-                "weight": null,
-                "server_role": "primary",
-                "is_active": true
-            }
-        ],
-        "origin_protocol_policy": "http",
-        "is_origin_redirection_enabled": false,
-        "host_header": "${host}",
-        "method": "",
-        "origin_path": "/requests",
-        "connection_timeout": 60,
-        "timeout_between_bytes": 120,
-        "hmac_authentication": false,
-        "hmac_region_name": "",
-        "hmac_access_key": "",
-        "hmac_secret_key": ""
-    },
-    "schema_version": 3
-}`
+// var sucRespOrigin string = `{
+//     "results": {
+//         "origin_id": 116207,
+//         "origin_key": "35e3a635-2227-4bb6-976c-5e8c8fa58a67",
+//         "name": "Create Origin22",
+//         "origin_type": "single_origin",
+//         "addresses": [
+//             {
+//                 "address": "httpbin.org",
+//                 "weight": null,
+//                 "server_role": "primary",
+//                 "is_active": true
+//             }
+//         ],
+//         "origin_protocol_policy": "http",
+//         "is_origin_redirection_enabled": false,
+//         "host_header": "${host}",
+//         "method": "",
+//         "origin_path": "/requests",
+//         "connection_timeout": 60,
+//         "timeout_between_bytes": 120,
+//         "hmac_authentication": false,
+//         "hmac_region_name": "",
+//         "hmac_access_key": "",
+//         "hmac_secret_key": ""
+//     },
+//     "schema_version": 3
+// }`
 
-var sucRespCacheSettings = `{
-    "results": {
-        "id": 138708,
-        "name": "Default Cache Settings2234",
-        "browser_cache_settings": "override",
-        "browser_cache_settings_maximum_ttl": 0,
-        "cdn_cache_settings": "override",
-        "cdn_cache_settings_maximum_ttl": 60,
-        "cache_by_query_string": "ignore",
-        "query_string_fields": null,
-        "enable_query_string_sort": false,
-        "cache_by_cookies": "ignore",
-        "cookie_names": null,
-        "adaptive_delivery_action": "ignore",
-        "device_group": [],
-        "enable_caching_for_post": false,
-        "l2_caching_enabled": false,
-        "is_slice_configuration_enabled": false,
-        "is_slice_edge_caching_enabled": false,
-        "is_slice_l2_caching_enabled": false,
-        "slice_configuration_range": 1024,
-        "enable_caching_for_options": false,
-        "enable_stale_cache": true,
-        "l2_region": null
-    },
-    "schema_version": 3
-}`
+// var sucRespCacheSettings = `{
+//     "results": {
+//         "id": 138708,
+//         "name": "Default Cache Settings2234",
+//         "browser_cache_settings": "override",
+//         "browser_cache_settings_maximum_ttl": 0,
+//         "cdn_cache_settings": "override",
+//         "cdn_cache_settings_maximum_ttl": 60,
+//         "cache_by_query_string": "ignore",
+//         "query_string_fields": null,
+//         "enable_query_string_sort": false,
+//         "cache_by_cookies": "ignore",
+//         "cookie_names": null,
+//         "adaptive_delivery_action": "ignore",
+//         "device_group": [],
+//         "enable_caching_for_post": false,
+//         "l2_caching_enabled": false,
+//         "is_slice_configuration_enabled": false,
+//         "is_slice_edge_caching_enabled": false,
+//         "is_slice_l2_caching_enabled": false,
+//         "slice_configuration_range": 1024,
+//         "enable_caching_for_options": false,
+//         "enable_stale_cache": true,
+//         "l2_region": null
+//     },
+//     "schema_version": 3
+// }`
 
-var sucRespRules = `{
-    "results": {
-        "id": 214790,
-        "name": "testorigin2",
-        "phase": "request",
-        "behaviors": [
-            {
-                "name": "set_origin",
-                "target": "116207"
-            }
-        ],
-        "criteria": [
-            [
-                {
-                    "variable": "${uri}",
-                    "operator": "starts_with",
-                    "conditional": "if",
-                    "input_value": "/"
-                }
-            ]
-        ],
-        "is_active": true,
-        "order": 1,
-        "description": ""
-    },
-    "schema_version": 3
-}`
+// var sucRespRules = `{
+//     "results": {
+//         "id": 214790,
+//         "name": "testorigin2",
+//         "phase": "request",
+//         "behaviors": [
+//             {
+//                 "name": "set_origin",
+//                 "target": "116207"
+//             }
+//         ],
+//         "criteria": [
+//             [
+//                 {
+//                     "variable": "${uri}",
+//                     "operator": "starts_with",
+//                     "conditional": "if",
+//                     "input_value": "/"
+//                 }
+//             ]
+//         ],
+//         "is_active": true,
+//         "order": 1,
+//         "description": ""
+//     },
+//     "schema_version": 3
+// }`
 
 func TestDeployCmd(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
