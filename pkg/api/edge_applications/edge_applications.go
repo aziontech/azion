@@ -328,6 +328,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 			if err != nil {
 				return nil, err
 			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
 		}
 	}
 
@@ -347,6 +348,7 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 			if errLog != nil {
 				return &sdk.RulesEngineResultResponse{}, errLog
 			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return &sdk.RulesEngineResultResponse{}, err
 	}
@@ -545,6 +547,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 			if err != nil {
 				return err
 			}
+			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 		logger.Debug("", zap.Any("Error", err.Error()))
 		return utils.ErrorPerStatusCode(httpResp, err)
@@ -580,7 +583,9 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 			if err != nil {
 				return err
 			}
+			return utils.ErrorPerStatusCode(httpResp, err)
 		}
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return nil

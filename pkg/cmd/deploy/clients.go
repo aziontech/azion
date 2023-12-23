@@ -21,6 +21,7 @@ type Clients struct {
 func NewClients(f *cmdutil.Factory) *Clients {
 	httpClient := f.HttpClient
 	apiURL := f.Config.GetString("api_url")
+	storageURL := f.Config.GetString("storage_url")
 	token := f.Config.GetString("token")
 
 	return &Clients{
@@ -28,7 +29,7 @@ func NewClients(f *cmdutil.Factory) *Clients {
 		EdgeApplication: apiEdgeApplications.NewClient(httpClient, apiURL, token),
 		Domain:          apiDomain.NewClient(httpClient, apiURL, token),
 		Origin:          apiOrigin.NewClient(httpClient, apiURL, token),
-		Bucket:          apiStorage.NewClientStorage(httpClient, apiURL, token),
-		Storage:         apiStorage.NewClient(httpClient, apiURL, token),
+		Bucket:          apiStorage.NewClientStorage(httpClient, storageURL, token),
+		Storage:         apiStorage.NewClient(httpClient, storageURL, token),
 	}
 }

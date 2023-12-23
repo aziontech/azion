@@ -2,8 +2,11 @@ package storage
 
 import (
 	"context"
-	"github.com/aziontech/azionapi-go-sdk/storage"
+	"fmt"
 	"net/http"
+
+	"github.com/aziontech/azionapi-go-sdk/storage"
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -11,7 +14,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/storageapi"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 )
 
 type Client struct {
@@ -47,11 +50,15 @@ func NewClientStorage(c *http.Client, url string, token string) *ClientStorage {
 }
 
 func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
+	logger.Debug("Creating bucket")
 	create := storage.BucketCreate{
 		Name:       name,
 		EdgeAccess: storage.READ_WRITE,
 	}
-	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create).Execute()
+
+	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create)
+	spew.Dump(req)
+	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while creating the project Bucket", zap.Error(err))
@@ -66,12 +73,25 @@ func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps) error {
-	req := c.apiClient.DefaultApi.StorageVersionIdPost(ctx, fileOps.VersionID).XAzionStaticPath(fileOps.Path).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
+	var file string
+	if conf.Prefix != "" {
+		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
+		logger.Debug("Object_key: " + file)
+	} else {
+		file = fileOps.Path
+	}
+	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, conf.Bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
-		return utils.ErrorPerStatusCode(httpResp, err)
+		if httpResp != nil {
+			logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+			return utils.ErrorPerStatusCode(httpResp, err)
+		}
 	}
 	return nil
 }

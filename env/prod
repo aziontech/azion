@@ -1,5 +1,5 @@
 API_URL=https://api.azionapi.net
 AUTH_URL=https://sso.azion.com/api
-STORAGE_URL=https://storage-api.azion.com
+STORAGE_URL=https://api.azion.com
 TEMPLATE_BRANCH=main
 TEMPLATE_MAJOR=0

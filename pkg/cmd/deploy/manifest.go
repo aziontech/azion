@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -13,7 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"go.uber.org/zap"
-	"strings"
 
 	thoth "github.com/aziontech/go-thoth"
 )
@@ -58,12 +59,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	logger.Debug("Execute manifest")
 	ctx := context.Background()
 
-	err := cmd.uploadFiles(f, conf.Prefix)
-	if err != nil {
-		return err
-	}
-
-	err = cmd.doApplication(clients.EdgeApplication, ctx, conf)
+	err := cmd.doApplication(clients.EdgeApplication, ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -74,6 +70,11 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	}
 
 	err = cmd.doBucket(clients.Bucket, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.uploadFiles(f, conf)
 	if err != nil {
 		return err
 	}
@@ -186,5 +187,5 @@ func checkFieldFrom(from string) (string, error) {
 		return doesNotMatch, nil
 	}
 
-	return "", errors.New("the value of 'from' not recognized")
+	return "", errors.New("the value of 'from' could not be recognized")
 }

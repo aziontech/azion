@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
@@ -17,6 +18,16 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
+
+var injectIntoFunction = `
+//---
+//storages:
+//   - name: assets
+//     bucket: %s
+//     prefix: %s
+//---
+
+`
 
 func (cmd *DeployCmd) doFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.ID == 0 {
@@ -114,7 +125,10 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	reqCre.SetCode(string(code))
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	newCode := append([]byte(prependText), code...)
+
+	reqCre.SetCode(string(newCode))
 
 	reqCre.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
@@ -154,7 +168,10 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	reqUpd.SetCode(string(code))
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	newCode := append([]byte(prependText), code...)
+
+	reqUpd.SetCode(string(newCode))
 
 	reqUpd.SetActive(true)
 	if conf.Function.Name == "__DEFAULT__" {
@@ -295,19 +312,22 @@ func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, c
 func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	reqOrigin := apiori.CreateRequest{}
 	var addresses []string
-	if len(conf.Origin.Address) > 0 {
-		address := prepareAddresses(conf.Origin.Address)
-		addresses = conf.Origin.Address
-		reqOrigin.SetAddresses(address)
-	} else {
-		strRequestAddresses := prepareAddresses(DefaultOrigin[:])
-		reqOrigin.SetAddresses(strRequestAddresses)
-	}
 	reqOrigin.SetName(conf.Name)
-	reqOrigin.SetHostHeader("${host}")
-
-	reqOrigin.Bucket = &conf.Bucket
-	reqOrigin.Prefix = &conf.Prefix
+	if conf.Mode == "deliver" {
+		reqOrigin.SetOriginType("object_storage")
+		reqOrigin.Bucket = &conf.Bucket
+		reqOrigin.Prefix = &conf.Prefix
+	} else {
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			addresses = conf.Origin.Address
+			reqOrigin.SetAddresses(address)
+		} else {
+			strRequestAddresses := prepareAddresses(DefaultOrigin[:])
+			reqOrigin.SetAddresses(strRequestAddresses)
+		}
+		reqOrigin.SetHostHeader("${host}")
+	}
 
 	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqOrigin)
 	if err != nil {

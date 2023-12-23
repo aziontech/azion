@@ -1,22 +1,20 @@
 {
 	"results": {
-		"supported_ciphers": "asdf",
-		"http3":  false,
-	  "id": 1673635841,
-	  "name": "New Edge Application",
-	  "delivery_protocol": "http,https",
-	  "http_port": [
+	"supported_ciphers": "asdf",
+	"http3":  false,
+	"id": 1673635841,
+	"name": "New Edge Application",
+	"delivery_protocol": "http,https",
+	"http_port": [
 		80
 	  ],
-	  "https_port": [
+	"https_port": [
 		443
 	  ],
 	  "minimum_tls_version": "",
 	  "active": true,
 	  "debug_rules": false,
-	  "http3": false,
 	  "websocket": null,
-	  "supported_ciphers": "all",
 	  "application_acceleration": false,
 	  "caching": true,
 	  "device_detection": false,
