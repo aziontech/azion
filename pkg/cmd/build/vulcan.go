@@ -26,6 +26,8 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 
 	command := vul.Command("", "build --preset %s --mode %s")
 
+	logger.FInfo(cmd.Io.Out, "Estou printando aqui")
+
 	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())

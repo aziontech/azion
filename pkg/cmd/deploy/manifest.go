@@ -106,12 +106,43 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			}
 		}
 
+		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
+		if err != nil {
+			logger.Debug("Error while updating rules engine", zap.Error(err))
+			return err
+		}
+
 		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while creating origin", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+
+		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+		
+		var behString sdk.RulesEngineBehaviorString
+		behString.SetName("set_origin")
+		behString.SetTarget(fmt.Sprintf("%d", conf.Origin.ID))
+		
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behString,
+		})	
+
+		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{	
+			IdApplication: conf.Application.ID,
+			Phase: "request",	
+			Id: ruleDefaultID,
+		}
+
+		reqUpdateRulesEngine.SetBehaviors(behaviors)
+
+		clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+		if err != nil {
+			logger.Debug("Error while updating rules engine", zap.Error(err))
+			return err
+		}
 
 		requestRules, err := requestRulesEngineManifest(conf.Origin.ID, InstanceID, route)
 		if err != nil {

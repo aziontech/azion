@@ -272,6 +272,23 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID int64,
 	return nil
 }
 
+func (c *Client) GetRulesDefault(ctx context.Context, applicationID int64, phase string) (int64, error) {
+	logger.Debug("Get Rules Engine Default")
+	request := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, applicationID, "request")
+	rules, httpResp, err := request.Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while deleting a Rules Engine", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return 0, err
+			}
+		}
+		return 0, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return rules.Results[0].Id, nil
+}
+
 func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesEngineRequest, idFunc int64) (EdgeApplicationsResponse, error) {
 	logger.Debug("Update Rules Engine Publish")
 	request := c.apiClient.EdgeApplicationsRulesEngineAPI.EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesGet(ctx, req.IdApplication, "request")
