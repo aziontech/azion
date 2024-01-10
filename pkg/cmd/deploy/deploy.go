@@ -124,9 +124,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	cliori := apiori.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
-	if err != nil {
-		return err
+	// skip upload when type = javascript (storage folder does not exist in this case)
+	if conf.Template != "javascript" {
+		err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = cmd.doFunction(client, ctx, conf)
