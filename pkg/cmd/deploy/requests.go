@@ -5,18 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 
-	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
+	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap"
+	"github.com/aziontech/azion-cli/utils"
 )
 
 var injectIntoFunction = `
@@ -106,12 +107,70 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return domainReturnedName[0], nil
 }
 
-func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	if conf.Origin.ID == 0 {
-		err := cmd.createAppRequirements(client, clientOrigin, ctx, conf)
+func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, mode string) error {
+	var addresses []string
+	var DefaultOrigin = [1]string{"httpbin.org"}
+
+	if conf.Origin.SingleOriginID == 0 {
+		reqSingleOrigin := apiori.CreateRequest{}
+
+		if len(conf.Origin.Address) > 0 {
+			address := prepareAddresses(conf.Origin.Address)
+			reqSingleOrigin.SetAddresses(address)
+		} else {
+			addresses := prepareAddresses(DefaultOrigin[:])
+			reqSingleOrigin.SetAddresses(addresses)
+		}
+
+		reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
+		reqSingleOrigin.SetHostHeader("${host}")
+
+		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
 		if err != nil {
+			logger.Debug("Error created object storage origin", zap.Any("Error", err))
 			return err
 		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+		conf.Origin.SingleOriginID = origin.GetOriginId()
+	}
+
+	if conf.Origin.StorageOriginID == 0 {
+		reqObjectStorageOrigin := apiori.CreateRequest{}
+		reqObjectStorageOrigin.SetName(utils.Concat(conf.Name, "_object"))
+		reqObjectStorageOrigin.SetOriginType("object_storage")
+		reqObjectStorageOrigin.Bucket = &conf.Bucket
+		reqObjectStorageOrigin.Prefix = &conf.Prefix
+
+		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqObjectStorageOrigin)
+		if err != nil {
+			logger.Debug("Error created object storage origin", zap.Any("Error", err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+		conf.Origin.StorageOriginID = origin.GetOriginId()
+		conf.Origin.Address = addresses
+		conf.Origin.Name = origin.GetName()
+
+		var reqCache apiapp.CreateCacheSettingsRequest
+		reqCache.SetName(conf.Name)
+
+		// create cache settings
+		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+		if err != nil {
+			logger.Debug("Error while creating cache settings", zap.Error(err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
+
+		// creates gzip and cache rules
+		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cache.GetId(), conf.Template, conf.Mode)
+		if err != nil {
+			logger.Debug("Error while creating rules engine", zap.Error(err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
 	}
 	return nil
 }
@@ -307,54 +366,6 @@ func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, c
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, domain.GetId()))
 	return domain, nil
-}
-
-func (cmd *DeployCmd) createAppRequirements(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	reqOrigin := apiori.CreateRequest{}
-	var addresses []string
-	reqOrigin.SetName(conf.Name)
-	if conf.Mode == "deliver" {
-		reqOrigin.SetOriginType("object_storage")
-		reqOrigin.Bucket = &conf.Bucket
-		reqOrigin.Prefix = &conf.Prefix
-	} else {
-		if len(conf.Origin.Address) > 0 {
-			address := prepareAddresses(conf.Origin.Address)
-			addresses = conf.Origin.Address
-			reqOrigin.SetAddresses(address)
-		} else {
-			strRequestAddresses := prepareAddresses(DefaultOrigin[:])
-			reqOrigin.SetAddresses(strRequestAddresses)
-		}
-		reqOrigin.SetHostHeader("${host}")
-	}
-
-	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqOrigin)
-	if err != nil {
-		return err
-	}
-
-	conf.Origin.ID = origin.GetOriginId()
-	conf.Origin.Address = addresses
-	conf.Origin.Name = origin.GetName()
-
-	var reqCache apiapp.CreateCacheSettingsRequest
-	reqCache.SetName(conf.Name)
-	cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
-	if err != nil {
-		logger.Debug("Error while creating cache settings", zap.Error(err))
-		return err
-	}
-	logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
-
-	err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cache.GetId(), conf.Template, conf.Mode)
-	if err != nil {
-		logger.Debug("Error while creating rules engine", zap.Error(err))
-		return err
-	}
-	logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
-
-	return nil
 }
 
 func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {

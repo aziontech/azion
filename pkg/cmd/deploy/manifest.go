@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -74,9 +75,12 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		return err
 	}
 
-	err = cmd.uploadFiles(f, conf)
-	if err != nil {
-		return err
+	// skip upload when type = javascript (storage folder does not exist in this case)
+	if conf.Template != "javascript" {
+		err = cmd.uploadFiles(f, conf)
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, route := range manifest.Routes {
@@ -97,14 +101,14 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 			}
 			InstanceID = instance.GetId()
-
-			// TODO: Review what to do when user updates Function ID directly in azion.json
-			err = cmd.updateRulesEngine(clients.EdgeApplication, ctx, conf)
-			if err != nil {
-				logger.Debug("Error while updating rules engine", zap.Error(err))
-				return err
-			}
 		}
+
+		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf, route.Type)
+		if err != nil {
+			logger.Debug("Error while creating origin", zap.Error(err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
 
 		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
 		if err != nil {
@@ -112,39 +116,36 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			return err
 		}
 
-		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
-		if err != nil {
-			logger.Debug("Error while creating origin", zap.Error(err))
-			return err
-		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
-
-
 		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-		
+
 		var behString sdk.RulesEngineBehaviorString
 		behString.SetName("set_origin")
-		behString.SetTarget(fmt.Sprintf("%d", conf.Origin.ID))
-		
+
+		if route.Type == "compute" {
+			behString.SetTarget(strconv.Itoa(int(conf.Origin.SingleOriginID)))
+		} else {
+			behString.SetTarget(strconv.Itoa(int(conf.Origin.StorageOriginID)))
+		}
+
 		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 			RulesEngineBehaviorString: &behString,
-		})	
+		})
 
-		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{	
+		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
 			IdApplication: conf.Application.ID,
-			Phase: "request",	
-			Id: ruleDefaultID,
+			Phase:         "request",
+			Id:            ruleDefaultID,
 		}
 
 		reqUpdateRulesEngine.SetBehaviors(behaviors)
 
-		clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
 		if err != nil {
 			logger.Debug("Error while updating rules engine", zap.Error(err))
 			return err
 		}
 
-		requestRules, err := requestRulesEngineManifest(conf.Origin.ID, InstanceID, route)
+		requestRules, err := requestRulesEngineManifest(conf.Origin.StorageOriginID, InstanceID, route)
 		if err != nil {
 			return err
 		}
@@ -152,6 +153,78 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &requestRules)
 		if err != nil {
 			return err
+		}
+
+		switch route.From {
+		case "/_next/static/":
+			logger.Debug("Create Rules to route /_next/static/ rewrite")
+
+			reqNextStatic := apiEdgeApplications.CreateRulesEngineRequest{}
+			reqNextStatic.SetName(fmt.Sprintf("rule_next_static_rewrite_%s", thoth.GenerateName()))
+
+			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+
+			// ---------------------------------
+			// capture match groups
+			// ---------------------------------
+
+			var behCaptureMatchGroups sdk.RulesEngineBehaviorObject
+
+			behCaptureMatchGroups.SetName("capture_match_groups")
+
+			behTarget := sdk.RulesEngineBehaviorObjectTarget{}
+			behTarget.SetCapturedArray("capture")
+			behTarget.SetSubject("${uri}")
+			behTarget.SetRegex("/_next/static/(.*)")
+
+			behCaptureMatchGroups.SetTarget(behTarget)
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorObject: &behCaptureMatchGroups,
+			})
+
+			// ---------------------------------
+			// rewrite request 
+			// ---------------------------------
+
+			var behRewriteRequest sdk.RulesEngineBehaviorString
+
+			behRewriteRequest.SetName("rewrite_request")
+			behRewriteRequest.SetTarget("/.next/static/%{capture[1]}")
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behRewriteRequest,
+			})
+
+			// ---------------------------------
+			// deliver 
+			// ---------------------------------
+
+			var behDeliver sdk.RulesEngineBehaviorString
+
+			behDeliver.SetName("deliver")
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behDeliver,
+			})
+
+			reqNextStatic.SetBehaviors(behaviors)
+			
+			criteria := make([][]sdk.RulesEngineCriteria, 1)
+			for i := 0; i < 1; i++ {
+				criteria[i] = make([]sdk.RulesEngineCriteria, 1)
+			}
+					
+			criteria[0][0].SetConditional("if")
+			criteria[0][0].SetVariable("${uri}")
+			criteria[0][0].SetOperator("starts_with")
+			criteria[0][0].SetInputValue(route.From)
+			reqNextStatic.SetCriteria(criteria)
+
+			_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &reqNextStatic)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = cmd.WriteAzionJsonContent(conf)
@@ -162,7 +235,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	}
 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, "https://"+domainName))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, utils.Concat("https://", domainName)))
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 	return nil
 }
@@ -174,19 +247,33 @@ func requestRulesEngineManifest(originID, functionID int64, routes Routes) (apiE
 	req.SetName(fmt.Sprintf("rules_manifest_%s", thoth.GenerateName()))
 
 	behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-	var behStringCache sdk.RulesEngineBehaviorString
 
 	if routes.Type == "compute" {
-		behStringCache.SetName("run_function")
-		behStringCache.SetTarget(fmt.Sprintf("%d", functionID))
-	} else {
-		behStringCache.SetName("set_origin")
-		behStringCache.SetTarget(fmt.Sprintf("%d", originID))
-	}
+		var behFunction sdk.RulesEngineBehaviorString
+		behFunction.SetName("run_function")
+		behFunction.SetTarget(fmt.Sprintf("%d", functionID))
 
-	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-		RulesEngineBehaviorString: &behStringCache,
-	})
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behFunction,
+		})
+	} else {
+		var behOrigin sdk.RulesEngineBehaviorString
+		behOrigin.SetName("set_origin")
+		behOrigin.SetTarget(fmt.Sprintf("%d", originID))
+
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behOrigin,
+		})
+
+		// var behOriginObject sdk.RulesEngineBehaviorObject
+
+		// var behDeliver sdk.RulesEngineBehaviorString
+		// behDeliver.SetName("deliver")
+		//
+		// behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+		// 	RulesEngineBehaviorString: &behDeliver,
+		// })
+	}
 
 	req.SetBehaviors(behaviors)
 
@@ -214,7 +301,7 @@ func checkFieldFrom(from string) (string, error) {
 		startWith := "starts_with"
 		return startWith, nil
 	} else if strings.HasPrefix(from, "\\.") && strings.HasSuffix(from, "$") {
-		doesNotMatch := "does_not_match"
+		doesNotMatch := "matches"
 		return doesNotMatch, nil
 	}
 
