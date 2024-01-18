@@ -160,7 +160,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			logger.Debug("Create Rules to route /_next/static/ rewrite")
 
 			reqNextStatic := apiEdgeApplications.CreateRulesEngineRequest{}
-			reqNextStatic.SetName(fmt.Sprintf("rule_rewrite_next_static"))
+			reqNextStatic.SetName("rule_rewrite_next_static")
 
 			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
@@ -229,7 +229,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			logger.Debug("Create Rules to route \\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$ rewrite")
 
 			reqAssets := apiEdgeApplications.CreateRulesEngineRequest{}
-			reqAssets.SetName(fmt.Sprintf("rule_rewrite_assets"))
+			reqAssets.SetName("rule_rewrite_assets")
 
 			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
