@@ -128,7 +128,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 
 			origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
 			if err != nil {
-				logger.Debug("Error created object storage origin", zap.Any("Error", err))
+				logger.Debug("Error creating the default origin", zap.Any("Error", err))
 				return err
 			}
 			logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
@@ -146,7 +146,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 
 		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqObjectStorageOrigin)
 		if err != nil {
-			logger.Debug("Error created object storage origin", zap.Any("Error", err))
+			logger.Debug("Error while creating origin of type object storage", zap.Any("Error", err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)

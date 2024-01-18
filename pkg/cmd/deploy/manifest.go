@@ -112,7 +112,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 
 		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
 		if err != nil {
-			logger.Debug("Error while updating rules engine", zap.Error(err))
+			logger.Debug("Error while getting default rules engine", zap.Error(err))
 			return err
 		}
 
@@ -141,7 +141,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 
 		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
 		if err != nil {
-			logger.Debug("Error while updating rules engine", zap.Error(err))
+			logger.Debug("Error while updating default rules engine", zap.Error(err))
 			return err
 		}
 

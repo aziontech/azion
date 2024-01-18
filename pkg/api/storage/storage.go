@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/aziontech/azionapi-go-sdk/storage"
-	"github.com/davecgh/go-spew/spew"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -57,7 +56,6 @@ func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
 	}
 
 	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create)
-	spew.Dump(req)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
