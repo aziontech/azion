@@ -225,6 +225,75 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			if err != nil {
 				return err
 			}
+		case "\\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$":
+			logger.Debug("Create Rules to route \\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$ rewrite")
+
+			reqAssets := apiEdgeApplications.CreateRulesEngineRequest{}
+			reqAssets.SetName(fmt.Sprintf("rule_assets_rewrite_%s", thoth.GenerateName()))
+
+			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+
+			// ---------------------------------
+			// capture match groups
+			// ---------------------------------
+
+			var behCaptureMatchGroups sdk.RulesEngineBehaviorObject
+
+			behCaptureMatchGroups.SetName("capture_match_groups")
+
+			behTarget := sdk.RulesEngineBehaviorObjectTarget{}
+			behTarget.SetCapturedArray("capture")
+			behTarget.SetSubject("${uri}")
+			behTarget.SetRegex("/(.*)")
+
+			behCaptureMatchGroups.SetTarget(behTarget)
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorObject: &behCaptureMatchGroups,
+			})
+
+			// ---------------------------------
+			// rewrite request 
+			// ---------------------------------
+
+			var behRewriteRequest sdk.RulesEngineBehaviorString
+
+			behRewriteRequest.SetName("rewrite_request")
+			behRewriteRequest.SetTarget("/public/%{capture[1]}")
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behRewriteRequest,
+			})
+
+			// ---------------------------------
+			// deliver 
+			// ---------------------------------
+
+			var behDeliver sdk.RulesEngineBehaviorString
+
+			behDeliver.SetName("deliver")
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behDeliver,
+			})
+
+			reqAssets.SetBehaviors(behaviors)
+			
+			criteria := make([][]sdk.RulesEngineCriteria, 1)
+			for i := 0; i < 1; i++ {
+				criteria[i] = make([]sdk.RulesEngineCriteria, 1)
+			}
+					
+			criteria[0][0].SetConditional("if")
+			criteria[0][0].SetVariable("${uri}")
+			criteria[0][0].SetOperator("matches")
+			criteria[0][0].SetInputValue(route.From)
+			reqAssets.SetCriteria(criteria)
+
+			_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &reqAssets)
+			if err != nil {
+				return err
+			}
 		}
 
 		err = cmd.WriteAzionJsonContent(conf)
