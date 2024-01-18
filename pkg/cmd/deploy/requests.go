@@ -307,18 +307,6 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	return nil
 }
 
-func (cmd *DeployCmd) updateRulesEngine(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	reqRules := apiapp.UpdateRulesEngineRequest{}
-	reqRules.IdApplication = conf.Application.ID
-
-	_, err := client.UpdateRulesEnginePublish(ctx, &reqRules, InstanceID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
 	ctx := context.Background()
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
