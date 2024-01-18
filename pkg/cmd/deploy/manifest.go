@@ -75,8 +75,8 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		return err
 	}
 
-	// skip upload when type = javascript (storage folder does not exist in this case)
-	if conf.Template != "javascript" {
+	// skip upload when type = javascript, typescript (storage folder does not exist in this case)
+	if conf.Template != "javascript" && conf.Template != "typescript" {
 		err = cmd.uploadFiles(f, conf)
 		if err != nil {
 			return err
@@ -333,15 +333,6 @@ func requestRulesEngineManifest(originID, functionID int64, routes Routes) (apiE
 		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 			RulesEngineBehaviorString: &behOrigin,
 		})
-
-		// var behOriginObject sdk.RulesEngineBehaviorObject
-
-		// var behDeliver sdk.RulesEngineBehaviorString
-		// behDeliver.SetName("deliver")
-		//
-		// behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-		// 	RulesEngineBehaviorString: &behDeliver,
-		// })
 	}
 
 	req.SetBehaviors(behaviors)
