@@ -111,28 +111,30 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 	var addresses []string
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
-	if conf.Origin.SingleOriginID == 0 {
-		reqSingleOrigin := apiori.CreateRequest{}
+	if conf.Mode == "Compute" {
+		if conf.Origin.SingleOriginID == 0 {
+			reqSingleOrigin := apiori.CreateRequest{}
 
-		if len(conf.Origin.Address) > 0 {
-			address := prepareAddresses(conf.Origin.Address)
-			reqSingleOrigin.SetAddresses(address)
-		} else {
-			addresses := prepareAddresses(DefaultOrigin[:])
-			reqSingleOrigin.SetAddresses(addresses)
+			if len(conf.Origin.Address) > 0 {
+				address := prepareAddresses(conf.Origin.Address)
+				reqSingleOrigin.SetAddresses(address)
+			} else {
+				addresses := prepareAddresses(DefaultOrigin[:])
+				reqSingleOrigin.SetAddresses(addresses)
+			}
+
+			reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
+			reqSingleOrigin.SetHostHeader("${host}")
+
+			origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
+			if err != nil {
+				logger.Debug("Error created object storage origin", zap.Any("Error", err))
+				return err
+			}
+			logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+			conf.Origin.SingleOriginID = origin.GetOriginId()
 		}
-
-		reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
-		reqSingleOrigin.SetHostHeader("${host}")
-
-		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
-		if err != nil {
-			logger.Debug("Error created object storage origin", zap.Any("Error", err))
-			return err
-		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
-
-		conf.Origin.SingleOriginID = origin.GetOriginId()
 	}
 
 	if conf.Origin.StorageOriginID == 0 {

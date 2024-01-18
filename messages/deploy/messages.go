@@ -25,7 +25,7 @@ var (
 	DeployPropagation                 = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
-	BucketInUse                       = "This bucket's name is already in use, please type another one"
+	BucketInUse                       = "This bucket's name is already in use, please try another one"
 	AskInputName                      = "Your bucket's name:"
 	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
 )

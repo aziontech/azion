@@ -9,7 +9,6 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 )
 
@@ -25,7 +24,7 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 	for {
 		err = client.CreateBucket(ctx, name)
 		// if the bucket name is already in use, we ask for another one
-		if errors.Is(err, utils.ErrorBucketInUse) {
+		if errors.Is(err, errors.New(msg.BucketInUse)) {
 			logger.FInfo(cmd.Io.Out, msg.BucketInUse)
 			projName, err := askForInput(msg.AskInputName, thoth.GenerateName())
 			if err != nil {
