@@ -363,7 +363,7 @@ func checkTlsVersion(body string) error {
 }
 
 func checkNameInUse(body string) error {
-	if strings.Contains(body, "name_already_in_use") {
+	if strings.Contains(body, "name_already_in_use") || strings.Contains(body, "bucket name is already in use") {
 		return ErrorNameInUse
 	}
 	return nil

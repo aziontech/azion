@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/aziontech/azionapi-go-sdk/storage"
-
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/aziontech/azionapi-go-sdk/storage"
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 )
 
