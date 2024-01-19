@@ -108,6 +108,9 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 }
 
 func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+	if conf.Template == "javascript" || conf.Template == "typescript" {
+		return nil
+	}
 	var addresses []string
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
