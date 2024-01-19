@@ -84,6 +84,10 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	}
 
 	for _, route := range manifest.Routes {
+		if route.From == "/_next/data/" {
+			continue
+		}
+
 		if route.Type == "compute" {
 			conf.Function.File = ".edge/worker.js"
 			err := cmd.doFunction(clients.EdgeFunction, ctx, conf)
