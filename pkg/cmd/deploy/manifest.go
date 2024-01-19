@@ -121,33 +121,44 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			return err
 		}
 
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+		if strings.ToLower(conf.Template) == "javascript" || strings.ToLower(conf.Template) == "typescript" {
+			reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
+			reqRules.IdApplication = conf.Application.ID
 
-		var behString sdk.RulesEngineBehaviorString
-		behString.SetName("set_origin")
-
-		if route.Type == "compute" {
-			behString.SetTarget(strconv.Itoa(int(conf.Origin.SingleOriginID)))
+			_, err := clients.EdgeApplication.UpdateRulesEnginePublish(ctx, &reqRules, InstanceID)
+			if err != nil {
+				return err
+			}
+			continue
 		} else {
-			behString.SetTarget(strconv.Itoa(int(conf.Origin.StorageOriginID)))
-		}
+			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
+			var behString sdk.RulesEngineBehaviorString
+			behString.SetName("set_origin")
 
-		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-			IdApplication: conf.Application.ID,
-			Phase:         "request",
-			Id:            ruleDefaultID,
-		}
+			if route.Type == "compute" {
+				behString.SetTarget(strconv.Itoa(int(conf.Origin.SingleOriginID)))
+			} else {
+				behString.SetTarget(strconv.Itoa(int(conf.Origin.StorageOriginID)))
+			}
 
-		reqUpdateRulesEngine.SetBehaviors(behaviors)
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behString,
+			})
 
-		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-		if err != nil {
-			logger.Debug("Error while updating default rules engine", zap.Error(err))
-			return err
+			reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
+				IdApplication: conf.Application.ID,
+				Phase:         "request",
+				Id:            ruleDefaultID,
+			}
+
+			reqUpdateRulesEngine.SetBehaviors(behaviors)
+
+			_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+			if err != nil {
+				logger.Debug("Error while updating default rules engine", zap.Error(err))
+				return err
+			}
 		}
 
 		if strings.ToLower(conf.Mode) == "compute" {
