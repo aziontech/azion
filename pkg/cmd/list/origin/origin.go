@@ -87,13 +87,13 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		for _, v := range resp.Results {
 			tbl.AddRow(
-				v.OriginKey,
+				*v.OriginKey,
 				utils.TruncateString(v.Name),
-				v.OriginId,
-				v.OriginType,
-				v.OriginPath,
+				*v.OriginId,
+				*v.OriginType,
+				*v.OriginPath,
 				v.Addresses,
-				v.ConnectionTimeout,
+				*v.ConnectionTimeout,
 			)
 		}
 

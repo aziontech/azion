@@ -1,19 +1,20 @@
 {
-    "name": "varejo",
-    "env": "production",
-    "Function": {
-      "name": "__DEFAULT__",
-      "file": "./dist/main.js",
-      "args": "./args.json",
-      "language": "javascript"
-    },
-    "application": {
-      "name": "__DEFAULT__"
-    },
-    "domain": {
-      "name": "__DEFAULT__"
-    },
-    "rt-purge": {
-      "purge_on_publish": true
-    }
+  "name": "varejo",
+  "env": "production",
+  "Function": {
+    "name": "__DEFAULT__",
+    "file": "./dist/main.js",
+    "args": "./args.json",
+    "language": "javascript",
+    "id": 123321
+  },
+  "application": {
+    "name": "__DEFAULT__"
+  },
+  "domain": {
+    "name": "__DEFAULT__"
+  },
+  "rt-purge": {
+    "purge_on_publish": true
   }
+}

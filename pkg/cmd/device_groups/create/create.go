@@ -19,6 +19,7 @@ type Fields struct {
 	ApplicationID int64
 	Name          string
 	UserAgent     string
+	Addresses     string
 	Path          string
 }
 

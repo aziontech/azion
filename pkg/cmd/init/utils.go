@@ -33,6 +33,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return userInput, nil
 }
 

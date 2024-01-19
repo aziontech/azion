@@ -20,8 +20,10 @@
         "connection_timeout": 60,
         "timeout_between_bytes": 120,
         "hmac_authentication": false,
+        "hmac_secret_key": "",
         "hmac_region_name": "",
-        "hmac_access_key": ""
+        "hmac_access_key": "",
+        "hmac_secret_key": ""
     },
     "schema_version": 3
 }

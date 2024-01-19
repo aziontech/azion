@@ -14,7 +14,7 @@ var (
 	WebAppInitCmdSuccess                  = "Template successfully fetched and configured\n\n"
 	InitGettingTemplates                  = "\nGetting modes available (Some dependencies may need to be installed)\n"
 	InitGettingVulcan                     = "Getting templates available\n"
-	InitProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your application's name: "
+	InitProjectQuestion                   = "Your application's name: "
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init command"
 	EdgeApplicationsInitSuccessful        = "Your application %s was initialized successfully\n"
 	EdgeApplicationsInitNameNotSent       = "The application name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n\n"

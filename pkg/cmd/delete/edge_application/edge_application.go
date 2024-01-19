@@ -78,21 +78,21 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 				return err //message with error
 			}
 		}
-		if azionJson.Application.Id == 0 {
+		if azionJson.Application.ID == 0 {
 			return msg.ErrorMissingApplicationIdJson
 		}
 		clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
 		clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
 
-		err = clientapp.Delete(ctx, azionJson.Application.Id)
+		err = clientapp.Delete(ctx, azionJson.Application.ID)
 		if err != nil {
 			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
 		}
 
-		if azionJson.Function.Id == 0 {
+		if azionJson.Function.ID == 0 {
 			fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
 		} else {
-			err = clientfunc.Delete(ctx, azionJson.Function.Id)
+			err = clientfunc.Delete(ctx, azionJson.Function.ID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
 			}
