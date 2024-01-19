@@ -337,8 +337,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				return err
 			}
 
-			//ROOT
-
 			reqDeliverRoot := apiEdgeApplications.CreateRulesEngineRequest{}
 			reqDeliverRoot.SetName("rule_rewrite_deliver_root")
 
