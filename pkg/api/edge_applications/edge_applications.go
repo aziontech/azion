@@ -296,7 +296,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 	edgeApplicationRules, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
