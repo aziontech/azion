@@ -52,7 +52,7 @@ type InitCmd struct {
 	CommandRunner         func(cmd string, envvars []string) (string, int, error)
 	CommandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
-	ShouldDevDeploy       func(info *InitInfo, msg string) (bool, error)
+	ShouldDevDeploy       func(info *InitInfo, msg string) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	ChangeDir             func(dir string) error
@@ -135,6 +135,7 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
 		if info.Name == "" {
+
 			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
@@ -163,15 +164,10 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		return msg.ErrorWorkingDir
 	}
 
-	shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
-	if err != err {
-		return err
-	}
+	shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
+
 	if shouldDev {
-		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
-		if err != err {
-			return err
-		}
+		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 
 		if shouldDeps {
 			answer, err := utils.GetPackageManager()
@@ -196,12 +192,10 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		logger.FInfo(cmd.Io.Out, msg.InitDevCommand)
 	}
 
-	shouldDeploy, err := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
-	if err != err {
-		return err
-	}
+	shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
 	if shouldDeploy {
-		shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
+
+		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project")
 		if err != err {
 			return err
 		}

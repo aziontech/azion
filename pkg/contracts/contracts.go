@@ -26,10 +26,11 @@ type DescribeOptions struct {
 type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
-	Template    string                   `json:"template"`
-	Mode        string                   `json:"mode"`
+	Bucket      string                   `json:"bucket"`
+	Template    string                   `json:"template"` // framework: react, next, vue, angular and etc
+	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
-	VersionID   string                   `json:"version-id"`
+	Prefix      string                   `json:"prefix"`
 	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
@@ -77,21 +78,22 @@ type CacheConf struct {
 }
 
 type AzionJsonDataFunction struct {
-	Id   int64  `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	File string `json:"file"`
 	Args string `json:"args"`
 }
 
 type AzionJsonDataApplication struct {
-	Id   int64  `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }
 
 type AzionJsonDataOrigin struct {
-	Id      int64    `json:"id"`
-	Name    string   `json:"name"`
-	Address []string `json:"address"`
+	SingleOriginID  int64    `json:"single-origin-id"`
+	StorageOriginID int64    `json:"storage-origin-id"`
+	Name            string   `json:"name"`
+	Address         []string `json:"address"`
 }
 
 type AzionJsonDataDomain struct {

@@ -1,19 +1,8 @@
 package deploy
 
 import (
-	"context"
-	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
-	"strings"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
-	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
-	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -22,6 +11,9 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"io/fs"
+	"os"
+	"path/filepath"
 )
 
 type DeployCmd struct {
@@ -38,10 +30,11 @@ type DeployCmd struct {
 	F                     *cmdutil.Factory
 }
 
-var InstanceId int64
-var Path string
-
-var DEFAULTORIGIN [1]string = [1]string{"www.example.com"}
+var (
+	InstanceID    int64
+	Path          string
+	DefaultOrigin = [1]string{"www.example.com"}
+)
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
@@ -86,9 +79,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
-	// Run build command
-	build := cmd.BuildCmd(f)
-	err := build.Run()
+	buildCmd := cmd.BuildCmd(f)
+	err := buildCmd.Run()
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 		return err
@@ -96,65 +88,22 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
 	}
 
-	var pathStatic string
-	conf.Function.File = ".edge/worker.js"
-
-	switch conf.Template {
-	// legacy type - will be removed once Framework Adapter is fully substituted by Vulcan
-	case "nextjs":
-		pathStatic = ".vercel/output/static"
-		conf.Function.File = "./out/worker.js"
-	case "static":
-		pathStatic = "dist"
-	default:
-		pathStatic = ".edge/storage"
-	}
-
-	if Path != "" {
-		modified := strings.Replace(Path, "./", "", -1)
-		pathStatic = modified
-	}
-
-	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clidom := apidom.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	cliori := apiori.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	ctx := context.Background()
-
-	err = cmd.uploadFiles(f, pathStatic, conf.VersionID)
+	manifest, err := readManifest(cmd)
 	if err != nil {
+		logger.Debug("Error while reading manifest", zap.Error(err))
 		return err
 	}
 
-	err = cmd.doFunction(client, ctx, conf)
+	clients := NewClients(f)
+	err = manifest.Interpreted(f, cmd, conf, clients)
 	if err != nil {
+		logger.Debug("Error while interpreting manifest", zap.Error(err))
 		return err
 	}
-	err = cmd.doApplication(cliapp, ctx, conf)
-	if err != nil {
-		return err
-	}
-	domainName, err := cmd.doDomain(clidom, ctx, conf)
-	if err != nil {
-		return err
-	}
-	err = cmd.doOrigin(cliapp, cliori, ctx, conf)
-	if err != nil {
-		return err
-	}
-
-	err = cmd.WriteAzionJsonContent(conf)
-	if err != nil {
-		logger.Debug("Error while writing azion.json file", zap.Error(err))
-		return err
-	}
-
-	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, "https://"+domainName))
-	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 
 	return nil
 }

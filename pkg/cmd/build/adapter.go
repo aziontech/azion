@@ -20,7 +20,7 @@ func adapter(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 		return err
 	}
 
-	conf.VersionID = versionID
+	conf.Prefix = versionID
 
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {

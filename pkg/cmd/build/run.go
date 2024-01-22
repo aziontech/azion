@@ -50,7 +50,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 
 	if conf.Template == "static" {
 		versionID := cmd.VersionID()
-		conf.VersionID = versionID
+		conf.Prefix = versionID
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {

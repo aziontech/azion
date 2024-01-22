@@ -48,8 +48,8 @@ type LinkCmd struct {
 	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
-	ShouldConfigure       func(info *LinkInfo) (bool, error)
-	ShouldDevDeploy       func(info *LinkInfo, msg string) (bool, error)
+	ShouldConfigure       func(info *LinkInfo) bool
+	ShouldDevDeploy       func(info *LinkInfo, msg string) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	F                     *cmdutil.Factory
@@ -131,10 +131,7 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 	}
 	info.PathWorkingDir = path
 
-	shouldLink, err := cmd.ShouldConfigure(info)
-	if err != nil {
-		return err
-	}
+	shouldLink := cmd.ShouldConfigure(info)
 	if !shouldLink {
 		return nil
 	}
@@ -180,15 +177,10 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
 
 		if !info.Auto {
-			shouldDev, err := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
-			if err != err {
-				return err
-			}
+			shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
+
 			if shouldDev {
-				shouldDeps, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
-				if err != err {
-					return err
-				}
+				shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
 
 				if shouldDeps {
 					answer, err := utils.GetPackageManager()
@@ -213,15 +205,10 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
 			}
 
-			shouldDeploy, err := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
-			if err != err {
-				return err
-			}
+			shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
+
 			if shouldDeploy {
-				shouldYarn, err := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project")
-				if err != err {
-					return err
-				}
+				shouldYarn := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project")
 
 				if shouldYarn {
 					answer, err := utils.GetPackageManager()

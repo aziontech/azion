@@ -17,6 +17,7 @@ var (
 	DeployOutputDomainCreate          = "Created Domain %v with ID %v\n"
 	DeployOutputDomainUpdate          = "Updated Domain %v with ID %v\n"
 	EdgeApplicationDeployPathFlag     = "Path to where your static files are stored"
+	OriginsSuccessful                 = "Created Origin for edge application\n"
 	CacheSettingsSuccessful           = "Created Cache Settings for Edge Application\n"
 	DeployInputAddress                = "Please inform an address to be used in the Origin of this application: "
 	RulesEngineSuccessful             = "Created Rules Engine for Edge Application\n"
@@ -24,4 +25,7 @@ var (
 	DeployPropagation                 = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
+	BucketInUse                       = "This bucket's name is already in use, please try another one"
+	AskInputName                      = "Your bucket's name:"
+	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
 )

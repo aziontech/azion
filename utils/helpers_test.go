@@ -63,7 +63,7 @@ func TestCobraCmd(t *testing.T) {
 		azJsonData.Name = "Test01"
 		azJsonData.Function.Name = "MyFunc"
 		azJsonData.Function.File = "myfile.js"
-		azJsonData.Function.Id = 476
+		azJsonData.Function.ID = 476
 
 		_ = WriteAzionJsonContent(&azJsonData)
 
@@ -83,7 +83,7 @@ func TestCobraCmd(t *testing.T) {
 		require.Contains(t, azJsonData.Name, "Test01")
 		require.Contains(t, azJsonData.Function.Name, "MyFunc")
 		require.Contains(t, azJsonData.Function.File, "myfile.js")
-		require.EqualValues(t, azJsonData.Function.Id, 476)
+		require.EqualValues(t, azJsonData.Function.ID, 476)
 	})
 
 	t.Run("returns invalid order_by", func(t *testing.T) {

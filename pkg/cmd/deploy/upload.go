@@ -14,7 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, versionID string) error {
+var pathStatic = ".edge/storage"
+
+func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -43,7 +45,7 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, version
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go worker(jobs, results, &currentFile, clientUpload)
+		go worker(jobs, results, &currentFile, clientUpload, conf)
 	}
 
 	bar := progressbar.NewOptions(
@@ -80,7 +82,6 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, pathStatic string, version
 				Path:        fileString,
 				MimeType:    mimeType.MediaType(),
 				FileContent: fileContent,
-				VersionID:   versionID,
 			}
 
 			jobs <- fileOptions

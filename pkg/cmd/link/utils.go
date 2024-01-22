@@ -9,38 +9,23 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/vulcan"
 	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	helpers "github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
-func shouldConfigure(info *LinkInfo) (bool, error) {
+func shouldConfigure(info *LinkInfo) bool {
 	if info.GlobalFlagAll || info.Auto {
-		return true, nil
+		return true
 	}
-	var shouldConfigure bool
 	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
+	return helpers.Confirm(msg)
 }
 
-func shouldDevDeploy(info *LinkInfo, msg string) (bool, error) {
+func shouldDevDeploy(info *LinkInfo, msg string) bool {
 	if info.GlobalFlagAll {
-		return true, nil
+		return true
 	}
-	var shouldConfigure bool
-	prompt := &survey.Confirm{
-		Message: msg,
-	}
-	err := survey.AskOne(prompt, &shouldConfigure)
-	if err != nil {
-		return false, err
-	}
-	return shouldConfigure, nil
+	return helpers.Confirm(msg)
 }
 
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
@@ -50,13 +35,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
-			prompt := &survey.Confirm{
-				Message: "This project was already configured. Do you want to override the previous configuration?",
-			}
-			err := survey.AskOne(prompt, &shouldFetchTemplates)
-			if err != nil {
-				return false, err
-			}
+			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration?"), nil
 		}
 
 		if shouldFetchTemplates {
