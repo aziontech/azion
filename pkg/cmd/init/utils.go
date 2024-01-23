@@ -89,8 +89,8 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		if err != nil {
 			return err
 		}
-		info.Template = preset
-		info.Mode = answer
+		info.Template = strings.ToLower(preset)
+		info.Mode = strings.ToLower(answer)
 		return nil
 	}
 
@@ -101,7 +101,7 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 
 	var mds string = newLineSplit[0]
 
-	info.Template = preset
+	info.Template = strings.ToLower(preset)
 	info.Mode = strings.ToLower(mds)
 	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
 

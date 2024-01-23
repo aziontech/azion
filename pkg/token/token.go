@@ -56,7 +56,7 @@ func (t *Token) Validate(token *string) (bool, error) {
 }
 
 func (t *Token) Save(b []byte) (string, error) {
-	logger.Debug("Save token", zap.Any("byte", string(b)))
+	logger.Debug("Saved token", zap.Any("byte", string(b)))
 	filePath, err := config.Dir()
 	if err != nil {
 		return "", err
