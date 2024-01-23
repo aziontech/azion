@@ -114,7 +114,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 	var addresses []string
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
-	if conf.Mode == "Compute" {
+	if conf.Mode == "compute" {
 		if conf.Origin.SingleOriginID == 0 {
 			reqSingleOrigin := apiori.CreateRequest{}
 
