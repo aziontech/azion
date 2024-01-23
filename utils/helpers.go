@@ -562,6 +562,10 @@ func Confirm(msg string) bool {
 	scanner.Scan()
 	confirm := scanner.Text()
 
+	if confirm == "" {
+		return false
+	}
+
 	switch confirm {
 	case "y", "Y":
 		return true
