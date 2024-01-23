@@ -20,6 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
+// inject this conde into worker.js
 var injectIntoFunction = `
 //---
 //storages:
