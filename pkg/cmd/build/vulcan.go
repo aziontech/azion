@@ -26,20 +26,12 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 
 	command := vul.Command("", "build --preset %s --mode %s")
 
-	logger.FInfo(cmd.Io.Out, "Estou printando aqui")
-
 	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
 
-	envPath := conf.ProjectRoot + "/.edge/.env"
-	fileEnv, err := cmd.FileReader(envPath)
-	if err != nil {
-		return msg.ErrorEnvFileVulcan
-	}
-	verIdSlice := strings.Split(string(fileEnv), "=")
-	versionID := verIdSlice[1]
+	versionID := cmd.VersionID()
 
 	conf.Prefix = versionID
 
