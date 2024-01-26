@@ -26,7 +26,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.UpdateUsage,
+		Use:           msg.Usage,
 		Short:         msg.UpdateShortDescription,
 		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,
@@ -42,7 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorMissingVariableIdArgument
 			}
 
-			request := api.UpdateRequest{}
+			request := api.Request{}
 
 			if cmd.Flags().Changed("in") {
 				var (

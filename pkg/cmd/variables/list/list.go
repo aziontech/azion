@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	listCmd := &cobra.Command{
-		Use:           msg.VariablesListUsage,
+		Use:           msg.Usage,
 		Short:         msg.VariablesListShortDescription,
 		Long:          msg.VariablesListLongDescription,
 		SilenceUsage:  true,
