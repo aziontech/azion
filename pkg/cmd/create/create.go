@@ -10,6 +10,7 @@ import (
 	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/create/rules_engine"
+	"github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -22,6 +23,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion create --help
 		$ azion create edge-application -h
 		$ azion create rules-engine -h
+		$ azion create domain -h
+		$ azion create token -h
+		$ azion create origin -h
+		$ azion create cache-setting -h
+		$ azion create edge-function -h
+		$ azion create variables -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -35,6 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cacheSetting.NewCmd(f))
 	cmd.AddCommand(edgeFunction.NewCmd(f))
+	cmd.AddCommand(variables.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

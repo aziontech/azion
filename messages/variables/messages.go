@@ -1,15 +1,15 @@
 package variables
 
 var (
-	// [ variables ]
 	Usage            = "variables"
+
+	// [ variables ]
 	ShortDescription = "Manages your environment variables and secrets"
 	LongDescription  = "Manages your environment variables and secrets to be used inside Edge Functions"
 	FlagHelp         = "Displays more information about the variables command"
 	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
 	// [ describe ]
-	DescribeUsage            = "describe --variable-id <variable_id> [flags]"
 	DescribeShortDescription = "Returns the specific variable's key and value"
 	DescribeLongDescription  = "Displays information about a variable based on a given UUID to show the variable's attributes in detail"
 	DescribeFlagOut          = "Exports the output to the given filepath, such as: <file_path/file_name.ext>"
@@ -20,7 +20,6 @@ var (
 	FileWritten = "File successfully written to: %s\n"
 
 	// [ list ]
-	VariablesListUsage            = "list [flags]"
 	VariablesListShortDescription = "Displays your variables in a list"
 	VariablesListLongDescription  = "Displays all your environment variables and secrets in a list"
 	VariablesListHelpFlag         = "Displays more information about the list subcommand"
@@ -33,7 +32,6 @@ var (
 	DeleteLongDescription  = "Deletes a variable based on its UUID"
 
 	//update cmd
-	UpdateUsage            = "update --variable-id <variable_id> [flags]"
 	UpdateShortDescription = "Modifies a variable's attributes"
 	UpdateLongDescription  = "Modifies a variable's attributes based on its UUID"
 	UpdateFlagKey          = "The variable's key"
@@ -44,13 +42,16 @@ var (
 	UpdateHelpFlag         = "Displays more information about the update subcommand"
 
 	// [ create ]
-	CreateUsage            = "create [flags]"
 	CreateShortDescription = "Creates a new environment variable or secret"
 	CreateLongDescription  = "Creates a new environment variable or secret to be used inside Edge Functions"
 	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."
-	CreateFlagIn           = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
+	CreateFlagFileJSON	   = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created variable with UUID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
+
+	// [ ask ]
+	AskKey = "Enter your key:"
+	AskValue = "Enter your value:"
 )
