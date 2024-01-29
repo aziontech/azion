@@ -1,7 +1,7 @@
 package variables
 
 var (
-	Usage            = "variables"
+	Usage = "variables"
 
 	// [ variables ]
 	ShortDescription = "Manages your environment variables and secrets"
@@ -47,11 +47,12 @@ var (
 	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."
-	CreateFlagFileJSON	   = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
+	CreateFlagFileJSON     = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
 	CreateOutputSuccess    = "Created variable with UUID %s\n"
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 
 	// [ ask ]
-	AskKey = "Enter your key:"
-	AskValue = "Enter your value:"
+	AskKey        = "Enter your key:"
+	AskValue      = "Enter your value:"
+	AskVariableID = "Enter your variable ID:"
 )
