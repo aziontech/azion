@@ -37,7 +37,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azion update variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --key 'Content-Type' --value 'json' --secret false
-		$ azion update variables -v 7a187044-4a00-4a4a-93ed-d230900421f3 --key 'Content-Type' --value 'json' --secret false
 		$ azion update variables --file variables.json
 		$ Example JSON: {
 		    "uuid": "32e8ffca-4021-49a4-971f-330935566af4",
