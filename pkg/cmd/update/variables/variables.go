@@ -93,20 +93,38 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
 	if !cmd.Flags().Changed("variable-id") {
 		answers, err := utils.AskInput(msg.AskVariableID)
-
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-
 		fields.ID = answers
 	}
 
-	if (!cmd.Flags().Changed("key") ||
-		!cmd.Flags().Changed("value") ||
-		!cmd.Flags().Changed("secret")) &&
-		!cmd.Flags().Changed("file") {
-		return msg.ErrorMissingFieldUpdateVariables
+	if !cmd.Flags().Changed("key") {
+		answers, err := utils.AskInput(msg.AskKey)
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+		fields.Key = answers
+	}
+
+	if !cmd.Flags().Changed("value") {
+		answers, err := utils.AskInput(msg.AskValue)
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+		fields.Value = answers
+	}
+
+	if !cmd.Flags().Changed("secret") {
+		answers, err := utils.AskInput(msg.AskSecret)
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+		fields.Secret = answers
 	}
 
 	secret, err := strconv.ParseBool(fields.Secret)

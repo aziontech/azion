@@ -54,5 +54,6 @@ var (
 	// [ ask ]
 	AskKey        = "Enter your key:"
 	AskValue      = "Enter your value:"
+	AskSecret     = "Enter your secret:"
 	AskVariableID = "Enter your variable ID:"
 )
