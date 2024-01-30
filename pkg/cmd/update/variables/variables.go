@@ -3,10 +3,11 @@ package variables
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 
@@ -81,7 +82,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVarP(&fields.ID, "variable-id", "v", "0", msg.FlagVariableID)
+	flags.StringVar(&fields.ID, "variable-id", "0", msg.FlagVariableID)
 	flags.StringVar(&fields.Key, "key", "", msg.UpdateFlagKey)
 	flags.StringVar(&fields.Value, "value", "", msg.UpdateFlagValue)
 	flags.StringVar(&fields.Secret, "secret", "", msg.UpdateFlagSecret)
