@@ -54,16 +54,15 @@ func TestUpdate(t *testing.T) {
 			httpmock.JSONFromString(successResponse),
 		)
 
-		f, _, _ := testutils.NewFactory(mock)
+		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4", "--key", "Content-Type"})
+		cmd.SetArgs([]string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4", "--key", "Content-Type", "--value", "1234", "--secret", "true"})
 
 		err := cmd.Execute()
-
-		require.ErrorIs(t, err, msg.ErrorMissingFieldUpdateVariables)
-
+		require.NoError(t, err)
+		require.Equal(t, "🚀 Updated Variable with ID 32e8ffca-4021-49a4-971f-330935566af4\n\n", stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
