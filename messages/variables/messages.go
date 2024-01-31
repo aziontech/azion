@@ -52,8 +52,8 @@ var (
 	CreateHelpFlag         = "Displays more information about the create subcommand"
 
 	// [ ask ]
-	AskKey        = "Enter your key:"
-	AskValue      = "Enter your value:"
-	AskSecret     = "Enter your secret:"
-	AskVariableID = "Enter your variable ID:"
+	AskKey        = "Enter the Variable's key:"
+	AskValue      = "Enter the Variable's value:"
+	AskSecret     = "Enter the Variable's secret:"
+	AskVariableID = "Enter the Variable's variable ID:"
 )
