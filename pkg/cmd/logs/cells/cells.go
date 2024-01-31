@@ -1,6 +1,7 @@
 package cells
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -15,13 +16,15 @@ import (
 var (
 	functionId string
 	tail       bool
+	pretty     bool
 	startTime  = time.Now()
+	utcTime    = startTime.UTC()
 	logTime    time.Time
 	limit      string
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	logTime = startTime.Add(-24 * time.Hour)
+	logTime = utcTime.Add(-5 * time.Minute)
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ShortDescription,
@@ -30,6 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true, Example: heredoc.Doc(`
 		$ azion logs cells
 		$ azion logs cells --tail
+		$ azion logs cells --function-id 1234 --limit 10
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			err := printLogs(cmd, f)
@@ -44,6 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&functionId, "function-id", "", msg.FlagFunctionId)
 	cmd.Flags().StringVar(&limit, "limit", "100", msg.LimitFlag)
 	cmd.Flags().BoolVar(&tail, "tail", false, msg.FlagTail)
+	cmd.Flags().BoolVar(&pretty, "pretty", false, msg.FlagPretty)
 	return cmd
 }
 
@@ -70,15 +75,20 @@ func printLogs(cmd *cobra.Command, f *cmdutil.Factory) error {
 			colorLog = color.FgWhite
 		}
 
-		logger.FInfo(f.IOStreams.Out, "Function ID: ")
-		logger.FInfo(f.IOStreams.Out, event.FunctionId)
-		logger.FInfo(f.IOStreams.Out, "\n\n")
-		logger.FInfo(f.IOStreams.Out, "Timestamp: ")
-		logger.FInfo(f.IOStreams.Out, event.Ts.String())
-		logger.FInfo(f.IOStreams.Out, "\n\n")
-		logger.FInfo(f.IOStreams.Out, "Log: \n")
-		color.New(colorLog).Fprintln(f.IOStreams.Out, event.Line)
-		logger.FInfo(f.IOStreams.Out, "\n\n")
+		if pretty {
+			logger.FInfo(f.IOStreams.Out, "Function ID: ")
+			logger.FInfo(f.IOStreams.Out, event.FunctionId)
+			logger.FInfo(f.IOStreams.Out, "\n")
+			logger.FInfo(f.IOStreams.Out, "Timestamp: ")
+			logger.FInfo(f.IOStreams.Out, event.Ts.String())
+			logger.FInfo(f.IOStreams.Out, "\n")
+			logger.FInfo(f.IOStreams.Out, "Log: \n")
+			color.New(colorLog).Fprintln(f.IOStreams.Out, event.Line)
+			logger.FInfo(f.IOStreams.Out, "\n\n")
+		} else {
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf("Function ID: %s, Timestamp: %s, Log: %s \n", event.FunctionId, event.Ts.String(), event.Line))
+		}
+
 		logTime = event.Ts
 
 	}
