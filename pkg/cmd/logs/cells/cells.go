@@ -87,7 +87,7 @@ func printLogs(cmd *cobra.Command, f *cmdutil.Factory) error {
 		logger.FInfo(f.IOStreams.Out, msg.NewLogs)
 		logger.FInfo(f.IOStreams.Out, "\n\n")
 		time.Sleep(10 * time.Second)
-		printLogs(cmd, f)
+		return printLogs(cmd, f)
 	}
 	return nil
 }
