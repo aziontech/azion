@@ -2,65 +2,77 @@ package cells
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"time"
 
+	msg "github.com/aziontech/azion-cli/messages/logs/cells"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/machinebox/graphql"
 )
 
-type HTTPEvent struct {
-	Status int `json:"status"`
-	Count  int `json:"count"`
+type CellsConsoleEvent struct {
+	Ts              time.Time `json:"ts"`
+	SolutionId      string    `json:"solutionId"`
+	ConfigurationId string    `json:"configurationId"`
+	FunctionId      string    `json:"functionId"`
+	ID              string    `json:"id"`
+	LineSource      string    `json:"lineSource"`
+	Level           string    `json:"level"`
+	Line            string    `json:"line"`
 }
 
-type Response struct {
-	HTTPEvents []HTTPEvent `json:"httpEvents"`
+type CellsConsoleEventsResponse struct {
+	CellsConsoleEvents []CellsConsoleEvent `json:"cellsConsoleEvents"`
 }
 
-func Option1(tokenvalue string) (Response, error) {
+func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Time, limitFlag string) (CellsConsoleEventsResponse, error) {
 	graphqlClient := graphql.NewClient("https://api.azionapi.net/events/graphql")
 
-	graphqlRequest := graphql.NewRequest(`
-	query Top10StatusCodes {
-		httpEvents(
-		  limit: 5
+	formattedTime := currentTime.Format("2006-01-02T15:04:05")
+
+	filter := ""
+	if functionId != "" {
+		filter = fmt.Sprintf(`functionId: "%s"`, functionId)
+	}
+
+	limit := "limit: " + limitFlag
+
+	query := `
+	query ConsoleLog {
+		cellsConsoleEvents(
+		  %s
 		  filter: {
-			tsRange: { begin:"2024-01-20T10:10:10", end:"2024-01-26T10:10:10" }
+			%s
+			tsGt: "%s"
+			
 		  }
-		  aggregate: {count: status}
-		  groupBy: [status]
-		  orderBy: [count_DESC]
-		  )
-		{
-		  status
-		  count
+		  orderBy: [ts_ASC]
+		) {
+		  ts
+		  solutionId
+		  configurationId
+		  functionId
+		  id
+		  lineSource
+		  level
+		  line
 		}
-	  }
-`)
+	  }	  
+`
+
+	formattedQuery := fmt.Sprintf(query, limit, filter, formattedTime)
+
+	graphqlRequest := graphql.NewRequest(formattedQuery)
+
+	tokenvalue := f.Config.GetString("token")
 	token := "Token " + tokenvalue
 
 	graphqlRequest.Header.Set("Authorization", token)
 
-	// var graphqlResponse interface{}
-	var response Response
+	var response CellsConsoleEventsResponse
 	if err := graphqlClient.Run(context.Background(), graphqlRequest, &response); err != nil {
-		panic(err)
+		return CellsConsoleEventsResponse{}, msg.ErrorRequest
 	}
 
-	PrettyPrint(response)
-	// spew.Dump(response)
-	// fmt.Println(response)
 	return response, nil
-}
-
-// print the contents of the obj
-func PrettyPrint(data interface{}) {
-	var p []byte
-	//    var err := error
-	p, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("%s \n", p)
 }
