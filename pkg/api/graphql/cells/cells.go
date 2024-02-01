@@ -21,6 +21,29 @@ type CellsConsoleEvent struct {
 	Line            string    `json:"line"`
 }
 
+const query string = `
+query ConsoleLog {
+	cellsConsoleEvents(
+	  %s
+	  filter: {
+		%s
+		tsGt: "%s"
+		
+	  }
+	  orderBy: [ts_ASC]
+	) {
+	  ts
+	  solutionId
+	  configurationId
+	  functionId
+	  id
+	  lineSource
+	  level
+	  line
+	}
+  }	  
+`
+
 type CellsConsoleEventsResponse struct {
 	CellsConsoleEvents []CellsConsoleEvent `json:"cellsConsoleEvents"`
 }
@@ -37,29 +60,7 @@ func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Ti
 
 	limit := "limit: " + limitFlag
 
-	query := `
-	query ConsoleLog {
-		cellsConsoleEvents(
-		  %s
-		  filter: {
-			%s
-			tsGt: "%s"
-			
-		  }
-		  orderBy: [ts_ASC]
-		) {
-		  ts
-		  solutionId
-		  configurationId
-		  functionId
-		  id
-		  lineSource
-		  level
-		  line
-		}
-	  }	  
-`
-
+	//prepare query
 	formattedQuery := fmt.Sprintf(query, limit, filter, formattedTime)
 
 	graphqlRequest := graphql.NewRequest(formattedQuery)
