@@ -30,7 +30,7 @@ type HTTPEventsResponse struct {
 }
 
 const query string = `
-query AverageRequestTimeByHostAndLocation {
+query HttpEvents {
 	httpEvents(
 	  %s
 	  filter: {
