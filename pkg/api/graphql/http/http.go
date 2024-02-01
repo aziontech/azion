@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	msg "github.com/aziontech/azion-cli/messages/logs/cells"
+	msg "github.com/aziontech/azion-cli/messages/logs/http"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/machinebox/graphql"
