@@ -37,6 +37,7 @@ type AzionApplicationOptions struct {
 	Domain      AzionJsonDataDomain      `json:"domain"`
 	RtPurge     AzionJsonDataPurge       `json:"rt-purge"`
 	Origin      AzionJsonDataOrigin      `json:"origin"`
+	RulesEngine AzionJsonDataRulesEngine `json:"rules-engine"`
 }
 
 type AzionApplicationSimple struct {
@@ -78,10 +79,11 @@ type CacheConf struct {
 }
 
 type AzionJsonDataFunction struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
-	File string `json:"file"`
-	Args string `json:"args"`
+	ID         int64  `json:"id"`
+	Name       string `json:"name"`
+	File       string `json:"file"`
+	Args       string `json:"args"`
+	InstanceID int64  `json:"instance-id"`
 }
 
 type AzionJsonDataApplication struct {
@@ -90,10 +92,11 @@ type AzionJsonDataApplication struct {
 }
 
 type AzionJsonDataOrigin struct {
-	SingleOriginID  int64    `json:"single-origin-id"`
-	StorageOriginID int64    `json:"storage-origin-id"`
-	Name            string   `json:"name"`
-	Address         []string `json:"address"`
+	SingleOriginID   int64    `json:"single-origin-id"`
+	StorageOriginID  int64    `json:"storage-origin-id"`
+	StorageOriginKey string   `json:"storage-origin-key"`
+	Name             string   `json:"name"`
+	Address          []string `json:"address"`
 }
 
 type AzionJsonDataDomain struct {
@@ -103,4 +106,8 @@ type AzionJsonDataDomain struct {
 
 type AzionJsonDataPurge struct {
 	PurgeOnPublish bool `json:"purge_on_publish"`
+}
+
+type AzionJsonDataRulesEngine struct {
+	Created bool `json:"created"`
 }
