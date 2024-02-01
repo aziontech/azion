@@ -7,7 +7,9 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/logs/cells"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/machinebox/graphql"
+	"go.uber.org/zap"
 )
 
 type HTTPEvent struct {
@@ -69,6 +71,7 @@ func HttpEvents(f *cmdutil.Factory, currentTime time.Time, limitFlag string) (HT
 
 	var response HTTPEventsResponse
 	if err := graphqlClient.Run(context.Background(), graphqlRequest, &response); err != nil {
+		logger.Debug("", zap.Any("Error", err.Error()))
 		return HTTPEventsResponse{}, msg.ErrorRequest
 	}
 
