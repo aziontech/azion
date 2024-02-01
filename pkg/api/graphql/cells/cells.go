@@ -23,6 +23,10 @@ type CellsConsoleEvent struct {
 	Line            string    `json:"line"`
 }
 
+type CellsConsoleEventsResponse struct {
+	CellsConsoleEvents []CellsConsoleEvent `json:"cellsConsoleEvents"`
+}
+
 const query string = `
 query ConsoleLog {
 	cellsConsoleEvents(
@@ -45,10 +49,6 @@ query ConsoleLog {
 	}
   }	  
 `
-
-type CellsConsoleEventsResponse struct {
-	CellsConsoleEvents []CellsConsoleEvent `json:"cellsConsoleEvents"`
-}
 
 func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Time, limitFlag string) (CellsConsoleEventsResponse, error) {
 	graphqlClient := graphql.NewClient("https://api.azionapi.net/events/graphql")

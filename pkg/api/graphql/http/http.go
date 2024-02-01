@@ -30,7 +30,7 @@ type HTTPEventsResponse struct {
 }
 
 const query string = `
-query HttpEvents {
+query HttpEventsLogs {
 	httpEvents(
 	  %s
 	  filter: {
