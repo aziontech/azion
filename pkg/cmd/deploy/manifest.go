@@ -150,7 +150,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			}
 		}
 
-		// check if the rules engines have been created.
+		// check if the rules engines have not been created.
 		if !conf.RulesEngine.Created {
 			// create rules engines to compute else delivery
 			if strings.ToLower(conf.Mode) == "compute" {

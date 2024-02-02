@@ -198,7 +198,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 
 		_, err := clientOrigin.Update(ctx, conf.Application.ID, conf.Origin.StorageOriginKey, &reqObjectStorageOrigin)
 		if err != nil {
-			logger.Debug("Error while update origin of type object storage", zap.Any("Error", err))
+			logger.Debug("Error while updating origin of type object storage", zap.Any("Error", err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.OriginsUpdateSuccessful, conf.Application.ID, conf.Origin.StorageOriginID))
