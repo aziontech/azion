@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/pkg/api/graphql"
 	"github.com/aziontech/azion-cli/pkg/cmd/logs/cells"
+	"github.com/aziontech/azion-cli/pkg/cmd/logs/http"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -21,6 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.AddCommand(cells.NewCmd(f))
+	cmd.AddCommand(http.NewCmd(f))
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
 }

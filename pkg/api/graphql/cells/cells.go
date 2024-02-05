@@ -7,7 +7,9 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/logs/cells"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/machinebox/graphql"
+	"go.uber.org/zap"
 )
 
 type CellsConsoleEvent struct {
@@ -25,6 +27,29 @@ type CellsConsoleEventsResponse struct {
 	CellsConsoleEvents []CellsConsoleEvent `json:"cellsConsoleEvents"`
 }
 
+const query string = `
+query ConsoleLog {
+	cellsConsoleEvents(
+	  %s
+	  filter: {
+		%s
+		tsGt: "%s"
+		
+	  }
+	  orderBy: [ts_ASC]
+	) {
+	  ts
+	  solutionId
+	  configurationId
+	  functionId
+	  id
+	  lineSource
+	  level
+	  line
+	}
+  }	  
+`
+
 func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Time, limitFlag string) (CellsConsoleEventsResponse, error) {
 	graphqlClient := graphql.NewClient("https://api.azionapi.net/events/graphql")
 
@@ -37,29 +62,7 @@ func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Ti
 
 	limit := "limit: " + limitFlag
 
-	query := `
-	query ConsoleLog {
-		cellsConsoleEvents(
-		  %s
-		  filter: {
-			%s
-			tsGt: "%s"
-			
-		  }
-		  orderBy: [ts_ASC]
-		) {
-		  ts
-		  solutionId
-		  configurationId
-		  functionId
-		  id
-		  lineSource
-		  level
-		  line
-		}
-	  }	  
-`
-
+	//prepare query
 	formattedQuery := fmt.Sprintf(query, limit, filter, formattedTime)
 
 	graphqlRequest := graphql.NewRequest(formattedQuery)
@@ -71,6 +74,7 @@ func CellsConsoleLogs(f *cmdutil.Factory, functionId string, currentTime time.Ti
 
 	var response CellsConsoleEventsResponse
 	if err := graphqlClient.Run(context.Background(), graphqlRequest, &response); err != nil {
+		logger.Debug("", zap.Any("Error", err.Error()))
 		return CellsConsoleEventsResponse{}, msg.ErrorRequest
 	}
 
