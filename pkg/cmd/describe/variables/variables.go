@@ -1,4 +1,4 @@
-package describe
+package variables
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
@@ -15,6 +16,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -23,19 +25,26 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	var variableID string
 	opts := &contracts.DescribeOptions{}
 	cmd := &cobra.Command{
-		Use:           msg.DescribeUsage,
+		Use:           msg.Usage,
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
-      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --format json
-      $ azion variables describe --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --out "./tmp/test.json" --format json
+      $ azion describe variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
+      $ azion describe variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --format json
+      $ azion describe variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3 --out "./tmp/test.json" --format json
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("variable-id") {
-				return msg.ErrorMissingArguments
+				answers, err := utils.AskInput(msg.AskVariableID)
+
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				variableID = answers
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -56,7 +65,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
+				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
 			} else {
 				_, err := out.Write(formattedFuction[:])
 				if err != nil {
@@ -68,7 +77,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&variableID, "variable-id", "v", "", msg.FlagVariableID)
+	cmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
 	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
@@ -76,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func format(cmd *cobra.Command, variable api.VariableResponse) ([]byte, error) {
+func format(cmd *cobra.Command, variable api.Response) ([]byte, error) {
 	format, err := cmd.Flags().GetString("format")
 	if err != nil {
 		return nil, err

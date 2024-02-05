@@ -176,7 +176,9 @@ func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceR
 	args := make(map[string]interface{})
 	req.SetArgs(args)
 
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, req.ApplicationId).ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest)
+	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.
+		EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, req.ApplicationId).
+		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {

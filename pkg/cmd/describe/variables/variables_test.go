@@ -1,4 +1,4 @@
-package describe
+package variables
 
 import (
 	"log"
@@ -26,7 +26,7 @@ func TestDescribe(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-v", "32e8ffca-4021-49a4-971f-330935566af4"})
+		cmd.SetArgs([]string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestDescribe(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"-v", "123423424"})
+		cmd.SetArgs([]string{"--variable-id", "123423424"})
 
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -74,7 +74,7 @@ func TestDescribe(t *testing.T) {
 
 		cmd := NewCmd(f)
 		path := "./out.json"
-		cmd.SetArgs([]string{"-v", "32e8ffca-4021-49a4-971f-330935566af4", "--out", path})
+		cmd.SetArgs([]string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4", "--out", path})
 
 		err := cmd.Execute()
 		if err != nil {
@@ -90,7 +90,6 @@ func TestDescribe(t *testing.T) {
 		}()
 
 		require.NoError(t, err)
-		require.Equal(t, `File successfully written to: out.json
-`, stdout.String())
+		require.Equal(t, "🚀 File successfully written to: out.json\n\n", stdout.String())
 	})
 }

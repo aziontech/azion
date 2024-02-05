@@ -31,9 +31,7 @@ type DeployCmd struct {
 }
 
 var (
-	InstanceID    int64
-	Path          string
-	DefaultOrigin = [1]string{"www.example.com"}
+	Path string
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {

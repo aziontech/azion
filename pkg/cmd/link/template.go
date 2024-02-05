@@ -2,6 +2,7 @@ package link
 
 import (
 	"encoding/json"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -18,8 +19,8 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	azionJson := &contracts.AzionApplicationOptions{
 		Name:        info.Name,
 		Env:         "production",
-		Template:    info.Preset,
-		Mode:        info.Mode,
+		Template:    strings.ToLower(info.Preset),
+		Mode:        strings.ToLower(info.Mode),
 		Prefix:      "",
 		ProjectRoot: info.PathWorkingDir,
 	}

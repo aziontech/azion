@@ -557,10 +557,14 @@ func Concat(strs ...string) string {
 }
 
 func Confirm(msg string) bool {
-	fmt.Printf("🤔 \x1b[32m%s (y\\N) \x1b[0m", msg)
+	fmt.Printf("🤔 \x1b[32m%s (y/N) \x1b[0m", msg)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 	confirm := scanner.Text()
+
+	if confirm == "" {
+		return false
+	}
 
 	switch confirm {
 	case "y", "Y":

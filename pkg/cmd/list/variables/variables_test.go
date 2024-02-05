@@ -1,4 +1,4 @@
-package list
+package variables
 
 import (
 	"net/http"

@@ -1,4 +1,4 @@
-package list
+package variables
 
 import (
 	"context"
@@ -21,14 +21,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	listCmd := &cobra.Command{
-		Use:           msg.VariablesListUsage,
+		Use:           msg.Usage,
 		Short:         msg.VariablesListShortDescription,
 		Long:          msg.VariablesListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion variables list --details
-		$ azion variables list
+		$ azion list variables -h
+		$ azion list variables --details
+		$ azion list variables
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

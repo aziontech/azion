@@ -1,9 +1,8 @@
-package delete
+package variables
 
 import (
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -30,7 +29,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Variable 7a187044-4a00-4a4a-93ed-d230900421f3 was successfully deleted\n", stdout.String())
+		assert.Equal(t, "🚀 Variable 7a187044-4a00-4a4a-93ed-d230900421f3 was successfully deleted\n\n", stdout.String())
 	})
 
 	t.Run("delete variable that is not found", func(t *testing.T) {
@@ -49,24 +48,5 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
-	})
-
-	t.Run("show error when not informing the --variable-id flag", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("DELETE", "variables/7a187044-4a00-4a4a-93ed-d230900421f3"),
-			httpmock.StatusStringResponse(404, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"", ""})
-
-		_, err := cmd.ExecuteC()
-
-		require.ErrorIs(t, err, msg.ErrorMissingVariableIdArgumentDelete)
 	})
 }

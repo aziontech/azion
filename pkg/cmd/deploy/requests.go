@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"go.uber.org/zap"
@@ -31,17 +32,29 @@ var injectIntoFunction = `
 
 `
 
-func (cmd *DeployCmd) doFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.ID == 0 {
-		DeployID, err := cmd.createFunction(client, ctx, conf)
+		DeployID, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
 		if err != nil {
 			return err
 		}
-
 		conf.Function.ID = DeployID
+
+		// create instance function
+		reqIns := apiapp.CreateInstanceRequest{}
+		reqIns.SetEdgeFunctionId(conf.Function.ID)
+		reqIns.SetName(conf.Name)
+		reqIns.ApplicationId = conf.Application.ID
+
+		instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
+		if err != nil {
+			logger.Debug("Error while creating edge function instance", zap.Error(err))
+			return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
+		}
+		conf.Function.InstanceID = instance.GetId()
 	}
 
-	_, err := cmd.updateFunction(client, ctx, conf)
+	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -112,10 +125,11 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 	if conf.Template == "javascript" || conf.Template == "typescript" {
 		return nil
 	}
+
 	var addresses []string
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
-	if conf.Mode == "compute" {
+	if strings.ToLower(conf.Mode) == "compute" {
 		if conf.Origin.SingleOriginID == 0 {
 			reqSingleOrigin := apiori.CreateRequest{}
 
@@ -156,6 +170,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
 
 		conf.Origin.StorageOriginID = origin.GetOriginId()
+		conf.Origin.StorageOriginKey = origin.GetOriginKey()
 		conf.Origin.Address = addresses
 		conf.Origin.Name = origin.GetName()
 
@@ -177,6 +192,16 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
+	} else {
+		reqObjectStorageOrigin := apiori.UpdateRequest{}
+		reqObjectStorageOrigin.Prefix = &conf.Prefix
+
+		_, err := clientOrigin.Update(ctx, conf.Application.ID, conf.Origin.StorageOriginKey, &reqObjectStorageOrigin)
+		if err != nil {
+			logger.Debug("Error while updating origin of type object storage", zap.Any("Error", err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.OriginsUpdateSuccessful, conf.Application.ID, conf.Origin.StorageOriginID))
 	}
 	return nil
 }

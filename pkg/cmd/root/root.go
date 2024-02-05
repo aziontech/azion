@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
+	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
@@ -110,6 +111,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
 	cobraCmd.AddCommand(initcmd.NewCmd(f))
+	cobraCmd.AddCommand(logcmd.NewCmd(f))
 	cobraCmd.AddCommand(deploycmd.NewCmd(f))
 	cobraCmd.AddCommand(buildCmd.NewCmd(f))
 	cobraCmd.AddCommand(devcmd.NewCmd(f))
