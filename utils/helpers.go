@@ -453,6 +453,29 @@ func GetPackageManager() (string, error) {
 	return answer, nil
 }
 
+func AskInputEmpty(msg string) (string, error) {
+	qs := []*survey.Question{
+		{
+			Name:     "id",
+			Prompt:   &survey.Input{Message: msg},
+			Validate: survey.MinLength(0),
+		},
+	}
+
+	answer := ""
+
+	err := survey.Ask(qs, &answer)
+	if err == terminal.InterruptErr {
+		logger.Error(ErrorCancelledContextInput.Error())
+		os.Exit(0)
+	} else if err != nil {
+		logger.Debug("Error while parsing answer", zap.Error(err))
+		return "", ErrorParseResponse
+	}
+
+	return answer, nil
+}
+
 func AskInput(msg string) (string, error) {
 	qs := []*survey.Question{
 		{
