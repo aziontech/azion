@@ -119,8 +119,8 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 		}
 
 		fields.Name = answers
-		request.SetName(fields.Name)
 	}
+	request.SetName(fields.Name)
 
 	if !cmd.Flags().Changed("origin-type") {
 		answer, err := utils.Select(msg.AskOriginType, []string{"single_origin", "object_storage"})
@@ -128,8 +128,9 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 			return err
 		}
 		fields.OriginType = answer
-		request.SetOriginType(answer)
 	}
+
+	request.SetOriginType(fields.OriginType)
 
 	if fields.OriginType == "object_storage" {
 
@@ -141,18 +142,20 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 			}
 
 			fields.Bucket = answers
-			request.SetOriginType(fields.Bucket)
 		}
 
 		if !cmd.Flags().Changed("prefix") {
-			answers, err := utils.AskInput(msg.AskPrefix)
+			answers, err := utils.AskInputEmpty(msg.AskPrefix)
 			if err != nil {
 				logger.Debug("Error while parsing answer", zap.Error(err))
 				return utils.ErrorParseResponse
 			}
-
 			fields.Prefix = answers
-			request.SetOriginType(fields.Prefix)
+
+		}
+		request.SetBucket(fields.Bucket)
+		if fields.Prefix != "" {
+			request.SetPrefix(fields.Prefix)
 		}
 
 	} else {
