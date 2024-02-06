@@ -38,6 +38,8 @@ type Fields struct {
 	HmacAccessKey        string
 	HmacSecretKey        string
 	Path                 string
+	Bucket               string
+	Prefix               string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -117,62 +119,94 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 		}
 
 		fields.Name = answers
+		request.SetName(fields.Name)
 	}
 
-	if !cmd.Flags().Changed("addresses") {
-		answers, err := utils.AskInput(msg.AskAddresses)
+	if !cmd.Flags().Changed("origin-type") {
+		answer, err := utils.Select(msg.AskOriginType, []string{"single_origin", "object_storage"})
 		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
+			return err
+		}
+		fields.OriginType = answer
+		request.SetOriginType(answer)
+	}
+
+	if fields.OriginType == "object_storage" {
+
+		if !cmd.Flags().Changed("bucket") {
+			answers, err := utils.AskInput(msg.AskBucket)
+			if err != nil {
+				logger.Debug("Error while parsing answer", zap.Error(err))
+				return utils.ErrorParseResponse
+			}
+
+			fields.Bucket = answers
+			request.SetOriginType(fields.Bucket)
 		}
 
-		fields.Addresses = []string{answers}
-	}
+		if !cmd.Flags().Changed("prefix") {
+			answers, err := utils.AskInput(msg.AskPrefix)
+			if err != nil {
+				logger.Debug("Error while parsing answer", zap.Error(err))
+				return utils.ErrorParseResponse
+			}
 
-	if !cmd.Flags().Changed("host-header") {
-		answers, err := utils.AskInput(msg.AskHostHeader)
-		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
+			fields.Prefix = answers
+			request.SetOriginType(fields.Prefix)
 		}
 
-		fields.HostHeader = answers
-	}
+	} else {
+		if !cmd.Flags().Changed("addresses") {
+			answers, err := utils.AskInput(msg.AskAddresses)
+			if err != nil {
+				logger.Debug("Error while parsing answer", zap.Error(err))
+				return utils.ErrorParseResponse
+			}
 
-	request.SetName(fields.Name)
-	request.SetAddresses(prepareAddresses(fields.Addresses))
-	request.SetHostHeader(fields.HostHeader)
-
-	if cmd.Flags().Changed("origin-type") {
-		request.SetOriginType(fields.OriginType)
-	}
-
-	if cmd.Flags().Changed("origin-protocol-policy") {
-		request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
-	}
-
-	if cmd.Flags().Changed("origin-path") {
-		request.SetOriginPath(fields.OriginPath)
-	}
-
-	if cmd.Flags().Changed("hmac-authentication") {
-		hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
-		if err != nil {
-			return msg.ErrorHmacAuthenticationFlag
+			fields.Addresses = []string{answers}
 		}
-		request.SetHmacAuthentication(hmacAuth)
-	}
 
-	if cmd.Flags().Changed("hmac-region-name") {
-		request.SetHmacRegionName(fields.HmacRegionName)
-	}
+		if !cmd.Flags().Changed("host-header") {
+			answers, err := utils.AskInput(msg.AskHostHeader)
+			if err != nil {
+				logger.Debug("Error while parsing answer", zap.Error(err))
+				return utils.ErrorParseResponse
+			}
 
-	if cmd.Flags().Changed("hmac-access-key") {
-		request.SetHmacAccessKey(fields.HmacAccessKey)
-	}
+			fields.HostHeader = answers
+		}
 
-	if cmd.Flags().Changed("hmac-secret-key") {
-		request.SetHmacSecretKey(fields.HmacSecretKey)
+		request.SetAddresses(prepareAddresses(fields.Addresses))
+		request.SetHostHeader(fields.HostHeader)
+
+		if cmd.Flags().Changed("origin-protocol-policy") {
+			request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+		}
+
+		if cmd.Flags().Changed("origin-path") {
+			request.SetOriginPath(fields.OriginPath)
+		}
+
+		if cmd.Flags().Changed("hmac-authentication") {
+			hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
+			if err != nil {
+				return msg.ErrorHmacAuthenticationFlag
+			}
+			request.SetHmacAuthentication(hmacAuth)
+		}
+
+		if cmd.Flags().Changed("hmac-region-name") {
+			request.SetHmacRegionName(fields.HmacRegionName)
+		}
+
+		if cmd.Flags().Changed("hmac-access-key") {
+			request.SetHmacAccessKey(fields.HmacAccessKey)
+		}
+
+		if cmd.Flags().Changed("hmac-secret-key") {
+			request.SetHmacSecretKey(fields.HmacSecretKey)
+		}
+
 	}
 
 	return nil
@@ -190,6 +224,8 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.FlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
+	flags.StringVar(&fields.Bucket, "bucket", "", msg.FlagBucket)
+	flags.StringVar(&fields.Prefix, "prefix", "", msg.FlagPrefix)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
