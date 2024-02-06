@@ -33,6 +33,8 @@ type Fields struct {
 	HmacAccessKey        string
 	HmacSecretKey        string
 	Path                 string
+	Bucket               string
+	Prefix               string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -133,6 +135,12 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 	if cmd.Flags().Changed("origin-path") {
 		request.SetOriginPath(fields.OriginPath)
 	}
+	if cmd.Flags().Changed("bucket") {
+		request.SetBucket(fields.Bucket)
+	}
+	if cmd.Flags().Changed("prefix") {
+		request.SetPrefix(fields.Prefix)
+	}
 
 	if cmd.Flags().Changed("hmac-authentication") {
 		hmacAuth, err := strconv.ParseBool(fields.HmacAuthentication)
@@ -170,6 +178,8 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.HmacRegionName, "hmac-region-name", "", msg.FlagHmacRegionName)
 	flags.StringVar(&fields.HmacAccessKey, "hmac-access-key", "", msg.FlagHmacAccessKey)
 	flags.StringVar(&fields.HmacSecretKey, "hmac-secret-key", "", msg.FlagHmacSecretKey)
+	flags.StringVar(&fields.Bucket, "bucket", "", msg.FlagBucketUpdate)
+	flags.StringVar(&fields.Prefix, "prefix", "", msg.FlagPrefixUpdate)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }

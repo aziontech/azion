@@ -336,7 +336,12 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 
-	return fmt.Errorf("%s", string(responseBody))
+	result := strings.ReplaceAll(string(responseBody), "{", "")
+	result = strings.ReplaceAll(result, "}", "")
+	result = strings.ReplaceAll(result, "[", "")
+	result = strings.ReplaceAll(result, "]", "")
+
+	return fmt.Errorf("%s", result)
 }
 
 func checkNoProduct(body string) error {
@@ -445,6 +450,29 @@ func GetPackageManager() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return answer, nil
+}
+
+func AskInputEmpty(msg string) (string, error) {
+	qs := []*survey.Question{
+		{
+			Name:     "id",
+			Prompt:   &survey.Input{Message: msg},
+			Validate: survey.MinLength(0),
+		},
+	}
+
+	answer := ""
+
+	err := survey.Ask(qs, &answer)
+	if err == terminal.InterruptErr {
+		logger.Error(ErrorCancelledContextInput.Error())
+		os.Exit(0)
+	} else if err != nil {
+		logger.Debug("Error while parsing answer", zap.Error(err))
+		return "", ErrorParseResponse
+	}
+
 	return answer, nil
 }
 

@@ -29,6 +29,7 @@ func TestCreate(t *testing.T) {
 			"--name", "onepieceisthebest",
 			"--addresses", "asdfsd.cvdf",
 			"--host-header", "asdfsdfsd.cvdf",
+			"--origin-type", "single_origin",
 		})
 
 		err := cmd.Execute()
