@@ -336,7 +336,12 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 
-	return fmt.Errorf("%s", string(responseBody))
+	result := strings.ReplaceAll(string(responseBody), "{", "")
+	result = strings.ReplaceAll(result, "}", "")
+	result = strings.ReplaceAll(result, "[", "")
+	result = strings.ReplaceAll(result, "]", "")
+
+	return fmt.Errorf("%s", result)
 }
 
 func checkNoProduct(body string) error {

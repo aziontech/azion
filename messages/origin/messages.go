@@ -41,9 +41,12 @@ var (
 	// [ ask ]
 	AskAppID      = "Enter the ID of the Edge Application this Origin is linked to:"
 	AskName       = "Enter the new Origin's Name:"
+	AskBucket     = "Enter the new Origin's Bucket:"
+	AskPrefix     = "Enter the new Origin's Prefix, or leave it blank if you are not using any prefix:"
 	AskAddresses  = "Enter the new Origin's Addresses:"
 	AskHostHeader = "Enter the new Origin's Host Header:"
 	AskOriginKey  = "Enter the Origin's Key:"
+	AskOriginType = "Enter the Origin's type:"
 
 	// [ flags ]
 	FlagEdgeApplicationID    = "Unique identifier for an Edge Application"
@@ -57,6 +60,10 @@ var (
 	FlagHmacAuthentication   = "Whether Hmac Authentication is used or not"
 	FlagHmacRegionName       = "Informs Hmac region name"
 	FlagHmacAccessKey        = "Informs Hmac Access Key"
+	FlagBucket               = "The Origin's bucket. Required flag that must be informed when origin-type is object_storage"
+	FlagBucketUpdate         = "The Origin's bucket"
+	FlagPrefix               = "The Origin's prefix. Optional flag that can be informed when origin-type is object_storage"
+	FlagPrefixUpdate         = "The Origin's prefix"
 	FlagHmacSecretKey        = "Informs Hmac Secret Key"
 	FlagFile                 = "Path to a JSON file containing the attributes of the Origin that will be created; you can use - for reading from stdin"
 	OriginsFileWritten       = "File successfully written to: %s\n"
