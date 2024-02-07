@@ -136,13 +136,6 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 		return nil
 	}
 
-	switch info.Preset {
-	case "simple":
-		return initSimple(cmd, path, info)
-	case "static":
-		return initStatic(cmd, info, options)
-	}
-
 	shouldFetchTemplates, err := shouldFetch(cmd, info)
 	if err != nil {
 		return err
