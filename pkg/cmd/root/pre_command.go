@@ -50,7 +50,18 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 		return err
 	}
 
-	if err := checkForUpdate(version.BinVersion, f); err != nil {
+	settings, err := token.ReadSettings()
+	if err != nil {
+		return err
+	}
+	globalSettings = &settings
+
+	if err := checkAuthorizeMetricsCollection(globalSettings); err != nil {
+		return err
+	}
+
+	//both verifications occurs if 24 hours have passed since the last execution
+	if err := checkForUpdateAndMetrics(version.BinVersion, f, globalSettings); err != nil {
 		return err
 	}
 
@@ -110,14 +121,10 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 	return nil
 }
 
-func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
+func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *token.Settings) error {
 	logger.Debug("Verifying if an update is required")
-	config, err := token.ReadSettings()
-	if err != nil {
-		return err
-	}
-	// Check if 12 hours have passed since the last update check
-	if time.Since(config.LastUpdateCheck) < 12*time.Hour && !config.LastUpdateCheck.IsZero() {
+	// Check if 24 hours have passed since the last check
+	if time.Since(settings.LastCheck) < 24*time.Hour && !settings.LastCheck.IsZero() {
 		return nil
 	}
 
@@ -170,8 +177,8 @@ func checkForUpdate(cVersion string, f *cmdutil.Factory) error {
 	}
 
 	// Update the last update check time
-	config.LastUpdateCheck = time.Now()
-	if err := token.WriteSettings(config); err != nil {
+	settings.LastCheck = time.Now()
+	if err := token.WriteSettings(*settings); err != nil {
 		return err
 	}
 
@@ -256,6 +263,26 @@ func linuxUpdateMessage(f *cmdutil.Factory) error {
 		logger.FInfo(f.IOStreams.Out, msg.ApkUpdate)
 	case "centos", "fedora", "opensuse", "mageia", "mandriva":
 		logger.FInfo(f.IOStreams.Out, msg.RpmUpdate)
+	}
+
+	return nil
+}
+
+// 0 = authorization was not asked yet, 1 = accepted, 2 = denied
+func checkAuthorizeMetricsCollection(settings *token.Settings) error {
+	if settings.AuthorizeMetricsCollection > 0 {
+		return nil
+	}
+
+	authorize := utils.Confirm(msg.AskCollectMetrics, true)
+	if authorize {
+		settings.AuthorizeMetricsCollection = 1
+	} else {
+		settings.AuthorizeMetricsCollection = 2
+	}
+
+	if err := token.WriteSettings(*settings); err != nil {
+		return err
 	}
 
 	return nil

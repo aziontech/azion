@@ -51,6 +51,8 @@ var (
 	configFlag string
 )
 
+var globalSettings *token.Settings
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewRootCmd(f), f)
 }
@@ -69,6 +71,13 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			})
 			if err != nil {
 				return err
+			}
+			return nil
+		},
+		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+			err := saveMetrict(cmd)
+			if err != nil {
+				logger.Debug("Error while saving metrics", zap.Error(err))
 			}
 			return nil
 		},

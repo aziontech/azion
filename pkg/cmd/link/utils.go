@@ -17,15 +17,15 @@ func shouldConfigure(info *LinkInfo) bool {
 	if info.GlobalFlagAll || info.Auto {
 		return true
 	}
-	msg := fmt.Sprintf("Do you want to link %s to Azion?", info.PathWorkingDir)
-	return helpers.Confirm(msg)
+	msg := fmt.Sprintf("Do you want to link %s to Azion? (y/N)", info.PathWorkingDir)
+	return helpers.Confirm(msg, false)
 }
 
-func shouldDevDeploy(info *LinkInfo, msg string) bool {
+func shouldDevDeploy(info *LinkInfo, msg string, defaultYes bool) bool {
 	if info.GlobalFlagAll {
 		return true
 	}
-	return helpers.Confirm(msg)
+	return helpers.Confirm(msg, defaultYes)
 }
 
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
@@ -35,7 +35,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
-			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration?"), nil
+			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration? (y/N)", false), nil
 		}
 
 		if shouldFetchTemplates {

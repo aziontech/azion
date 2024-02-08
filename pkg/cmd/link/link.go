@@ -49,7 +49,7 @@ type LinkCmd struct {
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) bool
-	ShouldDevDeploy       func(info *LinkInfo, msg string) bool
+	ShouldDevDeploy       func(info *LinkInfo, msg string, defaultYes bool) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	F                     *cmdutil.Factory
@@ -177,10 +177,10 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
 
 		if !info.Auto {
-			shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server?")
+			shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server? (y/N)", false)
 
 			if shouldDev {
-				shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server")
+				shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server (y/N)", false)
 
 				if shouldDeps {
 					answer, err := utils.GetPackageManager()
@@ -205,10 +205,10 @@ func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptio
 				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
 			}
 
-			shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project?")
+			shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project? (y/N)", false)
 
 			if shouldDeploy {
-				shouldYarn := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project")
+				shouldYarn := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project (y/N)", false)
 
 				if shouldYarn {
 					answer, err := utils.GetPackageManager()
