@@ -62,9 +62,15 @@ func saveMetrict(cmd *cobra.Command) error {
 	data[total]++
 
 	// Reset file offset to the beginning
-	file.Seek(0, 0)
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return err
+	}
 	// Truncate the file in case the new content is smaller than the previous one
-	file.Truncate(0)
+	err = file.Truncate(0)
+	if err != nil {
+		return err
+	}
 
 	// Encode and write the updated map back to the file
 	if err := json.NewEncoder(file).Encode(data); err != nil {
