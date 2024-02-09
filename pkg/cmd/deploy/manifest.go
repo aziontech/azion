@@ -314,7 +314,14 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				var behRewriteRequest sdk.RulesEngineBehaviorString
 
 				behRewriteRequest.SetName("rewrite_request")
-				behRewriteRequest.SetTarget("${uri}index.html")
+
+				var target = fmt.Sprintf("${uri}%sindex.html", "")
+				if strings.ToLower(conf.Template) == "html" && len(Path) > 0  {
+					Path = strings.ReplaceAll(Path, "/", "")
+					Path = strings.ReplaceAll(Path, ".", "")
+					target = fmt.Sprintf("${uri}/%s/index.html", Path)
+				}
+				behRewriteRequest.SetTarget(target)
 
 				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 					RulesEngineBehaviorString: &behRewriteRequest,
@@ -372,7 +379,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				}
 			}
 		}
-	}
+	}	
 
 	conf.RulesEngine.Created = true
 
