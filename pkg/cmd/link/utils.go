@@ -80,26 +80,21 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	if err != nil {
 		return err
 	}
-
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
 	command := vul.Command("--loglevel=error --no-update-notifier", "presets ls")
-
 	output, err := cmd.CommandRunner(cmd.F, command, []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
 
-	newLineSplit := strings.Split(output, "\n")
-	newLineSplit[len(newLineSplit)-1] = "static (azion)"
-
-	answer := ""
-	template := ""
-	mode := ""
+	outputInline := strings.Split(output, "\n")
 	prompt := &survey.Select{
 		Message: "Choose a preset and mode:",
-		Options: newLineSplit,
+		Options: outputInline,
 	}
+
+	var answer, template, mode string
 	err = survey.AskOne(prompt, &answer)
 	if err != nil {
 		return err
