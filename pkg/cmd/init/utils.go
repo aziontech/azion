@@ -14,11 +14,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldDevDeploy(info *InitInfo, msg string) bool {
+func shouldDevDeploy(info *InitInfo, msg string, defaultYes bool) bool {
 	if info.GlobalFlagAll {
 		return true
 	}
-	return helpers.Confirm(msg)
+	return helpers.Confirm(msg, defaultYes)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {

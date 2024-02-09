@@ -21,10 +21,11 @@ type Token struct {
 }
 
 type Settings struct {
-	Token             string
-	UUID              string
-	LastUpdateCheck   time.Time
-	LastVulcanVersion string
+	Token                      string
+	UUID                       string
+	LastCheck                  time.Time
+	LastVulcanVersion          string
+	AuthorizeMetricsCollection int
 }
 
 type Config struct {
