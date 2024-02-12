@@ -61,7 +61,7 @@ func Send(settings *token.Settings) {
 				Set("times executed", times),
 		})
 		if err != nil {
-			logger.Debug("Failed send metrics to the segment", zap.Error(err))
+			logger.Debug("failed to send metrics", zap.Error(err))
 			return 
 		}
 	}
