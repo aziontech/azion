@@ -15,6 +15,7 @@ import (
 )
 
 var username, password, tokenValue, uuid string
+var userInfo token.UserInfo
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
@@ -91,8 +92,10 @@ func selectLoginMode() (string, error) {
 
 func saveSettings(client *token.Token) error {
 	settings := token.Settings{
-		UUID:  uuid,
-		Token: tokenValue,
+		UUID:     uuid,
+		Token:    tokenValue,
+		ClientId: userInfo.Results.ClientID,
+		Email:    userInfo.Results.Email,
 	}
 
 	byteSettings, err := toml.Marshal(settings)
@@ -110,7 +113,8 @@ func saveSettings(client *token.Token) error {
 }
 
 func validateToken(client *token.Token, token string) error {
-	tokenValid, err := client.Validate(&token)
+	tokenValid, user, err := client.Validate(&token)
+	userInfo = user
 	if err != nil {
 		logger.Debug("Error while validating the token", zap.Error(err))
 		return err

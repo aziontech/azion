@@ -39,12 +39,12 @@ jobs:
         run: git fetch --tags
 
       - name: Build
-        env: 
+        env:
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make build ENVFILE=./env/prod
 
       # - name: Cross-build
-      #   env: 
+      #   env:
       #     STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
       #   run: make cross-build ENVFILE=./env/prod
 
@@ -67,18 +67,17 @@ jobs:
       #       distro=$(echo ${spec} | cut -d/ -f1);\
       #       goarch=$(echo ${spec} | cut -d/ -f2);\
       #       arch=$(echo ${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$/arm32/g;');\
-      #       cp dist/$distro/$arch/azion* dist/$distro/$arch/azion; 
+      #       cp dist/$distro/$arch/azion* dist/$distro/$arch/azion;
       #       aws s3 cp --no-progress --recursive \
       #         --exclude "*" --include "azion*" \
       #         dist/$distro/$arch/ s3://azion-downloads/$distro/$arch/; \
       #     done < BUILD
 
-      - id: binversion 
+      - id: binversion
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT
 
-      - name: set bin version to github env 
+      - name: set bin version to github env
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
-          
 
       - uses: goreleaser/goreleaser-action@v2
         with:
@@ -91,6 +90,7 @@ jobs:
           STORAGE_URL: https://api.azion.com
           AUTH_URL: https://sso.azion.com/api
           TEMPLATE_BRANCH: main
+          SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
 
   bump_formula:
     runs-on: ubuntu-latest
@@ -101,6 +101,3 @@ jobs:
           token: ${{secrets.RELEASE_GITHUB_TOKEN}}
           formula: azion
           tag: ${{needs.build.outputs.binver}}
-
-
-

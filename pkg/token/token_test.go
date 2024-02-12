@@ -33,7 +33,7 @@ func Test_Validate(t *testing.T) {
 
 		token.endpoint = "http://api.azion.net/token"
 		tokenString := "thisIsNotTheValidToken"
-		valid, _ := token.Validate(&tokenString)
+		valid, _, _ := token.Validate(&tokenString)
 
 		if valid {
 			t.Errorf("Validate() = %v; want false", valid)
@@ -57,7 +57,7 @@ func Test_Validate(t *testing.T) {
 
 		token.endpoint = "http://api.azion.net/token"
 		tokenString := "rightToken"
-		valid, _ := token.Validate(&tokenString)
+		valid, _, _ := token.Validate(&tokenString)
 
 		if !valid {
 			t.Errorf("Validate() = %v; want true", valid)
