@@ -2,7 +2,6 @@ package metric
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -48,21 +47,23 @@ func readLocalMetrics() map[string]int {
 
 func Send(settings *token.Settings) {
 	client := analytics.New(SegmentKey)
-	fmt.Println("here", SegmentKey)
 	defer client.Close()
 
 	metrics := readLocalMetrics()
 
 	for event, times := range metrics {
-		fmt.Println("só garantindo")
 
-		client.Enqueue(analytics.Track{
+		err := client.Enqueue(analytics.Track{
 			UserId: settings.ClientId,
 			Event:  event,
 			Properties: analytics.NewProperties().
 				Set("email", settings.Email).
 				Set("times executed", times),
 		})
+		if err != nil {
+			logger.Debug("Failed send metrics to the segment", zap.Error(err))
+			return 
+		}
 	}
 
 	clean()
