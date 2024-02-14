@@ -18,7 +18,7 @@ type UnlinkCmd struct {
 	F           *cmdutil.Factory
 }
 
-func NewLinkCmd(f *cmdutil.Factory) *UnlinkCmd {
+func NewUnlinkCmd(f *cmdutil.Factory) *UnlinkCmd {
 	return &UnlinkCmd{
 		F:           f,
 		ShouldClean: shouldClean,
@@ -37,8 +37,8 @@ func NewCobraCmd(unlink *UnlinkCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azion unlink
-		$ azion link --help
-		$ azion link --yes
+		$ azion unlink --help
+		$ azion unlink --yes
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return unlink.run()
@@ -49,7 +49,7 @@ func NewCobraCmd(unlink *UnlinkCmd, f *cmdutil.Factory) *cobra.Command {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewLinkCmd(f), f)
+	return NewCobraCmd(NewUnlinkCmd(f), f)
 }
 
 func (cmd *UnlinkCmd) run() error {
