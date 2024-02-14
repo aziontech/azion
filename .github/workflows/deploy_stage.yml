@@ -38,14 +38,14 @@ jobs:
         run: git fetch --tags
 
       - name: Build
-        env: 
+        env:
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
         run: make build ENVFILE=./env/stage
 
       # - name: Cross-build
-      #   env: 
+      #   env:
       #     AZION_API: ${{ secrets.AZION_API_STAGE }}
       #     AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
       #     STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
@@ -70,7 +70,7 @@ jobs:
       #       distro=$(echo ${spec} | cut -d/ -f1);\
       #       goarch=$(echo ${spec} | cut -d/ -f2);\
       #       arch=$(echo ${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$/arm32/g;');\
-      #       cp dist/$distro/$arch/azion* dist/$distro/$arch/azion; 
+      #       cp dist/$distro/$arch/azion* dist/$distro/$arch/azion;
       #       aws s3 cp --no-progress --recursive \
       #         --exclude "*" --include "azion*" \
       #         dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/; \

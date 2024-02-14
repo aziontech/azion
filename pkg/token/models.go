@@ -20,11 +20,21 @@ type Token struct {
 	out      io.Writer
 }
 
+type UserInfo struct {
+	Results struct {
+		ClientID string `json:"client_id"`
+		Email    string `json:"email"`
+	} `json:"results"`
+}
+
 type Settings struct {
-	Token             string
-	UUID              string
-	LastUpdateCheck   time.Time
-	LastVulcanVersion string
+	Token                      string
+	UUID                       string
+	LastCheck                  time.Time
+	LastVulcanVersion          string
+	AuthorizeMetricsCollection int
+	ClientId                   string
+	Email                      string
 }
 
 type Config struct {

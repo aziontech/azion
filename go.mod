@@ -10,6 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/joho/godotenv v1.5.1
 	github.com/manifoldco/promptui v0.9.0
+	github.com/segmentio/analytics-go/v3 v3.3.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.14.0
 	github.com/tidwall/gjson v1.14.3
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -28,6 +30,7 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/segmentio/backo-go v1.0.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

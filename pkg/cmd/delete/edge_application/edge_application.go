@@ -2,7 +2,6 @@ package edgeapplication
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,7 +10,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	fun "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -70,43 +68,11 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	ctx := context.Background()
 
 	if cmd.Flags().Changed("cascade") {
-		azionJson, err := del.GetAzion()
-		if err != nil {
-			if errors.Is(err, os.ErrNotExist) {
-				return msg.ErrorMissingAzionJson
-			} else {
-				return err //message with error
-			}
-		}
-		if azionJson.Application.ID == 0 {
-			return msg.ErrorMissingApplicationIdJson
-		}
-		clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
-		clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
-
-		err = clientapp.Delete(ctx, azionJson.Application.ID)
-		if err != nil {
-			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
-		}
-
-		if azionJson.Function.ID == 0 {
-			fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
-		} else {
-			err = clientfunc.Delete(ctx, azionJson.Function.ID)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
-			}
-		}
-
-		fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.CascadeSuccess)
-
-		err = del.UpdateJson(del)
+		err := del.Cascade(ctx)
 		if err != nil {
 			return err
 		}
-
 		return nil
-
 	}
 
 	if !cmd.Flags().Changed("application-id") {
