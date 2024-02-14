@@ -101,6 +101,6 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Remote resources deleted successfully\n", stdout.String())
+		assert.Equal(t, "Remote resources deleted successfully\n\n", stdout.String())
 	})
 }
