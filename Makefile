@@ -22,6 +22,7 @@ BIN := azion
 BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
 LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
+		-X github.com/aziontech/azion-cli/pkg/metric.SegmentKey=$$SEGMENT_KEY \
 		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
@@ -53,7 +54,7 @@ dev: dev-deps
 	$(RELOAD) -build 'make build' -exclude-dir '.git'
 
 .PHONY: dev-deps
-dev-deps: 
+dev-deps:
 	$(GO) install github.com/githubnemo/CompileDaemon@v1.4.0
 
 .PHONY: get-lint-deps
@@ -85,7 +86,7 @@ get-gosec-deps:
 	echo "go install package gosec"; \
 	@ cd $(GOPATH); \
 		$(GO) install github.com/securego/gosec/v2/cmd/gosec@latest
-		
+
 .PHONY : build
 build: ## build application
 	@ $(GO) version

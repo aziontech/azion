@@ -31,28 +31,34 @@ func New(c *Config) (*Token, error) {
 	}, nil
 }
 
-func (t *Token) Validate(token *string) (bool, error) {
+func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 	logger.Debug("Validate token", zap.Any("Token", *token))
 
 	req, err := http.NewRequest("GET", utils.Concat(t.endpoint, "/user/me"), nil)
 	if err != nil {
-		return false, err
+		return false, UserInfo{}, err
 	}
 	req.Header.Add("Accept", "application/json; version=3")
 	req.Header.Add("Authorization", "token "+*token)
 
 	resp, err := t.client.Do(req)
 	if err != nil {
-		return false, err
+		return false, UserInfo{}, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return false, nil
+		return false, UserInfo{}, nil
+	}
+
+	var userInfo UserInfo
+	err = json.NewDecoder(resp.Body).Decode(&userInfo)
+	if err != nil {
+		return false, UserInfo{}, err
 	}
 
 	t.valid = true
 
-	return true, nil
+	return true, userInfo, nil
 }
 
 func (t *Token) Save(b []byte) (string, error) {
@@ -170,3 +176,5 @@ func ReadSettings() (Settings, error) {
 
 	return settings, nil
 }
+
+// func GetUserInfo
