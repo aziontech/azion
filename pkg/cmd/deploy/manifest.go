@@ -154,7 +154,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		if !conf.RulesEngine.Created {
 			// create rules engines to compute else delivery
 			if strings.ToLower(conf.Mode) == "compute" {
-				requestRules, err := requestRulesEngineManifest(conf, conf.Function.InstanceID, route)
+				requestRules, err := requestRulesEngineManifest(conf, route)
 				if err != nil {
 					return err
 				}
@@ -255,7 +255,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	return nil
 }
 
-func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, functionID int64, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
+func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
 	logger.Debug("Create Rules Engine set origin")
 
 	req := apiEdgeApplications.CreateRulesEngineRequest{}
@@ -266,7 +266,7 @@ func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, functio
 	if routes.Type == "compute" {
 		var behFunction sdk.RulesEngineBehaviorString
 		behFunction.SetName("run_function")
-		behFunction.SetTarget(fmt.Sprintf("%d", functionID))
+		behFunction.SetTarget(fmt.Sprintf("%d", conf.Function.InstanceID))
 		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 			RulesEngineBehaviorString: &behFunction,
 		})
