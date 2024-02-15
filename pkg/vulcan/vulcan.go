@@ -19,7 +19,8 @@ const (
 	firstTimeExecuting   = "@2.2.0"
 )
 
-var versionVulcan = "@latest"
+// npm i edge-functions@2.4.0-stage.3
+var versionVulcan = "@2.4.0-stage.4"
 
 func Command(flags, params string) string {
 	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
