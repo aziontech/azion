@@ -18,6 +18,9 @@ const (
 )
 
 func saveMetrict(cmd *cobra.Command) error {
+	if !cmd.HasParent() {
+		return nil
+	}
 	//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
 	if globalSettings.AuthorizeMetricsCollection != 1 {
 		return nil
