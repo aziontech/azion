@@ -13,7 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var SegmentKey string = "YOUR_WRITE_KEY"
+const SEGMENT_KEY = "Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt"
 
 func location() string {
 	dir, err := config.Dir()
@@ -46,7 +46,7 @@ func readLocalMetrics() map[string]int {
 }
 
 func Send(settings *token.Settings) {
-	client := analytics.New(SegmentKey)
+	client := analytics.New(SEGMENT_KEY)
 	defer client.Close()
 
 	metrics := readLocalMetrics()
@@ -62,7 +62,7 @@ func Send(settings *token.Settings) {
 		})
 		if err != nil {
 			logger.Debug("failed to send metrics", zap.Error(err))
-			return 
+			return
 		}
 	}
 
