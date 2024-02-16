@@ -182,7 +182,10 @@ func Execute() {
 
 	err := cmd.Execute()
 	if err != nil {
-		metric.TotalCommandsCount(cmd, commandName, false)
+		err := metric.TotalCommandsCount(cmd, commandName, false)
+		if err != nil {
+			cobra.CheckErr(err)
+		}
 	}
 
 	cobra.CheckErr(err)
