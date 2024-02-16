@@ -3,4 +3,3 @@ AUTH_URL=https://sso.azion.com/api
 STORAGE_URL=https://api.azion.com
 TEMPLATE_BRANCH=main
 TEMPLATE_MAJOR=0
-SEGMENT_KEY=Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt

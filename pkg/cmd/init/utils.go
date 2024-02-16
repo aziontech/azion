@@ -15,10 +15,7 @@ import (
 )
 
 func shouldDevDeploy(info *InitInfo, msg string, defaultYes bool) bool {
-	if info.GlobalFlagAll {
-		return true
-	}
-	return helpers.Confirm(msg, defaultYes)
+	return helpers.Confirm(info.GlobalFlagAll, msg, defaultYes)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {

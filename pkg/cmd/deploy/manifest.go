@@ -154,7 +154,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		if !conf.RulesEngine.Created {
 			// create rules engines to compute else delivery
 			if strings.ToLower(conf.Mode) == "compute" {
-				requestRules, err := requestRulesEngineManifest(conf.Origin.StorageOriginID, conf.Function.InstanceID, route)
+				requestRules, err := requestRulesEngineManifest(conf, route)
 				if err != nil {
 					return err
 				}
@@ -164,146 +164,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 					return err
 				}
 
-				switch route.From {
-				case "/_next/static/":
-					logger.Debug("Create Rules to route /_next/static/ rewrite")
-
-					reqNextStatic := apiEdgeApplications.CreateRulesEngineRequest{}
-					reqNextStatic.SetName("rule_rewrite_next_static")
-
-					behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-					// ---------------------------------
-					// capture match groups
-					// ---------------------------------
-
-					var behCaptureMatchGroups sdk.RulesEngineBehaviorObject
-
-					behCaptureMatchGroups.SetName("capture_match_groups")
-
-					behTarget := sdk.RulesEngineBehaviorObjectTarget{}
-					behTarget.SetCapturedArray("capture")
-					behTarget.SetSubject("${uri}")
-					behTarget.SetRegex("/_next/static/(.*)")
-
-					behCaptureMatchGroups.SetTarget(behTarget)
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorObject: &behCaptureMatchGroups,
-					})
-
-					// ---------------------------------
-					// rewrite request
-					// ---------------------------------
-
-					var behRewriteRequest sdk.RulesEngineBehaviorString
-
-					behRewriteRequest.SetName("rewrite_request")
-					behRewriteRequest.SetTarget("/.next/static/%{capture[1]}")
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorString: &behRewriteRequest,
-					})
-
-					// ---------------------------------
-					// deliver
-					// ---------------------------------
-
-					var behDeliver sdk.RulesEngineBehaviorString
-
-					behDeliver.SetName("deliver")
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorString: &behDeliver,
-					})
-
-					reqNextStatic.SetBehaviors(behaviors)
-
-					criteria := make([][]sdk.RulesEngineCriteria, 1)
-					for i := 0; i < 1; i++ {
-						criteria[i] = make([]sdk.RulesEngineCriteria, 1)
-					}
-
-					criteria[0][0].SetConditional("if")
-					criteria[0][0].SetVariable("${uri}")
-					criteria[0][0].SetOperator("starts_with")
-					criteria[0][0].SetInputValue(route.From)
-					reqNextStatic.SetCriteria(criteria)
-
-					_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &reqNextStatic)
-					if err != nil {
-						return err
-					}
-				case "\\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$":
-					logger.Debug("Create Rules to route \\.(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4)$ rewrite")
-
-					reqAssets := apiEdgeApplications.CreateRulesEngineRequest{}
-					reqAssets.SetName("rule_rewrite_assets")
-
-					behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-					// ---------------------------------
-					// capture match groups
-					// ---------------------------------
-
-					var behCaptureMatchGroups sdk.RulesEngineBehaviorObject
-
-					behCaptureMatchGroups.SetName("capture_match_groups")
-
-					behTarget := sdk.RulesEngineBehaviorObjectTarget{}
-					behTarget.SetCapturedArray("capture")
-					behTarget.SetSubject("${uri}")
-					behTarget.SetRegex("/(.*)")
-
-					behCaptureMatchGroups.SetTarget(behTarget)
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorObject: &behCaptureMatchGroups,
-					})
-
-					// ---------------------------------
-					// rewrite request
-					// ---------------------------------
-
-					var behRewriteRequest sdk.RulesEngineBehaviorString
-
-					behRewriteRequest.SetName("rewrite_request")
-					behRewriteRequest.SetTarget("/public/%{capture[1]}")
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorString: &behRewriteRequest,
-					})
-
-					// ---------------------------------
-					// deliver
-					// ---------------------------------
-
-					var behDeliver sdk.RulesEngineBehaviorString
-
-					behDeliver.SetName("deliver")
-
-					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorString: &behDeliver,
-					})
-
-					reqAssets.SetBehaviors(behaviors)
-
-					criteria := make([][]sdk.RulesEngineCriteria, 1)
-					for i := 0; i < 1; i++ {
-						criteria[i] = make([]sdk.RulesEngineCriteria, 1)
-					}
-
-					criteria[0][0].SetConditional("if")
-					criteria[0][0].SetVariable("${uri}")
-					criteria[0][0].SetOperator("matches")
-					criteria[0][0].SetInputValue(route.From)
-					reqAssets.SetCriteria(criteria)
-
-					_, err = clients.EdgeApplication.CreateRulesEngine(ctx, conf.Application.ID, "request", &reqAssets)
-					if err != nil {
-						return err
-					}
-				}
 			} else {
 
 				reqDeliver := apiEdgeApplications.CreateRulesEngineRequest{}
@@ -316,7 +176,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				behRewriteRequest.SetName("rewrite_request")
 
 				var target = fmt.Sprintf("${uri}%sindex.html", "")
-				if strings.ToLower(conf.Template) == "html" && len(Path) > 0  {
+				if strings.ToLower(conf.Template) == "html" && len(Path) > 0 {
 					Path = strings.ReplaceAll(Path, "/", "")
 					Path = strings.ReplaceAll(Path, ".", "")
 					target = fmt.Sprintf("${uri}/%s/index.html", Path)
@@ -379,7 +239,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				}
 			}
 		}
-	}	
+	}
 
 	conf.RulesEngine.Created = true
 
@@ -395,7 +255,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	return nil
 }
 
-func requestRulesEngineManifest(originID, functionID int64, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
+func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
 	logger.Debug("Create Rules Engine set origin")
 
 	req := apiEdgeApplications.CreateRulesEngineRequest{}
@@ -406,18 +266,32 @@ func requestRulesEngineManifest(originID, functionID int64, routes Routes) (apiE
 	if routes.Type == "compute" {
 		var behFunction sdk.RulesEngineBehaviorString
 		behFunction.SetName("run_function")
-		behFunction.SetTarget(fmt.Sprintf("%d", functionID))
-
+		behFunction.SetTarget(fmt.Sprintf("%d", conf.Function.InstanceID))
 		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 			RulesEngineBehaviorString: &behFunction,
 		})
+
+		if strings.ToLower(conf.Template) == "next" {
+			var behForwardCookies sdk.RulesEngineBehaviorString
+			behForwardCookies.SetName("forward_cookies")
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behForwardCookies,
+			})
+		}
+
 	} else {
 		var behOrigin sdk.RulesEngineBehaviorString
 		behOrigin.SetName("set_origin")
-		behOrigin.SetTarget(fmt.Sprintf("%d", originID))
+		behOrigin.SetTarget(fmt.Sprintf("%d", conf.Origin.StorageOriginID))
 
 		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 			RulesEngineBehaviorString: &behOrigin,
+		})
+
+		var behDeliver sdk.RulesEngineBehaviorString
+		behDeliver.SetName("deliver")
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behDeliver,
 		})
 	}
 

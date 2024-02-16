@@ -47,17 +47,17 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 		return err
 	}
 
-	if err := checkTokenSent(cmd, f, pre.token); err != nil {
-		return err
-	}
-
 	settings, err := token.ReadSettings()
 	if err != nil {
 		return err
 	}
 	globalSettings = &settings
 
-	if err := checkAuthorizeMetricsCollection(globalSettings); err != nil {
+	if err := checkTokenSent(cmd, f, pre.token, settings); err != nil {
+		return err
+	}
+
+	if err := checkAuthorizeMetricsCollection(cmd, f.GlobalFlagAll, globalSettings); err != nil {
 		return err
 	}
 
@@ -79,7 +79,7 @@ func setConfigPath(cmd *cobra.Command, cfg string) error {
 	return nil
 }
 
-func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken string) error {
+func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken string, settings token.Settings) error {
 
 	// if global --token flag was sent, verify it and save it locally
 	if cmd.Flags().Changed("token") {
@@ -105,9 +105,10 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 		}
 
 		strToken := token.Settings{
-			Token:    configureToken,
-			ClientId: user.Results.ClientID,
-			Email:    user.Results.Email,
+			Token:                      configureToken,
+			ClientId:                   user.Results.ClientID,
+			Email:                      user.Results.Email,
+			AuthorizeMetricsCollection: settings.AuthorizeMetricsCollection,
 		}
 
 		bStrToken, err := toml.Marshal(strToken)
@@ -121,7 +122,7 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 		}
 
 		logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
-		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn)
+		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn+"\n")
 	}
 
 	return nil
@@ -280,12 +281,12 @@ func linuxUpdateMessage(f *cmdutil.Factory) error {
 }
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
-func checkAuthorizeMetricsCollection(settings *token.Settings) error {
-	if settings.AuthorizeMetricsCollection > 0 {
+func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {
+	if settings.AuthorizeMetricsCollection > 0 || cmd.Name() == "completion" {
 		return nil
 	}
 
-	authorize := utils.Confirm(msg.AskCollectMetrics, true)
+	authorize := utils.Confirm(globalFlagAll, msg.AskCollectMetrics, true)
 	if authorize {
 		settings.AuthorizeMetricsCollection = 1
 	} else {
