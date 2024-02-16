@@ -57,7 +57,7 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 		return err
 	}
 
-	if err := checkAuthorizeMetricsCollection(f.GlobalFlagAll, globalSettings); err != nil {
+	if err := checkAuthorizeMetricsCollection(cmd, f.GlobalFlagAll, globalSettings); err != nil {
 		return err
 	}
 
@@ -281,8 +281,8 @@ func linuxUpdateMessage(f *cmdutil.Factory) error {
 }
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
-func checkAuthorizeMetricsCollection(globalFlagAll bool, settings *token.Settings) error {
-	if settings.AuthorizeMetricsCollection > 0 {
+func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {
+	if settings.AuthorizeMetricsCollection > 0 || cmd.Name() == "completion" {
 		return nil
 	}
 
