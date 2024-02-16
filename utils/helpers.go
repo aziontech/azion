@@ -584,6 +584,11 @@ func Concat(strs ...string) string {
 	return sb.String()
 }
 
+// Confirm is a function that provides a confirmation prompt to the user.
+// It takes three parameters:
+// - globalFlagAll: a boolean flag to skip the confirmation and return true directly.
+// - msg: the message to display as part of the confirmation prompt.
+// - defaultYes: a boolean flag indicating whether pressing enter should default to 'yes'.
 func Confirm(globalFlagAll bool, msg string, defaultYes bool) bool {
 	if globalFlagAll {
 		return true
