@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"runtime"
 	"strconv"
+	"strings"
 	"time"
 	"unicode"
 
@@ -42,6 +43,11 @@ type GitHubRelease struct {
 
 // doPreCommandCheck carry out all pre-cmd checks needed
 func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error {
+
+	// get full command run and rewrite with our metrics pattern
+	commandName = cmd.CommandPath()
+	rewrittenCommand := strings.ReplaceAll(strings.TrimPrefix(commandName, "azion "), " ", "-")
+	commandName = rewrittenCommand
 
 	if err := setConfigPath(cmd, pre.config); err != nil {
 		return err
