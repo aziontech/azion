@@ -584,7 +584,16 @@ func Concat(strs ...string) string {
 	return sb.String()
 }
 
-func Confirm(msg string, defaultYes bool) bool {
+// Confirm is a function that provides a confirmation prompt to the user.
+// It takes three parameters:
+// - globalFlagAll: a boolean flag to skip the confirmation and return true directly.
+// - msg: the message to display as part of the confirmation prompt.
+// - defaultYes: a boolean flag indicating whether pressing enter should default to 'yes'.
+func Confirm(globalFlagAll bool, msg string, defaultYes bool) bool {
+	if globalFlagAll {
+		return true
+	}
+
 	fmt.Printf("🤔 \x1b[32m%s \x1b[0m", msg)
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
@@ -603,7 +612,7 @@ func Confirm(msg string, defaultYes bool) bool {
 		return false
 	default:
 		fmt.Printf("\x1b[33m%s\x1b[0m", "⚠️ Invalid input. Please enter 'y' or 'n'.\n")
-		return Confirm(msg, defaultYes)
+		return Confirm(globalFlagAll, msg, defaultYes)
 	}
 }
 
