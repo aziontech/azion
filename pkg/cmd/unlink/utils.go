@@ -11,11 +11,8 @@ import (
 )
 
 func shouldClean(f *cmdutil.Factory) bool {
-	if f.GlobalFlagAll {
-		return true
-	}
 	msg := "Do you want to unlink this project? (y/N)"
-	return helpers.Confirm(msg, false)
+	return helpers.Confirm(f.GlobalFlagAll, msg, false)
 }
 
 func clean(f *cmdutil.Factory, cmd *UnlinkCmd) error {
@@ -25,7 +22,7 @@ func clean(f *cmdutil.Factory, cmd *UnlinkCmd) error {
 		if f.GlobalFlagAll {
 			shouldCascade = true
 		} else {
-			answer := helpers.Confirm("Would you like to delete remote resources as well? (y/N)", false)
+			answer := helpers.Confirm(f.GlobalFlagAll, "Would you like to delete remote resources as well? (y/N)", false)
 			shouldCascade = answer
 		}
 

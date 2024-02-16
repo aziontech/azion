@@ -14,18 +14,15 @@ import (
 )
 
 func shouldConfigure(info *LinkInfo) bool {
-	if info.GlobalFlagAll || info.Auto {
+	if info.Auto {
 		return true
 	}
 	msg := fmt.Sprintf("Do you want to link %s to Azion? (y/N)", info.PathWorkingDir)
-	return helpers.Confirm(msg, false)
+	return helpers.Confirm(info.GlobalFlagAll, msg, false)
 }
 
 func shouldDevDeploy(info *LinkInfo, msg string, defaultYes bool) bool {
-	if info.GlobalFlagAll {
-		return true
-	}
-	return helpers.Confirm(msg, defaultYes)
+	return helpers.Confirm(info.GlobalFlagAll, msg, defaultYes)
 }
 
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
@@ -35,7 +32,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
-			return helpers.Confirm("This project was already configured. Do you want to override the previous configuration? (y/N)", false), nil
+			return helpers.Confirm(info.GlobalFlagAll, "This project was already configured. Do you want to override the previous configuration? (y/N)", false), nil
 		}
 
 		if shouldFetchTemplates {
@@ -90,7 +87,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 
 	// The list that comes from Vulcan comes with a blank line that we should remove.
 	outputInline := strings.Split(output, "\n")
-	noLastItem := len(outputInline)-1
+	noLastItem := len(outputInline) - 1
 	listPresets := make([]string, noLastItem)
 	copy(listPresets, outputInline[:noLastItem])
 

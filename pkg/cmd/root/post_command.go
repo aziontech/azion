@@ -32,6 +32,7 @@ func saveMetrict(cmd *cobra.Command) error {
 
 	ignoredWords := map[string]bool{
 		"__complete": true,
+		"completion": true,
 	}
 	if ignoredWords[cmd.Parent().Name()] || ignoredWords[cmd.Name()] {
 		return nil
@@ -39,7 +40,7 @@ func saveMetrict(cmd *cobra.Command) error {
 
 	metricsLocation := filepath.Join(dir, metricsFilename)
 
-	file, err := os.OpenFile(metricsLocation, os.O_RDWR|os.O_CREATE, 0666)
+	file, err := os.OpenFile(metricsLocation, os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
 		return err
 	}
