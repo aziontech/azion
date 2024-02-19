@@ -1,4 +1,4 @@
-package root
+package metric
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/spf13/cobra"
@@ -15,16 +14,16 @@ import (
 const (
 	metricsFilename = "metrics.json"
 	total           = "total-commands-executed"
+	totalSuccess    = "total-commands-executed-successfully"
+	totalFailed     = "total-commands-executed-unsuccessfully"
+	failSuffix      = "-failed"
 )
 
-func saveMetrict(cmd *cobra.Command) error {
-	if !cmd.HasParent() {
+func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) error {
+	if commandName == "" {
 		return nil
 	}
-	//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
-	if globalSettings.AuthorizeMetricsCollection != 1 {
-		return nil
-	}
+
 	dir, err := config.Dir()
 	if err != nil {
 		return err
@@ -34,7 +33,7 @@ func saveMetrict(cmd *cobra.Command) error {
 		"__complete": true,
 		"completion": true,
 	}
-	if ignoredWords[cmd.Parent().Name()] || ignoredWords[cmd.Name()] {
+	if ignoredWords[cmd.Name()] {
 		return nil
 	}
 
@@ -59,11 +58,17 @@ func saveMetrict(cmd *cobra.Command) error {
 		data = make(map[string]int)
 	}
 
-	commandRun := cmd.Parent().Name() + "-" + cmd.Name()
-	rewrittenCommand := strings.TrimPrefix(commandRun, "azion-")
+	if !success {
+		commandName = commandName + failSuffix
+	}
 
-	data[rewrittenCommand]++
+	data[commandName]++
 	data[total]++
+	if success {
+		data[totalSuccess]++
+	} else {
+		data[totalFailed]++
+	}
 
 	// Reset file offset to the beginning
 	_, err = file.Seek(0, 0)

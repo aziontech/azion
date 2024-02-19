@@ -18,6 +18,7 @@ import (
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
+	"github.com/aziontech/azion-cli/pkg/metric"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
@@ -48,8 +49,9 @@ func NewRootCmd(f *cmdutil.Factory) *RootCmd {
 }
 
 var (
-	tokenFlag  string
-	configFlag string
+	tokenFlag   string
+	configFlag  string
+	commandName string
 )
 
 var globalSettings *token.Settings
@@ -76,7 +78,11 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-			err := saveMetrict(cmd)
+			//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
+			if globalSettings.AuthorizeMetricsCollection != 1 {
+				return nil
+			}
+			err := metric.TotalCommandsCount(cmd, commandName, true)
 			if err != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}
@@ -174,5 +180,13 @@ func Execute() {
 
 	cmd := NewCmd(factory)
 
-	cobra.CheckErr(cmd.Execute())
+	err := cmd.Execute()
+	if err != nil {
+		err := metric.TotalCommandsCount(cmd, commandName, false)
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+	}
+
+	cobra.CheckErr(err)
 }
