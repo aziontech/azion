@@ -2,6 +2,7 @@ package metric
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -13,13 +14,15 @@ import (
 
 const (
 	metricsFilename = "metrics.json"
-	total           = "total-commands-executed"
-	totalSuccess    = "total-commands-executed-successfully"
-	totalFailed     = "total-commands-executed-unsuccessfully"
-	failSuffix      = "-failed"
 )
 
-func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) error {
+type command struct {
+	TotalSuccess  int
+	TotalFailed   int
+	ExecutionTime float64
+}
+
+func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, success bool) error {
 	if commandName == "" {
 		return nil
 	}
@@ -33,6 +36,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 		"__complete": true,
 		"completion": true,
 	}
+
 	if ignoredWords[cmd.Name()] {
 		return nil
 	}
@@ -45,7 +49,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 	}
 	defer file.Close()
 
-	var data map[string]int
+	var data map[string]*command
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&data)
@@ -55,19 +59,18 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 
 	// If EOF is encountered or the file is empty, initialize data as an empty map
 	if data == nil {
-		data = make(map[string]int)
+		data = make(map[string]*command)
 	}
 
-	if !success {
-		commandName = commandName + failSuffix
+	if data[commandName] == nil {
+		data[commandName] = &command{}
 	}
 
-	data[commandName]++
-	data[total]++
+	data[commandName].ExecutionTime = executionTime
 	if success {
-		data[totalSuccess]++
+		data[commandName].TotalSuccess++
 	} else {
-		data[totalFailed]++
+		data[commandName].TotalFailed++
 	}
 
 	// Reset file offset to the beginning
@@ -85,6 +88,8 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 	if err := json.NewEncoder(file).Encode(data); err != nil {
 		log.Fatal(err)
 	}
+
+	fmt.Println(data)
 
 	return nil
 }
