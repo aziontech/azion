@@ -9,7 +9,9 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
+	"go.uber.org/zap"
 )
 
 func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
@@ -24,7 +26,7 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 	for {
 		err = client.CreateBucket(ctx, name)
 		// if the bucket name is already in use, we ask for another one
-		if errors.Is(err, errors.New(msg.BucketInUse)) {
+		if errors.Is(err, utils.ErrorNameInUse) {
 			logger.FInfo(cmd.Io.Out, msg.BucketInUse)
 			projName, err := askForInput(msg.AskInputName, thoth.GenerateName())
 			if err != nil {
@@ -41,6 +43,12 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 	}
 
 	conf.Bucket = name
+	err = cmd.WriteAzionJsonContent(conf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 
