@@ -61,8 +61,8 @@ func Send(settings *token.Settings) {
 			Event:  event,
 			Properties: analytics.NewProperties().
 				Set("email", settings.Email).
-				Set("version cli", cmd.VersionCLI).
-				Set("version vulcan", cmd.VersionCLI).
+				Set("version cli", cmd.CLIVersion).
+				Set("version vulcan", cmd.VulcanVersion).
 				Set("total successful", cmd.TotalSuccess).
 				Set("total failed", cmd.TotalFailed).
 				Set("total", cmd.TotalSuccess+cmd.TotalFailed).
