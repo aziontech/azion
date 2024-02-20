@@ -62,6 +62,16 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		return err
 	}
 
+	tagName, err := github.GetVersionGitHub("vulcan")
+	if err != nil {
+		return err
+	}
+
+	echoShell, err := shell.Get()
+	if err != nil {
+		return err
+	}
+
 	// If EOF is encountered or the file is empty, initialize data as an empty map
 	if data == nil {
 		data = make(map[string]*command)
@@ -72,16 +82,9 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	}
 
 	data[commandName].ExecutionTime = executionTime
-	tagName, err := github.GetVersionGitHub("vulcan")
-	if err != nil {
-		return err
-	}
 	data[commandName].VersionCLI = version.BinVersion
-	data[commandName].VersionVulcan = tagName[1:]
-
-	echoShell, err := shell.Get()
-	if err != nil {
-		return err
+	if len(tagName) > 0 {
+		data[commandName].VersionVulcan = tagName[1:]
 	}
 	data[commandName].Shell = echoShell
 	if success {
