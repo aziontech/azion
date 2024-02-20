@@ -2,13 +2,14 @@ package metric
 
 import (
 	"encoding/json"
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/github"
-	"github.com/aziontech/azion-cli/pkg/shell"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/github"
+	"github.com/aziontech/azion-cli/pkg/shell"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/spf13/cobra"

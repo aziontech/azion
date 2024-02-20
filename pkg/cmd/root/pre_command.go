@@ -1,15 +1,13 @@
 package root
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/github"
-	"os/user"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/aziontech/azion-cli/pkg/github"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
@@ -21,8 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
-	"github.com/zcalusic/sysinfo"
-	"go.uber.org/zap"
 )
 
 type PreCmd struct {
@@ -179,19 +175,10 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 
 func showUpdateMessage(f *cmdutil.Factory) error {
 	logger.FInfo(f.IOStreams.Out, msg.NewVersion)
-	os := runtime.GOOS
 
-	switch os {
-	case "darwin":
-		logger.FInfo(f.IOStreams.Out, msg.BrewUpdate)
-		return nil
-	case "linux":
-		err := linuxUpdateMessage(f)
-		if err != nil {
-			return err
-		}
-	default:
-		logger.FInfo(f.IOStreams.Out, msg.UnsupportedOS)
+	err := showUpdadeMessageSystem(f)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -216,48 +203,6 @@ func format(input string) (int, error) {
 	}
 
 	return number, nil
-}
-
-func linuxUpdateMessage(f *cmdutil.Factory) error {
-	current, err := user.Current()
-	if err != nil {
-		logger.Debug("Error while getting current user's information", zap.Error(err))
-		return msg.ErrorCurrentUser
-	}
-
-	if current.Uid != "0" {
-		logger.FInfo(f.IOStreams.Out, msg.CouldNotGetUser)
-		return nil
-	}
-
-	var si sysinfo.SysInfo
-
-	si.GetSysInfo()
-
-	data, err := json.MarshalIndent(&si, "", "  ")
-	if err != nil {
-		logger.Debug("Error while marshaling current user's information", zap.Error(err))
-		return msg.ErrorMarshalUserInfo
-	}
-
-	var osInfo OSInfo
-	err = json.Unmarshal(data, &osInfo)
-	if err != nil {
-		logger.Debug("Error while unmarshaling current user's information", zap.Error(err))
-		return msg.ErrorUnmarshalUserInfo
-	}
-
-	logger.FInfo(f.IOStreams.Out, msg.DownloadRelease)
-	switch osInfo.OS.Vendor {
-	case "debian":
-		logger.FInfo(f.IOStreams.Out, msg.DpkgUpdate)
-	case "alpine":
-		logger.FInfo(f.IOStreams.Out, msg.ApkUpdate)
-	case "centos", "fedora", "opensuse", "mageia", "mandriva":
-		logger.FInfo(f.IOStreams.Out, msg.RpmUpdate)
-	}
-
-	return nil
 }
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
