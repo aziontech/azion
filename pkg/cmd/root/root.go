@@ -79,7 +79,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-			executionTime := time.Now().Sub(startTime).Seconds()
+			executionTime := time.Since(startTime).Seconds()
 
 			//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
 			if globalSettings.AuthorizeMetricsCollection != 1 {
@@ -185,7 +185,7 @@ func Execute() {
 
 	err := cmd.Execute()
 	if err != nil {
-		executionTime := time.Now().Sub(startTime).Seconds()
+		executionTime := time.Since(startTime).Seconds()
 		err := metric.TotalCommandsCount(cmd, commandName, executionTime, false)
 		if err != nil {
 			cobra.CheckErr(err)
