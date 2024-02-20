@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/github"
-	"github.com/aziontech/azion-cli/pkg/shell"
+	"github.com/riywo/loginshell"
 	"io"
 	"log"
 	"os"
@@ -22,8 +22,8 @@ type command struct {
 	TotalSuccess  int
 	TotalFailed   int
 	ExecutionTime float64
-	VersionCLI    string
-	VersionVulcan string
+	CLIVersion    string
+	VulcanVersion string
 	Shell         string
 }
 
@@ -67,7 +67,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		return err
 	}
 
-	echoShell, err := shell.Get()
+	shell, err := loginshell.Shell()
 	if err != nil {
 		return err
 	}
@@ -82,11 +82,11 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	}
 
 	data[commandName].ExecutionTime = executionTime
-	data[commandName].VersionCLI = version.BinVersion
+	data[commandName].CLIVersion = version.BinVersion
 	if len(tagName) > 0 {
-		data[commandName].VersionVulcan = tagName[1:]
+		data[commandName].VulcanVersion = tagName[1:]
 	}
-	data[commandName].Shell = echoShell
+	data[commandName].Shell = shell 
 	if success {
 		data[commandName].TotalSuccess++
 	} else {
