@@ -35,15 +35,17 @@ func showUpdadeMessageSystem(f *cmdutil.Factory) error {
 		return msg.ErrorMarshalUserInfo
 	}
 
-	var osInfo OSInfo
-	if osInfo == nil {
-		return msg.CouldNotGetUser
-	}
+	var osInfo *OSInfo
 
 	err = json.Unmarshal(data, &osInfo)
 	if err != nil {
 		logger.Debug("Error while unmarshaling current user's information", zap.Error(err))
 		return msg.ErrorUnmarshalUserInfo
+	}
+
+	if osInfo == nil {
+		logger.FInfo(f.IOStreams.Out, msg.CouldNotGetUser)
+		return nil
 	}
 
 	logger.FInfo(f.IOStreams.Out, msg.DownloadRelease)
