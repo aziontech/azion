@@ -20,6 +20,7 @@ var (
 	ReleasePage       = "Please visit our Releases page and download the appropriate file\n"
 	CouldNotGetUser   = "Sadly, we could not get information on your system to indicate the correct update form\n"
 	DownloadRelease   = "Visit https://github.com/aziontech/azion/releases to download the correct package"
+	CouldNotGetInfo   = "Visit https://github.com/aziontech/azion/releases to download the correct package"
 	RpmUpdate         = "Please run: 'sudo rpm -i <downloaded_file>' to update to the latest version\n"
 	DpkgUpdate        = "Please run: 'sudo dpkg -i <downloaded_file>' to update to the latest version\n"
 	ApkUpdate         = "Please run: 'sudo apk add <downloaded_file>' to update to the latest version\n"
