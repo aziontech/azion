@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/github"
+	"github.com/aziontech/azion-cli/pkg/shell"
 	"io"
 	"log"
 	"os"
@@ -23,6 +24,7 @@ type command struct {
 	ExecutionTime float64
 	VersionCLI    string
 	VersionVulcan string
+	Shell         string
 }
 
 func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, success bool) error {
@@ -76,6 +78,12 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	}
 	data[commandName].VersionCLI = version.BinVersion
 	data[commandName].VersionVulcan = tagName[1:]
+
+	echoShell, err := shell.Get()
+	if err != nil {
+		return err
+	}
+	data[commandName].Shell = echoShell
 	if success {
 		data[commandName].TotalSuccess++
 	} else {

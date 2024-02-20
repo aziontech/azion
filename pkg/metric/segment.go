@@ -62,6 +62,7 @@ func Send(settings *token.Settings) {
 				Set("total successful", cmd.TotalSuccess).
 				Set("total failed", cmd.TotalFailed).
 				Set("total", cmd.TotalSuccess+cmd.TotalFailed).
+				Set("shell", cmd.Shell).
 				Set("execution time", cmd.ExecutionTime),
 		})
 		if err != nil {
