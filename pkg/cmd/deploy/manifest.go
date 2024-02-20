@@ -83,6 +83,9 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		}
 	}
 
+	// cacheID created for "compute" in the SSR, will be used to create the function and configure the caching policy.
+	var cacheID int64 = 0
+
 	for _, route := range manifest.Routes {
 		if route.From == "/_next/data/" {
 			continue
@@ -93,7 +96,19 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			err := cmd.doFunction(clients, ctx, conf)
 			if err != nil {
 				return err
+			}	
+
+			var reqCache apiEdgeApplications.CreateCacheSettingsRequest
+			reqCache.SetName("function policy")
+
+			// create cache to function next
+			cache, err := clients.EdgeApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+			if err != nil {
+				logger.Debug("Error while creating cache settings", zap.Error(err))
+				return err
 			}
+			cacheID = cache.GetId()
+			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)	
 		}
 
 		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
@@ -154,7 +169,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		if !conf.RulesEngine.Created {
 			// create rules engines to compute else delivery
 			if strings.ToLower(conf.Mode) == "compute" {
-				requestRules, err := requestRulesEngineManifest(conf, route)
+				requestRules, err := requestRulesEngineManifest(conf, route, cacheID)
 				if err != nil {
 					return err
 				}
@@ -255,7 +270,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	return nil
 }
 
-func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes Routes) (apiEdgeApplications.CreateRulesEngineRequest, error) {
+func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes Routes, cacheID int64) (apiEdgeApplications.CreateRulesEngineRequest, error) {
 	logger.Debug("Create Rules Engine set origin")
 
 	req := apiEdgeApplications.CreateRulesEngineRequest{}
@@ -279,6 +294,12 @@ func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes 
 			})
 		}
 
+		var behCache sdk.RulesEngineBehaviorString
+		behCache.SetName("set_cache_policy")
+		behCache.SetTarget(fmt.Sprintf("%d", cacheID))
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behCache,
+		})
 	} else {
 		var behOrigin sdk.RulesEngineBehaviorString
 		behOrigin.SetName("set_origin")
