@@ -3,8 +3,7 @@ package root
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
+	"github.com/aziontech/azion-cli/pkg/github"
 	"os/user"
 	"runtime"
 	"strconv"
@@ -35,10 +34,6 @@ type OSInfo struct {
 	OS struct {
 		Vendor string `json:"vendor"`
 	} `json:"os"`
-}
-
-type GitHubRelease struct {
-	TagName string `json:"tag_name"`
 }
 
 // doPreCommandCheck carry out all pre-cmd checks needed
@@ -146,36 +141,15 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 		metric.Send(settings)
 	}
 
-	apiURL := "https://api.github.com/repos/aziontech/azion/releases/latest"
-
-	response, err := http.Get(apiURL)
+	tagName, err := github.GetVersionGitHub("azion")
 	if err != nil {
-		logger.Debug("Failed to get latest version of Azion CLI", zap.Error(err))
-		return nil
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		logger.Debug("Failed to get latest version of Azion CLI", zap.Error(err))
-		return nil
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		logger.Debug("Failed to read response body", zap.Error(err))
-		return nil
-	}
-
-	var release GitHubRelease
-	if err := json.Unmarshal(body, &release); err != nil {
-		logger.Debug("Failed to unmarshal response body", zap.Error(err))
-		return nil
+		return err
 	}
 
 	logger.Debug("Current version: " + cVersion)
-	logger.Debug("Latest version: " + release.TagName)
+	logger.Debug("Latest version: " + tagName)
 
-	latestVersion, err := format(release.TagName)
+	latestVersion, err := format(tagName)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,8 @@ package metric
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/github"
 	"io"
 	"log"
 	"os"
@@ -20,6 +21,8 @@ type command struct {
 	TotalSuccess  int
 	TotalFailed   int
 	ExecutionTime float64
+	VersionCLI    string
+	VersionVulcan string
 }
 
 func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, success bool) error {
@@ -67,6 +70,12 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	}
 
 	data[commandName].ExecutionTime = executionTime
+	tagName, err := github.GetVersionGitHub("vulcan")
+	if err != nil {
+		return err
+	}
+	data[commandName].VersionCLI = version.BinVersion
+	data[commandName].VersionVulcan = tagName[1:]
 	if success {
 		data[commandName].TotalSuccess++
 	} else {
@@ -88,8 +97,6 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	if err := json.NewEncoder(file).Encode(data); err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(data)
 
 	return nil
 }
