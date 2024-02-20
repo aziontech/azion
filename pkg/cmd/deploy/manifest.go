@@ -100,9 +100,14 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 
 			var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 			reqCache.SetName("function policy")
+			reqCache.SetBrowserCacheSettings("honor")
+			reqCache.SetCdnCacheSettings("honor")
+			reqCache.SetCdnCacheSettingsMaximumTtl(0)
+			reqCache.SetCacheByQueryString("all")
+			reqCache.SetCacheByCookies("all")
 
 			// create cache to function next
-			cache, err := clients.EdgeApplication.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+			cache, err := clients.EdgeApplication.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
 			if err != nil {
 				logger.Debug("Error while creating cache settings", zap.Error(err))
 				return err
