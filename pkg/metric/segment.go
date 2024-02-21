@@ -2,9 +2,11 @@ package metric
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -51,10 +53,13 @@ func Send(settings *token.Settings) {
 
 	metrics := readLocalMetrics()
 
+	os := runtime.GOOS
+	arch := runtime.GOARCH
+
 	for event, cmd := range metrics {
 		err := client.Enqueue(analytics.Track{
 			UserId: settings.ClientId,
-			Event:  event,
+			Event:  fmt.Sprintf("cli_%s", event),
 			Properties: analytics.NewProperties().
 				Set("email", settings.Email).
 				Set("cli version", cmd.CLIVersion).
@@ -63,7 +68,10 @@ func Send(settings *token.Settings) {
 				Set("total failed", cmd.TotalFailed).
 				Set("total", cmd.TotalSuccess+cmd.TotalFailed).
 				Set("shell", cmd.Shell).
-				Set("execution time", cmd.ExecutionTime),
+				Set("execution time", cmd.ExecutionTime).
+				Set("operating system", os).
+				Set("architecture", arch).
+				Set("client id", settings.ClientId),
 		})
 		if err != nil {
 			logger.Debug("failed to send metrics", zap.Error(err))

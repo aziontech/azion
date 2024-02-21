@@ -2,13 +2,14 @@ package metric
 
 import (
 	"encoding/json"
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/github"
-	"github.com/riywo/loginshell"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/github"
+	"github.com/riywo/loginshell"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/spf13/cobra"
@@ -86,7 +87,8 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	if len(tagName) > 0 {
 		data[commandName].VulcanVersion = tagName[1:]
 	}
-	data[commandName].Shell = shell 
+
+  data[commandName].Shell = shell
 	if success {
 		data[commandName].TotalSuccess++
 	} else {

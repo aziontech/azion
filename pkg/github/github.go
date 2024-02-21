@@ -3,10 +3,11 @@ package github
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap"
 )
 
 type Release struct {
@@ -18,13 +19,13 @@ func GetVersionGitHub(name string) (string, error) {
 
 	response, err := http.Get(apiURL)
 	if err != nil {
-		logger.Debug("Failed to get latest version of Azion CLI", zap.Error(err))
+		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
 		return "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		logger.Debug("Failed to get latest version of Azion CLI", zap.Error(err))
+		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
 		return "", nil
 	}
 
