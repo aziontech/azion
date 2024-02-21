@@ -49,12 +49,12 @@ func NewRootCmd(f *cmdutil.Factory) *RootCmd {
 }
 
 var (
-	tokenFlag   string
-	configFlag  string
-	commandName string
+	tokenFlag      string
+	configFlag     string
+	commandName    string
+	globalSettings *token.Settings
+	startTime      time.Time
 )
-
-var globalSettings *token.Settings
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewRootCmd(f), f)
@@ -67,6 +67,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		Short:   color.New(color.Bold).Sprint(fmt.Sprintf(msg.RootDescription, version.BinVersion)),
 		Version: version.BinVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			startTime = time.Now()
 			logger.LogLevel(f.Logger)
 			err := doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
@@ -78,11 +79,13 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			return nil
 		},
 		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+			executionTime := time.Since(startTime).Seconds()
+
 			//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
 			if globalSettings.AuthorizeMetricsCollection != 1 {
 				return nil
 			}
-			err := metric.TotalCommandsCount(cmd, commandName, true)
+			err := metric.TotalCommandsCount(cmd, commandName, executionTime, true)
 			if err != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}
@@ -182,7 +185,8 @@ func Execute() {
 
 	err := cmd.Execute()
 	if err != nil {
-		err := metric.TotalCommandsCount(cmd, commandName, false)
+		executionTime := time.Since(startTime).Seconds()
+		err := metric.TotalCommandsCount(cmd, commandName, executionTime, false)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
