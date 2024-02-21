@@ -7,19 +7,28 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/github"
+	"github.com/riywo/loginshell"
+
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/spf13/cobra"
 )
 
 const (
 	metricsFilename = "metrics.json"
-	total           = "total-commands-executed"
-	totalSuccess    = "total-commands-executed-successfully"
-	totalFailed     = "total-commands-executed-unsuccessfully"
-	failSuffix      = "-failed"
 )
 
-func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) error {
+type command struct {
+	TotalSuccess  int
+	TotalFailed   int
+	ExecutionTime float64
+	CLIVersion    string
+	VulcanVersion string
+	Shell         string
+}
+
+func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, success bool) error {
 	if commandName == "" {
 		return nil
 	}
@@ -33,6 +42,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 		"__complete": true,
 		"completion": true,
 	}
+
 	if ignoredWords[cmd.Name()] {
 		return nil
 	}
@@ -45,7 +55,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 	}
 	defer file.Close()
 
-	var data map[string]int
+	var data map[string]*command
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&data)
@@ -53,21 +63,36 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, success bool) er
 		return err
 	}
 
+	tagName, err := github.GetVersionGitHub("vulcan")
+	if err != nil {
+		return err
+	}
+
+	shell, err := loginshell.Shell()
+	if err != nil {
+		return err
+	}
+
 	// If EOF is encountered or the file is empty, initialize data as an empty map
 	if data == nil {
-		data = make(map[string]int)
+		data = make(map[string]*command)
 	}
 
-	if !success {
-		commandName = commandName + failSuffix
+	if data[commandName] == nil {
+		data[commandName] = &command{}
 	}
 
-	data[commandName]++
-	data[total]++
+	data[commandName].ExecutionTime = executionTime
+	data[commandName].CLIVersion = version.BinVersion
+	if len(tagName) > 0 {
+		data[commandName].VulcanVersion = tagName[1:]
+	}
+
+  data[commandName].Shell = shell
 	if success {
-		data[totalSuccess]++
+		data[commandName].TotalSuccess++
 	} else {
-		data[totalFailed]++
+		data[commandName].TotalFailed++
 	}
 
 	// Reset file offset to the beginning
