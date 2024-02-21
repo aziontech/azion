@@ -87,7 +87,8 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 	if len(tagName) > 0 {
 		data[commandName].VulcanVersion = tagName[1:]
 	}
-	data[commandName].Shell = shell
+
+  data[commandName].Shell = shell
 	if success {
 		data[commandName].TotalSuccess++
 	} else {

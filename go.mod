@@ -10,6 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/joho/godotenv v1.5.1
 	github.com/manifoldco/promptui v0.9.0
+	github.com/riywo/loginshell v0.0.0-20200815045211-7d26008be1ab
 	github.com/segmentio/analytics-go/v3 v3.3.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.14.0

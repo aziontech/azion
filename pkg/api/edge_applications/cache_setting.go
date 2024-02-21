@@ -22,10 +22,21 @@ func (c *Client) CreateCacheSettingsNextApplication(
 	req.SetCdnCacheSettings("override")
 	req.SetCdnCacheSettingsMaximumTtl(31536000)
 
+	resp, err := c.CreateCacheEdgeApplication(ctx, req, applicationID)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (c *Client) CreateCacheEdgeApplication(
+	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID int64,
+) (CacheSettingsResponse, error) {
+	logger.Debug("Create Cache Edge Application")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationID).
-		ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest).
-		Execute()
+		EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, edgeApplicationID).
+		ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while creating a cache setting", zap.Error(err))
@@ -36,6 +47,5 @@ func (c *Client) CreateCacheSettingsNextApplication(
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return resp.Results, nil
 }
