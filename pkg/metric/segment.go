@@ -2,6 +2,7 @@ package metric
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -58,7 +59,7 @@ func Send(settings *token.Settings) {
 	for event, cmd := range metrics {
 		err := client.Enqueue(analytics.Track{
 			UserId: settings.ClientId,
-			Event:  event,
+			Event:  fmt.Sprintf("cli_%s", event),
 			Properties: analytics.NewProperties().
 				Set("email", settings.Email).
 				Set("cli version", cmd.CLIVersion).
@@ -69,7 +70,8 @@ func Send(settings *token.Settings) {
 				Set("shell", cmd.Shell).
 				Set("execution time", cmd.ExecutionTime).
 				Set("operating system", os).
-				Set("architecture", arch),
+				Set("architecture", arch).
+				Set("client id", settings.ClientId),
 		})
 		if err != nil {
 			logger.Debug("failed to send metrics", zap.Error(err))
