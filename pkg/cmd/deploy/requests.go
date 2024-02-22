@@ -100,6 +100,12 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		conf.Domain.Id = domain.GetId()
 		newDomain = true
 
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return "", err
+		}
+
 	} else {
 		domain, err = cmd.updateDomain(client, ctx, conf)
 		if err != nil {
