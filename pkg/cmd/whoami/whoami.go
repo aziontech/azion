@@ -9,9 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// versionCmd represents the version command
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	versionCmd := &cobra.Command{
+	whoamiCmd := &cobra.Command{
 		Use:   msg.Usage,
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription,
@@ -33,11 +32,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	versionCmd.SetIn(f.IOStreams.In)
-	versionCmd.SetOut(f.IOStreams.Out)
-	versionCmd.SetErr(f.IOStreams.Err)
+	whoamiCmd.SetIn(f.IOStreams.In)
+	whoamiCmd.SetOut(f.IOStreams.Out)
+	whoamiCmd.SetErr(f.IOStreams.Err)
 
-	versionCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	whoamiCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
-	return versionCmd
+	return whoamiCmd
 }
