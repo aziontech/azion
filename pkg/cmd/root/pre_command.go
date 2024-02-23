@@ -50,7 +50,7 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 	}
 	globalSettings = &settings
 
-	if err := checkTokenSent(cmd, f, pre.token, settings); err != nil {
+	if err := checkTokenSent(cmd, f, pre.token, globalSettings); err != nil {
 		return err
 	}
 
@@ -76,7 +76,7 @@ func setConfigPath(cmd *cobra.Command, cfg string) error {
 	return nil
 }
 
-func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken string, settings token.Settings) error {
+func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken string, settings *token.Settings) error {
 
 	// if global --token flag was sent, verify it and save it locally
 	if cmd.Flags().Changed("token") {
@@ -117,6 +117,8 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 		if err != nil {
 			return err
 		}
+
+		globalSettings = &strToken
 
 		logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
 		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn+"\n")
