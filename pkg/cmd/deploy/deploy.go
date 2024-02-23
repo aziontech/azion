@@ -1,6 +1,10 @@
 package deploy
 
 import (
+	"io/fs"
+	"os"
+	"path/filepath"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
@@ -11,9 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
-	"io/fs"
-	"os"
-	"path/filepath"
 )
 
 type DeployCmd struct {
@@ -78,7 +79,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
 	buildCmd := cmd.BuildCmd(f)
-	err := buildCmd.Run()
+	err := buildCmd.Run(&contracts.BuildInfo{})
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 		return err

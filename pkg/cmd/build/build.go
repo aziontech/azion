@@ -15,9 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Preset string
-var Mode string
-
 type BuildCmd struct {
 	Io                    *iostreams.IOStreams
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
@@ -39,6 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func NewCobraCmd(build *BuildCmd) *cobra.Command {
+	fields := &contracts.BuildInfo{}
 	buildCmd := &cobra.Command{
 		Use:           msg.BuildUsage,
 		Short:         msg.BuildShortDescription,
@@ -47,13 +45,16 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 		SilenceUsage:  true,
 		Example:       heredoc.Doc("\n$ azion build\n"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return build.run()
+			return build.run(fields)
 		},
 	}
 
 	buildCmd.Flags().BoolP("help", "h", false, msg.BuildFlagHelp)
-	buildCmd.Flags().StringVar(&Preset, "preset", "", msg.FlagTemplate)
-	buildCmd.Flags().StringVar(&Mode, "mode", "", msg.FlagMode)
+	buildCmd.Flags().StringVar(&fields.Preset, "preset", "", msg.FlagTemplate)
+	buildCmd.Flags().StringVar(&fields.Mode, "mode", "", msg.FlagMode)
+	buildCmd.Flags().StringVar(&fields.Entry, "entry", "", msg.FlagEntry)
+	buildCmd.Flags().StringVar(&fields.NodePolyfills, "use-node-polyfills", "", msg.FlagPolyfill)
+	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)
 
 	return buildCmd
 }
@@ -82,6 +83,6 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	}
 }
 
-func (cmd *BuildCmd) Run() error {
-	return cmd.run()
+func (cmd *BuildCmd) Run(fields *contracts.BuildInfo) error {
+	return cmd.run(fields)
 }
