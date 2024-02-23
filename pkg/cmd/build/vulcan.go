@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
+func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams string) error {
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.CommandRunner(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
@@ -24,9 +24,9 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
 		return err
 	}
 
-	command := vul.Command("", "build --preset %s --mode %s")
+	command := vul.Command("", "build --preset %s --mode %s%s")
 
-	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode)))
+	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Template), strings.ToLower(conf.Mode), vulcanParams))
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
