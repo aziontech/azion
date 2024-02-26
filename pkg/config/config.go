@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 )
 
-const defaultPath = ".azion"
+const DEFAULT_PATH = ".azion"
 
-var pathDir string = defaultPath
+var pathDir string = DEFAULT_PATH 
 
 type Config interface {
 	GetString(key string) string
@@ -17,13 +17,17 @@ func SetPath(cp string) {
 	pathDir = cp
 }
 
+func GetPath() string {
+	return pathDir
+}
+
 func Dir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
 
-	if pathDir != defaultPath {
+	if pathDir != DEFAULT_PATH {
 		home = ""
 	}
 

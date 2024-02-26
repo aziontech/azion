@@ -150,16 +150,21 @@ func ReadSettings() (Settings, error) {
 	filePath := filepath.Join(dir, settingsFilename)
 
 	// Check if the file exists
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+	if _, err := os.Stat(filePath); os.IsNotExist(err) { 	
+
 		// File does not exist, create it with default settings
-		defaultSettings := Settings{}
+		if config.GetPath() == config.DEFAULT_PATH || 
+			utils.Confirm(false, "do you want to create new settings on the path you entered? (Y/n)", true) {
+			defaultSettings := Settings{}
+			err := WriteSettings(defaultSettings)
+			if err != nil {
+				return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
+			}
 
-		err := WriteSettings(defaultSettings)
-		if err != nil {
-			return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
-		}
+			return defaultSettings, nil
+		}		
 
-		return defaultSettings, nil
+		return Settings{}, fmt.Errorf("Provide the correct path of the configuration file. Make sure the file is in .toml format.")
 	}
 
 	// Read the file
@@ -177,4 +182,3 @@ func ReadSettings() (Settings, error) {
 	return settings, nil
 }
 
-// func GetUserInfo
