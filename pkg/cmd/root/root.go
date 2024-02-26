@@ -3,6 +3,7 @@ package root
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -57,6 +58,8 @@ var (
 	startTime      time.Time
 )
 
+const PREFIX_FLAG = "--"
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewRootCmd(f), f)
 }
@@ -70,10 +73,16 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			startTime = time.Now()
 			logger.LogLevel(f.Logger)
+
+			if strings.HasPrefix(configFlag, PREFIX_FLAG) {
+				return fmt.Errorf("A configuration path is expected for your location, not a flag")
+			}
+
 			err := doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
 				token:  tokenFlag,
 			})
+
 			if err != nil {
 				return err
 			}
