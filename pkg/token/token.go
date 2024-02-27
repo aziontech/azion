@@ -154,7 +154,7 @@ func ReadSettings() (Settings, error) {
 
 		// File does not exist, create it with default settings
 		if config.GetPath() == config.DEFAULT_PATH || 
-			utils.Confirm(false, "do you want to create new settings on the path you entered? (Y/n)", true) {
+			utils.Confirm(false, "Do you want to create new settings on the path you entered? (Y/n)", true) {
 			defaultSettings := Settings{}
 			err := WriteSettings(defaultSettings)
 			if err != nil {
