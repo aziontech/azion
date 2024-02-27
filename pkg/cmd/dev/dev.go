@@ -7,6 +7,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -61,7 +62,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 
 	// Run build command
 	build := cmd.BuildCmd(f)
-	err := build.Run()
+	err := build.Run(&contracts.BuildInfo{})
 	if err != nil {
 		logger.Debug("Error while running build command called by dev command", zap.Error(err))
 		return err

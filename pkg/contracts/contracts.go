@@ -9,6 +9,14 @@ type FileOps struct {
 	VersionID   string
 }
 
+type BuildInfo struct {
+	Preset        string
+	Mode          string
+	Entry         string
+	NodePolyfills string
+	OwnWorker     string
+}
+
 type ListOptions struct {
 	Details  bool
 	OrderBy  string
