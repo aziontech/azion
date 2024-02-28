@@ -9,6 +9,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
+	"github.com/maxwelbm/goom"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -26,6 +27,7 @@ const (
 
 type InitInfo struct {
 	Name           string
+	Goom           bool
 	Template       string
 	Mode           string
 	PathWorkingDir string
@@ -106,12 +108,18 @@ func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion init --name testproject
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if cmd.Flags().Changed("goom") {
+				goom.Goom()
+				return nil
+			}
+
 			info.GlobalFlagAll = f.GlobalFlagAll
 			return init.Run(info)
 		},
 	}
 
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
+	cobraCmd.Flags().BoolVar(&info.Goom, "goom", false, "Goom is a command line fps")
 	return cobraCmd
 }
 
