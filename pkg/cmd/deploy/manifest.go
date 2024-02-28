@@ -87,6 +87,10 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	var cacheID int64 = 0
 
 	for _, route := range manifest.Routes {
+		if conf.RulesEngine.Created {
+			break
+		}
+
 		if route.From == "/_next/data/" {
 			continue
 		}
@@ -96,7 +100,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			err := cmd.doFunction(clients, ctx, conf)
 			if err != nil {
 				return err
-			}	
+			}
 
 			var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 			reqCache.SetName("function policy")
@@ -113,7 +117,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				return err
 			}
 			cacheID = cache.GetId()
-			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)	
+			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 		}
 
 		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
