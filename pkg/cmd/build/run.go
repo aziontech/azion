@@ -61,7 +61,7 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		vulcanParams += " --useOwnWorker " + fields.OwnWorker
 	}
 
-	err = checkArgsJson(cmd, conf)
+	err = checkArgsJson(cmd)
 	if err != nil {
 		return err
 	}
@@ -94,10 +94,14 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 	return utils.ErrorUnsupportedType
 }
 
-func checkArgsJson(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
+func checkArgsJson(cmd *BuildCmd) error {
+	workingDir, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
 
-	workDirPath := conf.ProjectRoot + "/azion/args.json"
-	_, err := cmd.FileReader(workDirPath)
+	workDirPath := workingDir + "/azion/args.json"
+	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
 			logger.Debug("Error while trying to create args.json file", zap.Error(err))
