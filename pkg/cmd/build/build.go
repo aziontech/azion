@@ -28,6 +28,7 @@ type BuildCmd struct {
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	VersionID             func() string
+	GetWorkDir            func() (string, error)
 	f                     *cmdutil.Factory
 }
 
@@ -78,6 +79,7 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		WriteFile:             os.WriteFile,
 		Stat:                  os.Stat,
+		GetWorkDir:            utils.GetWorkingDir,
 		f:                     f,
 		VersionID:             createVersionID,
 	}

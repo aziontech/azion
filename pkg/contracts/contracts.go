@@ -39,7 +39,6 @@ type AzionApplicationOptions struct {
 	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
 	Prefix      string                   `json:"prefix"`
-	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`
