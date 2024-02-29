@@ -31,7 +31,6 @@ require (
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/riywo/loginshell v0.0.0-20200815045211-7d26008be1ab // indirect
 	github.com/segmentio/backo-go v1.0.0 // indirect
 	golang.org/x/term v0.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
