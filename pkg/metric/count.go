@@ -15,10 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	metricsFilename = "metrics.json"
-)
-
 type command struct {
 	TotalSuccess  int
 	TotalFailed   int
@@ -28,9 +24,14 @@ type command struct {
 	Shell         string
 }
 
-func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, success bool) error {
+func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, errExec error) error {
 	if commandName == "" {
 		return nil
+	}
+
+	success := true
+	if errExec != nil {
+		success = false
 	}
 
 	dir, err := config.Dir()
@@ -47,7 +48,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		return nil
 	}
 
-	metricsLocation := filepath.Join(dir, metricsFilename)
+	metricsLocation := filepath.Join(dir.Dir, dir.Metrics)
 
 	file, err := os.OpenFile(metricsLocation, os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
@@ -88,7 +89,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		data[commandName].VulcanVersion = tagName[1:]
 	}
 
-  data[commandName].Shell = shell
+	data[commandName].Shell = shell
 	if success {
 		data[commandName].TotalSuccess++
 	} else {

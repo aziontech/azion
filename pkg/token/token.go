@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
@@ -26,7 +27,7 @@ func New(c *Config) (*Token, error) {
 	return &Token{
 		client:   c.Client,
 		endpoint: constants.AuthURL,
-		filePath: filepath.Join(dir, settingsFilename),
+		filePath: filepath.Join(dir.Dir, dir.Settings),
 		out:      c.Out,
 	}, nil
 }
@@ -62,12 +63,12 @@ func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 }
 
 func (t *Token) Save(b []byte) (string, error) {
-	filePath, err := config.Dir()
+	dir, err := config.Dir()
 	if err != nil {
 		return "", err
 	}
 
-	err = os.MkdirAll(filePath, os.ModePerm)
+	err = os.MkdirAll(dir.Dir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
@@ -130,11 +131,11 @@ func WriteSettings(settings Settings) error {
 	}
 
 	// Check if the directory exists, create it if not
-	if err := os.MkdirAll(dir, 0777); err != nil {
+	if err := os.MkdirAll(dir.Dir, 0777); err != nil {
 		return fmt.Errorf("Error creating directory: %w", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, settingsFilename), b, 0777); err != nil {
+	if err := os.WriteFile(filepath.Join(dir.Dir, dir.Settings), b, 0777); err != nil {
 		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 	}
 
@@ -147,24 +148,21 @@ func ReadSettings() (Settings, error) {
 		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
 	}
 
-	filePath := filepath.Join(dir, settingsFilename)
+	filePath := filepath.Join(dir.Dir, dir.Settings)
 
 	// Check if the file exists
-	if _, err := os.Stat(filePath); os.IsNotExist(err) { 	
-
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		// File does not exist, create it with default settings
-		if config.GetPath() == config.DEFAULT_PATH || 
-			utils.Confirm(false, "Do you want to create new settings on the path you entered? (Y/n)", true) {
+		if config.GetPath() == config.DEFAULT_DIR {
 			defaultSettings := Settings{}
 			err := WriteSettings(defaultSettings)
 			if err != nil {
 				return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
 			}
-
 			return defaultSettings, nil
-		}		
+		}
 
-		return Settings{}, fmt.Errorf("Provide the correct path of the configuration file. Make sure the file is in .toml format.")
+		return Settings{}, root.ErrorReadFileSettingsToml
 	}
 
 	// Read the file
@@ -181,4 +179,3 @@ func ReadSettings() (Settings, error) {
 
 	return settings, nil
 }
-
