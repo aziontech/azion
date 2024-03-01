@@ -102,22 +102,24 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				return err
 			}
 
-			var reqCache apiEdgeApplications.CreateCacheSettingsRequest
-			reqCache.SetName("function policy")
-			reqCache.SetBrowserCacheSettings("honor")
-			reqCache.SetCdnCacheSettings("honor")
-			reqCache.SetCdnCacheSettingsMaximumTtl(0)
-			reqCache.SetCacheByQueryString("all")
-			reqCache.SetCacheByCookies("all")
+			if conf.Template != "javascript" && conf.Template != "typescript" {
+				var reqCache apiEdgeApplications.CreateCacheSettingsRequest
+				reqCache.SetName("function policy")
+				reqCache.SetBrowserCacheSettings("honor")
+				reqCache.SetCdnCacheSettings("honor")
+				reqCache.SetCdnCacheSettingsMaximumTtl(0)
+				reqCache.SetCacheByQueryString("all")
+				reqCache.SetCacheByCookies("all")
 
-			// create cache to function next
-			cache, err := clients.EdgeApplication.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
-			if err != nil {
-				logger.Debug("Error while creating cache settings", zap.Error(err))
-				return err
+				// create cache to function next
+				cache, err := clients.EdgeApplication.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
+				if err != nil {
+					logger.Debug("Error while creating cache settings", zap.Error(err))
+					return err
+				}
+				cacheID = cache.GetId()
+				logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 			}
-			cacheID = cache.GetId()
-			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 		}
 
 		err = cmd.doOrigin(clients.EdgeApplication, clients.Origin, ctx, conf)
@@ -125,8 +127,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			logger.Debug("Error while creating origin", zap.Error(err))
 			return err
 		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
-
 		// TODO: Update default rule engine is being run multiple times
 		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
 		if err != nil {
