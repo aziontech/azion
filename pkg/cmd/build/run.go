@@ -2,6 +2,7 @@ package build
 
 import (
 	"fmt"
+	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -10,10 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *BuildCmd) run() error {
+func (cmd *BuildCmd) run(fields *contracts.BuildInfo) error {
 	logger.Debug("Running build command")
 
-	err := RunBuildCmdLine(cmd)
+	err := RunBuildCmdLine(cmd, fields)
 	if err != nil {
 		return err
 	}
@@ -21,7 +22,7 @@ func (cmd *BuildCmd) run() error {
 	return nil
 }
 
-func RunBuildCmdLine(cmd *BuildCmd) error {
+func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 	var err error
 
 	conf, err := cmd.GetAzionJsonContent()
@@ -30,15 +31,37 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 		return msg.ErrorBuilding
 	}
 
-	if Preset != "" {
-		conf.Template = Preset
+	if fields.Preset != "" {
+		conf.Template = fields.Preset
 	}
 
-	if Mode != "" {
-		conf.Mode = Mode
+	if fields.Mode != "" {
+		conf.Mode = fields.Mode
 	}
 
-	err = checkArgsJson(cmd, conf)
+	var vulcanParams string
+
+	if fields.Entry != "" {
+		vulcanParams = " --entry " + fields.Entry
+	}
+
+	if fields.NodePolyfills != "" {
+		_, err := strconv.ParseBool(fields.NodePolyfills)
+		if err != nil {
+			return fmt.Errorf("%w: %s", msg.ErrorPolyfills, fields.NodePolyfills)
+		}
+		vulcanParams += " --useNodePolyfills " + fields.NodePolyfills
+	}
+
+	if fields.OwnWorker != "" {
+		_, err := strconv.ParseBool(fields.OwnWorker)
+		if err != nil {
+			return fmt.Errorf("%w: %s", msg.ErrorWorker, fields.OwnWorker)
+		}
+		vulcanParams += " --useOwnWorker " + fields.OwnWorker
+	}
+
+	err = checkArgsJson(cmd)
 	if err != nil {
 		return err
 	}
@@ -61,7 +84,7 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 	}
 
 	if conf.Template != "nextjs" {
-		return vulcan(cmd, conf)
+		return vulcan(cmd, conf, vulcanParams)
 	}
 
 	if conf.Template == "nextjs" {
@@ -71,10 +94,14 @@ func RunBuildCmdLine(cmd *BuildCmd) error {
 	return utils.ErrorUnsupportedType
 }
 
-func checkArgsJson(cmd *BuildCmd, conf *contracts.AzionApplicationOptions) error {
+func checkArgsJson(cmd *BuildCmd) error {
+	workingDir, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
 
-	workDirPath := conf.ProjectRoot + "/azion/args.json"
-	_, err := cmd.FileReader(workDirPath)
+	workDirPath := workingDir + "/azion/args.json"
+	_, err = cmd.FileReader(workDirPath)
 	if err != nil {
 		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
 			logger.Debug("Error while trying to create args.json file", zap.Error(err))

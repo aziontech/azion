@@ -9,6 +9,14 @@ type FileOps struct {
 	VersionID   string
 }
 
+type BuildInfo struct {
+	Preset        string
+	Mode          string
+	Entry         string
+	NodePolyfills string
+	OwnWorker     string
+}
+
 type ListOptions struct {
 	Details  bool
 	OrderBy  string
@@ -31,7 +39,6 @@ type AzionApplicationOptions struct {
 	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
 	Prefix      string                   `json:"prefix"`
-	ProjectRoot string                   `json:"project-root"`
 	Function    AzionJsonDataFunction    `json:"function"`
 	Application AzionJsonDataApplication `json:"application"`
 	Domain      AzionJsonDataDomain      `json:"domain"`

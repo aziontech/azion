@@ -17,12 +17,11 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	}
 
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:        info.Name,
-		Env:         "production",
-		Template:    strings.ToLower(info.Preset),
-		Mode:        strings.ToLower(info.Mode),
-		Prefix:      "",
-		ProjectRoot: info.PathWorkingDir,
+		Name:     info.Name,
+		Env:      "production",
+		Template: strings.ToLower(info.Preset),
+		Mode:     strings.ToLower(info.Mode),
+		Prefix:   "",
 	}
 	azionJson.Function.Name = "__DEFAULT__"
 	azionJson.Function.File = "./out/worker.js"
