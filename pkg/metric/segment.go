@@ -22,7 +22,6 @@ func location() string {
 	if err != nil {
 		logger.Debug("Failed get path file metric.json", zap.Error(err))
 	}
-	const metricsFilename = "metrics.json"
 	return filepath.Join(dir.Dir, dir.Metrics)
 }
 

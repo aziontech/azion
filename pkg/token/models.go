@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-const settingsFilename = "settings.toml"
-
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }

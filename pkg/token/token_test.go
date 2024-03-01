@@ -69,7 +69,10 @@ func Test_Validate(t *testing.T) {
 func Test_Save(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
-	config.SetPath("/tmp/testazion")
+	errSetPath := config.SetPath("/tmp/testazion/test.toml")
+	if errSetPath != nil {
+		t.Fatalf("SetPath() error: %s;", errSetPath.Error())
+	}
 
 	t.Run("save token to disk", func(t *testing.T) {
 		token, err := New(&Config{
