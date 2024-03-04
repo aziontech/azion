@@ -44,7 +44,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		"completion": true,
 	}
 
-	if ignoredWords[cmd.Name()] {
+	if ignoredWords[commandName] {
 		return nil
 	}
 
