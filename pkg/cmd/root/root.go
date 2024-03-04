@@ -179,7 +179,7 @@ func Execute() {
 	executionTime := time.Since(startTime).Seconds()
 
 	// 1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
-	if globalSettings.AuthorizeMetricsCollection == 1 {
+	if globalSettings != nil || globalSettings.AuthorizeMetricsCollection == 1 {
 		errMetrics := metric.TotalCommandsCount(cmd, commandName, executionTime, err)
 		if errMetrics != nil {
 			logger.Debug("Error while saving metrics", zap.Error(err))
