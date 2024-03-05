@@ -65,11 +65,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		return err
 	}
 
-	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
-	if err != nil {
-		return err
-	}
-
 	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
@@ -83,25 +78,27 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		}
 	}
 
+	conf.Function.File = ".edge/worker.js"
+	err = cmd.doFunction(clients, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
+		return err
+	}
+
 	// cacheID created for "compute" in the SSR, will be used to create the function and configure the caching policy.
 	var cacheID int64 = 0
 
 	for _, route := range manifest.Routes {
-		if conf.RulesEngine.Created {
-			break
-		}
 
 		if route.From == "/_next/data/" {
 			continue
 		}
 
-		if route.Type == "compute" {
-			conf.Function.File = ".edge/worker.js"
-			err := cmd.doFunction(clients, ctx, conf)
-			if err != nil {
-				return err
-			}
-
+		if route.Type == "compute" && !conf.RulesEngine.Created {
 			if conf.Template != "javascript" && conf.Template != "typescript" {
 				var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 				reqCache.SetName("function policy")
