@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -45,8 +44,6 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 		reqIns.SetEdgeFunctionId(conf.Function.ID)
 		reqIns.SetName(conf.Name)
 		reqIns.ApplicationId = conf.Application.ID
-
-		spew.Dump(reqIns)
 
 		instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
 		if err != nil {
@@ -250,9 +247,6 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
-	spew.Dump(response)
-	fmt.Println(response.GetId())
-	fmt.Println("ID ACIMAAAAAA")
 	if err != nil {
 		logger.Debug("Error while creating Edge Function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
