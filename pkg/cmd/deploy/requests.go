@@ -2,11 +2,11 @@ package deploy
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -45,6 +45,8 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 		reqIns.SetEdgeFunctionId(conf.Function.ID)
 		reqIns.SetName(conf.Name)
 		reqIns.ApplicationId = conf.Application.ID
+
+		spew.Dump(reqIns)
 
 		instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
 		if err != nil {
@@ -241,13 +243,16 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
-	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
 	reqCre.SetJsonArgs(args)
 	response, err := client.Create(ctx, &reqCre)
+	spew.Dump(response)
+	fmt.Println(response.GetId())
+	fmt.Println("ID ACIMAAAAAA")
 	if err != nil {
 		logger.Debug("Error while creating Edge Function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
@@ -284,7 +289,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
-	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}

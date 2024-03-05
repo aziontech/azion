@@ -1,6 +1,7 @@
 package deploy
 
 import (
+	"encoding/json"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -29,6 +30,7 @@ type DeployCmd struct {
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
+	Unmarshal             func(data []byte, v interface{}) error
 }
 
 var (
@@ -47,6 +49,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
+		Unmarshal:             json.Unmarshal,
 		F:                     f,
 	}
 }
