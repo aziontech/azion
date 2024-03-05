@@ -3,6 +3,7 @@ package root
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -57,6 +58,8 @@ var (
 	startTime      time.Time
 )
 
+const PREFIX_FLAG = "--"
+
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewRootCmd(f), f)
 }
@@ -70,27 +73,15 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			startTime = time.Now()
 			logger.LogLevel(f.Logger)
-			err := doPreCommandCheck(cmd, f, PreCmd{
+
+			if strings.HasPrefix(configFlag, PREFIX_FLAG) {
+				return fmt.Errorf("A configuration path is expected for your location, not a flag")
+			}
+
+			return doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
 				token:  tokenFlag,
 			})
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
-			executionTime := time.Since(startTime).Seconds()
-
-			//1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
-			if globalSettings.AuthorizeMetricsCollection != 1 {
-				return nil
-			}
-			err := metric.TotalCommandsCount(cmd, commandName, executionTime, true)
-			if err != nil {
-				logger.Debug("Error while saving metrics", zap.Error(err))
-			}
-			return nil
 		},
 		Example: heredoc.Doc(`
 		$ azion
@@ -184,15 +175,17 @@ func Execute() {
 	}
 
 	cmd := NewCmd(factory)
-
 	err := cmd.Execute()
-	if err != nil {
-		executionTime := time.Since(startTime).Seconds()
-		err := metric.TotalCommandsCount(cmd, commandName, executionTime, false)
-		if err != nil {
-			cobra.CheckErr(err)
+	executionTime := time.Since(startTime).Seconds()
+
+	// 1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
+	if globalSettings != nil {
+		if  globalSettings.AuthorizeMetricsCollection == 1 {
+			errMetrics := metric.TotalCommandsCount(cmd, commandName, executionTime, err)
+			if errMetrics != nil {
+				logger.Debug("Error while saving metrics", zap.Error(err))
+			}
 		}
 	}
-
 	cobra.CheckErr(err)
 }
