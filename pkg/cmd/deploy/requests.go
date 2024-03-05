@@ -52,6 +52,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 		}
 		conf.Function.InstanceID = instance.GetId()
+		return nil
 	}
 
 	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf)
