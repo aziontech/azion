@@ -13,6 +13,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/list/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -77,7 +78,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 		tbl.AddRow(
 			*v.Uuid,
 			utils.TruncateString(*v.Name),
-			*v.ExpiresAt,
+			v.ExpiresAt.Format(constants.FORMAT_DATE),
 			*v.Created,
 			utils.TruncateString(description),
 		)
