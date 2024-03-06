@@ -89,12 +89,6 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion --debug
 		$ azion -h
 		`),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			if cmd.Flags().Changed("token") {
-				return nil
-			}
-			return rootCmd.Run()
-		},
 		SilenceErrors: true, // Silence errors, so the help message won't be shown on flag error
 		SilenceUsage:  true, // Silence usage on error
 	}
@@ -140,19 +134,6 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(whoami.NewCmd(f))
 
 	return cobraCmd
-}
-
-func (cmd *RootCmd) Run() error {
-	logger.Debug("Running root command")
-	info := &initcmd.InitInfo{}
-	init := cmd.InitCmd(cmd.F)
-	err := init.Run(info)
-	if err != nil {
-		logger.Debug("Error while running init command called by root command", zap.Error(err))
-		return err
-	}
-
-	return nil
 }
 
 func Execute() {
