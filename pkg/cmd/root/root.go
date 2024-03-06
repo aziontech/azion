@@ -104,7 +104,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.SetErr(f.IOStreams.Err)
 
 	cobraCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		rootHelpFunc(f, cmd, args)
+		rootHelpFunc(cmd, args)
 	})
 
 	// Global flags
@@ -180,7 +180,7 @@ func Execute() {
 
 	// 1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
 	if globalSettings != nil {
-		if  globalSettings.AuthorizeMetricsCollection == 1 {
+		if globalSettings.AuthorizeMetricsCollection == 1 {
 			errMetrics := metric.TotalCommandsCount(cmd, commandName, executionTime, err)
 			if errMetrics != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))

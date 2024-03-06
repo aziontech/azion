@@ -7,7 +7,6 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/general"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/text"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -46,7 +45,7 @@ func isRootCmd(command *cobra.Command) bool {
 	return command != nil && !command.HasParent()
 }
 
-func rootHelpFunc(f *cmdutil.Factory, command *cobra.Command, args []string) {
+func rootHelpFunc(command *cobra.Command, args []string) {
 	if isRootCmd(command.Parent()) && len(args) >= 2 && args[1] != "--help" && args[1] != "-h" {
 		nestedSuggestFunc(command, args[1])
 		hasFailed = true
