@@ -346,6 +346,11 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
 	ctx := context.Background()
+	wildCard := "/*"
+	// Iterate over the array and append the string to each element
+	for i := 0; i < len(domainNames); i++ {
+		domainNames[i] += wildCard
+	}
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.Purge(ctx, domainNames)
 	if err != nil {
