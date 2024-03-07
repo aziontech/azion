@@ -5,6 +5,7 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
+	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
 // ParseExpirationDate parses a string representation of an expiration date and returns a time.Time value representing the expiration date.
@@ -25,18 +26,16 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 	}
 
 	// If the string contains a suffix, it is a range format
-	lastIndex := len(expirationString) - 1
-	lastChar := expirationString[lastIndex]
+	lastChar := expirationString[len(expirationString) - 1]
 	if interval, ok := suffixMapping[lastChar]; ok {
-		value := expirationString[:lastIndex]
 		intervalValue := 0
-		fmt.Sscanf(value, "%d", &intervalValue)
+		fmt.Sscanf(string(expirationString[0]), "%d", &intervalValue)
 		expirationDate := currentDate.Add(time.Duration(intervalValue) * interval)
-		return expirationDate, nil
+		return time.Parse(constants.FORMAT_DATE, expirationDate.Format(constants.FORMAT_DATE))	
 	}
 
 	// Try to analyze as full date (yyyy-mm-dd) or (dd/mm/yyyy)
-	formats := []string{"2006-01-02", "02/01/2006", "2006-01-02T00:00"}
+	formats := []string{"2006-01-02", "02/01/2006"}
 	for _, format := range formats {
 		if expirationDate, err := time.Parse(format, expirationString); err == nil {
 			if expirationDate.After(currentDate) {
