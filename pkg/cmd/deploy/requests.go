@@ -180,23 +180,31 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 		conf.Origin.Address = addresses
 		conf.Origin.Name = origin.GetName()
 
-		var reqCache apiapp.CreateCacheSettingsRequest
-		reqCache.SetName(conf.Name)
+		//HERE
+		var cacheId int64
+		authorize := utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
+		if authorize {
+			var reqCache apiapp.CreateCacheSettingsRequest
+			reqCache.SetName(conf.Name)
 
-		// create cache settings
-		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
-		if err != nil {
-			logger.Debug("Error while creating cache settings", zap.Error(err))
-			return err
+			// create cache settings
+			cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+			if err != nil {
+				logger.Debug("Error while creating cache settings", zap.Error(err))
+				return err
+			}
+			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
+			cacheId = cache.GetId()
 		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
 
 		// creates gzip and cache rules
-		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cache.GetId(), conf.Template, conf.Mode)
+		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Template, conf.Mode, authorize)
 		if err != nil {
 			logger.Debug("Error while creating rules engine", zap.Error(err))
 			return err
 		}
+
+		//TO HERE
 		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
 	} else {
 		reqObjectStorageOrigin := apiori.UpdateRequest{}

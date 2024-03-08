@@ -28,4 +28,5 @@ var (
 	BucketInUse                       = "This bucket's name is already in use, please try another one\n"
 	AskInputName                      = "Your bucket's name:"
 	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
+	AskCreateCacheSettings            = "Do you wish to create the following cache settings policy?"
 )
