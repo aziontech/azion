@@ -180,7 +180,6 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 		conf.Origin.Address = addresses
 		conf.Origin.Name = origin.GetName()
 
-		//HERE
 		var cacheId int64
 		authorize := utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
 		if authorize {
@@ -204,7 +203,6 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 			return err
 		}
 
-		//TO HERE
 		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
 	} else {
 		reqObjectStorageOrigin := apiori.UpdateRequest{}
