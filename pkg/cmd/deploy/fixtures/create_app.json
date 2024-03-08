@@ -6,7 +6,7 @@
     "file": "./dist/main.js",
     "args": "./args.json",
     "language": "javascript",
-    "id": 123321
+    "id": 0
   },
   "application": {
     "name": "__DEFAULT__"

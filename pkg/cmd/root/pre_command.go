@@ -40,8 +40,10 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 	rewrittenCommand := strings.ReplaceAll(strings.TrimPrefix(commandName, "azion "), " ", "-")
 	commandName = rewrittenCommand
 
-	if err := setConfigPath(cmd, pre.config); err != nil {
-		return err
+	if cmd.Flags().Changed("config") {
+		if err := config.SetPath(pre.config); err != nil {
+			return err
+		}
 	}
 
 	settings, err := token.ReadSettings()
@@ -61,16 +63,6 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 	//both verifications occurs if 24 hours have passed since the last execution
 	if err := checkForUpdateAndMetrics(version.BinVersion, f, globalSettings); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func setConfigPath(cmd *cobra.Command, cfg string) error {
-
-	if cmd.Flags().Changed("config") {
-		config.SetPath(cfg)
-		return nil
 	}
 
 	return nil

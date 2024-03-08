@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -52,6 +51,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
 		}
 		conf.Function.InstanceID = instance.GetId()
+		return nil
 	}
 
 	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf)
@@ -240,7 +240,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
-	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
@@ -283,7 +283,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
-	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
@@ -346,8 +346,14 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
 	ctx := context.Background()
+	wildCard := "/*"
+	purgeDomains := make([]string, len(domainNames))
+	// Iterate over the array and append the string to each element
+	for i := 0; i < len(domainNames); i++ {
+		purgeDomains[i] = domainNames[i] + wildCard
+	}
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	err := clipurge.Purge(ctx, domainNames)
+	err := clipurge.Purge(ctx, purgeDomains)
 	if err != nil {
 		logger.Debug("Error while purging domain", zap.Error(err))
 		return err

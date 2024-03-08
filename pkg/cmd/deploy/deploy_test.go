@@ -46,6 +46,37 @@ var successResponseApp string = `
 }
 `
 
+var sucRespInst string = `{
+	"results": {
+	  "edge_function_id": 1111,
+	  "name": "Edge Function",
+	  "args": {},
+	  "id": 101001
+	},
+	"schema_version": 3
+  }
+`
+
+var sucRespFunc string = `{
+	"results": {
+	  "id": 1111,
+	  "name": "Function Test API",
+	  "language": "javascript",
+	  "code": "{\r\n    async function handleRequest(request) {\r\n        return new Response(\"Hello world in a new response\");\r\n    }\r\n\r\n    addEventListener(\"fetch\", (event) => {\r\n        event.respondWith(handleRequest(event.request));\r\n    });\r\n}",
+	  "json_args": {
+		"key": "value"
+	  },
+	  "function_to_run": "",
+	  "initiator_type": "edge_application",
+	  "active": true,
+	  "last_editor": "mail@mail.com",
+	  "modified": "2023-04-27T17:37:12.389389Z",
+	  "reference_count": 1
+	},
+	"schema_version": 3
+  }
+`
+
 var sucRespDomain string = `{
     "results": {
         "id": 1702659986,
@@ -167,22 +198,27 @@ func TestDeployCmd(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "domains"),
-			httpmock.JSONFromString(sucRespDomain),
-		)
-
-		mock.Register(
 			httpmock.REST("POST", "v4/storage/buckets"),
 			httpmock.JSONFromString(""),
 		)
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1697666970"),
-			httpmock.JSONFromString(successResponseApp),
+			httpmock.REST("POST", "edge_functions"),
+			httpmock.JSONFromString(sucRespFunc),
 		)
 
 		mock.Register(
 			httpmock.REST("POST", "edge_applications/1697666970/functions_instances"),
+			httpmock.JSONFromString(sucRespInst),
+		)
+
+		mock.Register(
+			httpmock.REST("POST", "domains"),
+			httpmock.JSONFromString(sucRespDomain),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "edge_applications/1697666970"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
@@ -196,6 +232,14 @@ func TestDeployCmd(t *testing.T) {
 			return nil
 		}
 		deployCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions) error {
+			return nil
+		}
+
+		deployCmd.FileReader = func(path string) ([]byte, error) {
+			return []byte{}, nil
+		}
+
+		deployCmd.Unmarshal = func(data []byte, v interface{}) error {
 			return nil
 		}
 
