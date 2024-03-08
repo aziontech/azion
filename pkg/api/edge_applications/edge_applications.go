@@ -529,6 +529,9 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	req := CreateRulesEngineRequest{}
 	criteria := make([][]sdk.RulesEngineCriteria, 1)
+	for i := 0; i < 1; i++ {
+		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
+	}
 	if authorize {
 		req.SetName("cache policy")
 
@@ -543,10 +546,6 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		})
 
 		req.SetBehaviors(behaviors)
-
-		for i := 0; i < 1; i++ {
-			criteria[i] = make([]sdk.RulesEngineCriteria, 1)
-		}
 
 		criteria[0][0].SetConditional("if")
 		criteria[0][0].SetVariable("${uri}")
