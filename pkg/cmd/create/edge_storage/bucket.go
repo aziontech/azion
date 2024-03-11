@@ -62,7 +62,7 @@ func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []st
 			return fmt.Errorf(msg.ERROR_CREATE_BUCKET, err)
 		}
 
-		logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.SUCCESS_CREATE_BUCKET))
+		logger.LogSuccess(f.IOStreams.Out, msg.SUCCESS_CREATE_BUCKET)
 		return nil
 	}
 }
