@@ -28,4 +28,11 @@ var (
 	BucketInUse                       = "This bucket's name is already in use, please try another one\n"
 	AskInputName                      = "Your bucket's name:"
 	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
+	AskCreateCacheSettings            = `Azion CLI offers to create the following Cache Settings specifications:
+  - Browser Cache Settings: Override Cache Settings
+  - Maximum TTL for Browser Cache Settings (in seconds): 7200
+  - CDN Cache Settings: Override Cache Settings
+  - Maximum TTL for CDN Cache Settings (in seconds): 7200
+
+Do you wish to create a Cache Settings configuration with the above specifications? (y/N)`
 )

@@ -524,55 +524,56 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	return &resp.Results, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string, authorize bool) error {
 	logger.Debug("Create Rules Engine Next Application")
 
 	req := CreateRulesEngineRequest{}
-	req.SetName("cache policy")
-
-	behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-	var behStringCache sdk.RulesEngineBehaviorString
-	behStringCache.SetName("set_cache_policy")
-	behStringCache.SetTarget(fmt.Sprintf("%d", cacheId))
-
-	behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-		RulesEngineBehaviorString: &behStringCache,
-	})
-
-	req.SetBehaviors(behaviors)
-
 	criteria := make([][]sdk.RulesEngineCriteria, 1)
 	for i := 0; i < 1; i++ {
 		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
 	}
+	if authorize {
+		req.SetName("cache policy")
 
-	criteria[0][0].SetConditional("if")
-	criteria[0][0].SetVariable("${uri}")
-	criteria[0][0].SetOperator("starts_with")
+		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
-	if typeLang == "Next" && strings.ToLower(mode) == "compute" {
-		criteria[0][0].SetInputValue("/_next/static")
-	} else {
-		criteria[0][0].SetInputValue("/")
-	}
+		var behStringCache sdk.RulesEngineBehaviorString
+		behStringCache.SetName("set_cache_policy")
+		behStringCache.SetTarget(fmt.Sprintf("%d", cacheId))
 
-	req.SetCriteria(criteria)
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behStringCache,
+		})
 
-	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
-		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
-		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
-	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return err
+		req.SetBehaviors(behaviors)
+
+		criteria[0][0].SetConditional("if")
+		criteria[0][0].SetVariable("${uri}")
+		criteria[0][0].SetOperator("starts_with")
+
+		if typeLang == "Next" && strings.ToLower(mode) == "compute" {
+			criteria[0][0].SetInputValue("/_next/static")
+		} else {
+			criteria[0][0].SetInputValue("/")
+		}
+
+		req.SetCriteria(criteria)
+
+		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
+			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
+			CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+		if err != nil {
+			if httpResp != nil {
+				logger.Debug("Error while creating a Rules Engine", zap.Error(err))
+				err := utils.LogAndRewindBody(httpResp)
+				if err != nil {
+					return err
+				}
+				return utils.ErrorPerStatusCode(httpResp, err)
 			}
+			logger.Debug("", zap.Any("Error", err.Error()))
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
-		logger.Debug("", zap.Any("Error", err.Error()))
-		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	req.SetName("enable gzip")
@@ -595,7 +596,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetInputValue("")
 	req.SetCriteria(criteria)
 
-	_, httpResp, err = c.apiClient.EdgeApplicationsRulesEngineAPI.
+	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
 		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
