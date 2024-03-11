@@ -14,6 +14,7 @@ type Client struct {
 
 func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
+	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "Token "+token)
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{

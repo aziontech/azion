@@ -13,6 +13,7 @@ const (
 	FLAG_HELP_CREATE_BUCKET         = "Displays more information about the create edge-storege bucket command"
 	FLAG_NAME_CREATE_BUCKET         = "The name of the Edge Storage Bucket"
 	FLAG_EDGE_ACCESS_CREATE_BUCKET  = "Edge access is the access level of the bucket"
+	FLAG_FILE_JSON_CREATE_BUCKET    = "Path to a JSON file containing the attributes of the variable that will be created; you can use - for reading from stdin"
 	SUCCESS_CREATE_BUCKET           = "Created Bucket"
 	ASK_NAME_CREATE_BUCKET          = "Enter your name Bucket"
 	ASK_EDGE_ACCESSS_CREATE_BUCKET  = "Enter your Edge Access Bucket"

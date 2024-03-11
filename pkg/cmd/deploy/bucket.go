@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -25,7 +27,8 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	for {
-		err = client.CreateBucket(ctx, name, string(storage.READ_WRITE))
+		err = client.CreateBucket(ctx, api.RequestBucket{
+			BucketCreate: sdk.BucketCreate{Name: name, EdgeAccess: storage.READ_WRITE}})
 		// if the bucket name is already in use, we ask for another one
 		if errors.Is(err, utils.ErrorNameInUse) {
 			logger.FInfo(cmd.Io.Out, msg.BucketInUse)

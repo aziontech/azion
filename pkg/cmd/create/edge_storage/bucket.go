@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -49,14 +50,14 @@ func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []st
 				return utils.ErrorUnmarshalReader
 			}
 		} else {
-			err := createRequestFromFlags(cmd, fields)
+			err := createRequestFromFlags(cmd, fields, &request)
 			if err != nil {
 				return err
 			}
 		}
 
 		client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := client.CreateBucket(context.Background(), fields.Name, fields.EdgeAccess)
+		err := client.CreateBucket(context.Background(), request)
 		if err != nil {
 			return fmt.Errorf(msg.ERROR_CREATE_BUCKET, err)
 		}
@@ -66,7 +67,7 @@ func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []st
 	}
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.RequestBucket) error {
 	if !cmd.Flags().Changed("name") {
 		answers, err := utils.AskInput(msg.ASK_NAME_CREATE_BUCKET)
 		if err != nil {
@@ -84,11 +85,15 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields) error {
 
 		fields.EdgeAccess = answers
 	}
+
+	request.SetName(fields.Name)
+	request.SetEdgeAccess(sdk.EdgeAccessEnum(fields.EdgeAccess))
 	return nil
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_CREATE_BUCKET)
 	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
+	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }
