@@ -35,14 +35,14 @@ func TestNewBucket(t *testing.T) {
 			request:  httpmock.REST(http.MethodPost,  "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--name", "arthur-morgan", "--edge-access", "read_only"},
-			output:   "\x1b[32m🚀 Created Bucket\n\x1b[0m",
+			output:   "🚀 Created Bucket\n",
 		},
 		{
 			name:     "create new bucket command bucket of the edge-storage using flag --file",
 			request:  httpmock.REST(http.MethodPost,  "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--file", "fixtures/create.json"},
-			output:   "\x1b[32m🚀 Created Bucket\n\x1b[0m",
+			output:   "🚀 Created Bucket\n",
 		},
 		{
 			name:     "input file json err --file",
