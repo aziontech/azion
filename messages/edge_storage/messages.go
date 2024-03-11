@@ -5,7 +5,7 @@ const (
 	USAGE_BUCKET                    = "bucket"
 	SHORT_DESCRIPTION               = "Manages Edge Storage buckets and objects directly through the command line"
 	SHORT_DESCRIPTION_CREATE_BUCKET = "Creates a bucket in Edge Storage"
-	LONG_DESCRIPTION                = "Allows users to perform a wide range of operations, from creating and deleting buckets to adding, removing and manipulating objects, all quickly and conveniently, without the need for graphical interfaces or complex manual interactions."
+	LONG_DESCRIPTION                = "Allows users to perform a wide range of operations, from creating and deleting buckets to adding, removing, and manipulating objects."
 	LONG_DESCRIPTION_CREATE_BUCKET  = "Allows users to create a bucket in Edge Storage"
 	EXAMPLE                         = "$ azion create edge-storage\n$ azion create edge-storage --help"
 	EXAMPLE_CREATE_BUCKET           = "$ azion create edge-storage bucket --name 'zorosola' --edge-access 'read_only'"
