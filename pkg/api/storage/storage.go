@@ -22,6 +22,7 @@ func (c *Client) CreateBucket(ctx context.Context, name, edgeAccess string) erro
 		Name:       name,
 		EdgeAccess: sdk.EdgeAccessEnum(edgeAccess),
 	}
+
 	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create)
 	_, httpResp, err := req.Execute()
 	if err != nil {
