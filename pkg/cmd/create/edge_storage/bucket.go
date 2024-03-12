@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	"go.uber.org/zap"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -33,7 +33,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(msg.EXAMPLE_CREATE_BUCKET),
-		RunE: runE(f, fields),
+		RunE:          runE(f, fields),
 	}
 
 	flags := cmd.Flags()
@@ -77,12 +77,13 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		fields.Name = answers
 	}
 	if !cmd.Flags().Changed("edge-access") {
-		answers, err := utils.AskInput(msg.ASK_EDGE_ACCESSS_CREATE_BUCKET)	
+		answers, err := utils.Select(
+			msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
+			[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)})
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-
 		fields.EdgeAccess = answers
 	}
 
