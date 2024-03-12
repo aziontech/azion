@@ -14,7 +14,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       msg.EXAMPLE_CREATE,
+		Example:       msg.EXAMPLE_LIST,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
