@@ -14,7 +14,7 @@ const (
 	FLAG_NAME_CREATE_BUCKET         = "The name of the Edge Storage bucket"
 	FLAG_EDGE_ACCESS_CREATE_BUCKET  = "Indicates the type of permission for actions within the bucket. Possible values:	read_only, read_write or restricted"
 	FLAG_FILE_JSON_CREATE_BUCKET    = "Path to a JSON file containing the attributes of the bucket that will be created; you can use - for reading from stdin"
-	SUCCESS_CREATE_BUCKET           = "Bucket created"
+	SUCCESS_CREATE_BUCKET           = "Bucket created successfully"
 	ASK_NAME_CREATE_BUCKET          = "Enter your bucket's name"
-	ASK_EDGE_ACCESSS_CREATE_BUCKET  = "Enter your bucket's edge access type (possible value: Possible values: read_only, read_write or restricted)"
+	ASK_EDGE_ACCESSS_CREATE_BUCKET  = "Enter your bucket's edge access type (Possible values: read_only, read_write or restricted)"
 )
