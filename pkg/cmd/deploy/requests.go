@@ -514,7 +514,6 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	} else {
 		reqIns.SetName(conf.Function.Name)
 	}
-	// reqIns.SetArgs()
 	reqIns.ApplicationId = conf.Application.ID
 
 	//Read args
