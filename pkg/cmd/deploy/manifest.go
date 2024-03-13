@@ -84,11 +84,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		return err
 	}
 
-	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
-	if err != nil {
-		return err
-	}
-
 	var cacheID int64 = 0
 
 	for _, route := range manifest.Routes {
@@ -266,6 +261,11 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
 		return err
 	}
 
