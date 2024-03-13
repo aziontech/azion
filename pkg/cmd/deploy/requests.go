@@ -2,10 +2,12 @@ package deploy
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -33,11 +35,35 @@ var injectIntoFunction = `
 
 func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.ID == 0 {
-		DeployID, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+		var projName string
+		for {
+			functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+			if err != nil {
+				// if the name is already in use, we ask for another one
+				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					logger.FInfo(cmd.Io.Out, msg.FuncInUse)
+					if Auto {
+						projName = thoth.GenerateName()
+					} else {
+						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
+						if err != nil {
+							return err
+						}
+					}
+					conf.Function.Name = projName
+					continue
+				}
+				return err
+			}
+			conf.Function.ID = functionId
+			break
+		}
+
+		err := cmd.WriteAzionJsonContent(conf)
 		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		conf.Function.ID = DeployID
 
 		// create instance function
 		reqIns := apiapp.CreateInstanceRequest{}
@@ -45,12 +71,35 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 		reqIns.SetName(conf.Name)
 		reqIns.ApplicationId = conf.Application.ID
 
-		instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
-		if err != nil {
-			logger.Debug("Error while creating edge function instance", zap.Error(err))
-			return fmt.Errorf(msg.ErrorCreateInstance.Error(), err)
+		for {
+			instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
+			if err != nil {
+				// if the name is already in use, we ask for another one
+				if errors.Is(err, utils.ErrorNameInUse) {
+					logger.FInfo(cmd.Io.Out, msg.FuncInstInUse)
+					if Auto {
+						projName = thoth.GenerateName()
+					} else {
+						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
+						if err != nil {
+							return err
+						}
+					}
+					conf.Function.InstanceName = projName
+					reqIns.SetName(projName)
+					continue
+				}
+				return err
+			}
+			conf.Function.InstanceID = instance.GetId()
+			break
 		}
-		conf.Function.InstanceID = instance.GetId()
+		err = cmd.WriteAzionJsonContent(conf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+
 		return nil
 	}
 
@@ -64,19 +113,43 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 
 func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Application.ID == 0 {
-		applicationId, err := cmd.createApplication(client, ctx, conf)
-		if err != nil {
-			logger.Debug("Error while creating Edge Application", zap.Error(err))
-			return err
+		var projName string
+		for {
+			applicationId, err := cmd.createApplication(client, ctx, conf)
+			if err != nil {
+				fmt.Println("deu erro")
+				fmt.Println(err)
+				fmt.Println(Auto)
+				fmt.Println(errors.Is(err, utils.ErrorNameInUse))
+				// if the name is already in use, we ask for another one
+				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					logger.FInfo(cmd.Io.Out, msg.AppInUse)
+					if Auto {
+						projName = thoth.GenerateName()
+						fmt.Println("aquiuiuiuuiui")
+					} else {
+						fmt.Println("not aqui")
+						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
+						if err != nil {
+							return err
+						}
+					}
+					conf.Application.Name = projName
+					continue
+				}
+				return err
+			}
+			conf.Application.ID = applicationId
+			break
 		}
-		conf.Application.ID = applicationId
 
-		err = cmd.WriteAzionJsonContent(conf)
+		err := cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
 	} else {
+		fmt.Println("cheguei aqui")
 		err := cmd.updateApplication(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while updating Edge Application", zap.Error(err))
@@ -92,13 +165,30 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 
 	newDomain := false
 	if conf.Domain.Id == 0 {
-		domain, err = cmd.createDomain(client, ctx, conf)
-		if err != nil {
-			logger.Debug("Error while creating domain", zap.Error(err))
-			return "", err
+		var projName string
+		for {
+			domain, err = cmd.createDomain(client, ctx, conf)
+			if err != nil {
+				// if the name is already in use, we ask for another one
+				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					logger.FInfo(cmd.Io.Out, msg.DomainInUse)
+					if Auto {
+						projName = thoth.GenerateName()
+					} else {
+						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
+						if err != nil {
+							return "", err
+						}
+					}
+					conf.Domain.Name = projName
+					continue
+				}
+				return "", err
+			}
+			conf.Domain.Id = domain.GetId()
+			newDomain = true
+			break
 		}
-		conf.Domain.Id = domain.GetId()
-		newDomain = true
 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
@@ -181,7 +271,13 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 		conf.Origin.Name = origin.GetName()
 
 		var cacheId int64
-		authorize := utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
+		var authorize bool
+		if Auto {
+			authorize = false
+		} else {
+			authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
+		}
+
 		if authorize {
 			var reqCache apiapp.CreateCacheSettingsRequest
 			reqCache.SetName(conf.Name)
@@ -344,7 +440,7 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	reqApp.Id = conf.Application.ID
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
+		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
 	return nil

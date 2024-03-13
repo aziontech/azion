@@ -89,7 +89,6 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		return err
 	}
 
-	// cacheID created for "compute" in the SSR, will be used to create the function and configure the caching policy.
 	var cacheID int64 = 0
 
 	for _, route := range manifest.Routes {
