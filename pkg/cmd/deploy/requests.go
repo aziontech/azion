@@ -116,18 +116,12 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 		for {
 			applicationId, err := cmd.createApplication(client, ctx, conf)
 			if err != nil {
-				fmt.Println("deu erro")
-				fmt.Println(err)
-				fmt.Println(Auto)
-				fmt.Println(errors.Is(err, utils.ErrorNameInUse))
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					logger.FInfo(cmd.Io.Out, msg.AppInUse)
 					if Auto {
 						projName = thoth.GenerateName()
-						fmt.Println("aquiuiuiuuiui")
 					} else {
-						fmt.Println("not aqui")
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
 						if err != nil {
 							return err
@@ -148,7 +142,6 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			return err
 		}
 	} else {
-		fmt.Println("cheguei aqui")
 		err := cmd.updateApplication(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while updating Edge Application", zap.Error(err))
