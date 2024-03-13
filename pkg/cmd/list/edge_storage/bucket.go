@@ -2,6 +2,7 @@ package edge_storage
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	table "github.com/MaxwelMazur/tablecli"
@@ -46,7 +47,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 
 	resp, err := client.ListBucket(c, opts)
 	if err != nil {
-		return err
+		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
 	}
 
 	tbl := table.New("NAME", "EDGE ACCESS")
