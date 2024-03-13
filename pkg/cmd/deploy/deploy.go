@@ -65,6 +65,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion deploy --help
         $ azion deploy --path dist/storage
+        $ azion deploy --auto
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.Run(deploy.F)

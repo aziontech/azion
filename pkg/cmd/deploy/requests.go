@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -65,14 +66,8 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			return err
 		}
 
-		// create instance function
-		reqIns := apiapp.CreateInstanceRequest{}
-		reqIns.SetEdgeFunctionId(conf.Function.ID)
-		reqIns.SetName(conf.Name)
-		reqIns.ApplicationId = conf.Application.ID
-
 		for {
-			instance, err := clients.EdgeApplication.CreateInstancePublish(ctx, &reqIns)
+			instance, err := cmd.createInstance(ctx, clients.EdgeApplication, conf)
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if errors.Is(err, utils.ErrorNameInUse) {
@@ -86,7 +81,6 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 						}
 					}
 					conf.Function.InstanceName = projName
-					reqIns.SetName(projName)
 					continue
 				}
 				return err
@@ -104,6 +98,11 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 	}
 
 	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	_, err = cmd.updateInstance(ctx, clients.EdgeApplication, conf)
 	if err != nil {
 		return err
 	}
@@ -508,4 +507,76 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 		addresses = append(addresses, addr)
 	}
 	return
+}
+
+func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+	logger.Debug("Create Instance")
+
+	// create instance function
+	reqIns := apiapp.CreateInstanceRequest{}
+	reqIns.SetEdgeFunctionId(conf.Function.ID)
+
+	if conf.Function.InstanceName == "__DEFAULT__" {
+		reqIns.SetName(conf.Name)
+	} else {
+		reqIns.SetName(conf.Function.Name)
+	}
+	// reqIns.SetArgs()
+	reqIns.ApplicationId = conf.Application.ID
+
+	//Read args
+	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
+	if err != nil {
+		logger.Debug("Error while reding args.json file <"+conf.Function.Args+">", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+	}
+	args := make(map[string]interface{})
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
+		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+	}
+	reqIns.SetArgs(args)
+
+	resp, err := client.CreateFuncInstances(ctx, &reqIns, conf.Application.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+	logger.Debug("Update Instance")
+
+	// create instance function
+	reqIns := apiapp.UpdateInstanceRequest{}
+	reqIns.SetEdgeFunctionId(conf.Function.ID)
+
+	if conf.Function.InstanceName == "__DEFAULT__" {
+		reqIns.SetName(conf.Name)
+	} else {
+		reqIns.SetName(conf.Function.Name)
+	}
+
+	//Read args
+	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
+	if err != nil {
+		logger.Debug("Error while reding args.json file <"+conf.Function.Args+">", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+	}
+	args := make(map[string]interface{})
+	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
+		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
+		return nil, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+	}
+	reqIns.SetArgs(args)
+
+	instID := strconv.FormatInt(conf.Function.InstanceID, 10)
+	appID := strconv.FormatInt(conf.Application.ID, 10)
+	resp, err := client.UpdateInstance(ctx, &reqIns, appID, instID)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
