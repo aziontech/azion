@@ -20,7 +20,7 @@ import (
 
 func TestNewBucket(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	
+
 	tests := []struct {
 		name     string
 		request  httpmock.Matcher
@@ -32,14 +32,14 @@ func TestNewBucket(t *testing.T) {
 	}{
 		{
 			name:     "create new bucket command bucket of the edge-storage",
-			request:  httpmock.REST(http.MethodPost,  "v4/storage/buckets"),
+			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--name", "arthur-morgan", "--edge-access", "read_only"},
 			output:   fmt.Sprintf("🚀 %s\n", msg.SUCCESS_CREATE_BUCKET),
 		},
 		{
 			name:     "create new bucket command bucket of the edge-storage using flag --file",
-			request:  httpmock.REST(http.MethodPost,  "v4/storage/buckets"),
+			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--file", "fixtures/create.json"},
 			output:   fmt.Sprintf("🚀 %s\n", msg.SUCCESS_CREATE_BUCKET),
@@ -52,8 +52,8 @@ func TestNewBucket(t *testing.T) {
 			Err:      utils.ErrorUnmarshalReader.Error(),
 		},
 		{
-			name:     "failed internal error status 500",
-			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
+			name:    "failed internal error status 500",
+			request: httpmock.REST(http.MethodPost, "v4/storage/buckets"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
@@ -61,8 +61,8 @@ func TestNewBucket(t *testing.T) {
 					Header:     http.Header{"Content-Type": []string{"application/json"}},
 				}, nil
 			},
-			args:     []string{"--file", "fixtures/create.json"},
-			Err:      fmt.Sprintf(msg.ERROR_CREATE_BUCKET,  "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
+			args: []string{"--file", "fixtures/create.json"},
+			Err:  fmt.Sprintf(msg.ERROR_CREATE_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
 		},
 	}
 	for _, tt := range tests {
@@ -72,7 +72,7 @@ func TestNewBucket(t *testing.T) {
 			f, out, _ := testutils.NewFactory(mock)
 			cmd := NewBucket(f)
 			cmd.SetArgs(tt.args)
-			if err := cmd.Execute(); err != nil {		
+			if err := cmd.Execute(); err != nil {
 				if !strings.EqualFold(tt.Err, err.Error()) {
 					t.Errorf("Error expected: %s got: %s", tt.Err, err.Error())
 				}

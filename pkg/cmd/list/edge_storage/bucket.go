@@ -17,8 +17,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 )
 
-var bucketName string
-
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
@@ -52,6 +50,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	tbl := table.New("NAME", "EDGE ACCESS")
+	tbl.WithWriter(f.IOStreams.Out)
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
