@@ -75,8 +75,9 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 	return nil
 }
 
+
 func addFlags(flags *pflag.FlagSet, opts *contracts.ListOptions) {
 	flags.Int64Var(&opts.Page, "page", 1, general.ApiListFlagPage)
 	flags.Int64Var(&opts.PageSize, "page-size", 10, general.ApiListFlagPageSize)
-	flags.BoolP("help", "h", false, "")
+	flags.BoolP("help", "h", false, msg.EXAMPLE_LIST_BUCKET)
 }
