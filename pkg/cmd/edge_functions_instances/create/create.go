@@ -36,7 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion edge_functions_instances create -a 1673635839 --in "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := api.CreateFuncInstancesRequest{}
+			request := api.CreateInstanceRequest{}
 			if cmd.Flags().Changed("in") {
 				var (
 					file *os.File

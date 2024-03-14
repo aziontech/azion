@@ -152,7 +152,7 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 	logger.Debug("Formatted latest version: " + fmt.Sprint(latestVersion))
 
 	if latestVersion > currentVersion {
-		err := showUpdateMessage(f)
+		err := showUpdateMessage(f, tagName)
 		if err != nil {
 			return err
 		}
@@ -167,10 +167,10 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 	return nil
 }
 
-func showUpdateMessage(f *cmdutil.Factory) error {
+func showUpdateMessage(f *cmdutil.Factory, vNumber string) error {
 	logger.FInfo(f.IOStreams.Out, msg.NewVersion)
 
-	err := showUpdadeMessageSystem(f)
+	err := showUpdadeMessageSystem(f, vNumber)
 	if err != nil {
 		return err
 	}
