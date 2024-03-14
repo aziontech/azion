@@ -121,10 +121,6 @@ type FunctionsInstancesResponse interface {
 	GetArgs() interface{}
 }
 
-type CreateFuncInstancesRequest struct {
-	sdk.ApplicationCreateInstanceRequest
-}
-
 type CreateDeviceGroupsRequest struct {
 	sdk.CreateDeviceGroupsRequest
 }
@@ -165,30 +161,6 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
 		logger.Debug("Headers", zap.Any("http", httpResp.Header))
 		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
-	}
-
-	return edgeApplicationsResponse.Results, nil
-}
-
-func (c *Client) CreateInstancePublish(ctx context.Context, req *CreateInstanceRequest) (EdgeApplicationsResponse, error) {
-	logger.Debug("Create Instance Publish")
-	args := make(map[string]interface{})
-	req.SetArgs(args)
-
-	request := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.
-		EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, req.ApplicationId).
-		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest)
-
-	edgeApplicationsResponse, httpResp, err := request.Execute()
-	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function instance", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
@@ -416,7 +388,7 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 	return nil
 }
 
-func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateFuncInstancesRequest, applicationID int64) (FunctionsInstancesResponse, error) {
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID int64) (FunctionsInstancesResponse, error) {
 	logger.Debug("Create Edge Function Instance")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsEdgeFunctionsInstancesAPI.EdgeApplicationsEdgeApplicationIdFunctionsInstancesPost(ctx, applicationID).
 		ApplicationCreateInstanceRequest(req.ApplicationCreateInstanceRequest).Execute()
