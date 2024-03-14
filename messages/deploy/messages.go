@@ -22,10 +22,22 @@ var (
 	CacheSettingsSuccessful           = "Created Cache Settings for Edge Application\n"
 	RulesEngineSuccessful             = "Created Rules Engine for Edge Application\n"
 	DeployFlagHelp                    = "Displays more information about the deploy command"
+	DeployFlagAuto                    = "If sent, the entire flow of the command will be run without interruptions"
 	DeployPropagation                 = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
 	BucketInUse                       = "This bucket's name is already in use, please try another one\n"
-	AskInputName                      = "Your bucket's name:"
+	AppInUse                          = "This edge application's name is already in use, please try another one\n"
+	DomainInUse                       = "This domain's name is already in use, please try another one\n"
+	FuncInUse                         = "This edge function's name is already in use, please try another one\n"
+	FuncInstInUse                     = "This function instance's name is already in use, please try another one\n"
+	AskInputName                      = "Type the new name:"
 	ProjectNameMessage                = "Using the same name as your project to create the bucket\n"
+	AskCreateCacheSettings            = `Azion CLI offers to create the following Cache Settings specifications:
+  - Browser Cache Settings: Override Cache Settings
+  - Maximum TTL for Browser Cache Settings (in seconds): 7200
+  - CDN Cache Settings: Override Cache Settings
+  - Maximum TTL for CDN Cache Settings (in seconds): 7200
+
+Do you wish to create a Cache Settings configuration with the above specifications? (y/N)`
 )

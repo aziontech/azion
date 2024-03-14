@@ -75,7 +75,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			logger.LogLevel(f.Logger)
 
 			if strings.HasPrefix(configFlag, PREFIX_FLAG) {
-				return fmt.Errorf("A configuration path is expected for your location, not a flag")
+				return msg.ErrorPrefix
 			}
 
 			return doPreCommandCheck(cmd, f, PreCmd{
@@ -89,6 +89,12 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion --debug
 		$ azion -h
 		`),
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			if cmd.Flags().Changed("token") {
+				return nil
+			}
+			return cmd.Help()
+		},
 		SilenceErrors: true, // Silence errors, so the help message won't be shown on flag error
 		SilenceUsage:  true, // Silence usage on error
 	}
