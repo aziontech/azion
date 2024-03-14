@@ -93,7 +93,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_CREATE_BUCKET)
+	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_BUCKET)
 	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
