@@ -21,16 +21,21 @@ func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error 
 	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(request.BucketCreate)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating the project Bucket", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return err
-			}
-		}
+		logger.Debug("Error while creating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
+}
+
+func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedBucketList, error) {
+	logger.Debug("Listing bucket")
+	resp, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsList(ctx).
+		Page(int32(opts.Page)).PageSize(int32(opts.PageSize)).Execute()
+	if err != nil {
+		logger.Error("Error while listing buckets", zap.Error(err))
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
 }
 
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
@@ -53,6 +58,5 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 	}
-	return nil 
+	return nil
 }
-
