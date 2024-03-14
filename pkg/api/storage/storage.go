@@ -3,58 +3,22 @@ package storage
 import (
 	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/storage"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 )
 
-type Client struct {
-	apiClient *sdk.APIClient
+type RequestBucket struct {
+	sdk.BucketCreate
 }
 
-func NewClient(c *http.Client, url string, token string) *Client {
-	conf := sdk.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = sdk.ServerConfigurations{
-		{URL: url},
-	}
-	return &Client{
-		apiClient: sdk.NewAPIClient(conf),
-	}
-}
-
-type ClientStorage struct {
-	apiClient *storage.APIClient
-}
-
-func NewClientStorage(c *http.Client, url string, token string) *ClientStorage {
-	conf := storage.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = storage.ServerConfigurations{
-		{URL: url},
-	}
-	return &ClientStorage{
-		apiClient: storage.NewAPIClient(conf),
-	}
-}
-
-func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
+func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error {
 	logger.Debug("Creating bucket")
-	create := storage.BucketCreate{
-		Name:       name,
-		EdgeAccess: storage.READ_WRITE,
-	}
-
-	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create)
+	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(request.BucketCreate)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -66,7 +30,6 @@ func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
 		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return nil
 }
 
@@ -90,5 +53,6 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 	}
-	return nil
+	return nil 
 }
+
