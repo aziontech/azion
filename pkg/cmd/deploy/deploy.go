@@ -35,6 +35,7 @@ type DeployCmd struct {
 
 var (
 	Path string
+	Auto bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -64,6 +65,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion deploy --help
         $ azion deploy --path dist/storage
+        $ azion deploy --auto
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.Run(deploy.F)
@@ -71,6 +73,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
 	return deployCmd
 }
 

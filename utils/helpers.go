@@ -29,6 +29,10 @@ import (
 
 const shell = "/bin/sh"
 
+var (
+	NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict"}
+)
+
 func CleanDirectory(dir string) error {
 
 	err := os.RemoveAll(dir)
@@ -298,6 +302,9 @@ func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 	case 404:
 		return ErrorNotFound404
 
+	case 409:
+		return ErrorNameInUse
+
 	default:
 		return err
 
@@ -368,7 +375,7 @@ func checkTlsVersion(body string) error {
 }
 
 func checkNameInUse(body string) error {
-	if strings.Contains(body, "name_already_in_use") || strings.Contains(body, "bucket name is already in use") {
+	if strings.Contains(body, "name_already_in_use") || strings.Contains(body, "bucket name is already in use") || containsErrorMessageNameTaken(body) {
 		return ErrorNameInUse
 	}
 	return nil
@@ -631,4 +638,13 @@ func Format(input string) (int, error) {
 
 	return number, nil
 
+}
+
+func containsErrorMessageNameTaken(msg string) bool {
+	for _, phrase := range NameTaken {
+		if strings.Contains(msg, phrase) {
+			return true
+		}
+	}
+	return false
 }
