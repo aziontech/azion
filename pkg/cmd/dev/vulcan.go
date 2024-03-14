@@ -12,12 +12,9 @@ import (
 
 func vulcan(f *cmdutil.Factory, cmd *DevCmd, isFirewall bool) error {
 
-	var command string
-
+	command := vul.Command("", "dev")
 	if isFirewall {
 		command = vul.Command("", "dev --firewall")
-	} else {
-		command = vul.Command("", "dev")
 	}
 
 	err := runCommand(f, cmd, command)
