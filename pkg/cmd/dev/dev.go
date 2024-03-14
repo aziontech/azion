@@ -15,6 +15,10 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	isFirewall bool
+)
+
 type DevCmd struct {
 	Io                    *iostreams.IOStreams
 	CommandRunnerStream   func(out io.Writer, cmd string, envvars []string) error
@@ -50,6 +54,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		},
 	}
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
+	devCmd.Flags().BoolVar(&isFirewall, "firewall", false, msg.IsFirewall)
 	return devCmd
 }
 
@@ -60,15 +65,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running dev command")
 
+	contract := &contracts.BuildInfo{}
+
+	if isFirewall {
+		contract.IsFirewall = isFirewall
+		contract.OwnWorker = "true"
+	}
+
 	// Run build command
 	build := cmd.BuildCmd(f)
-	err := build.Run(&contracts.BuildInfo{})
+	err := build.Run(contract)
 	if err != nil {
 		logger.Debug("Error while running build command called by dev command", zap.Error(err))
 		return err
 	}
 
-	err = vulcan(f, cmd)
+	err = vulcan(f, cmd, isFirewall)
 	if err != nil {
 		return err
 	}
