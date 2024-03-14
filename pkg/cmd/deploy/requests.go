@@ -512,7 +512,7 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	if conf.Function.InstanceName == "__DEFAULT__" {
 		reqIns.SetName(conf.Name)
 	} else {
-		reqIns.SetName(conf.Function.Name)
+		reqIns.SetName(conf.Function.InstanceName)
 	}
 	reqIns.ApplicationId = conf.Application.ID
 

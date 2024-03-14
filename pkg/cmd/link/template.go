@@ -24,6 +24,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		Prefix:   "",
 	}
 	azionJson.Function.Name = "__DEFAULT__"
+	azionJson.Function.InstanceName = "__DEFAULT__"
 	azionJson.Function.File = "./out/worker.js"
 	azionJson.Function.Args = "./azion/args.json"
 	azionJson.Domain.Name = "__DEFAULT__"
