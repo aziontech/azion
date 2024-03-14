@@ -29,21 +29,24 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 	for {
 		err = client.CreateBucket(ctx, api.RequestBucket{
 			BucketCreate: sdk.BucketCreate{Name: name, EdgeAccess: storage.READ_WRITE}})
-		// if the bucket name is already in use, we ask for another one
-		if errors.Is(err, utils.ErrorNameInUse) {
-			logger.FInfo(cmd.Io.Out, msg.BucketInUse)
-			projName, err := askForInput(msg.AskInputName, thoth.GenerateName())
-			if err != nil {
-				return err
+		if err != nil {
+			// if the name is already in use, we ask for another one
+			if errors.Is(err, utils.ErrorNameInUse) {
+				logger.FInfo(cmd.Io.Out, msg.BucketInUse)
+				if Auto {
+					name = thoth.GenerateName()
+				} else {
+					name, err = askForInput(msg.AskInputName, thoth.GenerateName())
+					if err != nil {
+						return err
+					}
+				}
+				conf.Application.Name = name
+				continue
 			}
-			name = projName
-			continue
+			return err
 		}
 		break
-	}
-
-	if err != nil {
-		return err
 	}
 
 	conf.Bucket = name

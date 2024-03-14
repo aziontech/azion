@@ -86,11 +86,12 @@ type CacheConf struct {
 }
 
 type AzionJsonDataFunction struct {
-	ID         int64  `json:"id"`
-	Name       string `json:"name"`
-	File       string `json:"file"`
-	Args       string `json:"args"`
-	InstanceID int64  `json:"instance-id"`
+	ID           int64  `json:"id"`
+	Name         string `json:"name"`
+	File         string `json:"file"`
+	Args         string `json:"args"`
+	InstanceID   int64  `json:"instance-id"`
+	InstanceName string `json:"instance-name"`
 }
 
 type AzionJsonDataApplication struct {

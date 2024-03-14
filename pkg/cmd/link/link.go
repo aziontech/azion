@@ -11,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -87,7 +86,6 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 }
 
 func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
-	options := &contracts.AzionApplicationOptions{}
 	info := &LinkInfo{}
 	cobraCmd := &cobra.Command{
 		Use:           msg.EdgeApplicationsLinkUsage,
@@ -105,7 +103,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
-			return link.run(info, options)
+			return link.run(info)
 		},
 	}
 
@@ -121,7 +119,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewLinkCmd(f), f)
 }
 
-func (cmd *LinkCmd) run(info *LinkInfo, options *contracts.AzionApplicationOptions) error {
+func (cmd *LinkCmd) run(info *LinkInfo) error {
 	logger.Debug("Running link command")
 
 	path, err := cmd.GetWorkDir()
