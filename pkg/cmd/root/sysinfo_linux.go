@@ -4,6 +4,7 @@ package root
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/user"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
@@ -13,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func showUpdadeMessageSystem(f *cmdutil.Factory) error {
+func showUpdadeMessageSystem(f *cmdutil.Factory, vNumber string) error {
 	current, err := user.Current()
 	if err != nil {
 		logger.Debug("Error while getting current user's information", zap.Error(err))
@@ -51,11 +52,11 @@ func showUpdadeMessageSystem(f *cmdutil.Factory) error {
 	logger.FInfo(f.IOStreams.Out, msg.DownloadRelease)
 	switch osInfo.OS.Vendor {
 	case "debian":
-		logger.FInfo(f.IOStreams.Out, msg.DpkgUpdate)
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.DpkgUpdate, vNumber))
 	case "alpine":
-		logger.FInfo(f.IOStreams.Out, msg.ApkUpdate)
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ApkUpdate, vNumber))
 	case "centos", "fedora", "opensuse", "mageia", "mandriva":
-		logger.FInfo(f.IOStreams.Out, msg.RpmUpdate)
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.RpmUpdate, vNumber))
 	}
 
 	return nil

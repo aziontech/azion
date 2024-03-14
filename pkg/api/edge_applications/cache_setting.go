@@ -18,9 +18,9 @@ func (c *Client) CreateCacheSettingsNextApplication(
 	logger.Debug("Create Cache Settings Next Application")
 
 	req.SetBrowserCacheSettings("override")
-	req.SetBrowserCacheSettingsMaximumTtl(31536000)
+	req.SetBrowserCacheSettingsMaximumTtl(7200)
 	req.SetCdnCacheSettings("override")
-	req.SetCdnCacheSettingsMaximumTtl(31536000)
+	req.SetCdnCacheSettingsMaximumTtl(7200)
 
 	resp, err := c.CreateCacheEdgeApplication(ctx, req, applicationID)
 	if err != nil {
