@@ -38,6 +38,16 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 	return resp, nil
 }
 
+func (c *Client) DeleteBucket(ctx context.Context, name string) error {
+	logger.Debug("Delete bucket")
+	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsDestroy(ctx, name).Execute()
+	if err != nil {
+		logger.Error("Error while listing buckets", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
 	var file string
 	if conf.Prefix != "" {
