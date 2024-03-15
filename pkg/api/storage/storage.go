@@ -40,9 +40,21 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 
 func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	logger.Debug("Delete bucket")
-	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsDestroy(ctx, name).Execute()
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsDestroy(ctx, name).Execute()
 	if err != nil {
 		logger.Error("Error while listing buckets", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) UpdateBucket(ctx context.Context, name string) error {
+	logger.Debug("Updating bucket")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsPartialUpdate(ctx, name).Execute()
+	if err != nil {
+		logger.Debug("Error while creating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
