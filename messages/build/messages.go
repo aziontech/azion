@@ -16,4 +16,5 @@ var (
 	FlagWorker            = "Indicates that the constructed code inserts its own worker expression, such as addEventListener(\"fetch\") or similar, without the need to inject a provider"
 	FlagPolyfill          = "Use node polyfills in build"
 	FlagEntry             = "Code entrypoint; (default: ./main.js)"
+	IsFirewall            = "Indicates whether the function to be run is intended for the Edge Firewall"
 )

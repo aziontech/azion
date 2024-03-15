@@ -15,6 +15,11 @@ type BuildInfo struct {
 	Entry         string
 	NodePolyfills string
 	OwnWorker     string
+	IsFirewall    bool
+}
+
+type DevInfo struct {
+	IsFirewall string
 }
 
 type ListOptions struct {
