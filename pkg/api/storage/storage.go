@@ -43,7 +43,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsDestroy(ctx, name).Execute()
 	if err != nil {
-		logger.Error("Error while listing buckets", zap.Error(err))
+		logger.Error("Error while deleting the bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
@@ -54,7 +54,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string) error {
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsPartialUpdate(ctx, name).Execute()
 	if err != nil {
-		logger.Debug("Error while creating the project Bucket", zap.Error(err))
+		logger.Debug("Error while updating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil

@@ -36,6 +36,6 @@ const (
 	ASK_NAME_UPDATE_BUCKET         = "Enter the name of the Bucket you wish to update"
 
 	OUTPUT_CREATE_BUCKET = "Bucket created successfully"
-	OUTPUT_DELETE_BUCKET = "Bucket %s was successfully deleted"
+	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully"
 	OUTPUT_UPDATE_BUCKET = "Bucket updated successfully"
 )
