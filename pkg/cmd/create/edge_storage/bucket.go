@@ -62,7 +62,7 @@ func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []st
 			return fmt.Errorf(msg.ERROR_CREATE_BUCKET, err)
 		}
 
-		logger.LogSuccess(f.IOStreams.Out, msg.SUCCESS_CREATE_BUCKET)
+		logger.LogSuccess(f.IOStreams.Out, msg.OUTPUT_CREATE_BUCKET)
 		return nil
 	}
 }
@@ -93,7 +93,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_CREATE_BUCKET)
+	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_BUCKET)
 	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
