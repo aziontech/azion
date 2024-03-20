@@ -1,6 +1,7 @@
 package deploy
 
 import (
+	"context"
 	"encoding/json"
 	"io/fs"
 	"os"
@@ -13,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -84,12 +86,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 
-	buildCmd := cmd.BuildCmd(f)
-	err := buildCmd.Run(&contracts.BuildInfo{})
-	if err != nil {
-		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-		return err
-	}
+	// buildCmd := cmd.BuildCmd(f)
+	// err := buildCmd.Run(&contracts.BuildInfo{})
+	// if err != nil {
+	// 	logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+	// 	return err
+	// }
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
@@ -104,10 +106,34 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	clients := NewClients(f)
-	err = manifest.Interpreted(f, cmd, conf, clients)
+	interpreter := manifestInt.NewManifestInterpreter()
+
+	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
-		logger.Debug("Error while interpreting manifest", zap.Error(err))
 		return err
+	}
+
+	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf)
+	if err != nil {
+		return err
+	}
+
+	manifestStructure, err := interpreter.ReadManifest(pathManifest)
+	if err != nil {
+		return err
+	}
+
+	err = interpreter.CreateResources("/Users/patrick.menoti/Documents/Dev/azion/bin/gracious-robot/azion/azion.json", manifestStructure, f)
+	if err != nil {
+		return err
+	}
+
+	if true == false {
+		err = manifest.Interpreted(f, cmd, conf, clients)
+		if err != nil {
+			logger.Debug("Error while interpreting manifest", zap.Error(err))
+			return err
+		}
 	}
 
 	return nil
