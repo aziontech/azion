@@ -279,9 +279,6 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
 
 // Returns the correct error message for each HTTP Status code
 func ErrorPerStatusCode(httpResp *http.Response, err error) error {
-	//if httpResp != nil {
-	//	return LogAndRewindBody(httpResp)
-	//}
 
 	// when the CLI times out, probably due to SSO communication, httpResp is null and/or http status is 500;
 	// that's why we need this verification first
