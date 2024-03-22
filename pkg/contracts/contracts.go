@@ -147,7 +147,7 @@ type Manifest struct {
 }
 
 type CacheSetting struct {
-	Name                           *string  `json:"name"`
+	Name                           *string  `json:"name,omitempty"`
 	BrowserCacheSettings           *string  `json:"browser_cache_settings,omitempty"`
 	BrowserCacheSettingsMaximumTtl *int64   `json:"browser_cache_settings_maximum_ttl,omitempty"`
 	CdnCacheSettings               *string  `json:"cdn_cache_settings,omitempty"`
@@ -171,25 +171,25 @@ type CacheSetting struct {
 }
 
 type RuleEngine struct {
-	Name        *string                     `json:"name"`
-	Description *string                     `json:"description,omitempty"`
-	Criteria    [][]sdk.RulesEngineCriteria `json:"criteria"`
-	Behaviors   []RulesEngineBehaviorEntry  `json:"behaviors"`
+	Name        string                         `json:"name"`
+	Description *string                        `json:"description,omitempty"`
+	Criteria    [][]sdk.RulesEngineCriteria    `json:"criteria,omitempty"`
+	Behaviors   []sdk.RulesEngineBehaviorEntry `json:"behaviors,omitempty"`
 }
 
 type RulesEngineBehaviorEntry struct {
 	RulesEngineBehaviorObject *sdk.RulesEngineBehaviorObject
 	RulesEngineBehaviorString *sdk.RulesEngineBehaviorString
-	RulesEngineBehaviorOrigin *RulesEngineBehaviorObjectOrigin
+	// RulesEngineBehaviorOrigin *RulesEngineBehaviorObjectOrigin
 }
 
-type RulesEngineBehaviorObjectOrigin struct {
-	Name   string                                  `json:"rule"`
-	Target RulesEngineBehaviorManifestOriginTarget `json:"target"`
-}
+// type RulesEngineBehaviorObjectOrigin struct {
+// 	Name   string                                  `json:"rule"`
+// 	Target RulesEngineBehaviorManifestOriginTarget `json:"target"`
+// }
 
-type RulesEngineBehaviorManifestOriginTarget struct {
-	OriginType string `json:"origin_type"`
-	Bucket     string `json:"bucket"`
-	Prefix     string `json:"prefix"`
-}
+// type RulesEngineBehaviorManifestOriginTarget struct {
+// 	OriginType string `json:"origin_type"`
+// 	Bucket     string `json:"bucket"`
+// 	Prefix     string `json:"prefix"`
+// }

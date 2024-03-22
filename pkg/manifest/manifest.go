@@ -3,7 +3,7 @@ package manifest
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
 	"strconv"
 
@@ -15,20 +15,23 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 )
 
 var manifestFilePath = "/.edge/manifest.json"
 
 type ManifestInterpreter struct {
-	FileReader func(path string) ([]byte, error)
-	GetWorkDir func() (string, error)
+	FileReader            func(path string) ([]byte, error)
+	GetWorkDir            func() (string, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 }
 
 func NewManifestInterpreter() *ManifestInterpreter {
 	return &ManifestInterpreter{
-		FileReader: os.ReadFile,
-		GetWorkDir: utils.GetWorkingDir,
+		FileReader:            os.ReadFile,
+		GetWorkDir:            utils.GetWorkingDir,
+		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 	}
 }
 
@@ -59,8 +62,6 @@ func (man *ManifestInterpreter) ReadManifest(path string) (*contracts.Manifest, 
 
 func (man *ManifestInterpreter) CreateResources(path string, manifest *contracts.Manifest, f *cmdutil.Factory) error {
 
-	fmt.Println("Create Resources entered")
-
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
@@ -74,29 +75,41 @@ func (man *ManifestInterpreter) CreateResources(path string, manifest *contracts
 		return utils.ErrorUnmarshalAzionJsonFile
 	} else {
 		err = json.Unmarshal(byteAzionJson, &conf)
-		fmt.Println("Unmarshal")
 		if err != nil {
 			logger.Debug("Error reading unmarshalling azion.json file", zap.Error(err))
 			return msg.ErrorUnmarshalAzionJsonFile
 		}
 	}
 
-	for i, cache := range manifest.CacheSettings {
-		fmt.Println("cache ", +i)
-		found := false
-		for _, cacheConf := range conf.CacheSettings {
-			fmt.Println("found cache")
-			if cacheConf.Name == *cache.Name && conf.Application.ID != 0 && cacheConf.Id != 0 {
-				found = true
-				requestUpdate := makeCacheRequestUpdate(cache)
-				clientCache.Update(ctx, requestUpdate, conf.Application.ID, cacheConf.Id)
-				break
+	cacheIds := make(map[string]int64)
+	ruleIds := make(map[string]int64)
+	for _, cacheConf := range conf.CacheSettings {
+		cacheIds[cacheConf.Name] = cacheConf.Id
+	}
+
+	for _, ruleConf := range conf.RulesEngine.Rules {
+		ruleIds[ruleConf.Name] = ruleConf.Id
+	}
+
+	for _, cache := range manifest.CacheSettings {
+		if id := cacheIds[*cache.Name]; id > 0 {
+			requestUpdate := makeCacheRequestUpdate(cache)
+			if cache.Name != nil {
+				requestUpdate.Name = cache.Name
+			} else {
+				requestUpdate.Name = &conf.Name
 			}
-		}
-		if !found {
-			fmt.Println("not found cache")
-			found = true
+			_, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
+			if err != nil {
+				return err
+			}
+		} else {
 			requestUpdate := makeCacheRequestCreate(cache)
+			if cache.Name != nil {
+				requestUpdate.Name = *cache.Name
+			} else {
+				requestUpdate.Name = conf.Name + thoth.GenerateName()
+			}
 			created, err := clientCache.Create(ctx, requestUpdate, conf.Application.ID)
 			if err != nil {
 				return err
@@ -107,25 +120,32 @@ func (man *ManifestInterpreter) CreateResources(path string, manifest *contracts
 			}
 			conf.CacheSettings = append(conf.CacheSettings, newCache)
 		}
-		found = false
+	}
+
+	err = man.WriteAzionJsonContent(conf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
 	}
 
 	for _, rule := range manifest.Rules {
-		found := false
-		fmt.Println("rules entered")
-		for _, ruleConf := range conf.RulesEngine.Rules {
-			if ruleConf.Name == *rule.Name && conf.Application.ID != 0 && ruleConf.Id != 0 {
-				fmt.Println("rule found")
-				found = true
-				requestUpdate := makeRuleRequestUpdate(rule, conf)
-				client.UpdateRulesEngine(ctx, requestUpdate)
-				break
+		if id := ruleIds[rule.Name]; id > 0 {
+			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds)
+			if err != nil {
+				return err
 			}
-		}
-		if !found {
-			found = true
-			fmt.Println("Rule not found")
-			requestCreate := makeRuleRequestCreate(rule, conf)
+			_, err = client.UpdateRulesEngine(ctx, requestUpdate)
+			if err != nil {
+				return err
+			}
+
+		} else {
+			requestCreate := makeRuleRequestCreate(rule, conf, cacheIds)
+			if rule.Name != "" {
+				requestCreate.Name = rule.Name
+			} else {
+				requestCreate.Name = conf.Name + thoth.GenerateName()
+			}
 			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, "request", requestCreate)
 			if err != nil {
 				return err
@@ -136,8 +156,14 @@ func (man *ManifestInterpreter) CreateResources(path string, manifest *contracts
 			}
 			conf.RulesEngine.Rules = append(conf.RulesEngine.Rules, newRule)
 		}
-		found = false
 	}
+
+	err = man.WriteAzionJsonContent(conf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 
@@ -271,12 +297,9 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 	return request
 }
 
-func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions) *apiEdgeApplications.UpdateRulesEngineRequest {
+func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
 
-	if rule.Name != nil {
-		request.SetName(*rule.Name)
-	}
 	if rule.Description != nil {
 		request.SetDescription(*rule.Description)
 	}
@@ -321,11 +344,11 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-					for _, c := range conf.CacheSettings {
-						if c.Name == *rule.Name {
-							str := strconv.FormatInt(c.Id, 10)
-							behaviorString.SetTarget(str)
-						}
+					if id := cacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+						str := strconv.FormatInt(id, 10)
+						behaviorString.SetTarget(str)
+					} else {
+						return nil, errors.New("Could not Find this cache")
 					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
@@ -341,15 +364,12 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 
 	request.Behaviors = behaviors
 
-	return request
+	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions) *apiEdgeApplications.CreateRulesEngineRequest {
+func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions, cacheIds map[string]int64) *apiEdgeApplications.CreateRulesEngineRequest {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
-	if rule.Name != nil {
-		request.SetName(*rule.Name)
-	}
 	if rule.Description != nil {
 		request.SetDescription(*rule.Description)
 	}
@@ -374,6 +394,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 
 	request.Criteria = rulesEngineCriteria
 	var behaviors []sdk.RulesEngineBehaviorEntry
+
 	for _, v := range rule.Behaviors {
 		if v.RulesEngineBehaviorObject != nil {
 			if v.RulesEngineBehaviorObject.Target.CapturedArray != nil && v.RulesEngineBehaviorObject.Target.Regex != nil && v.RulesEngineBehaviorObject.Target.Subject != nil {
@@ -395,7 +416,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
 					for _, c := range conf.CacheSettings {
-						if c.Name == *rule.Name {
+						if c.Name == v.RulesEngineBehaviorString.Target {
 							str := strconv.FormatInt(c.Id, 10)
 							behaviorString.SetTarget(str)
 						}
