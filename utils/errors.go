@@ -17,7 +17,7 @@ var (
 	ErrorInvalidVariablesFileFormat = errors.New("The format of the variables in the file is invalid. You must provide a file with valid variable formats. Use the flags -h or --help with a command or subcommand to display more information")
 	ErrorInternalServerError        = errors.New("The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
 	ErrorUpdateNoFlagsSent          = errors.New("The subcommand update needs at least one flag with a valid value. Run the command `azion <command> update --help` to display more information and try again")
-	ErrorUnmarshalReader            = errors.New("Failed to decode the given 'azion.json' file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
+	ErrorUnmarshalReader            = errors.New("Failed to decode the given 'json' file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorFormatOut                  = errors.New("The server failed formatting data for display. Repeat the HTTP request and check the HTTP response's format")
 	ErrorWriteFile                  = errors.New("The file is read-only and/or isn't accessible. Change the attributes of the file to read and write and/or give access to it")
 	ErrorTokenManager               = errors.New("Internal token handling failure. Run 'azion configure --help' command to display more information and try again")
