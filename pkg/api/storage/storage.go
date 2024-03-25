@@ -72,6 +72,17 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 	return nil
 }
 
+func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contracts.ListOptions) (*sdk.PaginatedBucketObjectList, error) {
+	logger.Debug("Listing bucket")
+	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsList(ctx, bucketName)
+	resp, httpResp, err := req.Execute()
+	if err != nil {
+		logger.Error("Error while listing objects", zap.Error(err))
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
+}
+
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
 	file := fileOps.Path
 	if conf.Prefix != "" {

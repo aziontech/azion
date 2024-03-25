@@ -13,33 +13,31 @@ import (
 	"github.com/spf13/pflag"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
-	"github.com/aziontech/azion-cli/messages/general"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 )
 
-func NewBucket(f *cmdutil.Factory) *cobra.Command {
-	bucket := &Bucket{
+func NewObject(f *cmdutil.Factory) *cobra.Command {
+	object := &Objects{
 		Factory: f,
 		Options: &contracts.ListOptions{},
 	}
 	cmd := &cobra.Command{
-		Use:           msg.USAGE_BUCKET,
-		Short:         msg.SHORT_DESCRIPTION_LIST_BUCKET,
-		Long:          msg.LONG_DESCRIPTION_LIST_BUCKET,
+		Use:           msg.USAGE_OBJECTS,
+		Short:         msg.SHORT_DESCRIPTION_LIST_OBJECT,
+		Long:          msg.LONG_DESCRIPTION_LIST_OBJECT,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE:          bucket.RunE,
-		Example:       heredoc.Doc(msg.EXAMPLE_LIST_BUCKET),
+		RunE:          object.RunE,
+		Example:       heredoc.Doc(msg.EXAMPLE_LIST_OBJECT),
 	}
-
-	bucket.AddFlags(cmd.Flags())
+	object.AddFlags(cmd.Flags())
 	return cmd
 }
 
-func (b *Bucket) RunE(cmd *cobra.Command, args []string) error {
+func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 	client := api.NewClient(
 		b.Factory.HttpClient,
 		b.Factory.Config.GetString("storage_url"),
@@ -47,19 +45,22 @@ func (b *Bucket) RunE(cmd *cobra.Command, args []string) error {
 	return b.PrintTable(client)
 }
 
-func (b *Bucket) PrintTable(client *api.Client) error {
+func (b *Objects) PrintTable(client *api.Client) error {
 	c := context.Background()
-	resp, err := client.ListBucket(c, b.Options)
+	resp, err := client.ListObject(c, b.BucketName, b.Options)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
 	}
-	tbl := table.New("NAME", "EDGE ACCESS")
+	tbl := table.New("KEY", "LAST MODIFIED")
 	tbl.WithWriter(b.Factory.IOStreams.Out)
+	if b.Options.Details {
+		tbl = table.New("KEY", "LAST MODIFIED", "SIZE", "ETAG")
+	}
 	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
 	columnFmt := color.New(color.FgGreen).SprintfFunc()
 	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 	for _, v := range resp.Results {
-		tbl.AddRow(v.GetName(), v.GetEdgeAccess())
+		tbl.AddRow(v.GetKey(), v.GetLastModified(), v.GetSize(), v.GetEtag())
 	}
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
@@ -73,8 +74,8 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 	return nil
 }
 
-func (b *Bucket) AddFlags(flags *pflag.FlagSet) {
-	flags.Int64Var(&b.Options.Page, "page", 1, general.ApiListFlagPage)
-	flags.Int64Var(&b.Options.PageSize, "page-size", 10, general.ApiListFlagPageSize)
-	flags.BoolP("help", "h", false, msg.FLAG_HELP_LIST_BUCKET)
+func (b *Objects) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&b.BucketName, "bucket-name", "", msg.FLAG_NAME_BUCKET)
+	flags.BoolVar(&b.Options.Details, "details", false, msg.FLAG_HELP_DETAILS_OBJECTS)
+	flags.BoolP("help", "h", false, msg.FLAG_HELP_LIST_OBJECT)
 }
