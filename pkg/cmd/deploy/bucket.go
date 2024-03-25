@@ -4,17 +4,20 @@ import (
 	"context"
 	"errors"
 
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/aziontech/azionapi-go-sdk/storage"
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Bucket != "" || (conf.Template == "javascript" || conf.Template == "typescript") {
 		return nil
 	}
@@ -24,7 +27,8 @@ func (cmd *DeployCmd) doBucket(client *api.ClientStorage, ctx context.Context, c
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	for {
-		err = client.CreateBucket(ctx, name)
+		err = client.CreateBucket(ctx, api.RequestBucket{
+			BucketCreate: sdk.BucketCreate{Name: name, EdgeAccess: storage.READ_WRITE}})
 		if err != nil {
 			// if the name is already in use, we ask for another one
 			if errors.Is(err, utils.ErrorNameInUse) {

@@ -3,70 +3,60 @@ package storage
 import (
 	"context"
 	"fmt"
-	"net/http"
 
-	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/storage"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 )
 
-type Client struct {
-	apiClient *sdk.APIClient
+type RequestBucket struct {
+	sdk.BucketCreate
 }
 
-func NewClient(c *http.Client, url string, token string) *Client {
-	conf := sdk.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = sdk.ServerConfigurations{
-		{URL: url},
-	}
-	return &Client{
-		apiClient: sdk.NewAPIClient(conf),
-	}
-}
-
-type ClientStorage struct {
-	apiClient *storage.APIClient
-}
-
-func NewClientStorage(c *http.Client, url string, token string) *ClientStorage {
-	conf := storage.NewConfiguration()
-	conf.AddDefaultHeader("Authorization", "Token "+token)
-	conf.UserAgent = "Azion_CLI/" + version.BinVersion
-	conf.Servers = storage.ServerConfigurations{
-		{URL: url},
-	}
-	return &ClientStorage{
-		apiClient: storage.NewAPIClient(conf),
-	}
-}
-
-func (c *ClientStorage) CreateBucket(ctx context.Context, name string) error {
+func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error {
 	logger.Debug("Creating bucket")
-	create := storage.BucketCreate{
-		Name:       name,
-		EdgeAccess: storage.READ_WRITE,
-	}
-
-	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(create)
+	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(request.BucketCreate)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating the project Bucket", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return err
-			}
-		}
+		logger.Debug("Error while creating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
+	return nil
+}
 
+func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedBucketList, error) {
+	logger.Debug("Listing bucket")
+	resp, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsList(ctx).
+		Page(int32(opts.Page)).PageSize(int32(opts.PageSize)).Execute()
+	if err != nil {
+		logger.Error("Error while listing buckets", zap.Error(err))
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
+}
+
+func (c *Client) DeleteBucket(ctx context.Context, name string) error {
+	logger.Debug("Delete bucket")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsDestroy(ctx, name).Execute()
+	if err != nil {
+		logger.Error("Error while deleting the bucket", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) UpdateBucket(ctx context.Context, name string) error {
+	logger.Debug("Updating bucket")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsPartialUpdate(ctx, name).Execute()
+	if err != nil {
+		logger.Debug("Error while updating the project Bucket", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
 	return nil
 }
 

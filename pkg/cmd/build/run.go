@@ -61,6 +61,10 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		vulcanParams += " --useOwnWorker " + fields.OwnWorker
 	}
 
+	if fields.IsFirewall {
+		vulcanParams += " --firewall "
+	}
+
 	err = checkArgsJson(cmd)
 	if err != nil {
 		return err

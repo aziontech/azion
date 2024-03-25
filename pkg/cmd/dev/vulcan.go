@@ -10,8 +10,12 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(f *cmdutil.Factory, cmd *DevCmd) error {
+func vulcan(f *cmdutil.Factory, cmd *DevCmd, isFirewall bool) error {
+
 	command := vul.Command("", "dev")
+	if isFirewall {
+		command = vul.Command("", "dev --firewall")
+	}
 
 	err := runCommand(f, cmd, command)
 	if err != nil {

@@ -14,7 +14,7 @@ type Clients struct {
 	EdgeApplication *apiEdgeApplications.Client
 	Domain          *apiDomain.Client
 	Origin          *apiOrigin.Client
-	Bucket          *apiStorage.ClientStorage
+	Bucket          *apiStorage.Client
 	Storage         *apiStorage.Client
 }
 
@@ -29,7 +29,7 @@ func NewClients(f *cmdutil.Factory) *Clients {
 		EdgeApplication: apiEdgeApplications.NewClient(httpClient, apiURL, token),
 		Domain:          apiDomain.NewClient(httpClient, apiURL, token),
 		Origin:          apiOrigin.NewClient(httpClient, apiURL, token),
-		Bucket:          apiStorage.NewClientStorage(httpClient, storageURL, token),
+		Bucket:          apiStorage.NewClient(httpClient, storageURL, token),
 		Storage:         apiStorage.NewClient(httpClient, storageURL, token),
 	}
 }

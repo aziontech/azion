@@ -6,6 +6,7 @@ import (
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/create/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/create/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/edge_applications"
+	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/edge_storage"
 	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/create/edge_function"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
@@ -29,6 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion create cache-setting -h
 		$ azion create edge-function -h
 		$ azion create variables -h
+		$ azion create edge-storage -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -43,6 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(cacheSetting.NewCmd(f))
 	cmd.AddCommand(edgeFunction.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
+	cmd.AddCommand(edgeStorage.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
