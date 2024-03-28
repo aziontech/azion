@@ -17,7 +17,7 @@ const (
 	LONG_DESCRIPTION_LIST_BUCKET    = "Allows users to list their buckets in Edge Storage"
 	LONG_DESCRIPTION_LIST_OBJECT    = "Allows users to list their objects in Edge Storage"
 	LONG_DESCRIPTION_DELETE_BUCKET  = "Allows users to delete their buckets in Edge Storage"
-	LONG_DESCRIPTION_CREATE_OBJECTS = "Allows users to create a objects in Edge Storage"
+	LONG_DESCRIPTION_CREATE_OBJECTS = "Allows users to create objects in Edge Storage"
 
 	EXAMPLE_CREATE         = "$ azion create edge-storage\n$ azion create edge-storage --help"
 	EXAMPLE_CREATE_BUCKET  = "$ azion create edge-storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion create edge-storage bucket --help"
