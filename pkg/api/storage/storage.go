@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
@@ -82,6 +83,17 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 			}
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
+	}
+	return nil
+}
+
+func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
+	logger.Debug("Updating objects")
+	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsUpdate(ctx, bucketName, objectKey).
+		ContentType(contentType).Body(body).Execute()
+	if err != nil {
+		logger.Debug("Error while updating the object of the bucket", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
 }
