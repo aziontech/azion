@@ -1,8 +1,9 @@
 package edge_storage
 
 const (
-	USAGE        = "edge-storage"
-	USAGE_BUCKET = "bucket"
+	USAGE         = "edge-storage"
+	USAGE_BUCKET  = "bucket"
+	USAGE_OBJECTS = "object"
 
 	SHORT_DESCRIPTION               = "Manages Edge Storage buckets and objects directly through the command line"
 	SHORT_DESCRIPTION_CREATE_BUCKET = "Creates a bucket in Edge Storage"
@@ -14,13 +15,15 @@ const (
 	LONG_DESCRIPTION_LIST_BUCKET   = "Allows users to list their buckets in Edge Storage"
 	LONG_DESCRIPTION_DELETE_BUCKET = "Allows users to delete their buckets in Edge Storage"
 
-	EXAMPLE_CREATE        = "$ azion create edge-storage\n$ azion create edge-storage --help"
-	EXAMPLE_CREATE_BUCKET = "$ azion create edge-storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion create edge-storage bucket --help"
-	EXAMPLE_LIST          = "$ azion list edge-storage\n$ azion list edge-storage --help"
-	EXAMPLE_LIST_BUCKET   = "$ azion list edge-storage bucket\n$ azion list edge-storage bucket --page 1 --page-size 3\n$ azion list edge-storage --help"
-	EXAMPLE_DELETE        = "$ azion delete edge-storage\n$ azion delete edge-storage --help"
-	EXAMPLE_DELETE_BUCKET = "$ azion delete edge-storage bucket --name 'bucket-name'\n$ azion delete edge-storage bucket --help"
-	EXAMPLE_UPDATE        = "$ azion update edge-storage\n$ azion update edge-storage --help"
+	EXAMPLE_CREATE          = "$ azion create edge-storage\n$ azion create edge-storage --help"
+	EXAMPLE_CREATE_BUCKET   = "$ azion create edge-storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion create edge-storage bucket --help"
+	EXAMPLE_LIST            = "$ azion list edge-storage\n$ azion list edge-storage --help"
+	EXAMPLE_LIST_BUCKET     = "$ azion list edge-storage bucket\n$ azion list edge-storage bucket --page 1 --page-size 3\n$ azion list edge-storage --help"
+	EXAMPLE_DELETE          = "$ azion delete edge-storage\n$ azion delete edge-storage --help"
+	EXAMPLE_DELETE_BUCKET   = "$ azion delete edge-storage bucket --name 'bucket-name'\n$ azion delete edge-storage bucket --help"
+	EXAMPLE_UPDATE          = "$ azion update edge-storage\n$ azion update edge-storage --help"
+	EXAMPLE_DESCRIBE        = "$ azion describe edge-storage\n$ azion describe edge-storage --help"
+	EXAMPLE_DESCRIBE_OBJECT = "$ azion describe edge-storage objects --help\n$ azion describe edge-storage objects --bucket-name 'asdf' --object-key 'test.json'\n$ azion describe edge-storage objects --bucket-name 'asdf' --object-key 'test.json' --format json\n $ azion describe edge-storage objects --bucket-name 'asdf' --object-key 'test.json' --out './tmp/test.json'"
 
 	FLAG_HELP                      = "Displays more information about the edge-storage command"
 	FLAG_HELP_CREATE_BUCKET        = "Displays more information about the create edge-storege bucket command"
@@ -31,6 +34,7 @@ const (
 	FLAG_FILE_JSON_CREATE_BUCKET   = "Path to a JSON file containing the attributes of the bucket that will be created; you can use - for reading from stdin"
 
 	ASK_NAME_CREATE_BUCKET         = "Enter your bucket's name"
+	ASK_OBJECT_KEY                 = "Enter your object key"
 	ASK_EDGE_ACCESSS_CREATE_BUCKET = "Enter your bucket's edge access type"
 	ASK_NAME_DELETE_BUCKET         = "Enter the name of the Bucket you wish to delete"
 	ASK_NAME_UPDATE_BUCKET         = "Enter the name of the Bucket you wish to update"
