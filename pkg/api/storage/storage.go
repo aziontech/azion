@@ -66,7 +66,7 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while creating object to the edge storage", zap.Error(err))
+		logger.Debug("Error while creating object in the edge storage", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
