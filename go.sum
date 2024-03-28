@@ -57,11 +57,6 @@ github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239 h1:kFOfPq6dUM1hTo
 github.com/anmitsu/go-shlex v0.0.0-20161002113705-648efa622239/go.mod h1:2FmKhYUyUczH0OGQWaF5ceTx0UBShxjsH6f8oGKYe2c=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
-<<<<<<< HEAD
-=======
-github.com/aziontech/azionapi-go-sdk v0.121.0 h1:fw6BpU7C3tHlk4ROCTR38u4c/l8scpr5zH86NuXE+8Y=
-github.com/aziontech/azionapi-go-sdk v0.121.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
->>>>>>> dev
 github.com/aziontech/azionapi-go-sdk v0.123.0 h1:BfkNTiOpGdWxmWLtEMnazmsblFw3iLsJQIOZ5bMORok=
 github.com/aziontech/azionapi-go-sdk v0.123.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
 github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df h1:h4Ze+Zq3jMpKINpd6EXWWzNnImOcPeAKSFxetA5YOJs=
