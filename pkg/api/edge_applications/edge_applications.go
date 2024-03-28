@@ -316,7 +316,6 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
 		if httpResp != nil {
-			fmt.Println(err.Error())
 			logger.Debug("Error while updating a rules engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {

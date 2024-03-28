@@ -53,8 +53,6 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory) (*
 		return nil, err
 	}
 
-	fmt.Println(string(byteManifest))
-
 	err = json.Unmarshal(byteManifest, &manifest)
 	if err != nil {
 		return nil, err

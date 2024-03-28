@@ -90,24 +90,18 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 	ctx := context.Background()
 
-	// buildCmd := cmd.BuildCmd(f)
-	// err := buildCmd.Run(&contracts.BuildInfo{})
-	// if err != nil {
-	// 	logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-	// 	return err
-	// }
+	buildCmd := cmd.BuildCmd(f)
+	err := buildCmd.Run(&contracts.BuildInfo{})
+	if err != nil {
+		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+		return err
+	}
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
 	}
-
-	// manifest, err := readManifest(cmd)
-	// if err != nil {
-	// 	logger.Debug("Error while reading manifest", zap.Error(err))
-	// 	return err
-	// }
 
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
