@@ -3,6 +3,7 @@ package deploy
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -33,6 +34,7 @@ type DeployCmd struct {
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
 	Unmarshal             func(data []byte, v interface{}) error
+	Interpreter           func() *manifestInt.ManifestInterpreter
 }
 
 var (
@@ -54,6 +56,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,
 		F:                     f,
+		Interpreter:           manifestInt.NewManifestInterpreter,
 	}
 }
 
@@ -85,6 +88,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
+	ctx := context.Background()
 
 	// buildCmd := cmd.BuildCmd(f)
 	// err := buildCmd.Run(&contracts.BuildInfo{})
@@ -99,14 +103,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	manifest, err := readManifest(cmd)
-	if err != nil {
-		logger.Debug("Error while reading manifest", zap.Error(err))
-		return err
-	}
+	// manifest, err := readManifest(cmd)
+	// if err != nil {
+	// 	logger.Debug("Error while reading manifest", zap.Error(err))
+	// 	return err
+	// }
 
 	clients := NewClients(f)
-	interpreter := manifestInt.NewManifestInterpreter()
+	interpreter := cmd.Interpreter()
 
 	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
@@ -118,23 +122,61 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	manifestStructure, err := interpreter.ReadManifest(pathManifest)
+	err = cmd.doOriginSingle(clients.EdgeApplication, clients.Origin, ctx, conf)
 	if err != nil {
 		return err
 	}
 
-	err = interpreter.CreateResources("/Users/patrick.menoti/Documents/Dev/azion/bin/gracious-robot/azion/azion.json", manifestStructure, f)
+	conf.Function.File = ".edge/worker.js"
+	err = cmd.doFunction(clients, ctx, conf)
 	if err != nil {
 		return err
 	}
 
-	if true == false {
-		err = manifest.Interpreted(f, cmd, conf, clients)
+	manifestStructure, err := interpreter.ReadManifest(pathManifest, f)
+	if err != nil {
+		return err
+	}
+
+	name := ""
+
+	if len(manifestStructure.Origins) > 0 && manifestStructure.Origins[0].Name != "" {
+		name = ""
+	}
+
+	err = cmd.doBucket(clients.Bucket, ctx, conf, name)
+	if err != nil {
+		return err
+	}
+
+	if len(conf.RulesEngine.Rules) == 0 {
+		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication)
 		if err != nil {
-			logger.Debug("Error while interpreting manifest", zap.Error(err))
 			return err
 		}
 	}
 
+	// skip upload when type = javascript, typescript (storage folder does not exist in these cases)
+	if conf.Template != "javascript" && conf.Template != "typescript" {
+		err = cmd.uploadFiles(f, conf)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = interpreter.CreateResources(conf, manifestStructure, f)
+	if err != nil {
+		return err
+	}
+
+	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, utils.Concat("https://", domainName)))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 	return nil
+
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -317,6 +316,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
 		if httpResp != nil {
+			fmt.Println(err.Error())
 			logger.Debug("Error while updating a rules engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
@@ -503,49 +503,6 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria := make([][]sdk.RulesEngineCriteria, 1)
 	for i := 0; i < 1; i++ {
 		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
-	}
-	if authorize {
-		req.SetName("cache policy")
-
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-		var behStringCache sdk.RulesEngineBehaviorString
-		behStringCache.SetName("set_cache_policy")
-		behStringCache.SetTarget(fmt.Sprintf("%d", cacheId))
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behStringCache,
-		})
-
-		req.SetBehaviors(behaviors)
-
-		criteria[0][0].SetConditional("if")
-		criteria[0][0].SetVariable("${uri}")
-		criteria[0][0].SetOperator("starts_with")
-
-		if typeLang == "Next" && strings.ToLower(mode) == "compute" {
-			criteria[0][0].SetInputValue("/_next/static")
-		} else {
-			criteria[0][0].SetInputValue("/")
-		}
-
-		req.SetCriteria(criteria)
-
-		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
-			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "request").
-			CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
-		if err != nil {
-			if httpResp != nil {
-				logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-				err := utils.LogAndRewindBody(httpResp)
-				if err != nil {
-					return err
-				}
-				return utils.ErrorPerStatusCode(httpResp, err)
-			}
-			logger.Debug("", zap.Any("Error", err.Error()))
-			return utils.ErrorPerStatusCode(httpResp, err)
-		}
 	}
 
 	req.SetName("enable gzip")

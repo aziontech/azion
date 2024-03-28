@@ -17,31 +17,33 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, nameBucket string) error {
 	if conf.Bucket != "" || (conf.Template == "javascript" || conf.Template == "typescript") {
 		return nil
 	}
 
 	var err error
-	name := conf.Name
+	if nameBucket == "" {
+		nameBucket = conf.Bucket
+	}
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	for {
 		err = client.CreateBucket(ctx, api.RequestBucket{
-			BucketCreate: sdk.BucketCreate{Name: name, EdgeAccess: storage.READ_WRITE}})
+			BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
 		if err != nil {
 			// if the name is already in use, we ask for another one
 			if errors.Is(err, utils.ErrorNameInUse) {
 				logger.FInfo(cmd.Io.Out, msg.BucketInUse)
 				if Auto {
-					name = thoth.GenerateName()
+					nameBucket = thoth.GenerateName()
 				} else {
-					name, err = askForInput(msg.AskInputName, thoth.GenerateName())
+					nameBucket, err = askForInput(msg.AskInputName, thoth.GenerateName())
 					if err != nil {
 						return err
 					}
 				}
-				conf.Application.Name = name
+				conf.Application.Name = nameBucket
 				continue
 			}
 			return err
@@ -49,7 +51,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		break
 	}
 
-	conf.Bucket = name
+	conf.Bucket = nameBucket
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))

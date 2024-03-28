@@ -52,7 +52,7 @@ type AzionApplicationOptions struct {
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`
 	RtPurge       AzionJsonDataPurge           `json:"rt-purge"`
-	Origin        AzionJsonDataOrigin          `json:"origin"`
+	Origin        []AzionJsonDataOrigin        `json:"origin"`
 	RulesEngine   AzionJsonDataRulesEngine     `json:"rules-engine"`
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 }
@@ -110,11 +110,10 @@ type AzionJsonDataApplication struct {
 }
 
 type AzionJsonDataOrigin struct {
-	SingleOriginID   int64    `json:"single-origin-id"`
-	StorageOriginID  int64    `json:"storage-origin-id"`
-	StorageOriginKey string   `json:"storage-origin-key"`
-	Name             string   `json:"name"`
-	Address          []string `json:"address"`
+	OriginId  int64    `json:"origin-id"`
+	OriginKey string   `json:"origin-key"`
+	Name      string   `json:"name"`
+	Address   []string `json:"address,omitempty"`
 }
 
 type AzionJsonDataDomain struct {
@@ -143,6 +142,7 @@ type AzionJsonDataCacheSettings struct {
 
 type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
+	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
 }
 
@@ -170,6 +170,13 @@ type CacheSetting struct {
 	L2Region                       *string  `json:"l2_region,omitempty"`
 }
 
+type Origin struct {
+	Name       string `json:"name"`
+	OriginType string `json:"origin_type,omitempty"`
+	Bucket     string `json:"bucket,omitempty"`
+	Prefix     string `json:"prefix,omitempty"`
+}
+
 type RuleEngine struct {
 	Name        string                         `json:"name"`
 	Description *string                        `json:"description,omitempty"`
@@ -180,16 +187,4 @@ type RuleEngine struct {
 type RulesEngineBehaviorEntry struct {
 	RulesEngineBehaviorObject *sdk.RulesEngineBehaviorObject
 	RulesEngineBehaviorString *sdk.RulesEngineBehaviorString
-	// RulesEngineBehaviorOrigin *RulesEngineBehaviorObjectOrigin
 }
-
-// type RulesEngineBehaviorObjectOrigin struct {
-// 	Name   string                                  `json:"rule"`
-// 	Target RulesEngineBehaviorManifestOriginTarget `json:"target"`
-// }
-
-// type RulesEngineBehaviorManifestOriginTarget struct {
-// 	OriginType string `json:"origin_type"`
-// 	Bucket     string `json:"bucket"`
-// 	Prefix     string `json:"prefix"`
-// }

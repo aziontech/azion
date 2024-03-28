@@ -29,7 +29,6 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 	azionJson.Function.Args = "./azion/args.json"
 	azionJson.Domain.Name = "__DEFAULT__"
 	azionJson.Application.Name = "__DEFAULT__"
-	azionJson.Origin.Name = "__DEFAULT__"
 	azionJson.RtPurge.PurgeOnPublish = true
 
 	return cmd.createJsonFile(azionJson, info)

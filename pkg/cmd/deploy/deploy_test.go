@@ -14,10 +14,69 @@ import (
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
+var successRespRule string = `
+{
+	"results": {
+	  "id": 234567,
+	  "name": "enable gzip",
+	  "phase": "response",
+	  "behaviors": [
+		{
+		  "name": "enable_gzip",
+		}
+	  ],
+	  "criteria": [
+		[
+		  {
+			"variable": "${uri}",
+			"operator": "exists",
+			"conditional": "if",
+			"input_value": ""
+		  }
+		]
+	  ],
+	  "is_active": true,
+	  "order": 1,
+	},
+	"schema_version": 3
+  }
+`
+
+var successRespOrigin string = `
+{
+	"results": {
+	  "origin_id": 0,
+	  "origin_key": "000000-000000-00000-00000-000000",
+	  "name": "name",
+	  "origin_type": "single_origin",
+	  "addresses": [
+		{
+		  "address": "httpbin.org",
+		  "weight": null,
+		  "server_role": "primary",
+		  "is_active": true
+		}
+	  ],
+	  "origin_protocol_policy": "http",
+	  "is_origin_redirection_enabled": false,
+	  "host_header": "${host}",
+	  "method": "",
+	  "origin_path": "/requests",
+	  "connection_timeout": 60,
+	  "timeout_between_bytes": 120,
+	  "hmac_authentication": false,
+	  "hmac_region_name": "",
+	  "hmac_access_key": "",
+	  "hmac_secret_key": ""
+	},
+	"schema_version": 3
+  }
+`
 var successResponseApp string = `
 {
 	"results":{
@@ -208,6 +267,11 @@ func TestDeployCmd(t *testing.T) {
 		)
 
 		mock.Register(
+			httpmock.REST("POST", "edge_applications/1697666970/origins"),
+			httpmock.JSONFromString(successRespOrigin),
+		)
+
+		mock.Register(
 			httpmock.REST("POST", "edge_applications/1697666970/functions_instances"),
 			httpmock.JSONFromString(sucRespInst),
 		)
@@ -222,11 +286,13 @@ func TestDeployCmd(t *testing.T) {
 			httpmock.JSONFromString(successResponseApp),
 		)
 
+		mock.Register(
+			httpmock.REST("POST", "edge_applications/1697666970/rules_engine/response/rules"),
+			httpmock.JSONFromString(successRespRule),
+		)
+
 		f, _, _ := testutils.NewFactory(mock)
 		deployCmd := NewDeployCmd(f)
-		clients := NewClients(f)
-
-		manifest := Manifest{}
 
 		deployCmd.FilepathWalk = func(root string, fn filepath.WalkFunc) error {
 			return nil
@@ -243,7 +309,27 @@ func TestDeployCmd(t *testing.T) {
 			return nil
 		}
 
-		err := manifest.Interpreted(f, deployCmd, options, clients)
+		deployCmd.GetAzionJsonContent = func() (*contracts.AzionApplicationOptions, error) {
+			return &contracts.AzionApplicationOptions{}, nil
+		}
+
+		deployCmd.Interpreter = func() *manifestInt.ManifestInterpreter {
+			return &manifestInt.ManifestInterpreter{
+				FileReader: func(path string) ([]byte, error) {
+					return []byte{'{', '}'}, nil
+				},
+				WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions) error {
+					return nil
+				},
+				GetWorkDir: func() (string, error) {
+					return "", nil
+				},
+			}
+		}
+
+		err := deployCmd.Run(f)
+
+		// err := manifest.Interpreted(f, deployCmd, options, clients)
 		require.NoError(t, err)
 	})
 
@@ -262,7 +348,7 @@ func TestDeployCmd(t *testing.T) {
 
 		err := cmd.Execute()
 
-		require.EqualError(t, err, "Failed to build your resource. Azion configuration not found. Make sure you are in the root directory of your local repository and have already initialized or linked your resource with the commands 'azion init' or 'azion link'")
+		require.EqualError(t, err, "Failed to open the azion.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if you have initialized your project, if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	})
 
 	t.Run("failed to create application", func(t *testing.T) {
