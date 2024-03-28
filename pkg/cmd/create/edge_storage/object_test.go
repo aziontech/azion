@@ -3,22 +3,21 @@ package edge_storage
 import (
 	"bytes"
 	"fmt"
+	"github.com/aziontech/azion-cli/utils"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap/zapcore"
-
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/aziontech/azion-cli/utils"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap/zapcore"
 )
 
-func TestNewBucket(t *testing.T) {
+func TestNewObjects(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	tests := []struct {
@@ -31,18 +30,18 @@ func TestNewBucket(t *testing.T) {
 		Err      string
 	}{
 		{
-			name:     "create new bucket command bucket of the edge-storage",
-			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
-			response: httpmock.JSONFromFile("fixtures/response.json"),
-			args:     []string{"--name", "arthur-morgan", "--edge-access", "read_only"},
-			output:   msg.OUTPUT_CREATE_BUCKET,
+			name:     "create new object command object of the edge-storage",
+			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets/nomedobucket/objects/nomedoobject"),
+			response: httpmock.JSONFromFile("fixtures/response_object.json"),
+			args:     []string{"--bucket-name", "nomedobucket", "--object-key", "nomedoobject", "--source", "fixtures/index.html"},
+			output:   msg.OUTPUT_CREATE_OBJECT,
 		},
 		{
-			name:     "create new bucket command bucket of the edge-storage using flag --file",
-			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
-			response: httpmock.JSONFromFile("fixtures/response.json"),
-			args:     []string{"--file", "fixtures/create.json"},
-			output:   msg.OUTPUT_CREATE_BUCKET,
+			name:     "create new object command object of the edge-storage using flag --file",
+			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets/nomedobucket/objects/nomedoobject"),
+			response: httpmock.JSONFromFile("fixtures/response_object.json"),
+			args:     []string{"--file", "fixtures/create_object.json"},
+			output:   msg.OUTPUT_CREATE_OBJECT,
 		},
 		{
 			name:     "input file json err --file",
@@ -61,8 +60,8 @@ func TestNewBucket(t *testing.T) {
 					Header:     http.Header{"Content-Type": []string{"application/json"}},
 				}, utils.ErrorInternalServerError
 			},
-			args: []string{"--file", "fixtures/create.json"},
-			Err:  fmt.Sprintf(msg.ERROR_CREATE_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
+			args: []string{"--file", "fixtures/create_object.json"},
+			Err:  fmt.Sprintf(msg.ERROR_CREATE_OBJECT, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
 		},
 	}
 	for _, tt := range tests {
@@ -70,7 +69,7 @@ func TestNewBucket(t *testing.T) {
 			mock := &httpmock.Registry{}
 			mock.Register(tt.request, tt.response)
 			f, out, _ := testutils.NewFactory(mock)
-			cmd := NewBucket(f)
+			cmd := NewObjects(f)
 			cmd.SetArgs(tt.args)
 			if err := cmd.Execute(); err != nil {
 				if !strings.EqualFold(tt.Err, err.Error()) {

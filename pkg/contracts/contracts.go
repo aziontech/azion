@@ -23,12 +23,13 @@ type DevInfo struct {
 }
 
 type ListOptions struct {
-	Details  bool
-	OrderBy  string
-	Sort     string
-	Page     int64
-	PageSize int64
-	Filter   string
+	Details           bool
+	OrderBy           string
+	Sort              string
+	Page              int64
+	PageSize          int64
+	Filter            string
+	ContinuationToken string
 }
 
 type DescribeOptions struct {
