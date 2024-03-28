@@ -49,10 +49,13 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c *Client) UpdateBucket(ctx context.Context, name string) error {
+func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess sdk.EdgeAccessEnum) error {
 	logger.Debug("Updating bucket")
+	bucket := sdk.BucketUpdate{
+		EdgeAccess: edgeAccess,
+	}
 	_, httpResp, err := c.apiClient.StorageAPI.
-		StorageApiBucketsPartialUpdate(ctx, name).Execute()
+		StorageApiBucketsPartialUpdate(ctx, name).BucketUpdate(bucket).Execute()
 	if err != nil {
 		logger.Debug("Error while updating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
