@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -56,7 +57,7 @@ func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []st
 		}
 
 		client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := client.UpdateBucket(context.Background(), request.GetName())
+		err := client.UpdateBucket(context.Background(), request.GetName(), request.GetEdgeAccess())
 		if err != nil {
 			return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)
 		}
@@ -75,13 +76,24 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		}
 		fields.Name = answers
 	}
-
+	if !cmd.Flags().Changed("edge-access") {
+		answers, err := utils.Select(
+			msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
+			[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)})
+		if err != nil {
+			logger.Debug("Error while parsing answer", zap.Error(err))
+			return utils.ErrorParseResponse
+		}
+		fields.EdgeAccess = answers
+	}
 	request.SetName(fields.Name)
+	request.SetEdgeAccess(sdk.EdgeAccessEnum(fields.EdgeAccess))
 	return nil
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_BUCKET)
+	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }

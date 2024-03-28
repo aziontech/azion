@@ -34,7 +34,7 @@ func TestNewBucket(t *testing.T) {
 			name:     "update bucket command bucket of the edge-storage",
 			request:  httpmock.REST(http.MethodPatch, "v4/storage/buckets/John-Marston"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
-			args:     []string{"--name", "John-Marston"},
+			args:     []string{"--name", "John-Marston", "--edge-access", "read_only"},
 			output:   msg.OUTPUT_UPDATE_BUCKET,
 		},
 		{
