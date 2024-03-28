@@ -9,13 +9,13 @@ const (
 	SHORT_DESCRIPTION_CREATE_BUCKET  = "Creates a bucket in Edge Storage"
 	SHORT_DESCRIPTION_LIST_BUCKET    = "List the buckets in Edge Storage"
 	SHORT_DESCRIPTION_DELETE_BUCKET  = "Deleted the bucket in Edge Storage"
-	SHORT_DESCRIPTION_CREATE_OBJECTS = "Creates a objects in Edge Storage"
+	SHORT_DESCRIPTION_CREATE_OBJECTS = "Creates objects in Edge Storage"
 
 	LONG_DESCRIPTION                = "Allows users to perform a wide range of operations, from creating and deleting buckets to adding, removing, and manipulating objects."
 	LONG_DESCRIPTION_CREATE_BUCKET  = "Allows users to create a bucket in Edge Storage"
 	LONG_DESCRIPTION_LIST_BUCKET    = "Allows users to list their buckets in Edge Storage"
 	LONG_DESCRIPTION_DELETE_BUCKET  = "Allows users to delete their buckets in Edge Storage"
-	LONG_DESCRIPTION_CREATE_OBJECTS = "Allows users to create a objects in Edge Storage"
+	LONG_DESCRIPTION_CREATE_OBJECTS = "Allows users to create objects in Edge Storage"
 
 	EXAMPLE_CREATE         = "$ azion create edge-storage\n$ azion create edge-storage --help"
 	EXAMPLE_CREATE_BUCKET  = "$ azion create edge-storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion create edge-storage bucket --help"
@@ -44,7 +44,7 @@ const (
 	ASK_NAME_DELETE_BUCKET         = "Enter the name of the Bucket you wish to delete"
 	ASK_NAME_UPDATE_BUCKET         = "Enter the name of the Bucket you wish to update"
 	ASK_OBJECT_KEY_CREATE_OBJECT   = "Enter your object name"
-	ASK_SOURCE_CREATE_OBJECT       = "Enter your path source"
+	ASK_SOURCE_CREATE_OBJECT       = "Enter your source path"
 
 	OUTPUT_CREATE_BUCKET = "Bucket created successfully"
 	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully"
