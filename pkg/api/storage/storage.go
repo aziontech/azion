@@ -87,7 +87,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 
 func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
 	logger.Debug("Getting bucket")
-	object, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsRetrieve(ctx, bucketName, objectKey).Execute()
+	httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsRetrieve(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating the project Bucket", zap.Error(err))
@@ -98,7 +98,7 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 			return nil, utils.ErrorPerStatusCode(httpResp, err)
 		}
 	}
-	byteObject, err := io.ReadAll(object)
+	byteObject, err := io.ReadAll(httpResp.Body)
 	if err != nil {
 		return nil, errors.New("Error reading edge storage objects file")
 	}

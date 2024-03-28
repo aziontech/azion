@@ -51,19 +51,18 @@ func (f *Fields) RunE(cmd *cobra.Command, args []string) error {
 		}
 		f.ObjectKey = answers
 	}
-
 	client := api.NewClient(f.Factory.HttpClient, f.Factory.Config.GetString("storage_url"), f.Factory.Config.GetString("token"))
 	ctx := context.Background()
-	byte, err := client.GetObject(ctx, f.BucketName, f.ObjectKey)
+	bFile, err := client.GetObject(ctx, f.BucketName, f.ObjectKey)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_DESCRIBE_OBJECT, err)
 	}
-	logger.FInfo(f.Factory.IOStreams.Out, string(byte))
+	logger.FInfo(f.Factory.IOStreams.Out, string(bFile))
 	return nil
 }
 
 func (f *Fields) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&f.BucketName, "bucket-name", "", "")
-	flags.StringVar(&f.BucketName, "object-key", "", "")
+	flags.StringVar(&f.ObjectKey, "object-key", "", "")
 	flags.BoolP("help", "h", false, "")
 }

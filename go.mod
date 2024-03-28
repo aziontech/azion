@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.121.0
+	github.com/aziontech/azionapi-go-sdk v0.123.0
 	github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
