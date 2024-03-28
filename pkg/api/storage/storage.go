@@ -82,3 +82,14 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 	}
 	return nil
 }
+
+func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
+	logger.Debug("Delete objects")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		logger.Error("Error while deleting the object", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
