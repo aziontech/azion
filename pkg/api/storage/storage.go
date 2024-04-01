@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
@@ -118,6 +119,17 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		logger.Error("Error while deleting the object", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
+	logger.Debug("Updating objects")
+	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsUpdate(ctx, bucketName, objectKey).
+		ContentType(contentType).Body(body).Execute()
+	if err != nil {
+		logger.Debug("Error while updating the object of the bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
