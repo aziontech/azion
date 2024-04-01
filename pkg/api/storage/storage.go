@@ -65,25 +65,29 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess sdk.E
 	return nil
 }
 
+func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, bucketName, objectKey string) error {
+	logger.Debug("Creating object")
+	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, bucketName, objectKey).
+		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	_, httpResp, err := req.Execute()
+	if err != nil {
+		logger.Debug("Error while creating object to the edge storage", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
-	var file string
+	file := fileOps.Path
 	if conf.Prefix != "" {
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
-		logger.Debug("Object_key: " + file)
-	} else {
-		file = fileOps.Path
 	}
+	logger.Debug("Object_key: " + file)
 	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, conf.Bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return err
-			}
-			return utils.ErrorPerStatusCode(httpResp, err)
-		}
+		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
 }
