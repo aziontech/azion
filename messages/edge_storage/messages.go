@@ -9,7 +9,7 @@ const (
 	SHORT_DESCRIPTION_CREATE_BUCKET  = "Creates a bucket in Edge Storage"
 	SHORT_DESCRIPTION_LIST_BUCKET    = "List the buckets in Edge Storage"
 	SHORT_DESCRIPTION_LIST_OBJECT    = "List the objects in Edge Storage"
-	SHORT_DESCRIPTION_DELETE_BUCKET  = "Deleted the bucket in Edge Storage"
+	SHORT_DESCRIPTION_DELETE_BUCKET  = "Deletes the bucket in Edge Storage"
 	SHORT_DESCRIPTION_CREATE_OBJECTS = "Creates objects in Edge Storage"
 
 	LONG_DESCRIPTION                = "Allows users to perform a wide range of operations, from creating and deleting buckets to adding, removing, and manipulating objects."
