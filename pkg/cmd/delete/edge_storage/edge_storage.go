@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.AddCommand(NewBucket(f))
-	// cmd.AddCommand(NewBucket(f))
+	cmd.AddCommand(NewObject(f))
 	cmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP)
 	return cmd
 }

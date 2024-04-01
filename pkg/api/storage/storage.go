@@ -2,7 +2,10 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
@@ -97,6 +100,48 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+	logger.Debug("Getting bucket")
+	httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsRetrieve(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while updating the project Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
+		}
+	}
+	byteObject, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, errors.New("Error reading edge storage objects file")
+	}
+	return byteObject, nil
+}
+
+func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
+	logger.Debug("Delete objects")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		logger.Error("Error while deleting the object", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
+	logger.Debug("Updating objects")
+	_, httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsUpdate(ctx, bucketName, objectKey).
+		ContentType(contentType).Body(body).Execute()
+	if err != nil {
+		logger.Debug("Error while updating the object of the bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
