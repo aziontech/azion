@@ -2,7 +2,9 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
@@ -84,6 +86,26 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		}
 	}
 	return nil
+}
+
+func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+	logger.Debug("Getting bucket")
+	httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsRetrieve(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while updating the project Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
+		}
+	}
+	byteObject, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, errors.New("Error reading edge storage objects file")
+	}
+	return byteObject, nil
 }
 
 func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
