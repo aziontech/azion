@@ -14,13 +14,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       msg.EXAMPLE_DELETE,
+		Example:       msg.EXAMPLE_DESCRIBE,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
 	}
 
-	cmd.AddCommand(NewBucket(f))
 	cmd.AddCommand(NewObject(f))
 	cmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP)
 	return cmd

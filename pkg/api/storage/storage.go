@@ -2,7 +2,9 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"go.uber.org/zap"
@@ -49,10 +51,13 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c *Client) UpdateBucket(ctx context.Context, name string) error {
+func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess sdk.EdgeAccessEnum) error {
 	logger.Debug("Updating bucket")
+	bucket := sdk.BucketUpdate{
+		EdgeAccess: edgeAccess,
+	}
 	_, httpResp, err := c.apiClient.StorageAPI.
-		StorageApiBucketsPartialUpdate(ctx, name).Execute()
+		StorageApiBucketsPartialUpdate(ctx, name).BucketUpdate(bucket).Execute()
 	if err != nil {
 		logger.Debug("Error while updating the project Bucket", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
@@ -82,6 +87,37 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+	logger.Debug("Getting bucket")
+	httpResp, err := c.apiClient.StorageAPI.StorageApiBucketsObjectsRetrieve(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while updating the project Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
+		}
+	}
+	byteObject, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		return nil, errors.New("Error reading edge storage objects file")
+	}
+	return byteObject, nil
+}
+
+func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
+	logger.Debug("Delete objects")
+	_, httpResp, err := c.apiClient.StorageAPI.
+		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
+	if err != nil {
+		logger.Error("Error while deleting the object", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
