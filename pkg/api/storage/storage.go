@@ -72,10 +72,22 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while creating object to the edge storage", zap.Error(err))
+		logger.Debug("Error while creating object in the edge storage", zap.Error(err))
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
+}
+
+func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contracts.ListOptions) (*sdk.PaginatedBucketObjectList, error) {
+	logger.Debug("Listing bucket")
+	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsList(ctx, bucketName).
+		MaxObjectCount(int32(opts.PageSize)).ContinuationToken(opts.ContinuationToken)
+	resp, httpResp, err := req.Execute()
+	if err != nil {
+		logger.Error("Error while listing objects", zap.Error(err))
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return resp, nil
 }
 
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {

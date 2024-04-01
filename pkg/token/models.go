@@ -33,6 +33,7 @@ type Settings struct {
 	AuthorizeMetricsCollection int
 	ClientId                   string
 	Email                      string
+	ContinuationToken          string
 }
 
 type Config struct {
