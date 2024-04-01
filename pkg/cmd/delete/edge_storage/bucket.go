@@ -11,11 +11,13 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-var name string
-
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
+	bucket := bucket{
+		factory: f,
+	}
 	cmd := &cobra.Command{
 		Use:           msg.USAGE_BUCKET,
 		Short:         msg.SHORT_DESCRIPTION_DELETE_BUCKET,
@@ -23,29 +25,34 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(msg.EXAMPLE_DELETE_BUCKET),
-		RunE:          runE(f),
+		RunE:          bucket.runE,
 	}
-	cmd.Flags().StringVar(&name, "name", "", msg.FLAG_NAME_BUCKET)
-	cmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
+	bucket.addFlags(cmd.Flags())
 	return cmd
 }
 
-func runE(f *cmdutil.Factory) func(cmd *cobra.Command, args []string) error {
-	return func(cmd *cobra.Command, args []string) error {
-		if !cmd.Flags().Changed("name") {
-			answer, err := utils.AskInput(msg.ASK_NAME_DELETE_BUCKET)
-			if err != nil {
-				return err
-			}
-			name = answer
-		}
-		client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		ctx := context.Background()
-		err := client.DeleteBucket(ctx, name)
+func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
+	if !cmd.Flags().Changed("name") {
+		answer, err := utils.AskInput(msg.ASK_NAME_DELETE_BUCKET)
 		if err != nil {
-			return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
+			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, name))
-		return nil
+		b.name = answer
 	}
+	client := api.NewClient(
+		b.factory.HttpClient,
+		b.factory.Config.GetString("storage_url"),
+		b.factory.Config.GetString("token"))
+	ctx := context.Background()
+	err := client.DeleteBucket(ctx, b.name)
+	if err != nil {
+		return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
+	}
+	logger.FInfo(b.factory.IOStreams.Out, fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name))
+	return nil
+}
+
+func (f *bucket) addFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&f.name, "name", "", msg.FLAG_NAME_BUCKET)
+	flags.BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
 }

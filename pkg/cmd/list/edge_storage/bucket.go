@@ -3,6 +3,7 @@ package edge_storage
 import (
 	"context"
 	"fmt"
+	"github.com/MakeNowJust/heredoc"
 	"strings"
 
 	table "github.com/MaxwelMazur/tablecli"
@@ -28,6 +29,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE:          runE(f, opts),
+		Example:       heredoc.Doc(msg.EXAMPLE_LIST_BUCKET),
 	}
 
 	flags := cmd.Flags()
