@@ -17,64 +17,56 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
-type Fields struct {
-	Name       string
-	EdgeAccess string
-	FileJSON   string
-}
-
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
-	fields := &Fields{}
-
+	bucket := &bucket{
+		factory: f,
+	}
 	cmd := &cobra.Command{
 		Use:           msg.USAGE_BUCKET,
 		Short:         msg.SHORT_DESCRIPTION_CREATE_BUCKET,
 		Long:          msg.LONG_DESCRIPTION_CREATE_BUCKET,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_CREATE_BUCKET),
-		RunE:          runE(f, fields),
+		Example:       heredoc.Doc(msg.EXAMPLE_UPDATE_BUCKET),
+		RunE:          bucket.runE,
 	}
-
-	flags := cmd.Flags()
-	addFlags(flags, fields)
+	bucket.addFlags(cmd.Flags())
 	return cmd
 }
 
-func runE(f *cmdutil.Factory, fields *Fields) func(cmd *cobra.Command, args []string) error {
-	return func(cmd *cobra.Command, args []string) error {
-		request := api.RequestBucket{}
-		if cmd.Flags().Changed("file") {
-			err := utils.FlagFileUnmarshalJSON(fields.FileJSON, &request)
-			if err != nil {
-				return utils.ErrorUnmarshalReader
-			}
-		} else {
-			err := createRequestFromFlags(cmd, fields, &request)
-			if err != nil {
-				return err
-			}
-		}
-
-		client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := client.UpdateBucket(context.Background(), request.GetName(), request.GetEdgeAccess())
+func (b *bucket) runE(cmd *cobra.Command, args []string) error {
+	request := api.RequestBucket{}
+	if cmd.Flags().Changed("file") {
+		err := utils.FlagFileUnmarshalJSON(b.fileJSON, &request)
 		if err != nil {
-			return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)
+			return utils.ErrorUnmarshalReader
 		}
-
-		logger.FInfo(f.IOStreams.Out, msg.OUTPUT_UPDATE_BUCKET)
-		return nil
+	} else {
+		err := b.createRequestFromFlags(cmd, &request)
+		if err != nil {
+			return err
+		}
 	}
+	client := api.NewClient(
+		b.factory.HttpClient,
+		b.factory.Config.GetString("storage_url"),
+		b.factory.Config.GetString("token"))
+	err := client.UpdateBucket(context.Background(), request.GetName(), request.GetEdgeAccess())
+	if err != nil {
+		return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)
+	}
+	logger.FInfo(b.factory.IOStreams.Out, msg.OUTPUT_UPDATE_BUCKET)
+	return nil
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.RequestBucket) error {
+func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.RequestBucket) error {
 	if !cmd.Flags().Changed("name") {
 		answers, err := utils.AskInput(msg.ASK_NAME_UPDATE_BUCKET)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.Name = answers
+		b.name = answers
 	}
 	if !cmd.Flags().Changed("edge-access") {
 		answers, err := utils.Select(
@@ -84,16 +76,16 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.EdgeAccess = answers
+		b.edgeAccess = answers
 	}
-	request.SetName(fields.Name)
-	request.SetEdgeAccess(sdk.EdgeAccessEnum(fields.EdgeAccess))
+	request.SetName(b.name)
+	request.SetEdgeAccess(sdk.EdgeAccessEnum(b.edgeAccess))
 	return nil
 }
 
-func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_BUCKET)
-	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
-	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
+func (b *bucket) addFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&b.name, "name", "", msg.FLAG_NAME_BUCKET)
+	flags.StringVar(&b.edgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
+	flags.StringVar(&b.fileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }
