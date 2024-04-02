@@ -66,6 +66,7 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	defer termbox.Close()
 
 	printHeader := true
+	count := 0
 	for {
 		c := context.Background()
 
@@ -73,7 +74,13 @@ func (b *Objects) PrintTable(client *api.Client) error {
 		if err != nil {
 			return err
 		}
+
+		if count > 0 && len(settings.ContinuationToken) == 0 {
+			return nil
+		}
+
 		b.Options.ContinuationToken = settings.ContinuationToken
+		count = count + 1
 
 		resp, err := client.ListObject(c, b.BucketName, b.Options)
 		if err != nil {
