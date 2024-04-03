@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/utils"
 )
 
 func NewObject(f *cmdutil.Factory) *cobra.Command {
@@ -43,6 +44,13 @@ func NewObject(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
+	if !cmd.Flags().Changed("bucket-name") {
+		answer, err := utils.AskInput(msg.ASK_NAME_CREATE_BUCKET)
+		if err != nil {
+			return err
+		}
+		b.BucketName = answer
+	}
 	client := api.NewClient(
 		b.Factory.HttpClient,
 		b.Factory.Config.GetString("storage_url"),
@@ -58,6 +66,7 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	defer termbox.Close()
 
 	printHeader := true
+	count := 0
 	for {
 		c := context.Background()
 
@@ -65,7 +74,13 @@ func (b *Objects) PrintTable(client *api.Client) error {
 		if err != nil {
 			return err
 		}
+
+		if count > 0 && len(settings.ContinuationToken) == 0 {
+			return nil
+		}
+
 		b.Options.ContinuationToken = settings.ContinuationToken
+		count = count + 1
 
 		resp, err := client.ListObject(c, b.BucketName, b.Options)
 		if err != nil {

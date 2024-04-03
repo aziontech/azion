@@ -46,7 +46,13 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsDestroy(ctx, name).Execute()
 	if err != nil {
-		logger.Error("Error while deleting the bucket", zap.Error(err))
+		if httpResp != nil {
+			logger.Error("Error while deleting the bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
@@ -115,8 +121,8 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 			if err != nil {
 				return nil, err
 			}
-			return nil, utils.ErrorPerStatusCode(httpResp, err)
 		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	byteObject, err := io.ReadAll(httpResp.Body)
 	if err != nil {
@@ -130,7 +136,13 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
 	if err != nil {
-		logger.Error("Error while deleting the object", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while updating the project Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
