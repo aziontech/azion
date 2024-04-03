@@ -52,6 +52,7 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 			if err != nil {
 				return err
 			}
+			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -121,6 +122,7 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 			if err != nil {
 				return nil, err
 			}
+			return nil, utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -142,6 +144,7 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 			if err != nil {
 				return err
 			}
+			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
