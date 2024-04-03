@@ -30,15 +30,15 @@ func TestNewBucket(t *testing.T) {
 		Err      string
 	}{
 		{
-			name:     "delete bucket command bucket of the edge-storage",
-			request:  httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+			name:    "delete bucket command bucket of the edge-storage",
+			request: httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusNoContent,
 				}, nil
 			},
-			args:     []string{"--name", "arthur-morgan"},
-			output:   fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
+			args:   []string{"--name", "arthur-morgan"},
+			output: fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
 		},
 		{
 			name:    "failed delete bucket internal error status 500",
@@ -46,11 +46,11 @@ func TestNewBucket(t *testing.T) {
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
-					Body:       io.NopCloser(bytes.NewBufferString("")),
+					Body:       io.NopCloser(bytes.NewBufferString("{}")),
 					Header:     http.Header{"Content-Type": []string{"application/json"}},
 				}, nil
 			},
-			args:     []string{"--name", "arthur-morgan"},
+			args: []string{"--name", "arthur-morgan"},
 			Err:  fmt.Sprintf(msg.ERROR_DELETE_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
 		},
 	}
