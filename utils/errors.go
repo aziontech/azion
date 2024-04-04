@@ -51,3 +51,9 @@ var (
 	ErrorCancelledContextInput      = errors.New("Execution interrupted by the user. All interactions of this flow were lost.")
 	ErrorWriteSettings              = errors.New("Failed to write settings.toml file: %w")
 )
+
+const (
+	ERROR_CLONE        = "Error cloning the repository: %v"
+	ERROR_CDDIR        = "Error entering the repository folder: %v"
+	ERROR_INVALID_REPO = "Invalid repository URL: %s"
+)

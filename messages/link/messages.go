@@ -1,7 +1,6 @@
 package link
 
 var (
-
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
 	EdgeApplicationsLinkShortDescription  = "Links a local repo or project folder to an existing application on Azion"
@@ -21,4 +20,8 @@ var (
 	LinkDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	LinkDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	LinkFlagAuto                          = "If sent, the entire flow of the command will be run without interruptions"
+)
+
+const (
+	FLAG_REMOTE = "clone a remote repository and start a local setup"
 )
