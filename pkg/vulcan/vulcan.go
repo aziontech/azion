@@ -19,7 +19,7 @@ const (
 	firstTimeExecuting   = "@2.2.0"
 )
 
-var versionVulcan = "@latest"
+var versionVulcan = "@2.5.0"
 
 func Command(flags, params string) string {
 	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
