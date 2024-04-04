@@ -1,6 +1,9 @@
 package vulcan
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestCommand(t *testing.T) {
 	type args struct {
@@ -17,7 +20,7 @@ func TestCommand(t *testing.T) {
 			args: args{
 				params: "presets ls",
 			},
-			want: "npx --yes  edge-functions@latest presets ls",
+			want: fmt.Sprintf("npx --yes  edge-functions%s presets ls", versionVulcan),
 		},
 		{
 			name: "with flags",
@@ -25,14 +28,14 @@ func TestCommand(t *testing.T) {
 				flags:  "--loglevel=error --no-update-notifier",
 				params: "presets ls",
 			},
-			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@latest presets ls",
+			want: fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier edge-functions%s presets ls", versionVulcan),
 		},
 		{
 			name: "no params",
 			args: args{
 				flags: "--loglevel=error --no-update-notifier",
 			},
-			want: "npx --yes --loglevel=error --no-update-notifier edge-functions@latest ",
+			want: fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier edge-functions%s ", versionVulcan),
 		},
 	}
 	for _, tt := range tests {
