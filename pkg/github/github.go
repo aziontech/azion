@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"os/exec"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
@@ -42,4 +45,15 @@ func GetVersionGitHub(name string) (string, error) {
 	}
 
 	return release.TagName, nil
+}
+
+func Clone(url, path string) error {
+	cmd := exec.Command("git", "clone", url)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf(utils.ERROR_CLONE, err.Error())
+	}
+	if err := os.Chdir(path); err != nil {
+		return fmt.Errorf(utils.ERROR_CDDIR, err.Error())
+	}
+	return nil
 }
