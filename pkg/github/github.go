@@ -68,8 +68,6 @@ func GetNameRepo(url string) string {
 	parts := strings.Split(url, "/")
 	repoPart := parts[len(parts)-1]
 	// Remove the .git folder if it exists.
-	if strings.HasSuffix(repoPart, ".git") {
-		repoPart = repoPart[:len(repoPart)-4]
-	}
+	repoPart = strings.TrimSuffix(repoPart, ".git")
 	return repoPart
 }
