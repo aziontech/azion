@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 
 	"github.com/MakeNowJust/heredoc"
@@ -135,12 +136,15 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 
 	if len(info.remote) > 0 {
 		logger.Debug("flag remote", zap.Any("repository", info.remote))
-		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|bitbucket\.org|gitlab\.com)/[\w-]+/[\w-]+(\.git)?$`, info.remote)
+		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w-]+/[\w-]+(\.git)?$`, info.remote)
 		if !urlFull {
 			info.remote = fmt.Sprintf("https://github.com/%s.git", info.remote)
 		}
-		err = github.Clone(info.remote, path)
+		nameRepo := github.GetNameRepo(info.remote)
+		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
+		err = github.Clone(info.remote, filepath.Join(path, nameRepo))
 		if err != nil {
+			logger.Debug("Error while cloning the repository", zap.Error(err))
 			return err
 		}
 	}
