@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
+	"github.com/go-git/go-git/v5"
 	"go.uber.org/zap"
 )
 
@@ -42,4 +46,28 @@ func GetVersionGitHub(name string) (string, error) {
 	}
 
 	return release.TagName, nil
+}
+
+// Clone clone the repository using git
+func Clone(url, path string) error {
+	_, err := git.PlainClone(path, false, &git.CloneOptions{
+		URL: url,
+	})
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(path); err != nil {
+		return fmt.Errorf(utils.ERROR_CDDIR, err.Error())
+	}
+	return nil
+}
+
+// GetNameRepoFunction to get the repository name from the URL
+func GetNameRepo(url string) string {
+	// Remove the initial part of the URL
+	parts := strings.Split(url, "/")
+	repoPart := parts[len(parts)-1]
+	// Remove the .git folder if it exists.
+	repoPart = strings.TrimSuffix(repoPart, ".git")
+	return repoPart
 }
