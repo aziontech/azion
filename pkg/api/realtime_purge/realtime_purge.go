@@ -33,24 +33,73 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	}
 }
 
-func (c *Client) Purge(ctx context.Context, urlToPurge []string) error {
-	logger.Debug("Purge")
-	var purg sdk.PurgeWildcardRequest
-	purg.SetUrls(urlToPurge)
-	purg.SetMethod("delete")
-	request := c.apiClient.RealTimePurgeApi.PurgeWildcard(ctx).PurgeWildcardRequest(purg)
+func (c *Client) PurgeWildcard(ctx context.Context, urlToPurge []string) error {
+	logger.Debug("Purge wildcard")
+	var purge sdk.PurgeWildcardRequest
+	purge.SetUrls(urlToPurge)
+	purge.SetMethod("delete")
+	request := c.apiClient.RealTimePurgeApi.PurgeWildcard(ctx).PurgeWildcardRequest(purge)
 
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeWildcardExecute(request)
 	if err != nil {
-		logger.Debug("Error while purging a cache", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
+		logger.Debug("Error while purging wildcard", zap.Error(err))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return err
+		}
+
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	if httpResp.StatusCode != 201 {
 		return fmt.Errorf("%w: %s", err, httpResp.Status)
+	}
+
+	return nil
+}
+
+func (c *Client) PurgeUrls(ctx context.Context, urlToPurge []string) error {
+	logger.Debug("Purge urls")
+	var purge sdk.PurgeUrlRequest
+	purge.SetUrls(urlToPurge)
+	purge.SetMethod("delete")
+	request := c.apiClient.RealTimePurgeApi.PurgeUrl(ctx).PurgeUrlRequest(purge)
+
+	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
+	if err != nil {
+		logger.Debug("Error while purging urls", zap.Error(err))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return err
+		}
+
+		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	if httpResp.StatusCode != 201 {
+		return fmt.Errorf("%w: %s", err, httpResp.Status)
+	}
+
+	return nil
+}
+
+func (c *Client) PurgeCacheKey(ctx context.Context, urlToPurge []string, layer string) error {
+	logger.Debug("Purge cache-key")
+	var purge sdk.PurgeCacheKeyRequest
+	purge.SetUrls(urlToPurge)
+	purge.SetMethod("delete")
+	purge.SetLayer(layer)
+	request := c.apiClient.RealTimePurgeApi.PurgeCacheKey(ctx).PurgeCacheKeyRequest(purge)
+
+	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeCacheKeyExecute(request)
+	if err != nil {
+		logger.Debug("Error while purging cache keys", zap.Error(err))
+		err = utils.LogAndRewindBody(httpResp)
+		if err != nil {
+			return err
+		}
+
+		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return nil
