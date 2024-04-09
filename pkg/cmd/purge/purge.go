@@ -50,9 +50,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return err
 					}
 				case "wildcard":
-					if len(listOfUrls) > 1 {
-						return msg.ErrorTooManyUrls
-					}
 					err := purgeWildcard(listOfUrls, f)
 					if err != nil {
 						return err
@@ -75,11 +72,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if cmd.Flags().Changed("wildcard") {
-				wild := strings.Split(wildcard, ",")
-				if len(wild) > 1 {
-					return msg.ErrorTooManyUrls
-				}
-				err := purgeWildcard(wild, f)
+				err := purgeWildcard(strings.Split(wildcard, ","), f)
 				if err != nil {
 					return err
 				}

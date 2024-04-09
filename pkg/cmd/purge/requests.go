@@ -14,6 +14,9 @@ import (
 )
 
 func purgeWildcard(urls []string, f *cmdutil.Factory) error {
+	if len(urls) > 1 {
+		return msg.ErrorTooManyUrls
+	}
 	ctx := context.Background()
 
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
