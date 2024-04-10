@@ -136,7 +136,7 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 
 	if len(info.remote) > 0 {
 		logger.Debug("flag remote", zap.Any("repository", info.remote))
-		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w-]+/[\w-]+(\.git)?$`, info.remote)
+		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w.-]+/[\w.-]+(\.git)?$`, info.remote)
 		if !urlFull {
 			info.remote = fmt.Sprintf("https://github.com/%s.git", info.remote)
 		}
