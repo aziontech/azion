@@ -30,64 +30,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion purge --urls "www.example.com,www.pudim.com"
         $ azion purge --cache-key "www.domain.com/@@cookie_name=cookie_value,www.domain.com/test.js"
         `),
-		RunE: func(cmd *cobra.Command, _ []string) error {
-
-			if !cmd.Flags().Changed("urls") && !cmd.Flags().Changed("wildcard") && !cmd.Flags().Changed("cache-key") {
-				answer, err := getPurgeType()
-				if err != nil {
-					return err
-				}
-
-				listOfUrls, err := askForInput()
-				if err != nil {
-					return err
-				}
-
-				switch strings.ToLower(answer) {
-				case "urls":
-					err := purgeUrls(listOfUrls, f)
-					if err != nil {
-						return err
-					}
-				case "wildcard":
-					err := purgeWildcard(listOfUrls, f)
-					if err != nil {
-						return err
-					}
-				case "cache-key":
-					err := purgeCacheKeys(listOfUrls, f)
-					if err != nil {
-						return err
-					}
-				}
-
-				return nil
-			}
-
-			if cmd.Flags().Changed("urls") {
-				err := purgeUrls(strings.Split(urls, ","), f)
-				if err != nil {
-					return err
-				}
-			}
-
-			if cmd.Flags().Changed("wildcard") {
-				err := purgeWildcard(strings.Split(wildcard, ","), f)
-				if err != nil {
-					return err
-				}
-			}
-
-			if cmd.Flags().Changed("cache-key") {
-				err := purgeCacheKeys(strings.Split(cachekeys, ","), f)
-				if err != nil {
-					return err
-				}
-			}
-
-			logger.FInfo(f.IOStreams.Out, msg.PurgeSuccessful)
-			return nil
-		},
+		RunE: runE(f),
 	}
 
 	cmd.Flags().StringVar(&urls, "urls", "", msg.FlagUrls)
@@ -97,4 +40,65 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd
+}
+
+func runE(f *cmdutil.Factory) func(cmd *cobra.Command, _ []string) error {
+	return func(cmd *cobra.Command, _ []string) error {
+
+		if !cmd.Flags().Changed("urls") && !cmd.Flags().Changed("wildcard") && !cmd.Flags().Changed("cache-key") {
+			answer, err := getPurgeType()
+			if err != nil {
+				return err
+			}
+
+			listOfUrls, err := askForInput()
+			if err != nil {
+				return err
+			}
+
+			switch strings.ToLower(answer) {
+			case "urls":
+				err := purgeUrls(listOfUrls, f)
+				if err != nil {
+					return err
+				}
+			case "wildcard":
+				err := purgeWildcard(listOfUrls, f)
+				if err != nil {
+					return err
+				}
+			case "cache-key":
+				err := purgeCacheKeys(listOfUrls, f)
+				if err != nil {
+					return err
+				}
+			}
+
+			return nil
+		}
+
+		if cmd.Flags().Changed("urls") {
+			err := purgeUrls(strings.Split(urls, ","), f)
+			if err != nil {
+				return err
+			}
+		}
+
+		if cmd.Flags().Changed("wildcard") {
+			err := purgeWildcard(strings.Split(wildcard, ","), f)
+			if err != nil {
+				return err
+			}
+		}
+
+		if cmd.Flags().Changed("cache-key") {
+			err := purgeCacheKeys(strings.Split(cachekeys, ","), f)
+			if err != nil {
+				return err
+			}
+		}
+
+		logger.FInfo(f.IOStreams.Out, msg.PurgeSuccessful)
+		return nil
+	}
 }
