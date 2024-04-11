@@ -55,7 +55,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 
 func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 	logger.Debug("Get Domain")
-	request := c.apiClient.DomainsApi.GetDomain(ctx, id)
+	request := c.apiClient.DomainsAPI.GetDomain(ctx, id)
 	res, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -72,7 +72,7 @@ func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse, error) {
 	logger.Debug("Create Domain")
-	request := c.apiClient.DomainsApi.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
+	request := c.apiClient.DomainsAPI.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -90,7 +90,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse, error) {
 	logger.Debug("Update Domain")
 	str := strconv.FormatInt(req.Id, 10)
-	request := c.apiClient.DomainsApi.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
+	request := c.apiClient.DomainsAPI.UpdateDomain(ctx, str).UpdateDomainRequest(req.UpdateDomainRequest)
 
 	domainsResponse, httpResp, err := request.Execute()
 
@@ -114,7 +114,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	resp, httpResp, err := c.apiClient.DomainsApi.GetDomains(ctx).
+	resp, httpResp, err := c.apiClient.DomainsAPI.GetDomains(ctx).
 		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -138,7 +138,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Domain")
 	str := strconv.FormatInt(id, 10)
-	req := c.apiClient.DomainsApi.DelDomain(ctx, str)
+	req := c.apiClient.DomainsAPI.DelDomain(ctx, str)
 
 	httpResp, err := req.Execute()
 	if err != nil {
