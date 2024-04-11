@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/MaxwelMazur/tablecli v0.0.0-20230208145104-c9458b902b58
-	github.com/aziontech/azionapi-go-sdk v0.123.0
+	github.com/aziontech/azionapi-go-sdk v0.127.0
 	github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df
 	github.com/briandowns/spinner v1.23.0
 	github.com/fatih/color v1.13.0
@@ -27,7 +27,7 @@ require (
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
@@ -74,7 +74,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.1.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/schollz/progressbar/v3 v3.13.1
+	github.com/schollz/progressbar/v3 v3.14.2
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966
 	github.com/spf13/afero v1.9.2 // indirect
