@@ -23,5 +23,5 @@ var (
 )
 
 const (
-	FLAG_REMOTE = "clone a remote repository and start a local setup"
+	FLAG_REMOTE = "Clones a remote repository to be linked to an Azion edge application"
 )
