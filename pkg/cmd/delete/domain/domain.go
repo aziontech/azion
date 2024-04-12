@@ -10,13 +10,14 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var domain_id int64
+	var domainID int64
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ShortDescription,
@@ -41,27 +42,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				domain_id = num
+				domainID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err := client.Delete(ctx, domain_id)
+			err := client.Delete(ctx, domainID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.OutputSuccess, domain_id)
-
+			deleteOut := output.DeleteOutput{
+				Msg: fmt.Sprintf(msg.OutputSuccess, domainID),
+				Out: f.IOStreams.Out}
+			output.Print(&deleteOut)
 			return nil
 		},
 	}
 
-	cmd.Flags().Int64Var(&domain_id, "domain-id", 0, msg.FlagId)
+	cmd.Flags().Int64Var(&domainID, "domain-id", 0, msg.FlagId)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
-
 	return cmd
 }

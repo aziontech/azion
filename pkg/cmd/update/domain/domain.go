@@ -10,6 +10,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -122,7 +123,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
+			updateOut := output.UpdateOutput{
+				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+				Out: f.IOStreams.Out}
+			output.Print(&updateOut)
 			return nil
 		},
 	}

@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/metric"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
@@ -176,5 +177,5 @@ func Execute() {
 			}
 		}
 	}
-	cobra.CheckErr(err)
+	output.Print(&output.ErrorOutput{Err: err})
 }

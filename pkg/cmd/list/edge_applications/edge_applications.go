@@ -10,13 +10,13 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
 	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 

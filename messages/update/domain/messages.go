@@ -11,7 +11,7 @@ var (
 	FlagCnames               = "CNAMEs of your Domain"
 	FlagCnameAccessOnly      = "Whether the Domain should be Accessed only through CNAMEs or not"
 	FlagFile                 = "Given path and JSON file to automatically update the Domain attributes; you can use - for reading from stdin"
-	OutputSuccess            = "Updated Domain with ID %d\n"
+	OutputSuccess            = "Updated Domain with ID %d"
 	FlagActive               = "Whether the Domain should be active or not"
 	HelpFlag                 = "Displays more information about the update domains subcommand"
 	AskInputDomainID         = "Enter the Domain's ID:"

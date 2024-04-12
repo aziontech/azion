@@ -7,8 +7,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 
-	table "github.com/MaxwelMazur/tablecli"
 	"github.com/fatih/color"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
