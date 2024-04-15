@@ -1,11 +1,13 @@
 package init
 
-var (
+const (
+	USAGE             = "init"
+	SHORT_DESCRIPTION = "Initializes an Edge Application from a starter template"
+	LONG_DESCRIPTION  = "Defines primary parameters based on a given name and application preset to start an Edge Application"
+	EXAMPLE           = "$ azion init\n$ azion init --help\n$ azion init --name testproject"
+)
 
-	//init cmd
-	EdgeApplicationsInitUsage             = `init [flags]`
-	EdgeApplicationsInitShortDescription  = "Initializes an Edge Application from a starter template"
-	EdgeApplicationsInitLongDescription   = "Defines primary parameters based on a given name and application preset to start an Edge Application"
+var (
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge Application's name"
 	EdgeApplicationsInitFlagYes           = "Answers all yes/no interactions automatically with yes"
