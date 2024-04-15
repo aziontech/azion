@@ -8,7 +8,13 @@ import (
 )
 
 type ErrorOutput struct {
-	Err error
+	FlagOutPath string
+	FlagFormat  string
+	Err         error
+}
+
+func (e *ErrorOutput) Format() (bool, error) {
+	return false, nil
 }
 
 func (e *ErrorOutput) Output() {

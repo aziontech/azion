@@ -123,7 +123,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 			}
 
-			updateOut := output.UpdateOutput{
+			updateOut := output.GeneralOutput{
 				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
 				Out: f.IOStreams.Out}
 			output.Print(&updateOut)

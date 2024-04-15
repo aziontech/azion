@@ -10,10 +10,16 @@ import (
 )
 
 type ListOutput struct {
-	Columns []string
-	Lines   [][]string
-	Page    int64
-	Out     io.Writer
+	FlagOutPath string
+	FlagFormat  string
+	Columns     []string
+	Lines       [][]string
+	Page        int64
+	Out         io.Writer
+}
+
+func (l *ListOutput) Format() (bool, error) {
+	return false, nil
 }
 
 func (c *ListOutput) Output() {

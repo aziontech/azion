@@ -54,7 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
 			}
 
-			deleteOut := output.DeleteOutput{
+			deleteOut := output.GeneralOutput{
 				Msg: fmt.Sprintf(msg.OutputSuccess, domainID),
 				Out: f.IOStreams.Out}
 			output.Print(&deleteOut)

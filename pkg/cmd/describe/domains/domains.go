@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/MaxwelMazur/tablecli"
@@ -14,7 +15,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -51,23 +52,29 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, domain)
-			if err != nil {
-				return utils.ErrorFormatOut
+			domainID := strconv.FormatInt(domain.GetId(), 10)
+			cnameAccessOnly := strconv.FormatBool(domain.GetCnameAccessOnly())
+			edgeApplicationID := strconv.FormatInt(domain.GetDigitalCertificateId(), 10)
+			digitalCertifacateID := strconv.FormatInt(domain.GetDigitalCertificateId(), 10)
+
+			fields := [][]string{
+				{"ID", domainID},
+				{"Name", domain.GetName()},
+				{"Domain", domain.GetDomainName()},
+				{"Cname Access Only", cnameAccessOnly},
+				{"Cnames", fmt.Sprintf("%v", domain.GetCnames())},
+				{"Application ID", edgeApplicationID},
+				{"Digital Certificate ID", digitalCertifacateID},
 			}
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
-				return nil
+			describeOut := output.DescribeOutput{
+				Msg:         fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)),
+				FlagOutPath: opts.OutPath,
+				FlagFormat:  opts.Format,
+				Fields:      fields,
 			}
-
-			logger.FInfo(out, string(formattedFuction[:]))
-			return nil
+			describeOut.Out = f.IOStreams.Out
+			return output.Print(&describeOut)
 		},
 	}
 
