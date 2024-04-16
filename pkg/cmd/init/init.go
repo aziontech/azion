@@ -20,154 +20,134 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	REPO string = "https://github.com/aziontech/azioncli-template.git"
-)
-
-type InitInfo struct {
-	Name           string
-	Template       string
-	Mode           string
-	PathWorkingDir string
-	GlobalFlagAll  bool
+type initCmd struct {
+	name                  string
+	template              string
+	mode                  string
+	pathWorkingDir        string
+	globalFlagAll         bool
+	f                     *cmdutil.Factory
+	io                    *iostreams.IOStreams
+	getWorkDir            func() (string, error)
+	fileReader            func(path string) ([]byte, error)
+	lookPath              func(bin string) (string, error)
+	isDirEmpty            func(dirpath string) (bool, error)
+	cleanDir              func(dirpath string) error
+	writeFile             func(filename string, data []byte, perm fs.FileMode) error
+	openFile              func(name string) (*os.File, error)
+	removeAll             func(path string) error
+	rename                func(oldpath string, newpath string) error
+	createTempDir         func(dir string, pattern string) (string, error)
+	envLoader             func(path string) ([]string, error)
+	stat                  func(path string) (fs.FileInfo, error)
+	mkdir                 func(path string, perm os.FileMode) error
+	gitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
+	commandRunner         func(cmd string, envvars []string) (string, int, error)
+	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
+	commandRunInteractive func(f *cmdutil.Factory, comm string) error
+	shouldDevDeploy       func(msg string, globalFlagAll, defaultYes bool) bool
+	deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+	devCmd                func(f *cmdutil.Factory) *dev.DevCmd
+	changeDir             func(dir string) error
 }
 
-type InitCmd struct {
-	F                     *cmdutil.Factory
-	Io                    *iostreams.IOStreams
-	GetWorkDir            func() (string, error)
-	FileReader            func(path string) ([]byte, error)
-	LookPath              func(bin string) (string, error)
-	IsDirEmpty            func(dirpath string) (bool, error)
-	CleanDir              func(dirpath string) error
-	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	OpenFile              func(name string) (*os.File, error)
-	RemoveAll             func(path string) error
-	Rename                func(oldpath string, newpath string) error
-	CreateTempDir         func(dir string, pattern string) (string, error)
-	EnvLoader             func(path string) ([]string, error)
-	Stat                  func(path string) (fs.FileInfo, error)
-	Mkdir                 func(path string, perm os.FileMode) error
-	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
-	CommandRunner         func(cmd string, envvars []string) (string, int, error)
-	CommandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
-	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
-	ShouldDevDeploy       func(info *InitInfo, msg string, defaultYes bool) bool
-	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
-	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
-	ChangeDir             func(dir string) error
-}
-
-func NewInitCmd(f *cmdutil.Factory) *InitCmd {
-	return &InitCmd{
-		F:               f,
-		Io:              f.IOStreams,
-		GetWorkDir:      utils.GetWorkingDir,
-		FileReader:      os.ReadFile,
-		LookPath:        exec.LookPath,
-		IsDirEmpty:      utils.IsDirEmpty,
-		CleanDir:        utils.CleanDirectory,
-		WriteFile:       os.WriteFile,
-		OpenFile:        os.Open,
-		RemoveAll:       os.RemoveAll,
-		Rename:          os.Rename,
-		CreateTempDir:   os.MkdirTemp,
-		EnvLoader:       utils.LoadEnvVarsFromFile,
-		Stat:            os.Stat,
-		Mkdir:           os.MkdirAll,
-		GitPlainClone:   git.PlainClone,
-		ShouldDevDeploy: shouldDevDeploy,
-		DevCmd:          dev.NewDevCmd,
-		DeployCmd:       deploy.NewDeployCmd,
-		ChangeDir:       os.Chdir,
-		CommandRunner: func(cmd string, envvars []string) (string, int, error) {
+func NewInitCmd(f *cmdutil.Factory) *initCmd {
+	return &initCmd{
+		f:               f,
+		io:              f.IOStreams,
+		getWorkDir:      utils.GetWorkingDir,
+		fileReader:      os.ReadFile,
+		lookPath:        exec.LookPath,
+		isDirEmpty:      utils.IsDirEmpty,
+		cleanDir:        utils.CleanDirectory,
+		writeFile:       os.WriteFile,
+		openFile:        os.Open,
+		removeAll:       os.RemoveAll,
+		rename:          os.Rename,
+		createTempDir:   os.MkdirTemp,
+		envLoader:       utils.LoadEnvVarsFromFile,
+		stat:            os.Stat,
+		mkdir:           os.MkdirAll,
+		gitPlainClone:   git.PlainClone,
+		shouldDevDeploy: shouldDevDeploy,
+		devCmd:          dev.NewDevCmd,
+		deployCmd:       deploy.NewDeployCmd,
+		changeDir:       os.Chdir,
+		commandRunner: func(cmd string, envvars []string) (string, int, error) {
 			return utils.RunCommandWithOutput(envvars, cmd)
 		},
-		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+		commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 			return utils.CommandRunInteractive(f, comm)
 		},
-		CommandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+		commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 	}
 }
 
-func NewCobraCmd(init *InitCmd, f *cmdutil.Factory) *cobra.Command {
-	info := &InitInfo{}
-	cobraCmd := &cobra.Command{
-		Use:           msg.EdgeApplicationsInitUsage,
-		Short:         msg.EdgeApplicationsInitShortDescription,
-		Long:          msg.EdgeApplicationsInitLongDescription,
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	init := NewInitCmd(f)
+	cmd := &cobra.Command{
+		Use:           msg.USAGE,
+		Short:         msg.SHORT_DESCRIPTION,
+		Long:          msg.LONG_DESCRIPTION,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example: heredoc.Doc(`
-		$ azion init
-		$ azion init --help
-		$ azion init --name testproject
-		`),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			info.GlobalFlagAll = f.GlobalFlagAll
-			return init.Run(info)
-		},
+		Example:       heredoc.Doc(msg.EXAMPLE),
+		RunE:          init.Run,
 	}
-
-	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsInitFlagName)
-	return cobraCmd
+	cmd.Flags().StringVar(&init.name, "name", "", msg.EdgeApplicationsInitFlagName)
+	return cmd
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewInitCmd(f), f)
-}
-
-func (cmd *InitCmd) Run(info *InitInfo) error {
+func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	logger.Debug("Running init command")
 
-	path, err := cmd.GetWorkDir()
+	cmd.globalFlagAll = cmd.f.GlobalFlagAll
+
+	path, err := cmd.getWorkDir()
 	if err != nil {
 		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
-	info.PathWorkingDir = path
+	cmd.pathWorkingDir = path
 
 	// Checks for global --yes flag and that name flag was not sent
-	if info.GlobalFlagAll && info.Name == "" {
-		info.Name = thoth.GenerateName()
+	if cmd.globalFlagAll && cmd.name == "" {
+		cmd.name = thoth.GenerateName()
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
-		if info.Name == "" {
-
+		if cmd.name == "" {
 			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
 			}
-
-			info.Name = projName
+			cmd.name = projName
 		}
 	}
 
-	info.PathWorkingDir = info.PathWorkingDir + "/" + info.Name
-
-	err = cmd.selectVulcanTemplates(info)
+	cmd.pathWorkingDir = cmd.pathWorkingDir + "/" + cmd.name
+	err = cmd.selectVulcanTemplates()
 	if err != nil {
 		return err
 	}
 
-	if err = cmd.createTemplateAzion(info); err != nil {
+	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.WebAppInitCmdSuccess)
+	logger.FInfo(cmd.io.Out, msg.WebAppInitCmdSuccess)
 
-	err = cmd.ChangeDir(info.PathWorkingDir)
+	err = cmd.changeDir(cmd.pathWorkingDir)
 	if err != nil {
 		logger.Debug("Error while changing to new working directory", zap.Error(err))
 		return msg.ErrorWorkingDir
 	}
 
-	shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server? (y/N)", false)
+	shouldDev := cmd.shouldDevDeploy("Do you want to start a local development server? (y/N)", cmd.globalFlagAll, false)
 
 	if shouldDev {
-		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server (y/N)", false)
+		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to start local development server (y/N)", cmd.globalFlagAll, false)
 
 		if shouldDeps {
 			answer, err := utils.GetPackageManager()
@@ -182,20 +162,19 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		}
 
 		logger.Debug("Running dev command from init command")
-		dev := cmd.DevCmd(cmd.F)
-		err = dev.Run(cmd.F)
+		dev := cmd.devCmd(cmd.f)
+		err = dev.Run(cmd.f)
 		if err != nil {
 			logger.Debug("Error while running dev command called by init command", zap.Error(err))
 			return err
 		}
 	} else {
-		logger.FInfo(cmd.Io.Out, msg.InitDevCommand)
+		logger.FInfo(cmd.io.Out, msg.InitDevCommand)
 	}
 
-	shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project? (y/N)", false)
+	shouldDeploy := cmd.shouldDevDeploy("Do you want to deploy your project? (y/N)", cmd.globalFlagAll, false)
 	if shouldDeploy {
-
-		shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy your project (y/N)", false)
+		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to deploy your project (y/N)", cmd.globalFlagAll, false)
 		if err != err {
 			return err
 		}
@@ -213,15 +192,15 @@ func (cmd *InitCmd) Run(info *InitInfo) error {
 		}
 
 		logger.Debug("Running deploy command from init command")
-		deploy := cmd.DeployCmd(cmd.F)
-		err = deploy.Run(cmd.F)
+		deploy := cmd.deployCmd(cmd.f)
+		err = deploy.Run(cmd.f)
 		if err != nil {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err
 		}
 	} else {
-		logger.FInfo(cmd.Io.Out, msg.InitDeployCommand)
-		logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, info.Name))
+		logger.FInfo(cmd.io.Out, msg.InitDeployCommand)
+		logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name))
 	}
 
 	return nil
