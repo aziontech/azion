@@ -126,8 +126,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			updateOut := output.GeneralOutput{
 				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
 				Out: f.IOStreams.Out}
-			output.Print(&updateOut)
-			return nil
+			return output.Print(&updateOut)
 		},
 	}
 

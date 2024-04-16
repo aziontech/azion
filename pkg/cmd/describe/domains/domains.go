@@ -68,10 +68,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			describeOut := output.DescribeOutput{
-				Msg:         fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)),
-				FlagOutPath: opts.OutPath,
-				FlagFormat:  opts.Format,
-				Fields:      fields,
+				GeneralOutput: output.GeneralOutput{
+					Msg:         fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+				},
+				Fields: fields,
 			}
 			describeOut.Out = f.IOStreams.Out
 			return output.Print(&describeOut)

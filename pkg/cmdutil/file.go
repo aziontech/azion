@@ -8,7 +8,6 @@ import (
 )
 
 func WriteDetailsToFile(data []byte, outPath string, writer io.Writer) error {
-
 	err := os.MkdirAll(filepath.Dir(outPath), os.ModePerm)
 	if err != nil {
 		return err

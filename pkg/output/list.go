@@ -1,7 +1,6 @@
 package output
 
 import (
-	"io"
 	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -10,16 +9,22 @@ import (
 )
 
 type ListOutput struct {
-	FlagOutPath string
-	FlagFormat  string
-	Columns     []string
-	Lines       [][]string
-	Page        int64
-	Out         io.Writer
+	GeneralOutput `json:"-" yaml:"-" toml:"-"`
+	Columns       []string   `json:"columns" yaml:"columns" toml:"columns"`
+	Lines         [][]string `json:"lines" yaml:"lines" toml:"lines"`
+	Page          int64      `json:"page" yaml:"page" toml:"page"`
 }
 
 func (l *ListOutput) Format() (bool, error) {
-	return false, nil
+	formated := false
+	if len(l.FlagFormat) > 0 || len(l.FlagOutPath) > 0 {
+		formated = true
+		err := format(l, l.GeneralOutput)
+		if err != nil {
+			return formated, err
+		}
+	}
+	return formated, nil
 }
 
 func (c *ListOutput) Output() {

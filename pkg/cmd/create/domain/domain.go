@@ -112,8 +112,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			createOut := output.GeneralOutput{
 				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
 				Out: f.IOStreams.Out}
-			output.Print(&createOut)
-			return nil
+			return output.Print(&createOut)
 		},
 	}
 

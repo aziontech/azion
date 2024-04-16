@@ -71,7 +71,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		}
 
 		listOut.Page = opts.Page
-		output.Print(&listOut)
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
+		}
 
 		if opts.Page >= resp.TotalPages {
 			break

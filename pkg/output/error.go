@@ -8,13 +8,20 @@ import (
 )
 
 type ErrorOutput struct {
-	FlagOutPath string
-	FlagFormat  string
-	Err         error
+	GeneralOutput `json:"-" yaml:"-" toml:"-"`
+	Err           error `json:"error"`
 }
 
 func (e *ErrorOutput) Format() (bool, error) {
-	return false, nil
+	formated := false
+	if len(e.FlagFormat) > 0 || len(e.FlagOutPath) > 0 {
+		formated = true
+		err := format(e, e.GeneralOutput)
+		if err != nil {
+			return formated, err
+		}
+	}
+	return formated, nil
 }
 
 func (e *ErrorOutput) Output() {
