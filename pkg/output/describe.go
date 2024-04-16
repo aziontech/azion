@@ -19,7 +19,7 @@ func (d *DescribeOutput) Format() (bool, error) {
 	formated := false
 	if len(d.FlagFormat) > 0 || len(d.FlagOutPath) > 0 {
 		formated = true
-		err := format(d.Fields, d.GeneralOutput)
+		err := format(d.Values, d.GeneralOutput)
 		if err != nil {
 			return formated, err
 		}
