@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Domain 1234 was successfully deleted\n", stdout.String())
+		assert.Equal(t, "Domain 1234 was successfully deleted", stdout.String())
 	})
 
 	t.Run("delete domain - not found", func(t *testing.T) {

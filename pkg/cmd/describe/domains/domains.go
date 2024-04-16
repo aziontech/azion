@@ -2,15 +2,12 @@ package domains
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/describe/domain"
-	"github.com/fatih/color"
 
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -86,34 +83,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
-}
-
-func format(cmd *cobra.Command, domain api.DomainResponse) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(domain, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-
-	tbl.AddRow("ID: ", domain.GetId())
-	tbl.AddRow("Name: ", domain.GetName())
-	tbl.AddRow("Domain: ", domain.GetDomainName())
-	tbl.AddRow("Cname Access Only: ", domain.GetCnameAccessOnly())
-	if domain.GetCnameAccessOnly() {
-		Cnames := domain.GetCnames()
-		tbl.AddRow("Cnames: ")
-		for _, cname := range Cnames {
-			tbl.AddRow("	", cname)
-		}
-	}
-	tbl.AddRow("Application ID: ", domain.GetEdgeApplicationId())
-	tbl.AddRow("Digital Certificate ID: ", domain.GetDigitalCertificateId())
-
-	return tbl.GetByteFormat(), nil
 }

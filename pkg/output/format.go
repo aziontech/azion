@@ -19,8 +19,8 @@ const (
 )
 
 func format(v any, g GeneralOutput) error {
-	b := []byte{}
-	var err error = nil
+	var b []byte
+	var err error
 
 	switch g.FlagFormat {
 	case JSON:
