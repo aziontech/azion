@@ -38,6 +38,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type RootCmd struct {
@@ -144,6 +145,8 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 }
 
 func Execute() {
+	logger.New(zapcore.InfoLevel)
+
 	streams := iostreams.System()
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
