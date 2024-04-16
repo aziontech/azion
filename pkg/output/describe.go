@@ -1,6 +1,9 @@
 package output
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/fatih/color"
 	"github.com/maxwelbm/tablecli"
@@ -8,14 +11,14 @@ import (
 
 type DescribeOutput struct {
 	GeneralOutput `json:"-" yaml:"-" toml:"-"`
-	Fields        [][]string `json:"fields" yaml:"fields" toml:"fields"`
+	Fields        interface{} `json:"fields" yaml:"fields" toml:"fields"`
 }
 
 func (d *DescribeOutput) Format() (bool, error) {
 	formated := false
 	if len(d.FlagFormat) > 0 || len(d.FlagOutPath) > 0 {
 		formated = true
-		err := format(d, d.GeneralOutput)
+		err := format(d.Fields, d.GeneralOutput)
 		if err != nil {
 			return formated, err
 		}
@@ -24,12 +27,14 @@ func (d *DescribeOutput) Format() (bool, error) {
 }
 
 func (c *DescribeOutput) Output() {
-	sliceNull := make([]string, 2)
-	tbl := tablecli.NewTable(sliceNull)
+	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgBlue).SprintfFunc())
 
-	for _, v := range c.Fields {
-		tbl.AddRows(v)
+	interfaceFields := reflect.ValueOf(c.Fields)
+	for i := 0; i < interfaceFields.NumField(); i++ {
+		field := interfaceFields.Type().Field(i)
+		fieldValue := interfaceFields.Field(i).Interface()
+		tbl.AddRow(fmt.Sprintf("%s: ", field.Name), fieldValue)
 	}
 
 	logger.FInfo(c.Out, string(tbl.GetByteFormat()))

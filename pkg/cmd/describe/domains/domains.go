@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/domain"
+	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -49,19 +49,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
 
-			domainID := strconv.FormatInt(domain.GetId(), 10)
-			cnameAccessOnly := strconv.FormatBool(domain.GetCnameAccessOnly())
-			edgeApplicationID := strconv.FormatInt(domain.GetDigitalCertificateId(), 10)
-			digitalCertifacateID := strconv.FormatInt(domain.GetDigitalCertificateId(), 10)
-
-			fields := [][]string{
-				{"ID", domainID},
-				{"Name", domain.GetName()},
-				{"Domain", domain.GetDomainName()},
-				{"Cname Access Only", cnameAccessOnly},
-				{"Cnames", fmt.Sprintf("%v", domain.GetCnames())},
-				{"Application ID", edgeApplicationID},
-				{"Digital Certificate ID", digitalCertifacateID},
+			digitalCertifacateID := domain.GetDigitalCertificateId()
+			response := sdk.DomainResults{
+				Id:                   domain.GetId(),
+				Name:                 domain.GetName(),
+				DomainName:           domain.GetDomainName(),
+				CnameAccessOnly:      domain.GetCnameAccessOnly(),
+				Cnames:               domain.GetCnames(),
+				EdgeApplicationId:    domain.GetEdgeApplicationId(),
+				DigitalCertificateId: *sdk.NewNullableInt64(&digitalCertifacateID),
 			}
 
 			describeOut := output.DescribeOutput{
@@ -70,7 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					FlagOutPath: opts.OutPath,
 					FlagFormat:  opts.Format,
 				},
-				Fields: fields,
+				Fields: response,
 			}
 			describeOut.Out = f.IOStreams.Out
 			return output.Print(&describeOut)
