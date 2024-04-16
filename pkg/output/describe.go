@@ -12,7 +12,7 @@ import (
 type DescribeOutput struct {
 	GeneralOutput `json:"-" yaml:"-" toml:"-"`
 	Fields        map[string]string
-	Values        interface{} `json:"fields" yaml:"fields" toml:"fields"`
+	Values        interface{}
 }
 
 func (d *DescribeOutput) Format() (bool, error) {
