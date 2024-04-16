@@ -40,7 +40,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				domainID = answer
 			}
-
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
@@ -48,8 +47,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
-
 			digitalCertifacateID := domain.GetDigitalCertificateId()
+
+			fields := make(map[string]string, 0)
+			fields["Id"] = "ID"
+			fields["Name"] = "Name"
+			fields["DomainName"] = "Domain"
+			fields["CnameAccessOnly"] = "Cname Access Only"
+			fields["Cnames"] = "Cnames"
+			fields["EdgeApplicationId"] = "Application ID"
+			fields["DigitalCertificateId"] = "Digital Certificate ID"
+
 			response := sdk.DomainResults{
 				Id:                   domain.GetId(),
 				Name:                 domain.GetName(),
@@ -66,8 +74,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					FlagOutPath: opts.OutPath,
 					FlagFormat:  opts.Format,
 				},
-				Fields: response,
+				Fields: fields,
+				Values: response,
 			}
+
 			describeOut.Out = f.IOStreams.Out
 			return output.Print(&describeOut)
 		},
