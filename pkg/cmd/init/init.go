@@ -22,6 +22,7 @@ import (
 
 type initCmd struct {
 	name                  string
+	preset                string
 	template              string
 	mode                  string
 	pathWorkingDir        string
@@ -97,6 +98,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE:          init.Run,
 	}
 	cmd.Flags().StringVar(&init.name, "name", "", msg.EdgeApplicationsInitFlagName)
+	cmd.Flags().StringVar(&init.preset, "preset", "", msg.EdgeApplicationsInitFlagPreset)
+	cmd.Flags().StringVar(&init.template, "template", "", msg.EdgeApplicationsInitFlagTemplate)
 	return cmd
 }
 

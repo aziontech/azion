@@ -10,6 +10,8 @@ const (
 var (
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
 	EdgeApplicationsInitFlagName          = "The Edge Application's name"
+	EdgeApplicationsInitFlagPreset        = "The Preset name"
+	EdgeApplicationsInitFlagTemplate      = "The Template name"
 	EdgeApplicationsInitFlagYes           = "Answers all yes/no interactions automatically with yes"
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This application was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "

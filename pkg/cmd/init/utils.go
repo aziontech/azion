@@ -35,7 +35,6 @@ func askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *initCmd) selectVulcanTemplates() error {
-
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
@@ -49,7 +48,15 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 
 	logger.FInfo(cmd.io.Out, msg.InitGettingVulcan)
 
-	command := vul.Command("", "init --name "+cmd.name)
+	cmdVulcanInit := fmt.Sprintf("init --name %s", cmd.name)
+	if len(cmd.preset) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --preset '%s'", cmdVulcanInit, cmd.preset)
+	}
+	if len(cmd.template) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --template '%s'", cmdVulcanInit, cmd.template)
+	}
+
+	command := vul.Command("", cmdVulcanInit)
 
 	err = cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
