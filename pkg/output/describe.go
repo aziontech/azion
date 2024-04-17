@@ -31,13 +31,26 @@ func (c *DescribeOutput) Output() {
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgBlue).SprintfFunc())
 
-	interfaceFields := reflect.ValueOf(c.Values)
-	for i := 0; i < interfaceFields.NumField(); i++ {
-		field := interfaceFields.Type().Field(i)
-		fieldValue := interfaceFields.Field(i).Interface()
+	interfaceValue := reflect.ValueOf(c.Values).Elem()
 
-		if vl, ok := c.Fields[field.Name]; ok {
-			tbl.AddRow(fmt.Sprintf("%s: ", vl), fieldValue)
+	for i := 0; i < interfaceValue.NumField(); i++ {
+		field := interfaceValue.Field(i)
+
+		var dereferencedValue any
+		if field.CanInterface() {
+			fieldValue := field.Interface()
+
+			if reflect.TypeOf(fieldValue).Kind() == reflect.Ptr {
+				ptrValue := reflect.ValueOf(fieldValue)
+				if !ptrValue.IsNil() {
+					dereferencedValue = ptrValue.Elem().Interface()
+				}
+			}
+
+			fieldName := interfaceValue.Type().Field(i).Name
+			if vl, ok := c.Fields[fieldName]; ok {
+				tbl.AddRow(fmt.Sprintf("%s: ", vl), dereferencedValue)
+			}
 		}
 	}
 

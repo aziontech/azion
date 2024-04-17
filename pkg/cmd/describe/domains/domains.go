@@ -7,7 +7,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/domain"
-	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -47,7 +46,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
-			digitalCertifacateID := domain.GetDigitalCertificateId()
 
 			fields := make(map[string]string, 0)
 			fields["Id"] = "ID"
@@ -58,16 +56,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			fields["EdgeApplicationId"] = "Application ID"
 			fields["DigitalCertificateId"] = "Digital Certificate ID"
 
-			response := sdk.DomainResults{
-				Id:                   domain.GetId(),
-				Name:                 domain.GetName(),
-				DomainName:           domain.GetDomainName(),
-				CnameAccessOnly:      domain.GetCnameAccessOnly(),
-				Cnames:               domain.GetCnames(),
-				EdgeApplicationId:    domain.GetEdgeApplicationId(),
-				DigitalCertificateId: *sdk.NewNullableInt64(&digitalCertifacateID),
-			}
-
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
 					Msg:         fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)),
@@ -75,7 +63,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					FlagFormat:  opts.Format,
 				},
 				Fields: fields,
-				Values: response,
+				Values: domain,
 			}
 
 			describeOut.Out = f.IOStreams.Out
