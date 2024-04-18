@@ -71,7 +71,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 	}
 
 	// skip upload when type = javascript, typescript (storage folder does not exist in these cases)
-	if conf.Template != "javascript" && conf.Template != "typescript" {
+	if conf.Preset != "javascript" && conf.Preset != "typescript" {
 		err = cmd.uploadFiles(f, conf)
 		if err != nil {
 			return err
@@ -93,7 +93,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 		}
 
 		if route.Type == "compute" && !conf.RulesEngine.Created {
-			if conf.Template != "javascript" && conf.Template != "typescript" {
+			if conf.Preset != "javascript" && conf.Preset != "typescript" {
 				var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 				reqCache.SetName("function policy")
 				reqCache.SetBrowserCacheSettings("honor")
@@ -125,7 +125,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 			return err
 		}
 
-		if strings.ToLower(conf.Template) == "javascript" || strings.ToLower(conf.Template) == "typescript" {
+		if strings.ToLower(conf.Preset) == "javascript" || strings.ToLower(conf.Preset) == "typescript" {
 			reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
 			reqRules.IdApplication = conf.Application.ID
 
@@ -191,7 +191,7 @@ func (manifest *Manifest) Interpreted(f *cmdutil.Factory, cmd *DeployCmd, conf *
 				behRewriteRequest.SetName("rewrite_request")
 
 				var target = fmt.Sprintf("${uri}%sindex.html", "")
-				if strings.ToLower(conf.Template) == "html" && len(Path) > 0 {
+				if strings.ToLower(conf.Preset) == "html" && len(Path) > 0 {
 					Path = strings.ReplaceAll(Path, "/", "")
 					Path = strings.ReplaceAll(Path, ".", "")
 					target = fmt.Sprintf("${uri}/%s/index.html", Path)
@@ -291,7 +291,7 @@ func requestRulesEngineManifest(conf *contracts.AzionApplicationOptions, routes 
 			RulesEngineBehaviorString: &behFunction,
 		})
 
-		if strings.ToLower(conf.Template) == "next" {
+		if strings.ToLower(conf.Preset) == "next" {
 			var behForwardCookies sdk.RulesEngineBehaviorString
 			behForwardCookies.SetName("forward_cookies")
 			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
