@@ -10,7 +10,7 @@ var (
 	//create cmd
 	CreateShortDescription = "Creates a new serverless Edge Function"
 	CreateLongDescription  = "Creates an Edge Function based on given attributes to create a serverless code for Edge Applications"
-	CreateOutputSuccess    = "Created Edge Function with ID %d\n"
+	CreateOutputSuccess    = "Created Edge Function with ID %d"
 
 	//delete cmd
 	DeleteShortDescription = "Removes an Edge Function"

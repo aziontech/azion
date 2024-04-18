@@ -12,6 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -64,9 +65,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 			}
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()))
 
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 

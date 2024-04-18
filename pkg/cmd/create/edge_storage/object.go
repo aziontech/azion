@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -59,8 +60,11 @@ func (fields *FieldsObjects) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_CREATE_OBJECT, err)
 	}
-	logger.FInfo(f.IOStreams.Out, msg.OUTPUT_CREATE_OBJECT)
-	return nil
+	creatOut := output.GeneralOutput{
+		Msg: msg.OUTPUT_CREATE_OBJECT,
+		Out: f.IOStreams.Out,
+	}
+	return output.Print(&creatOut)
 }
 
 func (fields *FieldsObjects) CreateRequestFromFlags(cmd *cobra.Command) error {

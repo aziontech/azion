@@ -1,9 +1,11 @@
 package variables
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/variables"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -31,7 +33,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Created variable with UUID bea9d757-8b83-4b4a-a3b1-49dfd6111303\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.CreateOutputSuccess, "bea9d757-8b83-4b4a-a3b1-49dfd6111303"), stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -51,7 +53,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Created variable with UUID bea9d757-8b83-4b4a-a3b1-49dfd6111303\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.CreateOutputSuccess, "bea9d757-8b83-4b4a-a3b1-49dfd6111303"), stdout.String())
 	})
 
 	t.Run("bad request status 400", func(t *testing.T) {

@@ -7,7 +7,7 @@ var (
 	LongDescription  = "Creates an Edge Application without the need to manage infrastructure or security"
 	FlagFile         = "Path to a JSON file containing the attributes of the Edge Application being created; you can use - for reading from stdin"
 	FlagHelp         = "Displays more information about the create edge-application command"
-	OutputSuccess    = "Created Edge Application with ID %d\n"
+	OutputSuccess    = "Created Edge Application with ID %d"
 
 	FlagName                           = "Edge Application's name"
 	FlagApplicationAcceleration        = "Used for Application Acceleration, enable or disable"

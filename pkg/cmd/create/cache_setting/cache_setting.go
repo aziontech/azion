@@ -13,6 +13,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiEdgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -111,8 +112,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()))
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 
