@@ -8,6 +8,6 @@ const (
 	ManifestCreateRule   = "Rule Engine %s with id %d successfully created"
 	ManifestCreateOrigin = "Origin %s with id %d successfully created"
 	ManifestUpdateOrigin = "Origin %s with key %s successfully update"
-	ReadingManifest      = "Reading manifest.json file"
+	ReadingManifest      = "Reading manifest.json file\n"
 	CreatingManifest     = "Creating resources found in manifest.json file"
 )

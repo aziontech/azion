@@ -125,6 +125,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	err = cmd.doBucket(clients.Bucket, ctx, conf)
+	if err != nil {
+		return err
+	}
+
 	conf.Function.File = ".edge/worker.js"
 	err = cmd.doFunction(clients, ctx, conf)
 	if err != nil {
@@ -173,11 +178,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f)
-	if err != nil {
-		return err
-	}
-
-	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
 	}

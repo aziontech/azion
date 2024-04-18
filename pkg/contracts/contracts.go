@@ -48,6 +48,7 @@ type AzionApplicationOptions struct {
 	Mode          string                       `json:"mode"`     // deliver == ssg, compute == ssr
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
+	NotFirstRun   bool                         `json:"not-first-run"`
 	Function      AzionJsonDataFunction        `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`

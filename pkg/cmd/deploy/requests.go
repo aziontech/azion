@@ -307,6 +307,9 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 // }
 
 func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client) error {
+	if conf.NotFirstRun {
+		return nil
+	}
 	var cacheId int64
 	var authorize bool
 	if Auto {
@@ -336,6 +339,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return err
 	}
 
+	conf.NotFirstRun = true
 	return nil
 }
 

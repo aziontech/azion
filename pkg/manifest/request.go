@@ -194,7 +194,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 						return nil, msg.ErrorCacheNotFound
 					}
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
-					str := strconv.FormatInt(conf.Function.ID, 10)
+					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
 					if id := originKeys[v.RulesEngineBehaviorString.Target]; id > 0 {
@@ -274,7 +274,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 						return nil, msg.ErrorCacheNotFound
 					}
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
-					str := strconv.FormatInt(conf.Function.ID, 10)
+					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
 					if id := originKeys[v.RulesEngineBehaviorString.Target]; id > 0 {
