@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	"github.com/aziontech/azionapi-go-sdk/storage"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -12,25 +12,21 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/storage"
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 )
 
-func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, nameBucket string) error {
+func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Bucket != "" || (conf.Template == "javascript" || conf.Template == "typescript") {
 		return nil
 	}
 
-	var err error
-	if nameBucket == "" {
-		nameBucket = conf.Bucket
-	}
+	nameBucket := conf.Name
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	for {
-		err = client.CreateBucket(ctx, api.RequestBucket{
-			BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
+		err := client.CreateBucket(ctx, api.RequestBucket{
+			BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
 		if err != nil {
 			// if the name is already in use, we ask for another one
 			if errors.Is(err, utils.ErrorNameInUse) {
@@ -43,7 +39,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 						return err
 					}
 				}
-				conf.Application.Name = nameBucket
+				conf.Bucket = nameBucket
 				continue
 			}
 			return err
@@ -52,7 +48,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 	}
 
 	conf.Bucket = nameBucket
-	err = cmd.WriteAzionJsonContent(conf)
+	err := cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err

@@ -339,11 +339,11 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	return nil
 }
 
-func (cmd *DeployCmd) doOriginSingle(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
 	if len(conf.Origin) > 0 {
-		return nil
+		return 0, nil
 	}
 
 	reqSingleOrigin := apiori.CreateRequest{}
@@ -356,7 +356,7 @@ func (cmd *DeployCmd) doOriginSingle(client *apiapp.Client, clientOrigin *apiori
 	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
 	if err != nil {
 		logger.Debug("Error while creating default origin ", zap.Any("Error", err))
-		return err
+		return 0, err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
 	newOrigin := contracts.AzionJsonDataOrigin{
@@ -366,7 +366,7 @@ func (cmd *DeployCmd) doOriginSingle(client *apiapp.Client, clientOrigin *apiori
 	}
 	conf.Origin = append(conf.Origin, newOrigin)
 
-	return nil
+	return newOrigin.OriginId, nil
 }
 
 func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {

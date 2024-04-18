@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"fmt"
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -9,7 +10,6 @@ import (
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func makeCacheRequestUpdate(cache contracts.CacheSetting) *apiCache.UpdateRequest {
@@ -142,7 +142,7 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 	return request
 }
 
-func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
+func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originKeys map[string]int64) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -196,6 +196,14 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
 					str := strconv.FormatInt(conf.Function.ID, 10)
 					behaviorString.SetTarget(str)
+				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
+					if id := originKeys[v.RulesEngineBehaviorString.Target]; id > 0 {
+						str := strconv.FormatInt(id, 10)
+						behaviorString.SetTarget(str)
+					} else {
+						fmt.Println(v.RulesEngineBehaviorString.Target)
+						return nil, msg.ErrorCacheNotFound
+					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
 				}
@@ -213,7 +221,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
+func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originKeys map[string]int64) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -268,6 +276,14 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
 					str := strconv.FormatInt(conf.Function.ID, 10)
 					behaviorString.SetTarget(str)
+				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
+					if id := originKeys[v.RulesEngineBehaviorString.Target]; id > 0 {
+						str := strconv.FormatInt(id, 10)
+						behaviorString.SetTarget(str)
+					} else {
+						fmt.Println(v.RulesEngineBehaviorString.Target)
+						return nil, msg.ErrorCacheNotFound
+					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
 				}
@@ -285,16 +301,15 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 	return request, nil
 }
 
-func makeOriginCreateRequest(origin contracts.Origin) *apiOrigin.CreateRequest {
+func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.CreateRequest {
 	request := &apiOrigin.CreateRequest{}
 
-	spew.Dump(origin)
+	request.SetBucket(conf.Bucket)
 
-	if origin.Bucket != "" {
-		request.SetBucket(origin.Bucket)
-	}
 	if origin.Prefix != "" {
 		request.SetPrefix(origin.Prefix)
+	} else {
+		request.SetPrefix(conf.Prefix)
 	}
 	if origin.OriginType != "" {
 		request.SetOriginType(origin.OriginType)
@@ -303,18 +318,18 @@ func makeOriginCreateRequest(origin contracts.Origin) *apiOrigin.CreateRequest {
 	return request
 }
 
-func makeOriginUpdateRequest(origin contracts.Origin) *apiOrigin.UpdateRequest {
-	request := &apiOrigin.UpdateRequest{}
+// func makeOriginUpdateRequest(origin contracts.Origin) *apiOrigin.UpdateRequest {
+// 	request := &apiOrigin.UpdateRequest{}
 
-	if origin.Bucket != "" {
-		request.SetBucket(origin.Bucket)
-	}
-	if origin.Prefix != "" {
-		request.SetPrefix(origin.Prefix)
-	}
-	if origin.OriginType != "" {
-		request.SetOriginType(origin.OriginType)
-	}
+// 	if origin.Bucket != "" {
+// 		request.SetBucket(origin.Bucket)
+// 	}
+// 	if origin.Prefix != "" {
+// 		request.SetPrefix(origin.Prefix)
+// 	}
+// 	if origin.OriginType != "" {
+// 		request.SetOriginType(origin.OriginType)
+// 	}
 
-	return request
-}
+// 	return request
+// }

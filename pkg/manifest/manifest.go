@@ -15,7 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 )
 
@@ -71,7 +70,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	cacheIds := make(map[string]int64)
 	ruleIds := make(map[string]int64)
-	originKeys := make(map[string]string)
+	originKeys := make(map[string]int64)
 
 	for _, cacheConf := range conf.CacheSettings {
 		cacheIds[cacheConf.Name] = cacheConf.Id
@@ -82,30 +81,17 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	for _, originConf := range conf.Origin {
-		originKeys[originConf.Name] = originConf.OriginKey
+		originKeys[originConf.Name] = originConf.OriginId
 	}
 
 	for _, origin := range manifest.Origins {
-		if key := originKeys[origin.Name]; key != "" {
-			requestUpdate := makeOriginUpdateRequest(origin)
-			if origin.Name != "" {
-				requestUpdate.Name = &origin.Name
-			} else {
-				requestUpdate.Name = &conf.Name
-			}
-			_, err := clientOrigin.Update(ctx, conf.Application.ID, key, requestUpdate)
-			if err != nil {
-				return err
-			}
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, key))
-		} else {
-			requestCreate := makeOriginCreateRequest(origin)
+		if id := originKeys[origin.Name]; id == 0 {
+			requestCreate := makeOriginCreateRequest(origin, conf)
 			if origin.Name != "" {
 				requestCreate.Name = origin.Name
 			} else {
 				requestCreate.Name = conf.Name
 			}
-			spew.Dump(requestCreate)
 			created, err := clientOrigin.Create(ctx, conf.Application.ID, requestCreate)
 			if err != nil {
 				return err
@@ -116,7 +102,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name:      created.GetName(),
 			}
 			conf.Origin = append(conf.Origin, newOrigin)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, key))
+			originKeys[created.GetName()] = created.GetOriginId()
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId()))
 		}
 	}
 
@@ -161,7 +148,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	for _, rule := range manifest.Rules {
 		if id := ruleIds[rule.Name]; id > 0 {
-			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds, conf)
+			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds, conf, originKeys)
 			if err != nil {
 				return err
 			}
@@ -174,7 +161,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf)
+			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originKeys)
 			if err != nil {
 				return err
 			}

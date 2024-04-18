@@ -7,9 +7,12 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -17,6 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -90,12 +94,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 	ctx := context.Background()
 
-	buildCmd := cmd.BuildCmd(f)
-	err := buildCmd.Run(&contracts.BuildInfo{})
-	if err != nil {
-		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-		return err
-	}
+	// buildCmd := cmd.BuildCmd(f)
+	// err := buildCmd.Run(&contracts.BuildInfo{})
+	// if err != nil {
+	// 	logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+	// 	return err
+	// }
 
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
@@ -116,7 +120,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doOriginSingle(clients.EdgeApplication, clients.Origin, ctx, conf)
+	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf)
 	if err != nil {
 		return err
 	}
@@ -127,18 +131,53 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
+	if err != nil {
+		logger.Debug("Error while getting default rules engine", zap.Error(err))
+		return err
+	}
+
+	if strings.ToLower(conf.Template) == "javascript" || strings.ToLower(conf.Template) == "typescript" {
+		reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
+		reqRules.IdApplication = conf.Application.ID
+
+		_, err := clients.EdgeApplication.UpdateRulesEnginePublish(ctx, &reqRules, conf.Function.InstanceID)
+		if err != nil {
+			return err
+		}
+	} else {
+		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+
+		var behString sdk.RulesEngineBehaviorString
+		behString.SetName("set_origin")
+
+		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
+
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behString,
+		})
+
+		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
+			IdApplication: conf.Application.ID,
+			Phase:         "request",
+			Id:            ruleDefaultID,
+		}
+
+		reqUpdateRulesEngine.SetBehaviors(behaviors)
+
+		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+		if err != nil {
+			logger.Debug("Error while updating default rules engine", zap.Error(err))
+			return err
+		}
+	}
+
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f)
 	if err != nil {
 		return err
 	}
 
-	name := ""
-
-	if len(manifestStructure.Origins) > 0 && manifestStructure.Origins[0].Name != "" {
-		name = ""
-	}
-
-	err = cmd.doBucket(clients.Bucket, ctx, conf, name)
+	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
 	}
