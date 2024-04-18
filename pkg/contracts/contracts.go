@@ -41,8 +41,8 @@ type AzionApplicationOptions struct {
 	Test        func(path string) error  `json:"-"`
 	Name        string                   `json:"name"`
 	Bucket      string                   `json:"bucket"`
-	Template    string                   `json:"template"` // framework: react, next, vue, angular and etc
-	Mode        string                   `json:"mode"`     // deliver == ssg, compute == ssr
+	Preset      string                   `json:"preset"` // framework: react, next, vue, angular and etc
+	Mode        string                   `json:"mode"`   // deliver == ssg, compute == ssr
 	Env         string                   `json:"env"`
 	Prefix      string                   `json:"prefix"`
 	Function    AzionJsonDataFunction    `json:"function"`
