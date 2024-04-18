@@ -5,11 +5,13 @@ const (
 	SHORT_DESCRIPTION = "Initializes an Edge Application from a starter template"
 	LONG_DESCRIPTION  = "Defines primary parameters based on a given name and application preset to start an Edge Application"
 	EXAMPLE           = "$ azion init\n$ azion init --help\n$ azion init --name testproject"
+	FLAG_NAME         = "The Edge Application's name"
+	FLAG_PRESET       = "The Preset's name"
+	FLAG_TEMPLATE     = "The Template's name"
 )
 
 var (
 	EdgeApplicationsInitRunningCmd        = "Running init step command:\n\n"
-	EdgeApplicationsInitFlagName          = "The Edge Application's name"
 	EdgeApplicationsInitFlagYes           = "Answers all yes/no interactions automatically with yes"
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This application was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "

@@ -210,7 +210,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 }
 
 func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	if conf.Template == "javascript" || conf.Template == "typescript" {
+	if conf.Preset == "javascript" || conf.Preset == "typescript" {
 		return nil
 	}
 
@@ -285,7 +285,7 @@ func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Clien
 		}
 
 		// creates gzip and cache rules
-		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Template, conf.Mode, authorize)
+		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, conf.Mode, authorize)
 		if err != nil {
 			logger.Debug("Error while creating rules engine", zap.Error(err))
 			return err

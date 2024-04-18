@@ -32,7 +32,7 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 	}
 
 	if fields.Preset != "" {
-		conf.Template = fields.Preset
+		conf.Preset = fields.Preset
 	}
 
 	if fields.Mode != "" {
@@ -70,12 +70,12 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		return err
 	}
 
-	if conf.Template == "simple" {
+	if conf.Preset == "simple" {
 		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
 		return nil
 	}
 
-	if conf.Template == "static" {
+	if conf.Preset == "static" {
 		versionID := cmd.VersionID()
 		conf.Prefix = versionID
 
@@ -87,11 +87,11 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		return nil
 	}
 
-	if conf.Template != "nextjs" {
+	if conf.Preset != "nextjs" {
 		return vulcan(cmd, conf, vulcanParams)
 	}
 
-	if conf.Template == "nextjs" {
+	if conf.Preset == "nextjs" {
 		return adapter(cmd, conf)
 	}
 

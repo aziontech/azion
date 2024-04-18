@@ -18,7 +18,7 @@ import (
 )
 
 func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	if conf.Bucket != "" || (conf.Template == "javascript" || conf.Template == "typescript") {
+	if conf.Bucket != "" || (conf.Preset == "javascript" || conf.Preset == "typescript") {
 		return nil
 	}
 
