@@ -63,7 +63,7 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		return err
 	}
 
-	preset, err := getVulcanEnvInfo(cmd)
+	preset, mode, err := getVulcanEnvInfo(cmd)
 	if err != nil {
 		return err
 	}
@@ -72,42 +72,9 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		preset = "vue"
 	}
 
-	command = vul.Command("", "presets ls --preset "+preset)
-	output, _, err := cmd.commandRunner(command, []string{"CLEAN_OUTPUT_MODE=true"})
-	if err != nil {
-		return err
-	}
-
-	newLineSplit := strings.Split(output, "\n")
-	if newLineSplit[len(newLineSplit)-1] == "" {
-		newLineSplit = newLineSplit[:len(newLineSplit)-1]
-	}
-
-	answer := ""
-	if len(newLineSplit) > 1 {
-		prompt := &survey.Select{
-			Message: "Choose a mode:",
-			Options: newLineSplit,
-		}
-		err = survey.AskOne(prompt, &answer)
-		if err != nil {
-			return err
-		}
-		cmd.preset = strings.ToLower(preset)
-		cmd.mode = strings.ToLower(answer)
-		return nil
-	}
-
-	if len(newLineSplit) < 1 {
-		logger.Debug("No mode found for the selected preset: "+preset, zap.Error(err))
-		return msg.ErrorModeNotFound
-	}
-
-	var mds string = newLineSplit[0]
-
 	cmd.preset = strings.ToLower(preset)
-	cmd.mode = strings.ToLower(mds)
-	logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
+	cmd.mode = strings.ToLower(mode)
+	logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.ModeAutomatic, mode, preset))
 	return nil
 }
 
@@ -123,14 +90,15 @@ func depsInstall(cmd *initCmd, packageManager string) error {
 	return nil
 }
 
-func getVulcanEnvInfo(cmd *initCmd) (string, error) {
+func getVulcanEnvInfo(cmd *initCmd) (string, string, error) {
 	err := godotenv.Load(cmd.pathWorkingDir + "/.vulcan")
 	if err != nil {
 		logger.Debug("Error loading .vulcan file", zap.Error(err))
-		return "", err
+		return "", "", err
 	}
 
 	// Access environment variables
 	preset := os.Getenv("preset")
-	return preset, nil
+	mode := os.Getenv("mode")
+	return preset, mode, nil
 }
