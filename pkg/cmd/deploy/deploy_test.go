@@ -17,64 +17,66 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var successRespRule string = `
-{
-	"results": {
-	  "id": 234567,
-	  "name": "enable gzip",
-	  "phase": "response",
-	  "behaviors": [
-		{
-		  "name": "enable_gzip",
-		}
-	  ],
-	  "criteria": [
-		[
-		  {
-			"variable": "${uri}",
-			"operator": "exists",
-			"conditional": "if",
-			"input_value": ""
-		  }
-		]
-	  ],
-	  "is_active": true,
-	  "order": 1,
-	},
-	"schema_version": 3
-  }
-`
+// var successRespRule string = `
+// {
+// 	"results": {
+// 	  "id": 234567,
+// 	  "name": "enable gzip",
+// 	  "phase": "response",
+// 	  "behaviors": [
+// 		{
+// 		  "name": "enable_gzip",
+// 		}
+// 	  ],
+// 	  "criteria": [
+// 		[
+// 		  {
+// 			"variable": "${uri}",
+// 			"operator": "exists",
+// 			"conditional": "if",
+// 			"input_value": ""
+// 		  }
+// 		]
+// 	  ],
+// 	  "is_active": true,
+// 	  "order": 1,
+// 	},
+// 	"schema_version": 3
+//   }
+// `
 
-var successRespOrigin string = `
-{
-	"results": {
-	  "origin_id": 0,
-	  "origin_key": "000000-000000-00000-00000-000000",
-	  "name": "name",
-	  "origin_type": "single_origin",
-	  "addresses": [
-		{
-		  "address": "httpbin.org",
-		  "weight": null,
-		  "server_role": "primary",
-		  "is_active": true
-		}
-	  ],
-	  "origin_protocol_policy": "http",
-	  "is_origin_redirection_enabled": false,
-	  "host_header": "${host}",
-	  "method": "",
-	  "origin_path": "/requests",
-	  "connection_timeout": 60,
-	  "timeout_between_bytes": 120,
-	  "hmac_authentication": false,
-	  "hmac_region_name": "",
-	  "hmac_access_key": "",
-	  "hmac_secret_key": ""
-	},
-	"schema_version": 3
-  }
-`
+// var successRespOrigin string = `
+//
+//	{
+//		"results": {
+//		  "origin_id": 0,
+//		  "origin_key": "000000-000000-00000-00000-000000",
+//		  "name": "name",
+//		  "origin_type": "single_origin",
+//		  "addresses": [
+//			{
+//			  "address": "httpbin.org",
+//			  "weight": null,
+//			  "server_role": "primary",
+//			  "is_active": true
+//			}
+//		  ],
+//		  "origin_protocol_policy": "http",
+//		  "is_origin_redirection_enabled": false,
+//		  "host_header": "${host}",
+//		  "method": "",
+//		  "origin_path": "/requests",
+//		  "connection_timeout": 60,
+//		  "timeout_between_bytes": 120,
+//		  "hmac_authentication": false,
+//		  "hmac_region_name": "",
+//		  "hmac_access_key": "",
+//		  "hmac_secret_key": ""
+//		},
+//		"schema_version": 3
+//	  }
+//
+// `
 var successResponseApp string = `
 {
 	"results":{
@@ -103,53 +105,53 @@ var successResponseApp string = `
 }
 `
 
-var sucRespInst string = `{
-	"results": {
-	  "edge_function_id": 1111,
-	  "name": "Edge Function",
-	  "args": {},
-	  "id": 101001
-	},
-	"schema_version": 3
-  }
-`
+// var sucRespInst string = `{
+// 	"results": {
+// 	  "edge_function_id": 1111,
+// 	  "name": "Edge Function",
+// 	  "args": {},
+// 	  "id": 101001
+// 	},
+// 	"schema_version": 3
+//   }
+// `
 
-var sucRespFunc string = `{
-	"results": {
-	  "id": 1111,
-	  "name": "Function Test API",
-	  "language": "javascript",
-	  "code": "{\r\n    async function handleRequest(request) {\r\n        return new Response(\"Hello world in a new response\");\r\n    }\r\n\r\n    addEventListener(\"fetch\", (event) => {\r\n        event.respondWith(handleRequest(event.request));\r\n    });\r\n}",
-	  "json_args": {
-		"key": "value"
-	  },
-	  "function_to_run": "",
-	  "initiator_type": "edge_application",
-	  "active": true,
-	  "last_editor": "mail@mail.com",
-	  "modified": "2023-04-27T17:37:12.389389Z",
-	  "reference_count": 1
-	},
-	"schema_version": 3
-  }
-`
+// var sucRespFunc string = `{
+// 	"results": {
+// 	  "id": 1111,
+// 	  "name": "Function Test API",
+// 	  "language": "javascript",
+// 	  "code": "{\r\n    async function handleRequest(request) {\r\n        return new Response(\"Hello world in a new response\");\r\n    }\r\n\r\n    addEventListener(\"fetch\", (event) => {\r\n        event.respondWith(handleRequest(event.request));\r\n    });\r\n}",
+// 	  "json_args": {
+// 		"key": "value"
+// 	  },
+// 	  "function_to_run": "",
+// 	  "initiator_type": "edge_application",
+// 	  "active": true,
+// 	  "last_editor": "mail@mail.com",
+// 	  "modified": "2023-04-27T17:37:12.389389Z",
+// 	  "reference_count": 1
+// 	},
+// 	"schema_version": 3
+//   }
+// `
 
-var sucRespDomain string = `{
-    "results": {
-        "id": 1702659986,
-        "name": "My Domain",
-        "cnames": [],
-        "cname_access_only": false,
-        "digital_certificate_id": null,
-        "edge_application_id": 1697666970,
-        "is_active": true,
-        "domain_name": "ja65r2loc3.map.azionedge.net",
-        "is_mtls_enabled": false,
-        "mtls_verification": "enforce",
-        "mtls_trusted_ca_certificate_id": null
-    },
-    "schema_version": 3
-}`
+// var sucRespDomain string = `{
+//     "results": {
+//         "id": 1702659986,
+//         "name": "My Domain",
+//         "cnames": [],
+//         "cname_access_only": false,
+//         "digital_certificate_id": null,
+//         "edge_application_id": 1697666970,
+//         "is_active": true,
+//         "domain_name": "ja65r2loc3.map.azionedge.net",
+//         "is_mtls_enabled": false,
+//         "mtls_verification": "enforce",
+//         "mtls_trusted_ca_certificate_id": null
+//     },
+//     "schema_version": 3
+// }`
 
 // var sucRespOrigin string = `{
 //     "results": {
