@@ -23,7 +23,7 @@ var (
 	RpmUpdate         = "Please run: 'sudo rpm -i <downloaded_file>' to update it to v%s\n"
 	DpkgUpdate        = "Please run: 'sudo dpkg -i <downloaded_file>' to update it to v%s\n"
 	PkgUpdate         = "Please run: 'sudo pkg install <downloaded_file>' to update it to v%s\n"
-	ApkUpdate         = "Please run: 'sudo apk add <downloaded_file>' to update to the latest version\n"
+	ApkUpdate         = "Please run: 'sudo apk add <downloaded_file>' to update it to v%s\n"
 	AskCollectMetrics = "To better understand user needs and enhance our application, we gather anonymous data. Do you agree to participate? (Y/n)"
 	UnsupportedOS     = "Unsupported Operating System\n"
 )

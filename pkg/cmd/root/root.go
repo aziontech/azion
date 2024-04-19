@@ -40,14 +40,12 @@ import (
 )
 
 type RootCmd struct {
-	F       *cmdutil.Factory
-	InitCmd func(f *cmdutil.Factory) *initcmd.InitCmd
+	F *cmdutil.Factory
 }
 
 func NewRootCmd(f *cmdutil.Factory) *RootCmd {
 	return &RootCmd{
-		F:       f,
-		InitCmd: initcmd.NewInitCmd,
+		F: f,
 	}
 }
 

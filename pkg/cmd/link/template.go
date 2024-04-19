@@ -19,7 +19,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	azionJson := &contracts.AzionApplicationOptions{
 		Name:     info.Name,
 		Env:      "production",
-		Template: strings.ToLower(info.Preset),
+		Preset: strings.ToLower(info.Preset),
 		Mode:     strings.ToLower(info.Mode),
 		Prefix:   "",
 	}
@@ -29,7 +29,6 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	azionJson.Function.Args = "./azion/args.json"
 	azionJson.Domain.Name = "__DEFAULT__"
 	azionJson.Application.Name = "__DEFAULT__"
-	azionJson.Origin.Name = "__DEFAULT__"
 	azionJson.RtPurge.PurgeOnPublish = true
 
 	return cmd.createJsonFile(azionJson, info)

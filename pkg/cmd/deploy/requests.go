@@ -209,101 +209,168 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return domainReturnedName[0], nil
 }
 
-func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
-	if conf.Template == "javascript" || conf.Template == "typescript" {
+// func (cmd *DeployCmd) doOrigin(client *apiapp.Client, clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+// 	if conf.Template == "javascript" || conf.Template == "typescript" {
+// 		return nil
+// 	}
+
+// 	var addresses []string
+// 	var DefaultOrigin = [1]string{"httpbin.org"}
+
+// 	if strings.ToLower(conf.Mode) == "compute" {
+// 		if conf.Origin.SingleOriginID == 0 {
+// 			reqSingleOrigin := apiori.CreateRequest{}
+
+// 			if len(conf.Origin.Address) > 0 {
+// 				address := prepareAddresses(conf.Origin.Address)
+// 				reqSingleOrigin.SetAddresses(address)
+// 			} else {
+// 				addresses := prepareAddresses(DefaultOrigin[:])
+// 				reqSingleOrigin.SetAddresses(addresses)
+// 			}
+
+// 			reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
+// 			reqSingleOrigin.SetHostHeader("${host}")
+
+// 			origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
+// 			if err != nil {
+// 				logger.Debug("Error while creating default origin ", zap.Any("Error", err))
+// 				return err
+// 			}
+// 			logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+// 			conf.Origin.SingleOriginID = origin.GetOriginId()
+// 		}
+// 	}
+
+// 	if conf.Origin.StorageOriginID == 0 {
+// 		reqObjectStorageOrigin := apiori.CreateRequest{}
+// 		reqObjectStorageOrigin.SetName(utils.Concat(conf.Name, "_object"))
+// 		reqObjectStorageOrigin.SetOriginType("object_storage")
+// 		reqObjectStorageOrigin.Bucket = &conf.Bucket
+// 		reqObjectStorageOrigin.Prefix = &conf.Prefix
+
+// 		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqObjectStorageOrigin)
+// 		if err != nil {
+// 			logger.Debug("Error while creating origin of type object storage", zap.Any("Error", err))
+// 			return err
+// 		}
+// 		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+
+// 		conf.Origin.StorageOriginID = origin.GetOriginId()
+// 		conf.Origin.StorageOriginKey = origin.GetOriginKey()
+// 		conf.Origin.Address = addresses
+// 		conf.Origin.Name = origin.GetName()
+
+// 		var cacheId int64
+// 		var authorize bool
+// 		if Auto {
+// 			authorize = false
+// 		} else {
+// 			authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
+// 		}
+
+// 		if authorize {
+// 			var reqCache apiapp.CreateCacheSettingsRequest
+// 			reqCache.SetName(conf.Name)
+
+// 			// create cache settings
+// 			cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+// 			if err != nil {
+// 				logger.Debug("Error while creating cache settings", zap.Error(err))
+// 				return err
+// 			}
+// 			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
+// 			cacheId = cache.GetId()
+// 		}
+
+// 		// creates gzip and cache rules
+// 		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Template, conf.Mode, authorize)
+// 		if err != nil {
+// 			logger.Debug("Error while creating rules engine", zap.Error(err))
+// 			return err
+// 		}
+
+// 		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
+// 	} else {
+// 		reqObjectStorageOrigin := apiori.UpdateRequest{}
+// 		reqObjectStorageOrigin.Prefix = &conf.Prefix
+
+// 		_, err := clientOrigin.Update(ctx, conf.Application.ID, conf.Origin.StorageOriginKey, &reqObjectStorageOrigin)
+// 		if err != nil {
+// 			logger.Debug("Error while updating origin of type object storage", zap.Any("Error", err))
+// 			return err
+// 		}
+// 		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.OriginsUpdateSuccessful, conf.Application.ID, conf.Origin.StorageOriginID))
+// 	}
+// 	return nil
+// }
+
+func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client) error {
+	if conf.NotFirstRun {
 		return nil
 	}
+	var cacheId int64
+	var authorize bool
+	if Auto {
+		authorize = false
+	} else {
+		authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
+	}
 
-	var addresses []string
+	if authorize {
+		var reqCache apiapp.CreateCacheSettingsRequest
+		reqCache.SetName(conf.Name)
+
+		// create cache settings
+		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+		if err != nil {
+			logger.Debug("Error while creating cache settings", zap.Error(err))
+			return err
+		}
+		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
+		cacheId = cache.GetId()
+	}
+
+	// creates gzip and cache rules
+	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, conf.Mode, authorize)
+	if err != nil {
+		logger.Debug("Error while creating rules engine", zap.Error(err))
+		return err
+	}
+
+	conf.NotFirstRun = true
+	return nil
+}
+
+func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
-	if strings.ToLower(conf.Mode) == "compute" {
-		if conf.Origin.SingleOriginID == 0 {
-			reqSingleOrigin := apiori.CreateRequest{}
-
-			if len(conf.Origin.Address) > 0 {
-				address := prepareAddresses(conf.Origin.Address)
-				reqSingleOrigin.SetAddresses(address)
-			} else {
-				addresses := prepareAddresses(DefaultOrigin[:])
-				reqSingleOrigin.SetAddresses(addresses)
-			}
-
-			reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
-			reqSingleOrigin.SetHostHeader("${host}")
-
-			origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
-			if err != nil {
-				logger.Debug("Error while creating default origin ", zap.Any("Error", err))
-				return err
-			}
-			logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
-
-			conf.Origin.SingleOriginID = origin.GetOriginId()
-		}
+	if len(conf.Origin) > 0 {
+		return 0, nil
 	}
 
-	if conf.Origin.StorageOriginID == 0 {
-		reqObjectStorageOrigin := apiori.CreateRequest{}
-		reqObjectStorageOrigin.SetName(utils.Concat(conf.Name, "_object"))
-		reqObjectStorageOrigin.SetOriginType("object_storage")
-		reqObjectStorageOrigin.Bucket = &conf.Bucket
-		reqObjectStorageOrigin.Prefix = &conf.Prefix
+	reqSingleOrigin := apiori.CreateRequest{}
+	addresses := prepareAddresses(DefaultOrigin[:])
+	reqSingleOrigin.SetAddresses(addresses)
 
-		origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqObjectStorageOrigin)
-		if err != nil {
-			logger.Debug("Error while creating origin of type object storage", zap.Any("Error", err))
-			return err
-		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+	reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
+	reqSingleOrigin.SetHostHeader("${host}")
 
-		conf.Origin.StorageOriginID = origin.GetOriginId()
-		conf.Origin.StorageOriginKey = origin.GetOriginKey()
-		conf.Origin.Address = addresses
-		conf.Origin.Name = origin.GetName()
-
-		var cacheId int64
-		var authorize bool
-		if Auto {
-			authorize = false
-		} else {
-			authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
-		}
-
-		if authorize {
-			var reqCache apiapp.CreateCacheSettingsRequest
-			reqCache.SetName(conf.Name)
-
-			// create cache settings
-			cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
-			if err != nil {
-				logger.Debug("Error while creating cache settings", zap.Error(err))
-				return err
-			}
-			logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
-			cacheId = cache.GetId()
-		}
-
-		// creates gzip and cache rules
-		err = client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Template, conf.Mode, authorize)
-		if err != nil {
-			logger.Debug("Error while creating rules engine", zap.Error(err))
-			return err
-		}
-
-		logger.FInfo(cmd.F.IOStreams.Out, msg.RulesEngineSuccessful)
-	} else {
-		reqObjectStorageOrigin := apiori.UpdateRequest{}
-		reqObjectStorageOrigin.Prefix = &conf.Prefix
-
-		_, err := clientOrigin.Update(ctx, conf.Application.ID, conf.Origin.StorageOriginKey, &reqObjectStorageOrigin)
-		if err != nil {
-			logger.Debug("Error while updating origin of type object storage", zap.Any("Error", err))
-			return err
-		}
-		logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.OriginsUpdateSuccessful, conf.Application.ID, conf.Origin.StorageOriginID))
+	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
+	if err != nil {
+		logger.Debug("Error while creating default origin ", zap.Any("Error", err))
+		return 0, err
 	}
-	return nil
+	logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+	newOrigin := contracts.AzionJsonDataOrigin{
+		OriginId:  origin.GetOriginId(),
+		OriginKey: origin.GetOriginKey(),
+		Name:      origin.GetName(),
+	}
+	conf.Origin = append(conf.Origin, newOrigin)
+
+	return newOrigin.OriginId, nil
 }
 
 func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {

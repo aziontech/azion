@@ -14,8 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
-func shouldDevDeploy(info *InitInfo, msg string, defaultYes bool) bool {
-	return helpers.Confirm(info.GlobalFlagAll, msg, defaultYes)
+func shouldDevDeploy(msg string, globalFlagAll bool, defaultYes bool) bool {
+	return helpers.Confirm(globalFlagAll, msg, defaultYes)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {
@@ -34,29 +34,36 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	return userInput, nil
 }
 
-func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
-
+func (cmd *initCmd) selectVulcanTemplates() error {
 	// checking if vulcan major is correct
-	vulcanVer, err := cmd.CommandRunnerOutput(cmd.F, "npm show edge-functions version", []string{})
+	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
 		return err
 	}
 
-	err = vul.CheckVulcanMajor(vulcanVer, cmd.F)
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.f)
 	if err != nil {
 		return err
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.InitGettingVulcan)
+	logger.FInfo(cmd.io.Out, msg.InitGettingVulcan)
 
-	command := vul.Command("", "init --name "+info.Name)
+	cmdVulcanInit := fmt.Sprintf("init --name %s", cmd.name)
+	if len(cmd.preset) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --preset '%s'", cmdVulcanInit, cmd.preset)
+	}
+	if len(cmd.template) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --template '%s'", cmdVulcanInit, cmd.template)
+	}
 
-	err = cmd.CommandRunInteractive(cmd.F, command)
+	command := vul.Command("", cmdVulcanInit)
+
+	err = cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
 		return err
 	}
 
-	preset, err := getVulcanEnvInfo(info)
+	preset, err := getVulcanEnvInfo(cmd)
 	if err != nil {
 		return err
 	}
@@ -66,7 +73,7 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 	}
 
 	command = vul.Command("", "presets ls --preset "+preset)
-	output, _, err := cmd.CommandRunner(command, []string{"CLEAN_OUTPUT_MODE=true"})
+	output, _, err := cmd.commandRunner(command, []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
 	}
@@ -86,8 +93,8 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 		if err != nil {
 			return err
 		}
-		info.Template = strings.ToLower(preset)
-		info.Mode = strings.ToLower(answer)
+		cmd.preset = strings.ToLower(preset)
+		cmd.mode = strings.ToLower(answer)
 		return nil
 	}
 
@@ -98,17 +105,16 @@ func (cmd *InitCmd) selectVulcanTemplates(info *InitInfo) error {
 
 	var mds string = newLineSplit[0]
 
-	info.Template = strings.ToLower(preset)
-	info.Mode = strings.ToLower(mds)
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
-
+	cmd.preset = strings.ToLower(preset)
+	cmd.mode = strings.ToLower(mds)
+	logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.ModeAutomatic, mds, preset))
 	return nil
 }
 
-func depsInstall(cmd *InitCmd, packageManager string) error {
-	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
+func depsInstall(cmd *initCmd, packageManager string) error {
+	logger.FInfo(cmd.io.Out, msg.InitInstallDeps)
 	command := fmt.Sprintf("%s install", packageManager)
-	err := cmd.CommandRunInteractive(cmd.F, command)
+	err := cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
@@ -117,8 +123,8 @@ func depsInstall(cmd *InitCmd, packageManager string) error {
 	return nil
 }
 
-func getVulcanEnvInfo(info *InitInfo) (string, error) {
-	err := godotenv.Load(info.PathWorkingDir + "/.vulcan")
+func getVulcanEnvInfo(cmd *initCmd) (string, error) {
+	err := godotenv.Load(cmd.pathWorkingDir + "/.vulcan")
 	if err != nil {
 		logger.Debug("Error loading .vulcan file", zap.Error(err))
 		return "", err
