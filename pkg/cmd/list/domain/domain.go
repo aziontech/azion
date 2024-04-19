@@ -64,14 +64,14 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		for _, v := range resp.Results {
 			tbl.AddRow(
-				v.Id,
-				utils.TruncateString(v.Name),
-				v.DomainName,
-				v.DigitalCertificateId,
-				v.EdgeApplicationId,
-				v.CnameAccessOnly,
-				v.Cnames,
-				v.IsActive,
+				v.GetId(),
+				utils.TruncateString(v.GetName()),
+				v.GetDomainName(),
+				v.GetDigitalCertificateId(),
+				v.GetDigitalCertificateId(),
+				v.GetCnameAccessOnly(),
+				v.GetCnames(),
+				v.GetIsActive(),
 			)
 		}
 

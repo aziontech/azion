@@ -27,12 +27,13 @@ type DevInfo struct {
 }
 
 type ListOptions struct {
-	Details  bool
-	OrderBy  string
-	Sort     string
-	Page     int64
-	PageSize int64
-	Filter   string
+	Details           bool
+	OrderBy           string
+	Sort              string
+	Page              int64
+	PageSize          int64
+	Filter            string
+	ContinuationToken string
 }
 
 type DescribeOptions struct {
@@ -44,8 +45,8 @@ type AzionApplicationOptions struct {
 	Test          func(path string) error      `json:"-"`
 	Name          string                       `json:"name"`
 	Bucket        string                       `json:"bucket"`
-	Template      string                       `json:"template"` // framework: react, next, vue, angular and etc
-	Mode          string                       `json:"mode"`     // deliver == ssg, compute == ssr
+	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
+	Mode          string                       `json:"mode"`   // deliver == ssg, compute == ssr
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
 	NotFirstRun   bool                         `json:"not-first-run"`

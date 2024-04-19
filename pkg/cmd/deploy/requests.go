@@ -333,7 +333,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	}
 
 	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Template, conf.Mode, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, conf.Mode, authorize)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
@@ -514,7 +514,7 @@ func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) err
 		purgeDomains[i] = domainNames[i] + wildCard
 	}
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	err := clipurge.Purge(ctx, purgeDomains)
+	err := clipurge.PurgeWildcard(ctx, purgeDomains)
 	if err != nil {
 		logger.Debug("Error while purging domain", zap.Error(err))
 		return err

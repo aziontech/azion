@@ -35,14 +35,14 @@ func TestNewBucket(t *testing.T) {
 			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--name", "arthur-morgan", "--edge-access", "read_only"},
-			output:   fmt.Sprintf("🚀 %s\n", msg.SUCCESS_CREATE_BUCKET),
+			output:   msg.OUTPUT_CREATE_BUCKET,
 		},
 		{
 			name:     "create new bucket command bucket of the edge-storage using flag --file",
 			request:  httpmock.REST(http.MethodPost, "v4/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--file", "fixtures/create.json"},
-			output:   fmt.Sprintf("🚀 %s\n", msg.SUCCESS_CREATE_BUCKET),
+			output:   msg.OUTPUT_CREATE_BUCKET,
 		},
 		{
 			name:     "input file json err --file",
@@ -59,7 +59,7 @@ func TestNewBucket(t *testing.T) {
 					StatusCode: http.StatusInternalServerError,
 					Body:       io.NopCloser(bytes.NewBufferString("")),
 					Header:     http.Header{"Content-Type": []string{"application/json"}},
-				}, nil
+				}, utils.ErrorInternalServerError
 			},
 			args: []string{"--file", "fixtures/create.json"},
 			Err:  fmt.Sprintf(msg.ERROR_CREATE_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),

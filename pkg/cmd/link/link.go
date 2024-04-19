@@ -5,12 +5,15 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"regexp"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -26,6 +29,7 @@ type LinkInfo struct {
 	Mode           string
 	PathWorkingDir string
 	GlobalFlagAll  bool
+	remote         string
 	Auto           bool
 }
 
@@ -111,6 +115,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", msg.EdgeApplicationsLinkFlagTemplate)
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
+	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
 
 	return cobraCmd
 }
@@ -128,6 +133,21 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 		return err
 	}
 	info.PathWorkingDir = path
+
+	if len(info.remote) > 0 {
+		logger.Debug("flag remote", zap.Any("repository", info.remote))
+		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w.-]+/[\w.-]+(\.git)?$`, info.remote)
+		if !urlFull {
+			info.remote = fmt.Sprintf("https://github.com/%s.git", info.remote)
+		}
+		nameRepo := github.GetNameRepo(info.remote)
+		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
+		err = github.Clone(info.remote, filepath.Join(path, nameRepo))
+		if err != nil {
+			logger.Debug("Error while cloning the repository", zap.Error(err))
+			return err
+		}
+	}
 
 	shouldLink := cmd.ShouldConfigure(info)
 	if !shouldLink {

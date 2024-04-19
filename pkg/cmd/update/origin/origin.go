@@ -97,7 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()))
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()))
 			return nil
 		},
 	}

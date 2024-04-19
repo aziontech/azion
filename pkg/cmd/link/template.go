@@ -19,7 +19,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	azionJson := &contracts.AzionApplicationOptions{
 		Name:     info.Name,
 		Env:      "production",
-		Template: strings.ToLower(info.Preset),
+		Preset: strings.ToLower(info.Preset),
 		Mode:     strings.ToLower(info.Mode),
 		Prefix:   "",
 	}

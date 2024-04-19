@@ -8,19 +8,19 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
-func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
+func (cmd *initCmd) createTemplateAzion() error {
 
-	err := cmd.Mkdir(info.PathWorkingDir+"/azion", 0755) // 0755 is the permission mode for the new directories
+	err := cmd.mkdir(cmd.pathWorkingDir+"/azion", 0755) // 0755 is the permission mode for the new directories
 	if err != nil {
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
 
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:     info.Name,
-		Env:      "production",
-		Template: info.Template,
-		Mode:     info.Mode,
-		Prefix:   "",
+		Name:   cmd.name,
+		Env:    "production",
+		Preset: cmd.preset,
+		Mode:   cmd.mode,
+		Prefix: "",
 	}
 
 	azionJson.Function.Name = "__DEFAULT__"
@@ -31,17 +31,17 @@ func (cmd *InitCmd) createTemplateAzion(info *InitInfo) error {
 	azionJson.Application.Name = "__DEFAULT__"
 	azionJson.RtPurge.PurgeOnPublish = true
 
-	return cmd.createJsonFile(azionJson, info)
+	return cmd.createJsonFile(azionJson)
 
 }
 
-func (cmd *InitCmd) createJsonFile(options *contracts.AzionApplicationOptions, info *InitInfo) error {
+func (cmd *initCmd) createJsonFile(options *contracts.AzionApplicationOptions) error {
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
 		return msg.ErrorUnmarshalAzionFile
 	}
 
-	err = cmd.WriteFile(info.PathWorkingDir+"/azion/azion.json", data, 0644)
+	err = cmd.writeFile(cmd.pathWorkingDir+"/azion/azion.json", data, 0644)
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}

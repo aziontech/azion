@@ -143,7 +143,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 
-		if strings.ToLower(conf.Template) == "javascript" || strings.ToLower(conf.Template) == "typescript" {
+		if strings.ToLower(conf.Preset) == "javascript" || strings.ToLower(conf.Preset) == "typescript" {
 			reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
 			reqRules.IdApplication = conf.Application.ID
 
@@ -192,7 +192,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	// skip upload when type = javascript, typescript (storage folder does not exist in these cases)
-	if conf.Template != "javascript" && conf.Template != "typescript" {
+	if conf.Preset != "javascript" && conf.Preset != "typescript" {
 		err = cmd.uploadFiles(f, conf)
 		if err != nil {
 			return err

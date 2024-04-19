@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
+	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
@@ -39,14 +40,12 @@ import (
 )
 
 type RootCmd struct {
-	F       *cmdutil.Factory
-	InitCmd func(f *cmdutil.Factory) *initcmd.InitCmd
+	F *cmdutil.Factory
 }
 
 func NewRootCmd(f *cmdutil.Factory) *RootCmd {
 	return &RootCmd{
-		F:       f,
-		InitCmd: initcmd.NewInitCmd,
+		F: f,
 	}
 }
 
@@ -138,6 +137,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(update.NewCmd(f))
 	cobraCmd.AddCommand(version.NewCmd(f))
 	cobraCmd.AddCommand(whoami.NewCmd(f))
+	cobraCmd.AddCommand(purge.NewCmd(f))
 
 	return cobraCmd
 }
