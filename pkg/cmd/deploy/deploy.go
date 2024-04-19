@@ -1,19 +1,26 @@
 package deploy
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -31,6 +38,7 @@ type DeployCmd struct {
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
 	F                     *cmdutil.Factory
 	Unmarshal             func(data []byte, v interface{}) error
+	Interpreter           func() *manifestInt.ManifestInterpreter
 }
 
 var (
@@ -52,6 +60,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,
 		F:                     f,
+		Interpreter:           manifestInt.NewManifestInterpreter,
 	}
 }
 
@@ -83,6 +92,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
+	ctx := context.Background()
 
 	buildCmd := cmd.BuildCmd(f)
 	err := buildCmd.Run(&contracts.BuildInfo{})
@@ -97,18 +107,111 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	manifest, err := readManifest(cmd)
-	if err != nil {
-		logger.Debug("Error while reading manifest", zap.Error(err))
-		return err
-	}
-
 	clients := NewClients(f)
-	err = manifest.Interpreted(f, cmd, conf, clients)
+	interpreter := cmd.Interpreter()
+
+	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
-		logger.Debug("Error while interpreting manifest", zap.Error(err))
 		return err
 	}
 
+	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf)
+	if err != nil {
+		return err
+	}
+
+	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.doBucket(clients.Bucket, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	conf.Function.File = ".edge/worker.js"
+	err = cmd.doFunction(clients, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	if !conf.NotFirstRun {
+		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
+		if err != nil {
+			logger.Debug("Error while getting default rules engine", zap.Error(err))
+			return err
+		}
+
+		if strings.ToLower(conf.Preset) == "javascript" || strings.ToLower(conf.Preset) == "typescript" {
+			reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
+			reqRules.IdApplication = conf.Application.ID
+
+			_, err := clients.EdgeApplication.UpdateRulesEnginePublish(ctx, &reqRules, conf.Function.InstanceID)
+			if err != nil {
+				return err
+			}
+		} else {
+			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+
+			var behString sdk.RulesEngineBehaviorString
+			behString.SetName("set_origin")
+
+			behString.SetTarget(strconv.Itoa(int(singleOriginId)))
+
+			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behString,
+			})
+
+			reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
+				IdApplication: conf.Application.ID,
+				Phase:         "request",
+				Id:            ruleDefaultID,
+			}
+
+			reqUpdateRulesEngine.SetBehaviors(behaviors)
+
+			_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+			if err != nil {
+				logger.Debug("Error while updating default rules engine", zap.Error(err))
+				return err
+			}
+		}
+	}
+
+	manifestStructure, err := interpreter.ReadManifest(pathManifest, f)
+	if err != nil {
+		return err
+	}
+
+	if len(conf.RulesEngine.Rules) == 0 {
+		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication)
+		if err != nil {
+			return err
+		}
+	}
+
+	// skip upload when type = javascript, typescript (storage folder does not exist in these cases)
+	if conf.Preset != "javascript" && conf.Preset != "typescript" {
+		err = cmd.uploadFiles(f, conf)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = interpreter.CreateResources(conf, manifestStructure, f)
+	if err != nil {
+		return err
+	}
+
+	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	if err != nil {
+		return err
+	}
+
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, utils.Concat("https://", domainName)))
+	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 	return nil
+
 }
