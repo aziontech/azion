@@ -161,7 +161,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originKeys)
+			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originKeys, client, ctx)
 			if err != nil {
 				return err
 			}

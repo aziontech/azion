@@ -1,6 +1,7 @@
 package manifest
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -9,7 +10,9 @@ import (
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"go.uber.org/zap"
 )
 
 func makeCacheRequestUpdate(cache contracts.CacheSetting) *apiCache.UpdateRequest {
@@ -221,7 +224,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originKeys map[string]int64) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
+func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originKeys map[string]int64, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -274,6 +277,16 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 						return nil, msg.ErrorCacheNotFound
 					}
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
+					var beh sdk.RulesEngineBehaviorString
+					cacheId, err := doCacheForRule(ctx, client, conf)
+					if err != nil {
+						return nil, err
+					}
+					beh.SetName("set_cache_policy")
+					beh.SetTarget(fmt.Sprintf("%d", cacheId))
+					behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+						RulesEngineBehaviorString: &beh,
+					})
 					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
@@ -316,6 +329,24 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 	}
 
 	return request
+}
+
+func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptions) (int64, error) {
+	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
+	reqCache.SetName("function policy")
+	reqCache.SetBrowserCacheSettings("honor")
+	reqCache.SetCdnCacheSettings("honor")
+	reqCache.SetCdnCacheSettingsMaximumTtl(0)
+	reqCache.SetCacheByQueryString("all")
+	reqCache.SetCacheByCookies("all")
+
+	// create cache to function next
+	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
+	if err != nil {
+		logger.Debug("Error while creating cache settings", zap.Error(err))
+		return 0, err
+	}
+	return cache.GetId(), nil
 }
 
 // func makeOriginUpdateRequest(origin contracts.Origin) *apiOrigin.UpdateRequest {
