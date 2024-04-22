@@ -74,7 +74,6 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 
 	cmd.preset = strings.ToLower(preset)
 	cmd.mode = strings.ToLower(mode)
-	logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.ModeAutomatic, mode, preset))
 	return nil
 }
 
