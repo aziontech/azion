@@ -91,10 +91,6 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		return vulcan(cmd, conf, vulcanParams)
 	}
 
-	if conf.Preset == "nextjs" {
-		return adapter(cmd, conf)
-	}
-
 	return utils.ErrorUnsupportedType
 }
 
