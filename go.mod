@@ -7,7 +7,7 @@ require (
 	github.com/aziontech/azionapi-go-sdk v0.127.0
 	github.com/aziontech/go-thoth v0.0.0-20231215171110-aaa75e75c8df
 	github.com/briandowns/spinner v1.23.0
-	github.com/fatih/color v1.14.1
+	github.com/fatih/color v1.16.0
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/joho/godotenv v1.5.1
 	github.com/manifoldco/promptui v0.9.0
