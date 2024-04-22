@@ -10,7 +10,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/nsf/termbox-go"
 
-	table "github.com/MaxwelMazur/tablecli"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"

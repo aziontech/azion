@@ -2,17 +2,14 @@ package domain
 
 import (
 	"context"
-	"strings"
-
-	"github.com/fatih/color"
+	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/list/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -51,40 +48,32 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		tbl := table.New("ID", "NAME")
-		tbl.WithWriter(f.IOStreams.Out)
+		listOut := output.ListOutput{}
+		listOut.Columns = []string{"ID", "NAME"}
+		listOut.Out = f.IOStreams.Out
 
 		if opts.Details {
-			tbl = table.New("ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE")
+			listOut.Columns = []string{"ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE"}
 		}
-
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, v := range resp.Results {
-			tbl.AddRow(
-				v.GetId(),
+			ln := []string{
+				fmt.Sprintf("%d", v.GetId()),
 				utils.TruncateString(v.GetName()),
 				v.GetDomainName(),
-				v.GetDigitalCertificateId(),
-				v.GetDigitalCertificateId(),
-				v.GetCnameAccessOnly(),
-				v.GetCnames(),
-				v.GetIsActive(),
-			)
+				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+				fmt.Sprintf("%v", v.GetCnameAccessOnly()),
+				fmt.Sprintf("%v", v.GetCnames()),
+				fmt.Sprintf("%v", v.GetIsActive()),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
 
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-
-		// print the header only in the first flow
-		if opts.Page == 1 {
-			logger.PrintHeader(tbl, format)
-		}
-
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
+		listOut.Page = opts.Page
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
 		}
 
 		if opts.Page >= resp.TotalPages {

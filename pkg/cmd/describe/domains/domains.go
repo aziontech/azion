@@ -2,19 +2,16 @@ package domains
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/describe/domain"
-	"github.com/fatih/color"
 
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -42,7 +39,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				domainID = answer
 			}
-
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
@@ -51,23 +47,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, domain)
-			if err != nil {
-				return utils.ErrorFormatOut
+			fields := make(map[string]string, 0)
+			fields["Id"] = "ID"
+			fields["Name"] = "Name"
+			fields["DomainName"] = "Domain"
+			fields["CnameAccessOnly"] = "Cname Access Only"
+			fields["Cnames"] = "Cnames"
+			fields["EdgeApplicationId"] = "Application ID"
+			fields["DigitalCertificateId"] = "Digital Certificate ID"
+
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Msg:         fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+				},
+				Fields: fields,
+				Values: domain,
 			}
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
-				return nil
-			}
-
-			logger.FInfo(out, string(formattedFuction[:]))
-			return nil
+			describeOut.Out = f.IOStreams.Out
+			return output.Print(&describeOut)
 		},
 	}
 
@@ -77,34 +77,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
-}
-
-func format(cmd *cobra.Command, domain api.DomainResponse) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(domain, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-
-	tbl.AddRow("ID: ", domain.GetId())
-	tbl.AddRow("Name: ", domain.GetName())
-	tbl.AddRow("Domain: ", domain.GetDomainName())
-	tbl.AddRow("Cname Access Only: ", domain.GetCnameAccessOnly())
-	if domain.GetCnameAccessOnly() {
-		Cnames := domain.GetCnames()
-		tbl.AddRow("Cnames: ")
-		for _, cname := range Cnames {
-			tbl.AddRow("	", cname)
-		}
-	}
-	tbl.AddRow("Application ID: ", domain.GetEdgeApplicationId())
-	tbl.AddRow("Digital Certificate ID: ", domain.GetDigitalCertificateId())
-
-	return tbl.GetByteFormat(), nil
 }

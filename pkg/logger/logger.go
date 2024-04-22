@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
-	table "github.com/MaxwelMazur/tablecli"
 	"github.com/fatih/color"
+	"github.com/maxwelbm/tablecli"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -84,14 +84,14 @@ func FInfo(w io.Writer, message string) {
 	}
 }
 
-func PrintHeader(table table.Table, format string) {
+func PrintHeader(table tablecli.Table, format string) {
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
 		table.PrintHeader(format)
 	}
 }
 
-func PrintRow(table table.Table, format string, row []string) {
+func PrintRow(table tablecli.Table, format string, row []string) {
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
 		table.PrintRow(format, row)

@@ -8,7 +8,6 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
 	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
@@ -16,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
