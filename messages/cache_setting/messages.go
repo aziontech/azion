@@ -32,7 +32,7 @@ var (
 	UpdateUsage            = "update [flags]"
 	UpdateShortDescription = "Updates a Cache Settings configuration"
 	UpdateLongDescription  = "Updates a Cache Settings configuration based on given attributes to be used in Edge Applications"
-	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d\n"
+	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d"
 	UpdateFlagHelp         = "Displays more information about the update cache-setting command"
 
 	// [ describe ]

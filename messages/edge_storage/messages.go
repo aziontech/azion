@@ -66,6 +66,7 @@ const (
 	OUTPUT_CREATE_BUCKET = "Bucket created successfully"
 	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully"
 	OUTPUT_UPDATE_BUCKET = "Bucket updated successfully"
+	OUTPUT_UPDATE_OBJECT = "Object updated successfully"
 	OUTPUT_CREATE_OBJECT = "Object created successfully"
 	OUTPUT_DELETE_OBJECT = "Object %s was deleted successfully"
 )

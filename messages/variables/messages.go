@@ -37,7 +37,7 @@ var (
 	UpdateFlagValue        = "The variable's value"
 	UpdateFlagSecret       = "Indicates whether the value is meant to be confidential."
 	UpdateFlagIn           = "Given path and JSON file to automatically update the variable attributes; you can use - for reading from stdin"
-	UpdateOutputSuccess    = "Updated variable with UUID %d\n"
+	UpdateOutputSuccess    = "Updated variable with UUID %s"
 	UpdateHelpFlag         = "Displays more information about the update subcommand"
 
 	// [ create ]
