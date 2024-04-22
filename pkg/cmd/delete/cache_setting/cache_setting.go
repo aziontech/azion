@@ -10,6 +10,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -33,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.DeleteAskInputCacheID)
+				answer, err := utils.AskInput(msg.ListAskInputApplicationID)
 				if err != nil {
 					return err
 				}
@@ -71,8 +72,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.DeleteOutputSuccess, cacheSettingsID)
-			return nil
+			deleteOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, cacheSettingsID),
+				Out: f.IOStreams.Out}
+			return output.Print(&deleteOut)
+
 		},
 	}
 

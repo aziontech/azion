@@ -12,7 +12,6 @@ var (
 	ListAskInputApplicationID     = "Enter the ID of the Edge Application the Cache Setting is linked to:"
 	CreateAskInputApplicationID   = "Enter the ID of the Edge Application the Cache Setting will be linked to:"
 	UpdateAskInputCacheSettingID  = "Enter the ID of the Cache Setting you wish to update:"
-	AskInputCacheID               = "Enter the ID of the Cache Setting you wish to delete:"
 	DeleteAskInputCacheID         = "Enter the ID of the Cache Setting you wish to delete:"
 	DescribeAskInputCacheID       = "Enter the ID of the Cache Setting you wish to describe:"
 	DescibeAskInputApplicationID  = "Enter the ID of the Edge Application the Cache Settings is linked to:"
