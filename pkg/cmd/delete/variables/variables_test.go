@@ -29,7 +29,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "🚀 Variable 7a187044-4a00-4a4a-93ed-d230900421f3 was successfully deleted\n\n", stdout.String())
+		assert.Equal(t, "Variable 7a187044-4a00-4a4a-93ed-d230900421f3 was successfully deleted\n", stdout.String())
 	})
 
 	t.Run("delete variable that is not found", func(t *testing.T) {

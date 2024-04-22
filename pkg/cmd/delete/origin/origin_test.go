@@ -28,7 +28,7 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "🚀 Origin 58755fef-e830-4ea4-b9e0-6481f1ef496d was successfully deleted\n\n", stdout.String())
+		assert.Equal(t, "Origin 58755fef-e830-4ea4-b9e0-6481f1ef496d was successfully deleted\n", stdout.String())
 	})
 
 	t.Run("delete domain - not found", func(t *testing.T) {

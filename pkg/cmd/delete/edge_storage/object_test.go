@@ -30,7 +30,7 @@ func TestNewObject(t *testing.T) {
 		Err      string
 	}{
 		{
-			name:    "delete object command object of the edge-storage",
+			name:    "delete object command - edge-storage",
 			request: httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan/objects/revolver38"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{

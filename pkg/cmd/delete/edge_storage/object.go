@@ -57,7 +57,7 @@ func (b *object) runE(cmd *cobra.Command, _ []string) error {
 	}
 
 	deleteOut := output.GeneralOutput{
-		Msg: fmt.Sprintf(msg.ERROR_DELETE_OBJECT, b.objectKey),
+		Msg: fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, b.objectKey),
 		Out: b.factory.IOStreams.Out}
 	return output.Print(&deleteOut)
 
