@@ -31,8 +31,8 @@ if [ -f "$full_main_go_path" ]; then
     rm -rf vulcan
     rm -rf react-static
 
-    git clone https://github.com/aziontech/vulcan.git
-    cp -r vulcan/examples/react-static ./ 
+    git clone https://github.com/aziontech/vulcan-examples.git
+    cp -r vulcan-examples/examples/react-static ./ 
     cd react-static
 
     npm install
