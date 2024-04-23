@@ -42,8 +42,9 @@ type DeployCmd struct {
 }
 
 var (
-	Path string
-	Auto bool
+	Path     string
+	Auto     bool
+	NoPrompt bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -83,6 +84,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
 	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
+	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	return deployCmd
 }
 
