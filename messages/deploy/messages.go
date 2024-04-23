@@ -40,4 +40,5 @@ var (
   - Maximum TTL for CDN Cache Settings (in seconds): 7200
 
 Do you wish to create a Cache Settings configuration with the above specifications? (y/N)`
+	SkipUpload = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
 )
