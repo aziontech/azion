@@ -8,6 +8,6 @@ var (
 	FlagFormat       = "Changes the output format passing the json value to the flag"
 	HelpFlag         = "Displays more information about the describe command"
 	FlagDomainID     = "Unique identifier of the Domain"
-	FileWritten      = "File successfully written to: %s\n"
+	FileWritten      = "File successfully written to: %s"
 	AskInputDomainID = "Enter the Domain's ID:"
 )

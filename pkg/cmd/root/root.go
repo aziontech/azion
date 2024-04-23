@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/metric"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
@@ -37,6 +38,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type RootCmd struct {
@@ -143,6 +145,8 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 }
 
 func Execute() {
+	logger.New(zapcore.InfoLevel)
+
 	streams := iostreams.System()
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
@@ -174,5 +178,5 @@ func Execute() {
 			}
 		}
 	}
-	cobra.CheckErr(err)
+	output.Print(&output.ErrorOutput{Err: err})
 }

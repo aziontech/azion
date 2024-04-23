@@ -42,8 +42,9 @@ type DeployCmd struct {
 }
 
 var (
-	Path string
-	Auto bool
+	Path     string
+	Auto     bool
+	NoPrompt bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -83,6 +84,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
 	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
+	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	return deployCmd
 }
 
@@ -191,8 +193,10 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	// skip upload when type = javascript, typescript (storage folder does not exist in these cases)
-	if conf.Preset != "javascript" && conf.Preset != "typescript" {
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
 		err = cmd.uploadFiles(f, conf)
 		if err != nil {
 			return err

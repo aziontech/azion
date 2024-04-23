@@ -30,6 +30,9 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		if err != nil {
 			// if the name is already in use, we ask for another one
 			if errors.Is(err, utils.ErrorNameInUse) {
+				if NoPrompt {
+					return err
+				}
 				logger.FInfo(cmd.Io.Out, msg.BucketInUse)
 				if Auto {
 					nameBucket = thoth.GenerateName()

@@ -14,15 +14,15 @@ import (
 	"go.uber.org/zap"
 )
 
-var pathStatic = ".edge/storage"
+var PathStatic = ".edge/storage"
 
 func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
-	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
-			logger.Debug("File that caused the error: " + pathStatic)
+			logger.Debug("File that caused the error: " + PathStatic)
 			return err
 		}
 		if !info.IsDir() {
@@ -60,7 +60,7 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 		bar = nil
 	}
 
-	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 				return err
 			}
 
-			fileString := strings.TrimPrefix(path, pathStatic)
+			fileString := strings.TrimPrefix(path, PathStatic)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
 				logger.Debug("Error while matching file path", zap.Error(err))
