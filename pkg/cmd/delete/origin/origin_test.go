@@ -1,11 +1,13 @@
 package origin
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
+	msg "github.com/aziontech/azion-cli/messages/origin"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +30,8 @@ func TestCreate(t *testing.T) {
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "Origin 58755fef-e830-4ea4-b9e0-6481f1ef496d was successfully deleted\n", stdout.String())
+
+		assert.Equal(t, fmt.Sprintf(msg.DeleteOutputSuccess, "58755fef-e830-4ea4-b9e0-6481f1ef496d"), stdout.String())
 	})
 
 	t.Run("delete domain - not found", func(t *testing.T) {

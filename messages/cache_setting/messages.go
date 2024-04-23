@@ -46,7 +46,7 @@ var (
 	// [ delete ]
 	DeleteShortDescription    = "Deletes a Cache Settings configuration"
 	DeleteLongDescription     = "Deletes a Caches Settings configuration from the Edge Applications library based on its given ID"
-	DeleteOutputSuccess       = "Caches settings configuration %d was successfully deleted\n"
+	DeleteOutputSuccess       = "Caches settings configuration %d was successfully deleted"
 	DeleteFlagApplicationID   = "Unique identifier for an Edge Application"
 	DeleteFlagCacheSettingsID = "The Cache Settings configuration key unique identifier"
 	DeleteHelpFlag            = "Displays more information about the delete cache-setting command"

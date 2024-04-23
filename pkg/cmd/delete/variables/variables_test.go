@@ -1,6 +1,7 @@
 package variables
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -9,6 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
+
+	msg "github.com/aziontech/azion-cli/messages/variables"
 )
 
 func TestCreate(t *testing.T) {
@@ -29,7 +32,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Variable 7a187044-4a00-4a4a-93ed-d230900421f3 was successfully deleted\n", stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.DeleteOutputSuccess, "7a187044-4a00-4a4a-93ed-d230900421f3"), stdout.String())
 	})
 
 	t.Run("delete variable that is not found", func(t *testing.T) {

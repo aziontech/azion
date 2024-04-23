@@ -13,7 +13,7 @@ var (
 	// [delete]
 	DeleteShortDescription = "Deletes an Origin"
 	DeleteLongDescription  = "Deletes an Origin from the Edge Applications library based on its given ID"
-	DeleteOutputSuccess    = "Origin %s was successfully deleted\n"
+	DeleteOutputSuccess    = "Origin %s was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete Origin command"
 	DeleteAskInputApp      = "Enter the ID of the Edge Application linked to this Origin:"
 	DeleteAskInputOri      = "Enter the key of the Origin you wish to delete:"

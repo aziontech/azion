@@ -25,7 +25,7 @@ var (
 	VariablesListHelpFlag         = "Displays more information about the list subcommand"
 
 	// [ delete ]
-	DeleteOutputSuccess    = "Variable %v was successfully deleted\n"
+	DeleteOutputSuccess    = "Variable %v was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete subcommand"
 	DeleteShortDescription = "Deletes a variable"
 	DeleteLongDescription  = "Deletes a variable based on its UUID"

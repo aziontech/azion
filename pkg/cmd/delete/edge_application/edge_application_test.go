@@ -2,6 +2,7 @@ package edgeapplication
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"testing"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 )
 
 func TestCreate(t *testing.T) {
@@ -33,7 +36,8 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Edge Application 1234 was successfully deleted\n", stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.OutputSuccess, 1234), stdout.String())
+
 	})
 
 	t.Run("delete application - not found", func(t *testing.T) {
@@ -101,6 +105,6 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Remote resources deleted successfully\n", stdout.String())
+		assert.Equal(t, msg.CascadeSuccess, stdout.String())
 	})
 }

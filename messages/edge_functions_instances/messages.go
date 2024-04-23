@@ -30,7 +30,7 @@ var (
 	EdgeFuncInstanceDeleteUsage            = "delete --application-id <application_id> --instance-id <instance-id>"
 	EdgeFuncInstanceDeleteShortDescription = "Removes an Edge Functions instance"
 	EdgeFuncInstanceDeleteLongDescription  = "Removes an Edge Functions instance, instantiated in a specific Edge Application, based on the given flags."
-	EdgeFuncInstanceDeleteOutputSuccess    = "Edge functions instance %s was successfully deleted\n"
+	EdgeFuncInstanceDeleteOutputSuccess    = "Edge functions instance %s was successfully deleted"
 	EdgeFuncInstanceDeleteHelpFlag         = "Displays more information about the delete subcommand"
 
 	// [ create ]
