@@ -23,6 +23,7 @@ var (
 	RulesEngineSuccessful             = "Created Rules Engine for Edge Application\n"
 	DeployFlagHelp                    = "Displays more information about the deploy command"
 	DeployFlagAuto                    = "If sent, the entire flow of the command will be run without interruptions"
+	DeployFlagNoPrompt                = "If sent, whenever the CLI would display an interactive prompt due to an error, it instead just returns the error"
 	DeployPropagation                 = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	UploadStart                       = "Uploading static files\n"
 	UploadSuccessful                  = "\nUpload completed successfully!\n"
