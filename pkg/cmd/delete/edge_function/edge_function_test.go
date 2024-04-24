@@ -1,11 +1,13 @@
 package edgefunction
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +32,7 @@ func TestCreate(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, "Edge Function 1234 was successfully deleted\n", stdout.String())
+		assert.Equal(t, fmt.Sprintf(msg.DeleteOutputSuccess, 1234), stdout.String())
 	})
 
 	t.Run("delete function that is not found", func(t *testing.T) {

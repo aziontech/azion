@@ -9,6 +9,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/api/edge_function"
+	"github.com/aziontech/azion-cli/pkg/output"
 )
 
 func (del *DeleteCmd) Cascade(ctx context.Context) error {
@@ -40,12 +41,14 @@ func (del *DeleteCmd) Cascade(ctx context.Context) error {
 		}
 	}
 
-	fmt.Fprintf(del.f.IOStreams.Out, "%s\n", msg.CascadeSuccess)
-
 	err = del.UpdateJson(del)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	deleteOut := output.GeneralOutput{
+		Msg: msg.CascadeSuccess,
+		Out: del.f.IOStreams.Out}
+	return output.Print(&deleteOut)
+
 }

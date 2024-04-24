@@ -8,6 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/delete/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -46,10 +47,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.OutputSuccess, id)
+			deleteOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.OutputSuccess, id),
+				Out: f.IOStreams.Out}
+			return output.Print(&deleteOut)
 
-			return nil
 		},
 	}
 

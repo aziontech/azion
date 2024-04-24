@@ -8,7 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -48,8 +48,12 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
 	}
-	logger.FInfo(b.factory.IOStreams.Out, fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name))
-	return nil
+
+	deleteOut := output.GeneralOutput{
+		Msg: fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name),
+		Out: b.factory.IOStreams.Out}
+	return output.Print(&deleteOut)
+
 }
 
 func (f *bucket) addFlags(flags *pflag.FlagSet) {

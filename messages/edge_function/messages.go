@@ -15,7 +15,7 @@ var (
 	//delete cmd
 	DeleteShortDescription = "Removes an Edge Function"
 	DeleteLongDescription  = "Removes an Edge Function from the Edge Functions library based on its given ID"
-	DeleteOutputSuccess    = "Edge Function %d was successfully deleted\n"
+	DeleteOutputSuccess    = "Edge Function %d was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete edge-function command"
 
 	//describe cmd

@@ -10,6 +10,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -51,10 +52,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDeleteFunction.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			fmt.Fprintf(out, msg.DeleteOutputSuccess, function_id)
-
-			return nil
+			deleteOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, function_id),
+				Out: f.IOStreams.Out}
+			return output.Print(&deleteOut)
 		},
 	}
 
