@@ -70,7 +70,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	cacheIds := make(map[string]int64)
 	ruleIds := make(map[string]int64)
-	originKeys := make(map[string]int64)
+	originKeys := make(map[string]string)
+	originIds := make(map[string]int64)
 
 	for _, cacheConf := range conf.CacheSettings {
 		cacheIds[cacheConf.Name] = cacheConf.Id
@@ -81,11 +82,27 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	for _, originConf := range conf.Origin {
-		originKeys[originConf.Name] = originConf.OriginId
+		originKeys[originConf.Name] = originConf.OriginKey
+	}
+
+	for _, originConf := range conf.Origin {
+		originIds[originConf.Name] = originConf.OriginId
 	}
 
 	for _, origin := range manifest.Origins {
-		if id := originKeys[origin.Name]; id == 0 {
+		if id := originIds[origin.Name]; id > 0 {
+			requestUpdate := makeOriginUpdateRequest(origin, conf)
+			if origin.Name != "" {
+				requestUpdate.Name = &origin.Name
+			} else {
+				requestUpdate.Name = &conf.Name
+			}
+			created, err := clientOrigin.Update(ctx, conf.Application.ID, originKeys[origin.Name], requestUpdate)
+			if err != nil {
+				return err
+			}
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, created.GetOriginKey()))
+		} else {
 			requestCreate := makeOriginCreateRequest(origin, conf)
 			if origin.Name != "" {
 				requestCreate.Name = origin.Name
@@ -102,7 +119,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name:      created.GetName(),
 			}
 			conf.Origin = append(conf.Origin, newOrigin)
-			originKeys[created.GetName()] = created.GetOriginId()
+			originIds[created.GetName()] = created.GetOriginId()
+			originKeys[created.GetName()] = created.GetOriginKey()
 			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId()))
 		}
 	}
@@ -148,7 +166,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	for _, rule := range manifest.Rules {
 		if id := ruleIds[rule.Name]; id > 0 {
-			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds, conf, originKeys)
+			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds, conf, originIds)
 			if err != nil {
 				return err
 			}
@@ -161,7 +179,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originKeys, client, ctx)
+			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originIds, client, ctx)
 			if err != nil {
 				return err
 			}
