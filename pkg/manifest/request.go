@@ -331,6 +331,23 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 	return request
 }
 
+func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.UpdateRequest {
+	request := &apiOrigin.UpdateRequest{}
+
+	request.SetBucket(conf.Bucket)
+
+	if origin.Prefix != "" {
+		request.SetPrefix(origin.Prefix)
+	} else {
+		request.SetPrefix(conf.Prefix)
+	}
+	if origin.OriginType != "" {
+		request.SetOriginType(origin.OriginType)
+	}
+
+	return request
+}
+
 func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptions) (int64, error) {
 	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 	reqCache.SetName("function policy")
