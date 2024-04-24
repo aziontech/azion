@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/tidwall/sjson"
@@ -108,10 +109,10 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
 	}
 
-	out := del.f.IOStreams.Out
-	fmt.Fprintf(out, msg.OutputSuccess, application_id)
-
-	return nil
+	deleteOut := output.GeneralOutput{
+		Msg: fmt.Sprintf(msg.OutputSuccess, application_id),
+		Out: del.f.IOStreams.Out}
+	return output.Print(&deleteOut)
 }
 
 func updateAzionJson(cmd *DeleteCmd) error {

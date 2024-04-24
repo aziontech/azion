@@ -9,6 +9,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -47,8 +48,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.DeleteOutputSuccess, variableID))
-			return nil
+			deleteOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, variableID),
+				Out: f.IOStreams.Out}
+			return output.Print(&deleteOut)
+
 		},
 	}
 

@@ -7,7 +7,7 @@ const (
 	ManifestCreateCache  = "Cache Setting %s with id %d successfully created\n"
 	ManifestCreateRule   = "Rule Engine %s with id %d successfully created\n"
 	ManifestCreateOrigin = "Origin %s with id %d successfully created\n"
-	ManifestUpdateOrigin = "Origin %s with key %s successfully update\n"
+	ManifestUpdateOrigin = "Origin %s with key %s successfully updated\n"
 	ReadingManifest      = "Reading manifest.json file\n"
 	CreatingManifest     = "Creating resources found in manifest.json file\n"
 )
