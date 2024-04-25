@@ -1,6 +1,7 @@
 package variables
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
@@ -90,6 +92,6 @@ func TestDescribe(t *testing.T) {
 		}()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 File successfully written to: out.json\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(output.WRITE_SUCCESS, "./out.json"), stdout.String())
 	})
 }

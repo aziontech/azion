@@ -1,6 +1,7 @@
 package output
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -31,7 +32,8 @@ func (c *DescribeOutput) Output() {
 	tbl := tablecli.New("", "")
 	tbl.WithFirstColumnFormatter(color.New(color.FgBlue).SprintfFunc())
 
-	interfaceValue := reflect.ValueOf(c.Values).Elem()
+	values := reflect.ValueOf(c.Values)
+	interfaceValue := values.Elem()
 
 	for i := 0; i < interfaceValue.NumField(); i++ {
 		field := interfaceValue.Field(i)
@@ -45,14 +47,31 @@ func (c *DescribeOutput) Output() {
 				if !ptrValue.IsNil() {
 					dereferencedValue = ptrValue.Elem().Interface()
 				}
+			} else {
+				dereferencedValue = reflect.ValueOf(fieldValue).Interface()
 			}
 
 			fieldName := interfaceValue.Type().Field(i).Name
 			if vl, ok := c.Fields[fieldName]; ok {
-				tbl.AddRow(fmt.Sprintf("%s: ", vl), dereferencedValue)
+				tbl.AddRow(fmt.Sprintf("%s: ", vl), checkPrimitiveType(dereferencedValue))
 			}
 		}
 	}
 
 	logger.FInfo(c.Out, string(tbl.GetByteFormat()))
+}
+
+func checkPrimitiveType(value any) any {
+	valueType := reflect.TypeOf(value)
+	if valueType.Kind() == reflect.Int || valueType.Kind() == reflect.String ||
+		valueType.Kind() == reflect.Bool || valueType.Kind() == reflect.Float32 ||
+		valueType.Kind() == reflect.Float64 || valueType.Kind() == reflect.Uint ||
+		valueType.Kind() == reflect.Uint8 || valueType.Kind() == reflect.Uint16 ||
+		valueType.Kind() == reflect.Uint32 || valueType.Kind() == reflect.Uint64 ||
+		valueType.Kind() == reflect.Int8 || valueType.Kind() == reflect.Int16 ||
+		valueType.Kind() == reflect.Int32 || valueType.Kind() == reflect.Int64 {
+		return value
+	}
+	jsonValue, _ := json.Marshal(value)
+	return string(jsonValue)
 }

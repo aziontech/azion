@@ -1,9 +1,7 @@
 package edgefunction
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -14,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -53,31 +52,37 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			function, err := client.Get(ctx, function_id)
+			resp, err := client.Get(ctx, function_id)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetFunction.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, function)
-			if err != nil {
-				return utils.ErrorFormatOut
+			fields := make(map[string]string, 0)
+			fields["Id"] = "ID"
+			fields["Name"] = "Name"
+			fields["Active"] = "Active"
+			fields["Language"] = "Language"
+			fields["ReferenceCount"] = "Reference Count"
+			fields["Modified"] = "Modified at"
+			fields["InitiatorType"] = "Initiator Type"
+			fields["LastEditor"] = "Last Editor"
+			fields["FunctionToRun"] = "Function to run"
+			fields["JsonArgs"] = "JSON Args"
+			if cmd.Flags().Changed("with-code") {
+				fields["Code"] = "Code"
 			}
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
-			} else {
-				_, err := out.Write(formattedFuction[:])
-				if err != nil {
-					return err
-				}
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Msg:         filepath.Clean(opts.OutPath),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+					Out:         f.IOStreams.Out,
+				},
+				Fields: fields,
+				Values: resp,
 			}
-
-			return nil
+			return output.Print(&describeOut)
 		},
 	}
 
@@ -88,43 +93,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
-}
-
-func serializeToJson(data interface{}) string {
-	// ignoring errors on purpose
-	serialized, _ := json.Marshal(data)
-	return string(serialized)
-}
-
-func format(cmd *cobra.Command, function api.EdgeFunctionResponse) ([]byte, error) {
-	var b bytes.Buffer
-
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		file, err := json.MarshalIndent(function, "", " ")
-		if err != nil {
-			return nil, err
-		}
-		return file, nil
-	} else {
-		b.Write([]byte(fmt.Sprintf("ID: %d\n", uint64(function.GetId()))))
-		b.Write([]byte(fmt.Sprintf("Name: %s\n", function.GetName())))
-		b.Write([]byte(fmt.Sprintf("Active: %t\n", function.GetActive())))
-		b.Write([]byte(fmt.Sprintf("Language: %s\n", function.GetLanguage())))
-		b.Write([]byte(fmt.Sprintf("Reference Count: %d\n", uint64(function.GetReferenceCount()))))
-		b.Write([]byte(fmt.Sprintf("Modified at: %s\n", function.GetModified())))
-		b.Write([]byte(fmt.Sprintf("Initiator Type: %s\n", function.GetInitiatorType())))
-		b.Write([]byte(fmt.Sprintf("Last Editor: %s\n", function.GetLastEditor())))
-		b.Write([]byte(fmt.Sprintf("Function to run: %s\n", function.GetFunctionToRun())))
-		b.Write([]byte(fmt.Sprintf("JSON Args: %s\n", serializeToJson(function.GetJsonArgs()))))
-		if cmd.Flags().Changed("with-code") {
-			b.Write([]byte(fmt.Sprintf("Code:\n%s\n", function.GetCode())))
-		}
-
-		return b.Bytes(), nil
-	}
 }

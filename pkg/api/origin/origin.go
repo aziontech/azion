@@ -47,7 +47,28 @@ type Response interface {
 	GetName() string
 }
 
-func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey string) (sdk.OriginsResultResponse, error) {
+type GetResponse interface {
+	GetOriginId() int64
+	GetOriginKey() string
+	GetName() string
+	GetOriginType() string
+	GetAddresses() []sdk.OriginsResultResponseAddresses
+	GetOriginProtocolPolicy() string
+	GetIsOriginRedirectionEnabled() bool
+	GetHostHeader() string
+	GetMethod() string
+	GetOriginPath() string
+	GetConnectionTimeout() int64
+	GetTimeoutBetweenBytes() int64
+	GetHmacAuthentication() bool
+	GetHmacRegionName() string
+	GetHmacAccessKey() string
+	GetHmacSecretKey() string
+	GetBucket() string
+	GetPrefix() string
+}
+
+func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey string) (GetResponse, error) {
 	logger.Debug("Get Origin")
 
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
@@ -58,13 +79,13 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey str
 			logger.Debug("Error while describing an Origin", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
-				return sdk.OriginsResultResponse{}, err
+				return nil, err
 			}
 		}
-		return sdk.OriginsResultResponse{}, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return resp.Results, nil
+	return &resp.Results, nil
 }
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {

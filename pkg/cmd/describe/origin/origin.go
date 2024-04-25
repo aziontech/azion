@@ -2,24 +2,21 @@ package origin
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/origin"
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
@@ -75,26 +72,35 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, origin)
-			if err != nil {
-				return utils.ErrorFormatOut
-			}
+			fields := make(map[string]string, 0)
+			fields["OriginId"] = "Origin ID"
+			fields["OriginKey"] = "Origin Key"
+			fields["Name"] = "Name"
+			fields["OriginType"] = "Origin Type"
+			fields["Addresses"] = "Addresses"
+			fields["OriginProtocolPolicy"] = "Origin Protocol Policy"
+			fields["IsOriginRedirectionEnabled"] = "Is Origin Redirection Enable"
+			fields["HostHeader"] = "Host Header"
+			fields["Method"] = "Method"
+			fields["OriginPath"] = "Origin Path"
+			fields["ConnectionTimeout"] = "Connection Timeout"
+			fields["TimeoutBetweenBytes"] = "Timeout Between Bytes"
+			fields["HmacAuthentication"] = "Hmac Authentication"
+			fields["HmacRegionName"] = "Hmac Region Name"
+			fields["HmacAccessKey"] = "Hmac Secret Key"
+			fields["HmacSecretKey"] = "Hmac Access Key"
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				fmt.Fprintf(out, msg.OriginsFileWritten, filepath.Clean(opts.OutPath))
-			} else {
-				_, err := out.Write(formattedFuction[:])
-				if err != nil {
-					return err
-				}
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Msg:         filepath.Clean(opts.OutPath),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+					Out:         f.IOStreams.Out,
+				},
+				Fields: fields,
+				Values: origin,
 			}
-
-			return nil
+			return output.Print(&describeOut)
 		},
 	}
 
@@ -105,35 +111,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
-}
-
-func format(cmd *cobra.Command, origin sdk.OriginsResultResponse) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(origin, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("Origin ID: ", origin.OriginId)
-	tbl.AddRow("Origin Key: ", origin.OriginKey)
-	tbl.AddRow("Name: ", origin.Name)
-	tbl.AddRow("Origin Type: ", origin.OriginType)
-	tbl.AddRow("Addresses: ", origin.Addresses)
-	tbl.AddRow("Origin Protocol Policy: ", origin.OriginProtocolPolicy)
-	tbl.AddRow("Is Origin Redirection Enable: ", origin.IsOriginRedirectionEnabled)
-	tbl.AddRow("Host Header: ", origin.HostHeader)
-	tbl.AddRow("Method: ", origin.Method)
-	tbl.AddRow("Origin Path: ", origin.OriginPath)
-	tbl.AddRow("Connection Timeout: ", origin.ConnectionTimeout)
-	tbl.AddRow("Timeout Between Bytes: ", origin.TimeoutBetweenBytes)
-	tbl.AddRow("Hmac Authentication: ", origin.HmacAuthentication)
-	tbl.AddRow("Hmac Region Name: ", origin.HmacRegionName)
-	tbl.AddRow("Hmac Secret Key: ", origin.HmacSecretKey)
-	tbl.AddRow("Hmac Access Key: ", origin.HmacAccessKey)
-	return tbl.GetByteFormat(), nil
 }
