@@ -83,9 +83,6 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	for _, originConf := range conf.Origin {
 		originKeys[originConf.Name] = originConf.OriginKey
-	}
-
-	for _, originConf := range conf.Origin {
 		originIds[originConf.Name] = originConf.OriginId
 	}
 
