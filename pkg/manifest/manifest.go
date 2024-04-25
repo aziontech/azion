@@ -151,6 +151,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name: created.GetName(),
 			}
 			conf.CacheSettings = append(conf.CacheSettings, newCache)
+			cacheIds[newCache.Name] = newCache.Id
 			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, id))
 		}
 	}

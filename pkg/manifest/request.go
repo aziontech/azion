@@ -270,6 +270,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
+					fmt.Println(v.RulesEngineBehaviorString.Target)
 					if id := cacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
@@ -295,7 +296,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 						behaviorString.SetTarget(str)
 					} else {
 						fmt.Println(v.RulesEngineBehaviorString.Target)
-						return nil, msg.ErrorCacheNotFound
+						return nil, msg.ErrorOriginNotFound
 					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
