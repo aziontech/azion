@@ -48,7 +48,6 @@ func TestDescribe(t *testing.T) {
 		err := cmd.Execute()
 		require.Error(t, err)
 	})
-	//
 	t.Run("no id sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(

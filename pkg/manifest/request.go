@@ -365,19 +365,3 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	}
 	return cache.GetId(), nil
 }
-
-// func makeOriginUpdateRequest(origin contracts.Origin) *apiOrigin.UpdateRequest {
-// 	request := &apiOrigin.UpdateRequest{}
-
-// 	if origin.Bucket != "" {
-// 		request.SetBucket(origin.Bucket)
-// 	}
-// 	if origin.Prefix != "" {
-// 		request.SetPrefix(origin.Prefix)
-// 	}
-// 	if origin.OriginType != "" {
-// 		request.SetOriginType(origin.OriginType)
-// 	}
-
-// 	return request
-// }
