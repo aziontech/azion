@@ -30,7 +30,7 @@ func TestDeployCmd(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("read manifest structure", func(t *testing.T) {
+	t.Run("create resources", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		options := &contracts.AzionApplicationOptions{
 			Name: "NotAVeryGoodName",
