@@ -14,6 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -55,8 +56,12 @@ func (b *bucket) runE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)
 	}
-	logger.FInfo(b.factory.IOStreams.Out, msg.OUTPUT_UPDATE_BUCKET)
-	return nil
+
+	updateOut := output.GeneralOutput{
+		Msg: msg.OUTPUT_UPDATE_BUCKET,
+		Out: b.factory.IOStreams.Out,
+	}
+	return output.Print(&updateOut)
 }
 
 func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.RequestBucket) error {

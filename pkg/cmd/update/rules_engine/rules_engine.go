@@ -10,6 +10,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
@@ -65,8 +66,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdate.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
-			return nil
+			updateOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&updateOut)
 		},
 	}
 

@@ -40,7 +40,7 @@ var (
 	UpdateFlagActive        = "Whether the Edge Function should be active or not"
 	UpdateFlagArgs          = "Path and name of the JSON file containing the Edge Function's arguments"
 	UpdateFlagFile          = "Given path and JSON file to automatically update the Edge Function attributes; you can use - for reading from stdin"
-	UpdateOutputSuccess     = "Updated Edge Function with ID %d\n"
+	UpdateOutputSuccess     = "Updated Edge Function with ID %d"
 	UpdateHelpFlag          = "Displays more information about the update edge-function command"
 	UpdateAskEdgeFunctionID = "Enter the ID of the Edge Function you wish to update:"
 

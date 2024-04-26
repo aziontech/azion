@@ -1,6 +1,7 @@
 package variables
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -43,7 +44,7 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Variable with ID 32e8ffca-4021-49a4-971f-330935566af4\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, "32e8ffca-4021-49a4-971f-330935566af4"), stdout.String())
 	})
 
 	t.Run("missing fields", func(t *testing.T) {
@@ -62,7 +63,7 @@ func TestUpdate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Variable with ID 32e8ffca-4021-49a4-971f-330935566af4\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, "32e8ffca-4021-49a4-971f-330935566af4"), stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
@@ -100,6 +101,6 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Variable with ID 32e8ffca-4021-49a4-971f-330935566af4\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, "32e8ffca-4021-49a4-971f-330935566af4"), stdout.String())
 	})
 }

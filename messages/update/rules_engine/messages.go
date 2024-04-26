@@ -5,7 +5,7 @@ var (
 	ShortDescription = "Updates a rule in Rules Engine"
 	LongDescription  = "Updates a rule in Rules Engine based on given attributes to be used in Edge Applications"
 
-	OutputSuccess    = "Updated Rules Engine with ID %d\n"
+	OutputSuccess    = "Updated Rules Engine with ID %d"
 	RulesEnginePhase = "Rules Engine Phase <request|response>. The '--phase' flag is required"
 
 	FlagApplicationID = "Unique identifier for the Edge Application that implements these rules. The '--application-id' flag is required"

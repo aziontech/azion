@@ -11,6 +11,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/origin"
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -97,8 +98,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err)
 			}
 
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()))
-			return nil
+			updateOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&updateOut)
 		},
 	}
 
