@@ -1,8 +1,10 @@
 package edge_applications
 
 import (
+	"fmt"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/create/edge_application"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -31,7 +33,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: "🚀 Created Edge Application with ID 1694434702\n\n",
+			output: fmt.Sprintf(msg.OutputSuccess, 1694434702),
 		},
 		{
 			name: "Creating the edge application with the --file flag",
@@ -44,7 +46,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			output: "🚀 Created Edge Application with ID 1694434702\n\n",
+			output: fmt.Sprintf(msg.OutputSuccess, 1694434702),
 		},
 	}
 	for _, tt := range tests {

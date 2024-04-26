@@ -11,6 +11,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -58,9 +59,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateItem.Error(), err)
 			}
-
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetUuid()))
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetUuid()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 

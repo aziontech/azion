@@ -24,7 +24,7 @@ var (
 	// [ create ]
 	CreateShortDescription = "Creates a new Cache Settings configuration"
 	CreateLongDescription  = "Creates a Cache Settings configuration based on given attributes to be used in Edge Applications"
-	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d\n"
+	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d"
 	CreateAskInputName     = "Enter the new Cache Setting's name:"
 
 	// [ update ]

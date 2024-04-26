@@ -7,7 +7,7 @@ var (
 	// [create]
 	CreateShortDescription = "Creates a new Origin"
 	CreateLongDescription  = "Creates an Origin based on given attributes to be used in Edge Applications"
-	CreateOutputSuccess    = "Created Origin with key %s\n"
+	CreateOutputSuccess    = "Created Origin with key %s"
 	CreateFlagHelp         = "Displays more information about the create Origin command"
 
 	// [delete]
