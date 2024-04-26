@@ -2,18 +2,16 @@ package edge_applications
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/describe/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -45,31 +43,43 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
-			application, err := client.Get(ctx, applicationID)
+			resp, err := client.Get(ctx, applicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			formattedApp, err := format(cmd, application)
-			if err != nil {
-				return utils.ErrorFormatOut
-			}
+			fields := make(map[string]string, 0)
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedApp, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				fmt.Fprintf(out, msg.FileWritten, filepath.Clean(opts.OutPath))
-			} else {
-				_, err := out.Write(formattedApp[:])
-				if err != nil {
-					return err
-				}
-			}
+			fields["Id"] = "ID"
+			fields["Name"] = "Name"
+			fields["Active"] = "Active"
+			fields["ApplicationAcceleration"] = "Application Acceleration"
+			fields["Caching"] = "Caching"
+			fields["DeliveryProtocol"] = "Delivery Protocol"
+			fields["DeviceDetection"] = "Device Detection"
+			fields["EdgeFirewall"] = "Edge Firewall"
+			fields["EdgeFunctions"] = "Edge Functions"
+			fields["HttpPort"] = "Http Port"
+			fields["HttpsPort"] = "HttpsPort"
+			fields["ImageOptimization"] = "Image Optimization"
+			fields["L2Caching"] = "L2 Caching"
+			fields["LoadBalancer"] = "Load Balancer"
+			fields["MinimumTlsVersion"] = "Minimum TLS Version"
+			fields["RawLogs"] = "Raw Logs"
+			fields["WebApplicationFirewall"] = "Web Application Firewall"
 
-			return nil
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Out:         f.IOStreams.Out,
+					Msg:         filepath.Clean(opts.OutPath),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+				},
+				Fields: fields,
+				Values: resp,
+			}
+			return output.Print(&describeOut)
+
 		},
 	}
 
@@ -79,36 +89,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
-}
-
-func format(cmd *cobra.Command, application api.EdgeApplicationResponse) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(application, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("ID: ", application.GetId())
-	tbl.AddRow("Name: ", application.GetName())
-	tbl.AddRow("Active: ", application.GetActive())
-	tbl.AddRow("Application Acceleration: ", application.GetApplicationAcceleration())
-	tbl.AddRow("Caching: ", application.GetCaching())
-	tbl.AddRow("Delivery Protocol: ", application.GetDeliveryProtocol())
-	tbl.AddRow("Device Detection: ", application.GetDeviceDetection())
-	tbl.AddRow("Edge Firewall: ", application.GetEdgeFirewall())
-	tbl.AddRow("Edge Functions: ", application.GetEdgeFunctions())
-	tbl.AddRow("Http Port: ", application.GetHttpPort())
-	tbl.AddRow("HttpsPort: ", application.GetHttpsPort())
-	tbl.AddRow("Image Optimization: ", application.GetImageOptimization())
-	tbl.AddRow("L2 Caching: ", application.GetL2Caching())
-	tbl.AddRow("Load Balancer: ", application.GetLoadBalancer())
-	tbl.AddRow("Minimum TLS Version: ", application.GetMinimumTlsVersion())
-	tbl.AddRow("Raw Logs: ", application.GetRawLogs())
-	tbl.AddRow("Web Application Firewall: ", application.GetWebApplicationFirewall())
-	return tbl.GetByteFormat(), nil
 }

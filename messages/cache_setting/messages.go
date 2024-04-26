@@ -2,8 +2,7 @@ package cachesetting
 
 var (
 	// [ general ]
-	Usage       = "cache-setting"
-	FileWritten = "File successfully written to: %s\n"
+	Usage = "cache-setting"
 
 	CacheSettingsShortDescription = "Cache Settings allows you to manage existing cache configurations and create new ones"
 	CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"

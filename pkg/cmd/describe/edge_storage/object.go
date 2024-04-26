@@ -13,6 +13,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -51,14 +52,19 @@ func (f *Fields) RunE(cmd *cobra.Command, args []string) error {
 		}
 		f.ObjectKey = answers
 	}
+
 	client := api.NewClient(f.Factory.HttpClient, f.Factory.Config.GetString("storage_url"), f.Factory.Config.GetString("token"))
 	ctx := context.Background()
 	bFile, err := client.GetObject(ctx, f.BucketName, f.ObjectKey)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_DESCRIBE_OBJECT, err)
 	}
-	logger.FInfo(f.Factory.IOStreams.Out, string(bFile))
-	return nil
+
+	describeOut := output.GeneralOutput{
+		Msg: string(bFile),
+		Out: f.Factory.IOStreams.Out,
+	}
+	return output.Print(&describeOut)
 }
 
 func (f *Fields) AddFlags(flags *pflag.FlagSet) {

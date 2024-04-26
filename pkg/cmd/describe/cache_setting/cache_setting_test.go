@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -79,6 +79,6 @@ func TestDescribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, fmt.Sprintf(msg.FileWritten, path), stdout.String())
+		require.Equal(t, fmt.Sprintf(output.WRITE_SUCCESS, path), stdout.String())
 	})
 }

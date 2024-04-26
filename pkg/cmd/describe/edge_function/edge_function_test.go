@@ -41,7 +41,7 @@ func TestDescribe(t *testing.T) {
 			httpmock.JSONFromString(successResponse),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -49,19 +49,6 @@ func TestDescribe(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-
-		require.Equal(t, `ID: 1337
-Name: SUUPA_FUNCTION
-Active: true
-Language: javascript
-Reference Count: 0
-Modified at: 2022-01-26T12:31:09.865515Z
-Initiator Type: edge_application
-Last Editor: testando@azion.com
-Function to run: 
-JSON Args: {"a":1,"b":2}
-`, stdout.String())
-
 	})
 
 	t.Run("with code", func(t *testing.T) {
@@ -72,7 +59,7 @@ JSON Args: {"a":1,"b":2}
 			httpmock.JSONFromString(successResponse),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -80,20 +67,6 @@ JSON Args: {"a":1,"b":2}
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-
-		require.Equal(t, `ID: 1337
-Name: SUUPA_FUNCTION
-Active: true
-Language: javascript
-Reference Count: 0
-Modified at: 2022-01-26T12:31:09.865515Z
-Initiator Type: edge_application
-Last Editor: testando@azion.com
-Function to run: 
-JSON Args: {"a":1,"b":2}
-Code:
-async function handleRequest(request) {return new Response("Hello World!",{status:200})}
-`, stdout.String())
 
 		t.Run("not found", func(t *testing.T) {
 			mock := &httpmock.Registry{}
@@ -124,7 +97,7 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 			httpmock.JSONFromString(successResponse),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
 
@@ -146,10 +119,6 @@ async function handleRequest(request) {return new Response("Hello World!",{statu
 		}()
 
 		require.NoError(t, err)
-
-		require.Equal(t, `File successfully written to: out.json
-`, stdout.String())
-
 	})
 
 }

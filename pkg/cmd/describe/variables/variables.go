@@ -2,21 +2,19 @@ package variables
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"path/filepath"
 
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/variables"
 
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -54,26 +52,26 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetItem.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, variable)
-			if err != nil {
-				return utils.ErrorFormatOut
-			}
+			fields := make(map[string]string, 0)
+			fields["Uuid"] = "Uuid"
+			fields["Key"] = "Key"
+			fields["Value"] = "Value"
+			fields["Secret"] = "Secret"
+			fields["LastEditor"] = "Last Editor"
+			fields["CreatedAt"] = "Create At"
+			fields["UpdatedAt"] = "Update At"
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				logger.LogSuccess(out, fmt.Sprintf(msg.FileWritten, filepath.Clean(opts.OutPath)))
-			} else {
-				_, err := out.Write(formattedFuction[:])
-				if err != nil {
-					return err
-				}
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Msg:         filepath.Clean(opts.OutPath),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+					Out:         f.IOStreams.Out,
+				},
+				Fields: fields,
+				Values: variable,
 			}
-
-			return nil
+			return output.Print(&describeOut)
 		},
 	}
 
@@ -83,26 +81,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
-}
-
-func format(cmd *cobra.Command, variable api.Response) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(variable, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("Uuid: ", variable.GetUuid())
-	tbl.AddRow("Key: ", variable.GetKey())
-	tbl.AddRow("Value: ", variable.GetValue())
-	tbl.AddRow("Secret: ", variable.GetSecret())
-	tbl.AddRow("Last Editor: ", variable.GetLastEditor())
-	tbl.AddRow("Create At: ", variable.GetCreatedAt())
-	tbl.AddRow("Update At: ", variable.GetUpdatedAt())
-	return tbl.GetByteFormat(), nil
 }
