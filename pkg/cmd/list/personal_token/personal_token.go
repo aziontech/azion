@@ -72,7 +72,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 			*v.Uuid,
 			utils.TruncateString(*v.Name),
 			v.ExpiresAt.Format(constants.FORMAT_DATE),
-			fmt.Sprintf("%s", *v.Created),
+			fmt.Sprintf("%v", *v.Created),
 			utils.TruncateString(description),
 		}
 		listOut.Lines = append(listOut.Lines, ln)
