@@ -40,9 +40,9 @@ func TestCommand(t *testing.T) {
 			want: fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier edge-functions%s ", versionVulcan),
 		},
 	}
+	f, _, _ := testutils.NewFactory(nil)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, _, _ := testutils.NewFactory(nil)
 			if got := Command(tt.args.flags, tt.args.params, f); got != tt.want {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
