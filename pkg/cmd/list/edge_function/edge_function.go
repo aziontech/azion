@@ -3,18 +3,14 @@ package edgefunction
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
-
-	"github.com/fatih/color"
-	table "github.com/maxwelbm/tablecli"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -57,31 +53,32 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 		}
 
-		tbl := table.New("ID", "NAME", "LANGUAGE", "ACTIVE")
-		tbl.WithWriter(f.IOStreams.Out)
+		listOut := output.ListOutput{}
+		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
+		listOut.Out = f.IOStreams.Out
 
 		if opts.Details {
-			tbl = table.New("ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE")
+			listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE"}
 		}
-
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, v := range functions.Results {
-			tbl.AddRow(v.GetId(), v.GetName(), v.GetLanguage(), v.GetActive(), v.GetLastEditor(), v.GetModified(), v.GetReferenceCount(), v.GetInitiatorType())
+			ln := []string{
+				fmt.Sprintf("%d", v.GetId()),
+				fmt.Sprintf("%s", v.GetName()),
+				fmt.Sprintf("%s", v.GetLanguage()),
+				fmt.Sprintf("%v", v.GetActive()),
+				fmt.Sprintf("%s", v.GetLastEditor()),
+				fmt.Sprintf("%s", v.GetModified()),
+				fmt.Sprintf("%d", v.GetReferenceCount()),
+				fmt.Sprintf("%s", v.GetInitiatorType()),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
 
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-
-		// print the header only in the first flow
-		if opts.Page == 1 {
-			logger.PrintHeader(tbl, format)
-		}
-
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
+		listOut.Page = opts.Page
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
 		}
 
 		if opts.Page >= *functions.TotalPages {

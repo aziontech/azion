@@ -43,7 +43,7 @@ func (c *ListOutput) Output() {
 	tbl.CalculateWidths([]string{})
 
 	// print the header only in the first flow
-	if c.Page == 1 {
+	if c.Page == 1 || c.Page == 0 {
 		logger.PrintHeader(tbl, format)
 	}
 

@@ -3,12 +3,9 @@ package edge_storage
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 
-	"github.com/fatih/color"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -17,7 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 )
 
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
@@ -53,24 +50,19 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
 	}
-	tbl := table.New("NAME", "EDGE ACCESS")
-	tbl.WithWriter(b.Factory.IOStreams.Out)
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgGreen).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"NAME", "EDGE ACCESS"}
+	listOut.Out = b.Factory.IOStreams.Out
+
 	for _, v := range resp.Results {
-		tbl.AddRow(v.GetName(), v.GetEdgeAccess())
+		ln := []string{
+			v.GetName(),
+			string(v.GetEdgeAccess()),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
 	}
-	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
-	// print the header only in the first flow
-	if b.Options.Page == 1 {
-		logger.PrintHeader(tbl, format)
-	}
-	for _, row := range tbl.GetRows() {
-		logger.PrintRow(tbl, format, row)
-	}
-	return nil
+	return output.Print(&listOut)
 }
 
 func (b *Bucket) AddFlags(flags *pflag.FlagSet) {

@@ -2,10 +2,9 @@ package cachesetting
 
 import (
 	"context"
+	"fmt"
 	"strconv"
-	"strings"
 
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
@@ -14,8 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
@@ -73,31 +72,31 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return msg.ErrorGetCaches
 		}
 
-		tbl := table.New("ID", "NAME", "BROWSER CACHE SETTINGS")
-		tbl.WithWriter(f.IOStreams.Out)
+		listOut := output.ListOutput{}
+
+		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS"}
+		listOut.Out = f.IOStreams.Out
 
 		if cmd.Flags().Changed("details") {
-			tbl = table.New("ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST")
+			listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
 		}
-
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, v := range cache.Results {
-			tbl.AddRow(v.Id, v.Name, v.BrowserCacheSettings, v.CdnCacheSettings, v.CacheByCookies, v.EnableCachingForPost)
+			ln := []string{
+				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%s", v.Name),
+				fmt.Sprintf("%s", v.BrowserCacheSettings),
+				fmt.Sprintf("%s", v.CdnCacheSettings),
+				fmt.Sprintf("%s", v.CacheByCookies),
+				fmt.Sprintf("%v", v.EnableCachingForPost),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
 
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-
-		// print the header only in the first flow
-		if opts.Page == 1 {
-			logger.PrintHeader(tbl, format)
-		}
-
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
+		listOut.Page = opts.Page
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
 		}
 
 		if opts.Page >= cache.TotalPages {

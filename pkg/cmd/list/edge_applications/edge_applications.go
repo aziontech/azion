@@ -3,11 +3,8 @@ package edge_applications
 import (
 	"context"
 	"fmt"
-	"strings"
 
-	"github.com/aziontech/azion-cli/pkg/logger"
-
-	"github.com/fatih/color"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
@@ -16,7 +13,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
@@ -61,38 +57,30 @@ func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts
 			return err
 		}
 
-		tbl := table.New("ID", "NAME", "ACTIVE")
-		tbl.WithWriter(f.IOStreams.Out)
+		listOut := output.ListOutput{}
+		listOut.Columns = []string{"ID", "NAME", "ACTIVE"}
+		listOut.Out = f.IOStreams.Out
 
 		if opts.Details {
-			tbl = table.New("ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES")
+			listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES"}
 		}
-
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 		for _, v := range resp.Results {
-			tbl.AddRow(
-				v.Id,
-				utils.TruncateString(v.Name),
-				v.Active,
-				v.LastEditor,
-				v.LastModified,
-				v.DebugRules,
-			)
+			ln := []string{
+				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%s", utils.TruncateString(v.Name)),
+				fmt.Sprintf("%v", v.Active),
+				fmt.Sprintf("%s", v.LastEditor),
+				fmt.Sprintf("%s", v.LastModified),
+				fmt.Sprintf("%v", v.DebugRules),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
 
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-
-		// print the header only in the first flow
-		if opts.Page == 1 {
-			logger.PrintHeader(tbl, format)
-		}
-
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
+		listOut.Page = opts.Page
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
 		}
 
 		if opts.Page >= resp.TotalPages {
