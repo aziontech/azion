@@ -3,6 +3,8 @@ package vulcan
 import (
 	"fmt"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/testutils"
 )
 
 func TestCommand(t *testing.T) {
@@ -40,7 +42,8 @@ func TestCommand(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Command(tt.args.flags, tt.args.params); got != tt.want {
+			f, _, _ := testutils.NewFactory(nil)
+			if got := Command(tt.args.flags, tt.args.params, f); got != tt.want {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
 		})

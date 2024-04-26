@@ -21,7 +21,11 @@ const (
 
 var versionVulcan = "@latest"
 
-func Command(flags, params string) string {
+func Command(flags, params string, f *cmdutil.Factory) string {
+	if f.Logger.Debug {
+		installDebug := "DEBUG=true " + installEdgeFunctions
+		return fmt.Sprintf(installDebug, flags, versionVulcan, params)
+	}
 	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
 }
 
