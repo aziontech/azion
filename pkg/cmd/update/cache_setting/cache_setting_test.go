@@ -1,6 +1,7 @@
 package cachesetting
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -53,7 +54,7 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated a Cache Settings configuration with ID 115255\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 115255), stdout.String())
 	})
 
 	t.Run("create with file", func(t *testing.T) {
@@ -80,7 +81,8 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated a Cache Settings configuration with ID 115255\n\n", stdout.String())
+
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 115255), stdout.String())
 	})
 
 	t.Run("no acceleration error --in flag", func(t *testing.T) {

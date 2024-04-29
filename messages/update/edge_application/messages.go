@@ -21,7 +21,7 @@ var (
 	RawLogs                     = "Whether the Edge Application has Raw Logs active or not"
 	WebApplicationFirewall      = "Whether the Edge Application has Web Application Firewall active or not"
 	FlagFile                    = "Given path and JSON file to automatically update the Edge Application attributes; you can use - for reading from stdin"
-	OutputSuccess               = "Updated Edge Application with ID %d\n"
+	OutputSuccess               = "Updated Edge Application with ID %d"
 	HelpFlag                    = "Displays more information about the update edge-application command"
 	AskInputApplicationId       = "Enter the ID of the Edge Application you wish to update:"
 )

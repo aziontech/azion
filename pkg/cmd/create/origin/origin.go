@@ -10,6 +10,7 @@ import (
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	msg "github.com/aziontech/azion-cli/messages/origin"
 
@@ -72,9 +73,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateOrigins.Error(), err)
 			}
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.CreateOutputSuccess, response.GetOriginKey()))
-
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetOriginKey()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 

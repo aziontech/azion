@@ -11,6 +11,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/create/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -91,8 +92,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 			}
 
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.OutputSuccess, response.GetId()))
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 

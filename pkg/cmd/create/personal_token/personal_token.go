@@ -12,6 +12,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/create/personal_token"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -103,9 +104,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
 			}
 
-			fmt.Fprintf(f.IOStreams.Out, msg.CreateOutputSuccess, response.GetKey())
-
-			return nil
+			creatOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetKey()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&creatOut)
 		},
 	}
 

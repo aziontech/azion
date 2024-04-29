@@ -2,8 +2,7 @@ package cachesetting
 
 var (
 	// [ general ]
-	Usage       = "cache-setting"
-	FileWritten = "File successfully written to: %s\n"
+	Usage = "cache-setting"
 
 	CacheSettingsShortDescription = "Cache Settings allows you to manage existing cache configurations and create new ones"
 	CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
@@ -24,14 +23,14 @@ var (
 	// [ create ]
 	CreateShortDescription = "Creates a new Cache Settings configuration"
 	CreateLongDescription  = "Creates a Cache Settings configuration based on given attributes to be used in Edge Applications"
-	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d\n"
+	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d"
 	CreateAskInputName     = "Enter the new Cache Setting's name:"
 
 	// [ update ]
 	UpdateUsage            = "update [flags]"
 	UpdateShortDescription = "Updates a Cache Settings configuration"
 	UpdateLongDescription  = "Updates a Cache Settings configuration based on given attributes to be used in Edge Applications"
-	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d\n"
+	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d"
 	UpdateFlagHelp         = "Displays more information about the update cache-setting command"
 
 	// [ describe ]

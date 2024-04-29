@@ -270,6 +270,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
+					fmt.Println(v.RulesEngineBehaviorString.Target)
 					if id := cacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
@@ -295,7 +296,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 						behaviorString.SetTarget(str)
 					} else {
 						fmt.Println(v.RulesEngineBehaviorString.Target)
-						return nil, msg.ErrorCacheNotFound
+						return nil, msg.ErrorOriginNotFound
 					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
@@ -365,19 +366,3 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	}
 	return cache.GetId(), nil
 }
-
-// func makeOriginUpdateRequest(origin contracts.Origin) *apiOrigin.UpdateRequest {
-// 	request := &apiOrigin.UpdateRequest{}
-
-// 	if origin.Bucket != "" {
-// 		request.SetBucket(origin.Bucket)
-// 	}
-// 	if origin.Prefix != "" {
-// 		request.SetPrefix(origin.Prefix)
-// 	}
-// 	if origin.OriginType != "" {
-// 		request.SetOriginType(origin.OriginType)
-// 	}
-
-// 	return request
-// }

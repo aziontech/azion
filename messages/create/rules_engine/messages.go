@@ -8,7 +8,7 @@ var (
 	FlagName              = "The rule name"
 	FlagPhase             = "The phase is either 'request' or 'response'"
 	FlagFile              = "Path to a JSON file containing the attributes of the rule that will be created; you can use - for reading from stdin"
-	OutputSuccess         = "Created Rules Engine with ID %d\n"
+	OutputSuccess         = "Created Rules Engine with ID %d"
 	HelpFlag              = "Displays more information about the azion create rules-engine subcommand"
 	AskInputApplicationId = "Enter the ID of the Edge Application that the Rules Engine will be connected to:"
 	AskInputPhase         = "Enter the new Rule Engine's phase (request/response):"

@@ -24,7 +24,7 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 		return err
 	}
 
-	command := vul.Command("", "build --preset %s --mode %s%s")
+	command := vul.Command("", "build --preset %s --mode %s%s", cmd.f)
 
 	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Preset), strings.ToLower(conf.Mode), vulcanParams))
 	if err != nil {

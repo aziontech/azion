@@ -2,21 +2,20 @@ package cachesetting
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"strconv"
 
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -78,26 +77,34 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorGetCache.Error(), err)
 			}
 
-			out := f.IOStreams.Out
-			formattedFuction, err := format(cmd, resp)
-			if err != nil {
-				return utils.ErrorFormatOut
-			}
+			fields := make(map[string]string, 0)
+			fields["Id"] = "ID"
+			fields["Name"] = "Name"
+			fields["BrowserCacheSettings"] = "Browser cache settings"
+			fields["BrowserCacheSettingsMaximumTtl"] = "Browser cache settings maximum TTL"
+			fields["CdnCacheSettings"] = "Cdn cache settings"
+			fields["CdnCacheSettingsMaximumTtl"] = "Cdn cache settings maximum TTL"
+			fields["CacheByQueryString"] = "Cache by query string"
+			fields["QueryStringFields"] = "Query string fiedlds"
+			fields["EnableQueryStringSort"] = "Enable query string sort"
+			fields["CacheByCookies"] = "Cache by cookies"
+			fields["CookieNames"] = "Cookie Names"
+			fields["AdaptiveDeliveryAction"] = "Adaptive delivery action"
+			fields["DeviceGroup"] = "Device group"
+			fields["EnableCachingForPost"] = "EnableCachingForPost"
+			fields["L2CachingEnabled"] = "L2 caching enabled"
 
-			if cmd.Flags().Changed("out") {
-				err := cmdutil.WriteDetailsToFile(formattedFuction, opts.OutPath, out)
-				if err != nil {
-					return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
-				}
-				fmt.Fprintf(out, msg.FileWritten, opts.OutPath)
-			} else {
-				_, err := out.Write(formattedFuction[:])
-				if err != nil {
-					return err
-				}
+			describeOut := output.DescribeOutput{
+				GeneralOutput: output.GeneralOutput{
+					Out:         f.IOStreams.Out,
+					Msg:         filepath.Clean(opts.OutPath),
+					FlagOutPath: opts.OutPath,
+					FlagFormat:  opts.Format,
+				},
+				Fields: fields,
+				Values: resp,
 			}
-
-			return nil
+			return output.Print(&describeOut)
 		},
 	}
 
@@ -107,34 +114,4 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 	return cmd
-}
-
-func format(cmd *cobra.Command, strResp api.GetResponse) ([]byte, error) {
-	format, err := cmd.Flags().GetString("format")
-	if err != nil {
-		return nil, err
-	}
-
-	if format == "json" || cmd.Flags().Changed("out") {
-		return json.MarshalIndent(strResp, "", " ")
-	}
-
-	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgGreen).SprintfFunc())
-	tbl.AddRow("Id: ", strResp.GetId())
-	tbl.AddRow("Name: ", strResp.GetName())
-	tbl.AddRow("Browser cache settings: ", strResp.GetBrowserCacheSettings())
-	tbl.AddRow("Browser cache settings maximum TTL: ", strResp.GetBrowserCacheSettingsMaximumTtl())
-	tbl.AddRow("Cdn cache settings: ", strResp.GetCdnCacheSettings())
-	tbl.AddRow("Cdn cache settings maximum TTL: ", strResp.GetCdnCacheSettingsMaximumTtl())
-	tbl.AddRow("Cache by query string: ", strResp.GetCacheByQueryString())
-	tbl.AddRow("Query string fields: ", strResp.GetQueryStringFields())
-	tbl.AddRow("Enable query string sort: ", strResp.GetEnableCachingForPost())
-	tbl.AddRow("Cache by cookies: ", strResp.GetCacheByCookies())
-	tbl.AddRow("Cookie Names: ", strResp.GetCookieNames())
-	tbl.AddRow("Adaptive delivery action: ", strResp.GetAdaptiveDeliveryAction())
-	tbl.AddRow("Device group: ", strResp.GetDeviceGroup())
-	tbl.AddRow("EnableCachingForPost: ", strResp.GetEnableCachingForPost())
-	tbl.AddRow("L2 caching enabled: ", strResp.GetL2CachingEnabled())
-	return tbl.GetByteFormat(), nil
 }

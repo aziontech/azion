@@ -56,7 +56,7 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		cmdVulcanInit = fmt.Sprintf("%s --template '%s'", cmdVulcanInit, cmd.template)
 	}
 
-	command := vul.Command("", cmdVulcanInit)
+	command := vul.Command("", cmdVulcanInit, cmd.f)
 
 	err = cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {

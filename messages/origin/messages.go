@@ -7,7 +7,7 @@ var (
 	// [create]
 	CreateShortDescription = "Creates a new Origin"
 	CreateLongDescription  = "Creates an Origin based on given attributes to be used in Edge Applications"
-	CreateOutputSuccess    = "Created Origin with key %s\n"
+	CreateOutputSuccess    = "Created Origin with key %s"
 	CreateFlagHelp         = "Displays more information about the create Origin command"
 
 	// [delete]
@@ -36,7 +36,7 @@ var (
 	UpdateLongDescription       = "Updates an Origin based on its key and given attributes"
 	UpdateFlagEdgeApplicationId = "Unique identifier for an Edge Application"
 	UpdateFlagHelp              = "Displays more information about the update Origin command"
-	UpdateOutputSuccess         = "Updated Origin with key %s\n"
+	UpdateOutputSuccess         = "Updated Origin with key %s"
 
 	// [ ask ]
 	AskAppID      = "Enter the ID of the Edge Application this Origin is linked to:"

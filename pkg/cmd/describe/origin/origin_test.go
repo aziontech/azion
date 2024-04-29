@@ -1,12 +1,14 @@
 package origin
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -48,7 +50,6 @@ func TestDescribe(t *testing.T) {
 		err := cmd.Execute()
 		require.Error(t, err)
 	})
-	//
 	t.Run("no id sent", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
@@ -93,7 +94,7 @@ func TestDescribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		require.Equal(t, "File successfully written to: out.json\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(output.WRITE_SUCCESS, "./out.json"), stdout.String())
 
 	})
 }

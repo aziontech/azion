@@ -1,6 +1,7 @@
 package edgefunction
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"testing"
@@ -8,6 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
+	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
@@ -51,7 +53,7 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
 	})
 
 	t.Run("update code and args", func(t *testing.T) {
@@ -77,7 +79,7 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
 	})
 
 	t.Run("bad request", func(t *testing.T) {
@@ -115,6 +117,6 @@ func TestUpdate(t *testing.T) {
 		err := cmd.Execute()
 
 		require.NoError(t, err)
-		require.Equal(t, "🚀 Updated Edge Function with ID 1337\n\n", stdout.String())
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
 	})
 }

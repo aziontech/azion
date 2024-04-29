@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 
@@ -69,8 +70,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateVariable.Error(), err)
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf("Updated Variable with ID %s\n", response.GetUuid()))
-			return nil
+			updateOut := output.GeneralOutput{
+				Msg: fmt.Sprintf(msg.UpdateOutputSuccess, response.GetUuid()),
+				Out: f.IOStreams.Out,
+			}
+			return output.Print(&updateOut)
 		},
 	}
 

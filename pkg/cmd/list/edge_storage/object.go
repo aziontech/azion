@@ -10,8 +10,8 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/nsf/termbox-go"
 
-	table "github.com/maxwelbm/tablecli"
 	"github.com/fatih/color"
+	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
