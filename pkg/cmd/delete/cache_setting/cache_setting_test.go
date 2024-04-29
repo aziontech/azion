@@ -26,7 +26,7 @@ func TestCreate(t *testing.T) {
 
 		f, stdout, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "1673635839", "--cache-settings-id", "107313"})
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--cache-setting-id", "107313"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestCreate(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "1234", "--cache-settings-id", "107313"})
+		cmd.SetArgs([]string{"--application-id", "1234", "--cache-setting-id", "107313"})
 
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
