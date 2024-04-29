@@ -80,7 +80,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = vulcan(f, cmd, isFirewall)
+	err = vulcan(cmd, isFirewall)
 	if err != nil {
 		return err
 	}
