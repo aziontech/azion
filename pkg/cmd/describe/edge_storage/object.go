@@ -61,8 +61,10 @@ func (f *Fields) RunE(cmd *cobra.Command, args []string) error {
 	}
 
 	describeOut := output.GeneralOutput{
-		Msg: string(bFile),
-		Out: f.Factory.IOStreams.Out,
+		Msg:         string(bFile),
+		Out:         f.Factory.IOStreams.Out,
+		FlagOutPath: f.Factory.Out,
+		FlagFormat:  f.Factory.Format,
 	}
 	return output.Print(&describeOut)
 }
