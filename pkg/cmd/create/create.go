@@ -6,8 +6,8 @@ import (
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/create/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/cmd/create/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/edge_applications"
-	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/edge_storage"
 	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/create/edge_function"
+	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/edge_storage"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/create/rules_engine"
@@ -25,7 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion create edge-application -h
 		$ azion create rules-engine -h
 		$ azion create domain -h
-		$ azion create token -h
+		$ azion create personal-token -h
 		$ azion create origin -h
 		$ azion create cache-setting -h
 		$ azion create edge-function -h

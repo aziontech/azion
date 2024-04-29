@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
@@ -22,7 +23,7 @@ import (
 )
 
 var example = `
-	$ azion create origin --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+	$ azion create origin --application-id 1673635839 --name "drink coffe" --addresses "asdfg.asd" --host-header "\${host}"
 	$ azion create origin --application-id 1673635839 --file "create.json"
 `
 
@@ -69,6 +70,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			spew.Dump(request)
+			fmt.Println("HOST HEADER")
+			fmt.Println(fields.HostHeader)
 			response, err := client.Create(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateOrigins.Error(), err)
