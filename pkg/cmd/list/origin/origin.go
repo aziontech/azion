@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
@@ -15,8 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
@@ -75,38 +73,31 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		tbl := table.New("ORIGIN KEY", "NAME")
-		tbl.WithWriter(f.IOStreams.Out)
-		if opts.Details {
-			tbl = table.New("ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT")
-		}
+		listOut := output.ListOutput{}
+		listOut.Columns = []string{"ORIGIN KEY", "NAME"}
+		listOut.Out = f.IOStreams.Out
 
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+		if opts.Details {
+			listOut.Columns = []string{"ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT"}
+		}
 
 		for _, v := range resp.Results {
-			tbl.AddRow(
+			ln := []string{
 				*v.OriginKey,
 				utils.TruncateString(v.Name),
-				*v.OriginId,
+				fmt.Sprintf("%d", *v.OriginId),
 				*v.OriginType,
 				*v.OriginPath,
-				v.Addresses,
-				*v.ConnectionTimeout,
-			)
+				fmt.Sprintf("%v", v.Addresses),
+				fmt.Sprintf("%d", *v.ConnectionTimeout),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
 
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-
-		// print the header only in the first flow
-		if opts.Page == 1 {
-			logger.PrintHeader(tbl, format)
-		}
-
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
+		listOut.Page = opts.Page
+		err = output.Print(&listOut)
+		if err != nil {
+			return err
 		}
 
 		if opts.Page >= resp.TotalPages {

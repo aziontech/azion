@@ -3,9 +3,6 @@ package personaltoken
 import (
 	"context"
 	"fmt"
-	"strings"
-
-	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
@@ -13,9 +10,8 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
@@ -58,16 +54,13 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 		return err
 	}
 
-	tbl := table.New("ID", "NAME", "EXPIRES AT")
-	tbl.WithWriter(f.IOStreams.Out)
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ID", "NAME", "EXPIRES AT"}
+	listOut.Out = f.IOStreams.Out
 
 	if details {
-		tbl = table.New("ID", "NAME", "EXPIRES AT", "CREATED AT", "DESCRIPTION")
+		listOut.Columns = []string{"ID", "NAME", "EXPIRES AT", "CREATED AT", "DESCRIPTION"}
 	}
-
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgGreen).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
 
 	for _, v := range resp {
 		var description string
@@ -75,22 +68,14 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 			description = *v.Description.Get()
 		}
 
-		tbl.AddRow(
+		ln := []string{
 			*v.Uuid,
 			utils.TruncateString(*v.Name),
 			v.ExpiresAt.Format(constants.FORMAT_DATE),
-			*v.Created,
+			fmt.Sprintf("%v", *v.Created),
 			utils.TruncateString(description),
-		)
+		}
+		listOut.Lines = append(listOut.Lines, ln)
 	}
-
-	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
-	logger.PrintHeader(tbl, format)
-
-	for _, row := range tbl.GetRows() {
-		logger.PrintRow(tbl, format, row)
-	}
-
-	return nil
+	return output.Print(&listOut)
 }

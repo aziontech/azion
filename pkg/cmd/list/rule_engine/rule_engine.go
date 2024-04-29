@@ -4,9 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
-	"strings"
 
-	"github.com/fatih/color"
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
@@ -15,8 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 )
 
@@ -85,27 +83,23 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		return err
 	}
 
-	tbl := table.New("ID", "NAME")
-	table.DefaultWriter = f.IOStreams.Out
-	if cmd.Flags().Changed("details") {
-		tbl = table.New("ID", "NAME", "ORDER", "PHASE", "ACTIVE")
-	}
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ID", "NAME"}
+	listOut.Out = f.IOStreams.Out
 
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgGreen).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	if cmd.Flags().Changed("details") {
+		listOut.Columns = []string{"ID", "NAME", "ORDER", "PHASE", "ACTIVE"}
+	}
 
 	for _, v := range rules.Results {
-		tbl.AddRow(v.Id, v.Name, v.Order, v.Phase, v.IsActive)
+		ln := []string{
+			fmt.Sprintf("%d", v.Id),
+			v.Name,
+			fmt.Sprintf("%d", v.Order),
+			v.Phase,
+			fmt.Sprintf("%v", v.IsActive),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
 	}
-
-	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
-	logger.PrintHeader(tbl, format)
-	for _, row := range tbl.GetRows() {
-		logger.PrintRow(tbl, format, row)
-	}
-
-	f.IOStreams.Out = table.DefaultWriter
-	return nil
+	return output.Print(&listOut)
 }
