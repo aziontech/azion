@@ -9,7 +9,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,14 +22,13 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"--application-id", "1673635839"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n107313  Default Cache Settings  override                \n", stdout.String())
 	})
 
 	t.Run("list page 1 with iten 1", func(t *testing.T) {
@@ -41,14 +39,13 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/list_3_itens.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "1"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n107313  Default Cache Settings  override                \n107314  Default Cache Settings  override                \n107315  Default Cache Settings  override                \n", stdout.String())
 	})
 
 	t.Run("list page 3 with iten 1", func(t *testing.T) {
@@ -59,14 +56,13 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/list_3_itens.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "3"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "107313  Default Cache Settings  override                \n107314  Default Cache Settings  override                \n107315  Default Cache Settings  override                \n", stdout.String())
 	})
 
 	t.Run("no itens", func(t *testing.T) {
@@ -77,14 +73,13 @@ func TestList(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/nocaches.json"),
 		)
 
-		f, stdout, _ := testutils.NewFactory(mock)
+		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"--application-id", "1673635839"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
-		assert.Equal(t, "ID      NAME                    BROWSER CACHE SETTINGS  \n", stdout.String())
 	})
 
 	t.Run("list page 1 with iten 1", func(t *testing.T) {

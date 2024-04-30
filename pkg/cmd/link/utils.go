@@ -79,7 +79,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	}
 	logger.FInfo(cmd.Io.Out, msg.InitGettingTemplates)
 
-	command := vul.Command("--loglevel=error --no-update-notifier", "presets ls")
+	command := vul.Command("--loglevel=error --no-update-notifier", "presets ls", cmd.F)
 	output, err := cmd.CommandRunner(cmd.F, command, []string{"CLEAN_OUTPUT_MODE=true"})
 	if err != nil {
 		return err
