@@ -56,6 +56,8 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"ID", "KEY", "VALUE"}
 	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
 
 	if opts.Details {
 		listOut.Columns = []string{"ID", "KEY", "VALUE", "SECRET", "LAST EDITOR"}
