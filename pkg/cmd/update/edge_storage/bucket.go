@@ -58,8 +58,10 @@ func (b *bucket) runE(cmd *cobra.Command, args []string) error {
 	}
 
 	updateOut := output.GeneralOutput{
-		Msg: msg.OUTPUT_UPDATE_BUCKET,
-		Out: b.factory.IOStreams.Out,
+		Msg:         msg.OUTPUT_UPDATE_BUCKET,
+		Out:         b.factory.IOStreams.Out,
+		FlagOutPath: b.factory.Out,
+		FlagFormat:  b.factory.Format,
 	}
 	return output.Print(&updateOut)
 }
