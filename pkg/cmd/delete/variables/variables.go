@@ -49,8 +49,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, variableID),
-				Out: f.IOStreams.Out}
+				Msg:         fmt.Sprintf(msg.DeleteOutputSuccess, variableID),
+				Out:         f.IOStreams.Out,
+				FlagOutPath: f.Out,
+				FlagFormat:  f.Format,
+			}
 			return output.Print(&deleteOut)
 
 		},
