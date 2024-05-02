@@ -69,6 +69,6 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 
 func (b *Bucket) AddFlags(flags *pflag.FlagSet) {
 	flags.Int64Var(&b.Options.Page, "page", 1, general.ApiListFlagPage)
-	flags.Int64Var(&b.Options.PageSize, "page-size", 10, general.ApiListFlagPageSize)
+	flags.Int64Var(&b.Options.PageSize, "page-size", 50, general.ApiListFlagPageSize)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_LIST_BUCKET)
 }

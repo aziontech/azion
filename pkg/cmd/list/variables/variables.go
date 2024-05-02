@@ -74,6 +74,5 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 
 		listOut.Lines = append(listOut.Lines, ln)
 	}
-
 	return output.Print(&listOut)
 }

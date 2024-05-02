@@ -42,52 +42,34 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	for {
-		resp, err := client.List(ctx, opts)
-		if err != nil {
-			return err
-		}
-
-		listOut := output.ListOutput{}
-		listOut.Columns = []string{"ID", "NAME"}
-		listOut.Out = f.IOStreams.Out
-		listOut.FlagOutPath = f.Out
-		listOut.FlagFormat = f.Format
-
-		if opts.Details {
-			listOut.Columns = []string{"ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE"}
-		}
-
-		for _, v := range resp.Results {
-			ln := []string{
-				fmt.Sprintf("%d", v.GetId()),
-				utils.TruncateString(v.GetName()),
-				v.GetDomainName(),
-				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
-				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
-				fmt.Sprintf("%v", v.GetCnameAccessOnly()),
-				fmt.Sprintf("%v", v.GetCnames()),
-				fmt.Sprintf("%v", v.GetIsActive()),
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		}
-
-		listOut.Page = opts.Page
-		err = output.Print(&listOut)
-		if err != nil {
-			return err
-		}
-
-		if opts.Page >= resp.TotalPages {
-			break
-		}
-
-		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
-			break
-		}
-
-		opts.Page++
+	resp, err := client.List(ctx, opts)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ID", "NAME"}
+	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
+
+	if opts.Details {
+		listOut.Columns = []string{"ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE"}
+	}
+
+	for _, v := range resp.Results {
+		ln := []string{
+			fmt.Sprintf("%d", v.GetId()),
+			utils.TruncateString(v.GetName()),
+			v.GetDomainName(),
+			fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+			fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+			fmt.Sprintf("%v", v.GetCnameAccessOnly()),
+			fmt.Sprintf("%v", v.GetCnames()),
+			fmt.Sprintf("%v", v.GetIsActive()),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+
+	return output.Print(&listOut)
 }

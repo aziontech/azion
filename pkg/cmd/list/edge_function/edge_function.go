@@ -47,52 +47,34 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	for {
-		functions, err := client.List(ctx, opts)
-		if err != nil {
-			return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
-		}
-
-		listOut := output.ListOutput{}
-		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
-		listOut.Out = f.IOStreams.Out
-		listOut.FlagOutPath = f.Out
-		listOut.FlagFormat = f.Format
-
-		if opts.Details {
-			listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE"}
-		}
-
-		for _, v := range functions.Results {
-			ln := []string{
-				fmt.Sprintf("%d", v.GetId()),
-				v.GetName(),
-				v.GetLanguage(),
-				fmt.Sprintf("%v", v.GetActive()),
-				v.GetLastEditor(),
-				v.GetModified(),
-				fmt.Sprintf("%d", v.GetReferenceCount()),
-				v.GetInitiatorType(),
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		}
-
-		listOut.Page = opts.Page
-		err = output.Print(&listOut)
-		if err != nil {
-			return err
-		}
-
-		if opts.Page >= *functions.TotalPages {
-			break
-		}
-
-		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
-			break
-		}
-
-		opts.Page++
+	functions, err := client.List(ctx, opts)
+	if err != nil {
+		return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 	}
 
-	return nil
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
+	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
+
+	if opts.Details {
+		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE"}
+	}
+
+	for _, v := range functions.Results {
+		ln := []string{
+			fmt.Sprintf("%d", v.GetId()),
+			v.GetName(),
+			v.GetLanguage(),
+			fmt.Sprintf("%v", v.GetActive()),
+			v.GetLastEditor(),
+			v.GetModified(),
+			fmt.Sprintf("%d", v.GetReferenceCount()),
+			v.GetInitiatorType(),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+
+	return output.Print(&listOut)
 }
