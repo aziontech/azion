@@ -1,9 +1,7 @@
 package domains
 
 import (
-	"log"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -65,37 +63,5 @@ func TestDescribe(t *testing.T) {
 		err := cmd.Execute()
 
 		require.Error(t, err)
-	})
-
-	t.Run("export to a file", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "domains/878"),
-			httpmock.JSONFromFile("./fixtures/domain.json"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		path := "./out.json"
-
-		cmd.SetArgs([]string{"--domain-id", "878", "--out", path})
-
-		err := cmd.Execute()
-		if err != nil {
-			log.Println("error executing cmd err: ", err.Error())
-		}
-
-		_, err = os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("error reading `out.json`: %v", err)
-		}
-		defer func() {
-			_ = os.Remove(path)
-		}()
-
-		require.NoError(t, err)
 	})
 }

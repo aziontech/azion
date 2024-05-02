@@ -76,6 +76,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS"}
 		listOut.Out = f.IOStreams.Out
+		listOut.FlagOutPath = f.Out
+		listOut.FlagFormat = f.Format
 
 		if cmd.Flags().Changed("details") {
 			listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}

@@ -50,8 +50,11 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 	}
 
 	deleteOut := output.GeneralOutput{
-		Msg: fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name),
-		Out: b.factory.IOStreams.Out}
+		Msg:         fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name),
+		Out:         b.factory.IOStreams.Out,
+		FlagOutPath: b.factory.Out,
+		FlagFormat:  b.factory.Format,
+	}
 	return output.Print(&deleteOut)
 
 }

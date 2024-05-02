@@ -13,5 +13,7 @@ type Factory struct {
 	IOStreams  *iostreams.IOStreams
 	Config     config.Config
 	logger.Logger
+	Out           string
+	Format        string
 	GlobalFlagAll bool
 }

@@ -55,6 +55,8 @@ type Fields struct {
 	SupportedCiphers               string
 	Websocket                      string
 	Path                           string
+	OutPath                        string
+	Format                         string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -91,8 +93,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			creatOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.OutputSuccess, response.GetId()),
-				Out: f.IOStreams.Out,
+				Msg:         fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+				Out:         f.IOStreams.Out,
+				FlagOutPath: f.Out,
+				FlagFormat:  f.Format,
 			}
 			return output.Print(&creatOut)
 		},

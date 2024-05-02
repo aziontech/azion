@@ -56,6 +56,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		listOut := output.ListOutput{}
 		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
 		listOut.Out = f.IOStreams.Out
+		listOut.FlagOutPath = f.Out
+		listOut.FlagFormat = f.Format
 
 		if opts.Details {
 			listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "MODIFIED", "REFERENCE COUNT", "INITIATOR_TYPE"}
