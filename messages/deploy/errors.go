@@ -14,4 +14,5 @@ var (
 	ErrorCreateInstance    = errors.New("Failed to create the Edge Function Instance: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorCreateDomain      = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateDomain      = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorInvalidToken      = errors.New("The configured token is invalid. You must create a new token and configure it to use with the CLI.")
 )
