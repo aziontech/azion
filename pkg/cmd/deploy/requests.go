@@ -258,7 +258,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
-	if len(conf.Origin) > 0 {
+	if conf.NotFirstRun {
 		return 0, nil
 	}
 
