@@ -275,7 +275,6 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
 						delete(CacheIds, v.RulesEngineBehaviorString.Target)
-						fmt.Println("deletei ooooo fdp")
 					} else {
 						return nil, msg.ErrorCacheNotFound
 					}
