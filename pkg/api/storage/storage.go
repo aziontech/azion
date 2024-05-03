@@ -20,7 +20,7 @@ type RequestBucket struct {
 }
 
 func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error {
-	logger.Debug("Creating bucket")
+	logger.Debug("Creating bucket ", zap.Any("name", request.Name))
 	req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(request.BucketCreate)
 	_, httpResp, err := req.Execute()
 	if err != nil {

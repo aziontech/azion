@@ -1,6 +1,8 @@
 package deploy
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_replaceInvalidChars(t *testing.T) {
 	tests := []struct {

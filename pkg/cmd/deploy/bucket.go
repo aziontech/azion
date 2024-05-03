@@ -13,7 +13,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 )
 
@@ -23,35 +22,21 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 	}
 
 	nameBucket := replaceInvalidChars(conf.Name)
-
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
-	for {
+	for i := 0; i < 10; i++ {
+		nameB := nameBucket + utils.Timestamp()
 		err := client.CreateBucket(ctx, api.RequestBucket{
-			BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
+			BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
 		if err != nil {
-			// if the name is already in use, we ask for another one
-			if errors.Is(err, utils.ErrorNameInUse) {
-				if NoPrompt {
-					return err
-				}
-				logger.FInfo(cmd.Io.Out, msg.BucketInUse)
-				if Auto {
-					nameBucket = thoth.GenerateName()
-				} else {
-					nameBucket, err = askForInput(msg.AskInputName, thoth.GenerateName())
-					if err != nil {
-						return err
-					}
-				}
-				conf.Bucket = nameBucket
+			if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 				continue
 			}
 			return err
 		}
+		conf.Bucket = nameB
 		break
 	}
 
-	conf.Bucket = nameBucket
 	err := cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
