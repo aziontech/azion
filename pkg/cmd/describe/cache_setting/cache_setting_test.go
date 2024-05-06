@@ -14,7 +14,7 @@ import (
 
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("describe an cache settings", func(t *testing.T) {
+	t.Run("describe an Cache Settings", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

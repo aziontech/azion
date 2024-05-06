@@ -361,7 +361,7 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	// create cache to function next
 	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
 	if err != nil {
-		logger.Debug("Error while creating cache settings", zap.Error(err))
+		logger.Debug("Error while creating Cache Settings", zap.Error(err))
 		return 0, err
 	}
 	return cache.GetId(), nil

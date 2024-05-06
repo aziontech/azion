@@ -35,7 +35,7 @@ var successResponse string = `
 
 func TestCreate(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("create new edge function", func(t *testing.T) {
+	t.Run("create new Edge Function", func(t *testing.T) {
 		t.Parallel()
 
 		mock := &httpmock.Registry{}

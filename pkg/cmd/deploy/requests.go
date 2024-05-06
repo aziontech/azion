@@ -234,10 +234,10 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		var reqCache apiapp.CreateCacheSettingsRequest
 		reqCache.SetName(conf.Name)
 
-		// create cache settings
+		// create Cache Settings
 		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
 		if err != nil {
-			logger.Debug("Error while creating cache settings", zap.Error(err))
+			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
@@ -290,7 +290,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+		logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -333,7 +333,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+		logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
