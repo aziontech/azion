@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
@@ -13,6 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
@@ -99,7 +101,7 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 func dumpVariables(resp []api.Response) error {
 	file, err := os.Create(".env")
 	if err != nil {
-		fmt.Println("Error creating .env file:", err)
+		logger.Debug("Error creating .env file", zap.Error(err))
 		return err
 	}
 	defer file.Close()
@@ -108,7 +110,7 @@ func dumpVariables(resp []api.Response) error {
 		envLine := fmt.Sprintf("%s=%s\n", v.GetKey(), v.GetValue())
 		_, err := file.WriteString(envLine)
 		if err != nil {
-			fmt.Println("Error writing to .env file:", err)
+			logger.Debug("Error writing to .env file", zap.Error(err))
 			return err
 		}
 	}
