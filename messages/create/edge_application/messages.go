@@ -25,5 +25,5 @@ var (
 	FlagSupportedCiphers               = "Determines which cryptographic algorithms will be used in the TLS connections of your Edge Application"
 	FlagWebsocket                      = "Allows you to establish the WebSocket communication protocol between your Origin and your users under the reverse proxy architecture."
 	FlagBrowserCacheSettingsMaximumTtl = "Defines the maximum time to live (TTL) of cached resources in the browser. It can be used to set a time limit for how long resources can be cached in the browser."
-	FlagCdnCacheSettingsMaximumTtl     = "Defines the maximum time to live (TTL) of cached resources in the CDN. It can be used to set a time limit for how long resources can be cached on the CDN servers."
+	FlagCdnCacheSettingsMaximumTtl     = "Defines the maximum time to live (TTL) of cached resources in the Edge Application. It can be used to set a time limit for how long resources can be cached on the Edge Application servers."
 )

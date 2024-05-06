@@ -107,7 +107,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Li
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while listing the edge functions", zap.Error(err))
+			logger.Debug("Error while listing the Edge Functions", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
