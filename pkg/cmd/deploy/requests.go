@@ -38,33 +38,26 @@ var injectIntoFunction = `
 func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.ID == 0 {
 		var projName string
-		for {
-			functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
-			if err != nil {
-				// if the name is already in use, we ask for another one
-				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
-						return err
+		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+		if err != nil {
+			for i := 0; i < 10; i++ {
+				projName = fmt.Sprintf("%s-%s", conf.Function.Name, utils.Timestamp())
+				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+				if err != nil {
+					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
+						continue
 					}
-					logger.FInfo(cmd.Io.Out, msg.FuncInUse)
-					if Auto {
-						projName = thoth.GenerateName()
-					} else {
-						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
-						if err != nil {
-							return err
-						}
-					}
-					conf.Function.Name = projName
-					continue
+					return err
 				}
-				return err
+				conf.Function.Name = projName
+				conf.Function.ID = functionId
+				break
 			}
+		} else {
 			conf.Function.ID = functionId
-			break
 		}
 
-		err := cmd.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err

@@ -397,10 +397,6 @@ func checkOrderField(body string) error {
 	return nil
 }
 
-func CreateVersionID() string {
-	return time.Now().Format("20060102150405")
-}
-
 func TruncateString(str string) string {
 	if len(str) > 30 {
 		return str[:30] + "..."
