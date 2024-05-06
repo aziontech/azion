@@ -38,8 +38,8 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 	if conf.Function.ID == 0 {
 		var projName string
 		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
-		for i := 0; i < 10; i++ {
-			if err != nil {
+		if err != nil {
+			for i := 0; i < 10; i++ {
 				projName = fmt.Sprintf("%s-%s", conf.Function.Name, utils.Timestamp())
 				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
 				if err != nil {
@@ -48,13 +48,12 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 					}
 					return err
 				}
-
 				conf.Function.Name = projName
 				conf.Function.ID = functionId
 				break
 			}
+		} else {
 			conf.Function.ID = functionId
-			break
 		}
 
 		err = cmd.WriteAzionJsonContent(conf)
