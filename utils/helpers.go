@@ -648,3 +648,7 @@ func containsErrorMessageNameTaken(msg string) bool {
 	}
 	return false
 }
+
+func Timestamp() string {
+	return fmt.Sprintf("%d", time.Now().Unix())
+}

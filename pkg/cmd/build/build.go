@@ -82,7 +82,7 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		Stat:                  os.Stat,
 		GetWorkDir:            utils.GetWorkingDir,
 		f:                     f,
-		VersionID:             createVersionID,
+		VersionID:             utils.Timestamp,
 	}
 }
 
