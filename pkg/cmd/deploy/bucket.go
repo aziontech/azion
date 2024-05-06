@@ -40,6 +40,8 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 			conf.Bucket = nameB
 			break
 		}
+	} else {
+		conf.Bucket = nameBucket
 	}
 
 	return cmd.WriteAzionJsonContent(conf)
