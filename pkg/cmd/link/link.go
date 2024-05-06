@@ -16,6 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
@@ -126,6 +127,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *LinkCmd) run(info *LinkInfo) error {
 	logger.Debug("Running link command")
+
+	err := node.NodeVersion()
+	if err != nil {
+		return err
+	}
 
 	path, err := cmd.GetWorkDir()
 	if err != nil {
