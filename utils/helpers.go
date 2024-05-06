@@ -397,8 +397,8 @@ func checkOrderField(body string) error {
 	return nil
 }
 
-func CreateVersionID() string {
-	return time.Now().Format("20060102150405")
+func Timestamp() string {
+	return fmt.Sprintf("%d", time.Now().Unix())
 }
 
 func TruncateString(str string) string {
