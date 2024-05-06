@@ -30,6 +30,31 @@ func Test_replaceInvalidChars(t *testing.T) {
 			args: "asdfad#!@asdfadsf-asdf/***((ˆ",
 			want: "asdfadasdfadsf-asdf",
 		},
+		{
+			name: "case 05",
+			args: "azion-asdfad#!@asdfadsf-asdf/***((ˆ",
+			want: "asdfadasdfadsf-asdf",
+		},
+		{
+			name: "case 06",
+			args: "b2-asdfad#!@asdfadsf-asdf/***((ˆ",
+			want: "asdfadasdfadsf-asdf",
+		},
+		{
+			name: "case 07",
+			args: "azion-b2-asdfad#!@asdfadsf-asdf/***((ˆ",
+			want: "asdfadasdfadsf-asdf",
+		},
+		{
+			name: "case 08",
+			args: "b2-azion-asdfad#!@asdfadsf-asdf/***((ˆ",
+			want: "asdfadasdfadsf-asdf",
+		},
+		{
+			name: "case 09",
+			args: "B2-Azion-asdfad#!@asdfadsf-asdf/***((ˆ",
+			want: "asdfadasdfadsf-asdf",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
