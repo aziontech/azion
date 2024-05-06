@@ -397,10 +397,6 @@ func checkOrderField(body string) error {
 	return nil
 }
 
-func Timestamp() string {
-	return fmt.Sprintf("%d", time.Now().Unix())
-}
-
 func TruncateString(str string) string {
 	if len(str) > 30 {
 		return str[:30] + "..."
