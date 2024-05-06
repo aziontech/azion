@@ -2,7 +2,6 @@ package edgefunction
 
 import (
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -88,37 +87,4 @@ func TestDescribe(t *testing.T) {
 		})
 
 	})
-
-	t.Run("export to a file", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_functions/123"),
-			httpmock.JSONFromString(successResponse),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		path := "./out.json"
-
-		cmd.SetArgs([]string{"--function-id", "123", "--out", path})
-
-		err := cmd.Execute()
-		if err != nil {
-			t.Fatalf("error executing cmd")
-		}
-
-		_, err = os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("error reading `out.json`: %v", err)
-		}
-		defer func() {
-			_ = os.Remove(path)
-		}()
-
-		require.NoError(t, err)
-	})
-
 }

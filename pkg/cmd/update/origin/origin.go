@@ -48,8 +48,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "asdf.safe" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
-        $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "drink coffe" --addresses "asdfg.asd" --host-header "host"
+        $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "ffcafe222sdsdffdf" --addresses "httpbin.org" --host-header "\${host}" --origin-type "single_origin" --origin-protocol-policy "http" --origin-path "/requests" --hmac-authentication "false"
+        $ azion update origin --application-id 1673635839 --origin-key "58755fef-e830-4ea4-b9e0-6481f1ef496d" --name "drink coffe" --addresses "asdfg.asd" --host-header "\${host}"
         $ azion update origin --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -99,8 +99,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			updateOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()),
-				Out: f.IOStreams.Out,
+				Msg:         fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()),
+				Out:         f.IOStreams.Out,
+				FlagOutPath: f.Out,
+				FlagFormat:  f.Format,
 			}
 			return output.Print(&updateOut)
 		},

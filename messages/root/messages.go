@@ -7,6 +7,8 @@ var (
 	RootDoNotUpdate = "Do not receive update notification"
 	RootLogDebug    = "Displays log at a debug level"
 	RootLogLevel    = "Set the logging level, \"debug\", \"info\", or \"error\"."
+	RootFlagOut     = "Exports the output to the given <file_path/file_name.ext>"
+	RootFlagFormat  = "Changes the output format passing the json value to the flag"
 	RootLogSilent   = "Silences log completely; mostly used for automation purposes"
 	RootTokenFlag   = "Saves a given Personal Token locally to authorize CLI commands"
 	RootConfigFlag  = "Sets the Azion configuration folder for the current command only, without changing persistent settings."

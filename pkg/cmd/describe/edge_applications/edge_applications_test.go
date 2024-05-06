@@ -1,14 +1,11 @@
 package edge_applications
 
 import (
-	"fmt"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
@@ -69,40 +66,4 @@ func TestDescribe(t *testing.T) {
 
 		require.Error(t, err)
 	})
-
-	t.Run("export to a file", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/123"),
-			httpmock.JSONFromFile("./fixtures/response.json"),
-		)
-
-		f, stdout, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		path := "./out.json"
-
-		cmd.SetArgs([]string{"--application-id", "123", "--out", path})
-
-		err := cmd.Execute()
-		if err != nil {
-			t.Fatalf("error executing cmd")
-		}
-
-		_, err = os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("error reading `out.json`: %v", err)
-		}
-		defer func() {
-			_ = os.Remove(path)
-		}()
-
-		require.NoError(t, err)
-
-		require.Equal(t, fmt.Sprintf(output.WRITE_SUCCESS, "./out.json"), stdout.String())
-
-	})
-
 }

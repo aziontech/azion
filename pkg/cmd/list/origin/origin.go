@@ -76,6 +76,8 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 		listOut := output.ListOutput{}
 		listOut.Columns = []string{"ORIGIN KEY", "NAME"}
 		listOut.Out = f.IOStreams.Out
+		listOut.FlagOutPath = f.Out
+		listOut.FlagFormat = f.Format
 
 		if opts.Details {
 			listOut.Columns = []string{"ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT"}

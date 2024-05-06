@@ -29,7 +29,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion cache_settings delete --application-id 1673635839 --cache-settings-id 107313
+        $ azion delete cache-setting --application-id 1673635839 --cache-setting-id 107313
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -48,7 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				applicationID = num
 			}
 
-			if !cmd.Flags().Changed("cache-settings-id") {
+			if !cmd.Flags().Changed("cache-setting-id") {
 				answer, err := utils.AskInput(msg.DeleteAskInputCacheID)
 				if err != nil {
 					return err
@@ -73,15 +73,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, cacheSettingsID),
-				Out: f.IOStreams.Out}
+				Msg:         fmt.Sprintf(msg.DeleteOutputSuccess, cacheSettingsID),
+				Out:         f.IOStreams.Out,
+				FlagOutPath: f.Out,
+				FlagFormat:  f.Format,
+			}
 			return output.Print(&deleteOut)
 
 		},
 	}
 
 	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DeleteFlagApplicationID)
-	cmd.Flags().Int64Var(&cacheSettingsID, "cache-settings-id", 0, msg.DeleteFlagCacheSettingsID)
+	cmd.Flags().Int64Var(&cacheSettingsID, "cache-setting-id", 0, msg.DeleteFlagCacheSettingsID)
 	cmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 	return cmd
 }

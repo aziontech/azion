@@ -23,6 +23,7 @@ var (
 	VariablesListShortDescription = "Displays your variables in a list"
 	VariablesListLongDescription  = "Displays all your environment variables and secrets in a list"
 	VariablesListHelpFlag         = "Displays more information about the list subcommand"
+	VariablesDump                 = "Variables file (.env) dumped successfully"
 
 	// [ delete ]
 	DeleteOutputSuccess    = "Variable %v was successfully deleted"

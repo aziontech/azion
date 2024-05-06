@@ -1,15 +1,12 @@
 package rulesengine
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
@@ -63,36 +60,5 @@ func TestDescribe(t *testing.T) {
 
 		err := cmd.Execute()
 		require.Error(t, err)
-	})
-
-	t.Run("export to a file", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
-		)
-
-		f, stdout, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-		path := "./out.json"
-		cmd.SetArgs([]string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "request", "--out", path})
-
-		err := cmd.Execute()
-		if err != nil {
-			log.Println("error executing cmd err: ", err.Error())
-		}
-
-		_, err = os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("error reading `out.json`: %v", err)
-		}
-		defer func() {
-			_ = os.Remove(path)
-		}()
-
-		require.NoError(t, err)
-		require.Equal(t, fmt.Sprintf(output.WRITE_SUCCESS, "./out.json"), stdout.String())
 	})
 }

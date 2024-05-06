@@ -20,6 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -37,33 +38,26 @@ var injectIntoFunction = `
 func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	if conf.Function.ID == 0 {
 		var projName string
-		for {
-			functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
-			if err != nil {
-				// if the name is already in use, we ask for another one
-				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
-						return err
+		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+		if err != nil {
+			for i := 0; i < 10; i++ {
+				projName = fmt.Sprintf("%s-%s", conf.Function.Name, utils.Timestamp())
+				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+				if err != nil {
+					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
+						continue
 					}
-					logger.FInfo(cmd.Io.Out, msg.FuncInUse)
-					if Auto {
-						projName = thoth.GenerateName()
-					} else {
-						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
-						if err != nil {
-							return err
-						}
-					}
-					conf.Function.Name = projName
-					continue
+					return err
 				}
-				return err
+				conf.Function.Name = projName
+				conf.Function.ID = functionId
+				break
 			}
+		} else {
 			conf.Function.ID = functionId
-			break
 		}
 
-		err := cmd.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -234,10 +228,10 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		var reqCache apiapp.CreateCacheSettingsRequest
 		reqCache.SetName(conf.Name)
 
-		// create cache settings
+		// create Cache Settings
 		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
 		if err != nil {
-			logger.Debug("Error while creating cache settings", zap.Error(err))
+			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
 		}
 		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
@@ -290,7 +284,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+		logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -333,7 +327,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(conf.Function.File)
 	if err != nil {
-		logger.Debug("Error while reading edge function file <"+conf.Function.File+">", zap.Error(err))
+		logger.Debug("Error while reading Edge Function file <"+conf.Function.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -570,3 +564,29 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 // 	}
 // 	return "", errMsg
 // }
+
+func checkToken(f *cmdutil.Factory) error {
+	configureToken := f.Config.GetString("token")
+
+	t, err := token.New(&token.Config{
+		Client: f.HttpClient,
+		Out:    f.IOStreams.Out,
+	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
+	}
+
+	if configureToken == "" {
+		return utils.ErrorTokenNotProvided
+	}
+
+	valid, _, err := t.Validate(&configureToken)
+	if err != nil {
+		return err
+	}
+	if !valid {
+		return msg.ErrorInvalidToken
+	}
+
+	return nil
+}

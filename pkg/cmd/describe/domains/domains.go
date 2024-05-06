@@ -59,8 +59,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
 					Msg:         filepath.Clean(opts.OutPath),
-					FlagOutPath: opts.OutPath,
-					FlagFormat:  opts.Format,
+					FlagOutPath: f.Out,
+					FlagFormat:  f.Format,
 					Out:         f.IOStreams.Out,
 				},
 				Fields: fields,
@@ -71,8 +71,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&domainID, "domain-id", "", msg.FlagDomainID)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.FlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.FlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd

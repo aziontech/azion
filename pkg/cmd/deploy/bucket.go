@@ -3,6 +3,8 @@ package deploy
 import (
 	"context"
 	"errors"
+	"fmt"
+	"regexp"
 
 	"github.com/aziontech/azionapi-go-sdk/storage"
 
@@ -12,8 +14,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	thoth "github.com/aziontech/go-thoth"
-	"go.uber.org/zap"
 )
 
 func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
@@ -21,43 +21,30 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		return nil
 	}
 
-	nameBucket := conf.Name
-
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
-	for {
-		err := client.CreateBucket(ctx, api.RequestBucket{
-			BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
-		if err != nil {
-			// if the name is already in use, we ask for another one
-			if errors.Is(err, utils.ErrorNameInUse) {
-				if NoPrompt {
-					return err
-				}
-				logger.FInfo(cmd.Io.Out, msg.BucketInUse)
-				if Auto {
-					nameBucket = thoth.GenerateName()
-				} else {
-					nameBucket, err = askForInput(msg.AskInputName, thoth.GenerateName())
-					if err != nil {
-						return err
-					}
-				}
-				conf.Bucket = nameBucket
-				continue
-			}
-			return err
-		}
-		break
-	}
-
-	conf.Bucket = nameBucket
-	err := cmd.WriteAzionJsonContent(conf)
+	nameBucket := replaceInvalidChars(conf.Name)
+	err := client.CreateBucket(ctx, api.RequestBucket{
+		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
 	if err != nil {
-		logger.Debug("Error while writing azion.json file", zap.Error(err))
-		return err
+		// If the name is already in use, try 10 times with different names
+		for i := 0; i < 10; i++ {
+			nameB := fmt.Sprintf("%s-%s", nameBucket, utils.Timestamp())
+			err := client.CreateBucket(ctx, api.RequestBucket{
+				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
+			if err != nil {
+				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
+					continue
+				}
+				return err
+			}
+			conf.Bucket = nameB
+			break
+		}
+	} else {
+		conf.Bucket = nameBucket
 	}
 
-	return nil
+	return cmd.WriteAzionJsonContent(conf)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {
@@ -73,4 +60,10 @@ func askForInput(msg string, defaultIn string) (string, error) {
 		return "", err
 	}
 	return userInput, nil
+}
+
+// replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
+func replaceInvalidChars(str string) string {
+	re := regexp.MustCompile(`[^a-zA-Z0-9\-]`)
+	return re.ReplaceAllString(str, "")
 }
