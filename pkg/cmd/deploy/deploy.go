@@ -96,8 +96,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 	ctx := context.Background()
 
+	err := checkToken(f)
+	if err != nil {
+		return err
+	}
+
 	buildCmd := cmd.BuildCmd(f)
-	err := buildCmd.Run(&contracts.BuildInfo{})
+	err = buildCmd.Run(&contracts.BuildInfo{})
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 		return err
@@ -130,6 +135,16 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
+	}
+
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
+		err = cmd.uploadFiles(f, conf)
+		if err != nil {
+			return err
+		}
 	}
 
 	conf.Function.File = ".edge/worker.js"
@@ -188,16 +203,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if len(conf.RulesEngine.Rules) == 0 {
 		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.uploadFiles(f, conf)
 		if err != nil {
 			return err
 		}

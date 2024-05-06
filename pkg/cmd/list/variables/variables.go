@@ -3,8 +3,10 @@ package variables
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
@@ -12,9 +14,12 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
+
+var dump bool
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
@@ -41,6 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	listCmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
+	listCmd.Flags().BoolVar(&dump, "dump", false, "")
 	listCmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
 	return listCmd
 }
@@ -51,6 +57,20 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	resp, err := client.List(c)
 	if err != nil {
 		return err
+	}
+
+	if dump {
+		err := dumpVariables(resp)
+		if err != nil {
+			return err
+		}
+		dumpOut := output.GeneralOutput{
+			Msg:         msg.VariablesDump,
+			Out:         f.IOStreams.Out,
+			FlagOutPath: f.Out,
+			FlagFormat:  f.Format,
+		}
+		return output.Print(&dumpOut)
 	}
 
 	listOut := output.ListOutput{}
@@ -76,4 +96,24 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	}
 
 	return output.Print(&listOut)
+}
+
+func dumpVariables(resp []api.Response) error {
+	file, err := os.Create(".env")
+	if err != nil {
+		logger.Debug("Error creating .env file", zap.Error(err))
+		return err
+	}
+	defer file.Close()
+
+	for _, v := range resp {
+		envLine := fmt.Sprintf("%s=%s\n", v.GetKey(), v.GetValue())
+		_, err := file.WriteString(envLine)
+		if err != nil {
+			logger.Debug("Error writing to .env file", zap.Error(err))
+			return err
+		}
+	}
+
+	return nil
 }
