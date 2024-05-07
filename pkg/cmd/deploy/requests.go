@@ -128,7 +128,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 							return err
 						}
 					}
-					conf.Application.Name = projName
+					conf.Name = projName
 					continue
 				}
 				return err
@@ -169,6 +169,8 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 					}
 					logger.FInfo(cmd.Io.Out, msg.DomainInUse)
 					if Auto {
+						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
+						logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseApplication, projName))
 						projName = thoth.GenerateName()
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
