@@ -29,6 +29,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
 			nameB := fmt.Sprintf("%s-%s", nameBucket, utils.Timestamp())
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseBucket, nameB))
 			err := client.CreateBucket(ctx, api.RequestBucket{
 				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
 			if err != nil {
@@ -44,6 +45,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		conf.Bucket = nameBucket
 	}
 
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.BucketSuccessful, conf.Bucket))
 	return cmd.WriteAzionJsonContent(conf)
 }
 
