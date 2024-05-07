@@ -23,12 +23,14 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	nameBucket := replaceInvalidChars(conf.Name)
+
 	err := client.CreateBucket(ctx, api.RequestBucket{
 		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
 			nameB := fmt.Sprintf("%s-%s", nameBucket, utils.Timestamp())
+			logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseBucket, nameB))
 			err := client.CreateBucket(ctx, api.RequestBucket{
 				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
 			if err != nil {
@@ -44,6 +46,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		conf.Bucket = nameBucket
 	}
 
+	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.BucketSuccessful, conf.Bucket))
 	return cmd.WriteAzionJsonContent(conf)
 }
 
@@ -64,6 +67,6 @@ func askForInput(msg string, defaultIn string) (string, error) {
 
 // replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
 func replaceInvalidChars(str string) string {
-	re := regexp.MustCompile(`[^a-zA-Z0-9\-]`)
+	re := regexp.MustCompile(`(?i)(?:azion-|b2-)|[^a-z0-9\-]`)
 	return re.ReplaceAllString(str, "")
 }
