@@ -45,4 +45,5 @@ Do you wish to create a Cache Settings configuration with the above specificatio
 	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
 	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
 	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"
+	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
 )

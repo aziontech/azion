@@ -12,7 +12,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var (
@@ -72,15 +71,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		contract.OwnWorker = "true"
 	}
 
-	// Run build command
-	build := cmd.BuildCmd(f)
-	err := build.Run(contract)
-	if err != nil {
-		logger.Debug("Error while running build command called by dev command", zap.Error(err))
-		return err
-	}
-
-	err = vulcan(cmd, isFirewall)
+	err := vulcan(cmd, isFirewall)
 	if err != nil {
 		return err
 	}
