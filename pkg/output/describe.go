@@ -14,6 +14,7 @@ type DescribeOutput struct {
 	GeneralOutput `json:"-" yaml:"-" toml:"-"`
 	Fields        map[string]string
 	Values        interface{}
+	Field         string // Used for large character values like codes or scripts that break the table.
 }
 
 func (d *DescribeOutput) Format() (bool, error) {
@@ -56,9 +57,14 @@ func (c *DescribeOutput) Output() {
 				tbl.AddRow(fmt.Sprintf("%s: ", vl), checkPrimitiveType(dereferencedValue))
 			}
 		}
+
 	}
 
 	logger.FInfo(c.Out, string(tbl.GetByteFormat()))
+	if len(c.Field) > 0 {
+		format := color.New(color.FgGreen).SprintfFunc()
+		logger.FInfo(c.Out, format("\nCode: %s", c.Field))
+	}
 }
 
 func checkPrimitiveType(value any) any {

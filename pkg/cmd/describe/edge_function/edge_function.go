@@ -68,9 +68,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			fields["LastEditor"] = "Last Editor"
 			fields["FunctionToRun"] = "Function to run"
 			fields["JsonArgs"] = "JSON Args"
-			if cmd.Flags().Changed("with-code") {
-				fields["Code"] = "Code"
-			}
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
@@ -82,6 +79,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				Fields: fields,
 				Values: resp,
 			}
+
+			if cmd.Flags().Changed("with-code") {
+				describeOut.Field = resp.GetCode()
+			}
+
 			return output.Print(&describeOut)
 		},
 	}
