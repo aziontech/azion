@@ -128,7 +128,6 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 							return err
 						}
 					}
-					conf.Application.Name = projName
 					conf.Name = projName
 					continue
 				}
