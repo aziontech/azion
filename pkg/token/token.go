@@ -33,7 +33,7 @@ func New(c *Config) (*Token, error) {
 }
 
 func (t *Token) Validate(token *string) (bool, UserInfo, error) {
-	logger.Debug("Validate token", zap.Any("Token", *token))
+	logger.Debug("Validate token")
 
 	req, err := http.NewRequest("GET", utils.Concat(t.endpoint, "/user/me"), nil)
 	if err != nil {
