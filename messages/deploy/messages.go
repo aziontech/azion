@@ -20,6 +20,7 @@ var (
 	OriginsSuccessful                 = "Created Origin for Edge Application\n"
 	OriginsUpdateSuccessful           = "Updated Origin for Edge Application %v with ID %v \n"
 	CacheSettingsSuccessful           = "Created Cache Settings for Edge Application\n"
+	BucketSuccessful                  = "Created Bucket %s\n"
 	RulesEngineSuccessful             = "Created Rules Engine for Edge Application\n"
 	DeployFlagHelp                    = "Displays more information about the deploy command"
 	DeployFlagAuto                    = "If sent, the entire flow of the command will be run without interruptions"
@@ -41,5 +42,7 @@ var (
   - Maximum TTL for Edge Application Cache Settings (in seconds): 7200
 
 Do you wish to create a Cache Settings configuration with the above specifications? (y/N)`
-	SkipUpload = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
+	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
+	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
+	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"
 )

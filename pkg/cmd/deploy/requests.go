@@ -120,7 +120,8 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 					}
 					logger.FInfo(cmd.Io.Out, msg.AppInUse)
 					if Auto {
-						projName = thoth.GenerateName()
+						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
+						logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseApplication, projName))
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
 						if err != nil {
