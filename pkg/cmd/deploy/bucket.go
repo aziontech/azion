@@ -23,6 +23,7 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 
 	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
 	nameBucket := replaceInvalidChars(conf.Name)
+
 	err := client.CreateBucket(ctx, api.RequestBucket{
 		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
 	if err != nil {
@@ -64,6 +65,6 @@ func askForInput(msg string, defaultIn string) (string, error) {
 
 // replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
 func replaceInvalidChars(str string) string {
-	re := regexp.MustCompile(`[^a-zA-Z0-9\-]`)
+	re := regexp.MustCompile(`(?i)(?:azion-|b2-)|[^a-z0-9\-]`)
 	return re.ReplaceAllString(str, "")
 }
