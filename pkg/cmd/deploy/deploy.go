@@ -218,9 +218,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	conf.Domain.Url = utils.Concat("https://", domainName)
+	cmd.WriteAzionJsonContent(conf)
+
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, utils.Concat("https://", domainName)))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url))
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 	return nil
-
 }
