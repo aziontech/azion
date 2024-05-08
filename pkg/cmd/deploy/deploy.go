@@ -219,7 +219,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	conf.Domain.Url = utils.Concat("https://", domainName)
-	cmd.WriteAzionJsonContent(conf)
+	if err := cmd.WriteAzionJsonContent(conf); err != nil {
+		return err
+	}
 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url))
