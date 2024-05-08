@@ -213,13 +213,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	err = cmd.doDomain(clients.Domain, ctx, conf)
 	if err != nil {
-		return err
-	}
-
-	conf.Domain.Url = utils.Concat("https://", domainName)
-	if err := cmd.WriteAzionJsonContent(conf); err != nil {
 		return err
 	}
 

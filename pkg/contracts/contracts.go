@@ -119,9 +119,10 @@ type AzionJsonDataOrigin struct {
 }
 
 type AzionJsonDataDomain struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
-	Url  string `json:"url"`
+	Id         int64  `json:"id"`
+	Name       string `json:"name"`
+	DomainName string `json:"domain_name"`
+	Url        string `json:"url"`
 }
 
 type AzionJsonDataPurge struct {
