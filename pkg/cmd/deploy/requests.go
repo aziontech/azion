@@ -152,7 +152,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	return nil
 }
 
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (string, error) {
+func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
 	var domain apidom.DomainResponse
 	var err error
 
@@ -165,7 +165,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					if NoPrompt {
-						return "", err
+						return err
 					}
 					logger.FInfo(cmd.Io.Out, msg.DomainInUse)
 					if Auto {
@@ -175,15 +175,18 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
 						if err != nil {
-							return "", err
+							return err
 						}
 					}
 					conf.Domain.Name = projName
 					continue
 				}
-				return "", err
+				return err
 			}
 			conf.Domain.Id = domain.GetId()
+			conf.Domain.Name = domain.GetName()
+			conf.Domain.DomainName = domain.GetDomainName()
+			conf.Domain.Url = utils.Concat("https://", domain.GetDomainName())
 			newDomain = true
 			break
 		}
@@ -191,14 +194,14 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		err = cmd.WriteAzionJsonContent(conf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return "", err
+			return err
 		}
 
 	} else {
 		domain, err = cmd.updateDomain(client, ctx, conf)
 		if err != nil {
 			logger.Debug("Error while updating domain", zap.Error(err))
-			return "", err
+			return err
 		}
 	}
 
@@ -208,11 +211,11 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		err := cmd.purgeDomains(cmd.F, domainReturnedName)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
-			return "", err
+			return err
 		}
 	}
 
-	return domainReturnedName[0], nil
+	return nil
 }
 
 func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client) error {
