@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// CreateCacheSettingsNextApplication this function creates the necessary cache settings for next applications
+// CreateCacheSettingsNextApplication this function creates the necessary Cache Settings for next applications
 // to work correctly on the edge
 func (c *Client) CreateCacheSettingsNextApplication(
 	ctx context.Context, req *CreateCacheSettingsRequest,

@@ -96,8 +96,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 	ctx := context.Background()
 
+	err := checkToken(f)
+	if err != nil {
+		return err
+	}
+
 	buildCmd := cmd.BuildCmd(f)
-	err := buildCmd.Run(&contracts.BuildInfo{})
+	err = buildCmd.Run(&contracts.BuildInfo{})
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 		return err
@@ -130,6 +135,16 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	err = cmd.doBucket(clients.Bucket, ctx, conf)
 	if err != nil {
 		return err
+	}
+
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
+		err = cmd.uploadFiles(f, conf)
+		if err != nil {
+			return err
+		}
 	}
 
 	conf.Function.File = ".edge/worker.js"
@@ -193,29 +208,18 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.uploadFiles(f, conf)
-		if err != nil {
-			return err
-		}
-	}
-
 	err = interpreter.CreateResources(conf, manifestStructure, f)
 	if err != nil {
 		return err
 	}
 
-	domainName, err := cmd.doDomain(clients.Domain, ctx, conf)
+	err = cmd.doDomain(clients.Domain, ctx, conf)
 	if err != nil {
 		return err
 	}
 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, utils.Concat("https://", domainName)))
+	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url))
 	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
 	return nil
-
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
@@ -105,6 +106,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	logger.Debug("Running init command")
+
+	err := node.NodeVersion()
+	if err != nil {
+		return err
+	}
 
 	cmd.globalFlagAll = cmd.f.GlobalFlagAll
 

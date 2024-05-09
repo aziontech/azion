@@ -115,6 +115,8 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
 	cobraCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
 	cobraCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogLevel)
+	cobraCmd.PersistentFlags().StringVar(&f.Out, "out", "", msg.RootFlagOut)
+	cobraCmd.PersistentFlags().StringVar(&f.Format, "format", "", msg.RootFlagFormat)
 
 	// other flags
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)

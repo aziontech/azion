@@ -225,7 +225,8 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
+
+func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originIds map[string]int64, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -292,7 +293,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
-					if id := OriginIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := originIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
 						delete(OriginKeys, v.RulesEngineBehaviorString.Target)
@@ -362,7 +363,7 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	// create cache to function next
 	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
 	if err != nil {
-		logger.Debug("Error while creating cache settings", zap.Error(err))
+		logger.Debug("Error while creating Cache Settings", zap.Error(err))
 		return 0, err
 	}
 	return cache.GetId(), nil

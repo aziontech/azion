@@ -92,8 +92,9 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	copy(listPresets, outputInline[:noLastItem])
 
 	prompt := &survey.Select{
-		Message: "Choose a preset and mode:",
-		Options: listPresets,
+		Message:  "Choose a preset and mode:",
+		Options:  listPresets,
+		PageSize: len(listPresets),
 	}
 
 	var answer, template, mode string

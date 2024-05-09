@@ -68,7 +68,7 @@ var (
 	FlagSliceL2CachingEnabled      = "Whether slice L2 caching is active or not"
 	FlagL2CachingEnabled           = "Whether L2 caching is active or not"
 	FlagSliceConfigurationRange    = "Informs slice configuration range"
-	FlagCdnCacheSettingsMaxTtl     = "Informs CDN Cache Settings configuration maximum TTL"
+	FlagCdnCacheSettingsMaxTtl     = "Informs Edge Application Cache Settings configuration maximum TTL"
 	FlagBrowserCacheSettingsMaxTtl = "Informs Browser Cache Settings configuration maximum TTL"
 	FlagAdaptiveDeliveryAction     = "Informs the Cache Settings configuration adaptive delivery action."
 )

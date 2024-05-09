@@ -65,7 +65,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 		Sort(opts.Sort).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing cache settings", zap.Error(err))
+		logger.Debug("Error while listing Cache Settings", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
 		if err != nil {
 			return nil, err

@@ -60,6 +60,8 @@ func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts
 		listOut := output.ListOutput{}
 		listOut.Columns = []string{"ID", "NAME", "ACTIVE"}
 		listOut.Out = f.IOStreams.Out
+		listOut.FlagOutPath = f.Out
+		listOut.FlagFormat = f.Format
 
 		if opts.Details {
 			listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES"}

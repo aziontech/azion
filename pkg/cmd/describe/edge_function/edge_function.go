@@ -68,28 +68,28 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			fields["LastEditor"] = "Last Editor"
 			fields["FunctionToRun"] = "Function to run"
 			fields["JsonArgs"] = "JSON Args"
-			if cmd.Flags().Changed("with-code") {
-				fields["Code"] = "Code"
-			}
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
 					Msg:         filepath.Clean(opts.OutPath),
-					FlagOutPath: opts.OutPath,
-					FlagFormat:  opts.Format,
+					FlagOutPath: f.Out,
+					FlagFormat:  f.Format,
 					Out:         f.IOStreams.Out,
 				},
 				Fields: fields,
 				Values: resp,
 			}
+
+			if cmd.Flags().Changed("with-code") {
+				describeOut.Field = resp.GetCode()
+			}
+
 			return output.Print(&describeOut)
 		},
 	}
 
 	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagID)
 	cmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
-	cmd.Flags().StringVar(&opts.OutPath, "out", "", msg.DescribeFlagOut)
-	cmd.Flags().StringVar(&opts.Format, "format", "", msg.DescribeFlagFormat)
 	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cmd
