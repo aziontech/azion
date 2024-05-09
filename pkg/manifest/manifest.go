@@ -216,7 +216,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, conf, client, ctx)
+			requestCreate, err := makeRuleRequestCreate(rule, CacheIds, conf, OriginIds, client, ctx)
 			if err != nil {
 				return err
 			}
