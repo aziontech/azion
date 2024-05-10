@@ -24,6 +24,7 @@ import (
 
 var (
 	CacheIds         map[string]int64
+	CacheIdsBackup   map[string]int64
 	RuleIds          map[string]int64
 	OriginKeys       map[string]string
 	OriginIds        map[string]int64
@@ -79,6 +80,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	ctx := context.Background()
 
 	CacheIds = make(map[string]int64)
+	CacheIdsBackup = make(map[string]int64)
 	RuleIds = make(map[string]int64)
 	OriginKeys = make(map[string]string)
 	OriginIds = make(map[string]int64)
@@ -186,6 +188,11 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			CacheIds[newCache.Name] = newCache.Id
 			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, newCache.Id))
 		}
+	}
+
+	//backup cache ids
+	for k, v := range CacheIds {
+		CacheIdsBackup[k] = v
 	}
 
 	conf.CacheSettings = cacheConf
