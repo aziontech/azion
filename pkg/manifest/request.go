@@ -145,7 +145,7 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 	return request
 }
 
-func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originKeys map[string]int64) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
+func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -190,22 +190,25 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-					if id := cacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := CacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
+						delete(CacheIds, v.RulesEngineBehaviorString.Target)
 					} else {
+						logger.Debug("Cache Setting not found", zap.Any("Target", v.RulesEngineBehaviorString.Target))
 						return nil, msg.ErrorCacheNotFound
 					}
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
 					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
-					if id := originKeys[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := OriginIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
+						delete(OriginKeys, v.RulesEngineBehaviorString.Target)
 					} else {
-						fmt.Println(v.RulesEngineBehaviorString.Target)
-						return nil, msg.ErrorCacheNotFound
+						logger.Debug("Origin not found", zap.Any("Target", v.RulesEngineBehaviorString.Target))
+						return nil, msg.ErrorOriginNotFound
 					}
 				} else {
 					behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
@@ -224,7 +227,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, cacheIds map[string]int64,
 	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64, conf *contracts.AzionApplicationOptions, originIds map[string]int64, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
+func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -270,11 +273,12 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-					fmt.Println(v.RulesEngineBehaviorString.Target)
-					if id := cacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := CacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
+						delete(CacheIds, v.RulesEngineBehaviorString.Target)
 					} else {
+						logger.Debug("Cache Setting not found", zap.Any("Target", v.RulesEngineBehaviorString.Target))
 						return nil, msg.ErrorCacheNotFound
 					}
 				} else if v.RulesEngineBehaviorString.Name == "run_function" {
@@ -291,11 +295,12 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, cacheIds map[string]int64,
 					str := strconv.FormatInt(conf.Function.InstanceID, 10)
 					behaviorString.SetTarget(str)
 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
-					if id := originIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := OriginIds[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
+						delete(OriginKeys, v.RulesEngineBehaviorString.Target)
 					} else {
-						fmt.Println(v.RulesEngineBehaviorString.Target)
+						logger.Debug("Origin not found", zap.Any("Target", v.RulesEngineBehaviorString.Target))
 						return nil, msg.ErrorOriginNotFound
 					}
 				} else {
@@ -350,8 +355,11 @@ func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 }
 
 func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptions) (int64, error) {
+	if conf.Function.CacheId > 0 {
+		return conf.Function.CacheId, nil
+	}
 	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
-	reqCache.SetName("function policy")
+	reqCache.SetName("function-policy")
 	reqCache.SetBrowserCacheSettings("honor")
 	reqCache.SetCdnCacheSettings("honor")
 	reqCache.SetCdnCacheSettingsMaximumTtl(0)
@@ -364,5 +372,8 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 		logger.Debug("Error while creating Cache Settings", zap.Error(err))
 		return 0, err
 	}
+
+	conf.Function.CacheId = cache.GetId()
+
 	return cache.GetId(), nil
 }

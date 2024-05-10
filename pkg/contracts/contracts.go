@@ -105,6 +105,7 @@ type AzionJsonDataFunction struct {
 	Args         string `json:"args"`
 	InstanceID   int64  `json:"instance-id"`
 	InstanceName string `json:"instance-name"`
+	CacheId      int64  `json:"cache-id"`
 }
 
 type AzionJsonDataApplication struct {

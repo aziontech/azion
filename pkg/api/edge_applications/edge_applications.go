@@ -336,7 +336,7 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID int64,
 		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
 			errLog := utils.LogAndRewindBody(httpResp)
 			if errLog != nil {
 				return &sdk.RulesEngineResultResponse{}, errLog
