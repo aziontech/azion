@@ -12,7 +12,6 @@ type ListOutput struct {
 	GeneralOutput `json:"-" yaml:"-" toml:"-"`
 	Columns       []string   `json:"columns" yaml:"columns" toml:"columns"`
 	Lines         [][]string `json:"lines" yaml:"lines" toml:"lines"`
-	Page          int64      `json:"page" yaml:"page" toml:"page"`
 }
 
 func (l *ListOutput) Format() (bool, error) {
@@ -42,11 +41,7 @@ func (c *ListOutput) Output() {
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
 	tbl.CalculateWidths([]string{})
 
-	// print the header only in the first flow
-	if c.Page == 1 || c.Page == 0 {
-		logger.PrintHeader(tbl, format)
-	}
-
+	logger.PrintHeader(tbl, format)
 	for _, row := range tbl.GetRows() {
 		logger.PrintRow(tbl, format, row)
 	}

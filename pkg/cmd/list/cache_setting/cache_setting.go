@@ -66,51 +66,33 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	for {
-		cache, err := client.List(ctx, opts, edgeApplicationID)
-		if err != nil {
-			return msg.ErrorGetCaches
-		}
-
-		listOut := output.ListOutput{}
-
-		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS"}
-		listOut.Out = f.IOStreams.Out
-		listOut.FlagOutPath = f.Out
-		listOut.FlagFormat = f.Format
-
-		if cmd.Flags().Changed("details") {
-			listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
-		}
-
-		for _, v := range cache.Results {
-			ln := []string{
-				fmt.Sprintf("%d", v.Id),
-				v.Name,
-				v.BrowserCacheSettings,
-				v.CdnCacheSettings,
-				v.CacheByCookies,
-				fmt.Sprintf("%v", v.EnableCachingForPost),
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		}
-
-		listOut.Page = opts.Page
-		err = output.Print(&listOut)
-		if err != nil {
-			return err
-		}
-
-		if opts.Page >= cache.TotalPages {
-			break
-		}
-
-		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
-			break
-		}
-
-		opts.Page++
+	cache, err := client.List(ctx, opts, edgeApplicationID)
+	if err != nil {
+		return msg.ErrorGetCaches
 	}
 
-	return nil
+	listOut := output.ListOutput{}
+
+	listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS"}
+	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
+
+	if cmd.Flags().Changed("details") {
+		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
+	}
+
+	for _, v := range cache.Results {
+		ln := []string{
+			fmt.Sprintf("%d", v.Id),
+			v.Name,
+			v.BrowserCacheSettings,
+			v.CdnCacheSettings,
+			v.CacheByCookies,
+			fmt.Sprintf("%v", v.EnableCachingForPost),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+
+	return output.Print(&listOut)
 }

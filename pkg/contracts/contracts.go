@@ -32,6 +32,7 @@ type ListOptions struct {
 	Sort              string
 	Page              int64
 	PageSize          int64
+	NextPage          bool
 	Filter            string
 	ContinuationToken string
 }

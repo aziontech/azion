@@ -67,46 +67,33 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	c := context.Background()
 
-	for {
-		resp, err := client.ListOrigins(c, opts, edgeApplicationID)
-		if err != nil {
-			return err
-		}
-
-		listOut := output.ListOutput{}
-		listOut.Columns = []string{"ORIGIN KEY", "NAME"}
-		listOut.Out = f.IOStreams.Out
-		listOut.FlagOutPath = f.Out
-		listOut.FlagFormat = f.Format
-
-		if opts.Details {
-			listOut.Columns = []string{"ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT"}
-		}
-
-		for _, v := range resp.Results {
-			ln := []string{
-				*v.OriginKey,
-				utils.TruncateString(v.Name),
-				fmt.Sprintf("%d", *v.OriginId),
-				*v.OriginType,
-				*v.OriginPath,
-				fmt.Sprintf("%v", v.Addresses),
-				fmt.Sprintf("%d", *v.ConnectionTimeout),
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		}
-
-		listOut.Page = opts.Page
-		err = output.Print(&listOut)
-		if err != nil {
-			return err
-		}
-
-		if opts.Page >= resp.TotalPages {
-			break
-		}
-		opts.Page++
+	resp, err := client.ListOrigins(c, opts, edgeApplicationID)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ORIGIN KEY", "NAME"}
+	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
+
+	if opts.Details {
+		listOut.Columns = []string{"ORIGIN KEY", "NAME", "ID", "ORIGIN TYPE", "ORIGIN PATH", "ADDRESSES", "CONNECTION TIMEOUT"}
+	}
+
+	for _, v := range resp.Results {
+		ln := []string{
+			*v.OriginKey,
+			utils.TruncateString(v.Name),
+			fmt.Sprintf("%d", *v.OriginId),
+			*v.OriginType,
+			*v.OriginPath,
+			fmt.Sprintf("%v", v.Addresses),
+			fmt.Sprintf("%d", *v.ConnectionTimeout),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+
+	return output.Print(&listOut)
 }
