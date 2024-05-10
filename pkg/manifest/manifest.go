@@ -216,7 +216,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, CacheIds, conf, OriginIds, client, ctx)
+			requestCreate, err := makeRuleRequestCreate(rule, conf, client, ctx)
 			if err != nil {
 				return err
 			}
@@ -262,7 +262,7 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess, value))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value))
 	}
 
 	for i, value := range OriginKeys {
@@ -273,7 +273,7 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgorigin.DeleteOutputSuccess, value))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgorigin.DeleteOutputSuccess+"\n", value))
 	}
 
 	for _, value := range CacheIds {
@@ -281,7 +281,7 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgcache.DeleteOutputSuccess, value))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgcache.DeleteOutputSuccess+"\n", value))
 	}
 
 	return nil
