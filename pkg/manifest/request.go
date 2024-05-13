@@ -190,7 +190,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-					if id := CacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := CacheIdsBackup[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
 						delete(CacheIds, v.RulesEngineBehaviorString.Target)
@@ -273,7 +273,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 			if v.RulesEngineBehaviorString != nil {
 				var behaviorString sdk.RulesEngineBehaviorString
 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-					if id := CacheIds[v.RulesEngineBehaviorString.Target]; id > 0 {
+					if id := CacheIdsBackup[v.RulesEngineBehaviorString.Target]; id > 0 {
 						str := strconv.FormatInt(id, 10)
 						behaviorString.SetTarget(str)
 						delete(CacheIds, v.RulesEngineBehaviorString.Target)
