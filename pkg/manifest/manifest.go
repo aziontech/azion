@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
+	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
+	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	msg "github.com/aziontech/azion-cli/messages/manifest"
+	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
@@ -18,7 +22,14 @@ import (
 	"go.uber.org/zap"
 )
 
-var manifestFilePath = "/.edge/manifest.json"
+var (
+	CacheIds         map[string]int64
+	CacheIdsBackup   map[string]int64
+	RuleIds          map[string]int64
+	OriginKeys       map[string]string
+	OriginIds        map[string]int64
+	manifestFilePath = "/.edge/manifest.json"
+)
 
 type ManifestInterpreter struct {
 	FileReader            func(path string) ([]byte, error)
@@ -68,37 +79,46 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
-	cacheIds := make(map[string]int64)
-	ruleIds := make(map[string]int64)
-	originKeys := make(map[string]string)
-	originIds := make(map[string]int64)
+	CacheIds = make(map[string]int64)
+	CacheIdsBackup = make(map[string]int64)
+	RuleIds = make(map[string]int64)
+	OriginKeys = make(map[string]string)
+	OriginIds = make(map[string]int64)
 
 	for _, cacheConf := range conf.CacheSettings {
-		cacheIds[cacheConf.Name] = cacheConf.Id
+		CacheIds[cacheConf.Name] = cacheConf.Id
 	}
 
 	for _, ruleConf := range conf.RulesEngine.Rules {
-		ruleIds[ruleConf.Name] = ruleConf.Id
+		RuleIds[ruleConf.Name] = ruleConf.Id
 	}
 
 	for _, originConf := range conf.Origin {
-		originKeys[originConf.Name] = originConf.OriginKey
-		originIds[originConf.Name] = originConf.OriginId
+		OriginKeys[originConf.Name] = originConf.OriginKey
+		OriginIds[originConf.Name] = originConf.OriginId
 	}
 
+	originConf := []contracts.AzionJsonDataOrigin{}
 	for _, origin := range manifest.Origins {
-		if id := originIds[origin.Name]; id > 0 {
+		if id := OriginIds[origin.Name]; id > 0 {
 			requestUpdate := makeOriginUpdateRequest(origin, conf)
 			if origin.Name != "" {
 				requestUpdate.Name = &origin.Name
 			} else {
 				requestUpdate.Name = &conf.Name
 			}
-			created, err := clientOrigin.Update(ctx, conf.Application.ID, originKeys[origin.Name], requestUpdate)
+			updated, err := clientOrigin.Update(ctx, conf.Application.ID, OriginKeys[origin.Name], requestUpdate)
 			if err != nil {
 				return err
 			}
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, created.GetOriginKey()))
+
+			newEntry := contracts.AzionJsonDataOrigin{
+				OriginId:  updated.GetOriginId(),
+				OriginKey: updated.GetOriginKey(),
+				Name:      updated.GetName(),
+			}
+			originConf = append(originConf, newEntry)
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, updated.GetOriginKey()))
 		} else {
 			requestCreate := makeOriginCreateRequest(origin, conf)
 			if origin.Name != "" {
@@ -115,25 +135,39 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				OriginKey: created.GetOriginKey(),
 				Name:      created.GetName(),
 			}
-			conf.Origin = append(conf.Origin, newOrigin)
-			originIds[created.GetName()] = created.GetOriginId()
-			originKeys[created.GetName()] = created.GetOriginKey()
+
+			originConf = append(originConf, newOrigin)
+			OriginIds[created.GetName()] = created.GetOriginId()
+			OriginKeys[created.GetName()] = created.GetOriginKey()
 			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId()))
 		}
 	}
 
+	conf.Origin = originConf
+	err := man.WriteAzionJsonContent(conf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	cacheConf := []contracts.AzionJsonDataCacheSettings{}
 	for _, cache := range manifest.CacheSettings {
-		if id := cacheIds[*cache.Name]; id > 0 {
+		if id := CacheIds[*cache.Name]; id > 0 {
 			requestUpdate := makeCacheRequestUpdate(cache)
 			if cache.Name != nil {
 				requestUpdate.Name = cache.Name
 			} else {
 				requestUpdate.Name = &conf.Name
 			}
-			_, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
+			updated, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
 			if err != nil {
 				return err
 			}
+			newCache := contracts.AzionJsonDataCacheSettings{
+				Id:   updated.GetId(),
+				Name: updated.GetName(),
+			}
+			cacheConf = append(cacheConf, newCache)
 			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateCache, *cache.Name, id))
 		} else {
 			requestUpdate := makeCacheRequestCreate(cache)
@@ -150,34 +184,46 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Id:   created.GetId(),
 				Name: created.GetName(),
 			}
-			conf.CacheSettings = append(conf.CacheSettings, newCache)
-			cacheIds[newCache.Name] = newCache.Id
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, id))
+			cacheConf = append(cacheConf, newCache)
+			CacheIds[newCache.Name] = newCache.Id
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, newCache.Id))
 		}
 	}
 
-	err := man.WriteAzionJsonContent(conf)
+	//backup cache ids
+	for k, v := range CacheIds {
+		CacheIdsBackup[k] = v
+	}
+
+	conf.CacheSettings = cacheConf
+	err = man.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
+	ruleConf := []contracts.AzionJsonDataRules{}
 	for _, rule := range manifest.Rules {
-		if id := ruleIds[rule.Name]; id > 0 {
-			requestUpdate, err := makeRuleRequestUpdate(rule, cacheIds, conf, originIds)
+		if id := RuleIds[rule.Name]; id > 0 {
+			requestUpdate, err := makeRuleRequestUpdate(rule, conf)
 			if err != nil {
 				return err
 			}
 			requestUpdate.Id = id
 			requestUpdate.Phase = "request"
 			requestUpdate.IdApplication = conf.Application.ID
-			_, err = client.UpdateRulesEngine(ctx, requestUpdate)
+			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
 				return err
 			}
-
+			newRule := contracts.AzionJsonDataRules{
+				Id:   updated.GetId(),
+				Name: updated.GetName(),
+			}
+			ruleConf = append(ruleConf, newRule)
+			delete(RuleIds, rule.Name)
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, cacheIds, conf, originIds, client, ctx)
+			requestCreate, err := makeRuleRequestCreate(rule, conf, client, ctx)
 			if err != nil {
 				return err
 			}
@@ -194,14 +240,55 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Id:   created.GetId(),
 				Name: created.GetName(),
 			}
-			conf.RulesEngine.Rules = append(conf.RulesEngine.Rules, newRule)
+			ruleConf = append(ruleConf, newRule)
 		}
 	}
 
+	conf.RulesEngine.Rules = ruleConf
 	err = man.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
+	}
+
+	err = deleteResources(ctx, f, conf)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
+	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	for _, value := range RuleIds {
+		err := client.DeleteRulesEngine(ctx, conf.Application.ID, "request", value)
+		if err != nil {
+			return err
+		}
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value))
+	}
+
+	for i, value := range OriginKeys {
+		if strings.Contains(i, "_single") {
+			continue
+		}
+		err := clientOrigin.DeleteOrigins(ctx, conf.Application.ID, value)
+		if err != nil {
+			return err
+		}
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgorigin.DeleteOutputSuccess+"\n", value))
+	}
+
+	for _, value := range CacheIds {
+		err := clientCache.Delete(ctx, conf.Application.ID, value)
+		if err != nil {
+			return err
+		}
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgcache.DeleteOutputSuccess+"\n", value))
 	}
 
 	return nil

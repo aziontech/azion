@@ -7,6 +7,7 @@ var (
 	ApiListFlagSort     = "Defines the order of the items on the list; options <asc|desc>"
 	ApiListFlagPage     = "Returns a page of the list according to its number"
 	ApiListFlagPageSize = "Defines how many items should be returned per page"
+	ApiListFlagNextPage = "token to next page"
 	ApiListFlagFilter   = "Filters items by their name"
 	CliVersion          = "Azion CLI %s"
 )

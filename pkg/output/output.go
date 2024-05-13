@@ -19,5 +19,6 @@ func Print(out TypeOutputInterface) error {
 	if !format {
 		out.Output()
 	}
+
 	return nil
 }

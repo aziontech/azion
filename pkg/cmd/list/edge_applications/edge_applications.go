@@ -42,7 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.Int64Var(&opts.Page, "page", 1, general.ApiListFlagPage)
-	flags.Int64Var(&opts.PageSize, "page-size", 10, general.ApiListFlagPageSize)
+	flags.Int64Var(&opts.PageSize, "page-size", 50, general.ApiListFlagPageSize)
 	flags.BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
@@ -51,50 +51,32 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	c := context.Background()
 
-	for {
-		resp, err := client.List(c, opts)
-		if err != nil {
-			return err
-		}
-
-		listOut := output.ListOutput{}
-		listOut.Columns = []string{"ID", "NAME", "ACTIVE"}
-		listOut.Out = f.IOStreams.Out
-		listOut.FlagOutPath = f.Out
-		listOut.FlagFormat = f.Format
-
-		if opts.Details {
-			listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES"}
-		}
-
-		for _, v := range resp.Results {
-			ln := []string{
-				fmt.Sprintf("%d", v.Id),
-				utils.TruncateString(v.Name),
-				fmt.Sprintf("%v", v.Active),
-				v.LastEditor,
-				v.LastModified,
-				fmt.Sprintf("%v", v.DebugRules),
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		}
-
-		listOut.Page = opts.Page
-		err = output.Print(&listOut)
-		if err != nil {
-			return err
-		}
-
-		if opts.Page >= resp.TotalPages {
-			break
-		}
-
-		if cmd.Flags().Changed("page") || cmd.Flags().Changed("page-size") {
-			break
-		}
-
-		opts.Page++
+	resp, err := client.List(c, opts)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"ID", "NAME", "ACTIVE"}
+	listOut.Out = f.IOStreams.Out
+	listOut.FlagOutPath = f.Out
+	listOut.FlagFormat = f.Format
+
+	if opts.Details {
+		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES"}
+	}
+
+	for _, v := range resp.Results {
+		ln := []string{
+			fmt.Sprintf("%d", v.Id),
+			utils.TruncateString(v.Name),
+			fmt.Sprintf("%v", v.Active),
+			v.LastEditor,
+			v.LastModified,
+			fmt.Sprintf("%v", v.DebugRules),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+
+	return output.Print(&listOut)
 }

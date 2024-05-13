@@ -3,15 +3,9 @@ package edge_storage
 import (
 	"context"
 	"fmt"
-	"strings"
-	"time"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/briandowns/spinner"
-	"github.com/nsf/termbox-go"
 
-	"github.com/fatih/color"
-	table "github.com/maxwelbm/tablecli"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -20,7 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
@@ -59,83 +53,54 @@ func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 }
 
 func (b *Objects) PrintTable(client *api.Client) error {
-	err := termbox.Init()
+	c := context.Background()
+
+	settings, err := token.ReadSettings()
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer termbox.Close()
 
-	printHeader := true
-	count := 0
-	for {
-		c := context.Background()
-
-		settings, err := token.ReadSettings()
-		if err != nil {
-			return err
-		}
-
-		if count > 0 && len(settings.ContinuationToken) == 0 {
-			return nil
-		}
-
+	if len(settings.ContinuationToken) > 0 && b.Options.NextPage {
 		b.Options.ContinuationToken = settings.ContinuationToken
-		count = count + 1
-
-		resp, err := client.ListObject(c, b.BucketName, b.Options)
-		if err != nil {
-			return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
-		}
-
-		settings.ContinuationToken = resp.GetContinuationToken()
-		err = token.WriteSettings(settings)
-		if err != nil {
-			return err
-		}
-
-		tbl := table.New("KEY", "LAST MODIFIED")
-		tbl.WithWriter(b.Factory.IOStreams.Out)
-		if b.Options.Details {
-			tbl = table.New("KEY", "LAST MODIFIED", "SIZE", "ETAG")
-		}
-		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-		columnFmt := color.New(color.FgGreen).SprintfFunc()
-		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
-		for _, v := range resp.Results {
-			tbl.AddRow(v.GetKey(), v.GetLastModified(), v.GetSize(), v.GetEtag())
-		}
-		format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-		tbl.CalculateWidths([]string{})
-		if printHeader {
-			logger.PrintHeader(tbl, format)
-			printHeader = false
-		}
-		for _, row := range tbl.GetRows() {
-			logger.PrintRow(tbl, format, row)
-		}
-
-		s := spinner.New(spinner.CharSets[26], 150*time.Millisecond)
-		s.Prefix = "Press 'q' to exit, Enter or Space to continue"
-		s.Start()
-
-		switch ev := termbox.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			if ev.Key == termbox.KeyEsc || ev.Ch == 'q' {
-				s.Stop()
-				return nil
-			}
-
-			if ev.Key == termbox.KeySpace || ev.Key == termbox.KeyEnter {
-				s.Stop()
-				continue
-			}
-		}
 	}
+
+	resp, err := client.ListObject(c, b.BucketName, b.Options)
+	if err != nil {
+		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
+	}
+
+	settings.ContinuationToken = resp.GetContinuationToken()
+	err = token.WriteSettings(settings)
+	if err != nil {
+		return err
+	}
+
+	listOut := output.ListOutput{}
+	listOut.Columns = []string{"KEY", "LAST MODIFIED"}
+	listOut.Out = b.Factory.IOStreams.Out
+	listOut.FlagOutPath = b.Factory.Out
+	listOut.FlagFormat = b.Factory.Format
+
+	if b.Options.Details {
+		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE", "ETAG"}
+	}
+
+	for _, v := range resp.Results {
+		ln := []string{
+			v.GetKey(),
+			fmt.Sprintf("%v", v.GetLastModified()),
+			fmt.Sprintf("%v", v.GetSize()),
+			v.GetEtag(),
+		}
+		listOut.Lines = append(listOut.Lines, ln)
+	}
+	return output.Print(&listOut)
 }
 
 func (b *Objects) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&b.BucketName, "bucket-name", "", msg.FLAG_NAME_BUCKET)
 	flags.BoolVar(&b.Options.Details, "details", false, msg.FLAG_HELP_DETAILS_OBJECTS)
 	flags.Int64Var(&b.Options.PageSize, "page-size", 50, general.ApiListFlagPageSize)
+	flags.BoolVar(&b.Options.NextPage, "next-page", false, general.ApiListFlagNextPage)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_LIST_OBJECT)
 }
