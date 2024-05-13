@@ -7,7 +7,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/fatih/color"
-	"github.com/maxwelbm/tablecli"
+	"github.com/aziontech/tablecli"
 )
 
 type DescribeOutput struct {
