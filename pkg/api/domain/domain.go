@@ -33,7 +33,7 @@ type DomainResponse interface {
 	GetDomainName() string
 	GetCnames() []string
 	GetCnameAccessOnly() bool
-	GetDigitalCertificateId() int64
+	GetDigitalCertificateId() sdk.DomainDataDigitalCertificateId
 	GetEdgeApplicationId() int64
 }
 

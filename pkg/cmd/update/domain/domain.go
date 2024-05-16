@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -85,15 +86,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 
 				if cmd.Flags().Changed("digital-certificate-id") {
-					if fields.DigitalCertificate == "null" {
-						request.SetDigitalCertificateIdNil()
-					} else {
-						n, err := strconv.ParseInt(fields.DigitalCertificate, 10, 64)
-						if err != nil {
-							return msg.ErrorDigitalCertificateFlag
-						}
-						request.SetDigitalCertificateId(n)
-					}
+					digitalCert := sdk.DomainDataDigitalCertificateId{}
+					digitalCert.UnmarshalJSON([]byte(fields.DigitalCertificate))
+					request.SetDigitalCertificateId(digitalCert)
 				}
 
 				if cmd.Flags().Changed("cname-access-only") {

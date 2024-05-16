@@ -6,12 +6,14 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -23,7 +25,7 @@ type Fields struct {
 	Cnames               []string `json:"cnames"`
 	CnameAccessOnly      string   `json:"cname_access_only"`
 	EdgeApplicationID    int      `json:"edge_application_id"`
-	DigitalCertificateID int      `json:"digital_certificate_id"`
+	DigitalCertificateID string   `json:"digital_certificate_id"`
 	IsActive             string   `json:"is_active"`
 	Path                 string
 }
@@ -91,8 +93,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.SetName(fields.Name)
 				request.SetCnames(fields.Cnames)
 				request.SetEdgeApplicationId(int64(fields.EdgeApplicationID))
-				if fields.DigitalCertificateID > 0 {
-					request.SetDigitalCertificateId(int64(fields.DigitalCertificateID))
+				if cmd.Flags().Changed("digital-certificate-id") {
+					digitalCert := sdk.DomainDataDigitalCertificateId{}
+					fmt.Println([]byte(fields.DigitalCertificateID))
+					fmt.Println(fields.DigitalCertificateID)
+					digitalCert.UnmarshalJSON([]byte(fields.DigitalCertificateID))
+					spew.Dump(digitalCert)
+					request.SetDigitalCertificateId(digitalCert)
 				}
 
 				isActive, err := strconv.ParseBool(fields.IsActive)
@@ -123,7 +130,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.FlagCnames)
 	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "false", msg.FlagCnameAccessOnly)
-	flags.IntVar(&fields.DigitalCertificateID, "digital-certificate-id", 0, msg.FlagDigitalCertificateID)
+	flags.StringVar(&fields.DigitalCertificateID, "digital-certificate-id", "", msg.FlagDigitalCertificateID)
 	flags.IntVar(&fields.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.IsActive, "active", "true", msg.FlagIsActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)

@@ -14,7 +14,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var PathStatic = ".edge/storage"
+var (
+	PathStatic = ".edge/storage"
+	Jobs       chan contracts.FileOps
+	Retries    int64
+)
 
 func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
 	// Get total amount of files to display progress
@@ -40,12 +44,12 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 
 	noOfWorkers := 5
 	var currentFile int64
-	jobs := make(chan contracts.FileOps, totalFiles)
+	Jobs := make(chan contracts.FileOps, totalFiles)
 	results := make(chan error, noOfWorkers)
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go worker(jobs, results, &currentFile, clientUpload, conf)
+		go worker(Jobs, results, &currentFile, clientUpload, conf)
 	}
 
 	bar := progressbar.NewOptions(
@@ -84,14 +88,14 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 				FileContent: fileContent,
 			}
 
-			jobs <- fileOptions
+			Jobs <- fileOptions
 		}
 		return nil
 	}); err != nil {
 		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
-	close(jobs)
+	close(Jobs)
 
 	// Check for errors from workers
 	for a := 1; a <= totalFiles; a++ {
