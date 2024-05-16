@@ -29,8 +29,6 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			return
 		}
 
-		// for
-
 		if err := clientUpload.Upload(context.Background(), &job, conf); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
 			if Retries < 5 {
