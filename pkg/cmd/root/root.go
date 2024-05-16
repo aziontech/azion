@@ -23,6 +23,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/metric"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/schedule"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
@@ -78,7 +79,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			if strings.HasPrefix(configFlag, PREFIX_FLAG) {
 				return msg.ErrorPrefix
 			}
-
+			schedule.ExecSchedules()
 			return doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
 				token:  tokenFlag,
