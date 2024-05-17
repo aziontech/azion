@@ -40,6 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create domain --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
         $ azion create domain --name withargs --application-id 1231 --active true
+		$ azion create domain --digital-certificate-id "lets_encrypt" --cnames "www.thisismycname.com" --application-id 1231
         $ azion create domain --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
