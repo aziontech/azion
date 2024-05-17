@@ -2,32 +2,27 @@ package schedule
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
 
 type Schedule struct {
-	Name   string           `json:"name"`
-	Time   time.Time        `json:"time"` // schedule creation time
-	Object SheduleInterface `json:"object"`
+	Name string    `json:"name"`
+	Time time.Time `json:"time"` // schedule creation time
+	Kind string    `json:"kind"`
 }
 
-type SheduleInterface interface {
-	TriggerEvent() error
-}
-
-func NewSchedule(name string, object SheduleInterface) error {
+func NewSchedule(name string, kind string) error {
 	schedule := Schedule{
-		Name:   name,
-		Time:   time.Now(),
-		Object: object,
+		Name: name,
+		Time: time.Now(),
+		Kind: kind,
 	}
 
 	schedules, err := readFileShedule()
@@ -46,19 +41,15 @@ func NewSchedule(name string, object SheduleInterface) error {
 }
 
 func createFileShedule(shedule []Schedule) error {
-	fmt.Println(">> here: ", shedule)
 	b, err := json.MarshalIndent(shedule, "	", " ")
 	if err != nil {
-		fmt.Println(">>> err:", err.Error())
 		return err
 	}
-	fmt.Println(">> b: ", b)
 	configPath, err := config.Dir()
 	if err != nil {
 		return err
 	}
 	path := filepath.Join(configPath.Dir, configPath.Schedule)
-	fmt.Println(">> path: ", path)
 	return os.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
@@ -101,39 +92,27 @@ func readFileShedule() ([]Schedule, error) {
 	return schedules, nil
 }
 
-func ExecSchedules() {
+func ExecSchedules(factory *cmdutil.Factory) {
 	schedules, err := readFileShedule()
 	if err != nil {
 		logger.Debug("read shedule error", zap.Error(err))
 		return
-	}
-
-	var wg sync.WaitGroup
-	wg.Add(len(schedules))
-	errChan := make(chan error, len(schedules))
+	}	
 
 	for _, s := range schedules {
-		go func(s Schedule) {
-			defer wg.Done()
-
-			// Checks if the current time is before 24 hours after the time 's'.
-			if time.Now().Before(s.Time.Add(24*time.Hour)) {
-				if err := s.Object.TriggerEvent(); err != nil {
-					errChan <- err
+		if CheckIf24HoursPassed(s.Time) {
+			if s.Kind == DELETE_BUCKET {
+				if err := TriggerDeleteBucket(factory, s.Name); err != nil {
+					logger.Debug("event execution error", zap.Error(err))
 				}
 			}
-		}(s)
-	}
-	wg.Wait()
-
-	go func() {
-		wg.Wait()
-		close(errChan)
-	}()
-
-	go func() {
-		for err := range errChan {
-			logger.Debug("event execution error", zap.Error(err))
 		}
-	}()
+	}
+}
+
+// CheckIf24HoursPassed Checks if the current time is before 24 hours after the time 's'.
+func CheckIf24HoursPassed(passed time.Time) bool {
+	now := time.Now()
+	diff := now.Sub(passed)
+	return diff >= 24*time.Hour
 }

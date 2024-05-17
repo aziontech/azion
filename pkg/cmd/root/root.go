@@ -79,7 +79,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 			if strings.HasPrefix(configFlag, PREFIX_FLAG) {
 				return msg.ErrorPrefix
 			}
-			schedule.ExecSchedules()
+			schedule.ExecSchedules(f)
 			return doPreCommandCheck(cmd, f, PreCmd{
 				config: configFlag,
 				token:  tokenFlag,

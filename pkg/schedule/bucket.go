@@ -8,16 +8,13 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 )
 
-type DeleteBucket struct {
-	Factory *cmdutil.Factory
-	Name    string
-}
+const DELETE_BUCKET = "DeleteBucket" 
 
-func (b DeleteBucket) TriggerEvent() error {
+func TriggerDeleteBucket(f *cmdutil.Factory, name string) error {
 	client := api.NewClient(
-		b.Factory.HttpClient,
-		b.Factory.Config.GetString("storage_url"),
-		b.Factory.Config.GetString("token"))
+		f.HttpClient,
+		f.Config.GetString("storage_url"),
+		f.Config.GetString("token"))
 	ctx := context.Background()
-	return client.DeleteBucket(ctx, b.Name)
+	return client.DeleteBucket(ctx, name)
 }

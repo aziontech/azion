@@ -51,15 +51,19 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 	err := client.DeleteBucket(ctx, b.name)
 	if err != nil {
 		if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
-			if utils.Confirm(b.factory.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) || b.force {
-				logger.Info("Delete all objects bucket", zap.Any("bucket-name", b.name))
-				if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
-					return err
+			if !b.force {
+				if !utils.Confirm(b.factory.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) {
+					return nil
 				}
-				err := client.DeleteBucket(ctx, b.name)
-				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
-					return schedule.NewSchedule(b.name, schedule.DeleteBucket{Name: b.name, Factory: b.factory})	
-				}
+			}
+			logger.Info("Delete all objects bucket", zap.Any("bucket-name", b.name))
+			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
+				return err
+			}
+			err := client.DeleteBucket(ctx, b.name)
+			if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
+				logger.Info("schedules a delete for the bucket", zap.Any("bucket-name", b.name))
+				return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)	
 			}
 			return nil
 		}
@@ -81,16 +85,10 @@ func (f *bucket) addFlags(flags *pflag.FlagSet) {
 }
 
 func deleteAllObjects(client *api.Client, ctx context.Context, name, continuationToken string) error {
-	// maxWorkers := 10 
-	// workerChan := make(chan struct{}, maxWorkers)
-
 	objects, err := client.ListObject(ctx, name, &contracts.ListOptions{ContinuationToken: continuationToken})
 	if err != nil {
 		return err
 	}
-
-	// errChan := make(chan error, len(objects.GetResults()))
-
 	if len(objects.GetResults()) > 0 {
 		for _, o := range objects.GetResults() {
 			err := client.DeleteObject(ctx, name, o.GetKey())
