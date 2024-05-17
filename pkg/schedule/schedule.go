@@ -25,22 +25,22 @@ func NewSchedule(name string, kind string) error {
 		Kind: kind,
 	}
 
-	schedules, err := readFileShedule()
+	schedules, err := readFileSchedule()
 	if err != nil {
-		logger.Debug("read shedule error", zap.Error(err))
+		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return err
 	}
 	schedules = append(schedules, schedule)
 
-	err = createFileShedule(schedules)
+	err = createFileSchedule(schedules)
 	if err != nil {
-		logger.Debug("scheduling error", zap.Error(err))
+		logger.Debug("Scheduling error", zap.Error(err))
 		return err
 	}
 	return nil
 }
 
-func createFileShedule(shedule []Schedule) error {
+func createFileSchedule(shedule []Schedule) error {
 	b, err := json.MarshalIndent(shedule, "	", " ")
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func createFileShedule(shedule []Schedule) error {
 	return os.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
-func readFileShedule() ([]Schedule, error) {
+func readFileSchedule() ([]Schedule, error) {
 	configPath, err := config.Dir()
 	if err != nil {
 		return nil, err
@@ -93,9 +93,9 @@ func readFileShedule() ([]Schedule, error) {
 }
 
 func ExecSchedules(factory *cmdutil.Factory) {
-	schedules, err := readFileShedule()
+	schedules, err := readFileSchedule()
 	if err != nil {
-		logger.Debug("read shedule error", zap.Error(err))
+		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return
 	}	
 
@@ -103,7 +103,7 @@ func ExecSchedules(factory *cmdutil.Factory) {
 		if CheckIf24HoursPassed(s.Time) {
 			if s.Kind == DELETE_BUCKET {
 				if err := TriggerDeleteBucket(factory, s.Name); err != nil {
-					logger.Debug("event execution error", zap.Error(err))
+					logger.Debug("Event execution error", zap.Error(err))
 				}
 			}
 		}
