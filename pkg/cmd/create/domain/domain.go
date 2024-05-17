@@ -2,18 +2,17 @@ package domain
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/domain"
 	api "github.com/aziontech/azion-cli/pkg/api/domain"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-go-sdk/domains"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -78,6 +77,32 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					fields.Name = answer
 				}
 
+				if cmd.Flags().Changed("digital-certificate-id") {
+					request := new(api.CreateRequest)
+
+					if !isNum(fields.DigitalCertificateID) {
+						fields.DigitalCertificateID = "\"" + fields.DigitalCertificateID + "\""
+					}
+
+					s := fmt.Sprintf(`{
+ 	"cname_access_only": false,
+ 	"cnames": [],
+ 	"edge_application_id": 1,
+ 	"edge_firewall_id": null,
+ 	"digital_certificate_id": %v,
+ 	"is_active": true,
+ 	"is_mtls_enabled": false,
+ 	"mtls_trusted_ca_certificate_id": null,
+ 	"mtls_verification": "",
+ 	"name": ""
+}`, fields.DigitalCertificateID)
+
+					err := json.Unmarshal([]byte(s), request)
+					if err != nil {
+						return err
+					}
+				}
+
 				cnameAccessOnly, err := strconv.ParseBool(fields.CnameAccessOnly)
 				if err != nil {
 					return fmt.Errorf("%w: %q", msg.ErrorCnameAccessOnlyFlag, fields.CnameAccessOnly)
@@ -93,14 +118,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.SetName(fields.Name)
 				request.SetCnames(fields.Cnames)
 				request.SetEdgeApplicationId(int64(fields.EdgeApplicationID))
-				if cmd.Flags().Changed("digital-certificate-id") {
-					digitalCert := sdk.DomainDataDigitalCertificateId{}
-					fmt.Println([]byte(fields.DigitalCertificateID))
-					fmt.Println(fields.DigitalCertificateID)
-					digitalCert.UnmarshalJSON([]byte(fields.DigitalCertificateID))
-					spew.Dump(digitalCert)
-					request.SetDigitalCertificateId(digitalCert)
-				}
 
 				isActive, err := strconv.ParseBool(fields.IsActive)
 				if err != nil {
@@ -136,4 +153,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
+}
+
+func isNum(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }
