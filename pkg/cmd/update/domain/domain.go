@@ -85,15 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 
 				if cmd.Flags().Changed("digital-certificate-id") {
-					if fields.DigitalCertificate == "null" {
-						request.SetDigitalCertificateIdNil()
-					} else {
-						n, err := strconv.ParseInt(fields.DigitalCertificate, 10, 64)
-						if err != nil {
-							return msg.ErrorDigitalCertificateFlag
-						}
-						request.SetDigitalCertificateId(n)
-					}
+					request.SetDigitalCertificateId(fields.DigitalCertificate)
 				}
 
 				if cmd.Flags().Changed("cname-access-only") {

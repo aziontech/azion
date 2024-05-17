@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc v1.0.0
-	github.com/aziontech/azionapi-go-sdk v0.127.0
+	github.com/aziontech/azionapi-go-sdk v0.130.0
 	github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f
 	github.com/aziontech/tablecli v0.0.0-20240513193320-c4dbf16b013a
 	github.com/fatih/color v1.17.0
