@@ -42,6 +42,7 @@ const (
 	FLAG_HELP_LIST_OBJECT          = "Displays more information about the list edge-storege object command"
 	FLAG_HELP_DELETE_BUCKET        = "Displays more information about the delete edge-storege bucket command"
 	FLAG_NAME_BUCKET               = "The name of the Edge Storage bucket"
+	FLAG_FORCE					   = "Argument to force bucket delete"
 	FLAG_EDGE_ACCESS_CREATE_BUCKET = "Indicates the type of permission for actions within the bucket. Possible values:	read_only, read_write or restricted"
 	FLAG_SOURCE_UPDATE_OBJECT      = "file path field to update the edge storage bucket object"
 	FLAG_FILE_JSON_CREATE_BUCKET   = "Path to a JSON file containing the attributes of the bucket that will be created; you can use - for reading from stdin"
@@ -62,6 +63,7 @@ const (
 	ASK_OBJECT_KEY_CREATE_OBJECT   = "Enter your object name: "
 	ASK_SOURCE_CREATE_OBJECT       = "Enter your path source: "
 	ASK_OBJECT_DELETE_OBJECT       = "Enter the name of the Object you wish to delete: "
+	ASK_NOT_EMPTY_BUCKET		   =  "Your bucket can't be deleted because it's not empty. Do you want to empty it? (y/N)"
 
 	OUTPUT_CREATE_BUCKET = "Bucket created successfully"
 	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully"

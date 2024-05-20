@@ -42,12 +42,11 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 }
 
 func (c *Client) DeleteBucket(ctx context.Context, name string) error {
-	logger.Debug("Delete bucket")
+	logger.Debug("Delete bucket", zap.Any("bucket-name", name))
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsDestroy(ctx, name).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Error("Error while deleting the bucket", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
@@ -134,12 +133,11 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 }
 
 func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
-	logger.Debug("Delete objects")
+	logger.Debug("Delete object", zap.Any("object-key", objectKey))
 	_, httpResp, err := c.apiClient.StorageAPI.
 		StorageApiBucketsObjectsDestroy(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating the project Bucket", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err

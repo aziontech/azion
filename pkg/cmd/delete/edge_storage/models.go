@@ -4,6 +4,7 @@ import "github.com/aziontech/azion-cli/pkg/cmdutil"
 
 type bucket struct {
 	name    string
+	force   bool
 	factory *cmdutil.Factory
 }
 
