@@ -61,9 +61,13 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 				return err
 			}
 			err := client.DeleteBucket(ctx, b.name)
-			if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
-				logger.Info("schedules a delete for the bucket", zap.Any("bucket-name", b.name))
-				return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)	
+			if err != nil {
+				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
+					logger.Info("schedules a delete for the bucket", zap.Any("bucket-name", b.name))
+					return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)
+				} else {
+					return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
+				}
 			}
 			return nil
 		}
@@ -95,7 +99,7 @@ func deleteAllObjects(client *api.Client, ctx context.Context, name, continuatio
 			if err != nil {
 				return err
 			}
-		}	
+		}
 		return deleteAllObjects(client, ctx, name, continuationToken)
 	}
 	return nil
