@@ -15,7 +15,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"go.uber.org/zap"
 )
 
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
@@ -56,14 +55,14 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 					return nil
 				}
 			}
-			logger.Info("Delete all objects bucket", zap.Any("bucket-name", b.name))
+			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects from bucket\n")
 			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
 				return err
 			}
 			err := client.DeleteBucket(ctx, b.name)
 			if err != nil {
 				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
-					logger.Info("schedules a delete for the bucket", zap.Any("bucket-name", b.name))
+					logger.FInfo(b.factory.IOStreams.Out, "Bucket deletion was scheduled successfully")
 					return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)
 				} else {
 					return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
