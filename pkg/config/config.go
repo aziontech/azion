@@ -11,6 +11,7 @@ const (
 	DEFAULT_DIR      = ".azion"
 	DEFAULT_SETTINGS = "settings.toml"
 	DEFAULT_METRICS  = "metrics.json"
+	DEFAULT_SCHEDULE = "schedule.json"
 )
 
 var (
@@ -41,6 +42,7 @@ type DirPath struct {
 	Dir      string
 	Settings string
 	Metrics  string
+	Schedule string
 }
 
 func Dir() (DirPath, error) {
@@ -57,6 +59,7 @@ func Dir() (DirPath, error) {
 		Dir:      filepath.Join(home, pathDir),
 		Settings: pathSettings,
 		Metrics:  DEFAULT_METRICS,
+		Schedule: DEFAULT_SCHEDULE,
 	}
 	return dirPath, nil
 }

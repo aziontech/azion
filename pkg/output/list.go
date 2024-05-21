@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/tablecli"
 	"github.com/fatih/color"
-	"github.com/maxwelbm/tablecli"
 )
 
 type ListOutput struct {

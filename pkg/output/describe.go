@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/tablecli"
 	"github.com/fatih/color"
-	"github.com/maxwelbm/tablecli"
 )
 
 type DescribeOutput struct {
@@ -69,13 +69,13 @@ func (c *DescribeOutput) Output() {
 
 func checkPrimitiveType(value any) any {
 	valueType := reflect.TypeOf(value)
-	if valueType.Kind() == reflect.Int || valueType.Kind() == reflect.String ||
+	if valueType != nil && (valueType.Kind() == reflect.Int || valueType.Kind() == reflect.String ||
 		valueType.Kind() == reflect.Bool || valueType.Kind() == reflect.Float32 ||
 		valueType.Kind() == reflect.Float64 || valueType.Kind() == reflect.Uint ||
 		valueType.Kind() == reflect.Uint8 || valueType.Kind() == reflect.Uint16 ||
 		valueType.Kind() == reflect.Uint32 || valueType.Kind() == reflect.Uint64 ||
 		valueType.Kind() == reflect.Int8 || valueType.Kind() == reflect.Int16 ||
-		valueType.Kind() == reflect.Int32 || valueType.Kind() == reflect.Int64 {
+		valueType.Kind() == reflect.Int32 || valueType.Kind() == reflect.Int64) {
 		return value
 	}
 	jsonValue, _ := json.Marshal(value)

@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/fatih/color"
-	"github.com/maxwelbm/tablecli"
+	"github.com/aziontech/tablecli"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

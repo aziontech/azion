@@ -9,7 +9,7 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/MaxwelMazur/tablecli"
+	"github.com/aziontech/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/device_groups"
 
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"

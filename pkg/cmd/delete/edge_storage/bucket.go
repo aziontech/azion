@@ -8,7 +8,10 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/schedule"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -46,9 +49,29 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 	ctx := context.Background()
 	err := client.DeleteBucket(ctx, b.name)
 	if err != nil {
+		if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
+			if !b.force {
+				if !utils.Confirm(b.factory.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) {
+					return nil
+				}
+			}
+			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects from bucket\n")
+			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
+				return err
+			}
+			err := client.DeleteBucket(ctx, b.name)
+			if err != nil {
+				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
+					logger.FInfo(b.factory.IOStreams.Out, "Bucket deletion was scheduled successfully")
+					return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)
+				} else {
+					return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
+				}
+			}
+			return nil
+		}
 		return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
 	}
-
 	deleteOut := output.GeneralOutput{
 		Msg:         fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, b.name),
 		Out:         b.factory.IOStreams.Out,
@@ -56,10 +79,27 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 		FlagFormat:  b.factory.Format,
 	}
 	return output.Print(&deleteOut)
-
 }
 
 func (f *bucket) addFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&f.name, "name", "", msg.FLAG_NAME_BUCKET)
+	flags.BoolVar(&f.force, "force", false, msg.FLAG_FORCE)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
+}
+
+func deleteAllObjects(client *api.Client, ctx context.Context, name, continuationToken string) error {
+	objects, err := client.ListObject(ctx, name, &contracts.ListOptions{ContinuationToken: continuationToken})
+	if err != nil {
+		return err
+	}
+	if len(objects.GetResults()) > 0 {
+		for _, o := range objects.GetResults() {
+			err := client.DeleteObject(ctx, name, o.GetKey())
+			if err != nil {
+				return err
+			}
+		}
+		return deleteAllObjects(client, ctx, name, continuationToken)
+	}
+	return nil
 }

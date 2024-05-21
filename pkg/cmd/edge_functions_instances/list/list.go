@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 
 	"github.com/MakeNowJust/heredoc"
-	table "github.com/MaxwelMazur/tablecli"
+	table "github.com/aziontech/tablecli"
 	msg "github.com/aziontech/azion-cli/messages/edge_functions_instances"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"

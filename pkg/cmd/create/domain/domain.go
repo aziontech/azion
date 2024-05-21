@@ -23,7 +23,7 @@ type Fields struct {
 	Cnames               []string `json:"cnames"`
 	CnameAccessOnly      string   `json:"cname_access_only"`
 	EdgeApplicationID    int      `json:"edge_application_id"`
-	DigitalCertificateID int      `json:"digital_certificate_id"`
+	DigitalCertificateID string   `json:"digital_certificate_id"`
 	IsActive             string   `json:"is_active"`
 	Path                 string
 }
@@ -40,6 +40,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create domain --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
         $ azion create domain --name withargs --application-id 1231 --active true
+		$ azion create domain --digital-certificate-id "lets_encrypt" --cnames "www.thisismycname.com" --application-id 1231
         $ azion create domain --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -91,8 +92,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.SetName(fields.Name)
 				request.SetCnames(fields.Cnames)
 				request.SetEdgeApplicationId(int64(fields.EdgeApplicationID))
-				if fields.DigitalCertificateID > 0 {
-					request.SetDigitalCertificateId(int64(fields.DigitalCertificateID))
+
+				if cmd.Flags().Changed("digital-certificate-id") {
+					request.SetDigitalCertificateId(fields.DigitalCertificateID)
 				}
 
 				isActive, err := strconv.ParseBool(fields.IsActive)
@@ -123,7 +125,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringSliceVar(&fields.Cnames, "cnames", []string{}, msg.FlagCnames)
 	flags.StringVar(&fields.CnameAccessOnly, "cname-access-only", "false", msg.FlagCnameAccessOnly)
-	flags.IntVar(&fields.DigitalCertificateID, "digital-certificate-id", 0, msg.FlagDigitalCertificateID)
+	flags.StringVar(&fields.DigitalCertificateID, "digital-certificate-id", "", msg.FlagDigitalCertificateID)
 	flags.IntVar(&fields.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.IsActive, "active", "true", msg.FlagIsActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)

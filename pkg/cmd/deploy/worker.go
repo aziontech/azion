@@ -12,7 +12,6 @@ import (
 
 // worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
 func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client, conf *contracts.AzionApplicationOptions) {
-
 	for job := range jobs {
 		// Once ENG-27343 is completed, we might be able to remove this piece of code
 		fileInfo, err := job.FileContent.Stat()
@@ -32,9 +31,23 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 
 		if err := clientUpload.Upload(context.Background(), &job, conf); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
-			results <- err
-			return
+			for Retries < 5 {
+				atomic.AddInt64(&Retries, 1)
+				logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
+				err := clientUpload.Upload(context.Background(), &job, conf)
+				if err != nil {
+					continue
+				}
+				break
+			}
+
+			if Retries >= 5 {
+				logger.Debug("There have been 5 retries already, quitting upload")
+				results <- err
+				return
+			}
 		}
+
 		atomic.AddInt64(currentFile, 1)
 		results <- nil
 	}
