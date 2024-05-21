@@ -55,14 +55,14 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 					return nil
 				}
 			}
-			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects bucket\n")
+			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects from bucket\n")
 			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
 				return err
 			}
 			err := client.DeleteBucket(ctx, b.name)
 			if err != nil {
 				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
-					logger.FInfo(b.factory.IOStreams.Out, fmt.Sprintf("schedules a delete for the bucket: %s", b.name))
+					logger.FInfo(b.factory.IOStreams.Out, "Bucket deletion was scheduled successfully")
 					return schedule.NewSchedule(b.name, schedule.DELETE_BUCKET)
 				} else {
 					return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
