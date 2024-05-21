@@ -38,14 +38,14 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 				if err != nil {
 					continue
 				}
-				results <- nil
-				atomic.AddInt64(currentFile, 1)
-				return
+				break
 			}
 
-			logger.Debug("There have been 5 retries already, quitting upload")
-			results <- err
-			return
+			if Retries >= 5 {
+				logger.Debug("There have been 5 retries already, quitting upload")
+				results <- err
+				return
+			}
 		}
 
 		atomic.AddInt64(currentFile, 1)

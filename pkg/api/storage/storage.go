@@ -105,9 +105,17 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, conf.Bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+			return utils.ErrorPerStatusCode(httpResp, err)
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
+
 	return nil
 }
 
