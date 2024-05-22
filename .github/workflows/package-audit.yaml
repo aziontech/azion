@@ -7,7 +7,7 @@ on:
 jobs:
   PackageAuditing:
     name: Package Auditor (GoVulnCheck)
-    runs-on: [self-hosted, stage]
+    runs-on: [stage]
     container:
       image: golang:1.22.3
     steps:
