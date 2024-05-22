@@ -10,6 +10,7 @@ endif
 GOPATH ?= $(shell $(GO) env GOPATH)
 GOBIN ?= $(GOPATH)/bin
 GOSEC ?= $(GOBIN)/gosec
+GOVULNCHECK ?= $(GOBIN)/govulncheck
 GOLINT ?= $(GOBIN)/golint
 GOFMT ?= $(GOBIN)/gofmt
 RELOAD ?= $(GOBIN)/CompileDaemon
@@ -85,6 +86,14 @@ get-gosec-deps:
 	echo "go install package gosec"; \
 	@ cd $(GOPATH); \
 		$(GO) install github.com/securego/gosec/v2/cmd/gosec@latest
+
+.PHONY: govulncheck
+govulncheck: get-govulncheck-deps ## running GoVulnCheck
+	@ $(GOVULNCHECK) ./...
+
+.PHONY: get-govulncheck-deps
+get-govulncheck-deps:
+	@ $(GO) install golang.org/x/vuln/cmd/govulncheck@latest
 
 .PHONY : build
 build: ## build application
