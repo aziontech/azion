@@ -92,12 +92,16 @@ func readFileSchedule() ([]Schedule, error) {
 	return schedules, nil
 }
 
+// @PatrickMenoti
+// NOTE: preciso investigar o pq esse cara não consegui excluir a o item
+// NOTE: preciso que o item sejá deletado do json assim q o delete é feito com sucesso
 func ExecSchedules(factory *cmdutil.Factory) {
+	logger.Debug("Exec Schedules")
 	schedules, err := readFileSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return
-	}	
+	}
 
 	for _, s := range schedules {
 		if CheckIf24HoursPassed(s.Time) {
