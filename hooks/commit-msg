@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Path to commit message file
+COMMIT_MSG_FILE="$1"
+
+# Check if the commit message file exists
+if [ -f "$COMMIT_MSG_FILE" ]; then
+   commit_msg=$(cat "$COMMIT_MSG_FILE")
+   # echo "Commit message received: $commit_msg"  # Debug
+
+  # check the commit message is in the standard conventional commits https://www.conventionalcommits.org/en/v1.0.0/
+  pattern="^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+$"
+  if [[ ! $commit_msg =~ $pattern ]]; then
+     echo "Error: The commit message does not follow the semantic commit pattern."
+     echo "The pattern should be: <type>(optional scope): description"
+     echo "Valid example: 'feat: Add new functionality'"
+     echo "Invalid example: 'Add new feature'"
+     exit 1
+  else
+     exit 0
+  fi
+else
+   echo "Commit message file not found: $COMMIT_MSG_FILE"
+   exit 1
+fi
+
