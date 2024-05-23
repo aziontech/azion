@@ -56,7 +56,8 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 				}
 			}
 			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects from bucket\n")
-			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
+			logger.FInfo(b.factory.IOStreams.Out, "deleting objects...")
+			if err := deleteAllObjects(client, b, ctx, b.name, ""); err != nil {
 				return err
 			}
 			err := client.DeleteBucket(ctx, b.name)
@@ -87,7 +88,7 @@ func (f *bucket) addFlags(flags *pflag.FlagSet) {
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
 }
 
-func deleteAllObjects(client *api.Client, ctx context.Context, name, continuationToken string) error {
+func deleteAllObjects(client *api.Client, b *bucket, ctx context.Context, name, continuationToken string) error {
 	objects, err := client.ListObject(ctx, name, &contracts.ListOptions{ContinuationToken: continuationToken})
 	if err != nil {
 		return err
@@ -99,7 +100,7 @@ func deleteAllObjects(client *api.Client, ctx context.Context, name, continuatio
 				return err
 			}
 		}
-		return deleteAllObjects(client, ctx, name, continuationToken)
+		return deleteAllObjects(client, b, ctx, name, continuationToken)
 	}
 	return nil
 }

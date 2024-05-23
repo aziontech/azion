@@ -92,9 +92,6 @@ func readFileSchedule() ([]Schedule, error) {
 	return schedules, nil
 }
 
-// @PatrickMenoti
-// NOTE: preciso investigar o pq esse cara não consegui excluir a o item
-// NOTE: preciso que o item sejá deletado do json assim q o delete é feito com sucesso
 func ExecSchedules(factory *cmdutil.Factory) {
 	logger.Debug("Exec Schedules")
 	schedules, err := readFileSchedule()
@@ -103,14 +100,20 @@ func ExecSchedules(factory *cmdutil.Factory) {
 		return
 	}
 
+	scheds := []Schedule{}
 	for _, s := range schedules {
 		if CheckIf24HoursPassed(s.Time) {
 			if s.Kind == DELETE_BUCKET {
 				if err := TriggerDeleteBucket(factory, s.Name); err != nil {
 					logger.Debug("Event execution error", zap.Error(err))
+					scheds = append(scheds, s)
 				}
 			}
 		}
+	}
+
+	if err := createFileSchedule(scheds); err != nil {
+		logger.Debug("Scheduling error", zap.Error(err))
 	}
 }
 
