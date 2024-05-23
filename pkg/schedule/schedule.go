@@ -93,20 +93,27 @@ func readFileSchedule() ([]Schedule, error) {
 }
 
 func ExecSchedules(factory *cmdutil.Factory) {
+	logger.Debug("Exec Schedules")
 	schedules, err := readFileSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return
-	}	
+	}
 
+	scheds := []Schedule{}
 	for _, s := range schedules {
 		if CheckIf24HoursPassed(s.Time) {
 			if s.Kind == DELETE_BUCKET {
 				if err := TriggerDeleteBucket(factory, s.Name); err != nil {
 					logger.Debug("Event execution error", zap.Error(err))
+					scheds = append(scheds, s)
 				}
 			}
 		}
+	}
+
+	if err := createFileSchedule(scheds); err != nil {
+		logger.Debug("Scheduling error", zap.Error(err))
 	}
 }
 

@@ -56,6 +56,7 @@ func (b *bucket) runE(cmd *cobra.Command, _ []string) error {
 				}
 			}
 			logger.FInfo(b.factory.IOStreams.Out, "Delete all objects from bucket\n")
+			logger.FInfo(b.factory.IOStreams.Out, "Deleting objects...")
 			if err := deleteAllObjects(client, ctx, b.name, ""); err != nil {
 				return err
 			}
