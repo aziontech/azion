@@ -26,7 +26,7 @@ const (
 	EXAMPLE_UPDATE_BUCKET   = "$ azion update edge-storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion update edge-storage bucket --help"
 	EXAMPLE_LIST            = "$ azion list edge-storage\n$ azion list edge-storage --help"
 	EXAMPLE_LIST_BUCKET     = "$ azion list edge-storage bucket\n$ $ azion list edge-storage objects --bucket-name nomedobalde"
-	EXAMPLE_LIST_OBJECT     = "$ azion list edge-storage object --bucket-name 'balde'\n$ azion list edge-storage object --page 1 --page-size 3 --details\n$ azion list edge-storage object --help"
+	EXAMPLE_LIST_OBJECT     = "$ azion list edge-storage object --bucket-name 'balde'\n$ azion list edge-storage object --page-size 3 --details\n$ azion list edge-storage object --help"
 	EXAMPLE_DELETE          = "$ azion delete edge-storage\n$ azion delete edge-storage --help"
 	EXAMPLE_DELETE_BUCKET   = "$ azion delete edge-storage bucket --name 'bucket-name'\n$ azion delete edge-storage bucket --help"
 	EXAMPLE_UPDATE          = "$ azion update edge-storage\n$ azion update edge-storage --help"
