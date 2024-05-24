@@ -8,7 +8,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 )
 
-const DELETE_BUCKET = "DeleteBucket" 
+const DELETE_BUCKET = "DeleteBucket"
 
 func TriggerDeleteBucket(f *cmdutil.Factory, name string) error {
 	client := api.NewClient(
