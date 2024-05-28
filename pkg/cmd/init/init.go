@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
@@ -153,23 +154,16 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	gitignore, err := utils.CheckGitignore(cmd.pathWorkingDir)
+	gitignore, err := github.CheckGitignore(cmd.pathWorkingDir)
 	if err != nil {
 		return msg.ErrorReadingGitignore
 	}
 
-	var shouldSet bool
-	if !gitignore {
-		shouldSet = utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)
-
-		if shouldSet {
-			err := utils.WriteGitignore(cmd.pathWorkingDir)
-			if err != nil {
-				return msg.ErrorWritingGitignore
-			}
-			logger.FInfo(cmd.f.IOStreams.Out, msg.WrittenGitignore)
+	if !gitignore && (cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
+		if err := github.WriteGitignore(cmd.pathWorkingDir); err != nil {
+			return msg.ErrorWritingGitignore
 		}
-
+		logger.FInfo(cmd.f.IOStreams.Out, msg.WrittenGitignore)
 	}
 
 	shouldDev := cmd.shouldDevDeploy("Do you want to start a local development server? (y/N)", cmd.globalFlagAll, false)

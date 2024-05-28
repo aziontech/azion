@@ -194,27 +194,16 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
 
 		//asks if user wants to add files to .gitignore
-		gitignore, err := utils.CheckGitignore(info.PathWorkingDir)
+		gitignore, err := github.CheckGitignore(info.PathWorkingDir)
 		if err != nil {
 			return msg.ErrorReadingGitignore
 		}
 
-		var shouldSet bool
-		if !gitignore {
-			if info.Auto || info.GlobalFlagAll {
-				shouldSet = true
-			} else {
-				shouldSet = utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)
+		if !gitignore && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)) {
+			if err := github.WriteGitignore(info.PathWorkingDir); err != nil {
+				return msg.ErrorWritingGitignore
 			}
-
-			if shouldSet {
-				err := utils.WriteGitignore(info.PathWorkingDir)
-				if err != nil {
-					return msg.ErrorWritingGitignore
-				}
-				logger.FInfo(cmd.Io.Out, msg.WrittenGitignore)
-			}
-
+			logger.FInfo(cmd.Io.Out, msg.WrittenGitignore)
 		}
 
 		if !info.Auto {
