@@ -29,4 +29,6 @@ var (
 	InitDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	InitDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	InitInstallDeps                       = "Installing application dependencies"
+	AskGitignore                          = "Azion CLI creates some files during the build process for internal use. Would you like to add these to your .gitignore file? (Y/n)"
+	WrittenGitignore                      = "Sucessfully written to your .gitignore file\n"
 )
