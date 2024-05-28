@@ -20,6 +20,10 @@ var (
 	LinkDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	LinkDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	LinkFlagAuto                          = "If sent, the entire flow of the command will be run without interruptions"
+	AskDeploy                             = "Do you want to deploy your project? (y/N)"
+	AskInstallDepsDev                     = "Do you want to install project dependencies? This may be required to start local development server (y/N)"
+	AskInstallDepsDeploy                  = "Do you want to install project dependencies? This may be required to deploy your project (y/N)"
+	AskLocalDev                           = "Do you want to start a local development server? (y/N)"
 )
 
 const (

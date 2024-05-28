@@ -29,4 +29,8 @@ var (
 	InitDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	InitDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	InitInstallDeps                       = "Installing application dependencies"
+	AskDeploy                             = "Do you want to deploy your project? (y/N)"
+	AskInstallDepsDev                     = "Do you want to install project dependencies? This may be required to start local development server (y/N)"
+	AskInstallDepsDeploy                  = "Do you want to install project dependencies? This may be required to deploy your project (y/N)"
+	AskLocalDev                           = "Do you want to start a local development server? (y/N)"
 )
