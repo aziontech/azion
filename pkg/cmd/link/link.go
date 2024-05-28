@@ -207,12 +207,8 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 		}
 
 		if !info.Auto {
-			shouldDev := cmd.ShouldDevDeploy(info, "Do you want to start a local development server? (y/N)", false)
-
-			if shouldDev {
-				shouldDeps := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to start local development server (y/N)", false)
-
-				if shouldDeps {
+			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
+				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDev, false) {
 					answer, err := utils.GetPackageManager()
 					if err != nil {
 						return err
@@ -235,12 +231,8 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
 			}
 
-			shouldDeploy := cmd.ShouldDevDeploy(info, "Do you want to deploy your project? (y/N)", false)
-
-			if shouldDeploy {
-				shouldYarn := cmd.ShouldDevDeploy(info, "Do you want to install project dependencies? This may be required to deploy the project (y/N)", false)
-
-				if shouldYarn {
+			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
+				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDeploy, false) {
 					answer, err := utils.GetPackageManager()
 					if err != nil {
 						return err

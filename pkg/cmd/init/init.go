@@ -166,12 +166,8 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		logger.FInfo(cmd.f.IOStreams.Out, msg.WrittenGitignore)
 	}
 
-	shouldDev := cmd.shouldDevDeploy("Do you want to start a local development server? (y/N)", cmd.globalFlagAll, false)
-
-	if shouldDev {
-		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to start local development server (y/N)", cmd.globalFlagAll, false)
-
-		if shouldDeps {
+	if cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+		if cmd.shouldDevDeploy(msg.AskInstallDepsDev, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
@@ -194,14 +190,8 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		logger.FInfo(cmd.io.Out, msg.InitDevCommand)
 	}
 
-	shouldDeploy := cmd.shouldDevDeploy("Do you want to deploy your project? (y/N)", cmd.globalFlagAll, false)
-	if shouldDeploy {
-		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to deploy your project (y/N)", cmd.globalFlagAll, false)
-		if err != err {
-			return err
-		}
-
-		if shouldDeps {
+	if cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+		if cmd.shouldDevDeploy(msg.AskInstallDepsDeploy, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
