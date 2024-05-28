@@ -25,6 +25,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
+
+	gitignore "github.com/sabhiram/go-gitignore"
 )
 
 const shell = "/bin/sh"
@@ -647,4 +649,59 @@ func containsErrorMessageNameTaken(msg string) bool {
 
 func Timestamp() string {
 	return time.Now().Format("20060102150405")
+}
+
+func CheckGitignore(path string) (bool, error) {
+	logger.Debug("Checking .gitignore file for existence of Vulcan files")
+	path = path + "/.gitignore"
+
+	object, err := gitignore.CompileIgnoreFile(path)
+	if err != nil {
+		// if the error is "no such file or directory" we can return false and nil for error, because the code that called this func will create
+		// the .gitignore file
+		if strings.Contains(err.Error(), "no such file or directory") {
+			return false, nil
+		}
+		return false, err
+	}
+
+	if !object.MatchesPath(".edge/") || !object.MatchesPath(".vulcan") {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func WriteGitignore(path string) error {
+	logger.Debug("Writing .gitignore file")
+	path = path + "/.gitignore"
+
+	// Lines to add to .gitignore
+	linesToAdd := []string{"#Paths added by Azion CLI", ".edge/", ".vulcan"}
+
+	// Open the file in append mode, create if not exists
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger.Error("Error opening file", zap.Error(err))
+		return err
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+
+	for _, line := range linesToAdd {
+		_, err := writer.WriteString(line + "\n")
+		if err != nil {
+			logger.Error("Error writing to .gitignore file", zap.Error(err))
+			return err
+		}
+	}
+
+	// Ensure all data is written to the file
+	if err := writer.Flush(); err != nil {
+		logger.Error("Error flushing writer", zap.Error(err))
+		return err
+	}
+
+	return nil
 }

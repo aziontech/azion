@@ -20,6 +20,8 @@ var (
 	LinkDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	LinkDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
 	LinkFlagAuto                          = "If sent, the entire flow of the command will be run without interruptions"
+	AskGitignore                          = "Azion CLI creates some files during the build process for internal use. Would you like to add these to your .gitignore file? (Y/n)"
+	WrittenGitignore                      = "Sucessfully written to your .gitignore file\n"
 )
 
 const (

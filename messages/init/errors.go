@@ -22,4 +22,6 @@ var (
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
 	ErrorWorkingDir                    = errors.New("Failed to change current working directory")
 	ErrorModeNotFound                  = errors.New("No mode was found for the selected template. For more information, run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
+	ErrorReadingGitignore              = errors.New("Failed to read your .gitignore file")
+	ErrorWritingGitignore              = errors.New("Failed to write to your .gitignore file")
 )
