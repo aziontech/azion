@@ -194,9 +194,7 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
 
 		if !info.Auto {
-			shouldDev := cmd.ShouldDevDeploy(info, msg.AskLocalDev, false)
-
-			if shouldDev {
+			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
 				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDev, false) {
 					answer, err := utils.GetPackageManager()
 					if err != nil {
@@ -220,9 +218,7 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
 			}
 
-			shouldDeploy := cmd.ShouldDevDeploy(info, msg.AskDeploy, false)
-
-			if shouldDeploy {
+			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
 				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDeploy, false) {
 					answer, err := utils.GetPackageManager()
 					if err != nil {

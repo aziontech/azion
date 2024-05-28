@@ -153,9 +153,7 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	shouldDev := cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false)
-
-	if shouldDev {
+	if cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
 		if cmd.shouldDevDeploy(msg.AskInstallDepsDev, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
@@ -180,12 +178,7 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	}
 
 	if cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
-		shouldDeps := cmd.shouldDevDeploy(msg.AskInstallDepsDeploy, cmd.globalFlagAll, false)
-		if err != err {
-			return err
-		}
-
-		if shouldDeps {
+		if cmd.shouldDevDeploy(msg.AskInstallDepsDeploy, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
