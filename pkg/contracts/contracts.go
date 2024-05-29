@@ -177,10 +177,12 @@ type CacheSetting struct {
 }
 
 type Origin struct {
-	Name       string `json:"name"`
-	OriginType string `json:"origin_type,omitempty"`
-	Bucket     string `json:"bucket,omitempty"`
-	Prefix     string `json:"prefix,omitempty"`
+	Name       string                              `json:"name"`
+	OriginType string                              `json:"origin_type,omitempty"`
+	Bucket     string                              `json:"bucket,omitempty"`
+	Prefix     string                              `json:"prefix,omitempty"`
+	Addresses  []sdk.CreateOriginsRequestAddresses `json:"addresses,omitempty"`
+	HostHeader string                              `json:"host_header,omitempty"`
 }
 
 type RuleEngine struct {

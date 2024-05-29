@@ -323,13 +323,25 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.CreateRequest {
 	request := &apiOrigin.CreateRequest{}
 
-	request.SetBucket(conf.Bucket)
+	switch origin.OriginType {
+	case "single_origin":
+		if origin.HostHeader != "" {
+			request.SetHostHeader(origin.HostHeader)
+		}
+		if len(origin.Addresses) > 0 {
+			request.SetAddresses(origin.Addresses)
+		}
 
-	if origin.Prefix != "" {
-		request.SetPrefix(origin.Prefix)
-	} else {
-		request.SetPrefix(conf.Prefix)
+	case "object_storage":
+		request.SetBucket(conf.Bucket)
+
+		if origin.Prefix != "" {
+			request.SetPrefix(origin.Prefix)
+		} else {
+			request.SetPrefix(conf.Prefix)
+		}
 	}
+
 	if origin.OriginType != "" {
 		request.SetOriginType(origin.OriginType)
 	}
@@ -340,13 +352,25 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.UpdateRequest {
 	request := &apiOrigin.UpdateRequest{}
 
-	request.SetBucket(conf.Bucket)
+	switch origin.OriginType {
+	case "single_origin":
+		if origin.HostHeader != "" {
+			request.SetHostHeader(origin.HostHeader)
+		}
+		if len(origin.Addresses) > 0 {
+			request.SetAddresses(origin.Addresses)
+		}
 
-	if origin.Prefix != "" {
-		request.SetPrefix(origin.Prefix)
-	} else {
-		request.SetPrefix(conf.Prefix)
+	case "object_storage":
+		request.SetBucket(conf.Bucket)
+
+		if origin.Prefix != "" {
+			request.SetPrefix(origin.Prefix)
+		} else {
+			request.SetPrefix(conf.Prefix)
+		}
 	}
+
 	if origin.OriginType != "" {
 		request.SetOriginType(origin.OriginType)
 	}
