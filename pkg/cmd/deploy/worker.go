@@ -12,10 +12,10 @@ import (
 
 // worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
 func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, client *storage.Client, conf *contracts.AzionApplicationOptions) {
+	var attempt int = 0
+	var lastError error
 	for job := range jobs {
-		var attempt int
-		var lastError error
-		for attempt = 1; attempt <= 5; attempt++ {
+		for attempt <= 5 {
 			fileInfo, err := job.FileContent.Stat()
 			if err != nil {
 				logger.Debug("Error while worker tried to read file stats", zap.Error(err))
@@ -31,15 +31,16 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			}
 
 			if err := client.Upload(context.Background(), &job, conf); err != nil {
+				logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
+				attempt += 1
 				_, err := job.FileContent.Seek(0, 0)
 				if err != nil {
 					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))
 					break
 				}
 
-				logger.Debug("Erro ao tentar fazer o upload do arquivo", zap.Error(err))
-				lastError = err
 				if attempt < 5 {
+					logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
 					continue
 				} else {
 					break
