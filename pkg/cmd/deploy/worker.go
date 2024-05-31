@@ -31,7 +31,7 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 
 			if err := client.Upload(context.Background(), &job, conf); err != nil {
 				logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
-				Retries += 1
+				atomic.AddInt64(&Retries, 1)
 				_, err := job.FileContent.Seek(0, 0)
 				if err != nil {
 					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))
