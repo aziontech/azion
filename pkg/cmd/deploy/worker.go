@@ -52,7 +52,6 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 		}
 
 		if Retries > 5 || lastError != nil {
-			logger.Debug("There have been 5 retries already, quitting upload")
 			results <- lastError
 			return
 		}
