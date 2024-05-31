@@ -88,3 +88,14 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/aziont
 2. Clone your forked repo
 3. Commit the changes you’ve developed on your fork
 4. If everything looks good, create a pull request on the base repo with your changes.
+
+#### We use semantic commit
+
+To ensure that all commits follow the semantic commit pattern, we need to configure Git to use our custom hooks. 
+Run the following command to configure the hooks directory:
+```bash
+git config core.hooksPath hooks
+
+# To check that the hooks configuration is correct, you can do an empty commit
+# git commit --allow-empty -m "Hook commit-msg"
+```

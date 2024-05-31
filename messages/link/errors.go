@@ -19,4 +19,6 @@ var (
 	ErrorFailedCreatingWorkerDirectory = errors.New("Failed to create the worker directory. The worker's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
+	ErrorReadingGitignore              = errors.New("Failed to read your .gitignore file")
+	ErrorWritingGitignore              = errors.New("Failed to write to your .gitignore file")
 )

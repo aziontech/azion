@@ -259,6 +259,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	return nil
 }
 
+// this is called to delete resources no longer present in manifest.json
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

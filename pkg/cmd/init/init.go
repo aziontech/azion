@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
@@ -153,12 +154,20 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	shouldDev := cmd.shouldDevDeploy("Do you want to start a local development server? (y/N)", cmd.globalFlagAll, false)
+	gitignore, err := github.CheckGitignore(cmd.pathWorkingDir)
+	if err != nil {
+		return msg.ErrorReadingGitignore
+	}
 
-	if shouldDev {
-		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to start local development server (y/N)", cmd.globalFlagAll, false)
+	if !gitignore && (cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
+		if err := github.WriteGitignore(cmd.pathWorkingDir); err != nil {
+			return msg.ErrorWritingGitignore
+		}
+		logger.FInfo(cmd.f.IOStreams.Out, msg.WrittenGitignore)
+	}
 
-		if shouldDeps {
+	if cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+		if cmd.shouldDevDeploy(msg.AskInstallDepsDev, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
@@ -181,14 +190,8 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		logger.FInfo(cmd.io.Out, msg.InitDevCommand)
 	}
 
-	shouldDeploy := cmd.shouldDevDeploy("Do you want to deploy your project? (y/N)", cmd.globalFlagAll, false)
-	if shouldDeploy {
-		shouldDeps := cmd.shouldDevDeploy("Do you want to install project dependencies? This may be required to deploy your project (y/N)", cmd.globalFlagAll, false)
-		if err != err {
-			return err
-		}
-
-		if shouldDeps {
+	if cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+		if cmd.shouldDevDeploy(msg.AskInstallDepsDeploy, cmd.globalFlagAll, false) {
 			answer, err := utils.GetPackageManager()
 			if err != nil {
 				return err
