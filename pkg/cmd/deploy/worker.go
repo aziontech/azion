@@ -33,8 +33,14 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
 			for Retries < 5 {
 				atomic.AddInt64(&Retries, 1)
+				_, err := job.FileContent.Seek(0, 0)
+				if err != nil {
+					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))
+					break
+				}
+
 				logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
-				err := clientUpload.Upload(context.Background(), &job, conf)
+				err = clientUpload.Upload(context.Background(), &job, conf)
 				if err != nil {
 					continue
 				}
