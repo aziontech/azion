@@ -17,7 +17,7 @@ import (
 var (
 	PathStatic = ".edge/storage"
 	Jobs       chan contracts.FileOps
-	Retries    int64
+	Retries    int64 = 0
 )
 
 func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
@@ -42,7 +42,7 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 
 	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadStart)
 
-	noOfWorkers := 5
+	const noOfWorkers = 5
 	var currentFile int64
 	Jobs := make(chan contracts.FileOps, totalFiles)
 	results := make(chan error, noOfWorkers)
