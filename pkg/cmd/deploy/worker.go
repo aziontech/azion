@@ -15,9 +15,6 @@ func worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 	for job := range jobs {
 		var attempt int
 		var lastError error
-
-		defer job.FileContent.Close()
-
 		for attempt = 1; attempt <= 5; attempt++ {
 			fileInfo, err := job.FileContent.Stat()
 			if err != nil {
