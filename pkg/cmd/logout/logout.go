@@ -8,16 +8,16 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/logout"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   msg.Usage,
-		Short: msg.ShortDescription,
-		Long:  msg.LongDescription,
+		Use:   msg.USAGE,
+		Short: msg.SHORTDESCRIPTION,
+		Long:  msg.LONGDESCRIPTION,
 		Example: heredoc.Doc(`
 		$ azion logout --help
         `),
@@ -42,12 +42,16 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			logger.LogSuccessBye(f.IOStreams.Out, msg.Success)
-			return nil
+			logoutOut := output.GeneralOutput{
+				Msg: msg.SUCCESS,
+				Out: f.IOStreams.Out,
+			}
+
+			return output.Print(&logoutOut)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.BoolP("help", "h", false, msg.FlagHelp)
+	flags.BoolP("help", "h", false, msg.FLAGHELP)
 	return cmd
 }

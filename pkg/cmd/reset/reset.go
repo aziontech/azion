@@ -8,7 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/reset"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
@@ -41,8 +41,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			logger.LogSuccessBye(f.IOStreams.Out, msg.SUCCESS)
-			return nil
+			resetOut := output.GeneralOutput{
+				Msg: msg.SUCCESS,
+				Out: f.IOStreams.Out,
+			}
+
+			return output.Print(&resetOut)
 		},
 	}
 
