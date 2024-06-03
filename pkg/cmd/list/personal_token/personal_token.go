@@ -57,8 +57,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"ID", "NAME", "EXPIRES AT"}
 	listOut.Out = f.IOStreams.Out
-	listOut.FlagOutPath = f.Out
-	listOut.FlagFormat = f.Format
+	listOut.Flags = f.Flags
 
 	if details {
 		listOut.Columns = []string{"ID", "NAME", "EXPIRES AT", "CREATED AT", "DESCRIPTION"}

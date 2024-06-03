@@ -19,7 +19,7 @@ type DescribeOutput struct {
 
 func (d *DescribeOutput) Format() (bool, error) {
 	formated := false
-	if len(d.FlagFormat) > 0 || len(d.FlagOutPath) > 0 {
+	if len(d.Flags.Format) > 0 || len(d.Flags.Out) > 0 {
 		formated = true
 		err := format(d.Values, d.GeneralOutput)
 		if err != nil {
@@ -31,7 +31,10 @@ func (d *DescribeOutput) Format() (bool, error) {
 
 func (c *DescribeOutput) Output() {
 	tbl := tablecli.New("", "")
-	tbl.WithFirstColumnFormatter(color.New(color.FgBlue).SprintfFunc())
+
+	if !c.Flags.NoColor {
+		tbl.WithFirstColumnFormatter(color.New(color.FgBlue).SprintfFunc())
+	}
 
 	values := reflect.ValueOf(c.Values)
 	interfaceValue := values.Elem()
@@ -62,7 +65,10 @@ func (c *DescribeOutput) Output() {
 
 	logger.FInfo(c.Out, string(tbl.GetByteFormat()))
 	if len(c.Field) > 0 {
-		format := color.New(color.FgGreen).SprintfFunc()
+		format := fmt.Sprintf
+		if !c.Flags.NoColor {
+			format = color.New(color.FgGreen).SprintfFunc()
+		}
 		logger.FInfo(c.Out, format("\nCode: %s", c.Field))
 	}
 }

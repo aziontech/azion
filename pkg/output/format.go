@@ -22,7 +22,7 @@ func format(v any, g GeneralOutput) error {
 	var b []byte
 	var err error
 
-	switch g.FlagFormat {
+	switch g.Flags.Format {
 	case JSON:
 		b, err = json.MarshalIndent(v, "", " ")
 		if err != nil {
@@ -45,12 +45,12 @@ func format(v any, g GeneralOutput) error {
 		}
 	}
 
-	if len(g.FlagOutPath) > 0 {
-		err = cmdutil.WriteDetailsToFile(b, g.FlagOutPath, g.Out)
+	if len(g.Flags.Out) > 0 {
+		err = cmdutil.WriteDetailsToFile(b, g.Flags.Out, g.Out)
 		if err != nil {
 			return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 		}
-		logger.FInfo(g.Out, fmt.Sprintf(WRITE_SUCCESS, g.FlagOutPath))
+		logger.FInfo(g.Out, fmt.Sprintf(WRITE_SUCCESS, g.Flags.Out))
 		return nil
 	}
 

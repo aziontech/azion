@@ -99,10 +99,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			updateOut := output.GeneralOutput{
-				Msg:         fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()),
-				Out:         f.IOStreams.Out,
-				FlagOutPath: f.Out,
-				FlagFormat:  f.Format,
+				Msg:   fmt.Sprintf(msg.UpdateOutputSuccess, response.GetOriginKey()),
+				Out:   f.IOStreams.Out,
+				Flags: f.Flags,
 			}
 			return output.Print(&updateOut)
 		},

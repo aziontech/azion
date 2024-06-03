@@ -12,8 +12,13 @@ type Factory struct {
 	HttpClient *http.Client
 	IOStreams  *iostreams.IOStreams
 	Config     config.Config
+	Flags
+}
+
+type Flags struct {
 	logger.Logger
-	Out           string
-	Format        string
-	GlobalFlagAll bool
+	GlobalFlagAll bool   `json:"-" yaml:"-" toml:"-"`
+	Out           string `json:"-" yaml:"-" toml:"-"`
+	Format        string `json:"-" yaml:"-" toml:"-"`
+	NoColor       bool   `json:"-" yaml:"-" toml:"-"`
 }

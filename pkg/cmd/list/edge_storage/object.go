@@ -78,8 +78,7 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"KEY", "LAST MODIFIED"}
 	listOut.Out = b.Factory.IOStreams.Out
-	listOut.FlagOutPath = b.Factory.Out
-	listOut.FlagFormat = b.Factory.Format
+	listOut.Flags = b.Factory.Flags
 
 	if b.Options.Details {
 		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE", "ETAG"}

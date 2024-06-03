@@ -110,10 +110,9 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	}
 
 	deleteOut := output.GeneralOutput{
-		Msg:         fmt.Sprintf(msg.OutputSuccess, application_id),
-		Out:         del.f.IOStreams.Out,
-		FlagOutPath: del.f.Out,
-		FlagFormat:  del.f.Format,
+		Msg:   fmt.Sprintf(msg.OutputSuccess, application_id),
+		Out:   del.f.IOStreams.Out,
+		Flags: del.f.Flags,
 	}
 	return output.Print(&deleteOut)
 }

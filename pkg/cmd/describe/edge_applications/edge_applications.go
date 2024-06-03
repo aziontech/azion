@@ -70,10 +70,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
-					Out:         f.IOStreams.Out,
-					Msg:         filepath.Clean(opts.OutPath),
-					FlagOutPath: f.Out,
-					FlagFormat:  f.Format,
+					Out:   f.IOStreams.Out,
+					Msg:   filepath.Clean(opts.OutPath),
+					Flags: f.Flags,
 				},
 				Fields: fields,
 				Values: resp,
