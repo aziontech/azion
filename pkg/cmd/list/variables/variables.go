@@ -65,10 +65,9 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 			return err
 		}
 		dumpOut := output.GeneralOutput{
-			Msg:         msg.VariablesDump,
-			Out:         f.IOStreams.Out,
-			FlagOutPath: f.Out,
-			FlagFormat:  f.Format,
+			Msg:   msg.VariablesDump,
+			Out:   f.IOStreams.Out,
+			Flags: f.Flags,
 		}
 		return output.Print(&dumpOut)
 	}
@@ -76,8 +75,7 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"ID", "KEY", "VALUE"}
 	listOut.Out = f.IOStreams.Out
-	listOut.FlagOutPath = f.Out
-	listOut.FlagFormat = f.Format
+	listOut.Flags = f.Flags
 
 	if opts.Details {
 		listOut.Columns = []string{"ID", "KEY", "VALUE", "SECRET", "LAST EDITOR"}

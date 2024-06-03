@@ -16,7 +16,7 @@ type ListOutput struct {
 
 func (l *ListOutput) Format() (bool, error) {
 	formated := false
-	if len(l.FlagFormat) > 0 || len(l.FlagOutPath) > 0 {
+	if len(l.Flags.Format) > 0 || len(l.Flags.Out) > 0 {
 		formated = true
 		err := format(l, l.GeneralOutput)
 		if err != nil {
@@ -30,9 +30,11 @@ func (c *ListOutput) Output() {
 	tbl := tablecli.NewTable(c.Columns)
 	tbl.WithWriter(c.Out)
 
-	headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
-	columnFmt := color.New(color.FgWhite).SprintfFunc()
-	tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	if !c.Flags.NoColor {
+		headerFmt := color.New(color.FgBlue, color.Underline).SprintfFunc()
+		columnFmt := color.New(color.FgWhite).SprintfFunc()
+		tbl.WithHeaderFormatter(headerFmt).WithFirstColumnFormatter(columnFmt)
+	}
 
 	for _, ln := range c.Lines {
 		tbl.AddRows(ln)

@@ -50,8 +50,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"ID", "NAME"}
 	listOut.Out = f.IOStreams.Out
-	listOut.FlagOutPath = f.Out
-	listOut.FlagFormat = f.Format
+	listOut.Flags = f.Flags
 
 	if opts.Details {
 		listOut.Columns = []string{"ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE"}
