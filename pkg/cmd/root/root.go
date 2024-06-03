@@ -187,5 +187,8 @@ func Execute() {
 			}
 		}
 	}
-	output.Print(&output.ErrorOutput{Err: err})
+	output.Print(&output.ErrorOutput{
+		GeneralOutput: output.GeneralOutput{Flags: factory.Flags},
+		Err:           err,
+	})
 }
