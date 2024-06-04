@@ -56,8 +56,9 @@ func (fields *FieldsBucket) RunE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf(msg.ERROR_CREATE_BUCKET, err)
 	}
 	creatOut := output.GeneralOutput{
-		Msg: msg.OUTPUT_CREATE_BUCKET,
-		Out: f.IOStreams.Out,
+		Msg:   msg.OUTPUT_CREATE_BUCKET,
+		Out:   f.IOStreams.Out,
+		Flags: f.Flags,
 	}
 	return output.Print(&creatOut)
 }
