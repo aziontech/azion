@@ -1,5 +1,9 @@
 package link
 
+const (
+	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"
+)
+
 var (
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
