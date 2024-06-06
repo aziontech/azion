@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/fatih/color"
 	"github.com/aziontech/tablecli"
+	"github.com/fatih/color"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,9 +16,9 @@ var (
 )
 
 type Logger struct {
-	Debug    bool
-	Silent   bool
-	LogLevel string
+	Debug    bool   `json:"-" yaml:"-" toml:"-"`
+	Silent   bool   `json:"-" yaml:"-" toml:"-"`
+	LogLevel string `json:"-" yaml:"-" toml:"-"`
 }
 
 func LogLevel(logger Logger) {
@@ -119,7 +119,7 @@ func LogSuccess(w io.Writer, message string) {
 	FInfo(w, formatSuccess("🚀 %s\n", message))
 }
 
-func LogSuccessBad(w io.Writer, message string) {
+func LogSuccessBye(w io.Writer, message string) {
 	formatSuccess := color.New(color.FgBlue).SprintfFunc()
 	FInfo(w, formatSuccess("👋 %s\n", message))
 }

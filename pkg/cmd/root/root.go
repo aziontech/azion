@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
+	"github.com/aziontech/azion-cli/pkg/cmd/reset"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
@@ -117,12 +118,13 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	// Global flags
 	cobraCmd.PersistentFlags().StringVarP(&tokenFlag, "token", "t", "", msg.RootTokenFlag)
 	cobraCmd.PersistentFlags().StringVarP(&configFlag, "config", "c", "", msg.RootConfigFlag)
-	cobraCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
 	cobraCmd.PersistentFlags().BoolVarP(&f.Debug, "debug", "d", false, msg.RootLogDebug)
 	cobraCmd.PersistentFlags().BoolVarP(&f.Silent, "silent", "s", false, msg.RootLogSilent)
 	cobraCmd.PersistentFlags().StringVarP(&f.LogLevel, "log-level", "l", "info", msg.RootLogLevel)
+	cobraCmd.PersistentFlags().BoolVarP(&f.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
 	cobraCmd.PersistentFlags().StringVar(&f.Out, "out", "", msg.RootFlagOut)
 	cobraCmd.PersistentFlags().StringVar(&f.Format, "format", "", msg.RootFlagFormat)
+	cobraCmd.PersistentFlags().BoolVar(&f.NoColor, "no-color", false, msg.RootFlagFormat)
 
 	// other flags
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
@@ -148,6 +150,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(version.NewCmd(f))
 	cobraCmd.AddCommand(whoami.NewCmd(f))
 	cobraCmd.AddCommand(purge.NewCmd(f))
+	cobraCmd.AddCommand(reset.NewCmd(f))
 
 	return cobraCmd
 }
@@ -186,5 +189,8 @@ func Execute() {
 			}
 		}
 	}
-	output.Print(&output.ErrorOutput{Err: err})
+	output.Print(&output.ErrorOutput{
+		GeneralOutput: output.GeneralOutput{Flags: factory.Flags},
+		Err:           err,
+	})
 }

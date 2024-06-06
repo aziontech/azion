@@ -1,11 +1,11 @@
-package logout
+package reset
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/logout"
+	msg "github.com/aziontech/azion-cli/messages/reset"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -31,23 +31,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 				err = client.Delete(context.Background(), settings.UUID)
 				if err != nil {
-					return fmt.Errorf(msg.ErrorLogout, err.Error())
+					return fmt.Errorf(msg.ERRORLOGOUT, err.Error())
 				}
 			}
 
-			settings.UUID = ""
-			settings.Token = ""
+			settings = token.Settings{}
 			err = token.WriteSettings(settings)
 			if err != nil {
 				return err
 			}
 
-			logoutOut := output.GeneralOutput{
+			resetOut := output.GeneralOutput{
 				Msg: msg.SUCCESS,
 				Out: f.IOStreams.Out,
 			}
 
-			return output.Print(&logoutOut)
+			return output.Print(&resetOut)
 		},
 	}
 

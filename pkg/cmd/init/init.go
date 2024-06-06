@@ -27,6 +27,7 @@ type initCmd struct {
 	preset                string
 	template              string
 	mode                  string
+	packageManager        string
 	pathWorkingDir        string
 	globalFlagAll         bool
 	f                     *cmdutil.Factory
@@ -100,12 +101,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE:          init.Run,
 	}
 	cmd.Flags().StringVar(&init.name, "name", "", msg.FLAG_NAME)
+	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
 	cmd.Flags().StringVar(&init.preset, "preset", "", msg.FLAG_PRESET)
 	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
 	return cmd
 }
 
-func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
+func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	logger.Debug("Running init command")
 
 	err := node.NodeVersion()
@@ -145,7 +147,6 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
-
 	logger.FInfo(cmd.io.Out, msg.WebAppInitCmdSuccess)
 
 	err = cmd.changeDir(cmd.pathWorkingDir)
@@ -167,16 +168,8 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	}
 
 	if cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
-		if cmd.shouldDevDeploy(msg.AskInstallDepsDev, cmd.globalFlagAll, false) {
-			answer, err := utils.GetPackageManager()
-			if err != nil {
-				return err
-			}
-			err = depsInstall(cmd, answer)
-			if err != nil {
-				logger.Debug("Error while installing project dependencies", zap.Error(err))
-				return msg.ErrorDeps
-			}
+		if err := deps(c, cmd, msg.AskInstallDepsDev); err != nil {
+			return err
 		}
 
 		logger.Debug("Running dev command from init command")
@@ -191,16 +184,8 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 	}
 
 	if cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
-		if cmd.shouldDevDeploy(msg.AskInstallDepsDeploy, cmd.globalFlagAll, false) {
-			answer, err := utils.GetPackageManager()
-			if err != nil {
-				return err
-			}
-			err = depsInstall(cmd, answer)
-			if err != nil {
-				logger.Debug("Failed to install project dependencies")
-				return err
-			}
+		if err := deps(c, cmd, msg.AskInstallDepsDeploy); err != nil {
+			return err
 		}
 
 		logger.Debug("Running deploy command from init command")
@@ -215,5 +200,25 @@ func (cmd *initCmd) Run(_ *cobra.Command, _ []string) error {
 		logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name))
 	}
 
+	return nil
+}
+
+func deps(c *cobra.Command, cmd *initCmd, m string) error {
+	pacManIsInformed := c.Flags().Changed("package-manager")
+	var err error
+	if pacManIsInformed || cmd.shouldDevDeploy(m, cmd.globalFlagAll, false) {
+		pacMan := cmd.packageManager
+		if !pacManIsInformed {
+			pacMan, err = utils.GetPackageManager()
+			if err != nil {
+				return err
+			}
+		}
+		err = depsInstall(cmd, pacMan)
+		if err != nil {
+			logger.Debug("Failed to install project dependencies")
+			return err
+		}
+	}
 	return nil
 }

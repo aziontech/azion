@@ -54,8 +54,7 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"NAME", "EDGE ACCESS"}
 	listOut.Out = b.Factory.IOStreams.Out
-	listOut.FlagOutPath = b.Factory.Out
-	listOut.FlagFormat = b.Factory.Format
+	listOut.Flags = b.Factory.Flags
 
 	for _, v := range resp.Results {
 		ln := []string{

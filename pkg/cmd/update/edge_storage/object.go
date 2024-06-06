@@ -67,10 +67,9 @@ func (o *object) runE(cmd *cobra.Command, args []string) error {
 	}
 
 	updateOut := output.GeneralOutput{
-		Msg:         msg.OUTPUT_UPDATE_OBJECT,
-		Out:         o.factory.IOStreams.Out,
-		FlagOutPath: o.factory.Out,
-		FlagFormat:  o.factory.Format,
+		Msg:   msg.OUTPUT_UPDATE_OBJECT,
+		Out:   o.factory.IOStreams.Out,
+		Flags: o.factory.Flags,
 	}
 	return output.Print(&updateOut)
 }

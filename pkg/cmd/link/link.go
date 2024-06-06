@@ -28,6 +28,7 @@ type LinkInfo struct {
 	Name           string
 	Preset         string
 	Mode           string
+	packageManager string
 	PathWorkingDir string
 	GlobalFlagAll  bool
 	remote         string
@@ -108,12 +109,13 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
-			return link.run(info)
+			return link.run(cmd, info)
 		},
 	}
 
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsLinkFlagName)
 	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", msg.EdgeApplicationsLinkFlagTemplate)
+	cobraCmd.Flags().StringVar(&info.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
@@ -125,7 +127,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewLinkCmd(f), f)
 }
 
-func (cmd *LinkCmd) run(info *LinkInfo) error {
+func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	logger.Debug("Running link command")
 
 	err := node.NodeVersion()
@@ -208,16 +210,8 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
-				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDev, false) {
-					answer, err := utils.GetPackageManager()
-					if err != nil {
-						return err
-					}
-					err = depsInstall(cmd, answer)
-					if err != nil {
-						logger.Debug("Error while installing project dependencies", zap.Error(err))
-						return msg.ErrorDeps
-					}
+				if err := deps(c, cmd, info, msg.AskInstallDepsDev); err != nil {
+					return err
 				}
 
 				logger.Debug("Running dev command from link command")
@@ -232,16 +226,8 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
-				if cmd.ShouldDevDeploy(info, msg.AskInstallDepsDeploy, false) {
-					answer, err := utils.GetPackageManager()
-					if err != nil {
-						return err
-					}
-					err = depsInstall(cmd, answer)
-					if err != nil {
-						logger.Debug("Error while installing project dependencies", zap.Error(err))
-						return msg.ErrorDeps
-					}
+				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy); err != nil {
+					return err
 				}
 
 				logger.Debug("Running deploy command from link command")
@@ -259,5 +245,25 @@ func (cmd *LinkCmd) run(info *LinkInfo) error {
 
 	}
 
+	return nil
+}
+
+func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string) error {
+	pacManIsInformed := c.Flags().Changed("package-manager")
+	if pacManIsInformed || cmd.ShouldDevDeploy(info, m, false) {
+		var err error
+		pacMan := info.packageManager
+		if !pacManIsInformed {
+			pacMan, err = utils.GetPackageManager()
+			if err != nil {
+				return err
+			}
+		}
+		err = depsInstall(cmd, pacMan)
+		if err != nil {
+			logger.Debug("Error while installing project dependencies", zap.Error(err))
+			return msg.ErrorDeps
+		}
+	}
 	return nil
 }
