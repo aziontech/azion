@@ -88,7 +88,7 @@ It's possible to enable the autocompletion to be used with the `azion` CLI. To l
 
 ### Go Lang Update Policy
 
-Our update policy for the Go language aims to ensure that all developers benefit from new features, bug fixes and improvements. To this end, we have adopted the practice of maintaining our project at [Release](https://go.dev/doc/devel/release) - 1 (Go 1.21 -1).
+Our update policy for the Go language aims to ensure that all developers benefit from new features, bug fixes and improvements. To this end, we have adopted the practice of maintaining our project at [Release](https://go.dev/doc/devel/release) - 1 (Go 1.21 -1). We allow exceptions when vulnerabilities are found. 
 
 By following this approach, we prioritize the stability and consistency of the project, while keeping up to date with the latest language updates. As new versions of Go are released, we will evaluate and adopt the new "[Release](https://go.dev/doc/devel/release)" version, after having sufficient time to test and validate compatibility with our existing code.
 
