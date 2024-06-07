@@ -45,8 +45,8 @@ To download azion CLI through Homebrew, run:
 brew install azion
 ``````
 
-##### Test The Azion CLI with docker 
-get link release https://github.com/aziontech/azion/releases
+##### Test Azion CLI with docker
+You can find the URL for each package in our Releases page https://github.com/aziontech/azion/releases
 ```sh
 docker run -it --rm alpine:latest sh -c '
     cd && \
