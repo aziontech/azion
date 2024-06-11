@@ -19,6 +19,7 @@ import (
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 	"github.com/aziontech/azion-cli/pkg/cmd/reset"
+	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
@@ -151,6 +152,7 @@ func NewCobraCmd(rootCmd *RootCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.AddCommand(whoami.NewCmd(f))
 	cobraCmd.AddCommand(purge.NewCmd(f))
 	cobraCmd.AddCommand(reset.NewCmd(f))
+	cobraCmd.AddCommand(sync.NewCmd(f))
 
 	return cobraCmd
 }
