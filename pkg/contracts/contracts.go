@@ -196,3 +196,8 @@ type RulesEngineBehaviorEntry struct {
 	RulesEngineBehaviorObject *sdk.RulesEngineBehaviorObject
 	RulesEngineBehaviorString *sdk.RulesEngineBehaviorString
 }
+
+type SyncOpts struct {
+	RuleIds map[string]int64
+	Conf    *AzionApplicationOptions
+}
