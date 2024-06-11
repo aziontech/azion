@@ -12,10 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	isFirewall bool
-)
-
 type SyncCmd struct {
 	Io                    *iostreams.IOStreams
 	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
