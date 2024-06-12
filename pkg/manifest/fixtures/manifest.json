@@ -13,6 +13,7 @@
   "rules": [
     { 
       "name": "nomezinhomatotinho",
+      "phase": "request",
       "criteria": [
         [
           {
