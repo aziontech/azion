@@ -39,7 +39,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) err
 	}
 
 	for _, rule := range resp.Results {
-		if id := info.RuleIds[rule.Name]; id > 0 || rule.Name == "Default Rule" {
+		if r := info.RuleIds[rule.Name]; r.Id > 0 || rule.Name == "Default Rule" {
 			// if remote rule is also on local environment, no action is needed
 			continue
 		}

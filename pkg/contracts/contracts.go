@@ -137,8 +137,9 @@ type AzionJsonDataRulesEngine struct {
 }
 
 type AzionJsonDataRules struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id    int64  `json:"id"`
+	Name  string `json:"name"`
+	Phase string `json:"phase"`
 }
 
 type AzionJsonDataCacheSettings struct {
@@ -188,16 +189,17 @@ type Origin struct {
 type RuleEngine struct {
 	Name        string                         `json:"name"`
 	Description *string                        `json:"description,omitempty"`
+	Phase       string                         `json:"phase,omitempty"`
 	Criteria    [][]sdk.RulesEngineCriteria    `json:"criteria,omitempty"`
 	Behaviors   []sdk.RulesEngineBehaviorEntry `json:"behaviors,omitempty"`
 }
 
-type RulesEngineBehaviorEntry struct {
-	RulesEngineBehaviorObject *sdk.RulesEngineBehaviorObject
-	RulesEngineBehaviorString *sdk.RulesEngineBehaviorString
+type SyncOpts struct {
+	RuleIds map[string]RuleIdsStruct
+	Conf    *AzionApplicationOptions
 }
 
-type SyncOpts struct {
-	RuleIds map[string]int64
-	Conf    *AzionApplicationOptions
+type RuleIdsStruct struct {
+	Id    int64
+	Phase string
 }
