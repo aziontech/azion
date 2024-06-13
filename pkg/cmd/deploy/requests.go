@@ -208,7 +208,16 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	domainReturnedName := []string{domain.GetDomainName()}
 
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err := cmd.purgeDomains(cmd.F, domainReturnedName)
+		errChan := make(chan error)
+		go func() {
+			err := PurgeForUpdatedFiles(cmd, domainReturnedName)
+			if err != nil {
+				errChan <- err
+			} else {
+				close(errChan)
+			}
+		}()
+		err := <-errChan
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
