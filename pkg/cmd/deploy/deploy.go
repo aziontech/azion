@@ -42,9 +42,10 @@ type DeployCmd struct {
 }
 
 var (
-	Path     string
-	Auto     bool
-	NoPrompt bool
+	Path      string
+	Auto      bool
+	NoPrompt  bool
+	SkipBuild bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -85,6 +86,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
 	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
+	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
 	return deployCmd
 }
 
@@ -101,11 +103,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	buildCmd := cmd.BuildCmd(f)
-	err = buildCmd.Run(&contracts.BuildInfo{})
-	if err != nil {
-		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-		return err
+	if !SkipBuild {
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.Run(&contracts.BuildInfo{})
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
 	}
 
 	conf, err := cmd.GetAzionJsonContent()

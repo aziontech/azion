@@ -60,9 +60,12 @@ func (cmd *SyncCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	ruleIds := make(map[string]int64)
+	ruleIds := make(map[string]contracts.RuleIdsStruct)
 	for _, ruleConf := range conf.RulesEngine.Rules {
-		ruleIds[ruleConf.Name] = ruleConf.Id
+		ruleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+			Id:    ruleConf.Id,
+			Phase: ruleConf.Phase,
+		}
 	}
 
 	info := contracts.SyncOpts{

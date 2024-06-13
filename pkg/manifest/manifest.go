@@ -25,7 +25,7 @@ import (
 var (
 	CacheIds         map[string]int64
 	CacheIdsBackup   map[string]int64
-	RuleIds          map[string]int64
+	RuleIds          map[string]contracts.RuleIdsStruct
 	OriginKeys       map[string]string
 	OriginIds        map[string]int64
 	manifestFilePath = "/.edge/manifest.json"
@@ -81,7 +81,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	CacheIds = make(map[string]int64)
 	CacheIdsBackup = make(map[string]int64)
-	RuleIds = make(map[string]int64)
+	RuleIds = make(map[string]contracts.RuleIdsStruct)
 	OriginKeys = make(map[string]string)
 	OriginIds = make(map[string]int64)
 
@@ -90,7 +90,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	for _, ruleConf := range conf.RulesEngine.Rules {
-		RuleIds[ruleConf.Name] = ruleConf.Id
+		RuleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+			Id:    ruleConf.Id,
+			Phase: ruleConf.Phase,
+		}
 	}
 
 	for _, originConf := range conf.Origin {
@@ -204,21 +207,22 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	ruleConf := []contracts.AzionJsonDataRules{}
 	for _, rule := range manifest.Rules {
-		if id := RuleIds[rule.Name]; id > 0 {
+		if r := RuleIds[rule.Name]; r.Id > 0 {
 			requestUpdate, err := makeRuleRequestUpdate(rule, conf)
 			if err != nil {
 				return err
 			}
-			requestUpdate.Id = id
-			requestUpdate.Phase = "request"
+			requestUpdate.Id = r.Id
+			requestUpdate.Phase = rule.Phase
 			requestUpdate.IdApplication = conf.Application.ID
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
 				return err
 			}
 			newRule := contracts.AzionJsonDataRules{
-				Id:   updated.GetId(),
-				Name: updated.GetName(),
+				Id:    updated.GetId(),
+				Name:  updated.GetName(),
+				Phase: updated.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
@@ -232,13 +236,14 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			} else {
 				requestCreate.Name = conf.Name + thoth.GenerateName()
 			}
-			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, "request", requestCreate)
+			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, rule.Phase, requestCreate)
 			if err != nil {
 				return err
 			}
 			newRule := contracts.AzionJsonDataRules{
-				Id:   created.GetId(),
-				Name: created.GetName(),
+				Id:    created.GetId(),
+				Name:  created.GetName(),
+				Phase: created.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
 		}
@@ -266,11 +271,17 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 	for _, value := range RuleIds {
-		err := client.DeleteRulesEngine(ctx, conf.Application.ID, "request", value)
+		//since until [UXE-3599] was carried out we'd only cared about "request" phase, this check guarantees that if Phase is empty
+		// we are probably dealing with a rule engine from a previous version
+		phase := "request"
+		if value.Phase != "" {
+			phase = value.Phase
+		}
+		err := client.DeleteRulesEngine(ctx, conf.Application.ID, phase, value.Id)
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value.Id))
 	}
 
 	for i, value := range OriginKeys {
