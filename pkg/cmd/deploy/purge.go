@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
@@ -40,6 +41,13 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 		return err
 	}
 
+	if currentDataMap == nil {
+		wildCard := "/*"
+		if err := cmd.Purge(domain, wildCard); err != nil {
+			logger.Debug("Error purge path domain", zap.String("wildCard", wildCard), zap.Error(err))
+		}
+	}
+
 	newData, err := ReadFilesEdgeStorage()
 	if err != nil {
 		return err
@@ -53,8 +61,9 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 	for _, current := range currentDataMap {
 		if newDataItem, exists := newDataMap[current.Name]; exists {
 			if current.Hash != newDataItem.Hash {
-				if err := cmd.Purge(domain, current.Name); err != nil {
-					logger.Debug("Error purge path domain", zap.String("path", current.Name), zap.Error(err))
+				path := strings.TrimPrefix(current.Name, ".edge/storage")
+				if err := cmd.Purge(domain, path); err != nil {
+					logger.Debug("Error purge path domain", zap.String("path", path), zap.Error(err))
 				}
 				logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgePath, current.Name))
 			}
