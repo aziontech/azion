@@ -596,3 +596,21 @@ func checkToken(f *cmdutil.Factory) error {
 
 	return nil
 }
+
+func checkArgsJson(cmd *DeployCmd) error {
+	workingDir, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	workDirPath := workingDir + "/azion/args.json"
+	_, err = cmd.FileReader(workDirPath)
+	if err != nil {
+		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
+			logger.Debug("Error while trying to create args.json file", zap.Error(err))
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
+		}
+	}
+
+	return nil
+}

@@ -39,6 +39,7 @@ type DeployCmd struct {
 	F                     *cmdutil.Factory
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
+	VersionID             func() string
 }
 
 var (
@@ -63,6 +64,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		Unmarshal:             json.Unmarshal,
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
+		VersionID:             utils.Timestamp,
 	}
 }
 
@@ -74,10 +76,10 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion deploy --help
-        $ azion deploy --path dist/storage
-        $ azion deploy --auto
-        `),
+       $ azion deploy --help
+       $ azion deploy --path dist/storage
+       $ azion deploy --auto
+       `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.Run(deploy.F)
 		},
@@ -115,6 +117,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	conf, err := cmd.GetAzionJsonContent()
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
+	}
+
+	versionID := cmd.VersionID()
+
+	conf.Prefix = versionID
+
+	err = checkArgsJson(cmd)
+	if err != nil {
 		return err
 	}
 

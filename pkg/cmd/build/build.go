@@ -27,7 +27,6 @@ type BuildCmd struct {
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
-	VersionID             func() string
 	GetWorkDir            func() (string, error)
 	f                     *cmdutil.Factory
 }
@@ -82,7 +81,6 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		Stat:                  os.Stat,
 		GetWorkDir:            utils.GetWorkingDir,
 		f:                     f,
-		VersionID:             utils.Timestamp,
 	}
 }
 
