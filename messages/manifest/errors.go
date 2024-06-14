@@ -9,7 +9,7 @@ var (
 	ErrorOriginNotFound         = errors.New("Could not find this origin")
 	ErrorCreateOrigin           = errors.New("Failed to create the origin: %s")
 	ErrorCreateCache            = errors.New("Failed to create the cache setting: %s")
-	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine")
+	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine: %s")
 	ErrorUpdateOrigin           = errors.New("Failed to update the origin: %s")
 	ErrorUpdateCache            = errors.New("Failed to update the cache setting: %s")
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine: %s")
