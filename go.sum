@@ -50,8 +50,8 @@ github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be h1:9AeTilPcZAjCFI
 github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be/go.mod h1:ySMOLuWl6zY27l47sB3qLNK6tF2fkHG55UZxx8oIVo4=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPdPJAN/hZIm0C4OItdklCFmMRWYpio=
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
-github.com/aziontech/azionapi-go-sdk v0.130.0 h1:mKoOzPC6GJCRl5f7FZsyflc3JRKZ9nMRNMO+dly71E4=
-github.com/aziontech/azionapi-go-sdk v0.130.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
+github.com/aziontech/azionapi-go-sdk v0.133.0 h1:xwDJd0kY3oQBMwnSZifVry43x46qnhOaQ3vnAmjmWsQ=
+github.com/aziontech/azionapi-go-sdk v0.133.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f h1:b0IX6tpiiG+QzCVOBqwYEHP5gPeeESq57A5ZXiYyDS4=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
 github.com/aziontech/tablecli v0.0.0-20240513193320-c4dbf16b013a h1:jKR7y/1ePDPZkfKgqj7gUK9XB7KRHsyHci8tJXD3YTM=

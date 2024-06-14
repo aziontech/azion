@@ -31,10 +31,6 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
 
-	versionID := cmd.VersionID()
-
-	conf.Prefix = versionID
-
 	err = cmd.WriteAzionJsonContent(conf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))

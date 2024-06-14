@@ -190,6 +190,8 @@ type RuleEngine struct {
 	Name        string                         `json:"name"`
 	Description *string                        `json:"description,omitempty"`
 	Phase       string                         `json:"phase,omitempty"`
+	Order       int64                          `json:"order,omitempty"`
+	IsActive    bool                           `json:"is_active,omitempty"`
 	Criteria    [][]sdk.RulesEngineCriteria    `json:"criteria,omitempty"`
 	Behaviors   []sdk.RulesEngineBehaviorEntry `json:"behaviors,omitempty"`
 }

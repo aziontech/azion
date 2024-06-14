@@ -214,6 +214,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			requestUpdate.Id = r.Id
 			requestUpdate.Phase = rule.Phase
+			requestUpdate.IsActive = &rule.IsActive
+			requestUpdate.Order = &rule.Order
 			requestUpdate.IdApplication = conf.Application.ID
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
@@ -236,6 +238,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			} else {
 				requestCreate.Name = conf.Name + thoth.GenerateName()
 			}
+			requestCreate.IsActive = &rule.IsActive
+			requestCreate.Order = &rule.Order
 			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, rule.Phase, requestCreate)
 			if err != nil {
 				return err
