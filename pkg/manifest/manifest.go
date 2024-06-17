@@ -112,7 +112,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			updated, err := clientOrigin.Update(ctx, conf.Application.ID, OriginKeys[origin.Name], requestUpdate)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateOrigin.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateOrigin, err.Error())
 			}
 
 			newEntry := contracts.AzionJsonDataOrigin{
@@ -131,7 +131,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			created, err := clientOrigin.Create(ctx, conf.Application.ID, requestCreate)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateOrigin.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorCreateOrigin, err.Error())
 			}
 			newOrigin := contracts.AzionJsonDataOrigin{
 				OriginId:  created.GetOriginId(),
@@ -164,7 +164,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			updated, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateCache.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateCache, err.Error())
 			}
 			newCache := contracts.AzionJsonDataCacheSettings{
 				Id:   updated.GetId(),
@@ -181,7 +181,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			created, err := clientCache.Create(ctx, requestUpdate, conf.Application.ID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateCache.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorCreateCache, err.Error())
 			}
 			newCache := contracts.AzionJsonDataCacheSettings{
 				Id:   created.GetId(),
@@ -219,7 +219,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			requestUpdate.IdApplication = conf.Application.ID
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateRule.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateRule, err.Error())
 			}
 			newRule := contracts.AzionJsonDataRules{
 				Id:    updated.GetId(),
@@ -242,7 +242,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			requestCreate.Order = &rule.Order
 			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, rule.Phase, requestCreate)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateRule.Error(), err.Error())
+				return fmt.Errorf("%w: %s", msg.ErrorCreateRule, err.Error())
 			}
 			newRule := contracts.AzionJsonDataRules{
 				Id:    created.GetId(),
