@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams string) error {
+func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams string, fields *contracts.BuildInfo) error {
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.CommandRunner(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
@@ -31,7 +31,7 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
 
-	err = cmd.WriteAzionJsonContent(conf)
+	err = cmd.WriteAzionJsonContent(conf, fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile

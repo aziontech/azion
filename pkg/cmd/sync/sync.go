@@ -12,10 +12,12 @@ import (
 	"go.uber.org/zap"
 )
 
+var ProjectConf string
+
 type SyncCmd struct {
 	Io                    *iostreams.IOStreams
-	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	GetAzionJsonContent   func(confPath string) (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 	F                     *cmdutil.Factory
 }
 
@@ -44,6 +46,7 @@ func NewCobraCmd(sync *SyncCmd) *cobra.Command {
 		},
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
+	syncCmd.Flags().StringVar(&ProjectConf, "--config-dir", "azion", msg.CONFDIRFLAG)
 	return syncCmd
 }
 
@@ -54,7 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *SyncCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running sync command")
 
-	conf, err := cmd.GetAzionJsonContent()
+	conf, err := cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err

@@ -11,4 +11,5 @@ var (
 	CascadeSuccess   = "Remote resources deleted successfully"
 	FlagId           = "Unique identifier of the Edge Application"
 	AskInput         = "Enter the ID of the Edge Application you wish to delete:"
+	CONFDIRFLAG      = "Relative path to where your custom azion.json and args.json files are stored"
 )

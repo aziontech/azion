@@ -48,7 +48,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) err
 			Name: rule.GetName(),
 		}
 		info.Conf.RulesEngine.Rules = append(info.Conf.RulesEngine.Rules, newRule)
-		err := synch.WriteAzionJsonContent(info.Conf)
+		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err

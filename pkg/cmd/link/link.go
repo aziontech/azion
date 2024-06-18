@@ -33,6 +33,7 @@ type LinkInfo struct {
 	GlobalFlagAll  bool
 	remote         string
 	Auto           bool
+	projectPath    string
 }
 
 type LinkCmd struct {
@@ -119,6 +120,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
+	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
 
 	return cobraCmd
 }

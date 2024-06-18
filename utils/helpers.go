@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -208,20 +209,19 @@ func ResponseToBool(response string) (bool, error) {
 	return false, ErrorInvalidOption
 }
 
-func GetAzionJsonContent() (*contracts.AzionApplicationOptions, error) {
-	path, err := GetWorkingDir()
+func GetAzionJsonContent(confPath string) (*contracts.AzionApplicationOptions, error) {
+	wd, err := GetWorkingDir()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = os.Stat(path + "/azion/azion.json")
+	_, err = os.Stat(path.Join(wd, confPath, "azion.json"))
 	if err != nil {
 		logger.Debug("Error reading stats of azion.json file", zap.Error(err))
 		return nil, ErrorOpeningAzionJsonFile
 	}
 
-	jsonConf := path + "/azion/azion.json"
-	file, err := os.ReadFile(jsonConf)
+	file, err := os.ReadFile(path.Join(wd, confPath, "azion.json"))
 	if err != nil {
 		logger.Debug("Error reading azion.json file", zap.Error(err))
 		return nil, ErrorOpeningAzionJsonFile
@@ -257,19 +257,17 @@ func GetAzionJsonSimple() (*contracts.AzionApplicationSimple, error) {
 	return conf, nil
 }
 
-func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions) error {
-	path, err := GetWorkingDir()
+func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confPath string) error {
+	wd, err := GetWorkingDir()
 	if err != nil {
 		return err
 	}
-	jsonConf := path + "/azion/azion.json"
-
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return ErrorMarshalAzionJsonFile
 	}
 
-	err = os.WriteFile(jsonConf, data, 0644)
+	err = os.WriteFile(path.Join(wd, confPath, "azion.json"), data, 0644)
 	if err != nil {
 		return ErrorWritingAzionJsonFile
 	}

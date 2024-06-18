@@ -13,7 +13,7 @@ import (
 )
 
 func (del *DeleteCmd) Cascade(ctx context.Context) error {
-	azionJson, err := del.GetAzion()
+	azionJson, err := del.GetAzion(ProjectConf)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return msg.ErrorMissingAzionJson

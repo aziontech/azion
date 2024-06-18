@@ -23,8 +23,8 @@ type BuildCmd struct {
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	FileReader            func(path string) ([]byte, error)
 	ConfigRelativePath    string
-	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	GetWorkDir            func() (string, error)
@@ -56,6 +56,7 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd.Flags().StringVar(&fields.NodePolyfills, "use-node-polyfills", "", msg.FlagPolyfill)
 	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)
 	buildCmd.Flags().BoolVar(&fields.IsFirewall, "firewall", false, msg.IsFirewall)
+	buildCmd.Flags().StringVar(&fields.ProjectPath, "--config-dir", "azion", msg.ProjectConfFlag)
 
 	return buildCmd
 }
