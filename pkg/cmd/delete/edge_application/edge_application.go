@@ -21,9 +21,11 @@ import (
 	"go.uber.org/zap"
 )
 
+var ProjectConf string
+
 type DeleteCmd struct {
 	Io         *iostreams.IOStreams
-	GetAzion   func() (*contracts.AzionApplicationOptions, error)
+	GetAzion   func(confPath string) (*contracts.AzionApplicationOptions, error)
 	f          *cmdutil.Factory
 	UpdateJson func(cmd *DeleteCmd) error
 }
@@ -61,6 +63,7 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	cmd.Flags().Int64Var(&application_id, "application-id", 0, msg.FlagId)
 	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 
 	return cmd
 }

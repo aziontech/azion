@@ -34,7 +34,7 @@ var (
 type ManifestInterpreter struct {
 	FileReader            func(path string) ([]byte, error)
 	GetWorkDir            func() (string, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 }
 
 func NewManifestInterpreter() *ManifestInterpreter {
@@ -71,7 +71,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory) (*
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory) error {
+func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory, projectConf string) error {
 	logger.FInfo(f.IOStreams.Out, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -147,7 +147,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	conf.Origin = originConf
-	err := man.WriteAzionJsonContent(conf)
+	err := man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -199,7 +199,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	conf.CacheSettings = cacheConf
-	err = man.WriteAzionJsonContent(conf)
+	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -254,7 +254,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	conf.RulesEngine.Rules = ruleConf
-	err = man.WriteAzionJsonContent(conf)
+	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err

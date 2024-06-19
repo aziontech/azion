@@ -24,7 +24,7 @@ func (cmd *BuildCmd) run(fields *contracts.BuildInfo) error {
 func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 	var err error
 
-	conf, err := cmd.GetAzionJsonContent()
+	conf, err := cmd.GetAzionJsonContent(fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while building your project", zap.Error(err))
 		return msg.ErrorBuilding
@@ -64,6 +64,6 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		vulcanParams += " --firewall "
 	}
 
-	return vulcan(cmd, conf, vulcanParams)
+	return vulcan(cmd, conf, vulcanParams, fields)
 
 }

@@ -53,14 +53,14 @@ func TestDeployCmd(t *testing.T) {
 
 		interpreter := NewManifestInterpreter()
 
-		interpreter.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions) error {
+		interpreter.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
 			return nil
 		}
 
 		pathManifest := "fixtures/manifest.json"
 		manifest, err := interpreter.ReadManifest(pathManifest, f)
 		require.NoError(t, err)
-		err = interpreter.CreateResources(options, manifest, f)
+		err = interpreter.CreateResources(options, manifest, f, "azion")
 		require.NoError(t, err)
 	})
 
