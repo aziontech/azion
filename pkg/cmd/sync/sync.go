@@ -46,7 +46,7 @@ func NewCobraCmd(sync *SyncCmd) *cobra.Command {
 		},
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
-	syncCmd.Flags().StringVar(&ProjectConf, "--config-dir", "azion", msg.CONFDIRFLAG)
+	syncCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	return syncCmd
 }
 

@@ -237,26 +237,6 @@ func GetAzionJsonContent(confPath string) (*contracts.AzionApplicationOptions, e
 	return conf, nil
 }
 
-func GetAzionJsonSimple() (*contracts.AzionApplicationSimple, error) {
-	path, err := GetWorkingDir()
-	if err != nil {
-		return nil, err
-	}
-	jsonConf := path + "/azion/azion.json"
-	file, err := os.ReadFile(jsonConf)
-	if err != nil {
-		return nil, ErrorOpeningAzionJsonFile
-	}
-
-	conf := &contracts.AzionApplicationSimple{}
-	err = json.Unmarshal(file, &conf)
-	if err != nil {
-		return nil, ErrorUnmarshalAzionJsonFile
-	}
-
-	return conf, nil
-}
-
 func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confPath string) error {
 	wd, err := GetWorkingDir()
 	if err != nil {
