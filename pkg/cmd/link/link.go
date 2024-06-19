@@ -234,7 +234,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.Run(cmd.F)
+				err = deploy.ExternalRun(cmd.F, info.projectPath)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err

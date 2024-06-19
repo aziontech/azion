@@ -98,6 +98,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+	ProjectConf = configPath
+	return cmd.Run(f)
+}
+
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running deploy command")
 	ctx := context.Background()
@@ -109,7 +114,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.Run(&contracts.BuildInfo{})
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

@@ -22,7 +22,6 @@ type BuildCmd struct {
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	FileReader            func(path string) ([]byte, error)
-	ConfigRelativePath    string
 	GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 	EnvLoader             func(path string) ([]string, error)
@@ -74,7 +73,6 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
-		ConfigRelativePath:    "/azion/config.json",
 		EnvLoader:             utils.LoadEnvVarsFromFile,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
@@ -86,5 +84,10 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 }
 
 func (cmd *BuildCmd) Run(fields *contracts.BuildInfo) error {
+	return cmd.run(fields)
+}
+
+func (cmd *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string) error {
+	fields.ProjectPath = confPath
 	return cmd.run(fields)
 }
