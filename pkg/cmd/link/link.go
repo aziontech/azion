@@ -33,6 +33,7 @@ type LinkInfo struct {
 	GlobalFlagAll  bool
 	remote         string
 	Auto           bool
+	projectPath    string
 }
 
 type LinkCmd struct {
@@ -119,6 +120,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
+	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
 
 	return cobraCmd
 }
@@ -232,7 +234,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.Run(cmd.F)
+				err = deploy.ExternalRun(cmd.F, info.projectPath)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err

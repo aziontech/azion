@@ -28,7 +28,7 @@ func shouldDevDeploy(info *LinkInfo, msg string, defaultYes bool) bool {
 func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 	var err error
 	var shouldFetchTemplates bool
-	if empty, _ := cmd.IsDirEmpty("./azion"); !empty {
+	if empty, _ := cmd.IsDirEmpty(info.projectPath); !empty {
 		if info.GlobalFlagAll || info.Auto {
 			shouldFetchTemplates = true
 		} else {
@@ -36,7 +36,7 @@ func shouldFetch(cmd *LinkCmd, info *LinkInfo) (bool, error) {
 		}
 
 		if shouldFetchTemplates {
-			err = cmd.CleanDir("./azion")
+			err = cmd.CleanDir(info.projectPath)
 			if err != nil {
 				logger.Debug("Error while trying to clean azion directory", zap.Error(err))
 				return false, err

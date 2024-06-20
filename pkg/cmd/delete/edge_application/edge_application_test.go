@@ -89,7 +89,7 @@ func TestCreate(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		del := NewDeleteCmd(f)
-		del.GetAzion = func() (*contracts.AzionApplicationOptions, error) {
+		del.GetAzion = func(confPath string) (*contracts.AzionApplicationOptions, error) {
 			return options, nil
 		}
 		del.UpdateJson = func(cmd *DeleteCmd) error {

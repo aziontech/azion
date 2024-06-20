@@ -33,5 +33,6 @@ var (
 )
 
 const (
-	FLAG_REMOTE = "Clones a remote repository to be linked to an Azion Edge Application"
+	FLAG_REMOTE  = "Clones a remote repository to be linked to an Azion Edge Application"
+	FLAGPATHCONF = "Relative path to where your custom azion.json and args.json files are stored"
 )

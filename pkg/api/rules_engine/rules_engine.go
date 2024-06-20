@@ -74,7 +74,7 @@ func (c *Client) Create(ctx context.Context, edgeApplicationID int64, phase stri
 
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
