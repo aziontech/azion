@@ -19,6 +19,7 @@ type BuildInfo struct {
 	Entry         string
 	NodePolyfills string
 	OwnWorker     string
+	ProjectPath   string
 	IsFirewall    bool
 }
 
@@ -137,8 +138,9 @@ type AzionJsonDataRulesEngine struct {
 }
 
 type AzionJsonDataRules struct {
-	Id   int64  `json:"id"`
-	Name string `json:"name"`
+	Id    int64  `json:"id"`
+	Name  string `json:"name"`
+	Phase string `json:"phase"`
 }
 
 type AzionJsonDataCacheSettings struct {
@@ -188,11 +190,19 @@ type Origin struct {
 type RuleEngine struct {
 	Name        string                         `json:"name"`
 	Description *string                        `json:"description,omitempty"`
+	Phase       string                         `json:"phase,omitempty"`
+	Order       int64                          `json:"order,omitempty"`
+	IsActive    bool                           `json:"is_active,omitempty"`
 	Criteria    [][]sdk.RulesEngineCriteria    `json:"criteria,omitempty"`
 	Behaviors   []sdk.RulesEngineBehaviorEntry `json:"behaviors,omitempty"`
 }
 
-type RulesEngineBehaviorEntry struct {
-	RulesEngineBehaviorObject *sdk.RulesEngineBehaviorObject
-	RulesEngineBehaviorString *sdk.RulesEngineBehaviorString
+type SyncOpts struct {
+	RuleIds map[string]RuleIdsStruct
+	Conf    *AzionApplicationOptions
+}
+
+type RuleIdsStruct struct {
+	Id    int64
+	Phase string
 }

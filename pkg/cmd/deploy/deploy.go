@@ -30,8 +30,8 @@ type DeployCmd struct {
 	GetWorkDir            func() (string, error)
 	FileReader            func(path string) ([]byte, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	GetAzionJsonContent   func() (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
@@ -39,12 +39,15 @@ type DeployCmd struct {
 	F                     *cmdutil.Factory
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
+	VersionID             func() string
 }
 
 var (
-	Path     string
-	Auto     bool
-	NoPrompt bool
+	Path        string
+	Auto        bool
+	NoPrompt    bool
+	SkipBuild   bool
+	ProjectConf string
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -62,6 +65,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		Unmarshal:             json.Unmarshal,
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
+		VersionID:             utils.Timestamp,
 	}
 }
 
@@ -73,10 +77,10 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion deploy --help
-        $ azion deploy --path dist/storage
-        $ azion deploy --auto
-        `),
+       $ azion deploy --help
+       $ azion deploy --path dist/storage
+       $ azion deploy --auto
+       `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.Run(deploy.F)
 		},
@@ -85,11 +89,18 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
 	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
+	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
+	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	return deployCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
+}
+
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+	ProjectConf = configPath
+	return cmd.Run(f)
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
@@ -101,16 +112,27 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	buildCmd := cmd.BuildCmd(f)
-	err = buildCmd.Run(&contracts.BuildInfo{})
+	if !SkipBuild {
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf)
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
+	}
+
+	conf, err := cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
-		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
 	}
 
-	conf, err := cmd.GetAzionJsonContent()
+	versionID := cmd.VersionID()
+
+	conf.Prefix = versionID
+
+	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {
-		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
 	}
 
@@ -208,7 +230,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f)
+	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf)
 	if err != nil {
 		return err
 	}

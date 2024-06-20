@@ -7,7 +7,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
@@ -25,7 +24,7 @@ func (cmd *BuildCmd) run(fields *contracts.BuildInfo) error {
 func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 	var err error
 
-	conf, err := cmd.GetAzionJsonContent()
+	conf, err := cmd.GetAzionJsonContent(fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while building your project", zap.Error(err))
 		return msg.ErrorBuilding
@@ -65,49 +64,6 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		vulcanParams += " --firewall "
 	}
 
-	err = checkArgsJson(cmd)
-	if err != nil {
-		return err
-	}
+	return vulcan(cmd, conf, vulcanParams, fields)
 
-	if conf.Preset == "simple" {
-		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
-		return nil
-	}
-
-	if conf.Preset == "static" {
-		versionID := cmd.VersionID()
-		conf.Prefix = versionID
-
-		err = cmd.WriteAzionJsonContent(conf)
-		if err != nil {
-			return nil
-		}
-		logger.FInfo(cmd.Io.Out, msg.BuildSimple)
-		return nil
-	}
-
-	if conf.Preset != "nextjs" {
-		return vulcan(cmd, conf, vulcanParams)
-	}
-
-	return utils.ErrorUnsupportedType
-}
-
-func checkArgsJson(cmd *BuildCmd) error {
-	workingDir, err := cmd.GetWorkDir()
-	if err != nil {
-		return err
-	}
-
-	workDirPath := workingDir + "/azion/args.json"
-	_, err = cmd.FileReader(workDirPath)
-	if err != nil {
-		if err := cmd.WriteFile(workDirPath, []byte("{}"), 0644); err != nil {
-			logger.Debug("Error while trying to create args.json file", zap.Error(err))
-			return fmt.Errorf(utils.ErrorCreateFile.Error(), workDirPath)
-		}
-	}
-
-	return nil
 }

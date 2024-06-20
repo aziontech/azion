@@ -65,7 +65,7 @@ func TestCobraCmd(t *testing.T) {
 		azJsonData.Function.File = "myfile.js"
 		azJsonData.Function.ID = 476
 
-		_ = WriteAzionJsonContent(&azJsonData)
+		_ = WriteAzionJsonContent(&azJsonData, "azion")
 
 		require.NoError(t, err)
 	})
@@ -77,7 +77,7 @@ func TestCobraCmd(t *testing.T) {
 
 		_ = os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
 
-		azJsonData, err := GetAzionJsonContent()
+		azJsonData, err := GetAzionJsonContent("azion")
 
 		require.NoError(t, err)
 		require.Contains(t, azJsonData.Name, "Test01")

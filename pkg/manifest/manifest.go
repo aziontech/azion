@@ -25,7 +25,7 @@ import (
 var (
 	CacheIds         map[string]int64
 	CacheIdsBackup   map[string]int64
-	RuleIds          map[string]int64
+	RuleIds          map[string]contracts.RuleIdsStruct
 	OriginKeys       map[string]string
 	OriginIds        map[string]int64
 	manifestFilePath = "/.edge/manifest.json"
@@ -34,7 +34,7 @@ var (
 type ManifestInterpreter struct {
 	FileReader            func(path string) ([]byte, error)
 	GetWorkDir            func() (string, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions) error
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 }
 
 func NewManifestInterpreter() *ManifestInterpreter {
@@ -71,7 +71,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory) (*
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory) error {
+func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory, projectConf string) error {
 	logger.FInfo(f.IOStreams.Out, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -81,7 +81,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	CacheIds = make(map[string]int64)
 	CacheIdsBackup = make(map[string]int64)
-	RuleIds = make(map[string]int64)
+	RuleIds = make(map[string]contracts.RuleIdsStruct)
 	OriginKeys = make(map[string]string)
 	OriginIds = make(map[string]int64)
 
@@ -90,7 +90,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	for _, ruleConf := range conf.RulesEngine.Rules {
-		RuleIds[ruleConf.Name] = ruleConf.Id
+		RuleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+			Id:    ruleConf.Id,
+			Phase: ruleConf.Phase,
+		}
 	}
 
 	for _, originConf := range conf.Origin {
@@ -109,7 +112,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			updated, err := clientOrigin.Update(ctx, conf.Application.ID, OriginKeys[origin.Name], requestUpdate)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateOrigin, err.Error())
 			}
 
 			newEntry := contracts.AzionJsonDataOrigin{
@@ -128,7 +131,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			created, err := clientOrigin.Create(ctx, conf.Application.ID, requestCreate)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorCreateOrigin, err.Error())
 			}
 			newOrigin := contracts.AzionJsonDataOrigin{
 				OriginId:  created.GetOriginId(),
@@ -144,7 +147,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	conf.Origin = originConf
-	err := man.WriteAzionJsonContent(conf)
+	err := man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -161,7 +164,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			updated, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateCache, err.Error())
 			}
 			newCache := contracts.AzionJsonDataCacheSettings{
 				Id:   updated.GetId(),
@@ -178,7 +181,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			created, err := clientCache.Create(ctx, requestUpdate, conf.Application.ID)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorCreateCache, err.Error())
 			}
 			newCache := contracts.AzionJsonDataCacheSettings{
 				Id:   created.GetId(),
@@ -196,7 +199,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	conf.CacheSettings = cacheConf
-	err = man.WriteAzionJsonContent(conf)
+	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -204,21 +207,24 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	ruleConf := []contracts.AzionJsonDataRules{}
 	for _, rule := range manifest.Rules {
-		if id := RuleIds[rule.Name]; id > 0 {
+		if r := RuleIds[rule.Name]; r.Id > 0 {
 			requestUpdate, err := makeRuleRequestUpdate(rule, conf)
 			if err != nil {
 				return err
 			}
-			requestUpdate.Id = id
-			requestUpdate.Phase = "request"
+			requestUpdate.Id = r.Id
+			requestUpdate.Phase = rule.Phase
+			requestUpdate.IsActive = &rule.IsActive
+			requestUpdate.Order = &rule.Order
 			requestUpdate.IdApplication = conf.Application.ID
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorUpdateRule, err.Error())
 			}
 			newRule := contracts.AzionJsonDataRules{
-				Id:   updated.GetId(),
-				Name: updated.GetName(),
+				Id:    updated.GetId(),
+				Name:  updated.GetName(),
+				Phase: updated.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
@@ -232,20 +238,23 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			} else {
 				requestCreate.Name = conf.Name + thoth.GenerateName()
 			}
-			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, "request", requestCreate)
+			requestCreate.IsActive = &rule.IsActive
+			requestCreate.Order = &rule.Order
+			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, rule.Phase, requestCreate)
 			if err != nil {
-				return err
+				return fmt.Errorf("%w: %s", msg.ErrorCreateRule, err.Error())
 			}
 			newRule := contracts.AzionJsonDataRules{
-				Id:   created.GetId(),
-				Name: created.GetName(),
+				Id:    created.GetId(),
+				Name:  created.GetName(),
+				Phase: created.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
 		}
 	}
 
 	conf.RulesEngine.Rules = ruleConf
-	err = man.WriteAzionJsonContent(conf)
+	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -266,11 +275,17 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 	for _, value := range RuleIds {
-		err := client.DeleteRulesEngine(ctx, conf.Application.ID, "request", value)
+		//since until [UXE-3599] was carried out we'd only cared about "request" phase, this check guarantees that if Phase is empty
+		// we are probably dealing with a rule engine from a previous version
+		phase := "request"
+		if value.Phase != "" {
+			phase = value.Phase
+		}
+		err := client.DeleteRulesEngine(ctx, conf.Application.ID, phase, value.Id)
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value.Id))
 	}
 
 	for i, value := range OriginKeys {

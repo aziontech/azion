@@ -28,7 +28,6 @@ var (
 	ErrorNotFound404                = errors.New("The given ID or API's endpoint doesn't exist or isn't available. Check that the identifying information is correct")
 	ErrorFetchingTemplates          = errors.New("Failed to fetch templates from the Azion's GitHub remote repository. Verify the connectivity to the repository https://github.com/aziontech/azioncli-template and try again")
 	ErrorMovingFiles                = errors.New("Failed to initialize your project with the Azion template. Please verify if you have write permissions to this directory")
-	ErrorUnsupportedType            = errors.New("The project type isn’t supported. Modify the project to a valid type nextjs and try the command again. Use the flags -h or --help with a command or subcommand to display more information and try again")
 	ErrorInvalidOption              = errors.New("You must inform 'yes' or 'no' as input, or force --yes or --no by using the flags")
 	ErrorCleaningDirectory          = errors.New("Failed to clean the directory's contents because the directory is read-only and/or isn't accessible. Change the attributes of the directory to read/write and/or give access to it")
 	ErrorRunningCommand             = errors.New("Failed to run the command specified in the template (config.json)")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 	"strconv"
 	"strings"
 
@@ -57,7 +58,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			conf.Function.ID = functionId
 		}
 
-		err = cmd.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -85,7 +86,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			conf.Function.InstanceID = instance.GetId()
 			break
 		}
-		err = cmd.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -137,7 +138,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			break
 		}
 
-		err := cmd.WriteAzionJsonContent(conf)
+		err := cmd.WriteAzionJsonContent(conf, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -191,7 +192,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 			break
 		}
 
-		err = cmd.WriteAzionJsonContent(conf)
+		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -592,6 +593,25 @@ func checkToken(f *cmdutil.Factory) error {
 	}
 	if !valid {
 		return msg.ErrorInvalidToken
+	}
+
+	return nil
+}
+
+func checkArgsJson(cmd *DeployCmd, projectPath string) error {
+	workingDir, err := cmd.GetWorkDir()
+	if err != nil {
+		return err
+	}
+
+	workingDirPath := path.Join(workingDir, projectPath, "args.json")
+
+	_, err = cmd.FileReader(workingDirPath)
+	if err != nil {
+		if err := cmd.WriteFile(workingDirPath, []byte("{}"), 0644); err != nil {
+			logger.Debug("Error while trying to create args.json file", zap.Error(err))
+			return fmt.Errorf(utils.ErrorCreateFile.Error(), workingDirPath)
+		}
 	}
 
 	return nil
