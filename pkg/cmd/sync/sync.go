@@ -30,7 +30,8 @@ func NewDevCmd(f *cmdutil.Factory) *SyncCmd {
 	}
 }
 
-func NewCobraCmd(sync *SyncCmd) *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	cmdFactory := NewDevCmd(f)
 	syncCmd := &cobra.Command{
 		Use:           msg.USAGE,
 		Short:         msg.SHORTDESCRIPTION,
@@ -41,45 +42,52 @@ func NewCobraCmd(sync *SyncCmd) *cobra.Command {
         $ azion sync
         $ azion sync --help
         `),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return sync.Run(sync.F)
-		},
+		RunE: runE(cmdFactory),
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
 	syncCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	return syncCmd
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewDevCmd(f))
-}
+func runE(cmdFac *SyncCmd) func(cmd *cobra.Command, _ []string) error {
+	return func(cmd *cobra.Command, _ []string) error {
+		logger.Debug("Running sync command")
 
-func (cmd *SyncCmd) Run(f *cmdutil.Factory) error {
-	logger.Debug("Running sync command")
-
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
-	if err != nil {
-		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
-		return err
-	}
-
-	ruleIds := make(map[string]contracts.RuleIdsStruct)
-	for _, ruleConf := range conf.RulesEngine.Rules {
-		ruleIds[ruleConf.Name] = contracts.RuleIdsStruct{
-			Id:    ruleConf.Id,
-			Phase: ruleConf.Phase,
+		conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
+		if err != nil {
+			logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+			return err
 		}
-	}
 
-	info := contracts.SyncOpts{
-		RuleIds: ruleIds,
-		Conf:    conf,
-	}
+		ruleIds := make(map[string]contracts.RuleIdsStruct)
+		for _, ruleConf := range conf.RulesEngine.Rules {
+			ruleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+				Id:    ruleConf.Id,
+				Phase: ruleConf.Phase,
+			}
+		}
 
-	err = cmd.SyncResources(f, info)
-	if err != nil {
-		return err
-	}
+		originIds := make(map[string]contracts.AzionJsonDataOrigin)
+		for _, itemOrigin := range conf.Origin {
+			originIds[itemOrigin.Name] = contracts.AzionJsonDataOrigin{
+				OriginId:  itemOrigin.OriginId,
+				OriginKey: itemOrigin.OriginKey,
+				Name:      itemOrigin.Name,
+				Address:   itemOrigin.Address,
+			}
+		}
 
-	return nil
+		info := contracts.SyncOpts{
+			RuleIds:   ruleIds,
+			OriginIds: originIds,
+			Conf:      conf,
+		}
+
+		err = cmdFac.SyncResources(cmdFac.F, info)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
 }

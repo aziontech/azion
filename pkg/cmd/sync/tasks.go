@@ -5,7 +5,8 @@ import (
 	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	edgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -13,27 +14,90 @@ import (
 )
 
 var (
-	C    context.Context
-	Opts *contracts.ListOptions
+	opts *contracts.ListOptions
+	ctx  context.Context = context.Background()
 )
 
 func (synch *SyncCmd) SyncResources(f *cmdutil.Factory, info contracts.SyncOpts) error {
-	C = context.Background()
-	Opts = &contracts.ListOptions{
+	opts = &contracts.ListOptions{
 		PageSize: 1000,
 		Page:     1,
 	}
-	err := synch.syncRules(info, f)
+
+	var err error
+	err = synch.syncRules(info, f)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
+
+	err = synch.syncCache(info, f)
+	if err != nil {
+		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
+
+	err = synch.syncOrigin(info, f)
+	if err != nil {
+		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
+
+	return nil
+}
+
+func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory) error {
+	client := origin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	resp, err := client.ListOrigins(ctx, opts, info.Conf.Application.ID)
+	if err != nil {
+		return err
+	}
+	for _, origin := range resp.Results {
+		fmt.Println(origin)
+		if r := info.OriginIds[origin.Name]; r.OriginId > 0 || origin.Name == "Default Rule" {
+			continue
+		}
+		newOrigin := contracts.AzionJsonDataOrigin{
+			OriginId:  origin.GetOriginId(),
+			OriginKey: origin.GetOriginKey(),
+			Name:      origin.GetName(),
+		}
+		info.Conf.Origin = append(info.Conf.Origin, newOrigin)
+		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+		logger.FInfo(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGEORIGIN, origin.Name))
+	}
+	return nil
+}
+
+func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) error {
+	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID)
+	if err != nil {
+		return err
+	}
+	for _, cache := range resp {
+		if r := info.CacheIds[cache.Name]; r.Id > 0 || cache.Name == "Default Rule" {
+			continue
+		}
+		newCache := contracts.AzionJsonDataCacheSettings{
+			Id:   cache.GetId(),
+			Name: cache.GetName(),
+		}
+		info.Conf.CacheSettings = append(info.Conf.CacheSettings, newCache)
+		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+		logger.FInfo(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGECACHE, cache.Name))
 	}
 	return nil
 }
 
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) error {
-
-	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	resp, err := client.ListRulesEngine(C, Opts, info.Conf.Application.ID, "request")
+	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	resp, err := client.ListRulesEngine(context.Background(), opts, info.Conf.Application.ID, "request")
 	if err != nil {
 		return err
 	}

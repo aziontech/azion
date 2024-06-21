@@ -198,8 +198,10 @@ type RuleEngine struct {
 }
 
 type SyncOpts struct {
-	RuleIds map[string]RuleIdsStruct
-	Conf    *AzionApplicationOptions
+	RuleIds   map[string]RuleIdsStruct
+	CacheIds  map[string]AzionJsonDataCacheSettings
+	OriginIds map[string]AzionJsonDataOrigin
+	Conf      *AzionApplicationOptions
 }
 
 type RuleIdsStruct struct {
