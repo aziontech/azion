@@ -18,6 +18,7 @@ var (
 	DeployOutputDomainUpdate             = "Updated Domain %v with ID %v\n"
 	EdgeApplicationDeployPathFlag        = "Path to where your static files are stored"
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
+	EdgeApplicationDeploySync            = "Synchronizes the location with the additional locations via rtm"
 	OriginsSuccessful                    = "Created Origin for Edge Application\n"
 	OriginsUpdateSuccessful              = "Updated Origin for Edge Application %v with ID %v \n"
 	CacheSettingsSuccessful              = "Created Cache Settings for Edge Application\n"

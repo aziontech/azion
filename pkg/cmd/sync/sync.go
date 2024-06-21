@@ -21,7 +21,7 @@ type SyncCmd struct {
 	F                     *cmdutil.Factory
 }
 
-func NewDevCmd(f *cmdutil.Factory) *SyncCmd {
+func NewSync(f *cmdutil.Factory) *SyncCmd {
 	return &SyncCmd{
 		F:                     f,
 		Io:                    f.IOStreams,
@@ -31,7 +31,7 @@ func NewDevCmd(f *cmdutil.Factory) *SyncCmd {
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	cmdFactory := NewDevCmd(f)
+	cmdFactory := NewSync(f)
 	syncCmd := &cobra.Command{
 		Use:           msg.USAGE,
 		Short:         msg.SHORTDESCRIPTION,
@@ -42,52 +42,51 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion sync
         $ azion sync --help
         `),
-		RunE: runE(cmdFactory),
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return Sync(cmdFactory)
+		},
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
 	syncCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	return syncCmd
 }
 
-func runE(cmdFac *SyncCmd) func(cmd *cobra.Command, _ []string) error {
-	return func(cmd *cobra.Command, _ []string) error {
-		logger.Debug("Running sync command")
-
-		conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
-		if err != nil {
-			logger.Debug("Failed to get Azion JSON content", zap.Error(err))
-			return err
-		}
-
-		ruleIds := make(map[string]contracts.RuleIdsStruct)
-		for _, ruleConf := range conf.RulesEngine.Rules {
-			ruleIds[ruleConf.Name] = contracts.RuleIdsStruct{
-				Id:    ruleConf.Id,
-				Phase: ruleConf.Phase,
-			}
-		}
-
-		originIds := make(map[string]contracts.AzionJsonDataOrigin)
-		for _, itemOrigin := range conf.Origin {
-			originIds[itemOrigin.Name] = contracts.AzionJsonDataOrigin{
-				OriginId:  itemOrigin.OriginId,
-				OriginKey: itemOrigin.OriginKey,
-				Name:      itemOrigin.Name,
-				Address:   itemOrigin.Address,
-			}
-		}
-
-		info := contracts.SyncOpts{
-			RuleIds:   ruleIds,
-			OriginIds: originIds,
-			Conf:      conf,
-		}
-
-		err = cmdFac.SyncResources(cmdFac.F, info)
-		if err != nil {
-			return err
-		}
-
-		return nil
+func Sync(cmdFac *SyncCmd) error {
+	logger.Debug("Running sync command")
+	conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
+	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
 	}
+
+	ruleIds := make(map[string]contracts.RuleIdsStruct)
+	for _, ruleConf := range conf.RulesEngine.Rules {
+		ruleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+			Id:    ruleConf.Id,
+			Phase: ruleConf.Phase,
+		}
+	}
+
+	originIds := make(map[string]contracts.AzionJsonDataOrigin)
+	for _, itemOrigin := range conf.Origin {
+		originIds[itemOrigin.Name] = contracts.AzionJsonDataOrigin{
+			OriginId:  itemOrigin.OriginId,
+			OriginKey: itemOrigin.OriginKey,
+			Name:      itemOrigin.Name,
+			Address:   itemOrigin.Address,
+		}
+	}
+
+	info := contracts.SyncOpts{
+		RuleIds:   ruleIds,
+		OriginIds: originIds,
+		Conf:      conf,
+	}
+
+	err = cmdFac.SyncResources(cmdFac.F, info)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
