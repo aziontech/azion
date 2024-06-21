@@ -12,6 +12,7 @@ var (
 	DeployOutputCachePurge               = "Domain cache was purged\n"
 	DeployOutputEdgeFunctionCreate       = "Created Edge Function %v with ID %v\n"
 	DeployOutputEdgeFunctionUpdate       = "Updated Edge Function %v with ID %v\n"
+	DeployOutputCachePurgePath           = "The file cache has been purged: '%s'\n"
 	DeployOutputEdgeApplicationCreate    = "Created Edge Application %v with ID %v\n"
 	DeployOutputEdgeApplicationUpdate    = "Updated Edge Application %v with ID %v\n"
 	DeployOutputDomainCreate             = "Created Domain %v with ID %v\n"
