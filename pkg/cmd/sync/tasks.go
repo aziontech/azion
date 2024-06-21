@@ -51,7 +51,7 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory) er
 	}
 	for _, origin := range resp.Results {
 		fmt.Println(origin)
-		if r := info.OriginIds[origin.Name]; r.OriginId > 0 || origin.Name == "Default Rule" {
+		if r := info.OriginIds[origin.Name]; r.OriginId > 0 {
 			continue
 		}
 		newOrigin := contracts.AzionJsonDataOrigin{
@@ -77,7 +77,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) err
 		return err
 	}
 	for _, cache := range resp {
-		if r := info.CacheIds[cache.Name]; r.Id > 0 || cache.Name == "Default Rule" {
+		if r := info.CacheIds[cache.Name]; r.Id > 0 {
 			continue
 		}
 		newCache := contracts.AzionJsonDataCacheSettings{
