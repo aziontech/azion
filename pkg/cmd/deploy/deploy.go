@@ -116,8 +116,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if Sync {
+		if len(ProjectConf) > 0 {
+			sync.ProjectConf = ProjectConf
+		}
 		if err := sync.Sync(sync.NewSync(f)); err != nil {
-			logger.Debug("Error executing the RTM synchronization command", zap.Error(err))
+			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
 			return err
 		}
 	}
