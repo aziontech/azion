@@ -77,9 +77,18 @@ func Sync(cmdFac *SyncCmd) error {
 		}
 	}
 
+	cacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
+	for _, itemCache := range conf.CacheSettings {
+		cacheIds[itemCache.Name] = contracts.AzionJsonDataCacheSettings{
+			Id:   itemCache.Id,
+			Name: itemCache.Name,
+		}
+	}
+
 	info := contracts.SyncOpts{
 		RuleIds:   ruleIds,
 		OriginIds: originIds,
+		CacheIds:  cacheIds,
 		Conf:      conf,
 	}
 
