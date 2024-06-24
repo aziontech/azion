@@ -1,10 +1,12 @@
 package whoami
 
 import (
+	"fmt"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/whoami"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
@@ -27,8 +29,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorNotLoggedIn
 			}
 
-			logger.FInfo(f.IOStreams.Out, settings.Email+"\n")
-			return nil
+			whoamiOut := output.GeneralOutput{
+				Msg:   fmt.Sprintf(settings.Email + "\n"),
+				Out:   f.IOStreams.Out,
+				Flags: f.Flags,
+			}
+			return output.Print(&whoamiOut)
 		},
 	}
 
