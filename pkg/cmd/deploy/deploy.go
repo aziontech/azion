@@ -14,6 +14,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -48,6 +49,7 @@ var (
 	NoPrompt    bool
 	SkipBuild   bool
 	ProjectConf string
+	Sync        bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -91,6 +93,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
+	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	return deployCmd
 }
 
@@ -110,6 +113,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	err := checkToken(f)
 	if err != nil {
 		return err
+	}
+
+	if Sync {
+		sync.ProjectConf = ProjectConf
+		if err := sync.Sync(sync.NewSync(f)); err != nil {
+			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
+			return err
+		}
 	}
 
 	if !SkipBuild {
