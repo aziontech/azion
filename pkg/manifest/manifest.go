@@ -226,6 +226,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name:  updated.GetName(),
 				Phase: updated.GetPhase(),
 			}
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateRule, newRule.Name, newRule.Id))
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
 		} else {
@@ -250,6 +251,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Phase: created.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
+			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateRule, newRule.Name, newRule.Id))
 		}
 	}
 
