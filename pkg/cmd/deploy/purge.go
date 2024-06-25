@@ -20,7 +20,7 @@ type Data struct {
 	Hash string `json:"hash"`
 }
 
-func (cmd *DeployCmd) Purge(domain []string, path string) error {
+func (cmd *DeployCmd) PurgeWildcard(domain []string, path string) error {
 	purgeDomains := make([]string, len(domain))
 	for i := 0; i < len(domain); i++ {
 		purgeDomains[i] = domain[i] + path
@@ -29,7 +29,22 @@ func (cmd *DeployCmd) Purge(domain []string, path string) error {
 	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
 	err := clipurge.PurgeWildcard(ctx, purgeDomains)
 	if err != nil {
-		logger.Debug("Error while purging domain", zap.Error(err))
+		logger.Debug("Error while purging wildcard domain", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
+	purgeDomains := make([]string, len(domain))
+	for i := 0; i < len(domain); i++ {
+		purgeDomains[i] = domain[i] + path
+	}
+	ctx := context.Background()
+	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
+	err := clipurge.PurgeUrls(ctx, purgeDomains)
+	if err != nil {
+		logger.Debug("Error while purging urls domain", zap.Error(err))
 		return err
 	}
 	return nil
@@ -43,7 +58,7 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 
 	if currentDataMap == nil {
 		wildCard := "/*"
-		if err := cmd.Purge(domain, wildCard); err != nil {
+		if err := cmd.PurgeWildcard(domain, wildCard); err != nil {
 			logger.Debug("Error purge path domain", zap.String("wildCard", wildCard), zap.Error(err))
 		}
 	}
@@ -53,19 +68,21 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 		return err
 	}
 
-	newDataMap := make(map[string]Data)
-	for _, newDataItem := range newData {
-		newDataMap[newDataItem.Name] = newDataItem
-	}
+	if currentDataMap != nil {
+		newDataMap := make(map[string]Data)
+		for _, newDataItem := range newData {
+			newDataMap[newDataItem.Name] = newDataItem
+		}
 
-	for _, current := range currentDataMap {
-		if newDataItem, exists := newDataMap[current.Name]; exists {
-			if current.Hash != newDataItem.Hash {
-				path := strings.TrimPrefix(current.Name, ".edge/storage")
-				if err := cmd.Purge(domain, path); err != nil {
-					logger.Debug("Error purge path domain", zap.String("path", path), zap.Error(err))
+		for _, current := range currentDataMap {
+			if newDataItem, exists := newDataMap[current.Name]; exists {
+				if current.Hash != newDataItem.Hash {
+					path := strings.TrimPrefix(current.Name, ".edge/storage")
+					if err := cmd.PurgeUrls(domain, path); err != nil {
+						logger.Debug("Error purge path domain", zap.String("path", path), zap.Error(err))
+					}
+					logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgePath, current.Name))
 				}
-				logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgePath, current.Name))
 			}
 		}
 	}

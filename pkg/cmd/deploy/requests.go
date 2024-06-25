@@ -216,6 +216,12 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 			} else {
 				close(errChan)
 			}
+			err = PurgeForUpdatedFiles(cmd, domain.GetCnames())
+			if err != nil {
+				errChan <- err
+			} else {
+				close(errChan)
+			}
 		}()
 		err := <-errChan
 		if err != nil {
