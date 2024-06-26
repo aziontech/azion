@@ -15,6 +15,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription, Example: heredoc.Doc(`
 		$ azion logs cells
+		$ azion logs http
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
