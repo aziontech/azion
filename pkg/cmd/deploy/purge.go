@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
@@ -50,7 +51,12 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse) error {
+	listURLsDomains := domain.GetCnames()
+	if !domain.GetCnameAccessOnly() {
+		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
+	}
+
 	currentDataMap, err := ReadFilesJSONL()
 	if err != nil {
 		return err
@@ -58,8 +64,11 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 
 	if currentDataMap == nil {
 		wildCard := "/*"
-		if err := cmd.PurgeWildcard(domain, wildCard); err != nil {
-			logger.Debug("Error purge path domain", zap.String("wildCard", wildCard), zap.Error(err))
+		for _, v := range listURLsDomains {
+			if err := cmd.PurgeWildcard([]string{v}, wildCard); err != nil {
+				logger.Debug("Error purge path domain", zap.String("wildCard", wildCard), zap.Error(err))
+			}
+			logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgeWildCard, v))
 		}
 	}
 
@@ -78,10 +87,10 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain []string) error {
 			if newDataItem, exists := newDataMap[current.Name]; exists {
 				if current.Hash != newDataItem.Hash {
 					path := strings.TrimPrefix(current.Name, ".edge/storage")
-					if err := cmd.PurgeUrls(domain, path); err != nil {
+					if err := cmd.PurgeUrls(listURLsDomains, path); err != nil {
 						logger.Debug("Error purge path domain", zap.String("path", path), zap.Error(err))
 					}
-					logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgePath, current.Name))
+					logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgeUrl, current.Name))
 				}
 			}
 		}
