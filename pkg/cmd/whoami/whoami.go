@@ -33,6 +33,7 @@ func NewCobraCmd(whoami *WhoamiCmd, f *cmdutil.Factory) *cobra.Command {
 		Long:  msg.LongDescription,
 		Example: heredoc.Doc(`
 		$ azion whoami
+		$ azion whoami --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return whoami.run()
