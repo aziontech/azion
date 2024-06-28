@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/tablecli"
 	"github.com/fatih/color"
 
@@ -85,8 +84,8 @@ func FInfo(w io.Writer, message string) {
 	}
 }
 
-func FInfoFlags(w io.Writer, message string, flags cmdutil.Flags) {
-	if len(flags.Format) > 0 || len(flags.Out) > 0 {
+func FInfoFlags(w io.Writer, message, format, out string) {
+	if len(format) > 0 || len(out) > 0 {
 		return
 	}
 
