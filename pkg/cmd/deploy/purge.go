@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -51,7 +52,7 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string) error {
 	listURLsDomains := domain.GetCnames()
 	if !domain.GetCnameAccessOnly() {
 		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
@@ -101,7 +102,7 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse) error {
 		return err
 	}
 
-	jsonlFile, err := os.Create("./azion/files.json")
+	jsonlFile, err := os.Create(path.Join(confPath, "files.json"))
 	if err != nil {
 		return err
 	}

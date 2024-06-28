@@ -206,7 +206,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err = PurgeForUpdatedFiles(cmd, domain)
+		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
