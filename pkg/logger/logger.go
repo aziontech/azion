@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/tablecli"
 	"github.com/fatih/color"
 
@@ -78,6 +79,17 @@ func New(level zapcore.Level) {
 
 // FInfo I need to check if the debug is false because the error comes in the debug also as true
 func FInfo(w io.Writer, message string) {
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		fmt.Fprintf(w, message) // nolint:all
+	}
+}
+
+func FInfoFlags(w io.Writer, message string, flags cmdutil.Flags) {
+	if len(flags.Format) > 0 || len(flags.Out) > 0 {
+		return
+	}
+
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
 		fmt.Fprintf(w, message) // nolint:all
