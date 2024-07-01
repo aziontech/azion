@@ -34,7 +34,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 }
 
 func (c *Client) PurgeWildcard(ctx context.Context, urlToPurge []string) error {
-	logger.Debug("Purge wildcard")
+	logger.Debug("Purge wildcard", zap.Any("url", urlToPurge))
 	var purge sdk.PurgeWildcardRequest
 	purge.SetUrls(urlToPurge)
 	purge.SetMethod("delete")
@@ -59,7 +59,7 @@ func (c *Client) PurgeWildcard(ctx context.Context, urlToPurge []string) error {
 }
 
 func (c *Client) PurgeUrls(ctx context.Context, urlToPurge []string) error {
-	logger.Debug("Purge urls")
+	logger.Debug("Purge urls", zap.Any("url", urlToPurge))
 	var purge sdk.PurgeUrlRequest
 	purge.SetUrls(urlToPurge)
 	purge.SetMethod("delete")

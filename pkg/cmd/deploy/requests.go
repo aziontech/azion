@@ -17,7 +17,6 @@ import (
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
-	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -206,10 +205,8 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		}
 	}
 
-	domainReturnedName := []string{domain.GetDomainName()}
-
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err := cmd.purgeDomains(cmd.F, domainReturnedName)
+		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
@@ -415,25 +412,6 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 		return err
 	}
 	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
-	return nil
-}
-
-func (cmd *DeployCmd) purgeDomains(f *cmdutil.Factory, domainNames []string) error {
-	ctx := context.Background()
-	wildCard := "/*"
-	purgeDomains := make([]string, len(domainNames))
-	// Iterate over the array and append the string to each element
-	for i := 0; i < len(domainNames); i++ {
-		purgeDomains[i] = domainNames[i] + wildCard
-	}
-	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	err := clipurge.PurgeWildcard(ctx, purgeDomains)
-	if err != nil {
-		logger.Debug("Error while purging domain", zap.Error(err))
-		return err
-	}
-
-	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployOutputCachePurge)
 	return nil
 }
 

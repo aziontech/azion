@@ -1,6 +1,7 @@
 package login
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -8,6 +9,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/login"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
@@ -64,8 +66,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			logger.LogSuccess(f.IOStreams.Out, msg.Success)
-			return nil
+			loginOut := output.GeneralOutput{
+				Msg:   fmt.Sprintf(msg.Success),
+				Out:   f.IOStreams.Out,
+				Flags: f.Flags,
+			}
+			return output.Print(&loginOut)
 		},
 	}
 

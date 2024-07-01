@@ -90,7 +90,8 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey str
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
 	logger.Debug("List Origins")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
+		EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while listing your origins", zap.Error(err))

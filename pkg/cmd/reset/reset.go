@@ -19,7 +19,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.SHORTDESCRIPTION,
 		Long:  msg.LONGDESCRIPTION,
 		Example: heredoc.Doc(`
-		$ azion logout --help
+		$ azion reset --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			settings, err := token.ReadSettings()

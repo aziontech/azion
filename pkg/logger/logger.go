@@ -84,6 +84,17 @@ func FInfo(w io.Writer, message string) {
 	}
 }
 
+func FInfoFlags(w io.Writer, message, format, out string) {
+	if len(format) > 0 || len(out) > 0 {
+		return
+	}
+
+	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
+		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+		fmt.Fprintf(w, message) // nolint:all
+	}
+}
+
 func PrintHeader(table tablecli.Table, format string) {
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {

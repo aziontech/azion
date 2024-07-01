@@ -21,7 +21,7 @@ type SyncCmd struct {
 	F                     *cmdutil.Factory
 }
 
-func NewDevCmd(f *cmdutil.Factory) *SyncCmd {
+func NewSync(f *cmdutil.Factory) *SyncCmd {
 	return &SyncCmd{
 		F:                     f,
 		Io:                    f.IOStreams,
@@ -30,7 +30,8 @@ func NewDevCmd(f *cmdutil.Factory) *SyncCmd {
 	}
 }
 
-func NewCobraCmd(sync *SyncCmd) *cobra.Command {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	cmdFactory := NewSync(f)
 	syncCmd := &cobra.Command{
 		Use:           msg.USAGE,
 		Short:         msg.SHORTDESCRIPTION,
@@ -41,8 +42,8 @@ func NewCobraCmd(sync *SyncCmd) *cobra.Command {
         $ azion sync
         $ azion sync --help
         `),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return sync.Run(sync.F)
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return Sync(cmdFactory)
 		},
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
@@ -50,14 +51,9 @@ func NewCobraCmd(sync *SyncCmd) *cobra.Command {
 	return syncCmd
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	return NewCobraCmd(NewDevCmd(f))
-}
-
-func (cmd *SyncCmd) Run(f *cmdutil.Factory) error {
+func Sync(cmdFac *SyncCmd) error {
 	logger.Debug("Running sync command")
-
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -71,12 +67,32 @@ func (cmd *SyncCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	info := contracts.SyncOpts{
-		RuleIds: ruleIds,
-		Conf:    conf,
+	originIds := make(map[string]contracts.AzionJsonDataOrigin)
+	for _, itemOrigin := range conf.Origin {
+		originIds[itemOrigin.Name] = contracts.AzionJsonDataOrigin{
+			OriginId:  itemOrigin.OriginId,
+			OriginKey: itemOrigin.OriginKey,
+			Name:      itemOrigin.Name,
+			Address:   itemOrigin.Address,
+		}
 	}
 
-	err = cmd.SyncResources(f, info)
+	cacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
+	for _, itemCache := range conf.CacheSettings {
+		cacheIds[itemCache.Name] = contracts.AzionJsonDataCacheSettings{
+			Id:   itemCache.Id,
+			Name: itemCache.Name,
+		}
+	}
+
+	info := contracts.SyncOpts{
+		RuleIds:   ruleIds,
+		OriginIds: originIds,
+		CacheIds:  cacheIds,
+		Conf:      conf,
+	}
+
+	err = cmdFac.SyncResources(cmdFac.F, info)
 	if err != nil {
 		return err
 	}
