@@ -87,7 +87,7 @@ changelog:
     - title: "Documentation Updates"
       regexp: ^.*?docs(\([[:word:]]+\))??!?:.+$
       order: 50
-     - title: "Tests"
+    - title: "Tests"
       regexp: ^.*?tests(\([[:word:]]+\))??!?:.+$
       order: 60
     - title: Other Work
