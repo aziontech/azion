@@ -50,7 +50,6 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory) er
 		return err
 	}
 	for _, origin := range resp.Results {
-		fmt.Println(origin)
 		if r := info.OriginIds[origin.Name]; r.OriginId > 0 {
 			continue
 		}
