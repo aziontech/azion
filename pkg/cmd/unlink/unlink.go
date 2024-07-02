@@ -5,6 +5,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/unlink"
+	app "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -16,6 +17,7 @@ type UnlinkCmd struct {
 	IsDirEmpty  func(dirpath string) (bool, error)
 	CleanDir    func(dirpath string) error
 	F           *cmdutil.Factory
+	DeleteCmd   func(f *cmdutil.Factory) *app.DeleteCmd
 }
 
 func NewUnlinkCmd(f *cmdutil.Factory) *UnlinkCmd {
@@ -25,6 +27,7 @@ func NewUnlinkCmd(f *cmdutil.Factory) *UnlinkCmd {
 		Clean:       clean,
 		IsDirEmpty:  utils.IsDirEmpty,
 		CleanDir:    utils.CleanDirectory,
+		DeleteCmd:   app.NewDeleteCmd,
 	}
 }
 
