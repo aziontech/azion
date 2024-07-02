@@ -191,8 +191,11 @@ func Execute() {
 			}
 		}
 	}
-	output.Print(&output.ErrorOutput{
-		GeneralOutput: output.GeneralOutput{Flags: factory.Flags},
-		Err:           err,
-	})
+
+	if err != nil {
+		output.Print(&output.ErrorOutput{
+			GeneralOutput: output.GeneralOutput{Flags: factory.Flags},
+			Err:           err,
+		})
+	}
 }

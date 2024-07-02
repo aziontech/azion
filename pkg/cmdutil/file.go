@@ -2,12 +2,15 @@ package cmdutil
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 )
 
-func WriteDetailsToFile(data []byte, outPath string, writer io.Writer) error {
+func WriteDetailsToFile(data []byte, outPath string) error {
+	fmt.Println(">>> data", string(data))
+	fmt.Println(">>> outPath", outPath)
 	err := os.MkdirAll(filepath.Dir(outPath), os.ModePerm)
 	if err != nil {
 		return err
