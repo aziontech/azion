@@ -18,7 +18,7 @@ var (
 	ctx  context.Context = context.Background()
 )
 
-func (synch *SyncCmd) SyncResources(f *cmdutil.Factory, info contracts.SyncOpts) error {
+func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
 		PageSize: 1000,
 		Page:     1,

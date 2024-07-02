@@ -19,6 +19,7 @@ type SyncCmd struct {
 	GetAzionJsonContent   func(confPath string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 	F                     *cmdutil.Factory
+	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
 }
 
 func NewSync(f *cmdutil.Factory) *SyncCmd {
@@ -27,6 +28,7 @@ func NewSync(f *cmdutil.Factory) *SyncCmd {
 		Io:                    f.IOStreams,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		SyncResources:         SyncLocalResources,
 	}
 }
 
@@ -92,7 +94,7 @@ func Sync(cmdFac *SyncCmd) error {
 		Conf:      conf,
 	}
 
-	err = cmdFac.SyncResources(cmdFac.F, info)
+	err = cmdFac.SyncResources(cmdFac.F, info, cmdFac)
 	if err != nil {
 		return err
 	}
