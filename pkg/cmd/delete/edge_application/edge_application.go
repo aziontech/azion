@@ -28,6 +28,7 @@ type DeleteCmd struct {
 	GetAzion   func(confPath string) (*contracts.AzionApplicationOptions, error)
 	f          *cmdutil.Factory
 	UpdateJson func(cmd *DeleteCmd) error
+	Cascade    func(ctx context.Context, del *DeleteCmd) error
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -40,6 +41,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		GetAzion:   utils.GetAzionJsonContent,
 		f:          f,
 		UpdateJson: updateAzionJson,
+		Cascade:    CascadeDelete,
 	}
 }
 
@@ -72,7 +74,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	ctx := context.Background()
 
 	if cmd.Flags().Changed("cascade") {
-		err := del.Cascade(ctx)
+		err := del.Cascade(ctx, del)
 		if err != nil {
 			return err
 		}
