@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.22.4
+      image: golang:1.22.5
     env:
       CGO_ENABLED: 0 # Statically linked
 
