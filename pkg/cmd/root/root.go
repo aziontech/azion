@@ -194,8 +194,11 @@ func Execute() {
 
 	if err != nil {
 		output.Print(&output.ErrorOutput{
-			GeneralOutput: output.GeneralOutput{Flags: factory.Flags},
-			Err:           err,
+			GeneralOutput: output.GeneralOutput{
+				Out:   streams.Out,
+				Flags: factory.Flags,
+			},
+			Err: err,
 		})
 	}
 }

@@ -45,8 +45,6 @@ func format(v any, g GeneralOutput) error {
 		}
 	}
 
-	fmt.Println(">>> str", string(b))
-
 	if len(g.Flags.Out) > 0 {
 		err = cmdutil.WriteDetailsToFile(b, g.Flags.Out)
 		if err != nil {
