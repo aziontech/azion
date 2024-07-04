@@ -9,7 +9,6 @@ env:
 
 jobs:
   CLAssistant:
-    runs-on: ubuntu-latest
     container:
       image: maxwelbm/cla:test
     steps:
