@@ -4,6 +4,8 @@ on:
     types: [created]
   pull_request_target:
     types: [opened, synchronize]
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   CLAssistant:
