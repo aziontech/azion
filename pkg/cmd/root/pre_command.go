@@ -112,7 +112,7 @@ func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken strin
 
 		globalSettings = &strToken
 
-		logger.LogSuccess(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
+		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
 		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn+"\n")
 	}
 
