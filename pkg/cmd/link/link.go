@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
@@ -132,6 +133,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	logger.Debug("Running link command")
 
+	msgs := []string{}
 	err := node.NodeVersion()
 	if err != nil {
 		return err
@@ -195,7 +197,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return err
 		}
 
-		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
+		logger.FInfoFlags(cmd.Io.Out, msg.WebAppLinkCmdSuccess, cmd.F.Format, cmd.F.Out)
+		msgs = append(msgs, msg.WebAppLinkCmdSuccess)
 
 		//asks if user wants to add files to .gitignore
 		gitignore, err := github.CheckGitignore(info.PathWorkingDir)
@@ -207,7 +210,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			if err := github.WriteGitignore(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingGitignore
 			}
-			logger.FInfo(cmd.Io.Out, msg.WrittenGitignore)
+			logger.FInfoFlags(cmd.Io.Out, msg.WrittenGitignore, cmd.F.Format, cmd.F.Out)
+			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
 		if !info.Auto {
@@ -224,7 +228,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
+				logger.FInfoFlags(cmd.Io.Out, msg.LinkDevCommand, cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, msg.LinkDevCommand)
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
@@ -240,14 +245,24 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDeployCommand)
-				logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name))
+				logger.FInfoFlags(cmd.Io.Out, msg.LinkDeployCommand, cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, msg.LinkDeployCommand)
+				logger.FInfoFlags(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name), cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name))
 			}
 		}
 
 	}
 
-	return nil
+	initOut := output.SliceOutput{
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.F.IOStreams.Out,
+			Flags: cmd.F.Flags,
+		},
+		Messages: msgs,
+	}
+
+	return output.Print(&initOut)
 }
 
 func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string) error {
