@@ -8,6 +8,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/variables"
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
@@ -15,35 +16,56 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var variableID string
+var (
+	variableID string
+)
 
-	deleteCmd := &cobra.Command{
+type DeleteCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Delete   func(context.Context, string) error
+}
+
+func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
+	return &DeleteCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Delete: func(ctx context.Context, id string) error {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Delete(ctx, id)
+		},
+	}
+}
+
+func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.DeleteShortDescription,
 		Long:          msg.DeleteLongDescription,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Example: heredoc.Doc(`
-		$ azion delete variables -h
-		$ azion delete variables
-		$ azion delete variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
+			$ azion delete variables -h
+			$ azion delete variables
+			$ azion delete variables --variable-id 7a187044-4a00-4a4a-93ed-d230900421f3
 		`),
-
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !cmd.Flags().Changed("variable-id") {
-				answers, err := utils.AskInput(msg.AskVariableID)
+			var err error
 
+			if !cmd.Flags().Changed("variable-id") {
+				answer, err := delete.AskInput(msg.AskVariableID)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
 				}
-
-				variableID = answers
+				variableID = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			err := client.Delete(context.Background(), variableID)
+			ctx := context.Background()
+
+			err = delete.Delete(ctx, variableID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
 			}
@@ -54,12 +76,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				Flags: f.Flags,
 			}
 			return output.Print(&deleteOut)
-
 		},
 	}
 
-	deleteCmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
-	deleteCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
+	cobraCmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
-	return deleteCmd
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDeleteCmd(f), f)
 }

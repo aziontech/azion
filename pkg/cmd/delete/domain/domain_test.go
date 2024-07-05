@@ -1,53 +1,146 @@
 package domain
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap/zapcore"
 
+	msg "github.com/aziontech/azion-cli/messages/delete/domain"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate(t *testing.T) {
+func mockDomainID(msg string) (string, error) {
+	return "1234", nil
+}
+
+func mockInvalid(msg string) (string, error) {
+	return "invalid", nil
+}
+
+func mockParseError(msg string) (string, error) {
+	return "invalid", utils.ErrorParseResponse
+}
+
+func TestDeleteWithAskInput(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("delete domain by id", func(t *testing.T) {
-		mock := &httpmock.Registry{}
 
-		mock.Register(
-			httpmock.REST("DELETE", "domains/1234"),
-			httpmock.StatusStringResponse(204, ""),
-		)
+	tests := []struct {
+		name           string
+		domainID       string
+		method         string
+		endpoint       string
+		statusCode     int
+		responseBody   string
+		expectedOutput string
+		expectError    bool
+		mockInputs     func(string) (string, error)
+		mockError      error
+	}{
+		{
+			name:           "delete domain by id",
+			domainID:       "1234",
+			method:         "DELETE",
+			endpoint:       "domains/1234",
+			statusCode:     204,
+			responseBody:   "",
+			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
+			expectError:    false,
+			mockInputs:     mockDomainID,
+			mockError:      nil,
+		},
+		{
+			name:           "delete domain - not found",
+			domainID:       "1234",
+			method:         "DELETE",
+			endpoint:       "domains/1234",
+			statusCode:     404,
+			responseBody:   "Not Found",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockDomainID,
+			mockError:      fmt.Errorf("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support"),
+		},
+		{
+			name:           "error in input",
+			domainID:       "1234",
+			method:         "DELETE",
+			endpoint:       "domains/invalid",
+			statusCode:     400,
+			responseBody:   "Bad Request",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockInvalid,
+			mockError:      fmt.Errorf("invalid argument \"\" for \"--domain-id\" flag: strconv.ParseInt: parsing \"\": invalid syntax"),
+		},
+		{
+			name:           "ask for domain id success",
+			domainID:       "",
+			method:         "DELETE",
+			endpoint:       "domains/1234",
+			statusCode:     204,
+			responseBody:   "",
+			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
+			expectError:    false,
+			mockInputs:     mockDomainID,
+			mockError:      nil,
+		},
+		{
+			name:           "ask for domain id conversion failure",
+			domainID:       "",
+			method:         "",
+			endpoint:       "",
+			statusCode:     0,
+			responseBody:   "",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockInvalid,
+			mockError:      fmt.Errorf(msg.ErrorConvertId.Error()),
+		},
+		{
+			name:           "error - parse answer",
+			domainID:       "",
+			method:         "",
+			endpoint:       "",
+			statusCode:     0,
+			responseBody:   "",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockParseError,
+			mockError:      fmt.Errorf(utils.ErrorParseResponse.Error()),
+		},
+	}
 
-		f, stdout, _ := testutils.NewFactory(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			mock.Register(
+				httpmock.REST(tt.method, tt.endpoint),
+				httpmock.StatusStringResponse(tt.statusCode, tt.responseBody),
+			)
 
-		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--domain-id", "1234"})
+			f, stdout, _ := testutils.NewFactory(mock)
 
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
+			deleteCmd := NewDeleteCmd(f)
+			deleteCmd.AskInput = tt.mockInputs
+			cobraCmd := NewCobraCmd(deleteCmd, f)
 
-		assert.Equal(t, "Domain 1234 was successfully deleted", stdout.String())
-	})
+			if tt.domainID != "" {
+				cobraCmd.SetArgs([]string{"--domain-id", tt.domainID})
+			}
 
-	t.Run("delete domain - not found", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("DELETE", "domains/1234"),
-			httpmock.StatusStringResponse(404, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--domain-id", "1234"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
+			_, err := cobraCmd.ExecuteC()
+			if tt.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedOutput, stdout.String())
+			}
+		})
+	}
 }

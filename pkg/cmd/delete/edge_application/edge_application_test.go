@@ -18,58 +18,139 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 )
 
-func TestCreate(t *testing.T) {
+func mockApplicationID(msg string) (string, error) {
+	return "1234", nil
+}
+
+func mockInvalid(msg string) (string, error) {
+	return "invalid", nil
+}
+
+func mockParseError(msg string) (string, error) {
+	return "invalid", fmt.Errorf("error parsing input")
+}
+
+func TestDeleteWithAskInput(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("delete application by id", func(t *testing.T) {
-		mock := &httpmock.Registry{}
 
-		mock.Register(
-			httpmock.REST("DELETE", "edge_applications/1234"),
-			httpmock.StatusStringResponse(204, ""),
-		)
+	tests := []struct {
+		name           string
+		applicationID  string
+		method         string
+		endpoint       string
+		statusCode     int
+		responseBody   string
+		expectedOutput string
+		expectError    bool
+		mockInputs     func(string) (string, error)
+		mockError      error
+	}{
+		{
+			name:           "delete application by id",
+			applicationID:  "1234",
+			method:         "DELETE",
+			endpoint:       "edge_applications/1234",
+			statusCode:     204,
+			responseBody:   "",
+			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
+			expectError:    false,
+			mockInputs:     mockApplicationID,
+			mockError:      nil,
+		},
+		{
+			name:           "delete application - not found",
+			applicationID:  "1234",
+			method:         "DELETE",
+			endpoint:       "edge_applications/1234",
+			statusCode:     404,
+			responseBody:   "Not Found",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockApplicationID,
+			mockError:      fmt.Errorf("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support"),
+		},
+		{
+			name:           "error in input",
+			applicationID:  "1234",
+			method:         "DELETE",
+			endpoint:       "edge_applications/invalid",
+			statusCode:     400,
+			responseBody:   "Bad Request",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockInvalid,
+			mockError:      fmt.Errorf("invalid argument \"\" for \"--application-id\" flag: strconv.ParseInt: parsing \"\": invalid syntax"),
+		},
+		{
+			name:           "ask for application id success",
+			applicationID:  "",
+			method:         "DELETE",
+			endpoint:       "edge_applications/1234",
+			statusCode:     204,
+			responseBody:   "",
+			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
+			expectError:    false,
+			mockInputs:     mockApplicationID,
+			mockError:      nil,
+		},
+		{
+			name:           "ask for application id conversion failure",
+			applicationID:  "",
+			method:         "",
+			endpoint:       "",
+			statusCode:     0,
+			responseBody:   "",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockInvalid,
+			mockError:      fmt.Errorf(msg.ErrorConvertId.Error()),
+		},
+		{
+			name:           "error - parse answer",
+			applicationID:  "",
+			method:         "",
+			endpoint:       "",
+			statusCode:     0,
+			responseBody:   "",
+			expectedOutput: "",
+			expectError:    true,
+			mockInputs:     mockParseError,
+			mockError:      fmt.Errorf("error parsing input"),
+		},
+	}
 
-		f, stdout, _ := testutils.NewFactory(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			mock.Register(
+				httpmock.REST(tt.method, tt.endpoint),
+				httpmock.StatusStringResponse(tt.statusCode, tt.responseBody),
+			)
 
-		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--application-id", "1234"})
+			f, stdout, _ := testutils.NewFactory(mock)
 
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
+			deleteCmd := NewDeleteCmd(f)
+			deleteCmd.AskInput = tt.mockInputs
+			cobraCmd := NewCobraCmd(deleteCmd)
 
-		assert.Equal(t, fmt.Sprintf(msg.OutputSuccess, 1234), stdout.String())
+			if tt.applicationID != "" {
+				cobraCmd.SetArgs([]string{"--application-id", tt.applicationID})
+			}
 
-	})
+			_, err := cobraCmd.ExecuteC()
+			if tt.expectError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedOutput, stdout.String())
+			}
+		})
+	}
+}
 
-	t.Run("delete application - not found", func(t *testing.T) {
-		mock := &httpmock.Registry{}
+func TestCascadeDelete(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 
-		mock.Register(
-			httpmock.REST("DELETE", "edge_applications/1234"),
-			httpmock.StatusStringResponse(404, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--application-id", "1234"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
-
-	t.Run("delete cascade with no azion.json file", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--cascade"})
-
-		_, err := cmd.ExecuteC()
-		require.Error(t, err)
-	})
 	t.Run("cascade delete application", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		options := &contracts.AzionApplicationOptions{}

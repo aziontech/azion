@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -29,6 +28,7 @@ type DeleteCmd struct {
 	f          *cmdutil.Factory
 	UpdateJson func(cmd *DeleteCmd) error
 	Cascade    func(ctx context.Context, del *DeleteCmd) error
+	AskInput   func(string) (string, error)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -42,6 +42,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		f:          f,
 		UpdateJson: updateAzionJson,
 		Cascade:    CascadeDelete,
+		AskInput:   utils.AskInput,
 	}
 }
 
@@ -82,20 +83,9 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	}
 
 	if !cmd.Flags().Changed("application-id") {
-		qs := []*survey.Question{
-			{
-				Name:     "id",
-				Prompt:   &survey.Input{Message: msg.AskInput},
-				Validate: survey.Required,
-			},
-		}
-
-		answer := ""
-
-		err := survey.Ask(qs, &answer)
+		answer, err := del.AskInput(msg.AskInput)
 		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
+			return err
 		}
 
 		num, err := strconv.ParseInt(answer, 10, 64)
