@@ -3,7 +3,6 @@ package unlink
 import (
 	"context"
 
-	app "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	helpers "github.com/aziontech/azion-cli/utils"
@@ -27,9 +26,9 @@ func clean(f *cmdutil.Factory, cmd *UnlinkCmd) error {
 		}
 
 		if shouldCascade {
-			cmd := app.NewDeleteCmd(f)
+			delCmd := cmd.DeleteCmd(f)
 			ctx := context.Background()
-			err := cmd.Cascade(ctx)
+			err := delCmd.Cascade(ctx, delCmd)
 			if err != nil {
 				return err
 			}

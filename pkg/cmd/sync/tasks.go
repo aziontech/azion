@@ -18,7 +18,7 @@ var (
 	ctx  context.Context = context.Background()
 )
 
-func (synch *SyncCmd) SyncResources(f *cmdutil.Factory, info contracts.SyncOpts) error {
+func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
 		PageSize: 1000,
 		Page:     1,
@@ -50,7 +50,6 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory) er
 		return err
 	}
 	for _, origin := range resp.Results {
-		fmt.Println(origin)
 		if r := info.OriginIds[origin.Name]; r.OriginId > 0 {
 			continue
 		}
