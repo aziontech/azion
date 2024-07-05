@@ -139,13 +139,12 @@ func CommandRunInteractiveWithOutput(f *cmdutil.Factory, comm string, envVars []
 func CommandRunInteractive(f *cmdutil.Factory, comm string) error {
 	cmd := exec.Command(shell, "-c", comm)
 
-	if !f.Silent {
+	if !f.Silent && !(len(f.Flags.Format) > 0) && !(len(f.Flags.Out) > 0) {
 		cmd.Stdin = f.IOStreams.In
 		cmd.Stdout = f.IOStreams.Out
 	}
 
 	cmd.Stderr = f.IOStreams.Err
-
 	return cmd.Run()
 }
 

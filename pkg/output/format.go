@@ -46,7 +46,7 @@ func format(v any, g GeneralOutput) error {
 	}
 
 	if len(g.Flags.Out) > 0 {
-		err = cmdutil.WriteDetailsToFile(b, g.Flags.Out, g.Out)
+		err = cmdutil.WriteDetailsToFile(b, g.Flags.Out)
 		if err != nil {
 			return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 		}

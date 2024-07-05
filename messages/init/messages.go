@@ -9,6 +9,7 @@ const (
 	FLAG_PRESET         = "The Preset's name"
 	FLAG_TEMPLATE       = "The Template's name"
 	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"
+	FLAG_AUTO           = "If sent, the entire flow of the command will be run without interruptions"
 )
 
 var (

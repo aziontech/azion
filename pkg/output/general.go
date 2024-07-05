@@ -10,9 +10,9 @@ import (
 )
 
 type GeneralOutput struct {
-	Msg   string    `json:"message" yaml:"message" toml:"message"`
-	Out   io.Writer `json:"-" yaml:"-" toml:"-"`
-	Flags cmdutil.Flags
+	Msg   string        `json:"message,omitempty" yaml:"message,omitempty" toml:"message,omitempty"`
+	Out   io.Writer     `json:"-" yaml:"-" toml:"-"`
+	Flags cmdutil.Flags `json:"-" yaml:"-" toml:"-"`
 }
 
 func (g *GeneralOutput) Format() (bool, error) {
