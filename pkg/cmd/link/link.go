@@ -130,6 +130,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
+
 	logger.Debug("Running link command")
 
 	err := node.NodeVersion()
