@@ -54,8 +54,10 @@ func (man *ManifestInterpreter) ManifestPath() (string, error) {
 	return utils.Concat(pathWorkingDir, manifestFilePath), nil
 }
 
-func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory) (*contracts.Manifest, error) {
-	logger.FInfo(f.IOStreams.Out, msg.ReadingManifest)
+func (man *ManifestInterpreter) ReadManifest(
+	path string, f *cmdutil.Factory, msgs *[]string) (*contracts.Manifest, error) {
+	logger.FInfoFlags(f.IOStreams.Out, msg.ReadingManifest, f.Format, f.Out)
+	*msgs = append(*msgs, msg.ReadingManifest)
 	manifest := &contracts.Manifest{}
 
 	byteManifest, err := man.FileReader(path)
@@ -71,8 +73,14 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory) (*
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory, projectConf string) error {
-	logger.FInfo(f.IOStreams.Out, msg.CreatingManifest)
+func (man *ManifestInterpreter) CreateResources(
+	conf *contracts.AzionApplicationOptions,
+	manifest *contracts.Manifest,
+	f *cmdutil.Factory,
+	projectConf string,
+	msgs *[]string) error {
+	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
+	*msgs = append(*msgs, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -121,7 +129,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name:      updated.GetName(),
 			}
 			originConf = append(originConf, newEntry)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, updated.GetOriginKey()))
+
+			msgf := fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, updated.GetOriginKey())
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 		} else {
 			requestCreate := makeOriginCreateRequest(origin, conf)
 			if origin.Name != "" {
@@ -142,7 +153,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			originConf = append(originConf, newOrigin)
 			OriginIds[created.GetName()] = created.GetOriginId()
 			OriginKeys[created.GetName()] = created.GetOriginKey()
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId()))
+			msgf := fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId())
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 		}
 	}
 
@@ -171,7 +184,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name: updated.GetName(),
 			}
 			cacheConf = append(cacheConf, newCache)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateCache, *cache.Name, id))
+			msgf := fmt.Sprintf(msg.ManifestUpdateCache, *cache.Name, id)
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 		} else {
 			requestUpdate := makeCacheRequestCreate(cache)
 			if cache.Name != nil {
@@ -189,7 +204,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			}
 			cacheConf = append(cacheConf, newCache)
 			CacheIds[newCache.Name] = newCache.Id
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, newCache.Id))
+			msgf := fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, newCache.Id)
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 		}
 	}
 
@@ -226,7 +243,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Name:  updated.GetName(),
 				Phase: updated.GetPhase(),
 			}
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestUpdateRule, newRule.Name, newRule.Id))
+			msgf := fmt.Sprintf(msg.ManifestUpdateRule, newRule.Name, newRule.Id)
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
 			delete(RuleIds, rule.Name)
 		} else {
@@ -251,7 +270,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				Phase: created.GetPhase(),
 			}
 			ruleConf = append(ruleConf, newRule)
-			logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.ManifestCreateRule, newRule.Name, newRule.Id))
+			msgf := fmt.Sprintf(msg.ManifestCreateRule, newRule.Name, newRule.Id)
+			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+			*msgs = append(*msgs, msgf)
 		}
 	}
 
@@ -262,7 +283,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
-	err = deleteResources(ctx, f, conf)
+	err = deleteResources(ctx, f, conf, msgs)
 	if err != nil {
 		return err
 	}
@@ -271,7 +292,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 }
 
 // this is called to delete resources no longer present in manifest.json
-func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
+func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
@@ -287,7 +308,9 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value.Id))
+		msgf := fmt.Sprintf(msgrule.DeleteOutputSuccess+"\n", value.Id)
+		logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+		*msgs = append(*msgs, msgf)
 	}
 
 	for i, value := range OriginKeys {
@@ -298,7 +321,9 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgorigin.DeleteOutputSuccess+"\n", value))
+		msgf := fmt.Sprintf(msgorigin.DeleteOutputSuccess+"\n", value)
+		logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+		*msgs = append(*msgs, msgf)
 	}
 
 	for _, value := range CacheIds {
@@ -306,7 +331,9 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if err != nil {
 			return err
 		}
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msgcache.DeleteOutputSuccess+"\n", value))
+		msgf := fmt.Sprintf(msgcache.DeleteOutputSuccess+"\n", value)
+		logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
+		*msgs = append(*msgs, msgf)
 	}
 
 	return nil

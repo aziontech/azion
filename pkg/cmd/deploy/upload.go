@@ -20,7 +20,8 @@ var (
 	Retries    int64
 )
 
-func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) uploadFiles(
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
@@ -40,7 +41,8 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 
 	clientUpload := storage.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("storage_url"), cmd.F.Config.GetString("token"))
 
-	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadStart)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
+	*msgs = append(*msgs, msg.UploadStart)
 
 	noOfWorkers := 5
 	var currentFile int64
@@ -114,7 +116,8 @@ func (cmd *DeployCmd) uploadFiles(f *cmdutil.Factory, conf *contracts.AzionAppli
 
 	// All jobs are processed, no more values will be sent on results:
 	close(results)
-	logger.FInfo(cmd.F.IOStreams.Out, msg.UploadSuccessful)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
+	*msgs = append(*msgs, msg.UploadSuccessful)
 
 	return nil
 }
