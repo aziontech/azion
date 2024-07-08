@@ -101,6 +101,8 @@ func checkGitignore(path string) (bool, error) {
 
 	object, err := gitignore.CompileIgnoreFile(path)
 	if err != nil {
+		// if the error is "no such file or directory" we can return false and nil for error, because the code that called this func will create
+		// the .gitignore file
 		if errors.Is(err, os.ErrNotExist) {
 			return false, nil
 		}
