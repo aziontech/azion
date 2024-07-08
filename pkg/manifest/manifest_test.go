@@ -13,6 +13,7 @@ import (
 
 func TestDeployCmd(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
+	msgs := []string{}
 	t.Run("get manifest path", func(t *testing.T) {
 		interpreter := NewManifestInterpreter()
 
@@ -26,7 +27,7 @@ func TestDeployCmd(t *testing.T) {
 		interpreter := NewManifestInterpreter()
 
 		pathManifest := "fixtures/manifest.json"
-		_, err := interpreter.ReadManifest(pathManifest, f)
+		_, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 		require.NoError(t, err)
 	})
 
@@ -58,9 +59,9 @@ func TestDeployCmd(t *testing.T) {
 		}
 
 		pathManifest := "fixtures/manifest.json"
-		manifest, err := interpreter.ReadManifest(pathManifest, f)
+		manifest, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 		require.NoError(t, err)
-		err = interpreter.CreateResources(options, manifest, f, "azion")
+		err = interpreter.CreateResources(options, manifest, f, "azion", &msgs)
 		require.NoError(t, err)
 	})
 
