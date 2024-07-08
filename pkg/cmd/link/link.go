@@ -146,15 +146,17 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	}
 	info.PathWorkingDir = path
 
+	git := github.NewGithub()
+
 	if len(info.remote) > 0 {
 		logger.Debug("flag remote", zap.Any("repository", info.remote))
 		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w.-]+/[\w.-]+(\.git)?$`, info.remote)
 		if !urlFull {
 			info.remote = fmt.Sprintf("https://github.com/%s.git", info.remote)
 		}
-		nameRepo := github.GetNameRepo(info.remote)
+		nameRepo := git.GetNameRepo(info.remote)
 		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
-		err = github.Clone(info.remote, filepath.Join(path, nameRepo))
+		err = git.Clone(info.remote, filepath.Join(path, nameRepo))
 		if err != nil {
 			logger.Debug("Error while cloning the repository", zap.Error(err))
 			return err
@@ -201,13 +203,13 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		msgs = append(msgs, msg.WebAppLinkCmdSuccess)
 
 		//asks if user wants to add files to .gitignore
-		gitignore, err := github.CheckGitignore(info.PathWorkingDir)
+		gitignore, err := git.CheckGitignore(info.PathWorkingDir)
 		if err != nil {
 			return msg.ErrorReadingGitignore
 		}
 
 		if !gitignore && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)) {
-			if err := github.WriteGitignore(info.PathWorkingDir); err != nil {
+			if err := git.WriteGitignore(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingGitignore
 			}
 			logger.FInfoFlags(cmd.Io.Out, msg.WrittenGitignore, cmd.F.Format, cmd.F.Out)

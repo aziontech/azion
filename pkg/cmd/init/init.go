@@ -160,12 +160,14 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	gitignore, err := github.CheckGitignore(cmd.pathWorkingDir)
+	git := github.NewGithub()
+
+	gitignore, err := git.CheckGitignore(cmd.pathWorkingDir)
 	if err != nil {
 		return msg.ErrorReadingGitignore
 	}
 	if !gitignore && (cmd.auto || cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
-		if err := github.WriteGitignore(cmd.pathWorkingDir); err != nil {
+		if err := git.WriteGitignore(cmd.pathWorkingDir); err != nil {
 			return msg.ErrorWritingGitignore
 		}
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WrittenGitignore, cmd.f.Format, cmd.f.Out)

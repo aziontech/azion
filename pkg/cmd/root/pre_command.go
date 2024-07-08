@@ -131,7 +131,9 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 		metric.Send(settings)
 	}
 
-	tagName, err := github.GetVersionGitHub("azion")
+	git := github.NewGithub()
+
+	tagName, err := git.GetVersionGitHub("azion")
 	if err != nil {
 		return err
 	}
