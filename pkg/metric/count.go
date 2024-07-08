@@ -64,7 +64,9 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		return err
 	}
 
-	tagName, err := github.GetVersionGitHub("vulcan")
+	git := github.NewGithub()
+
+	tagName, err := git.GetVersionGitHub("vulcan")
 	if err != nil {
 		return err
 	}
