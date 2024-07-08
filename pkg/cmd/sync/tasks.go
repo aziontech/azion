@@ -64,7 +64,11 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory) er
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		logger.FInfo(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGEORIGIN, origin.Name))
+		logger.FInfoFlags(
+			synch.Io.Out,
+			fmt.Sprintf(msg.SYNCMESSAGEORIGIN, origin.Name),
+			synch.F.Format,
+			synch.F.Out)
 	}
 	return nil
 }
@@ -89,7 +93,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) err
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		logger.FInfo(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGECACHE, cache.Name))
+		logger.FInfoFlags(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGECACHE, cache.Name), synch.F.Format, synch.F.Out)
 	}
 	return nil
 }
@@ -116,7 +120,8 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) err
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		logger.FInfo(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGERULE, rule.Name))
+		logger.FInfoFlags(
+			synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGERULE, rule.Name), synch.F.Format, synch.F.Out)
 	}
 	return nil
 }
