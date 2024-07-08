@@ -19,14 +19,36 @@ import (
 	gitignore "github.com/sabhiram/go-gitignore"
 )
 
+type Github struct {
+	GetVersionGitHub func(name string) (string, error)
+	Clone            func(url, path string) error
+	GetNameRepo      func(url string) string
+	CheckGitignore   func(path string) (bool, error)
+	WriteGitignore   func(path string) error
+}
+
 type Release struct {
 	TagName string `json:"tag_name"`
 }
 
-func GetVersionGitHub(name string) (string, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
+var (
+	ApiURL string
+)
 
-	response, err := http.Get(apiURL)
+func NewGithub() *Github {
+	return &Github{
+		GetVersionGitHub: getVersionGitHub,
+		Clone:            clone,
+		GetNameRepo:      getNameRepo,
+		CheckGitignore:   checkGitignore,
+		WriteGitignore:   writeGitignore,
+	}
+}
+
+func getVersionGitHub(name string) (string, error) {
+	ApiURL = fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
+
+	response, err := http.Get(ApiURL)
 	if err != nil {
 		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
 		return "", err
@@ -53,8 +75,7 @@ func GetVersionGitHub(name string) (string, error) {
 	return release.TagName, nil
 }
 
-// Clone clone the repository using git
-func Clone(url, path string) error {
+func clone(url, path string) error {
 	_, err := git.PlainClone(path, false, &git.CloneOptions{
 		URL: url,
 	})
@@ -67,24 +88,19 @@ func Clone(url, path string) error {
 	return nil
 }
 
-// GetNameRepoFunction to get the repository name from the URL
-func GetNameRepo(url string) string {
-	// Remove the initial part of the URL
+func getNameRepo(url string) string {
 	parts := strings.Split(url, "/")
 	repoPart := parts[len(parts)-1]
-	// Remove the .git folder if it exists.
 	repoPart = strings.TrimSuffix(repoPart, ".git")
 	return repoPart
 }
 
-func CheckGitignore(path string) (bool, error) {
+func checkGitignore(path string) (bool, error) {
 	logger.Debug("Checking .gitignore file for existence of Vulcan files")
 	path = filepath.Join(path, ".gitignore")
 
 	object, err := gitignore.CompileIgnoreFile(path)
 	if err != nil {
-		// if the error is "no such file or directory" we can return false and nil for error, because the code that called this func will create
-		// the .gitignore file
 		if errors.Is(err, os.ErrNotExist) {
 			return false, nil
 		}
@@ -98,14 +114,12 @@ func CheckGitignore(path string) (bool, error) {
 	return true, nil
 }
 
-func WriteGitignore(path string) error {
+func writeGitignore(path string) error {
 	logger.Debug("Writing .gitignore file")
 	path = filepath.Join(path, ".gitignore")
 
-	// Lines to add to .gitignore
 	linesToAdd := []string{"#Paths added by Azion CLI", ".edge/", ".vulcan"}
 
-	// Open the file in append mode, create if not exists
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		logger.Error("Error opening file", zap.Error(err))
@@ -123,7 +137,6 @@ func WriteGitignore(path string) error {
 		}
 	}
 
-	// Ensure all data is written to the file
 	if err := writer.Flush(); err != nil {
 		logger.Error("Error flushing writer", zap.Error(err))
 		return err
