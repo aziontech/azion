@@ -223,15 +223,11 @@ func TestWriteGitignore(t *testing.T) {
 		{
 			name: "error opening file",
 			setup: func() string {
-				path := t.TempDir()
-				file := filepath.Join(path, ".gitignore")
-				os.WriteFile(file, []byte{}, 0444) // Create a read-only file
-				return path
+				return "does/not/exist"
 			},
 			wantErr: true,
 			cleanup: func(path string) {
-				os.Chmod(filepath.Join(path, ".gitignore"), 0644) // Restore permissions before cleanup
-				os.RemoveAll(path)
+				return
 			},
 		},
 	}
