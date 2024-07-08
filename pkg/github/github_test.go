@@ -43,7 +43,10 @@ func TestGetVersionGitHub(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(tt.statusCode)
-				w.Write([]byte(tt.response))
+				_, err := w.Write([]byte(tt.response))
+				if err != nil {
+					panic(err)
+				}
 			}))
 			defer server.Close()
 
