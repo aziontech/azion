@@ -158,7 +158,10 @@ func TestCheckGitignore(t *testing.T) {
 			setup: func() string {
 				path := t.TempDir()
 				file := filepath.Join(path, ".gitignore")
-				os.WriteFile(file, []byte(".edge/\n.vulcan\n"), 0644)
+				err := os.WriteFile(file, []byte(".edge/\n.vulcan\n"), 0644)
+				if err != nil {
+					return err.Error()
+				}
 				return path
 			},
 			want:    true,
@@ -227,7 +230,6 @@ func TestWriteGitignore(t *testing.T) {
 			},
 			wantErr: true,
 			cleanup: func(path string) {
-				return
 			},
 		},
 	}
