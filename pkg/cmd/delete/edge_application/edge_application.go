@@ -3,6 +3,7 @@ package edgeapplication
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"strconv"
 
@@ -29,6 +30,8 @@ type DeleteCmd struct {
 	UpdateJson func(cmd *DeleteCmd) error
 	Cascade    func(ctx context.Context, del *DeleteCmd) error
 	AskInput   func(string) (string, error)
+	ReadFile   func(name string) ([]byte, error)
+	WriteFile  func(name string, data []byte, perm fs.FileMode) error
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -43,6 +46,8 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		UpdateJson: updateAzionJson,
 		Cascade:    CascadeDelete,
 		AskInput:   utils.AskInput,
+		ReadFile:   os.ReadFile,
+		WriteFile:  os.WriteFile,
 	}
 }
 
@@ -118,8 +123,9 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		return utils.ErrorInternalServerError
 	}
 	azionJson := path + "/azion/azion.json"
-	byteAzionJson, err := os.ReadFile(azionJson)
+	byteAzionJson, err := cmd.ReadFile(azionJson)
 	if err != nil {
+		logger.Debug("Error while parsing json", zap.Error(err))
 		return utils.ErrorUnmarshalAzionJsonFile
 	}
 	jsonReplaceFunc, err := sjson.Set(string(byteAzionJson), "function.id", 0)
@@ -137,7 +143,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		return msg.ErrorFailedUpdateAzionJson
 	}
 
-	err = os.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
+	err = cmd.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
 	if err != nil {
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
 	}

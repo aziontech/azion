@@ -3,6 +3,7 @@ package edgeapplication
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os"
 	"testing"
 
@@ -187,5 +188,64 @@ func TestCascadeDelete(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, msg.CascadeSuccess, stdout.String())
+	})
+}
+
+func TestUpdateAzionJson(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	t.Run("update azion.json with new IDs", func(t *testing.T) {
+		// Mocking the content of azion.json
+		mockAzionJsonContent := `{
+			"function": {
+				"id": 1
+			},
+			"application": {
+				"id": 2
+			},
+			"domain": {
+				"id": 3
+			}
+		}`
+
+		// Create a temporary file for testing
+		tempFile, err := os.CreateTemp("", "azion.json")
+		require.NoError(t, err)
+		defer os.Remove(tempFile.Name())
+
+		// Write mock JSON content to the temporary file
+		_, err = tempFile.WriteString(mockAzionJsonContent)
+		require.NoError(t, err)
+		tempFile.Close()
+
+		mock := &httpmock.Registry{}
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		// Prepare the DeleteCmd instance with mock dependencies
+		del := &DeleteCmd{
+			f:  f,
+			Io: f.IOStreams,
+			GetAzion: func(confPath string) (*contracts.AzionApplicationOptions, error) {
+				conf := &contracts.AzionApplicationOptions{}
+				conf.Function.ID = 1
+				conf.Application.ID = 2
+				conf.Domain.Id = 3
+				return conf, nil
+			},
+			UpdateJson: func(cmd *DeleteCmd) error {
+				return nil
+			},
+			ReadFile: func(name string) ([]byte, error) {
+				return []byte(mockAzionJsonContent), nil
+			},
+			WriteFile: func(name string, data []byte, perm fs.FileMode) error {
+				return nil
+			},
+		}
+
+		// Run the test
+		err = updateAzionJson(del)
+		require.NoError(t, err)
 	})
 }
