@@ -10,10 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func (cmd *BuildCmd) run(fields *contracts.BuildInfo) error {
+func (cmd *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 	logger.Debug("Running build command")
 
-	err := RunBuildCmdLine(cmd, fields)
+	err := RunBuildCmdLine(cmd, fields, msgs)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (cmd *BuildCmd) run(fields *contracts.BuildInfo) error {
 	return nil
 }
 
-func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
+func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo, msgs *[]string) error {
 	var err error
 
 	conf, err := cmd.GetAzionJsonContent(fields.ProjectPath)
@@ -64,6 +64,6 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo) error {
 		vulcanParams += " --firewall "
 	}
 
-	return vulcan(cmd, conf, vulcanParams, fields)
+	return vulcan(cmd, conf, vulcanParams, fields, msgs)
 
 }

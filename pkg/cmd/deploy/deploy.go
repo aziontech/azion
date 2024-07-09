@@ -108,8 +108,9 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
-	logger.Debug("Running deploy command")
 	msgs := []string{}
+	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command", cmd.F.Format, cmd.F.Out)
+	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
 	err := checkToken(f)
@@ -127,7 +128,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
