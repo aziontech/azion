@@ -44,7 +44,8 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 		SilenceUsage:  true,
 		Example:       heredoc.Doc("\n$ azion build\n"),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return build.run(fields)
+			msgs := []string{}
+			return build.run(fields, &msgs)
 		},
 	}
 
@@ -83,11 +84,7 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	}
 }
 
-func (cmd *BuildCmd) Run(fields *contracts.BuildInfo) error {
-	return cmd.run(fields)
-}
-
-func (cmd *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string) error {
+func (cmd *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string, msgs *[]string) error {
 	fields.ProjectPath = confPath
-	return cmd.run(fields)
+	return cmd.run(fields, msgs)
 }

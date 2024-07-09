@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
@@ -132,6 +133,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	logger.Debug("Running link command")
 
+	msgs := []string{}
 	err := node.NodeVersion()
 	if err != nil {
 		return err
@@ -144,15 +146,17 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	}
 	info.PathWorkingDir = path
 
+	git := github.NewGithub()
+
 	if len(info.remote) > 0 {
 		logger.Debug("flag remote", zap.Any("repository", info.remote))
 		urlFull, _ := regexp.MatchString(`^https?://(?:www\.)?(?:github\.com|gitlab\.com)/[\w.-]+/[\w.-]+(\.git)?$`, info.remote)
 		if !urlFull {
 			info.remote = fmt.Sprintf("https://github.com/%s.git", info.remote)
 		}
-		nameRepo := github.GetNameRepo(info.remote)
+		nameRepo := git.GetNameRepo(info.remote)
 		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
-		err = github.Clone(info.remote, filepath.Join(path, nameRepo))
+		err = git.Clone(info.remote, filepath.Join(path, nameRepo))
 		if err != nil {
 			logger.Debug("Error while cloning the repository", zap.Error(err))
 			return err
@@ -195,19 +199,21 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return err
 		}
 
-		logger.FInfo(cmd.Io.Out, msg.WebAppLinkCmdSuccess)
+		logger.FInfoFlags(cmd.Io.Out, msg.WebAppLinkCmdSuccess, cmd.F.Format, cmd.F.Out)
+		msgs = append(msgs, msg.WebAppLinkCmdSuccess)
 
 		//asks if user wants to add files to .gitignore
-		gitignore, err := github.CheckGitignore(info.PathWorkingDir)
+		gitignore, err := git.CheckGitignore(info.PathWorkingDir)
 		if err != nil {
 			return msg.ErrorReadingGitignore
 		}
 
 		if !gitignore && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)) {
-			if err := github.WriteGitignore(info.PathWorkingDir); err != nil {
+			if err := git.WriteGitignore(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingGitignore
 			}
-			logger.FInfo(cmd.Io.Out, msg.WrittenGitignore)
+			logger.FInfoFlags(cmd.Io.Out, msg.WrittenGitignore, cmd.F.Format, cmd.F.Out)
+			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
 		if !info.Auto {
@@ -224,7 +230,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDevCommand)
+				logger.FInfoFlags(cmd.Io.Out, msg.LinkDevCommand, cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, msg.LinkDevCommand)
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
@@ -240,14 +247,24 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 					return err
 				}
 			} else {
-				logger.FInfo(cmd.Io.Out, msg.LinkDeployCommand)
-				logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name))
+				logger.FInfoFlags(cmd.Io.Out, msg.LinkDeployCommand, cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, msg.LinkDeployCommand)
+				logger.FInfoFlags(cmd.Io.Out, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name), cmd.F.Format, cmd.F.Out)
+				msgs = append(msgs, fmt.Sprintf(msg.EdgeApplicationsLinkSuccessful, info.Name))
 			}
 		}
 
 	}
 
-	return nil
+	initOut := output.SliceOutput{
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.F.IOStreams.Out,
+			Flags: cmd.F.Flags,
+		},
+		Messages: msgs,
+	}
+
+	return output.Print(&initOut)
 }
 
 func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string) error {

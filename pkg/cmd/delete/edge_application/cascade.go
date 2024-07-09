@@ -12,13 +12,13 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 )
 
-func (del *DeleteCmd) Cascade(ctx context.Context) error {
+func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	azionJson, err := del.GetAzion(ProjectConf)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return msg.ErrorMissingAzionJson
 		} else {
-			return err //message with error
+			return err
 		}
 	}
 	if azionJson.Application.ID == 0 {

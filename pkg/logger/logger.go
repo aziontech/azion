@@ -5,7 +5,6 @@ import (
 	"io"
 
 	"github.com/aziontech/tablecli"
-	"github.com/fatih/color"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -109,38 +108,10 @@ func PrintRow(table tablecli.Table, format string, row []string) {
 	}
 }
 
-func Info(message string, fields ...zap.Field) {
-	log.Info(message, fields...)
-}
-
-func Fatal(message string, fields ...zap.Field) {
-	log.Fatal(message, fields...)
-}
-
 func Debug(message string, fields ...zap.Field) {
 	log.Debug(message, fields...)
 }
 
 func Error(message string, fields ...zap.Field) {
 	log.Error(message, fields...)
-}
-
-func LogSuccess(w io.Writer, message string) {
-	formatSuccess := color.New(color.FgGreen).SprintfFunc()
-	FInfo(w, formatSuccess("🚀 %s\n", message))
-}
-
-func LogSuccessBye(w io.Writer, message string) {
-	formatSuccess := color.New(color.FgBlue).SprintfFunc()
-	FInfo(w, formatSuccess("👋 %s\n", message))
-}
-
-func LogWarning(w io.Writer, message string) {
-	formatWarning := color.New(color.FgYellow).SprintfFunc()
-	FInfo(w, formatWarning("⚠️ %s\n", message))
-}
-
-func LogError(w io.Writer, message string) {
-	formatError := color.New(color.FgRed).SprintfFunc()
-	FInfo(w, formatError("🐛 %s\n", message))
 }

@@ -16,12 +16,17 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
-func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doBucket(
+	client *api.Client,
+	ctx context.Context,
+	conf *contracts.AzionApplicationOptions,
+	msgs *[]string) error {
 	if conf.Bucket != "" || (conf.Preset == "javascript" || conf.Preset == "typescript") {
 		return nil
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
+	logger.FInfoFlags(cmd.Io.Out, msg.ProjectNameMessage, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msg.ProjectNameMessage)
 	nameBucket := replaceInvalidChars(conf.Name)
 
 	err := client.CreateBucket(ctx, api.RequestBucket{
@@ -30,7 +35,9 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
 			nameB := fmt.Sprintf("%s-%s", nameBucket, utils.Timestamp())
-			logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseBucket, nameB))
+			msgf := fmt.Sprintf(msg.NameInUseBucket, nameB)
+			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
+			*msgs = append(*msgs, msgf)
 			err := client.CreateBucket(ctx, api.RequestBucket{
 				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
 			if err != nil {
@@ -46,7 +53,9 @@ func (cmd *DeployCmd) doBucket(client *api.Client, ctx context.Context, conf *co
 		conf.Bucket = nameBucket
 	}
 
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.BucketSuccessful, conf.Bucket))
+	msgf := fmt.Sprintf(msg.BucketSuccessful, conf.Bucket)
+	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return cmd.WriteAzionJsonContent(conf, ProjectConf)
 }
 

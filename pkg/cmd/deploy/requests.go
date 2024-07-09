@@ -35,14 +35,14 @@ var injectIntoFunction = `
 
 `
 
-func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	if conf.Function.ID == 0 {
 		var projName string
-		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, msgs)
 		if err != nil {
 			for i := 0; i < 10; i++ {
 				projName = fmt.Sprintf("%s-%s", conf.Function.Name, utils.Timestamp())
-				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf)
+				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, msgs)
 				if err != nil {
 					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 						continue
@@ -68,7 +68,8 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if errors.Is(err, utils.ErrorNameInUse) {
-					logger.FInfo(cmd.Io.Out, msg.FuncInstInUse)
+					logger.FInfoFlags(cmd.Io.Out, msg.FuncInstInUse, cmd.F.Format, cmd.F.Out)
+					*msgs = append(*msgs, msg.FuncInstInUse)
 					if Auto {
 						projName = thoth.GenerateName()
 					} else {
@@ -94,7 +95,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 		return nil
 	}
 
-	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf)
+	_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf, msgs)
 	if err != nil {
 		return err
 	}
@@ -107,21 +108,28 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 	return nil
 }
 
-func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doApplication(
+	client *apiapp.Client,
+	ctx context.Context,
+	conf *contracts.AzionApplicationOptions,
+	msgs *[]string) error {
 	if conf.Application.ID == 0 {
 		var projName string
 		for {
-			applicationId, err := cmd.createApplication(client, ctx, conf)
+			applicationId, err := cmd.createApplication(client, ctx, conf, msgs)
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					if NoPrompt {
 						return err
 					}
-					logger.FInfo(cmd.Io.Out, msg.AppInUse)
+					logger.FInfoFlags(cmd.Io.Out, msg.AppInUse, cmd.F.Format, cmd.F.Out)
+					*msgs = append(*msgs, msg.AppInUse)
 					if Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
-						logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseApplication, projName))
+						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
+						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
+						*msgs = append(*msgs, msgf)
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
 						if err != nil {
@@ -143,7 +151,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			return err
 		}
 	} else {
-		err := cmd.updateApplication(client, ctx, conf)
+		err := cmd.updateApplication(client, ctx, conf, msgs)
 		if err != nil {
 			logger.Debug("Error while updating Edge Application", zap.Error(err))
 			return err
@@ -152,7 +160,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	return nil
 }
 
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	var domain apidom.DomainResponse
 	var err error
 
@@ -160,17 +168,20 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	if conf.Domain.Id == 0 {
 		var projName string
 		for {
-			domain, err = cmd.createDomain(client, ctx, conf)
+			domain, err = cmd.createDomain(client, ctx, conf, msgs)
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					if NoPrompt {
 						return err
 					}
-					logger.FInfo(cmd.Io.Out, msg.DomainInUse)
+					logger.FInfoFlags(cmd.Io.Out, msg.DomainInUse, cmd.F.Format, cmd.F.Out)
+					*msgs = append(*msgs, msg.DomainInUse)
 					if Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
-						logger.FInfo(cmd.Io.Out, fmt.Sprintf(msg.NameInUseApplication, projName))
+						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
+						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
+						*msgs = append(*msgs, msgf)
 						projName = thoth.GenerateName()
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
@@ -198,7 +209,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		}
 
 	} else {
-		domain, err = cmd.updateDomain(client, ctx, conf)
+		domain, err = cmd.updateDomain(client, ctx, conf, msgs)
 		if err != nil {
 			logger.Debug("Error while updating domain", zap.Error(err))
 			return err
@@ -206,7 +217,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf)
+		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf, msgs)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
@@ -216,7 +227,11 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return nil
 }
 
-func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client) error {
+func (cmd *DeployCmd) doRulesDeploy(
+	ctx context.Context,
+	conf *contracts.AzionApplicationOptions,
+	client *apiapp.Client,
+	msgs *[]string) error {
 	if conf.NotFirstRun {
 		return nil
 	}
@@ -238,7 +253,8 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
 		}
-		logger.FInfo(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful)
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful, cmd.F.Format, cmd.F.Out)
+		*msgs = append(*msgs, msg.CacheSettingsSuccessful)
 		cacheId = cache.GetId()
 	}
 
@@ -253,7 +269,11 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	return nil
 }
 
-func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *DeployCmd) doOriginSingle(
+	clientOrigin *apiori.Client,
+	ctx context.Context,
+	conf *contracts.AzionApplicationOptions,
+	msgs *[]string) (int64, error) {
 	var DefaultOrigin = [1]string{"httpbin.org"}
 
 	if conf.NotFirstRun {
@@ -272,7 +292,8 @@ func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Co
 		logger.Debug("Error while creating default origin ", zap.Any("Error", err))
 		return 0, err
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, msg.OriginsSuccessful)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.OriginsSuccessful, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msg.OriginsSuccessful)
 	newOrigin := contracts.AzionJsonDataOrigin{
 		OriginId:  origin.GetOriginId(),
 		OriginKey: origin.GetOriginKey(),
@@ -283,7 +304,7 @@ func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Co
 	return newOrigin.OriginId, nil
 }
 
-func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	reqCre := api.CreateRequest{}
 
 	code, err := cmd.FileReader(conf.Function.File)
@@ -322,11 +343,13 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		logger.Debug("Error while creating Edge Function", zap.Error(err))
 		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId()))
+	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return response.GetId(), nil
 }
 
-func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
 	code, err := cmd.FileReader(conf.Function.File)
@@ -365,11 +388,13 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeFunctionUpdate, response.GetName(), conf.Function.ID))
+	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionUpdate, response.GetName(), conf.Function.ID)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return response.GetId(), nil
 }
 
-func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (int64, error) {
+func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	if conf.Application.Name == "__DEFAULT__" {
 		reqApp.SetName(conf.Name)
@@ -383,7 +408,10 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationCreate, application.GetName(), application.GetId()))
+	msgf := fmt.Sprintf(
+		msg.DeployOutputEdgeApplicationCreate, application.GetName(), application.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 
 	reqUpApp := apiapp.UpdateRequest{}
 	reqUpApp.SetEdgeFunctions(true)
@@ -399,7 +427,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	return application.GetId(), nil
 }
 
-func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) error {
+func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	reqApp := apiapp.UpdateRequest{}
 	if conf.Application.Name == "__DEFAULT__" {
 		reqApp.SetName(conf.Name)
@@ -411,11 +439,14 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	if err != nil {
 		return err
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId()))
+	msgf := fmt.Sprintf(
+		msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return nil
 }
 
-func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (apidom.DomainResponse, error) {
+func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.CreateRequest{}
 	if conf.Domain.Name == "__DEFAULT__" {
 		reqDom.SetName(conf.Name)
@@ -430,11 +461,13 @@ func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, c
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, domain.GetId()))
+	msgf := fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, domain.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return domain, nil
 }
 
-func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions) (apidom.DomainResponse, error) {
+func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
 	if conf.Domain.Name == "__DEFAULT__" {
 		reqDom.SetName(conf.Name)
@@ -447,7 +480,9 @@ func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, c
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, domain.GetId()))
+	msgf := fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, domain.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
 	return domain, nil
 }
 
@@ -530,25 +565,6 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 
 	return resp, nil
 }
-
-// TODO: Use this method later
-// func checkNameInUse(errMsg error, printMessage string, Out io.Writer) (string, error) {
-// 	var name string
-// 	if strings.Contains(errMsg.Error(), utils.ErrorNameInUse.Error()) {
-// 		logger.FInfo(Out, printMessage)
-// 		if Auto {
-// 			name = thoth.GenerateName()
-// 		} else {
-// 			answer, err := askForInput(msg.AskInputName, thoth.GenerateName())
-// 			if err != nil {
-// 				return "", err
-// 			}
-// 			name = answer
-// 		}
-// 		return name, nil
-// 	}
-// 	return "", errMsg
-// }
 
 func checkToken(f *cmdutil.Factory) error {
 	configureToken := f.Config.GetString("token")

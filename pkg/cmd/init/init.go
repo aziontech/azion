@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
@@ -26,6 +27,7 @@ type initCmd struct {
 	name                  string
 	preset                string
 	template              string
+	auto                  bool
 	mode                  string
 	packageManager        string
 	pathWorkingDir        string
@@ -104,12 +106,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
 	cmd.Flags().StringVar(&init.preset, "preset", "", msg.FLAG_PRESET)
 	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
+	cmd.Flags().BoolVar(&init.auto, "auto", false, msg.FLAG_AUTO)
 	return cmd
 }
 
 func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	logger.Debug("Running init command")
 
+	msgs := []string{}
 	err := node.NodeVersion()
 	if err != nil {
 		return err
@@ -147,7 +151,8 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
-	logger.FInfo(cmd.io.Out, msg.WebAppInitCmdSuccess)
+	logger.FInfoFlags(cmd.io.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
+	msgs = append(msgs, msg.WebAppInitCmdSuccess)
 
 	err = cmd.changeDir(cmd.pathWorkingDir)
 	if err != nil {
@@ -155,23 +160,27 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	gitignore, err := github.CheckGitignore(cmd.pathWorkingDir)
+	git := github.NewGithub()
+
+	gitignore, err := git.CheckGitignore(cmd.pathWorkingDir)
 	if err != nil {
 		return msg.ErrorReadingGitignore
 	}
-
-	if !gitignore && (cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
-		if err := github.WriteGitignore(cmd.pathWorkingDir); err != nil {
+	if !gitignore && (cmd.auto || cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
+		if err := git.WriteGitignore(cmd.pathWorkingDir); err != nil {
 			return msg.ErrorWritingGitignore
 		}
-		logger.FInfo(cmd.f.IOStreams.Out, msg.WrittenGitignore)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WrittenGitignore, cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msg.WrittenGitignore)
 	}
 
-	if cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msg.InitDevCommand)
+	} else {
 		if err := deps(c, cmd, msg.AskInstallDepsDev); err != nil {
 			return err
 		}
-
 		logger.Debug("Running dev command from init command")
 		dev := cmd.devCmd(cmd.f)
 		err = dev.Run(cmd.f)
@@ -179,11 +188,16 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			logger.Debug("Error while running dev command called by init command", zap.Error(err))
 			return err
 		}
-	} else {
-		logger.FInfo(cmd.io.Out, msg.InitDevCommand)
 	}
 
-	if cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+	if cmd.auto || !cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+		logger.FInfoFlags(cmd.io.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msg.InitDeployCommand)
+		msgEdgeAppInitSuccessFul := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
+		logger.FInfoFlags(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
+			cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msgEdgeAppInitSuccessFul)
+	} else {
 		if err := deps(c, cmd, msg.AskInstallDepsDeploy); err != nil {
 			return err
 		}
@@ -195,12 +209,16 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err
 		}
-	} else {
-		logger.FInfo(cmd.io.Out, msg.InitDeployCommand)
-		logger.FInfo(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name))
 	}
 
-	return nil
+	initOut := output.SliceOutput{
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.f.IOStreams.Out,
+			Flags: cmd.f.Flags,
+		},
+		Messages: msgs,
+	}
+	return output.Print(&initOut)
 }
 
 func deps(c *cobra.Command, cmd *initCmd, m string) error {

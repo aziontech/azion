@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -44,7 +45,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		Long:          msg.DevLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example: heredoc.Doc(`       
+		Example: heredoc.Doc(`
         $ azion dev
         $ azion dev --help
         `),
@@ -63,6 +64,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running dev command")
+
+	if len(cmd.F.Flags.Format) > 0 {
+		outGen := output.GeneralOutput{
+			Msg:   "dev command is not compatible with the format flag",
+			Out:   f.IOStreams.Out,
+			Flags: f.Flags,
+		}
+		return output.Print(&outGen)
+	}
 
 	contract := &contracts.BuildInfo{}
 

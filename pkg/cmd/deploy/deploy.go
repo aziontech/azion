@@ -20,6 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
@@ -107,7 +108,9 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
-	logger.Debug("Running deploy command")
+	msgs := []string{}
+	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command", cmd.F.Format, cmd.F.Out)
+	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
 	err := checkToken(f)
@@ -125,7 +128,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -155,17 +158,17 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf)
+	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf, &msgs)
 	if err != nil {
 		return err
 	}
 
-	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf)
+	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
 	if err != nil {
 		return err
 	}
 
-	err = cmd.doBucket(clients.Bucket, ctx, conf)
+	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
 	if err != nil {
 		return err
 	}
@@ -174,14 +177,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		logger.Debug(msg.SkipUpload)
 	} else {
-		err = cmd.uploadFiles(f, conf)
+		err = cmd.uploadFiles(f, conf, &msgs)
 		if err != nil {
 			return err
 		}
 	}
 
 	conf.Function.File = ".edge/worker.js"
-	err = cmd.doFunction(clients, ctx, conf)
+	err = cmd.doFunction(clients, ctx, conf, &msgs)
 	if err != nil {
 		return err
 	}
@@ -229,30 +232,45 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, f)
+	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
 
 	if len(conf.RulesEngine.Rules) == 0 {
-		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication)
+		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf)
+	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
 
-	err = cmd.doDomain(clients.Domain, ctx, conf)
+	err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
 	if err != nil {
 		return err
 	}
 
-	logger.FInfo(cmd.F.IOStreams.Out, msg.DeploySuccessful)
-	logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url))
-	logger.FInfo(cmd.F.IOStreams.Out, msg.DeployPropagation)
-	return nil
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
+	msgs = append(msgs, msg.DeploySuccessful)
+
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
+	msgs = append(msgs, msgfOutputDomainSuccess)
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
+	msgs = append(msgs, msg.DeployPropagation)
+
+	outSlice := output.SliceOutput{
+		Messages: msgs,
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.F.IOStreams.Out,
+			Flags: cmd.F.Flags,
+		},
+	}
+
+	return output.Print(&outSlice)
 }

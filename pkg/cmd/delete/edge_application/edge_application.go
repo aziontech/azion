@@ -3,10 +3,10 @@ package edgeapplication
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"strconv"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -28,6 +28,10 @@ type DeleteCmd struct {
 	GetAzion   func(confPath string) (*contracts.AzionApplicationOptions, error)
 	f          *cmdutil.Factory
 	UpdateJson func(cmd *DeleteCmd) error
+	Cascade    func(ctx context.Context, del *DeleteCmd) error
+	AskInput   func(string) (string, error)
+	ReadFile   func(name string) ([]byte, error)
+	WriteFile  func(name string, data []byte, perm fs.FileMode) error
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -40,6 +44,10 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		GetAzion:   utils.GetAzionJsonContent,
 		f:          f,
 		UpdateJson: updateAzionJson,
+		Cascade:    CascadeDelete,
+		AskInput:   utils.AskInput,
+		ReadFile:   os.ReadFile,
+		WriteFile:  os.WriteFile,
 	}
 }
 
@@ -72,7 +80,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	ctx := context.Background()
 
 	if cmd.Flags().Changed("cascade") {
-		err := del.Cascade(ctx)
+		err := del.Cascade(ctx, del)
 		if err != nil {
 			return err
 		}
@@ -80,20 +88,9 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 	}
 
 	if !cmd.Flags().Changed("application-id") {
-		qs := []*survey.Question{
-			{
-				Name:     "id",
-				Prompt:   &survey.Input{Message: msg.AskInput},
-				Validate: survey.Required,
-			},
-		}
-
-		answer := ""
-
-		err := survey.Ask(qs, &answer)
+		answer, err := del.AskInput(msg.AskInput)
 		if err != nil {
-			logger.Debug("Error while parsing answer", zap.Error(err))
-			return utils.ErrorParseResponse
+			return err
 		}
 
 		num, err := strconv.ParseInt(answer, 10, 64)
@@ -126,8 +123,9 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		return utils.ErrorInternalServerError
 	}
 	azionJson := path + "/azion/azion.json"
-	byteAzionJson, err := os.ReadFile(azionJson)
+	byteAzionJson, err := cmd.ReadFile(azionJson)
 	if err != nil {
+		logger.Debug("Error while parsing json", zap.Error(err))
 		return utils.ErrorUnmarshalAzionJsonFile
 	}
 	jsonReplaceFunc, err := sjson.Set(string(byteAzionJson), "function.id", 0)
@@ -145,7 +143,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		return msg.ErrorFailedUpdateAzionJson
 	}
 
-	err = os.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
+	err = cmd.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
 	if err != nil {
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
 	}

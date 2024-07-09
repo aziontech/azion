@@ -5,14 +5,23 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"go.uber.org/zap"
 )
 
-func runCommand(cmd *BuildCmd, command string) error {
-	logger.FInfo(cmd.Io.Out, msg.BuildStart)
+func runCommand(cmd *BuildCmd, command string, msgs *[]string) error {
+	var hasDeployMessage bool
+	if len(*msgs) > 0 {
+		hasDeployMessage = true
+	}
 
-	logger.FInfo(cmd.Io.Out, msg.BuildRunningCmd)
-	logger.FInfo(cmd.Io.Out, fmt.Sprintf("$ %s\n", command))
+	logger.FInfoFlags(cmd.Io.Out, msg.BuildStart, cmd.f.Format, cmd.f.Out)
+	*msgs = append(*msgs, msg.BuildStart)
+
+	logger.FInfoFlags(cmd.Io.Out, msg.BuildRunningCmd, cmd.f.Format, cmd.f.Out)
+	*msgs = append(*msgs, msg.BuildRunningCmd)
+	logger.FInfoFlags(cmd.Io.Out, fmt.Sprintf("$ %s\n", command), cmd.f.Format, cmd.f.Out)
+	*msgs = append(*msgs, fmt.Sprintf("$ %s\n", command))
 
 	err := cmd.CommandRunInteractive(cmd.f, command)
 	if err != nil {
@@ -20,6 +29,20 @@ func runCommand(cmd *BuildCmd, command string) error {
 		return msg.ErrFailedToRunBuildCommand
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.BuildSuccessful)
-	return nil
+	logger.FInfoFlags(cmd.Io.Out, msg.BuildSuccessful, cmd.f.Format, cmd.f.Out)
+	*msgs = append(*msgs, msg.BuildSuccessful)
+
+	if hasDeployMessage {
+		return nil
+	}
+
+	outSlice := output.SliceOutput{
+		Messages: *msgs,
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.f.IOStreams.Out,
+			Flags: cmd.f.Flags,
+		},
+	}
+
+	return output.Print(&outSlice)
 }
