@@ -52,7 +52,7 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string, msgs *[]string) error {
 	listURLsDomains := domain.GetCnames()
 	if !domain.GetCnameAccessOnly() {
 		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
@@ -69,7 +69,9 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath
 			if err := cmd.PurgeWildcard([]string{v}, wildCard); err != nil {
 				logger.Debug("Error purge path domain", zap.String("wildCard", wildCard), zap.Error(err))
 			}
-			logger.FInfo(cmd.F.IOStreams.Out, fmt.Sprintf(msg.DeployOutputCachePurgeWildCard, v))
+			msgsf := fmt.Sprintf(msg.DeployOutputCachePurgeWildCard, v)
+			logger.FInfoFlags(cmd.F.IOStreams.Out, msgsf, cmd.F.Format, cmd.F.Out)
+			*msgs = append(*msgs, msgsf)
 		}
 	}
 

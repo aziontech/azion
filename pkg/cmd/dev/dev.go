@@ -45,7 +45,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		Long:          msg.DevLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example: heredoc.Doc(`       
+		Example: heredoc.Doc(`
         $ azion dev
         $ azion dev --help
         `),

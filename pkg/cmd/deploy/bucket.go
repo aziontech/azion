@@ -25,7 +25,8 @@ func (cmd *DeployCmd) doBucket(
 		return nil
 	}
 
-	logger.FInfo(cmd.Io.Out, msg.ProjectNameMessage)
+	logger.FInfoFlags(cmd.Io.Out, msg.ProjectNameMessage, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msg.ProjectNameMessage)
 	nameBucket := replaceInvalidChars(conf.Name)
 
 	err := client.CreateBucket(ctx, api.RequestBucket{
