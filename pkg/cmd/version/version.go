@@ -1,10 +1,12 @@
 package version
 
 import (
+	"fmt"
+
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/fatih/color"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +21,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azion version
         `),
-		Run: func(cmd *cobra.Command, args []string) {
-			color.New(color.Bold).Fprintln(f.IOStreams.Out, "Azion CLI "+BinVersion+"\n")
+		RunE: func(cmd *cobra.Command, args []string) error {
+			versionOut := output.GeneralOutput{
+				Msg:   fmt.Sprintf("Azion CLI %s\n", BinVersion),
+				Out:   f.IOStreams.Out,
+				Flags: f.Flags,
+			}
+			return output.Print(&versionOut)
 		},
 	}
 
