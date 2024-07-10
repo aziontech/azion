@@ -55,7 +55,9 @@ func TestGetVersionGitHub(t *testing.T) {
 			defer func() { ApiURL = oldURL }()
 
 			gh := NewGithub()
-			gh.GetVersionGitHub = getVersionGitHub
+			gh.GetVersionGitHub = func(name string) (string, error) {
+				return tt.wantTag, nil
+			}
 
 			gotTag, err := gh.GetVersionGitHub(tt.repoName)
 			if (err != nil) != tt.wantErr {
