@@ -12,7 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
-var ProjectConf string
+var (
+	ProjectConf string
+)
 
 type SyncCmd struct {
 	Io                    *iostreams.IOStreams
@@ -20,6 +22,7 @@ type SyncCmd struct {
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 	F                     *cmdutil.Factory
 	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
+	EnvPath               string
 }
 
 func NewSync(f *cmdutil.Factory) *SyncCmd {
@@ -50,6 +53,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
 	syncCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
+	syncCmd.Flags().StringVar(&cmdFactory.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
 	return syncCmd
 }
 
