@@ -7,9 +7,11 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/sync"
 	edgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/api/origin"
+	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
@@ -36,6 +38,11 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	}
 
 	err = synch.syncOrigin(info, f)
+	if err != nil {
+		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
+
+	err = synch.syncEnv(f)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
@@ -122,6 +129,42 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) err
 		}
 		logger.FInfoFlags(
 			synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGERULE, rule.Name), synch.F.Format, synch.F.Out)
+	}
+	return nil
+}
+
+func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
+
+	client := varApi.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	resp, err := client.List(context.Background())
+	if err != nil {
+		return err
+	}
+
+	// Load the .env file
+	envs, err := godotenv.Read(synch.EnvPath)
+	if err != nil {
+		logger.Debug("Error while loading .env file", zap.Error(err))
+		return err
+	}
+
+	for _, variable := range resp {
+		if v := envs[variable.GetKey()]; v != "" {
+			delete(envs, variable.GetKey())
+		}
+	}
+
+	for key, value := range envs {
+		createReq := &varApi.Request{}
+		createReq.Key = key
+		createReq.Value = value
+		_, err := client.Create(ctx, *createReq)
+		if err != nil {
+			logger.Debug("Error while creating variables during sync process", zap.Error(err))
+			return err
+		}
+		logger.FInfoFlags(
+			synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGEENV, key), synch.F.Format, synch.F.Out)
 	}
 	return nil
 }

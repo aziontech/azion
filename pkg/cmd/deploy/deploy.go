@@ -51,6 +51,7 @@ var (
 	SkipBuild   bool
 	ProjectConf string
 	Sync        bool
+	Env         string
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -95,6 +96,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
+	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
 
@@ -109,7 +111,7 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs := []string{}
-	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command", cmd.F.Format, cmd.F.Out)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
@@ -120,7 +122,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if Sync {
 		sync.ProjectConf = ProjectConf
-		if err := sync.Sync(sync.NewSync(f)); err != nil {
+		syncCmd := sync.NewSync(f)
+		syncCmd.EnvPath = Env
+		if err := sync.Sync(syncCmd); err != nil {
 			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
 			return err
 		}
