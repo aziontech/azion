@@ -15,7 +15,7 @@ func (c *Client) List(ctx context.Context) ([]sdk.PersonalTokenResponseGet, erro
 	resp, httpResp, err := c.apiClient.PersonalTokenApi.ListPersonalToken(ctx).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while list your personal token", zap.Error(err))
+			logger.Debug("Error while listing your personal token", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
