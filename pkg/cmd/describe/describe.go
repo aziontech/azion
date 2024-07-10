@@ -9,6 +9,7 @@ import (
 	function "github.com/aziontech/azion-cli/pkg/cmd/describe/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/edge_storage"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/describe/origin"
+	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -41,6 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(function.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
+	cmd.AddCommand(personal_token.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
