@@ -42,8 +42,9 @@ func TestCommand(t *testing.T) {
 	}
 	f, _, _ := testutils.NewFactory(nil)
 	for _, tt := range tests {
+		vul := NewVulcan()
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Command(tt.args.flags, tt.args.params, f); got != tt.want {
+			if got := vul.Command(tt.args.flags, tt.args.params, f); got != tt.want {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
 		})

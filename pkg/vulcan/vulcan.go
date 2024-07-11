@@ -21,7 +21,19 @@ const (
 
 var versionVulcan = "@latest"
 
-func Command(flags, params string, f *cmdutil.Factory) string {
+type VulcanPkg struct {
+	Command          func(flags, params string, f *cmdutil.Factory) string
+	CheckVulcanMajor func(currentVersion string, f *cmdutil.Factory) error
+}
+
+func NewVulcan() *VulcanPkg {
+	return &VulcanPkg{
+		Command:          command,
+		CheckVulcanMajor: checkVulcanMajor,
+	}
+}
+
+func command(flags, params string, f *cmdutil.Factory) string {
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installEdgeFunctions
 		return fmt.Sprintf(installDebug, flags, versionVulcan, params)
@@ -29,7 +41,7 @@ func Command(flags, params string, f *cmdutil.Factory) string {
 	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
 }
 
-func CheckVulcanMajor(currentVersion string, f *cmdutil.Factory) error {
+func checkVulcanMajor(currentVersion string, f *cmdutil.Factory) error {
 	parts := strings.Split(currentVersion, ".")
 
 	// Extract the first part and convert it to a number

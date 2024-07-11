@@ -8,7 +8,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	helpers "github.com/aziontech/azion-cli/utils"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
@@ -41,6 +41,7 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		return err
 	}
 
+	vul := vulcanPkg.NewVulcan()
 	err = vul.CheckVulcanMajor(vulcanVer, cmd.f)
 	if err != nil {
 		return err
