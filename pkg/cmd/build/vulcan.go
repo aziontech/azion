@@ -20,7 +20,7 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 	}
 
 	vul := vulcanPkg.NewVulcan()
-	err = vul.CheckVulcanMajor(vulcanVer, cmd.f)
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
 	if err != nil {
 		return err
 	}
