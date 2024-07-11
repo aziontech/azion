@@ -50,8 +50,6 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 	if currentVersion == "" {
 		parts = []string{}
 	}
-	fmt.Println(parts)
-	fmt.Println(len(parts))
 
 	// Extract the first part and convert it to a number
 	if len(parts) > 0 {
