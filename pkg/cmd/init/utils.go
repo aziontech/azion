@@ -42,7 +42,7 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 	}
 
 	vul := vulcanPkg.NewVulcan()
-	err = vul.CheckVulcanMajor(vulcanVer, cmd.f)
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
 	if err != nil {
 		return err
 	}
