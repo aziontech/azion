@@ -134,7 +134,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	logger.Debug("Running link command")
 
 	msgs := []string{}
-	err := node.NodeVersion()
+	nodeManager := node.NewNode()
+	err := nodeManager.NodeVer(nodeManager)
 	if err != nil {
 		return err
 	}

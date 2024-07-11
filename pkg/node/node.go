@@ -8,15 +8,29 @@ import (
 	"strings"
 )
 
-func NodeVersion() error {
-	cmd := exec.Command("node", "--version")
+type NodePkg struct {
+	NodeVer    func(node *NodePkg) error
+	CheckNode  func(str string) error
+	CmdBuilder func(name string, arg ...string) *exec.Cmd
+}
+
+func NewNode() *NodePkg {
+	return &NodePkg{
+		NodeVer:    nodeVersion,
+		CheckNode:  checkNode,
+		CmdBuilder: exec.Command,
+	}
+}
+
+func nodeVersion(node *NodePkg) error {
+	cmd := node.CmdBuilder("node", "--version")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
 	if err != nil {
 		return errors.New(NODE_NOT_INSTALLED)
 	}
-	return checkNode(out.String())
+	return node.CheckNode(out.String())
 }
 
 func checkNode(str string) error {
