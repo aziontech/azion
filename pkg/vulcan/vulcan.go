@@ -45,7 +45,7 @@ func command(flags, params string, f *cmdutil.Factory) string {
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {
 	parts := strings.Split(currentVersion, ".")
-	// strings.Split will always return at least one element, so parts will always be len>1
+	// strings.Split will always return at least one element, so parts will always be len>0
 	// to avoid this, I am checking if version is empty. If so, I just use an empty slice
 	if currentVersion == "" {
 		parts = []string{}
