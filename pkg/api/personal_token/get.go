@@ -10,12 +10,12 @@ import (
 	sdk "github.com/aziontech/azionapi-go-sdk/personal_tokens"
 )
 
-func (c *Client) List(ctx context.Context) ([]sdk.PersonalTokenResponseGet, error) {
-	logger.Debug("List Personal Tokens")
-	resp, httpResp, err := c.apiClient.PersonalTokenApi.ListPersonalToken(ctx).Execute()
+func (c *Client) Get(ctx context.Context, personalTokenID string) (*sdk.PersonalTokenResponseGet, error) {
+	logger.Debug("Get Personal Token")
+	resp, httpResp, err := c.apiClient.PersonalTokenApi.GetPersonalToken(ctx, personalTokenID).Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while listing your personal token", zap.Error(err))
+			logger.Debug("Error while describing your personal token", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return nil, err
@@ -23,5 +23,5 @@ func (c *Client) List(ctx context.Context) ([]sdk.PersonalTokenResponseGet, erro
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	return resp.Results, nil
+	return resp, nil
 }

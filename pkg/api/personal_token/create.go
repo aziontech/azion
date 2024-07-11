@@ -26,14 +26,17 @@ type Request struct {
 
 func (c *Client) Create(ctx context.Context, req *Request) (Response, error) {
 	logger.Debug("Create Personal Token")
-
 	response, httpResp, err := c.apiClient.PersonalTokenApi.CreatePersonalToken(ctx).
 		CreatePersonalTokenRequest(req.CreatePersonalTokenRequest).Execute()
-
 	if err != nil {
-		logger.Error("Error while creating a personal token", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while creating your personal token", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return response, nil
 }
