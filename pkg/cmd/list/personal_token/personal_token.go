@@ -65,7 +65,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 
 	for _, v := range resp {
 
-		ln := []string{}
+		var ln []string
 		if details {
 			var description string
 			if v.Description.Get() != nil {

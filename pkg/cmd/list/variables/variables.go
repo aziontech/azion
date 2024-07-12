@@ -82,7 +82,7 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	}
 
 	for _, v := range resp {
-		ln := []string{}
+		var ln []string
 		if opts.Details {
 			ln = []string{
 				v.GetUuid(),

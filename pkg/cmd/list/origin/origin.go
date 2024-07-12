@@ -82,7 +82,7 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{}
+		var ln []string
 		if opts.Details {
 			ln = []string{
 				*v.OriginKey,

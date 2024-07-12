@@ -62,7 +62,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	for _, v := range functions.Results {
-		ln := []string{}
+		var ln []string
 		if opts.Details {
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),

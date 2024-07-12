@@ -85,7 +85,7 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{}
+		var ln []string
 		if b.Options.Details {
 			ln = []string{
 				v.GetKey(),
