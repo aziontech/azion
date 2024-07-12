@@ -33,7 +33,7 @@ const (
 	EXAMPLE_CREATE_OBJECTS  = "$ azion create edge-storage object --bucket-name 'mynewbucket' --object-key 'path/to/my/remote/file.txt' --source './local/file.txt'"
 	EXAMPLE_UPDATE_OBJECT   = "$ azion update edge-storage object --bucket-name 'mybucket' --object-key 'path/index.html' --source './index.html'\n$ azion update edge-storage object --help"
 	EXAMPLE_DESCRIBE        = "$ azion describe edge-storage object --help"
-	EXAMPLE_DESCRIBE_OBJECT = "$ azion describe edge-storage object --help\n$ azion describe edge-storage object --bucket-name 'mybucket' --object-key 'test.json'"
+	EXAMPLE_DESCRIBE_OBJECT = "$ azion describe edge-storage object --help\n$ azion describe edge-storage object --bucket-name 'mybucket' --object-key 'test.json'\n$ azion describe edge-storage object --bucket-name 'mybucket' --object-key 'test.json' --format json\n$ azion describe edge-storage object --bucket-name 'mybucket' --object-key 'test.json' --out './tmp/test.json'"
 	EXAMPLE_DELETE_OBJECTS  = "$ azion delete edge-storage object --bucket-name 'bucket-name'\n$ azion delete edge-storage object --help"
 
 	FLAG_HELP                      = "Displays more information about the edge-storage command"
