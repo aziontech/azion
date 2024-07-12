@@ -36,12 +36,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create personal-token --name "ranking of kings" --expiration "9m" 
-        $ azion create personal-token --name "sakura" --expiration "9m" 
+        $ azion create personal-token --name "ranking of kings" --expiration "9m"
+        $ azion create personal-token --name "sakura" --expiration "9m"
         $ azion create personal-token --name "strawhat" --expiration "9m" --description "gear five"
         $ azion create personal-token --file "create.json"
-        $ "create.json" example: 
-        {   
+		$ "create.json" example:
+        {
             "name": "One day token",
             "expires_at": "9m",
             "description": "example"

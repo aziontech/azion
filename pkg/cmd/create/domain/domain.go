@@ -57,14 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					if err != nil {
 						return err
 					}
-
-					num, err := strconv.ParseInt(answer, 10, 64)
-					if err != nil {
-						logger.Debug("Error while converting answer to int64", zap.Error(err))
-						return msg.ErrorConvertApplicationID
-
-					}
-
+					num, _ := strconv.ParseInt(answer, 10, 64)
 					fields.EdgeApplicationID = int(num)
 				}
 
@@ -102,7 +95,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return fmt.Errorf("%w: %q", msg.ErrorIsActiveFlag, fields.IsActive)
 				}
 				request.SetIsActive(isActive)
-
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

@@ -105,12 +105,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 			return utils.ErrorParseResponse
 		}
 
-		applicationID, err := strconv.Atoi(answers)
-		if err != nil {
-			logger.Debug("Error while parsing string to integer", zap.Error(err))
-			return utils.ErrorConvertingStringToInt
-		}
-
+		applicationID, _ := strconv.Atoi(answers)
 		fields.ApplicationID = int64(applicationID)
 	}
 
@@ -136,7 +131,6 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	request.SetOriginType(fields.OriginType)
 
 	if fields.OriginType == "object_storage" {
-
 		if !cmd.Flags().Changed("bucket") {
 			answers, err := utils.AskInput(msg.AskBucket)
 			if err != nil {

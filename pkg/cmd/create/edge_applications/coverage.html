@@ -1,0 +1,348 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>edge_applications: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/aziontech/azion-cli/pkg/cmd/create/edge_applications/edge_application.go (85.7%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package edge_applications
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "strconv"
+
+        "github.com/MakeNowJust/heredoc"
+        "go.uber.org/zap"
+
+        msg "github.com/aziontech/azion-cli/messages/create/edge_application"
+        api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+        "github.com/aziontech/azion-cli/pkg/logger"
+        "github.com/aziontech/azion-cli/pkg/output"
+
+        "github.com/aziontech/azion-cli/pkg/cmdutil"
+        "github.com/aziontech/azion-cli/utils"
+        "github.com/spf13/cobra"
+        "github.com/spf13/pflag"
+)
+
+const example = `
+        $ azion create edge-application --name "naruno"
+        $ azion create edge-application --file create.json
+        $ json example to be used with '--file flag' "create.json": 
+        {
+            "name": "New Edge Application",
+            "delivery_protocol": "http",
+            "origin_type": "single_origin",
+            "address": "www.new.api",
+            "origin_protocol_policy": "preserve",
+            "host_header": "${host}",
+            "browser_cache_settings": "override",
+            "browser_cache_settings_maximum_ttl": 20,
+            "cdn_cache_settings": "honor",
+            "cdn_cache_settings_maximum_ttl": 60
+        }
+        `
+
+type Fields struct {
+        Name                           string `json:"name,omitempty"`
+        DeliveryProtocol               string `json:"delivery_protocol,omitempty"`
+        Http3                          string `json:"http_3,omitempty"`
+        HttpPort                       string `json:"http_port,omitempty"`
+        HttpsPort                      string `json:"https_port,omitempty"`
+        OriginType                     string `json:"origin_type,omitempty"`
+        Address                        string `json:"address,omitempty"`
+        OriginProtocolPolicy           string `json:"origin_protocol_policy,omitempty"`
+        HostHeader                     string `json:"host_header,omitempty"`
+        BrowserCacheSettings           string `json:"browser_cache_settings,omitempty"`
+        CdnCacheSettings               string `json:"cdn_cache_settings,omitempty"`
+        BrowserCacheSettingsMaximumTtl int64  `json:"browser_cache_settings_maximum_ttl,omitempty"`
+        CdnCacheSettingsMaximumTtl     int64  `json:"cdn_cache_settings_maximum_ttl,omitempty"`
+        DebugRules                     string `json:"debug_rules,omitempty"`
+        SupportedCiphers               string `json:"supported_ciphers,omitempty"`
+        Websocket                      string `json:"websocket,omitempty"`
+        Path                           string
+        OutPath                        string
+        Format                         string
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command <span class="cov8" title="1">{
+        fields := &amp;Fields{}
+
+        cmd := &amp;cobra.Command{
+                Use:           msg.Usage,
+                Short:         msg.ShortDescription,
+                Long:          msg.LongDescription,
+                SilenceUsage:  true,
+                SilenceErrors: true,
+                Example:       heredoc.Doc(example),
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov8" title="1">{
+                        request := api.CreateRequest{}
+
+                        if cmd.Flags().Changed("file") </span><span class="cov8" title="1">{
+                                err := utils.FlagFileUnmarshalJSON(fields.Path, &amp;request)
+                                if err != nil </span><span class="cov8" title="1">{
+                                        logger.Debug("Error while parsing &lt;"+fields.Path+"&gt; file", zap.Error(err))
+                                        return utils.ErrorUnmarshalReader
+                                }</span>
+                        } else<span class="cov8" title="1"> {
+
+                                b, _ := json.MarshalIndent(fields, " ", " ")
+                                fmt.Println(string(b))
+
+                                b1, _ := json.MarshalIndent(request, " ", " ")
+                                fmt.Println(string(b1))
+
+                                err := createRequestFromFlags(fields, &amp;request)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                        }
+
+                        <span class="cov8" title="1">fmt.Println("request: ", request)
+
+                        response, err := api.NewClient(
+                                f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
+                        ).Create(context.Background(), &amp;request)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf(msg.ErrorCreate.Error(), err)
+                        }</span>
+
+                        <span class="cov8" title="1">creatOut := output.GeneralOutput{
+                                Msg:   fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+                                Out:   f.IOStreams.Out,
+                                Flags: f.Flags,
+                        }
+                        return output.Print(&amp;creatOut)</span>
+                },
+        }
+
+        <span class="cov8" title="1">flags := cmd.Flags()
+        addFlags(flags, fields)
+
+        return cmd</span>
+}
+
+func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error <span class="cov8" title="1">{
+        // fmt.Println("&gt;&gt; request: ", request)
+
+        b, _ := json.MarshalIndent(fields, " ", " ")
+        fmt.Println(string(b))
+
+        b1, _ := json.MarshalIndent(request, " ", " ")
+        fmt.Println(string(b1))
+
+        if utils.IsEmpty(fields.Name) </span><span class="cov0" title="0">{
+                answers, err := utils.AskInput("Enter the new Edge Application's name")
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Debug("Error while parsing answer", zap.Error(err))
+                        return utils.ErrorParseResponse
+                }</span>
+
+                <span class="cov0" title="0">fields.Name = answers</span>
+        }
+
+        <span class="cov8" title="1">if utils.IsEmpty(fields.Name) </span><span class="cov0" title="0">{
+                return msg.ErrorMandatoryCreateFlags
+        }</span>
+
+        <span class="cov8" title="1">request.SetName(fields.Name)
+
+        if !utils.IsEmpty(fields.DeliveryProtocol) </span><span class="cov8" title="1">{
+                request.SetDeliveryProtocol(fields.DeliveryProtocol)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.Http3) </span><span class="cov8" title="1">{
+                http3, err := strconv.ParseBool(fields.Http3)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Debug("Error while parsing &lt;"+fields.Http3+"&gt; ", zap.Error(err))
+                        return utils.ErrorConvertingStringToBool
+                }</span>
+
+                <span class="cov8" title="1">request.SetHttp3(http3)</span>
+        }
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.DebugRules) </span><span class="cov8" title="1">{
+                debugRules, err := strconv.ParseBool(fields.DebugRules)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Debug("Error while parsing &lt;"+fields.DebugRules+"&gt; ", zap.Error(err))
+                        return utils.ErrorConvertingStringToBool
+                }</span>
+
+                <span class="cov8" title="1">request.SetDebugRules(debugRules)</span>
+        }
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.SupportedCiphers) </span><span class="cov8" title="1">{
+                request.SetSupportedCiphers(fields.SupportedCiphers)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.Websocket) </span><span class="cov8" title="1">{
+                websocket, err := strconv.ParseBool(fields.Websocket)
+                if err != nil </span><span class="cov0" title="0">{
+                        logger.Debug("Error while parsing &lt;"+fields.Websocket+"&gt; ", zap.Error(err))
+                        return utils.ErrorConvertingStringToBool
+                }</span>
+
+                <span class="cov8" title="1">request.SetWebsocket(websocket)</span>
+        }
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.HttpPort) </span><span class="cov8" title="1">{
+                request.SetHttpPort(fields.HttpPort)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.HttpsPort) </span><span class="cov8" title="1">{
+                request.SetHttpsPort(fields.HttpsPort)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.DeliveryProtocol) </span><span class="cov8" title="1">{
+                request.SetOriginType(fields.OriginType)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.Address) </span><span class="cov8" title="1">{
+                request.SetAddress(fields.Address)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.OriginProtocolPolicy) </span><span class="cov8" title="1">{
+                request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.HostHeader) </span><span class="cov8" title="1">{
+                request.SetHostHeader(fields.HostHeader)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.BrowserCacheSettings) </span><span class="cov8" title="1">{
+                request.SetBrowserCacheSettings(fields.BrowserCacheSettings)
+        }</span>
+
+        <span class="cov8" title="1">if !utils.IsEmpty(fields.CdnCacheSettings) </span><span class="cov8" title="1">{
+                request.SetCdnCacheSettings(fields.CdnCacheSettings)
+        }</span>
+
+        <span class="cov8" title="1">if fields.BrowserCacheSettingsMaximumTtl &lt;= 0 </span><span class="cov8" title="1">{
+                request.SetBrowserCacheSettingsMaximumTtl(fields.BrowserCacheSettingsMaximumTtl)
+        }</span>
+
+        <span class="cov8" title="1">if fields.CdnCacheSettingsMaximumTtl &lt;= 0 </span><span class="cov8" title="1">{
+                request.SetCdnCacheSettingsMaximumTtl(fields.CdnCacheSettingsMaximumTtl)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func addFlags(flags *pflag.FlagSet, fields *Fields) <span class="cov8" title="1">{
+        flags.StringVar(&amp;fields.Name, "name", "", msg.FlagName)
+        flags.StringVar(&amp;fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
+        flags.StringVar(&amp;fields.Http3, "http3", "", msg.FlagHttp3)
+        flags.StringVar(&amp;fields.HttpPort, "http-port", "", msg.FlagHttpPort)
+        flags.StringVar(&amp;fields.HttpsPort, "https-port", "", msg.FlagHttpsPort)
+        flags.StringVar(&amp;fields.OriginType, "origin-type", "", msg.FlagOriginType)
+        flags.StringVar(&amp;fields.Address, "address", "", msg.FlagAddress)
+        flags.StringVar(&amp;fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)
+        flags.StringVar(&amp;fields.HostHeader, "host-header", "", msg.FlagHostHeader)
+        flags.StringVar(&amp;fields.BrowserCacheSettings, "browser-cache-settings", "", msg.FlagBrowserCacheSettings)
+        flags.Int64Var(&amp;fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaximumTtl)
+        flags.StringVar(&amp;fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
+        flags.StringVar(&amp;fields.DebugRules, "debug-rules", "", msg.FlagDebugRules)
+        flags.StringVar(&amp;fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
+        flags.StringVar(&amp;fields.Websocket, "websocket", "", msg.FlagWebsocket)
+        flags.Int64Var(&amp;fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
+        flags.StringVar(&amp;fields.Path, "file", "", msg.FlagFile)
+        flags.BoolP("help", "h", false, msg.FlagHelp)
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
