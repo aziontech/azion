@@ -66,14 +66,24 @@ func PrintTable(cmd *cobra.Command, client *api.Client, f *cmdutil.Factory, opts
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{
-			fmt.Sprintf("%d", v.Id),
-			utils.TruncateString(v.Name),
-			fmt.Sprintf("%v", v.Active),
-			v.LastEditor,
-			v.LastModified,
-			fmt.Sprintf("%v", v.DebugRules),
+		var ln []string
+		if opts.Details {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				utils.TruncateString(v.Name),
+				fmt.Sprintf("%v", v.Active),
+				v.LastEditor,
+				v.LastModified,
+				fmt.Sprintf("%v", v.DebugRules),
+			}
+		} else {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				utils.TruncateString(v.Name),
+				fmt.Sprintf("%v", v.Active),
+			}
 		}
+
 		listOut.Lines = append(listOut.Lines, ln)
 	}
 

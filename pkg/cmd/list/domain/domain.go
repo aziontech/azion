@@ -57,16 +57,25 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{
-			fmt.Sprintf("%d", v.GetId()),
-			utils.TruncateString(v.GetName()),
-			v.GetDomainName(),
-			fmt.Sprintf("%d", v.GetDigitalCertificateId()),
-			fmt.Sprintf("%d", v.GetDigitalCertificateId()),
-			fmt.Sprintf("%v", v.GetCnameAccessOnly()),
-			fmt.Sprintf("%v", v.GetCnames()),
-			fmt.Sprintf("%v", v.GetIsActive()),
+		var ln []string
+		if opts.Details {
+			ln = []string{
+				fmt.Sprintf("%d", v.GetId()),
+				utils.TruncateString(v.GetName()),
+				v.GetDomainName(),
+				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
+				fmt.Sprintf("%v", v.GetCnameAccessOnly()),
+				fmt.Sprintf("%v", v.GetCnames()),
+				fmt.Sprintf("%v", v.GetIsActive()),
+			}
+		} else {
+			ln = []string{
+				fmt.Sprintf("%d", v.GetId()),
+				utils.TruncateString(v.GetName()),
+			}
 		}
+
 		listOut.Lines = append(listOut.Lines, ln)
 	}
 

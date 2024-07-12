@@ -82,14 +82,22 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{
-			*v.OriginKey,
-			utils.TruncateString(v.Name),
-			fmt.Sprintf("%d", *v.OriginId),
-			*v.OriginType,
-			*v.OriginPath,
-			fmt.Sprintf("%v", v.Addresses),
-			fmt.Sprintf("%d", *v.ConnectionTimeout),
+		var ln []string
+		if opts.Details {
+			ln = []string{
+				*v.OriginKey,
+				utils.TruncateString(v.Name),
+				fmt.Sprintf("%d", *v.OriginId),
+				*v.OriginType,
+				*v.OriginPath,
+				fmt.Sprintf("%v", v.Addresses),
+				fmt.Sprintf("%d", *v.ConnectionTimeout),
+			}
+		} else {
+			ln = []string{
+				*v.OriginKey,
+				utils.TruncateString(v.Name),
+			}
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}
