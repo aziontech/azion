@@ -77,7 +77,10 @@ func TestGetPath(t *testing.T) {
 			pathSettings = DEFAULT_SETTINGS
 
 			if tt.setPath != "" {
-				SetPath(tt.setPath)
+				err := SetPath(tt.setPath)
+				if err != nil {
+					panic(err)
+				}
 			}
 			if gotPath := GetPath(); gotPath != tt.wantPath {
 				t.Errorf("GetPath() = %v, want %v", gotPath, tt.wantPath)
@@ -142,7 +145,10 @@ func TestDir(t *testing.T) {
 			}
 
 			if tt.setPath != "" {
-				SetPath(tt.setPath)
+				err := SetPath(tt.setPath)
+				if err != nil {
+					panic(err)
+				}
 			}
 
 			gotDir, err := Dir()
