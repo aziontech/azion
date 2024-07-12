@@ -76,19 +76,29 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
-	if cmd.Flags().Changed("details") {
+	if opts.Details {
 		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
 	}
 
 	for _, v := range cache.Results {
-		ln := []string{
-			fmt.Sprintf("%d", v.Id),
-			v.Name,
-			v.BrowserCacheSettings,
-			v.CdnCacheSettings,
-			v.CacheByCookies,
-			fmt.Sprintf("%v", v.EnableCachingForPost),
+		ln := []string{}
+		if opts.Details {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				v.Name,
+				v.BrowserCacheSettings,
+				v.CdnCacheSettings,
+				v.CacheByCookies,
+				fmt.Sprintf("%v", v.EnableCachingForPost),
+			}
+		} else {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				v.Name,
+				v.BrowserCacheSettings,
+			}
 		}
+
 		listOut.Lines = append(listOut.Lines, ln)
 	}
 

@@ -62,15 +62,25 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	for _, v := range functions.Results {
-		ln := []string{
-			fmt.Sprintf("%d", v.GetId()),
-			v.GetName(),
-			v.GetLanguage(),
-			fmt.Sprintf("%v", v.GetActive()),
-			v.GetLastEditor(),
-			v.GetModified(),
-			fmt.Sprintf("%d", v.GetReferenceCount()),
-			v.GetInitiatorType(),
+		ln := []string{}
+		if opts.Details {
+			ln = []string{
+				fmt.Sprintf("%d", v.GetId()),
+				v.GetName(),
+				v.GetLanguage(),
+				fmt.Sprintf("%v", v.GetActive()),
+				v.GetLastEditor(),
+				v.GetModified(),
+				fmt.Sprintf("%d", v.GetReferenceCount()),
+				v.GetInitiatorType(),
+			}
+		} else {
+			ln = []string{
+				fmt.Sprintf("%d", v.GetId()),
+				v.GetName(),
+				v.GetLanguage(),
+				fmt.Sprintf("%v", v.GetActive()),
+			}
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}

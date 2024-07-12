@@ -64,17 +64,26 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 	}
 
 	for _, v := range resp {
-		var description string
-		if v.Description.Get() != nil {
-			description = *v.Description.Get()
-		}
 
-		ln := []string{
-			*v.Uuid,
-			utils.TruncateString(*v.Name),
-			v.ExpiresAt.Format(constants.FORMAT_DATE),
-			fmt.Sprintf("%v", *v.Created),
-			utils.TruncateString(description),
+		ln := []string{}
+		if details {
+			var description string
+			if v.Description.Get() != nil {
+				description = *v.Description.Get()
+			}
+			ln = []string{
+				*v.Uuid,
+				utils.TruncateString(*v.Name),
+				v.ExpiresAt.Format(constants.FORMAT_DATE),
+				fmt.Sprintf("%v", *v.Created),
+				utils.TruncateString(description),
+			}
+		} else {
+			ln = []string{
+				*v.Uuid,
+				utils.TruncateString(*v.Name),
+				v.ExpiresAt.Format(constants.FORMAT_DATE),
+			}
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}

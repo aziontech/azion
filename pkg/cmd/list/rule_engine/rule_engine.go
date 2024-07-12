@@ -88,17 +88,25 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
-	if cmd.Flags().Changed("details") {
+	if opts.Details {
 		listOut.Columns = []string{"ID", "NAME", "ORDER", "PHASE", "ACTIVE"}
 	}
 
 	for _, v := range rules.Results {
-		ln := []string{
-			fmt.Sprintf("%d", v.Id),
-			v.Name,
-			fmt.Sprintf("%d", v.Order),
-			v.Phase,
-			fmt.Sprintf("%v", v.IsActive),
+		ln := []string{}
+		if opts.Details {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				v.Name,
+				fmt.Sprintf("%d", v.Order),
+				v.Phase,
+				fmt.Sprintf("%v", v.IsActive),
+			}
+		} else {
+			ln = []string{
+				fmt.Sprintf("%d", v.Id),
+				v.Name,
+			}
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}

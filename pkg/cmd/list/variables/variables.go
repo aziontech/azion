@@ -82,12 +82,21 @@ func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.Li
 	}
 
 	for _, v := range resp {
-		ln := []string{
-			v.GetUuid(),
-			v.GetKey(),
-			utils.TruncateString(v.GetValue()),
-			fmt.Sprintf("%v", v.GetSecret()),
-			v.GetLastEditor(),
+		ln := []string{}
+		if opts.Details {
+			ln = []string{
+				v.GetUuid(),
+				v.GetKey(),
+				utils.TruncateString(v.GetValue()),
+				fmt.Sprintf("%v", v.GetSecret()),
+				v.GetLastEditor(),
+			}
+		} else {
+			ln = []string{
+				v.GetUuid(),
+				v.GetKey(),
+				utils.TruncateString(v.GetValue()),
+			}
 		}
 
 		listOut.Lines = append(listOut.Lines, ln)
