@@ -21,6 +21,7 @@ func TestNewSchedule(t *testing.T) {
 		name      string
 		schedule  Schedule
 		expectErr bool
+		schedules []Schedule
 	}{
 		{
 			name: "valid schedule",
@@ -29,6 +30,10 @@ func TestNewSchedule(t *testing.T) {
 				Kind: "TestKind",
 			},
 			expectErr: false,
+			schedules: []Schedule{
+				{Name: "Schedule1", Time: time.Now(), Kind: "Kind1"},
+				{Name: "Schedule2", Time: time.Now(), Kind: "Kind2"},
+			},
 		},
 	}
 

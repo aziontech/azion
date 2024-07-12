@@ -20,6 +20,7 @@ type Schedule struct {
 
 var (
 	TriggerDelete func(f *cmdutil.Factory, name string) error = TriggerDeleteBucket
+	ReadSchedule  func() ([]Schedule, error)                  = readFileSchedule
 )
 
 func NewSchedule(name string, kind string) error {
@@ -29,7 +30,7 @@ func NewSchedule(name string, kind string) error {
 		Kind: kind,
 	}
 
-	schedules, err := readFileSchedule()
+	schedules, err := ReadSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return err
