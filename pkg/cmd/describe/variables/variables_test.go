@@ -13,50 +13,66 @@ import (
 
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("describe an variables", func(t *testing.T) {
-		mock := &httpmock.Registry{}
 
-		mock.Register(
-			httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
-			httpmock.JSONFromFile(".fixtures/variables.json"),
-		)
+	tests := []struct {
+		name      string
+		setupMock func(mock *httpmock.Registry)
+		args      []string
+		expectErr bool
+	}{
+		{
+			name: "describe a variable",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
+					httpmock.JSONFromFile(".fixtures/variables.json"),
+				)
+			},
+			args:      []string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4"},
+			expectErr: false,
+		},
+		{
+			name: "not found",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
+					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+				)
+			},
+			args:      []string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4"},
+			expectErr: true,
+		},
+		{
+			name: "no id sent",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "variables/123423424"),
+					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+				)
+			},
+			args:      []string{"--variable-id", "123423424"},
+			expectErr: true,
+		},
+	}
 
-		f, _, _ := testutils.NewFactory(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			if tt.setupMock != nil {
+				tt.setupMock(mock)
+			}
 
-		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--variable-id", "32e8ffca-4021-49a4-971f-330935566af4"})
+			f, _, _ := testutils.NewFactory(mock)
 
-		err := cmd.Execute()
-		require.NoError(t, err)
-	})
-	t.Run("not found", func(t *testing.T) {
-		mock := &httpmock.Registry{}
+			cmd := NewCmd(f)
+			cmd.SetArgs(tt.args)
+			err := cmd.Execute()
 
-		mock.Register(
-			httpmock.REST("GET", "variables/32e8ffca-4021-49a4-971f-330935566af4"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		err := cmd.Execute()
-		require.Error(t, err)
-	})
-
-	t.Run("no id sent", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		mock.Register(
-			httpmock.REST("GET", "variables/123423424"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--variable-id", "123423424"})
-
-		err := cmd.Execute()
-		require.Error(t, err)
-	})
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }

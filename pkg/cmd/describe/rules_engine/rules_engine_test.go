@@ -1,7 +1,6 @@
 package rulesengine
 
 import (
-	"log"
 	"net/http"
 	"testing"
 
@@ -14,51 +13,155 @@ import (
 
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("describe a rule engine", func(t *testing.T) {
-		mock := &httpmock.Registry{}
 
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
-			httpmock.JSONFromFile("./fixtures/rules.json"),
-		)
+	tests := []struct {
+		name      string
+		setupMock func(mock *httpmock.Registry)
+		args      []string
+		askInput  func(s string) (string, error)
+		expectErr bool
+	}{
+		{
+			name: "describe a rule engine",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+					httpmock.JSONFromFile("./fixtures/rules.json"),
+				)
+			},
+			args:      []string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "request"},
+			expectErr: false,
+		},
+		{
+			name: "describe a rule engine - ask for app id",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+					httpmock.JSONFromFile("./fixtures/rules.json"),
+				)
+			},
+			args: []string{"--rule-id", "173617", "--phase", "request"},
+			askInput: func(s string) (string, error) {
+				return "1678743802", nil
+			},
+			expectErr: false,
+		},
+		{
+			name: "describe a rule engine - ask for phase",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+					httpmock.JSONFromFile("./fixtures/rules.json"),
+				)
+			},
+			args: []string{"--application-id", "1678743802", "--rule-id", "173617"},
+			askInput: func(s string) (string, error) {
+				return "request", nil
+			},
+			expectErr: false,
+		},
+		{
+			name: "describe a rule engine - ask for rule id",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+					httpmock.JSONFromFile("./fixtures/rules.json"),
+				)
+			},
+			args: []string{"--application-id", "1678743802", "--phase", "request"},
+			askInput: func(s string) (string, error) {
+				return "173617", nil
+			},
+			expectErr: false,
+		},
+		{
+			name: "not found",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/666"),
+					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+				)
+			},
+			args:      []string{"--application-id", "1678743802", "--rule-id", "666", "--phase", "request"},
+			expectErr: true,
+		},
+		{
+			name: "missing mandatory flag",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/1"),
+					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+				)
+			},
+			args:      []string{},
+			expectErr: true,
+		},
+		{
+			name: "different phases",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/response/rules/173617"),
+					httpmock.JSONFromFile("./fixtures/rules.json"),
+				)
+			},
+			args:      []string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "response"},
+			expectErr: false,
+		},
+		{
+			name: "invalid JSON response",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/173617"),
+					httpmock.StringResponse("{invalid json"),
+				)
+			},
+			args:      []string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "request"},
+			expectErr: true,
+		},
+		{
+			name: "non-existent application ID",
+			setupMock: func(mock *httpmock.Registry) {
+				mock.Register(
+					httpmock.REST("GET", "edge_applications/999999999/rules_engine/request/rules/173617"),
+					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+				)
+			},
+			args:      []string{"--application-id", "999999999", "--rule-id", "173617", "--phase", "request"},
+			expectErr: true,
+		},
+		{
+			name: "invalid phase",
+			setupMock: func(mock *httpmock.Registry) {
+				// No mock needed for invalid phase
+			},
+			args:      []string{"--application-id", "1678743802", "--rule-id", "173617", "--phase", "invalid_phase"},
+			expectErr: true,
+		},
+	}
 
-		f, _, _ := testutils.NewFactory(mock)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			if tt.setupMock != nil {
+				tt.setupMock(mock)
+			}
 
-		cmd := NewCmd(f)
-		err := cmd.Execute()
-		if err != nil {
-			log.Println("error executing cmd err: ", err.Error())
-		}
-	})
+			f, _, _ := testutils.NewFactory(mock)
 
-	t.Run("not found", func(t *testing.T) {
-		mock := &httpmock.Registry{}
+			descCmd := NewDescribeCmd(f)
+			if tt.askInput != nil {
+				descCmd.AskInput = tt.askInput
+			}
 
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/666"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
+			cmd := NewCobraCmd(descCmd, f)
+			cmd.SetArgs(tt.args)
+			err := cmd.Execute()
 
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		err := cmd.Execute()
-		require.Error(t, err)
-	})
-
-	t.Run("missing mandatory flag", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules/1"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
-		cmd.SetArgs([]string{})
-
-		err := cmd.Execute()
-		require.Error(t, err)
-	})
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }
