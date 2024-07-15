@@ -1,4 +1,4 @@
-package domains
+package edge_storage
 
 import (
 	"net/http"
@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func TestDescribe(t *testing.T) {
+func TestDescribeObject(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	tests := []struct {
@@ -22,24 +22,24 @@ func TestDescribe(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			name:      "describe a domain",
-			request:   httpmock.REST("GET", "domains/1675272891"),
-			response:  httpmock.JSONFromFile("./fixtures/domain.json"),
-			args:      []string{"--domain-id", "1675272891"},
-			expectErr: false,
-		},
-		{
-			name:      "not found",
-			request:   httpmock.REST("GET", "domains/878"),
+			name:      "object not found",
+			request:   httpmock.REST("GET", "storage/buckets/unknown/objects/unknown-object"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-			args:      []string{"--domain-id", "878"},
+			args:      []string{"--bucket-name", "unknown", "--object-key", "unknown-object"},
 			expectErr: true,
 		},
 		{
-			name:      "no id sent",
-			request:   httpmock.REST("GET", "edge_applications/1234"),
+			name:      "missing bucket name",
+			request:   httpmock.REST("GET", "storage/buckets/missing/objects/test-object"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-			args:      []string{},
+			args:      []string{"--object-key", "test-object"},
+			expectErr: true,
+		},
+		{
+			name:      "missing object key",
+			request:   httpmock.REST("GET", "storage/buckets/test-bucket/objects/"),
+			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+			args:      []string{"--bucket-name", "test-bucket"},
 			expectErr: true,
 		},
 	}
@@ -49,8 +49,8 @@ func TestDescribe(t *testing.T) {
 			mock := &httpmock.Registry{}
 			mock.Register(tt.request, tt.response)
 
-			f, _, _ := testutils.NewFactory(mock)
-			cmd := NewCmd(f)
+			factory, _, _ := testutils.NewFactory(mock)
+			cmd := NewObject(factory)
 			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()

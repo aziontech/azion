@@ -11,6 +11,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
@@ -18,10 +19,32 @@ import (
 	"go.uber.org/zap"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var function_id int64
+var (
+	functionID int64
+)
+
+type DescribeCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Get      func(context.Context, int64) (api.EdgeFunctionResponse, error)
+}
+
+func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
+	return &DescribeCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Get: func(ctx context.Context, functionID int64) (api.EdgeFunctionResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Get(ctx, functionID)
+		},
+	}
+}
+
+func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
-	cmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
@@ -35,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := utils.AskInput(msg.AskEdgeFunctionID)
+				answer, err := describe.AskInput(msg.AskEdgeFunctionID)
 				if err != nil {
 					return err
 				}
@@ -46,34 +69,33 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdFunction
 				}
 
-				function_id = num
+				functionID = num
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-
 			ctx := context.Background()
-			resp, err := client.Get(ctx, function_id)
+			resp, err := describe.Get(ctx, functionID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetFunction.Error(), err)
 			}
 
-			fields := make(map[string]string, 0)
-			fields["Id"] = "ID"
-			fields["Name"] = "Name"
-			fields["Active"] = "Active"
-			fields["Language"] = "Language"
-			fields["ReferenceCount"] = "Reference Count"
-			fields["Modified"] = "Modified at"
-			fields["InitiatorType"] = "Initiator Type"
-			fields["LastEditor"] = "Last Editor"
-			fields["FunctionToRun"] = "Function to run"
-			fields["JsonArgs"] = "JSON Args"
+			fields := map[string]string{
+				"Id":             "ID",
+				"Name":           "Name",
+				"Active":         "Active",
+				"Language":       "Language",
+				"ReferenceCount": "Reference Count",
+				"Modified":       "Modified at",
+				"InitiatorType":  "Initiator Type",
+				"LastEditor":     "Last Editor",
+				"FunctionToRun":  "Function to run",
+				"JsonArgs":       "JSON Args",
+			}
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
+					Out:   f.IOStreams.Out,
 					Msg:   filepath.Clean(opts.OutPath),
 					Flags: f.Flags,
-					Out:   f.IOStreams.Out,
 				},
 				Fields: fields,
 				Values: resp,
@@ -87,9 +109,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&function_id, "function-id", 0, msg.FlagID)
-	cmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
-	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
+	cobraCmd.Flags().Int64Var(&functionID, "function-id", 0, msg.FlagID)
+	cobraCmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
-	return cmd
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDescribeCmd(f), f)
 }

@@ -4,12 +4,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"go.uber.org/zap/zapcore"
-
 	"github.com/aziontech/azion-cli/pkg/httpmock"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 var successResponse string = `
@@ -32,59 +31,64 @@ var successResponse string = `
 
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("describe a function", func(t *testing.T) {
-		mock := &httpmock.Registry{}
 
-		mock.Register(
-			httpmock.REST("GET", "edge_functions/123"),
-			httpmock.JSONFromString(successResponse),
-		)
+	tests := []struct {
+		name      string
+		request   httpmock.Matcher
+		response  httpmock.Responder
+		args      []string
+		expectErr bool
+		mockInput func(string) (string, error)
+	}{
+		{
+			name:      "describe a function",
+			request:   httpmock.REST("GET", "edge_functions/123"),
+			response:  httpmock.JSONFromString(successResponse),
+			args:      []string{"--function-id", "123"},
+			expectErr: false,
+		},
+		{
+			name:      "describe a function - no function id",
+			request:   httpmock.REST("GET", "edge_functions/123"),
+			response:  httpmock.JSONFromString(successResponse),
+			expectErr: false,
+			mockInput: func(s string) (string, error) {
+				return "123", nil
+			},
+		},
+		{
+			name:      "with code",
+			request:   httpmock.REST("GET", "edge_functions/123"),
+			response:  httpmock.JSONFromString(successResponse),
+			args:      []string{"--function-id", "123", "--with-code"},
+			expectErr: false,
+		},
+		{
+			name:      "not found",
+			request:   httpmock.REST("GET", "edge_functions/1234"),
+			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+			args:      []string{"--function-id", "1234", "--with-code"},
+			expectErr: true,
+		},
+	}
 
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--function-id", "123"})
-
-		err := cmd.Execute()
-		require.NoError(t, err)
-	})
-
-	t.Run("with code", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_functions/123"),
-			httpmock.JSONFromString(successResponse),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--function-id", "123", "--with-code"})
-
-		err := cmd.Execute()
-		require.NoError(t, err)
-
-		t.Run("not found", func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
-
-			mock.Register(
-				httpmock.REST("GET", "edge_functions/1234"),
-				httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-			)
+			mock.Register(tt.request, tt.response)
 
 			f, _, _ := testutils.NewFactory(mock)
-
-			cmd := NewCmd(f)
-
-			cmd.SetArgs([]string{"--function-id", "1234", "--with-code"})
+			descCmd := NewDescribeCmd(f)
+			descCmd.AskInput = tt.mockInput
+			cmd := NewCobraCmd(descCmd, f)
+			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()
-
-			require.Error(t, err)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
 		})
-
-	})
+	}
 }

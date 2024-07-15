@@ -14,56 +14,52 @@ import (
 func TestDescribe(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
-	t.Run("describe an edge application", func(t *testing.T) {
-		mock := &httpmock.Registry{}
+	tests := []struct {
+		name      string
+		request   httpmock.Matcher
+		response  httpmock.Responder
+		args      []string
+		expectErr bool
+	}{
+		{
+			name:      "describe an edge application",
+			request:   httpmock.REST("GET", "edge_applications/1232132135"),
+			response:  httpmock.JSONFromFile("./fixtures/response.json"),
+			args:      []string{"--application-id", "1232132135"},
+			expectErr: false,
+		},
+		{
+			name:      "not found",
+			request:   httpmock.REST("GET", "edge_applications/1234"),
+			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+			args:      []string{"--application-id", "1234"},
+			expectErr: true,
+		},
+		{
+			name:      "no id sent",
+			request:   httpmock.REST("GET", "edge_applications/1234"),
+			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
+			args:      []string{},
+			expectErr: true,
+		},
+	}
 
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1232132135"),
-			httpmock.JSONFromFile("./fixtures/response.json"),
-		)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			mock.Register(tt.request, tt.response)
 
-		f, _, _ := testutils.NewFactory(mock)
+			f, _, _ := testutils.NewFactory(mock)
+			cmd := NewCmd(f)
+			cmd.SetArgs(tt.args)
 
-		cmd := NewCmd(f)
+			err := cmd.Execute()
 
-		cmd.SetArgs([]string{"--application-id", "1232132135"})
-
-		err := cmd.Execute()
-		require.NoError(t, err)
-	})
-	t.Run("not found", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1234"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--application-id", "1234"})
-
-		err := cmd.Execute()
-
-		require.Error(t, err)
-	})
-
-	t.Run("no id sent", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1234"),
-			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		err := cmd.Execute()
-
-		require.Error(t, err)
-	})
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
 }

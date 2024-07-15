@@ -10,29 +10,51 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var applicationID string
+var (
+	applicationID string
+)
+
+type DescribeCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Get      func(context.Context, string) (api.EdgeApplicationResponse, error)
+}
+
+func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
+	return &DescribeCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Get: func(ctx context.Context, applicationID string) (api.EdgeApplicationResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Get(ctx, applicationID)
+		},
+	}
+}
+
+func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
-	cmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion describe edge-application --application-id 4312
-        $ azion describe edge-application --application-id 1337 --out "./tmp/test.json"
-        $ azion describe edge-application --application-id 1337 --format json
-        `),
+		$ azion describe edge-application --application-id 4312
+		$ azion describe edge-application --application-id 1337 --out "./tmp/test.json"
+		$ azion describe edge-application --application-id 1337 --format json
+		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.AskInputApplicationID)
+				answer, err := describe.AskInput(msg.AskInputApplicationID)
 				if err != nil {
 					return err
 				}
@@ -40,33 +62,31 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				applicationID = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-
 			ctx := context.Background()
-			resp, err := client.Get(ctx, applicationID)
+			resp, err := describe.Get(ctx, applicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
 			}
 
-			fields := make(map[string]string, 0)
-
-			fields["Id"] = "ID"
-			fields["Name"] = "Name"
-			fields["Active"] = "Active"
-			fields["ApplicationAcceleration"] = "Application Acceleration"
-			fields["Caching"] = "Caching"
-			fields["DeliveryProtocol"] = "Delivery Protocol"
-			fields["DeviceDetection"] = "Device Detection"
-			fields["EdgeFirewall"] = "Edge Firewall"
-			fields["EdgeFunctions"] = "Edge Functions"
-			fields["HttpPort"] = "Http Port"
-			fields["HttpsPort"] = "HttpsPort"
-			fields["ImageOptimization"] = "Image Optimization"
-			fields["L2Caching"] = "L2 Caching"
-			fields["LoadBalancer"] = "Load Balancer"
-			fields["MinimumTlsVersion"] = "Minimum TLS Version"
-			fields["RawLogs"] = "Raw Logs"
-			fields["WebApplicationFirewall"] = "Web Application Firewall"
+			fields := map[string]string{
+				"Id":                      "ID",
+				"Name":                    "Name",
+				"Active":                  "Active",
+				"ApplicationAcceleration": "Application Acceleration",
+				"Caching":                 "Caching",
+				"DeliveryProtocol":        "Delivery Protocol",
+				"DeviceDetection":         "Device Detection",
+				"EdgeFirewall":            "Edge Firewall",
+				"EdgeFunctions":           "Edge Functions",
+				"HttpPort":                "Http Port",
+				"HttpsPort":               "HttpsPort",
+				"ImageOptimization":       "Image Optimization",
+				"L2Caching":               "L2 Caching",
+				"LoadBalancer":            "Load Balancer",
+				"MinimumTlsVersion":       "Minimum TLS Version",
+				"RawLogs":                 "Raw Logs",
+				"WebApplicationFirewall":  "Web Application Firewall",
+			}
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
@@ -82,8 +102,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
-	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
-	return cmd
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDescribeCmd(f), f)
 }

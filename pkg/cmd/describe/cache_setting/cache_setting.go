@@ -14,6 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
@@ -25,9 +26,28 @@ var (
 	cacheSettingsID int64
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type DescribeCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Get      func(context.Context, int64, int64) (api.GetResponse, error)
+}
+
+func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
+	return &DescribeCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Get: func(ctx context.Context, appID, cacheID int64) (api.GetResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Get(ctx, appID, cacheID)
+		},
+	}
+}
+
+func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
-	cmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
@@ -41,7 +61,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.DescibeAskInputApplicationID)
+				answer, err := describe.AskInput(msg.DescibeAskInputApplicationID)
 				if err != nil {
 					return err
 				}
@@ -56,7 +76,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if !cmd.Flags().Changed("cache-setting-id") {
-				answer, err := utils.AskInput(msg.DescribeAskInputCacheID)
+				answer, err := describe.AskInput(msg.DescribeAskInputCacheID)
 				if err != nil {
 					return err
 				}
@@ -70,9 +90,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				cacheSettingsID = num
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			resp, err := client.Get(ctx, applicationID, cacheSettingsID)
+			resp, err := describe.Get(ctx, applicationID, cacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetCache.Error(), err)
 			}
@@ -107,8 +126,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DescribeFlagApplicationID)
-	cmd.Flags().Int64Var(&cacheSettingsID, "cache-setting-id", 0, msg.DescribeFlagCacheSettingsID)
-	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
-	return cmd
+	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DescribeFlagApplicationID)
+	cobraCmd.Flags().Int64Var(&cacheSettingsID, "cache-setting-id", 0, msg.DescribeFlagCacheSettingsID)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDescribeCmd(f), f)
 }
