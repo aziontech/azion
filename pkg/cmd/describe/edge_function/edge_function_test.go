@@ -38,6 +38,7 @@ func TestDescribe(t *testing.T) {
 		response  httpmock.Responder
 		args      []string
 		expectErr bool
+		mockInput func(string) (string, error)
 	}{
 		{
 			name:      "describe a function",
@@ -45,6 +46,15 @@ func TestDescribe(t *testing.T) {
 			response:  httpmock.JSONFromString(successResponse),
 			args:      []string{"--function-id", "123"},
 			expectErr: false,
+		},
+		{
+			name:      "describe a function - no function id",
+			request:   httpmock.REST("GET", "edge_functions/123"),
+			response:  httpmock.JSONFromString(successResponse),
+			expectErr: false,
+			mockInput: func(s string) (string, error) {
+				return "123", nil
+			},
 		},
 		{
 			name:      "with code",
@@ -68,7 +78,9 @@ func TestDescribe(t *testing.T) {
 			mock.Register(tt.request, tt.response)
 
 			f, _, _ := testutils.NewFactory(mock)
-			cmd := NewCmd(f)
+			descCmd := NewDescribeCmd(f)
+			descCmd.AskInput = tt.mockInput
+			cmd := NewCobraCmd(descCmd, f)
 			cmd.SetArgs(tt.args)
 
 			err := cmd.Execute()
