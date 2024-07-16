@@ -2,6 +2,7 @@ package purge
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -35,6 +36,7 @@ func purgeUrls(urls []string, f *cmdutil.Factory) error {
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	err := clipurge.PurgeUrls(ctx, urls)
 	if err != nil {
+		fmt.Println(err.Error())
 		logger.Debug("Error while purging URLs", zap.Error(err))
 		return err
 	}
