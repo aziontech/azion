@@ -17,9 +17,6 @@ import (
 
 func TestNewCmd(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	type apiMock struct {
-		method, url, path string
-	}
 
 	tests := []struct {
 		name      string
