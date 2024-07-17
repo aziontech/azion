@@ -87,7 +87,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), fields.ApplicationID, fields.Phase, reqSdk)
-
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 			}

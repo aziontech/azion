@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCreate(t *testing.T) {
@@ -81,5 +82,49 @@ func TestCreate(t *testing.T) {
 		cmd := NewCmd(f)
 		err := cmd.Execute()
 		require.Error(t, err)
+	})
+
+	t.Run("Error file not exist", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "domains"),
+			httpmock.JSONFromString("{}"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+		cmd.SetArgs([]string{"--file", "./fixtures/no_exist.json"})
+
+		err := cmd.Execute()
+		require.ErrorIs(t, err, utils.ErrorUnmarshalReader)
+	})
+
+	t.Run("Error this is not number", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("POST", "domains"),
+			httpmock.JSONFromFile("./fixtures/response.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+		cmd.SetArgs([]string{
+			"--name", "one piece is the best",
+			"--application-id", "$1asf",
+			"--cname-access-only", "false",
+			"--active", "true",
+		})
+
+		err := cmd.Execute()
+
+		stringError := `invalid argument "$1asf" for "--application-id" flag: strconv.ParseInt: parsing "$1asf": invalid syntax`
+		if stringError == err.Error() {
+			return
+		}
+		t.Fatalf("Error: %q", err)
 	})
 }
