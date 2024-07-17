@@ -2,6 +2,7 @@ package edge_applications
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -38,22 +39,22 @@ const example = `
         `
 
 type Fields struct {
-	Name                           string
-	DeliveryProtocol               string
-	Http3                          string
-	HttpPort                       string
-	HttpsPort                      string
-	OriginType                     string
-	Address                        string
-	OriginProtocolPolicy           string
-	HostHeader                     string
-	BrowserCacheSettings           string
-	CdnCacheSettings               string
-	BrowserCacheSettingsMaximumTtl int64
-	CdnCacheSettingsMaximumTtl     int64
-	DebugRules                     string
-	SupportedCiphers               string
-	Websocket                      string
+	Name                           string `json:"name,omitempty"`
+	DeliveryProtocol               string `json:"delivery_protocol,omitempty"`
+	Http3                          string `json:"http_3,omitempty"`
+	HttpPort                       string `json:"http_port,omitempty"`
+	HttpsPort                      string `json:"https_port,omitempty"`
+	OriginType                     string `json:"origin_type,omitempty"`
+	Address                        string `json:"address,omitempty"`
+	OriginProtocolPolicy           string `json:"origin_protocol_policy,omitempty"`
+	HostHeader                     string `json:"host_header,omitempty"`
+	BrowserCacheSettings           string `json:"browser_cache_settings,omitempty"`
+	CdnCacheSettings               string `json:"cdn_cache_settings,omitempty"`
+	BrowserCacheSettingsMaximumTtl int64  `json:"browser_cache_settings_maximum_ttl,omitempty"`
+	CdnCacheSettingsMaximumTtl     int64  `json:"cdn_cache_settings_maximum_ttl,omitempty"`
+	DebugRules                     string `json:"debug_rules,omitempty"`
+	SupportedCiphers               string `json:"supported_ciphers,omitempty"`
+	Websocket                      string `json:"websocket,omitempty"`
 	Path                           string
 	OutPath                        string
 	Format                         string
@@ -79,11 +80,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
+
+				b, _ := json.MarshalIndent(fields, " ", " ")
+				fmt.Println(string(b))
+
+				b1, _ := json.MarshalIndent(request, " ", " ")
+				fmt.Println(string(b1))
+
 				err := createRequestFromFlags(fields, &request)
 				if err != nil {
 					return err
 				}
 			}
+
+			fmt.Println("request: ", request)
 
 			response, err := api.NewClient(
 				f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
@@ -108,6 +118,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
+	// fmt.Println(">> request: ", request)
+
+	b, _ := json.MarshalIndent(fields, " ", " ")
+	fmt.Println(string(b))
+
+	b1, _ := json.MarshalIndent(request, " ", " ")
+	fmt.Println(string(b1))
+
 	if utils.IsEmpty(fields.Name) {
 		answers, err := utils.AskInput("Enter the new Edge Application's name")
 		if err != nil {

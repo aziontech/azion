@@ -14,6 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
@@ -25,9 +26,28 @@ var (
 	originKey     string
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type DescribeCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Get      func(context.Context, int64, string) (api.GetResponse, error)
+}
+
+func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
+	return &DescribeCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Get: func(ctx context.Context, appID int64, key string) (api.GetResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Get(ctx, appID, key)
+		},
+	}
+}
+
+func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
-	cmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
@@ -40,39 +60,38 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answers, err := utils.AskInput(msg.AskAppID)
+				answer, err := describe.AskInput(msg.AskAppID)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
 				}
 
-				appID, err := strconv.Atoi(answers)
+				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
-					logger.Debug("Error while parsing string to integer", zap.Error(err))
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return utils.ErrorConvertingStringToInt
 				}
 
-				applicationID = int64(appID)
+				applicationID = num
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
-				answers, err := utils.AskInput(msg.AskOriginKey)
+				answer, err := describe.AskInput(msg.AskOriginKey)
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
 				}
 
-				originKey = answers
+				originKey = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			origin, err := client.Get(ctx, applicationID, originKey)
+			origin, err := describe.Get(ctx, applicationID, originKey)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
 
-			fields := make(map[string]string, 0)
+			fields := make(map[string]string)
 			fields["OriginId"] = "Origin ID"
 			fields["OriginKey"] = "Origin Key"
 			fields["Name"] = "Name"
@@ -92,9 +111,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
+					Out:   f.IOStreams.Out,
 					Msg:   filepath.Clean(opts.OutPath),
 					Flags: f.Flags,
-					Out:   f.IOStreams.Out,
 				},
 				Fields: fields,
 				Values: origin,
@@ -103,9 +122,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
-	cmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
-	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
+	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cobraCmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
-	return cmd
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDescribeCmd(f), f)
 }

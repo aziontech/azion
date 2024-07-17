@@ -12,12 +12,16 @@ import (
 
 func (c *Client) List(ctx context.Context) ([]sdk.PersonalTokenResponseGet, error) {
 	logger.Debug("List Personal Tokens")
-
 	resp, httpResp, err := c.apiClient.PersonalTokenApi.ListPersonalToken(ctx).Execute()
 	if err != nil {
-		logger.Error("Error while listing personal tokens", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while listing your personal token", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return resp.Results, nil
 }

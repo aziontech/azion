@@ -85,11 +85,19 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	}
 
 	for _, v := range resp.Results {
-		ln := []string{
-			v.GetKey(),
-			fmt.Sprintf("%v", v.GetLastModified()),
-			fmt.Sprintf("%v", v.GetSize()),
-			v.GetEtag(),
+		var ln []string
+		if b.Options.Details {
+			ln = []string{
+				v.GetKey(),
+				fmt.Sprintf("%v", v.GetLastModified()),
+				fmt.Sprintf("%v", v.GetSize()),
+				v.GetEtag(),
+			}
+		} else {
+			ln = []string{
+				v.GetKey(),
+				fmt.Sprintf("%v", v.GetLastModified()),
+			}
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}

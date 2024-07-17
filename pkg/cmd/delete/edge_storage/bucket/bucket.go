@@ -76,7 +76,6 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 
 			err = client.DeleteBucket(ctx, bucketName)
 			if err != nil {
-				fmt.Println(err.Error())
 				if msg.ERROR_NO_EMPTY_BUCKET == err.Error() {
 					if !forceDelete {
 						if !delete.ConfirmDelete(f.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) {

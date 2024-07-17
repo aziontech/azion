@@ -114,7 +114,8 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	logger.Debug("Running init command")
 
 	msgs := []string{}
-	err := node.NodeVersion()
+	nodeManager := node.NewNode()
+	err := nodeManager.NodeVer(nodeManager)
 	if err != nil {
 		return err
 	}

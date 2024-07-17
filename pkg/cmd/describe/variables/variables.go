@@ -5,24 +5,44 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"go.uber.org/zap"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/variables"
 
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	var variableID string
+type DescribeCmd struct {
+	Io       *iostreams.IOStreams
+	AskInput func(string) (string, error)
+	Get      func(context.Context, string) (api.Response, error)
+}
+
+var (
+	variableID string
+)
+
+func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
+	return &DescribeCmd{
+		Io: f.IOStreams,
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		Get: func(ctx context.Context, id string) (api.Response, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.Get(ctx, id)
+		},
+	}
+}
+
+func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
-	cmd := &cobra.Command{
+	cobraCmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
@@ -35,47 +55,50 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("variable-id") {
-				answers, err := utils.AskInput(msg.AskVariableID)
-
+				answer, err := describe.AskInput(msg.AskVariableID)
 				if err != nil {
-					logger.Debug("Error while parsing answer", zap.Error(err))
-					return utils.ErrorParseResponse
+					return err
 				}
 
-				variableID = answers
+				variableID = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			ctx := context.Background()
-			variable, err := client.Get(ctx, variableID)
+			variable, err := describe.Get(ctx, variableID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetItem.Error(), err)
 			}
 
-			fields := make(map[string]string, 0)
-			fields["Uuid"] = "Uuid"
-			fields["Key"] = "Key"
-			fields["Value"] = "Value"
-			fields["Secret"] = "Secret"
-			fields["LastEditor"] = "Last Editor"
-			fields["CreatedAt"] = "Create At"
-			fields["UpdatedAt"] = "Update At"
+			fields := map[string]string{
+				"Uuid":       "Uuid",
+				"Key":        "Key",
+				"Value":      "Value",
+				"Secret":     "Secret",
+				"LastEditor": "Last Editor",
+				"CreatedAt":  "Create At",
+				"UpdatedAt":  "Update At",
+			}
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
-					Msg:   filepath.Clean(opts.OutPath),
 					Out:   f.IOStreams.Out,
+					Msg:   filepath.Clean(opts.OutPath),
 					Flags: f.Flags,
 				},
 				Fields: fields,
 				Values: variable,
 			}
+
 			return output.Print(&describeOut)
 		},
 	}
 
-	cmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
-	cmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
+	cobraCmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
+	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
-	return cmd
+	return cobraCmd
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewDescribeCmd(f), f)
 }

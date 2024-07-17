@@ -5,12 +5,13 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap"
 )
 
 func vulcan(cmd *DevCmd, isFirewall bool) error {
 
+	vul := vulcanPkg.NewVulcan()
 	command := vul.Command("", "dev", cmd.F)
 	if isFirewall {
 		command = vul.Command("", "dev --firewall", cmd.F)

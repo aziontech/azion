@@ -7,12 +7,11 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type FieldsObjects struct {
+type fieldsObjects struct {
 	BucketName string `json:"bucket-name"`
 	ObjectKey  string `json:"object-key"`
 	Source     string `json:"source"`
-	FileJSON   string
-	Factory    *cmdutil.Factory
+	fileJSON   string
 }
 
 type FieldsBucket struct {

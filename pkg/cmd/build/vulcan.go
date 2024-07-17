@@ -7,7 +7,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
@@ -19,7 +19,8 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 		return err
 	}
 
-	err = vul.CheckVulcanMajor(vulcanVer, cmd.f)
+	vul := vulcanPkg.NewVulcan()
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
 	if err != nil {
 		return err
 	}

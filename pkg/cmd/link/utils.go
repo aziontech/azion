@@ -7,8 +7,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/vulcan"
-	vul "github.com/aziontech/azion-cli/pkg/vulcan"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	helpers "github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
@@ -73,7 +72,8 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return err
 	}
 
-	err = vulcan.CheckVulcanMajor(vulcanVer, cmd.F)
+	vul := vulcanPkg.NewVulcan()
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.F, vul)
 	if err != nil {
 		return err
 	}

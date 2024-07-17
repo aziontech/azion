@@ -21,7 +21,21 @@ const (
 
 var versionVulcan = "@latest"
 
-func Command(flags, params string, f *cmdutil.Factory) string {
+type VulcanPkg struct {
+	Command          func(flags, params string, f *cmdutil.Factory) string
+	CheckVulcanMajor func(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error
+	ReadSettings     func() (token.Settings, error)
+}
+
+func NewVulcan() *VulcanPkg {
+	return &VulcanPkg{
+		Command:          command,
+		CheckVulcanMajor: checkVulcanMajor,
+		ReadSettings:     token.ReadSettings,
+	}
+}
+
+func command(flags, params string, f *cmdutil.Factory) string {
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installEdgeFunctions
 		return fmt.Sprintf(installDebug, flags, versionVulcan, params)
@@ -29,8 +43,13 @@ func Command(flags, params string, f *cmdutil.Factory) string {
 	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
 }
 
-func CheckVulcanMajor(currentVersion string, f *cmdutil.Factory) error {
+func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {
 	parts := strings.Split(currentVersion, ".")
+	// strings.Split will always return at least one element, so parts will always be len>0
+	// to avoid this, I am checking if version is empty. If so, I just use an empty slice
+	if currentVersion == "" {
+		parts = []string{}
+	}
 
 	// Extract the first part and convert it to a number
 	if len(parts) > 0 {
@@ -39,7 +58,7 @@ func CheckVulcanMajor(currentVersion string, f *cmdutil.Factory) error {
 			return err
 		}
 
-		config, err := token.ReadSettings()
+		config, err := vulcan.ReadSettings()
 		if err != nil {
 			return err
 		}
