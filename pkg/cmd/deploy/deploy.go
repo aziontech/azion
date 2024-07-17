@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -199,40 +198,29 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			logger.Debug("Error while getting default rules engine", zap.Error(err))
 			return err
 		}
+		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
-		if strings.ToLower(conf.Preset) == "javascript" || strings.ToLower(conf.Preset) == "typescript" {
-			reqRules := apiEdgeApplications.UpdateRulesEngineRequest{}
-			reqRules.IdApplication = conf.Application.ID
+		var behString sdk.RulesEngineBehaviorString
+		behString.SetName("set_origin")
 
-			_, err := clients.EdgeApplication.UpdateRulesEnginePublish(ctx, &reqRules, conf.Function.InstanceID)
-			if err != nil {
-				return err
-			}
-		} else {
-			behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
 
-			var behString sdk.RulesEngineBehaviorString
-			behString.SetName("set_origin")
+		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+			RulesEngineBehaviorString: &behString,
+		})
 
-			behString.SetTarget(strconv.Itoa(int(singleOriginId)))
+		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
+			IdApplication: conf.Application.ID,
+			Phase:         "request",
+			Id:            ruleDefaultID,
+		}
 
-			behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-				RulesEngineBehaviorString: &behString,
-			})
+		reqUpdateRulesEngine.SetBehaviors(behaviors)
 
-			reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-				IdApplication: conf.Application.ID,
-				Phase:         "request",
-				Id:            ruleDefaultID,
-			}
-
-			reqUpdateRulesEngine.SetBehaviors(behaviors)
-
-			_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-			if err != nil {
-				logger.Debug("Error while updating default rules engine", zap.Error(err))
-				return err
-			}
+		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
+		if err != nil {
+			logger.Debug("Error while updating default rules engine", zap.Error(err))
+			return err
 		}
 	}
 
