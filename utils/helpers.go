@@ -625,3 +625,5 @@ func containsErrorMessageNameTaken(msg string) bool {
 func Timestamp() string {
 	return time.Now().Format("20060102150405")
 }
+
+func PointerString(v string) *string { return &v }

@@ -21,10 +21,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
-func NewObjects(f *cmdutil.Factory) *cobra.Command {
-	fields := &FieldsObjects{
-		Factory: f,
-	}
+func commandObjects(fact *factoryObjects) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.USAGE_OBJECTS,
 		Short:         msg.SHORT_DESCRIPTION_CREATE_OBJECTS,
@@ -32,31 +29,54 @@ func NewObjects(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(msg.EXAMPLE_CREATE_OBJECTS),
-		RunE:          fields.RunE,
+		RunE:          fact.RunE,
 	}
-	fields.AddFlags(cmd.Flags())
+	fact.AddFlags(cmd.Flags())
 	return cmd
 }
 
-func (fields *FieldsObjects) RunE(cmd *cobra.Command, args []string) error {
-	f := fields.Factory
+type factoryObjects struct {
+	Factory               *cmdutil.Factory
+	FlagFileUnmarshalJSON func(path string, request interface{}) error                      // utils.FlagFileUnmarshalJSON
+	Join                  func(elem ...string) string                                       // filepath.Join
+	MatchFilePath         func(path string, limAndPref ...int) (mimemagic.MediaType, error) // mimemagic.MatchFilePath
+	AskInput              func(msg string) (string, error)                                  // utils.AskInput
+	Open                  func(name string) (*os.File, error)                               // os.Open
+	Getwd                 func() (dir string, err error)                                    // os.Getwd
+	fieldsObjects
+}
+
+func NewFactoryObjects(fact *cmdutil.Factory) *factoryObjects {
+	return &factoryObjects{
+		Factory:               fact,
+		FlagFileUnmarshalJSON: utils.FlagFileUnmarshalJSON,
+		Join:                  filepath.Join,
+		MatchFilePath:         mimemagic.MatchFilePath,
+		AskInput:              utils.AskInput,
+		Open:                  os.Open,
+		Getwd:                 os.Getwd,
+	}
+}
+
+func (fact *factoryObjects) RunE(cmd *cobra.Command, args []string) error {
+	f := fact.Factory
 	if cmd.Flags().Changed("file") {
-		err := utils.FlagFileUnmarshalJSON(fields.FileJSON, &fields)
+		err := fact.FlagFileUnmarshalJSON(fact.fieldsObjects.fileJSON, &fact.fieldsObjects)
 		if err != nil {
 			return utils.ErrorUnmarshalReader
 		}
 	} else {
-		err := fields.CreateRequestFromFlags(cmd)
+		err := fact.CreateRequestFromFlags(cmd)
 		if err != nil {
 			return err
 		}
 	}
-	fileOptions, err := fileOptions(fields)
+	fileOptions, err := fileOptions(fact)
 	if err != nil {
 		return err
 	}
 	client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-	err = client.CreateObject(context.Background(), fileOptions, fields.BucketName, fields.ObjectKey)
+	err = client.CreateObject(context.Background(), fileOptions, fact.BucketName, fact.ObjectKey)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_CREATE_OBJECT, err)
 	}
@@ -67,60 +87,60 @@ func (fields *FieldsObjects) RunE(cmd *cobra.Command, args []string) error {
 	return output.Print(&creatOut)
 }
 
-func (fields *FieldsObjects) CreateRequestFromFlags(cmd *cobra.Command) error {
+func (fact *factoryObjects) CreateRequestFromFlags(cmd *cobra.Command) error {
 	if !cmd.Flags().Changed("bucket-name") {
-		answers, err := utils.AskInput(msg.ASK_NAME_CREATE_BUCKET)
+		answers, err := fact.AskInput(msg.ASK_NAME_CREATE_BUCKET)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.BucketName = answers
+		fact.BucketName = answers
 	}
 	if !cmd.Flags().Changed("object-key") {
-		answers, err := utils.AskInput(msg.ASK_OBJECT_KEY_CREATE_OBJECT)
+		answers, err := fact.AskInput(msg.ASK_OBJECT_KEY_CREATE_OBJECT)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.ObjectKey = answers
+		fact.ObjectKey = answers
 	}
 	if !cmd.Flags().Changed("source") {
-		answers, err := utils.AskInput(msg.ASK_SOURCE_CREATE_OBJECT)
+		answers, err := fact.AskInput(msg.ASK_SOURCE_CREATE_OBJECT)
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.Source = answers
+		fact.Source = answers
 	}
 	return nil
 }
 
-func (fields *FieldsObjects) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&fields.BucketName, "bucket-name", "", msg.FLAG_NAME_BUCKET)
-	flags.StringVar(&fields.ObjectKey, "object-key", "", msg.FLAG_NAME_CREATE_OBJECT)
-	flags.StringVar(&fields.Source, "source", "", msg.FLAG_NAME_CREATE_SOURCE)
-	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_OBJECTS)
+func (fact *factoryObjects) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&fact.BucketName, "bucket-name", "", msg.FLAG_NAME_BUCKET)
+	flags.StringVar(&fact.ObjectKey, "object-key", "", msg.FLAG_NAME_CREATE_OBJECT)
+	flags.StringVar(&fact.Source, "source", "", msg.FLAG_NAME_CREATE_SOURCE)
+	flags.StringVar(&fact.fileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_OBJECTS)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_OBJECTS)
 }
 
-func fileOptions(fields *FieldsObjects) (*contracts.FileOps, error) {
-	pathWorkingDir, err := os.Getwd()
+func fileOptions(fact *factoryObjects) (*contracts.FileOps, error) {
+	pathWorkingDir, err := fact.Getwd()
 	if err != nil {
 		return &contracts.FileOps{}, utils.ErrorInternalServerError
 	}
-	pathFull := filepath.Join(pathWorkingDir, fields.Source)
-	fileContent, err := os.Open(pathFull)
+	pathFull := fact.Join(pathWorkingDir, fact.Source)
+	fileContent, err := fact.Open(pathFull)
 	if err != nil {
-		logger.Debug("Error while trying to read file <"+fields.Source+"> about to be created object of the edge storage", zap.Error(err))
+		logger.Debug("Error while trying to read file <"+fact.Source+"> about to be created object of the edge storage", zap.Error(err))
 		return &contracts.FileOps{}, err
 	}
-	mimeType, err := mimemagic.MatchFilePath(fields.Source, -1)
+	mimeType, err := fact.MatchFilePath(fact.Source, -1)
 	if err != nil {
 		logger.Debug("Error while matching file path", zap.Error(err))
 		return &contracts.FileOps{}, err
 	}
 	return &contracts.FileOps{
-		Path:        fields.Source,
+		Path:        fact.Source,
 		MimeType:    mimeType.MediaType(),
 		FileContent: fileContent,
 	}, nil

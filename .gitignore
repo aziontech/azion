@@ -21,3 +21,4 @@ completions
 .idea/
 
 *.orig
+.DS_Store
