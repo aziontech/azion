@@ -35,12 +35,10 @@ var (
 )
 
 func CleanDirectory(dir string) error {
-
 	err := os.RemoveAll(dir)
 	if err != nil {
 		return fmt.Errorf("%w - %s", ErrorCleaningDirectory, dir)
 	}
-
 	return nil
 }
 

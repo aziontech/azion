@@ -10,7 +10,6 @@ import (
 )
 
 func TestCobraCmd(t *testing.T) {
-
 	t.Run("clean directory", func(t *testing.T) {
 		_ = os.MkdirAll("/tmp/ThisIsAzionCliTestDir", os.ModePerm)
 		err := CleanDirectory("/tmp/ThisIsAzionCliTestDir")
@@ -103,58 +102,64 @@ func TestIsEmpty(t *testing.T) {
 	var num *int
 
 	tests := []struct {
-		name string
-		args args
-		want bool
+		value interface{}
+		want  bool
 	}{
-		{
-			name: "string",
-			args: args{
-				value: "string",
-			},
-			want: false,
-		},
-		{
-			name: "string empty",
-			args: args{
-				value: "",
-			},
-			want: true,
-		},
-		{
-			name: "string empty pointer",
-			args: args{
-				value: str,
-			},
-			want: true,
-		},
-		{
-			name: "int",
-			args: args{
-				value: 1,
-			},
-			want: false,
-		},
-		{
-			name: "int number zero",
-			args: args{
-				value: 0,
-			},
-			want: false,
-		},
-		{
-			name: "int pointer",
-			args: args{
-				value: num,
-			},
-			want: true,
-		},
+		{value: "string", want: false},
+		{value: "", want: true},
+		{value: str, want: true},
+		{value: 1, want: false},
+		{value: 0, want: false},
+		{value: num, want: true},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := IsEmpty(tt.args.value); got != tt.want {
+		t.Run("", func(t *testing.T) {
+			if got := IsEmpty(tt.value); got != tt.want {
 				t.Errorf("IsEmpty() = %v, want %v", got, tt.want)
 			}
 		})
 	}
+}
+
+func TestCleanDirectory(t *testing.T) {
+	t.Run("Successful cleaning", func(t *testing.T) {
+		dir, err := os.MkdirTemp("", "testdir")
+		if err != nil {
+			t.Fatalf("Error creating temporary directory: %v", err)
+		}
+		defer os.RemoveAll(dir)
+
+		tempFile1 := filepath.Join(dir, "file1.txt")
+		tempFile2 := filepath.Join(dir, "file2.txt")
+		if err := os.WriteFile(tempFile1, []byte("content1"), 0666); err != nil {
+			t.Fatalf("Error creating temporary file: %v", err)
+		}
+		if err := os.WriteFile(tempFile2, []byte("content2"), 0666); err != nil {
+			t.Fatalf("Error creating temporary file: %v", err)
+		}
+
+		if _, err := os.Stat(tempFile1); os.IsNotExist(err) {
+			t.Fatalf("file %s not created", tempFile1)
+		}
+		if _, err := os.Stat(tempFile2); os.IsNotExist(err) {
+			t.Fatalf("file %s not created", tempFile2)
+		}
+
+		if err := CleanDirectory(dir); err != nil {
+			t.Errorf("CleanDirectory failed: %v", err)
+		}
+
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			t.Errorf("Dir %s not removed", dir)
+		}
+	})
+
+	t.Run("Error cleaning directory", func(t *testing.T) {
+		nonExistentDir := "."
+		err := CleanDirectory(nonExistentDir)
+		errExpected := "Failed to clean the directory's contents because the directory is read-only and/or isn't accessible. Change the attributes of the directory to read/write and/or give access to it - ."
+		if err != nil && err.Error() != errExpected {
+			t.Errorf("Error not expected %q", err)
+		}
+	})
 }
