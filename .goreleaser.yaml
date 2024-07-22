@@ -88,7 +88,7 @@ changelog:
       regexp: ^.*?docs(\([[:word:]]+\))??!?:.+$
       order: 50
     - title: "Tests"
-      regexp: ^.*?tests(\([[:word:]]+\))??!?:.+$
+      regexp: ^.*?(test(s)?(\([[:word:]]+\))?)!?:.+$
       order: 60
     - title: Other Work
       order: 999
