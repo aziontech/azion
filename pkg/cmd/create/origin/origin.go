@@ -126,7 +126,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	request.SetName(fields.Name)
 
 	if !cmd.Flags().Changed("origin-type") {
-		answer, err := utils.Select(msg.AskOriginType, []string{"single_origin", "object_storage"})
+		answer, err := utils.Select(utils.NewSelectPrompter(msg.AskOriginType, []string{"single_origin", "object_storage"}))
 		if err != nil {
 			return err
 		}

@@ -10,14 +10,17 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/manifoldco/promptui"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestCleanDirectory(t *testing.T) {
@@ -1178,9 +1181,7 @@ func (m mockAsk) Ask(qs []*survey.Question, response interface{}, opts ...survey
 	return m(qs, response, opts...)
 }
 
-// Testa a função AskInputEmpty
 func TestAskInputEmpty(t *testing.T) {
-
 	tests := []struct {
 		name         string
 		mockResponse mockAsk
@@ -1197,32 +1198,6 @@ func TestAskInputEmpty(t *testing.T) {
 			expected:    "non-empty input",
 			expectedErr: nil,
 		},
-		// {
-		// 	name: "User enters an empty string",
-		// 	mockResponse: func(qs []*survey.Question, response interface{}, opts ...survey.AskOpt) error {
-		// 		*(response.(*string)) = ""
-		// 		return nil
-		// 	},
-		// 	expected:    "",
-		// 	expectedErr: nil,
-		// },
-		// {
-		// 	name: "User interrupts the input",
-		// 	mockResponse: func(qs []*survey.Question, response interface{}, opts ...survey.AskOpt) error {
-		// 		return terminal.InterruptErr
-		// 	},
-		// 	expected:     "",
-		// 	expectedErr:  ErrorCancelledContextInput,
-		// 	exitExpected: true,
-		// },
-		// {
-		// 	name: "Error while parsing answer",
-		// 	mockResponse: func(qs []*survey.Question, response interface{}, opts ...survey.AskOpt) error {
-		// 		return errors.New("parse error")
-		// 	},
-		// 	expected:    "",
-		// 	expectedErr: ErrorParseResponse,
-		// },
 	}
 
 	for _, tt := range tests {
@@ -1232,7 +1207,7 @@ func TestAskInputEmpty(t *testing.T) {
 
 			if tt.exitExpected {
 				// Handle os.Exit call
-				assert.PanicsWithValue(t, 0, func() { AskInputEmpty("Test") })
+				assert.PanicsWithValue(t, 0, func() { AskInputEmpty("Test") }) //nolint:errcheck
 			} else {
 				result, err := AskInputEmpty("Test")
 				assert.Equal(t, tt.expected, result)
@@ -1274,7 +1249,7 @@ func TestAskInput(t *testing.T) {
 
 			if tt.exitExpected {
 				// Handle os.Exit call
-				assert.PanicsWithValue(t, 0, func() { AskInput("Test") })
+				assert.PanicsWithValue(t, 0, func() { AskInput("Test") }) //nolint:errcheck
 			} else {
 				result, err := AskInput("Test")
 				assert.Equal(t, tt.expected, result)
@@ -1313,7 +1288,7 @@ func TestAskPassword(t *testing.T) {
 
 			if tt.exitExpected {
 				// Handle os.Exit call
-				assert.PanicsWithValue(t, 0, func() { AskPassword("Test") })
+				assert.PanicsWithValue(t, 0, func() { AskPassword("Test") }) //nolint:errcheck
 			} else {
 				result, err := AskPassword("Test")
 				assert.Equal(t, tt.expected, result)
@@ -1323,6 +1298,480 @@ func TestAskPassword(t *testing.T) {
 					assert.NoError(t, err)
 				}
 			}
+		})
+	}
+}
+
+// faultyReader simulates a reader that can return an error.
+type faultyReader struct {
+	data   []byte
+	err    error
+	offset int
+}
+
+func (r *faultyReader) Read(p []byte) (int, error) {
+	if r.err != nil {
+		return 0, r.err
+	}
+	if r.offset >= len(r.data) {
+		return 0, io.EOF
+	}
+	n := copy(p, r.data[r.offset:])
+	r.offset += n
+	return n, nil
+}
+
+func TestLogAndRewindBody(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	tests := []struct {
+		name          string
+		responseBody  string
+		readError     error
+		expectedError error
+	}{
+		{
+			name:          "successful read",
+			responseBody:  `{"message": "success"}`,
+			readError:     nil,
+			expectedError: nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Mock the HTTP response body
+			body := io.NopCloser(&faultyReader{
+				data:   []byte(test.responseBody),
+				err:    test.readError,
+				offset: 0,
+			})
+			httpResp := &http.Response{
+				StatusCode: 200,
+				Header:     make(http.Header),
+				Body:       body,
+			}
+
+			err := LogAndRewindBody(httpResp)
+			if test.expectedError != nil {
+				assert.EqualError(t, err, test.expectedError.Error())
+			} else {
+				assert.NoError(t, err)
+
+				// Ensure the body is rewound correctly
+				bodyBytes, _ := io.ReadAll(httpResp.Body)
+				assert.Equal(t, test.responseBody, string(bodyBytes))
+			}
+		})
+	}
+}
+
+func TestFlagFileUnmarshalJSON(t *testing.T) {
+	tests := []struct {
+		name          string
+		path          string
+		input         string
+		expected      interface{}
+		unmarshallErr error
+		expectedError error
+	}{
+		{
+			name:          "read from stdin",
+			path:          "-",
+			input:         `{"key": "value"}`,
+			expected:      &map[string]string{"key": "value"},
+			unmarshallErr: nil,
+			expectedError: nil,
+		},
+		{
+			name:          "read from file",
+			path:          "testfile.json",
+			input:         `{"key": "value"}`,
+			expected:      &map[string]string{"key": "value"},
+			unmarshallErr: nil,
+			expectedError: nil,
+		},
+		{
+			name:          "error opening file",
+			path:          "nonexistent.json",
+			input:         ``,
+			expected:      nil,
+			unmarshallErr: nil,
+			expectedError: fmt.Errorf("%w: nonexistent.json", ErrorOpeningFile),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.path == "testfile.json" || test.path == "invalid.json" {
+				// Create a temporary file for testing
+				file, err := os.Create(test.path)
+				assert.NoError(t, err)
+				_, err = file.WriteString(test.input)
+				assert.NoError(t, err)
+				file.Close()
+				defer os.Remove(test.path) // Remove the file after the test
+			}
+
+			if test.path == "-" {
+				// Reset stdin to simulate stdin input
+				oldStdin := os.Stdin
+				defer func() { os.Stdin = oldStdin }()
+
+				r, w, _ := os.Pipe()
+				os.Stdin = r
+				_, err := w.Write([]byte(test.input))
+				assert.NoError(t, err)
+				w.Close()
+			}
+
+			var result interface{}
+			if test.expected != nil {
+				result = &map[string]string{}
+			}
+
+			err := FlagFileUnmarshalJSON(test.path, &result)
+			if test.expectedError != nil {
+				assert.EqualError(t, err, test.expectedError.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			}
+		})
+	}
+}
+
+func TestNewSelectPrompter(t *testing.T) {
+	tests := []struct {
+		name  string
+		label string
+		items []string
+	}{
+		{
+			name:  "test with label and items",
+			label: "Select an option",
+			items: []string{"item1", "item2"},
+		},
+		{
+			name:  "test with empty items",
+			label: "Select an option",
+			items: []string{},
+		},
+		{
+			name:  "test with no label",
+			label: "",
+			items: []string{"item1", "item2"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			prompter := NewSelectPrompter(test.label, test.items)
+			selectPrompt, ok := prompter.(*promptui.Select)
+			assert.True(t, ok)
+			assert.Equal(t, test.label, selectPrompt.Label)
+			assert.Equal(t, test.items, selectPrompt.Items)
+		})
+	}
+}
+
+type mockPrompter struct {
+	index  int
+	result string
+	err    error
+}
+
+func (mp *mockPrompter) Run() (int, string, error) {
+	return mp.index, mp.result, mp.err
+}
+
+func TestSelect(t *testing.T) {
+	tests := []struct {
+		name          string
+		prompter      Prompter
+		expected      string
+		expectedError error
+	}{
+		{
+			name:          "successful selection",
+			prompter:      &mockPrompter{index: 1, result: "item2", err: nil},
+			expected:      "item2",
+			expectedError: nil,
+		},
+		{
+			name:          "prompt error",
+			prompter:      &mockPrompter{index: -1, result: "", err: errors.New("prompt error")},
+			expected:      "",
+			expectedError: errors.New("prompt error"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := Select(test.prompter)
+			if test.expectedError != nil {
+				assert.EqualError(t, err, test.expectedError.Error())
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, test.expected, result)
+			}
+		})
+	}
+}
+
+func TestConcat(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected string
+	}{
+		{
+			name:     "no strings",
+			input:    []string{},
+			expected: "",
+		},
+		{
+			name:     "one string",
+			input:    []string{"hello"},
+			expected: "hello",
+		},
+		{
+			name:     "multiple strings",
+			input:    []string{"hello", " ", "world"},
+			expected: "hello world",
+		},
+		{
+			name:     "empty strings",
+			input:    []string{"", "", ""},
+			expected: "",
+		},
+		{
+			name:     "mix of empty and non-empty strings",
+			input:    []string{"hello", "", "world"},
+			expected: "helloworld",
+		},
+		{
+			name:     "strings with special characters",
+			input:    []string{"hello", "\n", "world"},
+			expected: "hello\nworld",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := Concat(test.input...)
+			assert.Equal(t, test.expected, result)
+		})
+	}
+}
+
+func mockStdin(input string) func() {
+	oldStdin := os.Stdin
+	r, w, _ := os.Pipe()
+	os.Stdin = r
+	go func() {
+		w.WriteString(input) //nolint:errcheck
+		w.Close()
+	}()
+	return func() { os.Stdin = oldStdin }
+}
+
+func TestConfirm(t *testing.T) {
+	tests := []struct {
+		name          string
+		globalFlagAll bool
+		msg           string
+		defaultYes    bool
+		input         string
+		expected      bool
+	}{
+		{
+			name:          "global flag all",
+			globalFlagAll: true,
+			msg:           "Proceed?",
+			defaultYes:    false,
+			input:         "",
+			expected:      true,
+		},
+		{
+			name:          "default yes with empty input",
+			globalFlagAll: false,
+			msg:           "Proceed?",
+			defaultYes:    true,
+			input:         "",
+			expected:      true,
+		},
+		{
+			name:          "default no with empty input",
+			globalFlagAll: false,
+			msg:           "Proceed?",
+			defaultYes:    false,
+			input:         "",
+			expected:      false,
+		},
+		{
+			name:          "input yes",
+			globalFlagAll: false,
+			msg:           "Proceed?",
+			defaultYes:    false,
+			input:         "y\n",
+			expected:      true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockInput := mockStdin(test.input)
+			defer mockInput()
+
+			// Redirects standard output to capture error messages
+			_, w, _ := os.Pipe()
+			oldStdout := os.Stdout
+			os.Stdout = w
+
+			result := Confirm(test.globalFlagAll, test.msg, test.defaultYes)
+
+			w.Close()
+			os.Stdout = oldStdout
+
+			assert.Equal(t, test.expected, result)
+		})
+	}
+}
+
+func TestFormat(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected int
+		err      error
+	}{
+		{
+			name:     "only digits",
+			input:    "12345",
+			expected: 12345,
+			err:      nil,
+		},
+		{
+			name:     "mixed digits and letters",
+			input:    "a1b2c3",
+			expected: 123,
+			err:      nil,
+		},
+		{
+			name:     "digits with special characters",
+			input:    "!@#1$2%3^",
+			expected: 123,
+			err:      nil,
+		},
+		{
+			name:     "digits with spaces",
+			input:    " 4 5 6 ",
+			expected: 456,
+			err:      nil,
+		},
+		{
+			name:     "leading and trailing spaces with digits",
+			input:    "   789   ",
+			expected: 789,
+			err:      nil,
+		},
+		{
+			name:     "negative numbers (minus sign ignored)",
+			input:    "-123",
+			expected: 123,
+			err:      nil,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := Format(test.input)
+			assert.Equal(t, test.expected, result)
+			assert.Equal(t, test.err, err)
+		})
+	}
+}
+
+func TestContainsErrorMessageNameTaken(t *testing.T) {
+	tests := []struct {
+		name     string
+		msg      string
+		expected bool
+	}{
+		{
+			name:     "message contains username taken",
+			msg:      "Error: Username is already taken",
+			expected: true,
+		},
+		{
+			name:     "message contains name in use",
+			msg:      "The name is already in use",
+			expected: true,
+		},
+		{
+			name:     "message contains none of the phrases",
+			msg:      "No errors found",
+			expected: false,
+		},
+		{
+			name:     "empty message",
+			msg:      "",
+			expected: false,
+		},
+		{
+			name:     "phrase is a substring",
+			msg:      "Username is already taken and cannot be used again",
+			expected: true,
+		},
+		{
+			name:     "partial match of error message",
+			msg:      "The error is: Name is already in use",
+			expected: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := containsErrorMessageNameTaken(test.msg)
+			assert.Equal(t, test.expected, result)
+		})
+	}
+}
+
+func abs(value float64) float64 {
+	if value < 0 {
+		return -value
+	}
+	return value
+}
+
+func TestTimestamp(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected string
+	}{
+		{
+			name:     "current timestamp",
+			expected: time.Now().Format("20060102150405"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result := Timestamp()
+
+			// Verifica o formato do timestamp
+			_, err := time.Parse("20060102150405", result)
+			assert.NoError(t, err)
+
+			// Verifica se o timestamp está dentro de um intervalo de 1 segundo
+			now := time.Now().Format("20060102150405")
+			nowTime, _ := time.Parse("20060102150405", now)
+			resultTime, _ := time.Parse("20060102150405", result)
+
+			diff := nowTime.Sub(resultTime).Seconds()
+			assert.LessOrEqual(t, abs(diff), 1.0) // A diferença deve ser no máximo 1 segundo
 		})
 	}
 }

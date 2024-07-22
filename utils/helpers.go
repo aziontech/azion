@@ -542,13 +542,19 @@ func FlagFileUnmarshalJSON(path string, request interface{}) error {
 	return cmdutil.UnmarshallJsonFromReader(file, &request)
 }
 
-func Select(label string, items []string) (string, error) {
-	prompt := promptui.Select{
+type Prompter interface {
+	Run() (int, string, error)
+}
+
+func NewSelectPrompter(label string, items []string) Prompter {
+	return &promptui.Select{
 		Label: label,
 		Items: items,
 	}
+}
 
-	_, result, err := prompt.Run()
+func Select(prompter Prompter) (string, error) {
+	_, result, err := prompter.Run()
 	if err != nil {
 		return "", err
 	}
