@@ -291,7 +291,7 @@ func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 // checks varying errors that may occur when status code is 500
 func checkStatusCode500Error(err error) error {
 
-	if strings.Contains(err.Error(), "Client.Timeout") {
+	if err != nil && strings.Contains(err.Error(), "Client.Timeout") {
 		return ErrorTimeoutAPICall
 	}
 
