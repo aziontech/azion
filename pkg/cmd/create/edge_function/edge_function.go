@@ -114,7 +114,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	}
 
 	if !cmd.Flags().Changed("active") {
-		answers, err := utils.Select(msg.AskActive, []string{"true", "false"})
+		answers, err := utils.Select(utils.NewSelectPrompter(msg.AskActive, []string{"true", "false"}))
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse

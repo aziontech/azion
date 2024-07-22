@@ -30,17 +30,13 @@ import (
 
 const shell = "/bin/sh"
 
-var (
-	NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict"}
-)
+var NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict"}
 
 func CleanDirectory(dir string) error {
-
 	err := os.RemoveAll(dir)
 	if err != nil {
 		return fmt.Errorf("%w - %s", ErrorCleaningDirectory, dir)
 	}
-
 	return nil
 }
 
@@ -419,6 +415,8 @@ func IsEmpty(value interface{}) bool {
 	return false
 }
 
+var AskOne = survey.AskOne
+
 func GetPackageManager() (string, error) {
 	opts := []string{"npm", "yarn"}
 	answer := ""
@@ -426,12 +424,14 @@ func GetPackageManager() (string, error) {
 		Message: "Choose a package manager:",
 		Options: opts,
 	}
-	err := survey.AskOne(prompt, &answer)
+	err := AskOne(prompt, &answer)
 	if err != nil {
 		return "", err
 	}
 	return answer, nil
 }
+
+var ask = survey.Ask
 
 func AskInputEmpty(msg string) (string, error) {
 	qs := []*survey.Question{
@@ -444,7 +444,7 @@ func AskInputEmpty(msg string) (string, error) {
 
 	answer := ""
 
-	err := survey.Ask(qs, &answer)
+	err := ask(qs, &answer)
 	if err == terminal.InterruptErr {
 		logger.Error(ErrorCancelledContextInput.Error())
 		os.Exit(0)
@@ -467,7 +467,7 @@ func AskInput(msg string) (string, error) {
 
 	answer := ""
 
-	err := survey.Ask(qs, &answer)
+	err := ask(qs, &answer)
 	if err == terminal.InterruptErr {
 		logger.Error(ErrorCancelledContextInput.Error())
 		os.Exit(0)
@@ -490,7 +490,7 @@ func AskPassword(msg string) (string, error) {
 
 	answer := ""
 
-	err := survey.Ask(qs, &answer)
+	err := ask(qs, &answer)
 	if err == terminal.InterruptErr {
 		logger.Error(ErrorCancelledContextInput.Error())
 		os.Exit(0)
@@ -542,13 +542,19 @@ func FlagFileUnmarshalJSON(path string, request interface{}) error {
 	return cmdutil.UnmarshallJsonFromReader(file, &request)
 }
 
-func Select(label string, items []string) (string, error) {
-	prompt := promptui.Select{
+type Prompter interface {
+	Run() (int, string, error)
+}
+
+func NewSelectPrompter(label string, items []string) Prompter {
+	return &promptui.Select{
 		Label: label,
 		Items: items,
 	}
+}
 
-	_, result, err := prompt.Run()
+func Select(prompter Prompter) (string, error) {
+	_, result, err := prompter.Run()
 	if err != nil {
 		return "", err
 	}

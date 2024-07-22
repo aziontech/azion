@@ -74,8 +74,9 @@ func (fields *FieldsBucket) CreateRequestFromFlags(cmd *cobra.Command, request *
 	}
 	if !cmd.Flags().Changed("edge-access") {
 		answers, err := utils.Select(
-			msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
-			[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)})
+			utils.NewSelectPrompter(
+				msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
+				[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)}))
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
