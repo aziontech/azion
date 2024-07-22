@@ -82,7 +82,6 @@ func TestSync(t *testing.T) {
 			syncCmd.GetAzionJsonContent = tt.mockGetContentFunc
 			syncCmd.WriteAzionJsonContent = tt.mockWriteFunc
 
-			// Replace syncResources function with mock
 			syncCmd.SyncResources = tt.mockSyncResources
 
 			err := Sync(syncCmd)
