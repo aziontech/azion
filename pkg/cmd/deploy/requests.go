@@ -274,7 +274,7 @@ func (cmd *DeployCmd) doOriginSingle(
 	ctx context.Context,
 	conf *contracts.AzionApplicationOptions,
 	msgs *[]string) (int64, error) {
-	var DefaultOrigin = [1]string{"httpbin.org"}
+	var DefaultOrigin = [1]string{"api.azion.net"}
 
 	if conf.NotFirstRun {
 		return 0, nil

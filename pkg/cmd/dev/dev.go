@@ -7,10 +7,10 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +25,7 @@ type DevCmd struct {
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
+	Vulcan                func() *vulcanPkg.VulcanPkg
 }
 
 func NewDevCmd(f *cmdutil.Factory) *DevCmd {
@@ -35,6 +36,7 @@ func NewDevCmd(f *cmdutil.Factory) *DevCmd {
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 			return utils.CommandRunInteractive(f, comm)
 		},
+		Vulcan: vulcanPkg.NewVulcan,
 	}
 }
 
@@ -72,13 +74,6 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 			Flags: f.Flags,
 		}
 		return output.Print(&outGen)
-	}
-
-	contract := &contracts.BuildInfo{}
-
-	if isFirewall {
-		contract.IsFirewall = isFirewall
-		contract.OwnWorker = "true"
 	}
 
 	err := vulcan(cmd, isFirewall)

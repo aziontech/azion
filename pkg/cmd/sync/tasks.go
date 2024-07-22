@@ -118,8 +118,9 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory) err
 			continue
 		}
 		newRule := contracts.AzionJsonDataRules{
-			Id:   rule.GetId(),
-			Name: rule.GetName(),
+			Id:    rule.GetId(),
+			Name:  rule.GetName(),
+			Phase: rule.GetPhase(),
 		}
 		info.Conf.RulesEngine.Rules = append(info.Conf.RulesEngine.Rules, newRule)
 		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
@@ -145,7 +146,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 	envs, err := godotenv.Read(synch.EnvPath)
 	if err != nil {
 		logger.Debug("Error while loading .env file", zap.Error(err))
-		return err
+		return nil // not every project has a .env file... this should not stop the execution
 	}
 
 	for _, variable := range resp {
