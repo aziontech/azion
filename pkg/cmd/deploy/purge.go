@@ -53,6 +53,9 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 }
 
 func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string, msgs *[]string) error {
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		return nil
+	}
 	listURLsDomains := domain.GetCnames()
 	if !domain.GetCnameAccessOnly() {
 		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
