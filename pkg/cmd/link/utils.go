@@ -114,7 +114,6 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 }
 
 func depsInstall(cmd *LinkCmd, packageManager string) error {
-	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {

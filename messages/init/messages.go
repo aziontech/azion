@@ -30,7 +30,7 @@ var (
 	EdgeApplicationsInitTypeNotSent       = "The application preset was not sent through the --template flag; By default when --template is not informed it is auto-detected based on the framework used by the user\n\n"
 	InitDevCommand                        = "If you want to start a local development server later, run 'azion dev'\n"
 	InitDeployCommand                     = "If you want to deploy your application later, run 'azion deploy'\n"
-	InitInstallDeps                       = "Installing application dependencies"
+	InitInstallDeps                       = "Installing application dependencies\n"
 	AskDeploy                             = "Do you want to deploy your project? (y/N)"
 	AskInstallDepsDev                     = "Do you want to install project dependencies? This may be required to start local development server (y/N)"
 	AskInstallDepsDeploy                  = "Do you want to install project dependencies? This may be required to deploy your project (y/N)"
