@@ -1,11 +1,16 @@
 package init
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
+	"log"
+	"net/http"
 	"os"
 	"os/exec"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
@@ -18,9 +23,14 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+)
+
+const (
+	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
 )
 
 type initCmd struct {
@@ -100,7 +110,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(msg.EXAMPLE),
-		RunE:          init.Run,
+		RunE:          init.NewRun,
 	}
 	cmd.Flags().StringVar(&init.name, "name", "", msg.FLAG_NAME)
 	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
@@ -108,6 +118,113 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
 	cmd.Flags().BoolVar(&init.auto, "auto", false, msg.FLAG_AUTO)
 	return cmd
+}
+
+func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
+	url := "https://os4bzngzt0.map.azionedge.net/api/templates"
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Error: unable to fetch data, status code:", resp.StatusCode)
+		return err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return err
+	}
+
+	templateMap := make(map[string][]Item)
+
+	var templates []Template
+	err = json.Unmarshal(body, &templates)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return err
+	}
+
+	listTemplates := make([]string, len(templates))
+
+	for number, value := range templates {
+		templateMap[value.Name] = value.Items
+		listTemplates[number] = value.Name
+	}
+
+	prompt := &survey.Select{
+		Message:  "Choose a preset:",
+		Options:  listTemplates,
+		PageSize: len(listTemplates),
+	}
+
+	var answer string
+	err = survey.AskOne(prompt, &answer)
+	if err != nil {
+		return err
+	}
+
+	templateOptions := make([]string, len(templateMap[answer]))
+	templateOptionsMap := make(map[string]Item)
+	for number, value := range templateMap[answer] {
+		templateOptions[number] = value.Name
+		templateOptionsMap[value.Name] = value
+	}
+
+	promptTemplate := &survey.Select{
+		Message:  "Choose a template:",
+		Options:  templateOptions,
+		PageSize: len(templateOptions),
+	}
+
+	var answerTemplate string
+	err = survey.AskOne(promptTemplate, &answerTemplate)
+	if err != nil {
+		return err
+	}
+
+	// Create a temporary directory
+	tempDir, err := os.MkdirTemp("", "tempclonesamples")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Defer deletion of the temporary directory
+	// defer func() {
+	// 	err := os.RemoveAll(tempDir)
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// 	fmt.Println("Temporary directory deleted")
+	// }()
+
+	fmt.Println(tempDir)
+
+	git := github.NewGithub()
+	err = git.Clone(SAMPLESURL, tempDir)
+	if err != nil {
+		logger.Debug("Error while cloning the repository", zap.Error(err))
+		return err
+	}
+
+	spew.Dump(templateOptionsMap[answerTemplate])
+
+	// prettyPrint(templates)
+
+	return nil
+}
+
+func prettyPrint(data interface{}) {
+	jsonData, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		fmt.Println("Error pretty printing JSON:", err)
+		return
+	}
+	fmt.Println(string(jsonData))
 }
 
 func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {

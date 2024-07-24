@@ -85,7 +85,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return err
 	}
 
-	// The list that comes from Vulcan comes with a blank line that we should remove.
+	// The list that comes from Vulcan has a blank line that we should remove.
 	outputInline := strings.Split(output, "\n")
 	noLastItem := len(outputInline) - 1
 	listPresets := make([]string, noLastItem)
