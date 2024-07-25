@@ -2,6 +2,8 @@ package init
 
 import (
 	"encoding/json"
+	"fmt"
+	"path"
 
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -10,8 +12,9 @@ import (
 
 func (cmd *initCmd) createTemplateAzion() error {
 
-	err := cmd.mkdir(cmd.pathWorkingDir+"/azion", 0755) // 0755 is the permission mode for the new directories
+	err := cmd.mkdir(path.Join(cmd.pathWorkingDir, "azion"), 0755) // 0755 is the permission mode for the new directories
 	if err != nil {
+		fmt.Println(err.Error())
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
 

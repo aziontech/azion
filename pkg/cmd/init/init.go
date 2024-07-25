@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -23,7 +25,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -31,6 +32,7 @@ import (
 
 const (
 	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
+	APIURL     = "https://os4bzngzt0.map.azionedge.net/api/templates"
 )
 
 type initCmd struct {
@@ -121,22 +123,42 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
-	url := "https://os4bzngzt0.map.azionedge.net/api/templates"
-	resp, err := http.Get(url)
+	pathWorkingDirHere, err := cmd.getWorkDir()
 	if err != nil {
-		fmt.Println("Error:", err)
+		logger.Debug("Error while getting working directory", zap.Error(err))
+		return err
+	}
+
+	msgs := []string{}
+
+	// Checks for global --yes flag and that name flag was not sent
+	if cmd.globalFlagAll && cmd.name == "" {
+		cmd.name = thoth.GenerateName()
+	} else {
+		// if name was not sent we ask for input, otherwise info.Name already has the value
+		if cmd.name == "" {
+			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
+			if err != nil {
+				return err
+			}
+			cmd.name = projName
+		}
+	}
+
+	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+
+	resp, err := http.Get(APIURL)
+	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error: unable to fetch data, status code:", resp.StatusCode)
 		return err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
 		return err
 	}
 
@@ -145,7 +167,6 @@ func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
 	var templates []Template
 	err = json.Unmarshal(body, &templates)
 	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
 		return err
 	}
 
@@ -190,19 +211,16 @@ func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
 	// Create a temporary directory
 	tempDir, err := os.MkdirTemp("", "tempclonesamples")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	// Defer deletion of the temporary directory
-	// defer func() {
-	// 	err := os.RemoveAll(tempDir)
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// 	fmt.Println("Temporary directory deleted")
-	// }()
-
-	fmt.Println(tempDir)
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	git := github.NewGithub()
 	err = git.Clone(SAMPLESURL, tempDir)
@@ -211,11 +229,78 @@ func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	spew.Dump(templateOptionsMap[answerTemplate])
+	//move contents from temporary directory into final destination
+	err = cmd.rename(path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path), path.Join(pathWorkingDirHere, cmd.name))
+	if err != nil {
+		fmt.Println(err.Error())
+		return utils.ErrorMovingFiles
+	}
 
-	// prettyPrint(templates)
+	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
+	cmd.mode = strings.ToLower(templateOptionsMap[answerTemplate].Mode)
 
-	return nil
+	if err = cmd.createTemplateAzion(); err != nil {
+		return err
+	}
+	logger.FInfoFlags(cmd.io.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
+	msgs = append(msgs, msg.WebAppInitCmdSuccess)
+
+	err = cmd.changeDir(cmd.pathWorkingDir)
+	if err != nil {
+		logger.Debug("Error while changing to new working directory", zap.Error(err))
+		return msg.ErrorWorkingDir
+	}
+
+	err = cmd.selectVulcanTemplates()
+	if err != nil {
+		return err
+	}
+
+	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msg.InitDevCommand)
+	} else {
+		if err := deps(c, cmd, msg.AskInstallDepsDev); err != nil {
+			return err
+		}
+		logger.Debug("Running dev command from init command")
+		dev := cmd.devCmd(cmd.f)
+		err = dev.Run(cmd.f)
+		if err != nil {
+			logger.Debug("Error while running dev command called by init command", zap.Error(err))
+			return err
+		}
+	}
+
+	if cmd.auto || !cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+		logger.FInfoFlags(cmd.io.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msg.InitDeployCommand)
+		msgEdgeAppInitSuccessFul := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
+		logger.FInfoFlags(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
+			cmd.f.Format, cmd.f.Out)
+		msgs = append(msgs, msgEdgeAppInitSuccessFul)
+	} else {
+		if err := deps(c, cmd, msg.AskInstallDepsDeploy); err != nil {
+			return err
+		}
+
+		logger.Debug("Running deploy command from init command")
+		deploy := cmd.deployCmd(cmd.f)
+		err = deploy.Run(cmd.f)
+		if err != nil {
+			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
+			return err
+		}
+	}
+
+	initOut := output.SliceOutput{
+		GeneralOutput: output.GeneralOutput{
+			Out:   cmd.f.IOStreams.Out,
+			Flags: cmd.f.Flags,
+		},
+		Messages: msgs,
+	}
+	return output.Print(&initOut)
 }
 
 func prettyPrint(data interface{}) {
