@@ -225,7 +225,6 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	//move contents from temporary directory into final destination
 	err = cmd.rename(path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path), path.Join(pathWorkingDirHere, cmd.name))
 	if err != nil {
-		fmt.Println(err.Error())
 		return utils.ErrorMovingFiles
 	}
 
