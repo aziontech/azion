@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 
@@ -21,7 +20,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
@@ -48,7 +46,6 @@ type initCmd struct {
 	io                    *iostreams.IOStreams
 	getWorkDir            func() (string, error)
 	fileReader            func(path string) ([]byte, error)
-	lookPath              func(bin string) (string, error)
 	isDirEmpty            func(dirpath string) (bool, error)
 	cleanDir              func(dirpath string) error
 	writeFile             func(filename string, data []byte, perm fs.FileMode) error
@@ -75,7 +72,6 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		io:              f.IOStreams,
 		getWorkDir:      utils.GetWorkingDir,
 		fileReader:      os.ReadFile,
-		lookPath:        exec.LookPath,
 		isDirEmpty:      utils.IsDirEmpty,
 		cleanDir:        utils.CleanDirectory,
 		writeFile:       os.WriteFile,
@@ -112,17 +108,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       heredoc.Doc(msg.EXAMPLE),
-		RunE:          init.NewRun,
+		RunE:          init.Run,
 	}
 	cmd.Flags().StringVar(&init.name, "name", "", msg.FLAG_NAME)
 	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
-	cmd.Flags().StringVar(&init.preset, "preset", "", msg.FLAG_PRESET)
-	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
 	cmd.Flags().BoolVar(&init.auto, "auto", false, msg.FLAG_AUTO)
 	return cmd
 }
 
-func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
+func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	pathWorkingDirHere, err := cmd.getWorkDir()
 	if err != nil {
 		logger.Debug("Error while getting working directory", zap.Error(err))
@@ -254,127 +248,6 @@ func (cmd *initCmd) NewRun(c *cobra.Command, _ []string) error {
 	err = cmd.selectVulcanTemplates()
 	if err != nil {
 		return err
-	}
-
-	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
-		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msg.InitDevCommand)
-	} else {
-		if err := deps(c, cmd, msg.AskInstallDepsDev); err != nil {
-			return err
-		}
-		logger.Debug("Running dev command from init command")
-		dev := cmd.devCmd(cmd.f)
-		err = dev.Run(cmd.f)
-		if err != nil {
-			logger.Debug("Error while running dev command called by init command", zap.Error(err))
-			return err
-		}
-	}
-
-	if cmd.auto || !cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
-		logger.FInfoFlags(cmd.io.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msg.InitDeployCommand)
-		msgEdgeAppInitSuccessFul := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
-		logger.FInfoFlags(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
-			cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msgEdgeAppInitSuccessFul)
-	} else {
-		if err := deps(c, cmd, msg.AskInstallDepsDeploy); err != nil {
-			return err
-		}
-
-		logger.Debug("Running deploy command from init command")
-		deploy := cmd.deployCmd(cmd.f)
-		err = deploy.Run(cmd.f)
-		if err != nil {
-			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
-			return err
-		}
-	}
-
-	initOut := output.SliceOutput{
-		GeneralOutput: output.GeneralOutput{
-			Out:   cmd.f.IOStreams.Out,
-			Flags: cmd.f.Flags,
-		},
-		Messages: msgs,
-	}
-	return output.Print(&initOut)
-}
-
-func prettyPrint(data interface{}) {
-	jsonData, err := json.MarshalIndent(data, "", "    ")
-	if err != nil {
-		fmt.Println("Error pretty printing JSON:", err)
-		return
-	}
-	fmt.Println(string(jsonData))
-}
-
-func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
-	logger.Debug("Running init command")
-
-	msgs := []string{}
-	nodeManager := node.NewNode()
-	err := nodeManager.NodeVer(nodeManager)
-	if err != nil {
-		return err
-	}
-
-	cmd.globalFlagAll = cmd.f.GlobalFlagAll
-
-	path, err := cmd.getWorkDir()
-	if err != nil {
-		logger.Debug("Error while getting working directory", zap.Error(err))
-		return err
-	}
-	cmd.pathWorkingDir = path
-
-	// Checks for global --yes flag and that name flag was not sent
-	if cmd.globalFlagAll && cmd.name == "" {
-		cmd.name = thoth.GenerateName()
-	} else {
-		// if name was not sent we ask for input, otherwise info.Name already has the value
-		if cmd.name == "" {
-			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
-			if err != nil {
-				return err
-			}
-			cmd.name = projName
-		}
-	}
-
-	cmd.pathWorkingDir = cmd.pathWorkingDir + "/" + cmd.name
-	err = cmd.selectVulcanTemplates()
-	if err != nil {
-		return err
-	}
-
-	if err = cmd.createTemplateAzion(); err != nil {
-		return err
-	}
-	logger.FInfoFlags(cmd.io.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
-	msgs = append(msgs, msg.WebAppInitCmdSuccess)
-
-	err = cmd.changeDir(cmd.pathWorkingDir)
-	if err != nil {
-		logger.Debug("Error while changing to new working directory", zap.Error(err))
-		return msg.ErrorWorkingDir
-	}
-
-	git := github.NewGithub()
-
-	gitignore, err := git.CheckGitignore(cmd.pathWorkingDir)
-	if err != nil {
-		return msg.ErrorReadingGitignore
-	}
-	if !gitignore && (cmd.auto || cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
-		if err := git.WriteGitignore(cmd.pathWorkingDir); err != nil {
-			return msg.ErrorWritingGitignore
-		}
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WrittenGitignore, cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msg.WrittenGitignore)
 	}
 
 	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
