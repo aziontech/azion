@@ -36,7 +36,6 @@ const (
 type initCmd struct {
 	name                  string
 	preset                string
-	template              string
 	auto                  bool
 	mode                  string
 	packageManager        string
