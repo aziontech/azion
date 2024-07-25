@@ -5,7 +5,6 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
-	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/init"
@@ -180,7 +179,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
 	} else {
-		if err := deps(c, cmd, &msgs); err != nil {
+		if err := deps(c, cmd, msg.AskInstallDepsDev, &msgs); err != nil {
 			return err
 		}
 		logger.Debug("Running dev command from init command")
@@ -200,7 +199,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFul)
 	} else {
-		if err := deps(c, cmd, &msgs); err != nil {
+		if err := deps(c, cmd, msg.AskInstallDepsDeploy, &msgs); err != nil {
 			return err
 		}
 
@@ -223,44 +222,28 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	return output.Print(&initOut)
 }
 
-func deps(c *cobra.Command, cmd *initCmd, msgs *[]string) error {
-	pacManIsInformed := c.Flags().Changed("package-manager")
-	var err error
+func deps(c *cobra.Command, cmd *initCmd, m string, msgs *[]string) error {
+	if !c.Flags().Changed("package-manager") {
+		if !cmd.shouldDevDeploy(m, cmd.globalFlagAll, true) {
+			return nil
+		}
 
-	pacMan := cmd.packageManager
-	if !pacManIsInformed {
 		pathWorkDir, err := cmd.getWorkDir()
 		if err != nil {
 			return err
 		}
 
-		npmLockFile := filepath.Join(pathWorkDir, "package-lock.json")
-		yarnLockFile := filepath.Join(pathWorkDir, "yarn.lock")
-		pnpmLockFile := filepath.Join(pathWorkDir, "pnpm-lock.yaml")
-
-		npmExists := utils.FileExists(npmLockFile)
-		yarnExists := utils.FileExists(yarnLockFile)
-		pnpmExists := utils.FileExists(pnpmLockFile)
-
-		if npmExists {
-			pacMan = "npm"
-		} else if yarnExists {
-			pacMan = "yarn"
-		} else if pnpmExists {
-			pacMan = "pnpm"
-		} else {
-			logger.FInfoFlags(cmd.io.Out, msg.NoHasPackageManager, cmd.f.Format, cmd.f.Out)
-			*msgs = append(*msgs, msg.NoHasPackageManager)
-			return nil
-		}
+		cmd.packageManager = node.DetectPackageManager(pathWorkDir)
 	}
 
 	logger.FInfoFlags(cmd.io.Out, msg.InstallDeps, cmd.f.Format, cmd.f.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
-	err = depsInstall(cmd, pacMan)
-	if err != nil {
+
+	if err := depsInstall(cmd, cmd.packageManager); err != nil {
 		logger.Debug("Failed to install project dependencies")
 		return err
 	}
+
 	return nil
 }
+

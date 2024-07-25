@@ -219,7 +219,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
-				if err := deps(c, cmd, info, &msgs); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
 					return err
 				}
 
@@ -236,7 +236,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
-				if err := deps(c, cmd, info, &msgs); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy, &msgs); err != nil {
 					return err
 				}
 
@@ -268,42 +268,26 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	return output.Print(&initOut)
 }
 
-func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, msgs *[]string) error {
-	pacManIsInformed := c.Flags().Changed("package-manager")
-	var err error
+func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]string) error {
+	if !c.Flags().Changed("package-manager") {
+		if !cmd.ShouldDevDeploy(info, m, true) {
+			return nil
+		}
 
-	pacMan := info.packageManager
-	if !pacManIsInformed {
+
 		pathWorkDir, err := cmd.GetWorkDir()
 		if err != nil {
 			return err
 		}
 
-		npmLockFile := filepath.Join(pathWorkDir, "package-lock.json")
-		yarnLockFile := filepath.Join(pathWorkDir, "yarn.lock")
-		pnpmLockFile := filepath.Join(pathWorkDir, "pnpm-lock.yaml")
-
-		npmExists := utils.FileExists(npmLockFile)
-		yarnExists := utils.FileExists(yarnLockFile)
-		pnpmExists := utils.FileExists(pnpmLockFile)
-
-		if npmExists {
-			pacMan = "npm"
-		} else if yarnExists {
-			pacMan = "yarn"
-		} else if pnpmExists {
-			pacMan = "pnpm"
-		} else {
-			logger.FInfoFlags(cmd.Io.Out, msg.NoHasPackageManager, cmd.F.Format, cmd.F.Out)
-			*msgs = append(*msgs, msg.NoHasPackageManager)
-			return nil
-		}
+		info.packageManager = node.DetectPackageManager(pathWorkDir)
 	}
 
 	logger.FInfoFlags(cmd.Io.Out, msg.InstallDeps, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
-	err = depsInstall(cmd, pacMan)
-	if err != nil {
+
+	
+	if err := depsInstall(cmd, info.packageManager); err != nil {
 		logger.Debug("Error while installing project dependencies", zap.Error(err))
 		return msg.ErrorDeps
 	}
