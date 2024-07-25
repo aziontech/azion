@@ -30,7 +30,7 @@ import (
 
 const (
 	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
-	APIURL     = "https://os4bzngzt0.map.azionedge.net/api/templates"
+	APIURL     = "https://api.azion.com/v4/utils/project_samples"
 )
 
 type initCmd struct {
