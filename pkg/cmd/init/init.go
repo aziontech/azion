@@ -234,22 +234,29 @@ func deps(c *cobra.Command, cmd *initCmd, msgs *[]string) error {
 			return err
 		}
 
+		npmLockFile := filepath.Join(pathWorkDir, "package-lock.json")
 		yarnLockFile := filepath.Join(pathWorkDir, "yarn.lock")
 		pnpmLockFile := filepath.Join(pathWorkDir, "pnpm-lock.yaml")
+
+		npmExists := utils.FileExists(npmLockFile)
 		yarnExists := utils.FileExists(yarnLockFile)
 		pnpmExists := utils.FileExists(pnpmLockFile)
 
-		if yarnExists {
+		if npmExists {
+			pacMan = "npm"
+		} else if yarnExists {
 			pacMan = "yarn"
 		} else if pnpmExists {
 			pacMan = "pnpm"
 		} else {
-			pacMan = "npm"
+			logger.FInfoFlags(cmd.io.Out, msg.NoHasPackageManager, cmd.f.Format, cmd.f.Out)
+			*msgs = append(*msgs, msg.NoHasPackageManager)
+			return nil
 		}
 	}
 
-	logger.FInfoFlags(cmd.io.Out, msg.InitInstallDeps, cmd.f.Format, cmd.f.Out)
-	*msgs = append(*msgs, msg.InitInstallDeps)
+	logger.FInfoFlags(cmd.io.Out, msg.InstallDeps, cmd.f.Format, cmd.f.Out)
+	*msgs = append(*msgs, msg.InstallDeps)
 	err = depsInstall(cmd, pacMan)
 	if err != nil {
 		logger.Debug("Failed to install project dependencies")

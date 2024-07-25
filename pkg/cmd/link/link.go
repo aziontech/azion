@@ -279,17 +279,24 @@ func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, msgs *[]string) error 
 			return err
 		}
 
+		npmLockFile := filepath.Join(pathWorkDir, "package-lock.json")
 		yarnLockFile := filepath.Join(pathWorkDir, "yarn.lock")
 		pnpmLockFile := filepath.Join(pathWorkDir, "pnpm-lock.yaml")
+
+		npmExists := utils.FileExists(npmLockFile)
 		yarnExists := utils.FileExists(yarnLockFile)
 		pnpmExists := utils.FileExists(pnpmLockFile)
 
-		if yarnExists {
+		if npmExists {
+			pacMan = "npm"
+		} else if yarnExists {
 			pacMan = "yarn"
 		} else if pnpmExists {
 			pacMan = "pnpm"
 		} else {
-			pacMan = "npm"
+			logger.FInfoFlags(cmd.Io.Out, msg.NoHasPackageManager, cmd.F.Format, cmd.F.Out)
+			*msgs = append(*msgs, msg.NoHasPackageManager)
+			return nil
 		}
 	}
 
