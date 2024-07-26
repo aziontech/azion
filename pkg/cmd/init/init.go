@@ -1,11 +1,17 @@
 package init
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
+	"log"
+	"net/http"
 	"os"
-	"os/exec"
+	"path"
+	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
@@ -14,7 +20,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
@@ -23,10 +28,14 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
+	APIURL     = "https://api.azion.com/v4/utils/project_samples"
+)
+
 type initCmd struct {
 	name                  string
 	preset                string
-	template              string
 	auto                  bool
 	mode                  string
 	packageManager        string
@@ -36,7 +45,6 @@ type initCmd struct {
 	io                    *iostreams.IOStreams
 	getWorkDir            func() (string, error)
 	fileReader            func(path string) ([]byte, error)
-	lookPath              func(bin string) (string, error)
 	isDirEmpty            func(dirpath string) (bool, error)
 	cleanDir              func(dirpath string) error
 	writeFile             func(filename string, data []byte, perm fs.FileMode) error
@@ -63,7 +71,6 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		io:              f.IOStreams,
 		getWorkDir:      utils.GetWorkingDir,
 		fileReader:      os.ReadFile,
-		lookPath:        exec.LookPath,
 		isDirEmpty:      utils.IsDirEmpty,
 		cleanDir:        utils.CleanDirectory,
 		writeFile:       os.WriteFile,
@@ -104,30 +111,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 	cmd.Flags().StringVar(&init.name, "name", "", msg.FLAG_NAME)
 	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
-	cmd.Flags().StringVar(&init.preset, "preset", "", msg.FLAG_PRESET)
-	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
 	cmd.Flags().BoolVar(&init.auto, "auto", false, msg.FLAG_AUTO)
 	return cmd
 }
 
 func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
-	logger.Debug("Running init command")
-
-	msgs := []string{}
-	nodeManager := node.NewNode()
-	err := nodeManager.NodeVer(nodeManager)
-	if err != nil {
-		return err
-	}
-
-	cmd.globalFlagAll = cmd.f.GlobalFlagAll
-
-	path, err := cmd.getWorkDir()
+	pathWorkingDirHere, err := cmd.getWorkDir()
 	if err != nil {
 		logger.Debug("Error while getting working directory", zap.Error(err))
 		return err
 	}
-	cmd.pathWorkingDir = path
+
+	msgs := []string{}
 
 	// Checks for global --yes flag and that name flag was not sent
 	if cmd.globalFlagAll && cmd.name == "" {
@@ -143,11 +138,98 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	cmd.pathWorkingDir = cmd.pathWorkingDir + "/" + cmd.name
-	err = cmd.selectVulcanTemplates()
+	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+
+	resp, err := http.Get(APIURL)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	templateMap := make(map[string][]Item)
+
+	var templates []Template
+	err = json.Unmarshal(body, &templates)
+	if err != nil {
+		return err
+	}
+
+	listTemplates := make([]string, len(templates))
+
+	for number, value := range templates {
+		templateMap[value.Name] = value.Items
+		listTemplates[number] = value.Name
+	}
+
+	prompt := &survey.Select{
+		Message:  "Choose a preset:",
+		Options:  listTemplates,
+		PageSize: len(listTemplates),
+	}
+
+	var answer string
+	err = survey.AskOne(prompt, &answer)
+	if err != nil {
+		return err
+	}
+
+	templateOptions := make([]string, len(templateMap[answer]))
+	templateOptionsMap := make(map[string]Item)
+	for number, value := range templateMap[answer] {
+		templateOptions[number] = value.Name
+		templateOptionsMap[value.Name] = value
+	}
+
+	promptTemplate := &survey.Select{
+		Message:  "Choose a template:",
+		Options:  templateOptions,
+		PageSize: len(templateOptions),
+	}
+
+	var answerTemplate string
+	err = survey.AskOne(promptTemplate, &answerTemplate)
+	if err != nil {
+		return err
+	}
+
+	// Create a temporary directory
+	tempDir, err := os.MkdirTemp("", "tempclonesamples")
+	if err != nil {
+		return err
+	}
+
+	// Defer deletion of the temporary directory
+	defer func() {
+		err := os.RemoveAll(tempDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	git := github.NewGithub()
+	err = git.Clone(SAMPLESURL, tempDir)
+	if err != nil {
+		logger.Debug("Error while cloning the repository", zap.Error(err))
+		return err
+	}
+
+	//move contents from temporary directory into final destination
+	err = cmd.rename(path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path), path.Join(pathWorkingDirHere, cmd.name))
+	if err != nil {
+		return utils.ErrorMovingFiles
+	}
+
+	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
+	cmd.mode = strings.ToLower(templateOptionsMap[answerTemplate].Mode)
 
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
@@ -161,18 +243,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	git := github.NewGithub()
-
-	gitignore, err := git.CheckGitignore(cmd.pathWorkingDir)
+	err = cmd.selectVulcanTemplates()
 	if err != nil {
-		return msg.ErrorReadingGitignore
-	}
-	if !gitignore && (cmd.auto || cmd.f.GlobalFlagAll || utils.Confirm(cmd.f.GlobalFlagAll, msg.AskGitignore, true)) {
-		if err := git.WriteGitignore(cmd.pathWorkingDir); err != nil {
-			return msg.ErrorWritingGitignore
-		}
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WrittenGitignore, cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msg.WrittenGitignore)
+		return err
 	}
 
 	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {

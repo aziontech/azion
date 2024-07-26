@@ -2,7 +2,6 @@ package edge_applications
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -80,20 +79,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-
-				b, _ := json.MarshalIndent(fields, " ", " ")
-				fmt.Println(string(b))
-
-				b1, _ := json.MarshalIndent(request, " ", " ")
-				fmt.Println(string(b1))
-
 				err := createRequestFromFlags(fields, &request)
 				if err != nil {
 					return err
 				}
 			}
-
-			fmt.Println("request: ", request)
 
 			response, err := api.NewClient(
 				f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
@@ -118,13 +108,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
-	// fmt.Println(">> request: ", request)
-
-	b, _ := json.MarshalIndent(fields, " ", " ")
-	fmt.Println(string(b))
-
-	b1, _ := json.MarshalIndent(request, " ", " ")
-	fmt.Println(string(b1))
 
 	if utils.IsEmpty(fields.Name) {
 		answers, err := utils.AskInput("Enter the new Edge Application's name")

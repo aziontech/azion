@@ -20,7 +20,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -48,11 +47,9 @@ type LinkCmd struct {
 	OpenFile              func(name string) (*os.File, error)
 	RemoveAll             func(path string) error
 	Rename                func(oldpath string, newpath string) error
-	CreateTempDir         func(dir string, pattern string) (string, error)
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	Mkdir                 func(path string, perm os.FileMode) error
-	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) bool
@@ -75,11 +72,9 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		OpenFile:        os.Open,
 		RemoveAll:       os.RemoveAll,
 		Rename:          os.Rename,
-		CreateTempDir:   os.MkdirTemp,
 		EnvLoader:       utils.LoadEnvVarsFromFile,
 		Stat:            os.Stat,
 		Mkdir:           os.MkdirAll,
-		GitPlainClone:   git.PlainClone,
 		ShouldConfigure: shouldConfigure,
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
