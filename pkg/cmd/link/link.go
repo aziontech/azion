@@ -214,7 +214,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
-				if err := deps(c, cmd, info, msg.AskInstallDepsDev); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
 					return err
 				}
 
@@ -231,7 +231,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
-				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy, &msgs); err != nil {
 					return err
 				}
 
@@ -263,22 +263,29 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	return output.Print(&initOut)
 }
 
-func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string) error {
-	pacManIsInformed := c.Flags().Changed("package-manager")
-	if pacManIsInformed || cmd.ShouldDevDeploy(info, m, false) {
-		var err error
-		pacMan := info.packageManager
-		if !pacManIsInformed {
-			pacMan, err = utils.GetPackageManager()
-			if err != nil {
-				return err
-			}
+func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]string) error {
+	if !c.Flags().Changed("package-manager") {
+		if !cmd.ShouldDevDeploy(info, m, true) {
+			return nil
 		}
-		err = depsInstall(cmd, pacMan)
+
+
+		pathWorkDir, err := cmd.GetWorkDir()
 		if err != nil {
-			logger.Debug("Error while installing project dependencies", zap.Error(err))
-			return msg.ErrorDeps
+			return err
 		}
+
+		info.packageManager = node.DetectPackageManager(pathWorkDir)
 	}
+
+	logger.FInfoFlags(cmd.Io.Out, msg.InstallDeps, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msg.InstallDeps)
+
+	
+	if err := depsInstall(cmd, info.packageManager); err != nil {
+		logger.Debug("Error while installing project dependencies", zap.Error(err))
+		return msg.ErrorDeps
+	}
+
 	return nil
 }

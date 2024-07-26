@@ -80,7 +80,6 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 }
 
 func depsInstall(cmd *initCmd, packageManager string) error {
-	logger.FInfoFlags(cmd.io.Out, msg.InitInstallDeps, cmd.f.Format, cmd.f.Out)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
