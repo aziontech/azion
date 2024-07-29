@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	currentMajor         = 3
+	currentMajor         = 2
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@3.0.0"
+	firstTimeExecuting   = "@v2.5.0"
 )
 
 var versionVulcan = "@latest"
