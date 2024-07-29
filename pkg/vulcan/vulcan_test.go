@@ -105,7 +105,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version without last version",
 			args: args{
-				currentVersion: "3.0.0",
+				currentVersion: "4.0.0",
 			},
 			lastVulcanVer:   "",
 			expectedVersion: firstTimeExecuting,
@@ -114,19 +114,19 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version with last version",
 			args: args{
-				currentVersion: "3.0.0",
+				currentVersion: "4.0.0",
 			},
 			lastVulcanVer:   "2.5.0",
-			expectedVersion: "@v2.5.0",
+			expectedVersion: "@2.5.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "2.0.0",
+				currentVersion: "3.0.0",
 			},
 			lastVulcanVer:   "2.5.0",
-			expectedVersion: "@v2.5.0",
+			expectedVersion: "@3.0.0",
 			wantErr:         false,
 		},
 		{
@@ -150,10 +150,13 @@ func TestCheckVulcanMajor(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, _, _ := testutils.NewFactory(nil)
+			mock := &httpmock.Registry{}
+			f, _, _ := testutils.NewFactory(mock)
 			vul := NewVulcan()
 			vul.ReadSettings = func() (token.Settings, error) {
-				return token.Settings{}, nil
+				return token.Settings{
+					LastVulcanVersion: tt.lastVulcanVer,
+				}, nil
 			}
 			err := vul.CheckVulcanMajor(tt.args.currentVersion, f, vul)
 			if (err != nil) != tt.wantErr {
