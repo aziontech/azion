@@ -2,6 +2,7 @@ package variables
 
 import (
 	"context"
+	"fmt"
 
 	"go.uber.org/zap"
 
@@ -14,6 +15,7 @@ func (c *Client) List(ctx context.Context) ([]Response, error) {
 
 	resp, httpResp, err := c.apiClient.VariablesAPI.ApiVariablesList(ctx).Execute()
 	if err != nil {
+		fmt.Println(err.Error())
 		if httpResp != nil {
 			logger.Debug("Error while listing variables", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)

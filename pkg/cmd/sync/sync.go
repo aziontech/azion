@@ -8,6 +8,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -23,21 +24,22 @@ type SyncCmd struct {
 	F                     *cmdutil.Factory
 	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
 	EnvPath               string
+	ReadEnv               func(filenames ...string) (envMap map[string]string, err error)
 }
 
-func NewSync(f *cmdutil.Factory) *SyncCmd {
+func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
 	return &SyncCmd{
 		F:                     f,
 		Io:                    f.IOStreams,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		SyncResources:         SyncLocalResources,
+		ReadEnv:               godotenv.Read,
 	}
 }
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	cmdFactory := NewSync(f)
-	syncCmd := &cobra.Command{
+func NewCobraCmd(sync *SyncCmd, f *cmdutil.Factory) *cobra.Command {
+	cobraCmd := &cobra.Command{
 		Use:           msg.USAGE,
 		Short:         msg.SHORTDESCRIPTION,
 		Long:          msg.LONGDESCRIPTION,
@@ -47,17 +49,23 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion sync
         $ azion sync --help
         `),
-		RunE: func(_ *cobra.Command, _ []string) error {
-			return Sync(cmdFactory)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return Run(sync)
 		},
 	}
-	syncCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
-	syncCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
-	syncCmd.Flags().StringVar(&cmdFactory.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
-	return syncCmd
+
+	cobraCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
+	cobraCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
+	cobraCmd.Flags().StringVar(&sync.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
+
+	return cobraCmd
 }
 
-func Sync(cmdFac *SyncCmd) error {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewSyncCmd(f), f)
+}
+
+func Run(cmdFac *SyncCmd) error {
 	logger.Debug("Running sync command")
 	conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
 	if err != nil {
