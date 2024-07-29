@@ -47,14 +47,15 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		return err
 	}
 
-	logger.FInfoFlags(cmd.io.Out, msg.InitGettingVulcan, cmd.f.Format, cmd.f.Out)
-
-	cmdVulcanInit := fmt.Sprintf("init --name %s", cmd.name)
+	cmdVulcanInit := "init"
 	if len(cmd.preset) > 0 {
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s'", cmdVulcanInit, cmd.preset)
 	}
-	if len(cmd.template) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --template '%s'", cmdVulcanInit, cmd.template)
+	if len(cmd.mode) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --mode '%s'", cmdVulcanInit, cmd.mode)
+	}
+	if len(cmd.pathWorkingDir) > 0 {
+		cmdVulcanInit = fmt.Sprintf("%s --scope '%s'", cmdVulcanInit, cmd.pathWorkingDir)
 	}
 
 	command := vul.Command("", cmdVulcanInit, cmd.f)
@@ -79,7 +80,6 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 }
 
 func depsInstall(cmd *initCmd, packageManager string) error {
-	logger.FInfoFlags(cmd.io.Out, msg.InitInstallDeps, cmd.f.Format, cmd.f.Out)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {

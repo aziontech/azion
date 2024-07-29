@@ -20,7 +20,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -48,11 +47,9 @@ type LinkCmd struct {
 	OpenFile              func(name string) (*os.File, error)
 	RemoveAll             func(path string) error
 	Rename                func(oldpath string, newpath string) error
-	CreateTempDir         func(dir string, pattern string) (string, error)
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	Mkdir                 func(path string, perm os.FileMode) error
-	GitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) bool
@@ -75,11 +72,9 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		OpenFile:        os.Open,
 		RemoveAll:       os.RemoveAll,
 		Rename:          os.Rename,
-		CreateTempDir:   os.MkdirTemp,
 		EnvLoader:       utils.LoadEnvVarsFromFile,
 		Stat:            os.Stat,
 		Mkdir:           os.MkdirAll,
-		GitPlainClone:   git.PlainClone,
 		ShouldConfigure: shouldConfigure,
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
@@ -219,7 +214,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
-				if err := deps(c, cmd, info, msg.AskInstallDepsDev); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
 					return err
 				}
 
@@ -236,7 +231,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 
 			if cmd.ShouldDevDeploy(info, msg.AskDeploy, false) {
-				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy); err != nil {
+				if err := deps(c, cmd, info, msg.AskInstallDepsDeploy, &msgs); err != nil {
 					return err
 				}
 
@@ -268,22 +263,29 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 	return output.Print(&initOut)
 }
 
-func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string) error {
-	pacManIsInformed := c.Flags().Changed("package-manager")
-	if pacManIsInformed || cmd.ShouldDevDeploy(info, m, false) {
-		var err error
-		pacMan := info.packageManager
-		if !pacManIsInformed {
-			pacMan, err = utils.GetPackageManager()
-			if err != nil {
-				return err
-			}
+func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]string) error {
+	if !c.Flags().Changed("package-manager") {
+		if !cmd.ShouldDevDeploy(info, m, true) {
+			return nil
 		}
-		err = depsInstall(cmd, pacMan)
+
+
+		pathWorkDir, err := cmd.GetWorkDir()
 		if err != nil {
-			logger.Debug("Error while installing project dependencies", zap.Error(err))
-			return msg.ErrorDeps
+			return err
 		}
+
+		info.packageManager = node.DetectPackageManager(pathWorkDir)
 	}
+
+	logger.FInfoFlags(cmd.Io.Out, msg.InstallDeps, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msg.InstallDeps)
+
+	
+	if err := depsInstall(cmd, info.packageManager); err != nil {
+		logger.Debug("Error while installing project dependencies", zap.Error(err))
+		return msg.ErrorDeps
+	}
+
 	return nil
 }

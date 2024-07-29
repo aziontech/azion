@@ -1775,3 +1775,53 @@ func TestTimestamp(t *testing.T) {
 		})
 	}
 }
+
+func TestPointerString(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  string
+		want string
+	}{
+		{"Empty string", "", ""},
+		{"Normal string", "hello", "hello"},
+		{"String with spaces", "hello world", "hello world"},
+		{"String with special characters", "hello!@#$%^&*()", "hello!@#$%^&*()"},
+		{"String with newline", "hello\nworld", "hello\nworld"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := PointerString(tt.arg)
+			if got == nil || *got != tt.want {
+				t.Errorf("PointerString(%q) = %v; want %v", tt.arg, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFileExists(t *testing.T) {
+	tests := []struct {
+		name     string
+		filename string
+		want     bool
+	}{
+		{"File exists", "existing_file.txt", true},
+		{"File does not exist", "non_existing_file.txt", false},
+		{"Is a directory", ".", false},
+	}
+
+	// Setup: Create a file and a directory to test
+	if _, err := os.Create("existing_file.txt"); err != nil {
+		t.Fatalf("Setup failed: %v", err)
+	}
+	defer os.Remove("existing_file.txt")
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := FileExists(tt.filename)
+			if got != tt.want {
+				t.Errorf("FileExists(%s) = %v; want %v", tt.filename, got, tt.want)
+			}
+		})
+	}
+}

@@ -5,7 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
+
+	"github.com/aziontech/azion-cli/utils"
 )
 
 type NodePkg struct {
@@ -51,4 +54,21 @@ func checkNode(str string) error {
 		}
 	}
 	return nil
+}
+
+func DetectPackageManager(pathWorkDir string) string {
+	npmLockFile := filepath.Join(pathWorkDir, "package-lock.json")
+	yarnLockFile := filepath.Join(pathWorkDir, "yarn.lock")
+	pnpmLockFile := filepath.Join(pathWorkDir, "pnpm-lock.yaml")
+
+	switch {
+	case utils.FileExists(npmLockFile):
+		return "npm"
+	case utils.FileExists(yarnLockFile):
+		return "yarn"
+	case utils.FileExists(pnpmLockFile):
+		return "pnpm"
+	default:
+		return "npm"
+	}
 }

@@ -18,6 +18,7 @@ var (
 	LinkProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your application's name: "
 	EdgeApplicationsLinkFlagHelp          = "Displays more information about the link command"
 	EdgeApplicationsLinkSuccessful        = "Your application %s was linked successfully\n"
+	InstallDeps                           = "Installing application dependencies\n"
 	EdgeApplicationsLinkNameNotSent       = "The application name was not sent through the --name flag; By default when --name is not informed the one found in your package.json file or working directory is used\n\n"
 	EdgeApplicationsLinkNameNotSentSimple = "The application name was not sent through the --name flag; By default, when --name is not given, the working directory is used\n"
 	EdgeApplicationsLinkNameNotSentStatic = "The application name was not sent through the --name flag; By default, when --name is not given, the working directory is used\n"

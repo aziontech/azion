@@ -85,7 +85,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return err
 	}
 
-	// The list that comes from Vulcan comes with a blank line that we should remove.
+	// The list that comes from Vulcan has a blank line that we should remove.
 	outputInline := strings.Split(output, "\n")
 	noLastItem := len(outputInline) - 1
 	listPresets := make([]string, noLastItem)
@@ -114,7 +114,6 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 }
 
 func depsInstall(cmd *LinkCmd, packageManager string) error {
-	logger.FInfo(cmd.Io.Out, msg.InitInstallDeps)
 	command := fmt.Sprintf("%s install", packageManager)
 	err := cmd.CommandRunInteractive(cmd.F, command)
 	if err != nil {
