@@ -33,15 +33,15 @@ type OSInfo struct {
 }
 
 // doPreCommandCheck carry out all pre-cmd checks needed
-func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error {
+func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 
 	// get full command run and rewrite with our metrics pattern
-	commandName = cmd.CommandPath()
-	rewrittenCommand := strings.ReplaceAll(strings.TrimPrefix(commandName, "azion "), " ", "-")
-	commandName = rewrittenCommand
+	fact.commandName = cmd.CommandPath()
+	rewrittenCommand := strings.ReplaceAll(strings.TrimPrefix(fact.commandName, "azion "), " ", "-")
+	fact.commandName = rewrittenCommand
 
 	if cmd.Flags().Changed("config") {
-		if err := config.SetPath(pre.config); err != nil {
+		if err := config.SetPath(fact.configFlag); err != nil {
 			return err
 		}
 	}
@@ -50,72 +50,71 @@ func doPreCommandCheck(cmd *cobra.Command, f *cmdutil.Factory, pre PreCmd) error
 	if err != nil {
 		return err
 	}
-	globalSettings = &settings
+	fact.globalSettings = &settings
 
-	if err := checkTokenSent(cmd, f, pre.token, globalSettings); err != nil {
-		return err
+	t, err := token.New(&token.Config{
+		Client: fact.Factory.HttpClient,
+		Out:    fact.Factory.IOStreams.Out,
+	})
+	if err != nil {
+		return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
 	}
 
-	if err := checkAuthorizeMetricsCollection(cmd, f.GlobalFlagAll, globalSettings); err != nil {
+	if cmd.Flags().Changed("token") {
+		if err := checkTokenSent(fact, fact.globalSettings, t); err != nil {
+			return err
+		}
+	}
+
+
+
+	if err := checkAuthorizeMetricsCollection(cmd, fact.Factory.GlobalFlagAll, fact.globalSettings); err != nil {
 		return err
 	}
 
 	//both verifications occurs if 24 hours have passed since the last execution
-	if err := checkForUpdateAndMetrics(version.BinVersion, f, globalSettings); err != nil {
+	if err := checkForUpdateAndMetrics(version.BinVersion, fact.Factory, fact.globalSettings); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func checkTokenSent(cmd *cobra.Command, f *cmdutil.Factory, configureToken string, settings *token.Settings) error {
-
-	// if global --token flag was sent, verify it and save it locally
-	if cmd.Flags().Changed("token") {
-		t, err := token.New(&token.Config{
-			Client: f.HttpClient,
-			Out:    f.IOStreams.Out,
-		})
-		if err != nil {
-			return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
-		}
-
-		if configureToken == "" {
-			return utils.ErrorTokenNotProvided
-		}
-
-		valid, user, err := t.Validate(&configureToken)
-		if err != nil {
-			return err
-		}
-
-		if !valid {
-			return utils.ErrorInvalidToken
-		}
-
-		strToken := token.Settings{
-			Token:                      configureToken,
-			ClientId:                   user.Results.ClientID,
-			Email:                      user.Results.Email,
-			AuthorizeMetricsCollection: settings.AuthorizeMetricsCollection,
-		}
-
-		bStrToken, err := toml.Marshal(strToken)
-		if err != nil {
-			return err
-		}
-
-		filePath, err := t.Save(bStrToken)
-		if err != nil {
-			return err
-		}
-
-		globalSettings = &strToken
-
-		logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
-		logger.FInfo(f.IOStreams.Out, msg.TokenUsedIn+"\n")
+func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token.Token) error {
+	if fact.tokenFlag == "" {
+		return utils.ErrorTokenNotProvided
 	}
 
+	valid, user, err := tokenStr.Validate(&fact.tokenFlag)
+	if err != nil {
+		return err
+	}
+
+	if !valid {
+		return utils.ErrorInvalidToken
+	}
+
+	strToken := token.Settings{
+		Token:                      fact.tokenFlag,
+		ClientId:                   user.Results.ClientID,
+		Email:                      user.Results.Email,
+		AuthorizeMetricsCollection: settings.AuthorizeMetricsCollection,
+	}
+
+	bStrToken, err := toml.Marshal(strToken)
+	if err != nil {
+		return err
+	}
+
+	filePath, err := tokenStr.Save(bStrToken)
+	if err != nil {
+		return err
+	}
+
+	fact.globalSettings = &strToken
+
+	logger.FInfo(fact.Factory.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
+	logger.FInfo(fact.Factory.IOStreams.Out, msg.TokenUsedIn+"\n")
 	return nil
 }
 
@@ -201,13 +200,18 @@ func format(input string) (int, error) {
 	return number, nil
 }
 
+// Mock para utils.Confirm
+var confirmFn = func(globalFlagAll bool, msg string, defaultValue bool) bool {
+	return defaultValue
+}
+
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
 func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {
 	if settings.AuthorizeMetricsCollection > 0 || cmd.Name() == "completion" {
 		return nil
 	}
 
-	authorize := utils.Confirm(globalFlagAll, msg.AskCollectMetrics, true)
+	authorize := confirmFn(globalFlagAll, msg.AskCollectMetrics, true)
 	if authorize {
 		settings.AuthorizeMetricsCollection = 1
 	} else {

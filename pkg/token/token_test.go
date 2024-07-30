@@ -32,7 +32,7 @@ func Test_Validate(t *testing.T) {
 			t.Fatalf("NewToken() = %v; want nil", err)
 		}
 
-		token.endpoint = "http://api.azion.net/token"
+		token.Endpoint = "http://api.azion.net/token"
 		tokenString := "thisIsNotTheValidToken"
 		valid, _, _ := token.Validate(&tokenString)
 
@@ -56,7 +56,7 @@ func Test_Validate(t *testing.T) {
 			t.Fatalf("NewToken() = %v; want nil", err)
 		}
 
-		token.endpoint = "http://api.azion.net/token"
+		token.Endpoint = "http://api.azion.net/token"
 		tokenString := "rightToken"
 		valid, _, _ := token.Validate(&tokenString)
 
@@ -116,7 +116,7 @@ func Test_Create(t *testing.T) {
 			t.Fatalf("NewToken() = %v; want nil", err)
 		}
 
-		token.endpoint = "http://api.azion.net/token"
+		token.Endpoint = "http://api.azion.net/token"
 		response, err := token.Create("base64Credentials")
 		if err != nil {
 			t.Fatalf("Create() = %v; want nil", err)

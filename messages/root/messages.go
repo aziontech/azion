@@ -1,5 +1,12 @@
 package root
 
+const EXAMPLE = `
+	$ azion
+	$ azion -t azionb43a9554776zeg05b11cb1declkbabcc9la
+	$ azion --debug
+	$ azion -h
+`
+
 var (
 	RootUsage       = "azion <command> <subcommand> [flags]"
 	RootDescription = "The Azion Command Line Interface is a unified tool to manage your Azion projects and resources"
