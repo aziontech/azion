@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
@@ -28,15 +29,12 @@ func TestSync(t *testing.T) {
 		{
 			name: "sync - successful synchronization",
 			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptions, error) {
-				return &contracts.AzionApplicationOptions{
-					// Mock relevant fields
-				}, nil
+				return &contracts.AzionApplicationOptions{}, nil
 			},
 			mockWriteFunc: func(conf *contracts.AzionApplicationOptions, confPath string) error {
 				return nil
 			},
 			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
-				// Mock synchronization logic
 				return nil
 			},
 			expectedError: nil,
@@ -76,15 +74,14 @@ func TestSync(t *testing.T) {
 			mock := &httpmock.Registry{}
 			f, _, _ := testutils.NewFactory(mock)
 
-			syncCmd := NewSync(f)
+			syncCmd := NewSyncCmd(f)
 
-			// Mock GetAzionJsonContent and WriteAzionJsonContent functions
 			syncCmd.GetAzionJsonContent = tt.mockGetContentFunc
 			syncCmd.WriteAzionJsonContent = tt.mockWriteFunc
 
 			syncCmd.SyncResources = tt.mockSyncResources
 
-			err := Sync(syncCmd)
+			err := Run(syncCmd)
 			if tt.expectedError != nil {
 				require.Error(t, err)
 				assert.Equal(t, tt.expectedError.Error(), err.Error())
@@ -93,4 +90,157 @@ func TestSync(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSyncFull(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	t.Run("sync full - no items", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
+			httpmock.JSONFromFile("./fixtures/cache.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/origins"),
+			httpmock.JSONFromFile("./fixtures/origins.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "variables"),
+			httpmock.JSONFromFile("./fixtures/variables.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		syncCmd := NewSyncCmd(f)
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
+			return &contracts.AzionApplicationOptions{
+				Application: contracts.AzionJsonDataApplication{
+					ID:   1000000,
+					Name: "testename",
+				},
+			}, nil
+		}
+		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
+			return nil, nil
+		}
+
+		cmd := NewCobraCmd(syncCmd, f)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+	})
+
+	t.Run("sync full - items", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
+			httpmock.JSONFromFile("./fixtures/cache_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/origins"),
+			httpmock.JSONFromFile("./fixtures/origins_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "variables"),
+			httpmock.JSONFromFile("./fixtures/variables.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		syncCmd := NewSyncCmd(f)
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
+			return &contracts.AzionApplicationOptions{
+				Application: contracts.AzionJsonDataApplication{
+					ID:   1000000,
+					Name: "testename",
+				},
+			}, nil
+		}
+		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
+			return nil, nil
+		}
+
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			return nil
+		}
+
+		cmd := NewCobraCmd(syncCmd, f)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+	})
+
+	t.Run("sync full - failed to write", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
+			httpmock.JSONFromFile("./fixtures/cache_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/origins"),
+			httpmock.JSONFromFile("./fixtures/origins_results.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "variables"),
+			httpmock.JSONFromFile("./fixtures/variables.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		syncCmd := NewSyncCmd(f)
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
+			return &contracts.AzionApplicationOptions{
+				Application: contracts.AzionJsonDataApplication{
+					ID:   1000000,
+					Name: "testename",
+				},
+			}, nil
+		}
+		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
+			return nil, nil
+		}
+
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			return utils.ErrorWritingAzionJsonFile
+		}
+
+		cmd := NewCobraCmd(syncCmd, f)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
+
+		require.Error(t, err)
+	})
 }

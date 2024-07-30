@@ -121,9 +121,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if Sync {
 		sync.ProjectConf = ProjectConf
-		syncCmd := sync.NewSync(f)
+		syncCmd := sync.NewSyncCmd(f)
 		syncCmd.EnvPath = Env
-		if err := sync.Sync(syncCmd); err != nil {
+		if err := sync.Run(syncCmd); err != nil {
 			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
 			return err
 		}
