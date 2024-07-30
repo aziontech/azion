@@ -11,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
@@ -143,7 +142,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 	}
 
 	// Load the .env file
-	envs, err := godotenv.Read(synch.EnvPath)
+	envs, err := synch.ReadEnv(synch.EnvPath)
 	if err != nil {
 		logger.Debug("Error while loading .env file", zap.Error(err))
 		return nil // not every project has a .env file... this should not stop the execution

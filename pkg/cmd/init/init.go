@@ -320,4 +320,3 @@ func deps(c *cobra.Command, cmd *initCmd, m string, msgs *[]string) error {
 
 	return nil
 }
-
