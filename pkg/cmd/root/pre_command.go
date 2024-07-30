@@ -21,11 +21,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type PreCmd struct {
-	token  string
-	config string
-}
-
 type OSInfo struct {
 	OS struct {
 		Vendor string `json:"vendor"`
