@@ -1,0 +1,39 @@
+{
+    "count": 1,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+      "previous": null,
+      "next": null
+    },
+    "results": [
+      {
+        "id": 123456,
+        "name": "Little Rule",
+        "phase": "default",
+        "behaviors": [
+          {
+            "name": "set_origin",
+            "target": "123456"
+          },
+          {
+            "name": "set_cache_policy",
+            "target": "123456"
+          }
+        ],
+        "criteria": [
+          [
+            {
+              "variable": "${uri}",
+              "operator": "starts_with",
+              "conditional": "if",
+              "input_value": "/"
+            }
+          ]
+        ],
+        "is_active": true,
+        "order": 1,
+        "description": null
+      }
+    ]
+}
