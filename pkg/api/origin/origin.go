@@ -2,7 +2,6 @@ package origin
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -94,7 +93,6 @@ func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, e
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
-		fmt.Println(err.Error())
 		if httpResp != nil {
 			logger.Debug("Error while listing your origins", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)

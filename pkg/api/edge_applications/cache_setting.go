@@ -2,7 +2,6 @@ package edge_applications
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -59,7 +58,6 @@ func (c *Client) ListCacheEdgeApp(
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
 		EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).Execute()
 	if err != nil {
-		fmt.Println(err.Error())
 		if httpResp != nil {
 			logger.Debug("Error while listing a cache setting", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
