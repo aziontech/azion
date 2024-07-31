@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"os"
 
-	// "errors"
-	// "fmt"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/httpmock"
@@ -13,11 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"go.uber.org/zap/zapcore"
 
-	// "github.com/aziontech/azion-cli/pkg/httpmock"
-
-	// "github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/pkg/token"
-	// "github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
