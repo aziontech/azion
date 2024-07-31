@@ -78,7 +78,6 @@ func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error
 	}
 
 	if err := fact.doPreCommandCheck(cmd, fact); err != nil {
-		// , PreCmd{ config: fact.configFlag, token:  fact.tokenFlag,
 		return err
 	}
 
