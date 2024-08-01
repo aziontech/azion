@@ -14,27 +14,40 @@ import (
 )
 
 var (
-	tail      bool
-	pretty    bool
 	startTime = time.Now()
 	utcTime   = startTime.UTC()
-	logTime   time.Time
-	limit     string
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	logTime = utcTime.Add(-5 * time.Minute)
+type LogsCmd struct {
+	Io        *cmdutil.Factory
+	Tail      bool
+	Pretty    bool
+	LogTime   time.Time
+	Limit     string
+	GetEvents func(f *cmdutil.Factory, currentTime time.Time, limitFlag string) (http.HTTPEventsResponse, error)
+}
+
+func NewLogsCmd(f *cmdutil.Factory) *LogsCmd {
+	return &LogsCmd{
+		Io:        f,
+		LogTime:   utcTime.Add(-5 * time.Minute),
+		GetEvents: http.HttpEvents,
+	}
+}
+
+func NewCobraCmd(logs *LogsCmd, f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
-		SilenceErrors: true, Example: heredoc.Doc(`
+		SilenceErrors: true,
+		Example: heredoc.Doc(`
 		$ azion logs http
 		$ azion logs http --tail
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := printLogs(cmd, f)
+			err := printLogs(logs, cmd, f)
 			if err != nil {
 				return err
 			}
@@ -43,27 +56,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
-	cmd.Flags().StringVar(&limit, "limit", "100", msg.LimitFlag)
-	cmd.Flags().BoolVar(&tail, "tail", false, msg.FlagTail)
-	cmd.Flags().BoolVar(&pretty, "pretty", false, msg.FlagPretty)
+	cmd.Flags().StringVar(&logs.Limit, "limit", "100", msg.LimitFlag)
+	cmd.Flags().BoolVar(&logs.Tail, "tail", false, msg.FlagTail)
+	cmd.Flags().BoolVar(&logs.Pretty, "pretty", false, msg.FlagPretty)
 	return cmd
 }
 
-func printLogs(cmd *cobra.Command, f *cmdutil.Factory) error {
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewLogsCmd(f), f)
+}
 
-	resp, err := http.HttpEvents(f, logTime, limit)
+func printLogs(logs *LogsCmd, cmd *cobra.Command, f *cmdutil.Factory) error {
+	resp, err := logs.GetEvents(f, logs.LogTime, logs.Limit)
 	if err != nil {
 		return err
 	}
 
 	for _, event := range resp.HTTPEvents {
-		if tail && logTime.After(event.Ts) {
+		if logs.Tail && logs.LogTime.After(event.Ts) {
 			continue
 		}
 
 		colorLog := color.FgGreen
 
-		if pretty {
+		if logs.Pretty {
 			color.New(colorLog).Fprint(f.IOStreams.Out, "Timestamp: ")
 			logger.FInfo(f.IOStreams.Out, event.Ts.String())
 			logger.FInfo(f.IOStreams.Out, "\n")
@@ -96,15 +112,14 @@ func printLogs(cmd *cobra.Command, f *cmdutil.Factory) error {
 				event.Ts.String(), event.Host, event.RequestURI, fmt.Sprint(event.Status), event.HTTPUserAgent, event.GeolocRegion, fmt.Sprint(event.UpstreamBytesSent), event.RequestTime, event.RequestMethod))
 		}
 
-		logTime = event.Ts
-
+		logs.LogTime = event.Ts
 	}
 
-	if tail {
+	if logs.Tail {
 		logger.FInfo(f.IOStreams.Out, msg.NewLogs)
 		logger.FInfo(f.IOStreams.Out, "\n\n")
 		time.Sleep(10 * time.Second)
-		return printLogs(cmd, f)
+		return printLogs(logs, cmd, f)
 	}
 	return nil
 }
