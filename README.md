@@ -3,6 +3,8 @@
 [![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](https://github.com/aziontech/azion-cli/wiki/azion)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aziontech/azion-cli)](https://goreportcard.com/report/github.com/aziontech/azion-cli)
 
+Azion CLI: efficient creation and management of applications on Azion Edge Platform.
+
 **Azion CLI** is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands. It makes possible the initialization, build, and deployment of applications, from simple static pages to different frameworks, such as:
 
 - Next.js 
