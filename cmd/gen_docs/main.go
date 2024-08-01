@@ -41,9 +41,11 @@ func run(args []string) error {
 		return fmt.Errorf("error: --doc-path not set")
 	}
 
-	rootCmd := cmd.NewCmd(&cmdutil.Factory{
+	fact := cmd.NewFactoryRoot(&cmdutil.Factory{
 		IOStreams: iostreams.System(),
 	})
+
+	rootCmd := cmd.CmdRoot(fact)
 	rootCmd.InitDefaultHelpCmd()
 
 	switch {

@@ -11,7 +11,7 @@ type HTTPClient interface {
 }
 
 type Token struct {
-	endpoint string
+	Endpoint string
 	client   HTTPClient
 	filePath string
 	valid    bool
