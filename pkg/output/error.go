@@ -14,15 +14,15 @@ type ErrorOutput struct {
 }
 
 func (e *ErrorOutput) Format() (bool, error) {
-	formated := false
+	formatted := false
 	if len(e.Flags.Format) > 0 || len(e.Flags.Out) > 0 {
-		formated = true
+		formatted = true
 		err := format(e, e.GeneralOutput)
 		if err != nil {
-			return formated, err
+			return formatted, err
 		}
 	}
-	return formated, nil
+	return formatted, nil
 }
 
 func (e *ErrorOutput) Output() {
@@ -31,7 +31,7 @@ func (e *ErrorOutput) Output() {
 		if !e.Flags.NoColor {
 			format = color.New(color.FgRed).SprintfFunc()
 		}
-		logger.FInfo(os.Stderr, format("Error: %s", e.Err.Error()))
+		logger.FInfo(os.Stderr, format("Error: %s\n", e.Err.Error()))
 		os.Exit(1)
 	}
 }
