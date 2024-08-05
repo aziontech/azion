@@ -1,4 +1,4 @@
-package edge_storage
+package bucket
 
 import (
 	"context"
@@ -16,6 +16,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/output"
 )
+
+type Bucket struct {
+	Options *contracts.ListOptions
+	Factory *cmdutil.Factory
+}
 
 func NewBucket(f *cmdutil.Factory) *cobra.Command {
 	bucket := &Bucket{

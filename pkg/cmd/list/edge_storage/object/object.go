@@ -1,4 +1,4 @@
-package edge_storage
+package object
 
 import (
 	"context"
@@ -18,6 +18,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
+
+type Objects struct {
+	BucketName string
+	Options    *contracts.ListOptions
+	Factory    *cmdutil.Factory
+}
 
 func NewObject(f *cmdutil.Factory) *cobra.Command {
 	object := &Objects{

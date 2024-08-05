@@ -4,6 +4,8 @@ import (
 	"github.com/spf13/cobra"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/edge_storage/bucket"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/edge_storage/object"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 )
 
@@ -20,8 +22,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(NewBucket(f))
-	cmd.AddCommand(NewObject(f))
+	cmd.AddCommand(bucket.NewBucket(f))
+	cmd.AddCommand(object.NewObject(f))
 	cmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP)
 	return cmd
 }
