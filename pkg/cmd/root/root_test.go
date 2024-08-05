@@ -1,10 +1,10 @@
-package main
+package root
 
 import (
 	"net/http"
+	"testing"
 	"time"
 
-	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func main() {
+func TestExecute(t *testing.T) {
 	streams := iostreams.System()
 	httpClient := &http.Client{
 		Timeout: 10 * time.Second, // TODO: Configure this somewhere
@@ -31,5 +31,5 @@ func main() {
 		Config:     viper.GetViper(),
 	}
 
-	cmd.Execute(factory)
+	Execute(factory)
 }

@@ -25,6 +25,10 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		Page:     1,
 	}
 
+	if info.Conf.Application.ID <= 0 {
+		return msg.ERRORNOTDEPLOYED
+	}
+
 	var err error
 	err = synch.syncRules(info, f)
 	if err != nil {

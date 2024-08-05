@@ -1,6 +1,7 @@
 package cachesetting
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -14,7 +15,8 @@ import (
 
 func TestList(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("list defatul", func(t *testing.T) {
+
+	t.Run("list default", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -31,7 +33,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("list page 1 with iten 1", func(t *testing.T) {
+	t.Run("list page 1 with item 1", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -48,7 +50,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("list page 3 with iten 1", func(t *testing.T) {
+	t.Run("list page 3 with item 1", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -65,7 +67,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("no itens", func(t *testing.T) {
+	t.Run("no items", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -82,8 +84,14 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("list page 1 with iten 1", func(t *testing.T) {
+	t.Run("list with AskInput function", func(t *testing.T) {
 		mock := &httpmock.Registry{}
+		expectedAppID := int64(1673635839)
+
+		// Create a mock for AskInput
+		mockAskInput := func(prompt string) (string, error) {
+			return strconv.FormatInt(expectedAppID, 10), nil
+		}
 
 		mock.Register(
 			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
@@ -91,9 +99,13 @@ func TestList(t *testing.T) {
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
+		listCmd := NewListCmd(f)
+		listCmd.AskInput = mockAskInput // Use the mocked AskInput function
 
-		cmd.SetArgs([]string{"--application-id", "1673635839"})
+		cmd := NewCobraCmd(listCmd, f)
+
+		// Simulate the --application-id flag not being set
+		cmd.SetArgs([]string{})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err, msg.ErrorGetCache)

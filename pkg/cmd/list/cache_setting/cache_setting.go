@@ -12,16 +12,39 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
-var edgeApplicationID int64
+type ListCmd struct {
+	Io                *iostreams.IOStreams
+	ReadInput         func(string) (string, error)
+	ListCaches        func(context.Context, *contracts.ListOptions, int64) (*edgeapplications.ApplicationCacheGetResponse, error)
+	AskInput          func(string) (string, error)
+	EdgeApplicationID int64
+}
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	opts := &contracts.ListOptions{}
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	return &ListCmd{
+		Io: f.IOStreams,
+		ReadInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		ListCaches: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*edgeapplications.ApplicationCacheGetResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.List(ctx, opts, appID)
+		},
+		AskInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+	}
+}
+
+func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ListShortDescription,
@@ -29,44 +52,42 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion list cache-setting --application-id 16736354321
-		$ azion list cache-setting --application-id 16736354321 --details
-        `),
-
+			$ azion list cache-setting --application-id 16736354321
+			$ azion list cache-setting --application-id 16736354321 --details
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := utils.AskInput(msg.ListAskInputApplicationID)
+				answer, err := list.AskInput(msg.ListAskInputApplicationID)
 				if err != nil {
 					return err
 				}
-
 				num, err := strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdApplication
 				}
-
-				edgeApplicationID = num
+				list.EdgeApplicationID = num
 			}
 
-			if err := PrintTable(cmd, f, opts); err != nil {
+			opts := &contracts.ListOptions{}
+			if err := PrintTable(cmd, f, opts, list); err != nil {
 				return msg.ErrorGetCaches
 			}
 			return nil
 		},
 	}
 
-	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cmdutil.AddAzionApiFlags(cmd, &contracts.ListOptions{})
+	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
+
 	return cmd
 }
 
-func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, list *ListCmd) error {
 	ctx := context.Background()
 
-	cache, err := client.List(ctx, opts, edgeApplicationID)
+	response, err := list.ListCaches(ctx, opts, list.EdgeApplicationID)
 	if err != nil {
 		return msg.ErrorGetCaches
 	}
@@ -80,7 +101,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
 	}
 
-	for _, v := range cache.Results {
+	for _, v := range response.Results {
 		var ln []string
 		if opts.Details {
 			ln = []string{
@@ -103,4 +124,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	return output.Print(&listOut)
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewListCmd(f), f)
 }

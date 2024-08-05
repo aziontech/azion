@@ -1,4 +1,4 @@
-package edge_storage
+package bucket
 
 import (
 	"bytes"

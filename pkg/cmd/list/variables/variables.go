@@ -14,6 +14,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
@@ -21,40 +22,53 @@ import (
 
 var dump bool
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
-	opts := &contracts.ListOptions{}
+type ListCmd struct {
+	Io               *iostreams.IOStreams
+	ListAllVariables func(context.Context, *api.Client, *cmdutil.Factory, *contracts.ListOptions) error
+	Dump             bool
+}
 
-	listCmd := &cobra.Command{
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	return &ListCmd{
+		Io: f.IOStreams,
+		ListAllVariables: func(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+			return listAllVariables(ctx, client, f, opts)
+		},
+	}
+}
+
+func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
+	opts := &contracts.ListOptions{}
+	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.VariablesListShortDescription,
 		Long:          msg.VariablesListLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion list variables -h
-		$ azion list variables --details
-		$ azion list variables
+			$ azion list variables -h
+			$ azion list variables --details
+			$ azion list variables
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-			if err := listAllVariables(client, f, opts); err != nil {
+			if err := list.ListAllVariables(context.Background(), client, f, opts); err != nil {
 				return err
 			}
 			return nil
 		},
 	}
 
-	listCmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	listCmd.Flags().BoolVar(&dump, "dump", false, "")
-	listCmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
-	return listCmd
+	cmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
+	cmd.Flags().BoolVar(&dump, "dump", false, "")
+	cmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
+
+	return cmd
 }
 
-func listAllVariables(client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-	c := context.Background()
-
-	resp, err := client.List(c)
+func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+	resp, err := client.List(ctx)
 	if err != nil {
 		return err
 	}
@@ -122,4 +136,8 @@ func dumpVariables(resp []api.Response) error {
 	}
 
 	return nil
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewListCmd(f), f)
 }

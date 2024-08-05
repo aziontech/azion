@@ -26,7 +26,7 @@ func New(c *Config) (*Token, error) {
 
 	return &Token{
 		client:   c.Client,
-		endpoint: constants.AuthURL,
+		Endpoint: constants.AuthURL,
 		filePath: filepath.Join(dir.Dir, dir.Settings),
 		out:      c.Out,
 	}, nil
@@ -35,7 +35,7 @@ func New(c *Config) (*Token, error) {
 func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 	logger.Debug("Validate token")
 
-	req, err := http.NewRequest("GET", utils.Concat(t.endpoint, "/user/me"), nil)
+	req, err := http.NewRequest("GET", utils.Concat(t.Endpoint, "/user/me"), nil)
 	if err != nil {
 		return false, UserInfo{}, err
 	}
@@ -83,7 +83,7 @@ func (t *Token) Save(b []byte) (string, error) {
 
 func (t *Token) Create(b64 string) (*Response, error) {
 	logger.Debug("Create token", zap.Any("base64", b64))
-	req, err := http.NewRequest(http.MethodPost, utils.Concat(t.endpoint, "/tokens"), nil)
+	req, err := http.NewRequest(http.MethodPost, utils.Concat(t.Endpoint, "/tokens"), nil)
 	if err != nil {
 		return nil, err
 	}

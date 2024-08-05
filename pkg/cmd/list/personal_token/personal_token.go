@@ -10,12 +10,37 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/aziontech/azionapi-go-sdk/personal_tokens"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type ListCmd struct {
+	Io         *iostreams.IOStreams
+	ReadInput  func(string) (string, error)
+	ListTokens func(context.Context) ([]personal_tokens.PersonalTokenResponseGet, error)
+}
+
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	return &ListCmd{
+		Io: f.IOStreams,
+		ReadInput: func(prompt string) (string, error) {
+			return utils.AskInput(prompt)
+		},
+		ListTokens: func(ctx context.Context) ([]personal_tokens.PersonalTokenResponseGet, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			resp, err := client.List(ctx)
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		},
+	}
+}
+
+func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	var details bool
 
 	cmd := &cobra.Command{
@@ -23,17 +48,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
-		SilenceErrors: true, Example: heredoc.Doc(`
-        $ azion list personal-token  
-        $ azion list personal-token --details
-        `),
+		SilenceErrors: true,
+		Example: heredoc.Doc(`
+			$ azion list personal-token
+			$ azion list personal-token --details
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient,
-				f.Config.GetString("api_url"),
-				f.Config.GetString("token"),
-			)
-
-			if err := PrintTable(client, f, details); err != nil {
+			if err := PrintTable(list, f, details); err != nil {
 				return fmt.Errorf(msg.ErrorList.Error(), err)
 			}
 			return nil
@@ -43,13 +64,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolVar(&details, "details", false, general.ApiListFlagDetails)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
+
 	return cmd
 }
 
-func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
-	c := context.Background()
+func PrintTable(list *ListCmd, f *cmdutil.Factory, details bool) error {
+	ctx := context.Background()
 
-	resp, err := client.List(c)
+	resp, err := list.ListTokens(ctx)
 	if err != nil {
 		return err
 	}
@@ -64,7 +86,6 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 	}
 
 	for _, v := range resp {
-
 		var ln []string
 		if details {
 			var description string
@@ -87,5 +108,10 @@ func PrintTable(client *api.Client, f *cmdutil.Factory, details bool) error {
 		}
 		listOut.Lines = append(listOut.Lines, ln)
 	}
+
 	return output.Print(&listOut)
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	return NewCobraCmd(NewListCmd(f), f)
 }
