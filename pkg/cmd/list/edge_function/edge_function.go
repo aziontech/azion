@@ -9,11 +9,28 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azionapi-go-sdk/edgefunctions"
 	"github.com/spf13/cobra"
 )
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type ListCmd struct {
+	Io            *iostreams.IOStreams
+	ListFunctions func(context.Context, *contracts.ListOptions) (*edgefunctions.ListEdgeFunctionResponse, error)
+}
+
+func NewListCmd(f *cmdutil.Factory) *ListCmd {
+	return &ListCmd{
+		Io: f.IOStreams,
+		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*edgefunctions.ListEdgeFunctionResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			return client.List(ctx, opts)
+		},
+	}
+}
+
+func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
@@ -23,15 +40,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion list edge-function --details
-		$ azion list edge-function --order_by "id"
-		$ azion list edge-function --page 1  
-		$ azion list edge-function --page_size 5
-		$ azion list edge-function --sort "asc" 
+			$ azion list edge-function --details
+			$ azion list edge-function --order_by "id"
+			$ azion list edge-function --page 1
+			$ azion list edge-function --page_size 5
+			$ azion list edge-function --sort "asc"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			if err := PrintTable(cmd, f, opts); err != nil {
+			if err := PrintTable(cmd, f, list, opts); err != nil {
 				return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 			}
 			return nil
@@ -43,11 +59,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-	client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
-
-	functions, err := client.List(ctx, opts)
+	functions, err := list.ListFunctions(ctx, opts)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 	}
@@ -86,4 +100,9 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	}
 
 	return output.Print(&listOut)
+}
+
+func NewCmd(f *cmdutil.Factory) *cobra.Command {
+	listCmd := NewListCmd(f)
+	return NewCobraCmd(listCmd, f)
 }

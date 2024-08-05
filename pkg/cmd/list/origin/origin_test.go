@@ -13,7 +13,7 @@ import (
 
 func TestList(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("list page 1", func(t *testing.T) {
+	t.Run("list page 1 with flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -30,7 +30,28 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("no itens", func(t *testing.T) {
+	t.Run("list page 1 with AskForInput", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.JSONFromFile("./fixtures/origins.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		listCmd := NewListCmd(f)
+		listCmd.AskInput = func(s string) (string, error) {
+			return "123423424", nil
+		}
+		cmd := NewCobraCmd(listCmd, f)
+		cmd.SetArgs([]string{})
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
+	})
+
+	t.Run("no items with flag", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
@@ -42,6 +63,27 @@ func TestList(t *testing.T) {
 		cmd := NewCmd(f)
 
 		cmd.SetArgs([]string{"--application-id", "123423424"})
+
+		_, err := cmd.ExecuteC()
+		require.NoError(t, err)
+	})
+
+	t.Run("no items with AskForInput", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/123423424/origins"),
+			httpmock.JSONFromFile("./fixtures/noorigins.json"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		listCmd := NewListCmd(f)
+		listCmd.AskInput = func(s string) (string, error) {
+			return "123423424", nil
+		}
+		cmd := NewCobraCmd(listCmd, f)
+		cmd.SetArgs([]string{})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
