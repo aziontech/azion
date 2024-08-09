@@ -30,18 +30,20 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo, msgs *[]string)
 		return msg.ErrorBuilding
 	}
 
+	var vulcanParams string
+
 	if fields.Preset != "" {
+		vulcanParams = " --preset " + fields.Preset
 		conf.Preset = fields.Preset
 	}
 
 	if fields.Mode != "" {
+		vulcanParams += "--mode " + fields.Mode
 		conf.Mode = fields.Mode
 	}
 
-	var vulcanParams string
-
 	if fields.Entry != "" {
-		vulcanParams = " --entry " + fields.Entry
+		vulcanParams += " --entry " + fields.Entry
 	}
 
 	if fields.NodePolyfills != "" {
