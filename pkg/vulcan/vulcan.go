@@ -19,7 +19,7 @@ const (
 	firstTimeExecuting   = "@v3.0.0"
 )
 
-var versionVulcan = "@3.0.0"
+var versionVulcan = "@3.1.0-stage.1"
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
