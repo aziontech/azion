@@ -152,6 +152,22 @@ type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
+	Domain        Domains        `json:"domain"`
+}
+
+type Domains struct {
+	Name                       string   `json:"name,omitempty"`
+	Cnames                     []string `json:"cnames,omitempty"`
+	CnameAccessOnly            *bool    `json:"cname_access_only,omitempty"`
+	IsActive                   *bool    `json:"is_active,omitempty"`
+	EdgeApplicationId          int64    `json:"edge_application_id,omitempty"`
+	DigitalCertificateId       *string  `json:"digital_certificate_id,omitempty"`
+	Environment                *string  `json:"environment,omitempty"`
+	IsMtlsEnabled              *bool    `json:"is_mtls_enabled,omitempty"`
+	MtlsTrustedCaCertificateId int64    `json:"mtls_trusted_ca_certificate_id,omitempty"`
+	EdgeFirewallId             int64    `json:"edge_firewall_id,omitempty"`
+	MtlsVerification           *string  `json:"mtls_verification,omitempty"`
+	CrlList                    []int64  `json:"crl_list,omitempty"`
 }
 
 type CacheSetting struct {

@@ -241,9 +241,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
-	if err != nil {
-		return err
+	if manifestStructure.Domain.Name == "" {
+		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
+		if err != nil {
+			return err
+		}
 	}
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)

@@ -7,6 +7,7 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
+	apiDomain "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -400,4 +401,83 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	conf.Function.CacheId = cache.GetId()
 
 	return cache.GetId(), nil
+}
+
+func makeDomainUpdateRequest(domain contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.UpdateRequest {
+	request := &apiDomain.UpdateRequest{}
+
+	if domain.CnameAccessOnly != nil {
+		request.SetCnameAccessOnly(*domain.CnameAccessOnly)
+	}
+	if len(domain.CrlList) > 0 {
+		request.SetCrlList(domain.CrlList)
+	}
+	if domain.DigitalCertificateId != nil {
+		request.SetDigitalCertificateId(*domain.DigitalCertificateId)
+	}
+	if domain.EdgeApplicationId > 0 {
+		request.SetEdgeApplicationId(domain.EdgeApplicationId)
+	} else {
+		request.SetEdgeApplicationId(conf.Application.ID)
+	}
+	if domain.EdgeFirewallId > 0 {
+		request.SetEdgeFirewallId(domain.EdgeApplicationId)
+	}
+	if domain.IsActive != nil {
+		request.SetIsActive(*domain.IsActive)
+	}
+	if domain.IsMtlsEnabled != nil {
+		request.SetIsMtlsEnabled(*domain.IsMtlsEnabled)
+	}
+	if domain.MtlsTrustedCaCertificateId > 0 {
+		request.SetMtlsTrustedCaCertificateId(domain.MtlsTrustedCaCertificateId)
+	}
+	if domain.MtlsVerification != nil {
+		request.SetMtlsVerification(*domain.MtlsVerification)
+	}
+
+	request.Name = &domain.Name
+	request.Id = conf.Domain.Id
+	request.SetCnames(domain.Cnames)
+
+	return request
+}
+
+func makeDomainCreateRequest(domain contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.CreateRequest {
+	request := &apiDomain.CreateRequest{}
+
+	if domain.CnameAccessOnly != nil {
+		request.SetCnameAccessOnly(*domain.CnameAccessOnly)
+	}
+	if len(domain.CrlList) > 0 {
+		request.SetCrlList(domain.CrlList)
+	}
+	if domain.DigitalCertificateId != nil {
+		request.SetDigitalCertificateId(*domain.DigitalCertificateId)
+	}
+	if domain.EdgeApplicationId > 0 {
+		request.SetEdgeApplicationId(domain.EdgeApplicationId)
+	} else {
+		request.SetEdgeApplicationId(conf.Application.ID)
+	}
+	if domain.EdgeFirewallId > 0 {
+		request.SetEdgeFirewallId(domain.EdgeApplicationId)
+	}
+	if domain.IsActive != nil {
+		request.SetIsActive(*domain.IsActive)
+	}
+	if domain.IsMtlsEnabled != nil {
+		request.SetIsMtlsEnabled(*domain.IsMtlsEnabled)
+	}
+	if domain.MtlsTrustedCaCertificateId > 0 {
+		request.SetMtlsTrustedCaCertificateId(domain.MtlsTrustedCaCertificateId)
+	}
+	if domain.MtlsVerification != nil {
+		request.SetMtlsVerification(*domain.MtlsVerification)
+	}
+
+	request.Name = domain.Name
+	request.SetCnames(domain.Cnames)
+
+	return request
 }
