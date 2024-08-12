@@ -332,6 +332,24 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 		if len(origin.Addresses) > 0 {
 			request.SetAddresses(origin.Addresses)
 		}
+		if origin.HmacAccessKey != nil {
+			request.SetHmacAccessKey(*origin.HmacSecretKey)
+		}
+		if origin.HmacAuthentication != nil {
+			request.SetHmacAuthentication(*origin.HmacAuthentication)
+		}
+		if origin.HmacRegionName != nil {
+			request.SetHmacRegionName(*origin.HmacRegionName)
+		}
+		if origin.HmacSecretKey != nil {
+			request.SetHmacSecretKey(*origin.HmacSecretKey)
+		}
+		if origin.OriginPath != nil {
+			request.SetOriginPath(*origin.OriginPath)
+		}
+		if origin.OriginProtocolPolicy != nil {
+			request.SetOriginProtocolPolicy(*origin.OriginProtocolPolicy)
+		}
 
 	case "object_storage":
 		request.SetBucket(conf.Bucket)
@@ -360,6 +378,24 @@ func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 		}
 		if len(origin.Addresses) > 0 {
 			request.SetAddresses(origin.Addresses)
+		}
+		if origin.HmacAccessKey != nil {
+			request.SetHmacAccessKey(*origin.HmacSecretKey)
+		}
+		if origin.HmacAuthentication != nil {
+			request.SetHmacAuthentication(*origin.HmacAuthentication)
+		}
+		if origin.HmacRegionName != nil {
+			request.SetHmacRegionName(*origin.HmacRegionName)
+		}
+		if origin.HmacSecretKey != nil {
+			request.SetHmacSecretKey(*origin.HmacSecretKey)
+		}
+		if origin.OriginPath != nil {
+			request.SetOriginPath(*origin.OriginPath)
+		}
+		if origin.OriginProtocolPolicy != nil {
+			request.SetOriginProtocolPolicy(*origin.OriginProtocolPolicy)
 		}
 
 	case "object_storage":
