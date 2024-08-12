@@ -46,7 +46,7 @@ if [ -f "$full_main_go_path" ]; then
         check_folder_exists "$expected_folder"
 
         # Run the build command
-        echo "Running cmd/azion/main.go build --debug"
+        echo "Running cmd/azion/main.go build --preset react --mode deliver --debug"
         go run "$full_main_go_path" build --debug
 
         # Check the exit status of the build command
