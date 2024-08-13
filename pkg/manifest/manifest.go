@@ -12,6 +12,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
+	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 
 	apiDomain "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -308,6 +309,30 @@ func (man *ManifestInterpreter) CreateResources(
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
+	}
+
+	purgeCmd := purge.NewPurgeCmd(f)
+	for _, purgeObj := range manifest.Purge {
+		switch purgeObj.Type {
+		case "url":
+			err := purgeCmd.PurgeUrls(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging urls", zap.Error(err))
+				return nil
+			}
+		case "cachekey":
+			err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging cache keys", zap.Error(err))
+				return nil
+			}
+		case "wildcard":
+			err := purgeCmd.PurgeWildcard(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging wildcards", zap.Error(err))
+				return nil
+			}
+		}
 	}
 
 	err = deleteResources(ctx, f, conf, msgs)

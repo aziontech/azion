@@ -153,6 +153,13 @@ type Manifest struct {
 	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
 	Domain        Domains        `json:"domain"`
+	Purge         []Purges       `json:"purge"`
+}
+
+type Purges struct {
+	Type   string   `json:"type"`
+	Urls   []string `json:"urls"`
+	Method string   `json:"method"`
 }
 
 type Domains struct {
