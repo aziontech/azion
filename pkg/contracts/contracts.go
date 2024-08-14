@@ -152,6 +152,29 @@ type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
+	Domain        Domains        `json:"domain"`
+	Purge         []Purges       `json:"purge"`
+}
+
+type Purges struct {
+	Type   string   `json:"type"`
+	Urls   []string `json:"urls"`
+	Method string   `json:"method"`
+}
+
+type Domains struct {
+	Name                       string   `json:"name,omitempty"`
+	Cnames                     []string `json:"cnames,omitempty"`
+	CnameAccessOnly            *bool    `json:"cname_access_only,omitempty"`
+	IsActive                   *bool    `json:"is_active,omitempty"`
+	EdgeApplicationId          int64    `json:"edge_application_id,omitempty"`
+	DigitalCertificateId       *string  `json:"digital_certificate_id,omitempty"`
+	Environment                *string  `json:"environment,omitempty"`
+	IsMtlsEnabled              *bool    `json:"is_mtls_enabled,omitempty"`
+	MtlsTrustedCaCertificateId int64    `json:"mtls_trusted_ca_certificate_id,omitempty"`
+	EdgeFirewallId             int64    `json:"edge_firewall_id,omitempty"`
+	MtlsVerification           *string  `json:"mtls_verification,omitempty"`
+	CrlList                    []int64  `json:"crl_list,omitempty"`
 }
 
 type CacheSetting struct {
@@ -179,12 +202,18 @@ type CacheSetting struct {
 }
 
 type Origin struct {
-	Name       string                              `json:"name"`
-	OriginType string                              `json:"origin_type,omitempty"`
-	Bucket     string                              `json:"bucket,omitempty"`
-	Prefix     string                              `json:"prefix,omitempty"`
-	Addresses  []sdk.CreateOriginsRequestAddresses `json:"addresses,omitempty"`
-	HostHeader string                              `json:"host_header,omitempty"`
+	Name                 string                              `json:"name"`
+	OriginType           string                              `json:"origin_type,omitempty"`
+	Bucket               string                              `json:"bucket,omitempty"`
+	Prefix               string                              `json:"prefix,omitempty"`
+	Addresses            []sdk.CreateOriginsRequestAddresses `json:"addresses,omitempty"`
+	HostHeader           string                              `json:"host_header,omitempty"`
+	OriginProtocolPolicy *string                             `json:"origin_protocol_policy,omitempty"`
+	OriginPath           *string                             `json:"origin_path,omitempty"`
+	HmacAuthentication   *bool                               `json:"hmac_authentication,omitempty"`
+	HmacRegionName       *string                             `json:"hmac_region_name,omitempty"`
+	HmacAccessKey        *string                             `json:"hmac_access_key,omitempty"`
+	HmacSecretKey        *string                             `json:"hmac_secret_key,omitempty"`
 }
 
 type RuleEngine struct {
