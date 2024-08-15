@@ -269,7 +269,6 @@ func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]stri
 			return nil
 		}
 
-
 		pathWorkDir, err := cmd.GetWorkDir()
 		if err != nil {
 			return err
@@ -281,7 +280,6 @@ func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]stri
 	logger.FInfoFlags(cmd.Io.Out, msg.InstallDeps, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
 
-	
 	if err := depsInstall(cmd, info.packageManager); err != nil {
 		logger.Debug("Error while installing project dependencies", zap.Error(err))
 		return msg.ErrorDeps

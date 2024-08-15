@@ -38,7 +38,7 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo, msgs *[]string)
 	}
 
 	if fields.Mode != "" {
-		vulcanParams += "--mode " + fields.Mode
+		vulcanParams += " --mode " + fields.Mode
 		conf.Mode = fields.Mode
 	}
 
