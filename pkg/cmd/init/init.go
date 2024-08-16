@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -202,8 +203,13 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// Create a temporary directory
-	tempDir, err := os.MkdirTemp("", "tempclonesamples")
+	dirPath, err := config.Dir()
+	if err != nil {
+		return err
+	}
+
+	// Create a temporary directory	
+	tempDir, err := os.MkdirTemp(dirPath.Dir, "tempclonesamples")
 	if err != nil {
 		return err
 	}
@@ -223,9 +229,13 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
+	oldPath := path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path)
+	newPath := path.Join(pathWorkingDirHere, cmd.name)
+
 	//move contents from temporary directory into final destination
-	err = cmd.rename(path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path), path.Join(pathWorkingDirHere, cmd.name))
+	err = cmd.rename(oldPath, newPath)
 	if err != nil {
+		logger.Debug("Error move contents directory", zap.Error(err))
 		return utils.ErrorMovingFiles
 	}
 
