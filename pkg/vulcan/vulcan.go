@@ -21,6 +21,7 @@ const (
 
 var versionVulcan = "@3.2.0"
 
+
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
 	CheckVulcanMajor func(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error

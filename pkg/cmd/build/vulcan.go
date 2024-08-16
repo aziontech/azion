@@ -2,7 +2,6 @@ package build
 
 import (
 	"fmt"
-	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -25,9 +24,9 @@ func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams
 		return err
 	}
 
-	command := vul.Command("", "build --preset %s --mode %s%s", cmd.f)
+	command := vul.Command("", "build%s", cmd.f)
 
-	err = runCommand(cmd, fmt.Sprintf(command, strings.ToLower(conf.Preset), strings.ToLower(conf.Mode), vulcanParams), msgs)
+	err = runCommand(cmd, fmt.Sprintf(command, vulcanParams), msgs)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}

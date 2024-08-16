@@ -11,6 +11,8 @@ var (
 	ErrorCreateCache            = errors.New("Failed to create the cache setting")
 	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine")
 	ErrorUpdateOrigin           = errors.New("Failed to update the origin")
+	ErrorUpdateDomain           = errors.New("Failed to update the domain")
+	ErrorCreateDomain           = errors.New("Failed to create the domain")
 	ErrorUpdateCache            = errors.New("Failed to update the cache setting")
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine")
 )

@@ -12,6 +12,9 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
+	"github.com/aziontech/azion-cli/pkg/cmd/purge"
+
+	apiDomain "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -79,12 +82,14 @@ func (man *ManifestInterpreter) CreateResources(
 	f *cmdutil.Factory,
 	projectConf string,
 	msgs *[]string) error {
+
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientDomain := apiDomain.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
 	CacheIds = make(map[string]int64)
@@ -107,6 +112,29 @@ func (man *ManifestInterpreter) CreateResources(
 	for _, originConf := range conf.Origin {
 		OriginKeys[originConf.Name] = originConf.OriginKey
 		OriginIds[originConf.Name] = originConf.OriginId
+	}
+
+	if manifest.Domain.Name != "" {
+		if conf.Domain.Id > 0 {
+			requestUpdate := makeDomainUpdateRequest(manifest.Domain, conf)
+			updated, err := clientDomain.Update(ctx, requestUpdate)
+			if err != nil {
+				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, *requestUpdate.Name, err.Error())
+			}
+			conf.Domain.Name = updated.GetName()
+			conf.Domain.DomainName = updated.GetDomainName()
+			conf.Domain.Url = utils.Concat("https://", updated.GetDomainName())
+		} else {
+			requestCreate := makeDomainCreateRequest(manifest.Domain, conf)
+			created, err := clientDomain.Create(ctx, requestCreate)
+			if err != nil {
+				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, requestCreate.Name, err.Error())
+			}
+			conf.Domain.Name = created.GetName()
+			conf.Domain.DomainName = created.GetDomainName()
+			conf.Domain.Url = utils.Concat("https://", created.GetDomainName())
+			conf.Domain.Id = created.GetId()
+		}
 	}
 
 	originConf := []contracts.AzionJsonDataOrigin{}
@@ -281,6 +309,30 @@ func (man *ManifestInterpreter) CreateResources(
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
+	}
+
+	purgeCmd := purge.NewPurgeCmd(f)
+	for _, purgeObj := range manifest.Purge {
+		switch purgeObj.Type {
+		case "url":
+			err := purgeCmd.PurgeUrls(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging urls", zap.Error(err))
+				return nil
+			}
+		case "cachekey":
+			err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging cache keys", zap.Error(err))
+				return nil
+			}
+		case "wildcard":
+			err := purgeCmd.PurgeWildcard(purgeObj.Urls, f)
+			if err != nil {
+				logger.Debug("Error while purging wildcards", zap.Error(err))
+				return nil
+			}
+		}
 	}
 
 	err = deleteResources(ctx, f, conf, msgs)
