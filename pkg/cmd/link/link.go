@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/spf13/cobra"
@@ -250,6 +251,17 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 		}
 
+	}
+
+	cmdVulcanInit := "init"
+	cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, info.Preset, info.Mode, info.PathWorkingDir)
+
+	vul := vulcanPkg.NewVulcan()
+	command := vul.Command("", cmdVulcanInit, cmd.F)
+
+	_, err = cmd.CommandRunner(cmd.F, command, []string{})
+	if err != nil {
+		return err
 	}
 
 	initOut := output.SliceOutput{

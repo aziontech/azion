@@ -47,7 +47,7 @@ if [ -f "$full_main_go_path" ]; then
 
         # Run the build command
         echo "Running cmd/azion/main.go build --preset react --mode deliver --debug"
-        go run "$full_main_go_path" build --debug
+        go run "$full_main_go_path" build --preset react --mode deliver --debug
 
         # Check the exit status of the build command
         if [ $? -eq 0 ]; then

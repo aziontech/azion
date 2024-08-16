@@ -110,16 +110,6 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	info.Preset = template
 	info.Mode = mode
 
-	cmdVulcanInit := "init"
-	cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, template, mode, info.PathWorkingDir)
-
-	command = vul.Command("", cmdVulcanInit, cmd.F)
-
-	_, err = cmd.CommandRunner(cmd.F, command, []string{})
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
