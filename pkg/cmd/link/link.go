@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/spf13/cobra"
@@ -252,6 +253,17 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 	}
 
+	cmdVulcanInit := "init"
+	cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, info.Preset, info.Mode, info.PathWorkingDir)
+
+	vul := vulcanPkg.NewVulcan()
+	command := vul.Command("", cmdVulcanInit, cmd.F)
+
+	_, err = cmd.CommandRunner(cmd.F, command, []string{})
+	if err != nil {
+		return err
+	}
+
 	initOut := output.SliceOutput{
 		GeneralOutput: output.GeneralOutput{
 			Out:   cmd.F.IOStreams.Out,
@@ -269,7 +281,6 @@ func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]stri
 			return nil
 		}
 
-
 		pathWorkDir, err := cmd.GetWorkDir()
 		if err != nil {
 			return err
@@ -281,7 +292,6 @@ func deps(c *cobra.Command, cmd *LinkCmd, info *LinkInfo, m string, msgs *[]stri
 	logger.FInfoFlags(cmd.Io.Out, msg.InstallDeps, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
 
-	
 	if err := depsInstall(cmd, info.packageManager); err != nil {
 		logger.Debug("Error while installing project dependencies", zap.Error(err))
 		return msg.ErrorDeps
