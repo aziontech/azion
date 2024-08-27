@@ -32,7 +32,6 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
-
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ListShortDescription,

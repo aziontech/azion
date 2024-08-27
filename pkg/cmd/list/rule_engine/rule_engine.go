@@ -46,6 +46,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 }
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
+	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
 		Use:           msg.RulesEngineListUsage,
 		Short:         msg.RulesEngineListShortDescription,
@@ -78,7 +79,6 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 				list.Phase = answer
 			}
 
-			opts := &contracts.ListOptions{}
 			if err := PrintTable(cmd, f, opts, list); err != nil {
 				return msg.ErrorGetRulesEngines
 			}
@@ -86,7 +86,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmdutil.AddAzionApiFlags(cmd, &contracts.ListOptions{})
+	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
 	cmd.Flags().StringVar(&list.Phase, "phase", "request", msg.RulesEnginePhase)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)

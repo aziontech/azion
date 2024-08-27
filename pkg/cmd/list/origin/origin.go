@@ -45,6 +45,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 }
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
+	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ListShortDescription,
@@ -69,7 +70,6 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 				list.EdgeApplicationID = num
 			}
 
-			opts := &contracts.ListOptions{}
 			if err := PrintTable(cmd, f, opts, list); err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigins.Error(), err)
 			}
@@ -77,7 +77,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmdutil.AddAzionApiFlags(cmd, &contracts.ListOptions{})
+	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 
