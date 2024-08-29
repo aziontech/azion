@@ -3,9 +3,11 @@
 [![CLI Reference](https://img.shields.io/badge/cli-reference-green.svg)](https://github.com/aziontech/azion-cli/wiki/azion)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aziontech/azion-cli)](https://goreportcard.com/report/github.com/aziontech/azion-cli)
 
-Azion CLI: efficient creation and management of applications on Azion Edge Platform.
+## Efficient creation and management of applications on Azion Edge Platform.
 
-**Azion CLI** is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands. It makes possible the initialization, build, and deployment of applications, from simple static pages to different frameworks, such as:
+**Azion CLI** is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands.
+
+It makes possible the initialization, build, and deployment of applications, from simple static pages to different frameworks, such as:
 
 - Next.js 
 - Vue
@@ -48,13 +50,14 @@ To download azion CLI through Homebrew, run:
 brew install azion
 ``````
 
-##### Test Azion CLI with docker
-You can find the URL for each package in our Releases page https://github.com/aziontech/azion/releases
+## Using Azion CLI with docker
+You can find the URL for each package in our Releases page https://github.com/aziontech/azion/releases.
+
 ```sh
 docker run -it --rm alpine:latest sh -c '
     cd && \
-    wget https://github.com/aziontech/azion/releases/download/1.28.1/azion_1.28.1_linux_arm64.apk && \
-    apk add --allow-untrusted azion_1.28.1_linux_arm64.apk && \
+    wget https://github.com/aziontech/azion/releases/download/1.36.1/azion_1.36.1_linux_arm64.apk && \
+    apk add --allow-untrusted azion_1.36.1_linux_arm64.apk && \
     azion version; \
     exec sh'
 ```
@@ -70,7 +73,6 @@ $ make cross-build
 ```
 
 ---
-
 
 ## How to Use
 
