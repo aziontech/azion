@@ -40,6 +40,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 }
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
+	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
 		Short:         msg.ShortDescription,
@@ -51,22 +52,21 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 			$ azion list domain --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := PrintTable(cmd, f, list); err != nil {
+			if err := PrintTable(cmd, f, list, opts); err != nil {
 				return msg.ErrorGetDomains
 			}
 			return nil
 		},
 	}
 
-	cmdutil.AddAzionApiFlags(cmd, &contracts.ListOptions{})
+	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd
 }
 
-func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd) error {
+func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
-	opts := &contracts.ListOptions{}
 
 	response, err := list.ListDomains(ctx, opts)
 	if err != nil {
