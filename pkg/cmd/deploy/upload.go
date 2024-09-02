@@ -15,19 +15,18 @@ import (
 )
 
 var (
-	PathStatic = ".edge/storage"
-	Jobs       chan contracts.FileOps
-	Retries    int64
+	Jobs    chan contracts.FileOps
+	Retries int64
 )
 
 func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
-	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
-			logger.Debug("File that caused the error: " + PathStatic)
+			logger.Debug("File that caused the error: " + pathStatic)
 			return err
 		}
 		if !info.IsDir() {
@@ -66,7 +65,7 @@ func (cmd *DeployCmd) uploadFiles(
 		bar = nil
 	}
 
-	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -78,7 +77,7 @@ func (cmd *DeployCmd) uploadFiles(
 				return err
 			}
 
-			fileString := strings.TrimPrefix(path, PathStatic)
+			fileString := strings.TrimPrefix(path, pathStatic)
 			mimeType, err := mimemagic.MatchFilePath(path, -1)
 			if err != nil {
 				logger.Debug("Error while matching file path", zap.Error(err))

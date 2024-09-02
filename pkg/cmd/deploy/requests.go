@@ -10,6 +10,7 @@ import (
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	thoth "github.com/aziontech/go-thoth"
+	"github.com/skratchdot/open-golang/open"
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -157,73 +158,6 @@ func (cmd *DeployCmd) doApplication(
 			return err
 		}
 	}
-	return nil
-}
-
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	var domain apidom.DomainResponse
-	var err error
-
-	newDomain := false
-	if conf.Domain.Id == 0 {
-		var projName string
-		for {
-			domain, err = cmd.createDomain(client, ctx, conf, msgs)
-			if err != nil {
-				// if the name is already in use, we ask for another one
-				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
-						return err
-					}
-					logger.FInfoFlags(cmd.Io.Out, msg.DomainInUse, cmd.F.Format, cmd.F.Out)
-					*msgs = append(*msgs, msg.DomainInUse)
-					if Auto {
-						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
-						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
-						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
-						*msgs = append(*msgs, msgf)
-						projName = thoth.GenerateName()
-					} else {
-						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
-						if err != nil {
-							return err
-						}
-					}
-					conf.Domain.Name = projName
-					continue
-				}
-				return err
-			}
-			conf.Domain.Id = domain.GetId()
-			conf.Domain.Name = domain.GetName()
-			conf.Domain.DomainName = domain.GetDomainName()
-			conf.Domain.Url = utils.Concat("https://", domain.GetDomainName())
-			newDomain = true
-			break
-		}
-
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return err
-		}
-
-	} else {
-		domain, err = cmd.updateDomain(client, ctx, conf, msgs)
-		if err != nil {
-			logger.Debug("Error while updating domain", zap.Error(err))
-			return err
-		}
-	}
-
-	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf, msgs)
-		if err != nil {
-			logger.Debug("Error while purging domain", zap.Error(err))
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -608,5 +542,14 @@ func checkArgsJson(cmd *DeployCmd, projectPath string) error {
 		}
 	}
 
+	return nil
+}
+
+func openBrowser(f *cmdutil.Factory, urlSsoNext string) error {
+	logger.FInfo(f.IOStreams.Out, "msg.VisitMsg")
+	err := open.Run(urlSsoNext)
+	if err != nil {
+		return err
+	}
 	return nil
 }

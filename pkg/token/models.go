@@ -34,6 +34,9 @@ type Settings struct {
 	ClientId                   string
 	Email                      string
 	ContinuationToken          string
+	S3AccessKey                string
+	S3SecreKey                 string
+	S3Bucket                   string
 }
 
 type Config struct {
