@@ -32,6 +32,23 @@ func TestList(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 	})
+	t.Run("list - page 0 should generate an error", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
+			httpmock.StatusStringResponse(404, "Not Found"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "0"})
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
 
 	t.Run("list page 1 with item 1", func(t *testing.T) {
 		mock := &httpmock.Registry{}

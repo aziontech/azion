@@ -38,6 +38,24 @@ func TestList(t *testing.T) {
 		assert.Equal(t, tblWithFunc, stdout.String())
 	})
 
+	t.Run("list - page 0 should generate an error", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "edge_functions"),
+			httpmock.StatusStringResponse(404, "Not Found"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--page", "0"})
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
+
 	t.Run("no functions", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
