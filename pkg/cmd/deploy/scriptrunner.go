@@ -44,6 +44,11 @@ func callScript(token, id, secret, prefix, name string) (string, error) {
 			"instantiation_data_path": "envs.[3].value",
 			"value":                   prefix,
 		},
+		{
+			"field":                   "TOKEN",
+			"instantiation_data_path": "envs.[4].value",
+			"value":                   token,
+		},
 	}
 
 	// Marshal the payload to JSON

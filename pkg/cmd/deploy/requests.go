@@ -545,9 +545,9 @@ func checkArgsJson(cmd *DeployCmd, projectPath string) error {
 	return nil
 }
 
-func openBrowser(f *cmdutil.Factory, urlSsoNext string) error {
-	logger.FInfo(f.IOStreams.Out, "msg.VisitMsg")
-	err := open.Run(urlSsoNext)
+func openBrowser(f *cmdutil.Factory, urlConsoleDeploy string) error {
+	logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.VisitMsg, urlConsoleDeploy))
+	err := open.Run(urlConsoleDeploy)
 	if err != nil {
 		return err
 	}

@@ -50,6 +50,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
+	DeployURL   string
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -166,25 +167,20 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.Prefix = cmd.VersionID()
 
-	err = cmd.uploadFiles(f, conf, &msgs, localDir)
+	err = cmd.uploadFiles(f, conf, &msgs, localDir, settings.S3Bucket)
 	if err != nil {
 		return err
 	}
 
-	id, err := callScript("azion3c6bad99a7f30a2491e5423e227050aa72a", settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket)
-	if err != nil {
-		return err
-	}
-	fmt.Println(id)
-
-	fmt.Println("5")
-
-	err = openBrowser(f, fmt.Sprintf("https://stage-console.azion.com/create/deploy/%s", id))
+	id, err := callScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("6")
+	err = openBrowser(f, fmt.Sprintf("%s/%s", DeployURL, id))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

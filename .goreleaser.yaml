@@ -10,6 +10,7 @@ builds:
       - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL={{ .Env.DEPLOY_URL }}
       - -X github.com/aziontech/azion-cli/pkg/pkg/cmd/edge_applications/init.TemplateBranch={{ .Env.TEMPLATE_BRANCH }}
     binary: azion
     goos:

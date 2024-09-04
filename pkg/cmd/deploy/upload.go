@@ -20,7 +20,7 @@ var (
 )
 
 func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic string) error {
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -50,7 +50,7 @@ func (cmd *DeployCmd) uploadFiles(
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go worker(Jobs, results, &currentFile, clientUpload, conf)
+		go worker(Jobs, results, &currentFile, clientUpload, conf, bucket)
 	}
 
 	bar := progressbar.NewOptions(

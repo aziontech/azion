@@ -1,5 +1,6 @@
-API_URL=https://api.azionapi.net
-AUTH_URL=https://sso.azion.com/api
-STORAGE_URL=https://api.azion.com
+API_URL=https://stage-api.azion.net
+AUTH_URL=https://stage-sso.azion.com/api
+STORAGE_URL=https://stage-api.azion.com
+DEPLOY_URL=https://stage-console.azion.com/create/deploy
 TEMPLATE_BRANCH=main
 TEMPLATE_MAJOR=0

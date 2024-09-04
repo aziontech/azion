@@ -52,4 +52,6 @@ Do you wish to create a Cache Settings configuration with the above specificatio
 	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
 	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"
 	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
+
+	VisitMsg = "Please visit %s in case it did not open automatically, to follow up the full deploy process\n"
 )
