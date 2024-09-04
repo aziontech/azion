@@ -1,6 +1,7 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -39,6 +40,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 		fields       *contracts.BuildInfo
 		msgs         *[]string
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -64,6 +66,15 @@ func TestBuildCmd_vulcan(t *testing.T) {
 					confPath string,
 				) error {
 					return nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
 				},
 			},
 			args: args{
@@ -94,6 +105,246 @@ func TestBuildCmd_vulcan(t *testing.T) {
 				fields:       &contracts.BuildInfo{},
 				msgs:         &[]string{},
 			},
+		},
+		{
+			name: "error get version on edge-functions",
+			fields: fields{
+				Io: iostreams.System(),
+				CommandRunner: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "", errors.New("Error Get version edge-functions")
+				},
+				CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				WriteAzionJsonContent: func(
+					conf *contracts.AzionApplicationOptions,
+					confPath string,
+				) error {
+					return nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(
+						flags, params string,
+						f *cmdutil.Factory,
+					) string {
+						installEdgeFunctions := "npx --yes %s edge-functions%s %s"
+						versionVulcan := "@3.2.1"
+						return fmt.Sprintf(
+							installEdgeFunctions,
+							flags,
+							versionVulcan,
+							params,
+						)
+					},
+				},
+				conf:         &contracts.AzionApplicationOptions{},
+				vulcanParams: "",
+				fields:       &contracts.BuildInfo{},
+				msgs:         &[]string{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error check vulcan major",
+			fields: fields{
+				Io: iostreams.System(),
+				CommandRunner: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "", nil
+				},
+				CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				WriteAzionJsonContent: func(
+					conf *contracts.AzionApplicationOptions,
+					confPath string,
+				) error {
+					return nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return errors.New("Error check vulcan major")
+					},
+					Command: func(
+						flags, params string,
+						f *cmdutil.Factory,
+					) string {
+						installEdgeFunctions := "npx --yes %s edge-functions%s %s"
+						versionVulcan := "@3.2.1"
+						return fmt.Sprintf(
+							installEdgeFunctions,
+							flags,
+							versionVulcan,
+							params,
+						)
+					},
+				},
+				conf:         &contracts.AzionApplicationOptions{},
+				vulcanParams: "",
+				fields:       &contracts.BuildInfo{},
+				msgs:         &[]string{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error run command build edge-funcionts bundler",
+			fields: fields{
+				Io: iostreams.System(),
+				CommandRunner: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "", nil
+				},
+				CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return errors.New("error run command interactive command build bundler")
+				},
+				WriteAzionJsonContent: func(
+					conf *contracts.AzionApplicationOptions,
+					confPath string,
+				) error {
+					return nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(
+						flags, params string,
+						f *cmdutil.Factory,
+					) string {
+						installEdgeFunctions := "npx --yes %s edge-functions%s %s"
+						versionVulcan := "@3.2.1"
+						return fmt.Sprintf(
+							installEdgeFunctions,
+							flags,
+							versionVulcan,
+							params,
+						)
+					},
+				},
+				conf:         &contracts.AzionApplicationOptions{},
+				vulcanParams: "",
+				fields:       &contracts.BuildInfo{},
+				msgs:         &[]string{},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error write azion json content",
+			fields: fields{
+				Io: iostreams.System(),
+				CommandRunner: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "", nil
+				},
+				CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				WriteAzionJsonContent: func(
+					conf *contracts.AzionApplicationOptions,
+					confPath string,
+				) error {
+					return errors.New("Error while writing azion.json file")
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(
+						flags, params string,
+						f *cmdutil.Factory,
+					) string {
+						installEdgeFunctions := "npx --yes %s edge-functions%s %s"
+						versionVulcan := "@3.2.1"
+						return fmt.Sprintf(
+							installEdgeFunctions,
+							flags,
+							versionVulcan,
+							params,
+						)
+					},
+				},
+				conf:         &contracts.AzionApplicationOptions{},
+				vulcanParams: "",
+				fields:       &contracts.BuildInfo{},
+				msgs:         &[]string{},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {

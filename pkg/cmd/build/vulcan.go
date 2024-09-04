@@ -30,8 +30,7 @@ func (b *BuildCmd) vulcan(
 	}
 
 	command := vul.Command("", "build%s", b.f)
-	vulcanCommand := fmt.Sprintf(command, vulcanParams)
-	err = b.runCommand(vulcanCommand, msgs)
+	err = b.runCommand(fmt.Sprintf(command, vulcanParams), msgs)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}

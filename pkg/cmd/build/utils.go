@@ -15,7 +15,15 @@ func (b *BuildCmd) runCommand(command string, msgs *[]string) error {
 		hasDeployMessage = true
 	}
 
-	logger.FInfoFlags(b.Io.Out, msg.BuildStart, b.f.Format, b.f.Out)
+	out := b.Io.Out
+	format := b.f.Format
+
+	fmt.Println()
+	fmt.Println()
+
+	outS := b.f.Out
+
+	logger.FInfoFlags(out, msg.BuildStart, format, outS)
 	*msgs = append(*msgs, msg.BuildStart)
 
 	logger.FInfoFlags(b.Io.Out, msg.BuildRunningCmd, b.f.Format, b.f.Out)
