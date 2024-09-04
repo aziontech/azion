@@ -111,11 +111,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	err := checkToken(f)
-	if err != nil {
-		return err
-	}
-
 	if Sync {
 		sync.ProjectConf = ProjectConf
 		syncCmd := sync.NewSyncCmd(f)
@@ -128,7 +123,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

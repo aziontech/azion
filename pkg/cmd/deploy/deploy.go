@@ -114,6 +114,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
+	err := checkToken(f)
+	if err != nil {
+		return err
+	}
+
 	settings, err := token.ReadSettings()
 	if err != nil {
 		return err
