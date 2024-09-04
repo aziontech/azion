@@ -8,7 +8,6 @@ import (
 
 	"github.com/aziontech/azionapi-go-sdk/storage"
 
-	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -57,21 +56,6 @@ func (cmd *DeployCmd) doBucket(
 	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return cmd.WriteAzionJsonContent(conf, ProjectConf)
-}
-
-func askForInput(msg string, defaultIn string) (string, error) {
-	var userInput string
-	prompt := &survey.Input{
-		Message: msg,
-		Default: defaultIn,
-	}
-
-	// Prompt the user for input
-	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true))
-	if err != nil {
-		return "", err
-	}
-	return userInput, nil
 }
 
 // replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
