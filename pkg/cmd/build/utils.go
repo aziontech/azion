@@ -9,27 +9,27 @@ import (
 	"go.uber.org/zap"
 )
 
-func runCommand(cmd *BuildCmd, command string, msgs *[]string) error {
+func (b *BuildCmd) runCommand(command string, msgs *[]string) error {
 	var hasDeployMessage bool
 	if len(*msgs) > 0 {
 		hasDeployMessage = true
 	}
 
-	logger.FInfoFlags(cmd.Io.Out, msg.BuildStart, cmd.f.Format, cmd.f.Out)
+	logger.FInfoFlags(b.Io.Out, msg.BuildStart, b.f.Format, b.f.Out)
 	*msgs = append(*msgs, msg.BuildStart)
 
-	logger.FInfoFlags(cmd.Io.Out, msg.BuildRunningCmd, cmd.f.Format, cmd.f.Out)
+	logger.FInfoFlags(b.Io.Out, msg.BuildRunningCmd, b.f.Format, b.f.Out)
 	*msgs = append(*msgs, msg.BuildRunningCmd)
-	logger.FInfoFlags(cmd.Io.Out, fmt.Sprintf("$ %s\n", command), cmd.f.Format, cmd.f.Out)
+	logger.FInfoFlags(b.Io.Out, fmt.Sprintf("$ %s\n", command), b.f.Format, b.f.Out)
 	*msgs = append(*msgs, fmt.Sprintf("$ %s\n", command))
 
-	err := cmd.CommandRunInteractive(cmd.f, command)
+	err := b.CommandRunInteractive(b.f, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrFailedToRunBuildCommand
 	}
 
-	logger.FInfoFlags(cmd.Io.Out, msg.BuildSuccessful, cmd.f.Format, cmd.f.Out)
+	logger.FInfoFlags(b.Io.Out, msg.BuildSuccessful, b.f.Format, b.f.Out)
 	*msgs = append(*msgs, msg.BuildSuccessful)
 
 	if hasDeployMessage {
@@ -39,8 +39,8 @@ func runCommand(cmd *BuildCmd, command string, msgs *[]string) error {
 	outSlice := output.SliceOutput{
 		Messages: *msgs,
 		GeneralOutput: output.GeneralOutput{
-			Out:   cmd.f.IOStreams.Out,
-			Flags: cmd.f.Flags,
+			Out:   b.f.IOStreams.Out,
+			Flags: b.f.Flags,
 		},
 	}
 
