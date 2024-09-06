@@ -23,9 +23,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
+	helpers "github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
+	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -53,50 +56,54 @@ type initCmd struct {
 	openFile              func(name string) (*os.File, error)
 	removeAll             func(path string) error
 	rename                func(oldpath string, newpath string) error
-	createTempDir         func(dir string, pattern string) (string, error)
 	envLoader             func(path string) ([]string, error)
 	stat                  func(path string) (fs.FileInfo, error)
 	mkdir                 func(path string, perm os.FileMode) error
 	gitPlainClone         func(path string, isBare bool, o *git.CloneOptions) (*git.Repository, error)
-	commandRunner         func(cmd string, envvars []string) (string, int, error)
+	commandRunner         func(envVars []string, comm string) (string, int, error)
 	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	commandRunInteractive func(f *cmdutil.Factory, comm string) error
-	shouldDevDeploy       func(msg string, globalFlagAll, defaultYes bool) bool
 	deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	changeDir             func(dir string) error
+	askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+	load                  func(filenames ...string) (err error)
+	dir                   func() (config.DirPath, error)
+	mkdirTemp             func(dir, pattern string) (string, error)
+	readAll               func(r io.Reader) ([]byte, error)
+	get                   func(url string) (resp *http.Response, err error)
+	marshalIndent         func(v any, prefix, indent string) ([]byte, error)
 }
 
 func NewInitCmd(f *cmdutil.Factory) *initCmd {
 	return &initCmd{
-		f:               f,
-		io:              f.IOStreams,
-		getWorkDir:      utils.GetWorkingDir,
-		fileReader:      os.ReadFile,
-		isDirEmpty:      utils.IsDirEmpty,
-		cleanDir:        utils.CleanDirectory,
-		writeFile:       os.WriteFile,
-		openFile:        os.Open,
-		removeAll:       os.RemoveAll,
-		rename:          os.Rename,
-		createTempDir:   os.MkdirTemp,
-		envLoader:       utils.LoadEnvVarsFromFile,
-		stat:            os.Stat,
-		mkdir:           os.MkdirAll,
-		gitPlainClone:   git.PlainClone,
-		shouldDevDeploy: shouldDevDeploy,
-		devCmd:          dev.NewDevCmd,
-		deployCmd:       deploy.NewDeployCmd,
-		changeDir:       os.Chdir,
-		commandRunner: func(cmd string, envvars []string) (string, int, error) {
-			return utils.RunCommandWithOutput(envvars, cmd)
-		},
-		commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-			return utils.CommandRunInteractive(f, comm)
-		},
-		commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
-			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
-		},
+		f:                     f,
+		io:                    f.IOStreams,
+		getWorkDir:            utils.GetWorkingDir,
+		fileReader:            os.ReadFile,
+		isDirEmpty:            utils.IsDirEmpty,
+		cleanDir:              utils.CleanDirectory,
+		writeFile:             os.WriteFile,
+		openFile:              os.Open,
+		removeAll:             os.RemoveAll,
+		rename:                os.Rename,
+		mkdirTemp:             os.MkdirTemp,
+		envLoader:             utils.LoadEnvVarsFromFile,
+		stat:                  os.Stat,
+		mkdir:                 os.MkdirAll,
+		gitPlainClone:         git.PlainClone,
+		devCmd:                dev.NewDevCmd,
+		deployCmd:             deploy.NewDeployCmd,
+		changeDir:             os.Chdir,
+		commandRunner:         utils.RunCommandWithOutput,
+		commandRunInteractive: utils.CommandRunInteractive,
+		commandRunnerOutput:   utils.CommandRunInteractiveWithOutput,
+		askOne:                survey.AskOne,
+		load:                  godotenv.Load,
+		dir:                   config.Dir,
+		readAll:               io.ReadAll,
+		get:                   http.Get,
+		marshalIndent:         json.MarshalIndent,
 	}
 }
 
@@ -132,7 +139,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
 		if cmd.name == "" {
-			projName, err := askForInput(msg.InitProjectQuestion, thoth.GenerateName())
+			projName, err := cmd.askForInput(msg.InitProjectQuestion, thoth.GenerateName())
 			if err != nil {
 				return err
 			}
@@ -141,8 +148,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
-
-	resp, err := http.Get(APIURL)
+	resp, err := cmd.get(APIURL)
 	if err != nil {
 		return err
 	}
@@ -152,7 +158,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	body, err := cmd.readAll(resp.Body)
 	if err != nil {
 		return err
 	}
@@ -179,7 +185,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	var answer string
-	err = survey.AskOne(prompt, &answer)
+	err = cmd.askOne(prompt, &answer)
 	if err != nil {
 		return err
 	}
@@ -198,25 +204,25 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	var answerTemplate string
-	err = survey.AskOne(promptTemplate, &answerTemplate)
+	err = cmd.askOne(promptTemplate, &answerTemplate)
 	if err != nil {
 		return err
 	}
 
-	dirPath, err := config.Dir()
+	dirPath, err := cmd.dir()
 	if err != nil {
 		return err
 	}
 
-	// Create a temporary directory	
-	tempDir, err := os.MkdirTemp(dirPath.Dir, "tempclonesamples")
+	// Create a temporary directory
+	tempDir, err := cmd.mkdirTemp(dirPath.Dir, "tempclonesamples")
 	if err != nil {
 		return err
 	}
 
 	// Defer deletion of the temporary directory
 	defer func() {
-		err := os.RemoveAll(tempDir)
+		err := cmd.removeAll(tempDir)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -254,16 +260,17 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	err = cmd.selectVulcanTemplates()
+	vul := vulcanPkg.NewVulcan()
+	err = cmd.selectVulcanTemplates(vul)
 	if err != nil {
 		return err
 	}
 
-	if cmd.auto || !cmd.shouldDevDeploy(msg.AskLocalDev, cmd.globalFlagAll, false) {
+	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
 	} else {
-		if err := deps(c, cmd, msg.AskInstallDepsDev, &msgs); err != nil {
+		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
 			return err
 		}
 		logger.Debug("Running dev command from init command")
@@ -275,15 +282,15 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	if cmd.auto || !cmd.shouldDevDeploy(msg.AskDeploy, cmd.globalFlagAll, false) {
+	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.io.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
-		msgEdgeAppInitSuccessFul := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
+		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
 		logger.FInfoFlags(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
 			cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msgEdgeAppInitSuccessFul)
+		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
-		if err := deps(c, cmd, msg.AskInstallDepsDeploy, &msgs); err != nil {
+		if err := cmd.deps(c, msg.AskInstallDepsDeploy, &msgs); err != nil {
 			return err
 		}
 
@@ -306,9 +313,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	return output.Print(&initOut)
 }
 
-func deps(c *cobra.Command, cmd *initCmd, m string, msgs *[]string) error {
+func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !cmd.shouldDevDeploy(m, cmd.globalFlagAll, true) {
+		if !helpers.Confirm(cmd.globalFlagAll, m, true) {
 			return nil
 		}
 
@@ -323,7 +330,7 @@ func deps(c *cobra.Command, cmd *initCmd, m string, msgs *[]string) error {
 	logger.FInfoFlags(cmd.io.Out, msg.InstallDeps, cmd.f.Format, cmd.f.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
 
-	if err := depsInstall(cmd, cmd.packageManager); err != nil {
+	if err := cmd.depsInstall(); err != nil {
 		logger.Debug("Failed to install project dependencies")
 		return err
 	}
