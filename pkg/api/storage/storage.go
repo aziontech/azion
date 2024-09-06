@@ -106,8 +106,17 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
+			// Read the response body
+			body, err := io.ReadAll(httpResp.Body)
+			if err != nil {
+				fmt.Println("Error reading body:", err)
+				return err
+			}
+
+			// Print the body
+			fmt.Println(string(body))
 			logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			err = utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
 			}

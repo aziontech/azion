@@ -89,7 +89,6 @@ jobs:
           API_URL: https://api.azionapi.net
           STORAGE_URL: https://api.azion.com
           AUTH_URL: https://sso.azion.com/api
-          DEPLOY_URL: https://console.azion.com/create/deploy
           TEMPLATE_BRANCH: main
           SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
 

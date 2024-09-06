@@ -26,7 +26,8 @@ LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSI
 		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
-		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$DEPLOY_URL \
+		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$CONSOLE \
+		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID=$$SCRIPT_ID \
 		-X github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init.TemplateBranch=$$TEMPLATE_BRANCH \
 		-X github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init.TemplateMajor=$$TEMPLATE_MAJOR
 LDFLAGS_STRIP=-s -w

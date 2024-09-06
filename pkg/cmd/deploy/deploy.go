@@ -1,10 +1,14 @@
 package deploy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
@@ -21,6 +25,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	"github.com/briandowns/spinner"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -50,7 +55,8 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
-	DeployURL   string
+	DeployURL   = "https://console.azion.com"
+	ScriptID    = "92480a31-b88b-495b-8615-3ed5eff6314e"
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -182,9 +188,116 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = openBrowser(f, fmt.Sprintf("%s/%s", DeployURL, id))
+	err = openBrowser(f, fmt.Sprintf("%s/create/deploy/%s", DeployURL, id))
 	if err != nil {
 		return err
+	}
+
+	err = caputeLogs(id, settings.Token, cmd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func caputeLogs(execId, token string, cmd *DeployCmd) error {
+	logsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/logs", DeployURL, execId)
+	resultsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/results", DeployURL, execId)
+
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond) // Build our new spinner
+	s.Suffix = " Deploying your project..."
+	s.FinalMSG = "Deployed completed successfully!\n"
+	s.Start() // Start the spinner
+
+	// Create a new HTTP request
+	req, err := http.NewRequest("GET", logsURL, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		logger.Debug("Error creating request", zap.Error(err))
+		return err
+	}
+
+	// Set headers
+	req.Header.Set("accept", "application/json; version=3")
+	req.Header.Set("content-type", "application/json; version=3")
+	req.Header.Set("Authorization", "Token "+token)
+
+	// Send the request
+	client := &http.Client{}
+
+	for {
+		resp, err := client.Do(req)
+		if err != nil {
+			logger.Debug("Error sending request", zap.Error(err))
+			return err
+		}
+		defer resp.Body.Close()
+
+		logs := contracts.Logs{}
+
+		// Read the response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		if err := json.Unmarshal(body, &logs); err != nil {
+			logger.Debug("Error unmarshalling response", zap.Error(err))
+			return err
+		}
+
+		switch logs.Status {
+		case "queued", "running", "started", "pending finish":
+			time.Sleep(7 * time.Second)
+			continue
+		case "succeeded":
+			// Create a new HTTP request
+			requestResults, err := http.NewRequest("GET", resultsURL, bytes.NewBuffer([]byte{}))
+			if err != nil {
+				logger.Debug("Error creating request", zap.Error(err))
+				return err
+			}
+
+			// Set headers
+			requestResults.Header.Set("accept", "application/json; version=3")
+			requestResults.Header.Set("content-type", "application/json; version=3")
+			requestResults.Header.Set("Authorization", "Token "+token)
+
+			// Send the request
+			clientResults := &http.Client{}
+
+			respResults, err := clientResults.Do(requestResults)
+			if err != nil {
+				logger.Debug("Error sending request", zap.Error(err))
+				return err
+			}
+			defer respResults.Body.Close()
+
+			// Read the response
+			body, err := io.ReadAll(respResults.Body)
+			if err != nil {
+				return err
+			}
+
+			result := contracts.Results{}
+			if err := json.Unmarshal(body, &result); err != nil {
+				logger.Debug("Error unmarshalling response", zap.Error(err))
+				return err
+			}
+
+			if result.Result.Errors != nil {
+				return errors.New(result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+			}
+
+			err = cmd.WriteAzionJsonContent(result.Result.Azion, ProjectConf)
+			if err != nil {
+				return err
+			}
+		default:
+			return errors.New("Unexpected response") //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+		}
+		s.Stop()
+		break
 	}
 
 	return nil

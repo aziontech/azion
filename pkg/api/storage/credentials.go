@@ -16,7 +16,6 @@ type RequestCredentials struct {
 func (c *Client) CreateCredentials(ctx context.Context, request RequestCredentials) (*sdk.ResponseS3Credential, error) {
 	logger.Debug("Creating s3 credentials ", zap.Any("name", request.Name))
 	req := c.apiClient.StorageAPI.StorageApiS3CredentialsCreate(ctx).S3CredentialCreate(request.S3CredentialCreate)
-	// req := c.apiClient.StorageAPI.StorageApiBucketsCreate(ctx).BucketCreate(request.BucketCreate)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while creating the user's s3 credentials", zap.Error(err))

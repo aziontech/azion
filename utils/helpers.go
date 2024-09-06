@@ -239,11 +239,13 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confPath str
 	}
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
+		logger.Debug("Error marshalling response", zap.Error(err))
 		return ErrorMarshalAzionJsonFile
 	}
 
 	err = os.WriteFile(path.Join(wd, confPath, "azion.json"), data, 0644)
 	if err != nil {
+		logger.Debug("Error writing file", zap.Error(err))
 		return ErrorWritingAzionJsonFile
 	}
 

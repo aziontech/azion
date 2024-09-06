@@ -3,6 +3,7 @@ package deploy
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -20,7 +21,7 @@ type Response struct {
 
 func callScript(token, id, secret, prefix, name string) (string, error) {
 	logger.Debug("Calling script runner api")
-	url := "https://stage-console.azion.com/api/template-engine/templates/92480a31-b88b-495b-8615-3ed5eff6314e/instantiate"
+	instantiateURL := fmt.Sprintf("%s/api/template-engine/templates/%s/instantiate", DeployURL, ScriptID)
 
 	// Define the request payload
 	payload := []map[string]string{
@@ -59,7 +60,7 @@ func callScript(token, id, secret, prefix, name string) (string, error) {
 	}
 
 	// Create a new HTTP request
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequest("POST", instantiateURL, bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		logger.Debug("Error creating request", zap.Error(err))
 		return "", err
