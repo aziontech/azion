@@ -205,9 +205,9 @@ func caputeLogs(execId, token string, cmd *DeployCmd) error {
 	logsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/logs", DeployURL, execId)
 	resultsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/results", DeployURL, execId)
 
-	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond) // Build our new spinner
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
 	s.Suffix = " Deploying your project..."
-	s.FinalMSG = "Deployed completed successfully!\n"
+	s.FinalMSG = "Deployed finished executing\n"
 	s.Start() // Start the spinner
 
 	// Create a new HTTP request
@@ -294,7 +294,8 @@ func caputeLogs(execId, token string, cmd *DeployCmd) error {
 				return err
 			}
 		default:
-			return errors.New("Unexpected response") //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+			s.Stop()
+			return msg.ErrorDeployRemote //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
 		}
 		s.Stop()
 		break

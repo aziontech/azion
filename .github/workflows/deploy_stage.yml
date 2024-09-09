@@ -43,7 +43,6 @@ jobs:
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }}
-          INSTANTIATE_STAGE: ${{ secrets.INSTANTIATE_URL }}
         run: make build ENVFILE=./env/stage
 
       - name: Cross-build
@@ -52,7 +51,6 @@ jobs:
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }} 
-          INSTANTIATE_STAGE: ${{ secrets.INSTANTIATE_URL }}
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI

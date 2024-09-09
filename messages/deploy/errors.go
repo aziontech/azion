@@ -15,4 +15,5 @@ var (
 	ErrorCreateDomain      = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorUpdateDomain      = errors.New("Failed to update the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorInvalidToken      = errors.New("The configured token is invalid. You must create a new token and configure it to use with the CLI.")
+	ErrorDeployRemote      = errors.New("Failed to read the response from remote deploy process. Please verify if your deploy finished successfully, and update your azion.json file, if necessary.")
 )
