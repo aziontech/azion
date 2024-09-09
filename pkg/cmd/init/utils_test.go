@@ -2,71 +2,406 @@ package init
 
 import (
 	"errors"
-	"io"
-	"io/fs"
-	"net/http"
 	"os"
 	"testing"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
-	"github.com/aziontech/azion-cli/pkg/cmd/dev"
+	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	"github.com/aziontech/azion-cli/pkg/config"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/go-git/go-git/v5"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap/zapcore"
 )
+
+func Test_initCmd_askForInput(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	type fields struct {
+		askOne func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+	}
+	type args struct {
+		msg       string
+		defaultIn string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "success flow",
+			fields: fields{
+				askOne: func(
+					p survey.Prompt,
+					response interface{},
+					opts ...survey.AskOpt,
+				) error {
+					return nil
+				},
+			},
+			args: args{
+				msg:       "",
+				defaultIn: "",
+			},
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name: "error askOne",
+			fields: fields{
+				askOne: func(
+					p survey.Prompt,
+					response interface{},
+					opts ...survey.AskOpt,
+				) error {
+					return errors.New("error askOne")
+				},
+			},
+			args: args{
+				msg:       "",
+				defaultIn: "",
+			},
+			want:    "",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := &initCmd{
+				askOne: tt.fields.askOne,
+			}
+			got, err := cmd.askForInput(tt.args.msg, tt.args.defaultIn)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("initCmd.askForInput() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("initCmd.askForInput() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_initCmd_selectVulcanTemplates(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	type fields struct {
+		preset                string
+		auto                  bool
+		mode                  string
+		packageManager        string
+		pathWorkingDir        string
+		commandRunner         func(envVars []string, comm string) (string, int, error)
+		commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
+		commandRunInteractive func(f *cmdutil.Factory, comm string) error
+		load                  func(filenames ...string) (err error)
+	}
+	type args struct {
+		vul *vulcanPkg.VulcanPkg
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "success flow ",
+			fields: fields{
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vanilla")
+					os.Setenv("mode", "compute")
+					return nil
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "success flow with the flags",
+			fields: fields{
+				preset:         "vanilla",
+				mode:           "compute",
+				pathWorkingDir: "./azion/pathmock",
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vite")
+					os.Setenv("mode", "deliver")
+					return nil
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "error command runner output",
+			fields: fields{
+				preset:         "vanilla",
+				mode:           "compute",
+				pathWorkingDir: "./azion/pathmock",
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", errors.New("error commandRunnerOutput")
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vanilla")
+					os.Setenv("mode", "compute")
+					return nil
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error CheckVulcanMajor",
+			fields: fields{
+				preset:         "vanilla",
+				mode:           "compute",
+				pathWorkingDir: "./azion/pathmock",
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vanilla")
+					os.Setenv("mode", "compute")
+					return nil
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return errors.New("error CheckVulcanMajor")
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error commandRunInteractive",
+			fields: fields{
+				preset:         "vanilla",
+				mode:           "compute",
+				pathWorkingDir: "./azion/pathmock",
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return errors.New("error commandRunInteractive")
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vanilla")
+					os.Setenv("mode", "compute")
+					return nil
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error getVulcanEnvInfo",
+			fields: fields{
+				preset:         "vanilla",
+				mode:           "compute",
+				pathWorkingDir: "./azion/pathmock",
+				commandRunnerOutput: func(
+					f *cmdutil.Factory,
+					comm string,
+					envVars []string,
+				) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					return errors.New("error load")
+				},
+			},
+			args: args{
+				vul: &vulcanPkg.VulcanPkg{
+					CheckVulcanMajor: func(
+						currentVersion string,
+						f *cmdutil.Factory,
+						vulcan *vulcanPkg.VulcanPkg,
+					) error {
+						return nil
+					},
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "init"
+					},
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := &initCmd{
+				preset:                tt.fields.preset,
+				auto:                  tt.fields.auto,
+				mode:                  tt.fields.mode,
+				packageManager:        tt.fields.packageManager,
+				pathWorkingDir:        tt.fields.pathWorkingDir,
+				commandRunner:         tt.fields.commandRunner,
+				commandRunnerOutput:   tt.fields.commandRunnerOutput,
+				commandRunInteractive: tt.fields.commandRunInteractive,
+				load:                  tt.fields.load,
+			}
+			if err := cmd.selectVulcanTemplates(tt.args.vul); (err != nil) != tt.wantErr {
+				t.Errorf("initCmd.selectVulcanTemplates() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_initCmd_depsInstall(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	type fields struct {
+		packageManager        string
+		commandRunInteractive func(f *cmdutil.Factory, comm string) error
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "flow completed with success",
+			fields: fields{
+				packageManager: "npm",
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "error run command interactive",
+			fields: fields{
+				packageManager: "npm",
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return msg.ErrorDeps
+				},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmd := &initCmd{
+				packageManager:        tt.fields.packageManager,
+				commandRunInteractive: tt.fields.commandRunInteractive,
+			}
+			if err := cmd.depsInstall(); (err != nil) != tt.wantErr {
+				t.Errorf("initCmd.depsInstall() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
 func Test_initCmd_getVulcanEnvInfo(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	type fields struct {
-		name           string
-		preset         string
-		auto           bool
-		mode           string
-		packageManager string
-		pathWorkingDir string
-		globalFlagAll  bool
-		f              *cmdutil.Factory
-		io             *iostreams.IOStreams
-		getWorkDir     func() (string, error)
-		fileReader     func(path string) ([]byte, error)
-		isDirEmpty     func(dirpath string) (bool, error)
-		cleanDir       func(dirpath string) error
-		writeFile      func(filename string, data []byte, perm fs.FileMode) error
-		openFile       func(name string) (*os.File, error)
-		removeAll      func(path string) error
-		rename         func(oldpath string, newpath string) error
-		envLoader      func(path string) ([]string, error)
-		stat           func(path string) (fs.FileInfo, error)
-		mkdir          func(path string, perm os.FileMode) error
-		gitPlainClone  func(
-			path string,
-			isBare bool, o *git.CloneOptions,
-		) (*git.Repository, error)
-		commandRunner       func(envVars []string, comm string) (string, int, error)
-		commandRunnerOutput func(
-			f *cmdutil.Factory,
-			comm string, envVars []string,
-		) (string, error)
-		commandRunInteractive func(f *cmdutil.Factory, comm string) error
-		deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
-		devCmd                func(f *cmdutil.Factory) *dev.DevCmd
-		changeDir             func(dir string) error
-		askOne                func(
-			p survey.Prompt,
-			response interface{},
-			opts ...survey.AskOpt,
-		) error
-		load          func(filenames ...string) (err error)
-		dir           func() (config.DirPath, error)
-		mkdirTemp     func(dir, pattern string) (string, error)
-		readAll       func(r io.Reader) ([]byte, error)
-		get           func(url string) (resp *http.Response, err error)
-		marshalIndent func(v any, prefix, indent string) ([]byte, error)
+		load func(filenames ...string) (err error)
 	}
 	tests := []struct {
 		name    string
@@ -103,40 +438,7 @@ func Test_initCmd_getVulcanEnvInfo(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := &initCmd{
-				name:                  tt.fields.name,
-				preset:                tt.fields.preset,
-				auto:                  tt.fields.auto,
-				mode:                  tt.fields.mode,
-				packageManager:        tt.fields.packageManager,
-				pathWorkingDir:        tt.fields.pathWorkingDir,
-				globalFlagAll:         tt.fields.globalFlagAll,
-				f:                     tt.fields.f,
-				io:                    tt.fields.io,
-				getWorkDir:            tt.fields.getWorkDir,
-				fileReader:            tt.fields.fileReader,
-				isDirEmpty:            tt.fields.isDirEmpty,
-				cleanDir:              tt.fields.cleanDir,
-				writeFile:             tt.fields.writeFile,
-				openFile:              tt.fields.openFile,
-				removeAll:             tt.fields.removeAll,
-				rename:                tt.fields.rename,
-				envLoader:             tt.fields.envLoader,
-				stat:                  tt.fields.stat,
-				mkdir:                 tt.fields.mkdir,
-				gitPlainClone:         tt.fields.gitPlainClone,
-				commandRunner:         tt.fields.commandRunner,
-				commandRunnerOutput:   tt.fields.commandRunnerOutput,
-				commandRunInteractive: tt.fields.commandRunInteractive,
-				deployCmd:             tt.fields.deployCmd,
-				devCmd:                tt.fields.devCmd,
-				changeDir:             tt.fields.changeDir,
-				askOne:                tt.fields.askOne,
-				load:                  tt.fields.load,
-				dir:                   tt.fields.dir,
-				mkdirTemp:             tt.fields.mkdirTemp,
-				readAll:               tt.fields.readAll,
-				get:                   tt.fields.get,
-				marshalIndent:         tt.fields.marshalIndent,
+				load: tt.fields.load,
 			}
 			got, got1, err := cmd.getVulcanEnvInfo()
 			if (err != nil) != tt.wantErr {
