@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
@@ -213,6 +214,18 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
+		//run init before calling build
+		cmdVulcanInit := "init"
+		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, strings.ToLower(info.Preset), strings.ToLower(info.Mode), info.PathWorkingDir)
+
+		vul := vulcanPkg.NewVulcan()
+		command := vul.Command("", cmdVulcanInit, cmd.F)
+
+		_, err = cmd.CommandRunner(cmd.F, command, []string{})
+		if err != nil {
+			return err
+		}
+
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
 				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
@@ -251,17 +264,6 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 		}
 
-	}
-
-	cmdVulcanInit := "init"
-	cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, info.Preset, info.Mode, info.PathWorkingDir)
-
-	vul := vulcanPkg.NewVulcan()
-	command := vul.Command("", cmdVulcanInit, cmd.F)
-
-	_, err = cmd.CommandRunner(cmd.F, command, []string{})
-	if err != nil {
-		return err
 	}
 
 	initOut := output.SliceOutput{
