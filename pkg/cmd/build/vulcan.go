@@ -11,27 +11,31 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *BuildCmd, conf *contracts.AzionApplicationOptions, vulcanParams string, fields *contracts.BuildInfo, msgs *[]string) error {
+func (b *BuildCmd) vulcan(
+	vul *vulcanPkg.VulcanPkg,
+	conf *contracts.AzionApplicationOptions,
+	vulcanParams string,
+	fields *contracts.BuildInfo,
+	msgs *[]string,
+) error {
 	// checking if vulcan major is correct
-	vulcanVer, err := cmd.CommandRunner(cmd.f, "npm show edge-functions version", []string{})
+	vulcanVer, err := b.CommandRunner(b.f, "npm show edge-functions version", []string{})
 	if err != nil {
 		return err
 	}
 
-	vul := vulcanPkg.NewVulcan()
-	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
+	err = vul.CheckVulcanMajor(vulcanVer, b.f, vul)
 	if err != nil {
 		return err
 	}
 
-	command := vul.Command("", "build%s", cmd.f)
-
-	err = runCommand(cmd, fmt.Sprintf(command, vulcanParams), msgs)
+	command := vul.Command("", "build%s", b.f)
+	err = b.runCommand(fmt.Sprintf(command, vulcanParams), msgs)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
 
-	err = cmd.WriteAzionJsonContent(conf, fields.ProjectPath)
+	err = b.WriteAzionJsonContent(conf, fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return utils.ErrorWritingAzionJsonFile

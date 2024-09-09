@@ -84,7 +84,7 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	}
 }
 
-func (cmd *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string, msgs *[]string) error {
+func (b *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string, msgs *[]string) error {
 	fields.ProjectPath = confPath
-	return cmd.run(fields, msgs)
+	return b.run(fields, msgs)
 }
