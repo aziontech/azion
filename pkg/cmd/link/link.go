@@ -214,6 +214,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
+		//run init before calling build
 		cmdVulcanInit := "init"
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, strings.ToLower(info.Preset), strings.ToLower(info.Mode), info.PathWorkingDir)
 
