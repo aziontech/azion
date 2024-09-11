@@ -7,24 +7,16 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap"
 )
 
-func (cmd *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
+func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 	logger.Debug("Running build command")
 
-	err := RunBuildCmdLine(cmd, fields, msgs)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo, msgs *[]string) error {
 	var err error
 
-	conf, err := cmd.GetAzionJsonContent(fields.ProjectPath)
+	conf, err := b.GetAzionJsonContent(fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while building your project", zap.Error(err))
 		return msg.ErrorBuilding
@@ -66,6 +58,6 @@ func RunBuildCmdLine(cmd *BuildCmd, fields *contracts.BuildInfo, msgs *[]string)
 		vulcanParams += " --firewall "
 	}
 
-	return vulcan(cmd, conf, vulcanParams, fields, msgs)
-
+	vul := vulcanPkg.NewVulcan()
+	return b.vulcan(vul, conf, vulcanParams, fields, msgs)
 }
