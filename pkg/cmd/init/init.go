@@ -19,7 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/github"
-	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -47,7 +46,7 @@ type initCmd struct {
 	pathWorkingDir        string
 	globalFlagAll         bool
 	f                     *cmdutil.Factory
-	io                    *iostreams.IOStreams
+	git                   github.Github
 	getWorkDir            func() (string, error)
 	fileReader            func(path string) ([]byte, error)
 	isDirEmpty            func(dirpath string) (bool, error)
@@ -73,12 +72,13 @@ type initCmd struct {
 	readAll               func(r io.Reader) ([]byte, error)
 	get                   func(url string) (resp *http.Response, err error)
 	marshalIndent         func(v any, prefix, indent string) ([]byte, error)
+	unmarshal             func(data []byte, v any) error
+	DetectPackageManager  func(pathWorkDir string) string
 }
 
 func NewInitCmd(f *cmdutil.Factory) *initCmd {
 	return &initCmd{
 		f:                     f,
-		io:                    f.IOStreams,
 		getWorkDir:            utils.GetWorkingDir,
 		fileReader:            os.ReadFile,
 		isDirEmpty:            utils.IsDirEmpty,
@@ -104,6 +104,9 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		readAll:               io.ReadAll,
 		get:                   http.Get,
 		marshalIndent:         json.MarshalIndent,
+		unmarshal:             json.Unmarshal,
+		git:                   *github.NewGithub(),
+		DetectPackageManager:  node.DetectPackageManager,
 	}
 }
 
@@ -155,7 +158,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return err
+		return fmt.Errorf("expected status code %d but got %d", http.StatusOK, resp.StatusCode)
 	}
 
 	body, err := cmd.readAll(resp.Body)
@@ -166,7 +169,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	templateMap := make(map[string][]Item)
 
 	var templates []Template
-	err = json.Unmarshal(body, &templates)
+	err = cmd.unmarshal(body, &templates)
 	if err != nil {
 		return err
 	}
@@ -228,8 +231,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}()
 
-	git := github.NewGithub()
-	err = git.Clone(SAMPLESURL, tempDir)
+	err = cmd.git.Clone(SAMPLESURL, tempDir)
 	if err != nil {
 		logger.Debug("Error while cloning the repository", zap.Error(err))
 		return err
@@ -251,7 +253,8 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
-	logger.FInfoFlags(cmd.io.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
+
+	logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
 	msgs = append(msgs, msg.WebAppInitCmdSuccess)
 
 	err = cmd.changeDir(cmd.pathWorkingDir)
@@ -267,7 +270,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
-		logger.FInfoFlags(cmd.io.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
 	} else {
 		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
@@ -283,10 +286,10 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
-		logger.FInfoFlags(cmd.io.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
 		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
-		logger.FInfoFlags(cmd.io.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
+		logger.FInfoFlags(cmd.f.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
@@ -327,7 +330,7 @@ func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 		cmd.packageManager = node.DetectPackageManager(pathWorkDir)
 	}
 
-	logger.FInfoFlags(cmd.io.Out, msg.InstallDeps, cmd.f.Format, cmd.f.Out)
+	logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InstallDeps, cmd.f.Format, cmd.f.Out)
 	*msgs = append(*msgs, msg.InstallDeps)
 
 	if err := cmd.depsInstall(); err != nil {
