@@ -9,17 +9,14 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/login"
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	cmdPersToken "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
-func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
-
+func (l *login) terminalLogin(cmd *cobra.Command) error {
 	if !cmd.Flags().Changed("username") {
 		answer, err := utils.AskInput(msg.AskUsername)
 		if err != nil {
@@ -38,18 +35,13 @@ func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 		password = answer
 	}
 
-	client, err := token.New(&token.Config{Client: f.HttpClient})
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Create(b64(username, password))
+	resp, err := l.token.Create(b64(username, password))
 	if err != nil {
 		logger.Debug("Error while creating basic token", zap.Error(err))
 		return err
 	}
 
-	err = validateToken(client, resp.Token)
+	err = l.validateToken(resp.Token)
 	if err != nil {
 		return err
 	}
@@ -66,7 +58,7 @@ func terminalLogin(cmd *cobra.Command, f *cmdutil.Factory) error {
 	request.SetName(username)
 	request.SetExpiresAt(date)
 
-	clientPersonalToken := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientPersonalToken := api.NewClient(l.factory.HttpClient, l.factory.Config.GetString("api_url"), l.factory.Config.GetString("token"))
 	response, err := clientPersonalToken.Create(context.Background(), &request)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorLogin.Error(), err.Error())

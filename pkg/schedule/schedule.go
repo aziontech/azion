@@ -45,20 +45,13 @@ func createFileSchedule(shedule []Schedule) error {
 	if err != nil {
 		return err
 	}
-	configPath, err := config.Dir()
-	if err != nil {
-		return err
-	}
+	configPath := config.Dir()
 	path := filepath.Join(configPath.Dir, configPath.Schedule)
 	return os.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
 func readFileSchedule() ([]Schedule, error) {
-	configPath, err := config.Dir()
-	if err != nil {
-		return nil, err
-	}
-
+	configPath := config.Dir()
 	schedules := []Schedule{}
 
 	path := filepath.Join(configPath.Dir, configPath.Schedule)

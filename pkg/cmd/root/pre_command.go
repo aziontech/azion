@@ -47,21 +47,16 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 	}
 	fact.globalSettings = &settings
 
-	t, err := token.New(&token.Config{
+	t := token.New(&token.Config{
 		Client: fact.Factory.HttpClient,
 		Out:    fact.Factory.IOStreams.Out,
 	})
-	if err != nil {
-		return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
-	}
 
 	if cmd.Flags().Changed("token") {
 		if err := checkTokenSent(fact, fact.globalSettings, t); err != nil {
 			return err
 		}
 	}
-
-
 
 	if err := checkAuthorizeMetricsCollection(cmd, fact.Factory.GlobalFlagAll, fact.globalSettings); err != nil {
 		return err

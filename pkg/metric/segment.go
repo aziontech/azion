@@ -18,10 +18,7 @@ import (
 const SEGMENT_KEY = "Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt"
 
 func location() string {
-	dir, err := config.Dir()
-	if err != nil {
-		logger.Debug("Failed get path file metric.json", zap.Error(err))
-	}
+	dir := config.Dir()
 	return filepath.Join(dir.Dir, dir.Metrics)
 }
 
