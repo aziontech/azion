@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -29,6 +30,13 @@ func (cmd *DeployCmd) uploadFiles(
 			logger.Debug("File that caused the error: " + pathStatic)
 			return err
 		}
+
+		// Skip node_modules and .edge directories
+		if info.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
+			logger.Debug("Skipping directory: " + path)
+			return filepath.SkipDir
+		}
+
 		if !info.IsDir() {
 			totalFiles++
 		}
@@ -68,6 +76,12 @@ func (cmd *DeployCmd) uploadFiles(
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+
+		// Skip node_modules and .edge directories
+		if info.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
+			logger.Debug("Skipping directory: " + path)
+			return filepath.SkipDir
 		}
 
 		if !info.IsDir() {
