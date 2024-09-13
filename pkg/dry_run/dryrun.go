@@ -37,6 +37,8 @@ type DryrunStruct struct {
 	VersionID             func() string
 }
 
+var skip bool
+
 func NewDryrunCmd(f *cmdutil.Factory) *DryrunStruct {
 	return &DryrunStruct{
 		Io:                    f.IOStreams,
@@ -140,6 +142,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		}
 
 		if manifestStructure.Domain.Name != "" {
+			skip = true
 			logger.Debug("", zap.Any("Domain Payload", manifestStructure.Domain))
 			if conf.Domain.Id > 0 {
 				msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, manifestStructure.Domain.Name)
@@ -248,7 +251,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 
 	}
 
-	if manifestStructure.Domain.Name == "" {
+	if !skip {
 		if conf.Domain.Id > 0 {
 			msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, conf.Name)
 			msgs = append(msgs, msgf)
