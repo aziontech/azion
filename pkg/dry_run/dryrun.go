@@ -35,6 +35,7 @@ type DryrunStruct struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
+	Stat                  func(name string) (fs.FileInfo, error)
 }
 
 var skip bool
@@ -55,6 +56,7 @@ func NewDryrunCmd(f *cmdutil.Factory) *DryrunStruct {
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
 		VersionID:             utils.Timestamp,
+		Stat:                  os.Stat,
 	}
 }
 
@@ -115,7 +117,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		skipManifest = true
 	}
 
-	if _, err := os.Stat(pathManifest); os.IsNotExist(err) {
+	if _, err := dry.Stat(pathManifest); os.IsNotExist(err) {
 		logger.FInfoFlags(dry.Io.Out, msg.SkipManifest, dry.F.Format, dry.F.Out)
 		msgs = append(msgs, msg.SkipManifest)
 	} else if !skipManifest {

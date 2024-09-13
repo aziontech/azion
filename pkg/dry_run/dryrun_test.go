@@ -3,6 +3,7 @@ package dryrun
 import (
 	"bytes"
 	"errors"
+	"io/fs"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -106,6 +107,12 @@ func TestSimulateDeploy(t *testing.T) {
 				Application: contracts.AzionJsonDataApplication{
 					ID: 12345,
 				},
+				Domain: contracts.AzionJsonDataDomain{
+					Id: 12345,
+				},
+				Function: contracts.AzionJsonDataFunction{
+					ID: 123321,
+				},
 				NotFirstRun: false,
 			},
 			manifestPath: "path/to/manifest.json",
@@ -119,6 +126,17 @@ func TestSimulateDeploy(t *testing.T) {
 			name:            "missing Azion JSON content",
 			getAzionJsonErr: errors.New("file not found"),
 			wantError:       true,
+		},
+		{
+			name: "manifest path not found",
+			conf: &contracts.AzionApplicationOptions{
+				Name: "test-app",
+			},
+			manifestPath: "",
+			wantMessages: []string{
+				"This project has not been built yet",
+			},
+			fileReaderFunc: fileReaderSuccess,
 		},
 	}
 
@@ -144,6 +162,9 @@ func TestSimulateDeploy(t *testing.T) {
 					return "v1.0.0"
 				},
 				F: f,
+				Stat: func(name string) (fs.FileInfo, error) {
+					return nil, nil
+				},
 			}
 
 			err := dryrun.SimulateDeploy(tt.workingDir, tt.manifestPath)
