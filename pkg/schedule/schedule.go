@@ -18,6 +18,11 @@ type Schedule struct {
 	Kind string    `json:"kind"`
 }
 
+var (
+	TriggerDelete func(f *cmdutil.Factory, name string) error = TriggerDeleteBucket
+	ReadSchedule  func() ([]Schedule, error)                  = readFileSchedule
+)
+
 func NewSchedule(name string, kind string) error {
 	schedule := Schedule{
 		Name: name,
@@ -25,7 +30,7 @@ func NewSchedule(name string, kind string) error {
 		Kind: kind,
 	}
 
-	schedules, err := readFileSchedule()
+	schedules, err := ReadSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return err
@@ -104,7 +109,7 @@ func ExecSchedules(factory *cmdutil.Factory) {
 	for _, s := range schedules {
 		if CheckIf24HoursPassed(s.Time) {
 			if s.Kind == DELETE_BUCKET {
-				if err := TriggerDeleteBucket(factory, s.Name); err != nil {
+				if err := TriggerDelete(factory, s.Name); err != nil {
 					logger.Debug("Event execution error", zap.Error(err))
 					scheds = append(scheds, s)
 				}
