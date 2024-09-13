@@ -1,16 +1,14 @@
-package mock
+package login
 
 import (
 	"context"
 	"net/http"
 )
 
-var CancelForce context.CancelFunc
-
 type ServerMock struct{}
 
 func (s *ServerMock) ListenAndServe() error {
-	CancelForce()
+	shutdownContext()
 	return http.ErrServerClosed
 }
 

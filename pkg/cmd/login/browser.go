@@ -19,8 +19,24 @@ type Server interface {
 	Shutdown(ctx context.Context) error
 }
 
+var (
+	globalCtx    context.Context
+	globalCancel context.CancelFunc
+)
+
+func initializeContext() {
+	globalCtx, globalCancel = context.WithCancel(context.Background())
+}
+
+func shutdownContext() {
+	if globalCancel != nil {
+		globalCancel()
+	}
+}
+
 func (l *login) browserLogin(srv Server) error {
-	ctx, cancel := context.WithCancel(context.Background())
+	initializeContext()
+	defer shutdownContext()
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		paramValue := r.URL.Query().Get("c")
@@ -28,13 +44,14 @@ func (l *login) browserLogin(srv Server) error {
 		if paramValue != "" {
 			tokenValue = paramValue
 		}
-		cancel()
+		globalCancel()
 	})
 
 	err := l.openBrowser()
 	if err != nil {
 		return err
 	}
+
 	go func() {
 		err := srv.ListenAndServe()
 		if err != http.ErrServerClosed {
@@ -42,7 +59,7 @@ func (l *login) browserLogin(srv Server) error {
 		}
 	}()
 
-	<-ctx.Done() // wait for the signal to gracefully shutdown the server
+	<-globalCtx.Done() // wait for the signal to gracefully shutdown the server
 
 	// gracefully shutdown the server:
 	// waiting indefinitely for connections to return to idle and then shut down.
