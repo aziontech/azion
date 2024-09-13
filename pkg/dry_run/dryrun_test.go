@@ -113,6 +113,27 @@ func TestSimulateDeploy(t *testing.T) {
 				Function: contracts.AzionJsonDataFunction{
 					ID: 123321,
 				},
+				CacheSettings: []contracts.AzionJsonDataCacheSettings{
+					{
+						Id: 112233,
+					},
+				},
+				Origin: []contracts.AzionJsonDataOrigin{
+					{
+						OriginId:  11111,
+						OriginKey: "123-abc",
+						Name:      "origin-storage-default",
+					},
+				},
+				RulesEngine: contracts.AzionJsonDataRulesEngine{
+					Rules: []contracts.AzionJsonDataRules{
+						{
+							Id:    2121212,
+							Phase: "request",
+							Name:  "Deliver Static Assets",
+						},
+					},
+				},
 				NotFirstRun: false,
 			},
 			manifestPath: "path/to/manifest.json",
@@ -128,13 +149,13 @@ func TestSimulateDeploy(t *testing.T) {
 			wantError:       true,
 		},
 		{
-			name: "manifest path not found",
+			name: "empty manifest path",
 			conf: &contracts.AzionApplicationOptions{
 				Name: "test-app",
 			},
 			manifestPath: "",
 			wantMessages: []string{
-				"This project has not been built yet",
+				"Creating Edge Application",
 			},
 			fileReaderFunc: fileReaderSuccess,
 		},
