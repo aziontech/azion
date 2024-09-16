@@ -1,6 +1,7 @@
 package init
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"testing"
@@ -24,14 +25,18 @@ func Test_initCmd_askForInput(t *testing.T) {
 		defaultIn string
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    string
-		wantErr bool
+		name     string
+		fields   fields
+		args     args
+		want     string
+		wantErr  bool
+		readFile func(filename string) ([]byte, error)
 	}{
 		{
 			name: "success flow",
+			readFile: func(filename string) ([]byte, error) {
+				return nil, nil
+			},
 			fields: fields{
 				askOne: func(
 					p survey.Prompt,
@@ -70,7 +75,8 @@ func Test_initCmd_askForInput(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := &initCmd{
-				askOne: tt.fields.askOne,
+				askOne:     tt.fields.askOne,
+				fileReader: tt.readFile,
 			}
 			got, err := cmd.askForInput(tt.args.msg, tt.args.defaultIn)
 			if (err != nil) != tt.wantErr {
@@ -97,6 +103,8 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 		commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 		commandRunInteractive func(f *cmdutil.Factory, comm string) error
 		load                  func(filenames ...string) (err error)
+		fileReader            func(path string) ([]byte, error)
+		unmarshal             func(data []byte, v any) error
 	}
 	type args struct {
 		vul *vulcanPkg.VulcanPkg
@@ -108,8 +116,12 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "success flow ",
+			name: "success flow",
 			fields: fields{
+				unmarshal: json.Unmarshal,
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
 					comm string,
@@ -145,6 +157,10 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 		{
 			name: "success flow with the flags",
 			fields: fields{
+				unmarshal: json.Unmarshal,
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				preset:         "vanilla",
 				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
@@ -313,6 +329,9 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				load: func(filenames ...string) (err error) {
 					return errors.New("error load")
 				},
+				fileReader: func(path string) ([]byte, error) {
+					return nil, errors.New("error reading info.json")
+				},
 			},
 			args: args{
 				vul: &vulcanPkg.VulcanPkg{
@@ -343,6 +362,8 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				commandRunnerOutput:   tt.fields.commandRunnerOutput,
 				commandRunInteractive: tt.fields.commandRunInteractive,
 				load:                  tt.fields.load,
+				fileReader:            tt.fields.fileReader,
+				unmarshal:             tt.fields.unmarshal,
 			}
 			if err := cmd.selectVulcanTemplates(tt.args.vul); (err != nil) != tt.wantErr {
 				t.Errorf("initCmd.selectVulcanTemplates() error = %v, wantErr %v", err, tt.wantErr)
@@ -397,59 +418,76 @@ func Test_initCmd_depsInstall(t *testing.T) {
 	}
 }
 
-func Test_initCmd_getVulcanEnvInfo(t *testing.T) {
+func Test_initCmd_getVulcanInfo(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	type fields struct {
-		load func(filenames ...string) (err error)
+		pathWorkingDir string
+		unmarshal      func(data []byte, v interface{}) error
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		want    string
-		want1   string
-		wantErr bool
+		name       string
+		fields     fields
+		mockFile   string
+		wantPreset string
+		wantMode   string
+		wantErr    bool
+		readFile   func(filename string) ([]byte, error)
 	}{
 		{
 			name: "flow completed with success",
 			fields: fields{
-				load: func(filenames ...string) (err error) {
-					os.Setenv("preset", "vanilla")
-					os.Setenv("mode", "compute")
+				pathWorkingDir: "/path/to/working/dir",
+				unmarshal: func(data []byte, v interface{}) error {
+					// Mocking unmarshalling process
+					*(v.(*map[string]string)) = map[string]string{
+						"preset": "astro",
+						"mode":   "deliver",
+					}
 					return nil
 				},
 			},
-			want:    "vanilla",
-			want1:   "compute",
-			wantErr: false,
+			wantPreset: "astro",
+			wantMode:   "deliver",
+			wantErr:    false,
+			readFile: func(filename string) ([]byte, error) {
+				return []byte(`{"preset": "astro", "mode": "deliver"}`), nil
+			},
 		},
 		{
-			name: "error load envirements on .vulcan",
+			name: "error reading the file",
 			fields: fields{
-				load: func(filenames ...string) (err error) {
-					return errors.New("error loading .vulcan file")
+				pathWorkingDir: "/path/to/working/dir",
+				unmarshal: func(data []byte, v interface{}) error {
+					return errors.New("error unmarshalling json")
 				},
 			},
-			want:    "",
-			want1:   "",
-			wantErr: true,
+			wantPreset: "",
+			wantMode:   "",
+			wantErr:    true,
+			readFile: func(filename string) ([]byte, error) {
+				return nil, errors.New("error reading json")
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cmd := &initCmd{
-				load: tt.fields.load,
+				pathWorkingDir: tt.fields.pathWorkingDir,
+				unmarshal:      tt.fields.unmarshal,
+				fileReader:     tt.readFile,
 			}
-			got, got1, err := cmd.getVulcanInfo()
+
+			gotPreset, gotMode, err := cmd.getVulcanInfo()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("initCmd.getVulcanEnvInfo() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("initCmd.getVulcanInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
-				t.Errorf("initCmd.getVulcanEnvInfo() got = %v, want %v", got, tt.want)
+			if gotPreset != tt.wantPreset {
+				t.Errorf("initCmd.getVulcanInfo() gotPreset = %v, want %v", gotPreset, tt.wantPreset)
 			}
-			if got1 != tt.want1 {
-				t.Errorf("initCmd.getVulcanEnvInfo() got1 = %v, want %v", got1, tt.want1)
+			if gotMode != tt.wantMode {
+				t.Errorf("initCmd.getVulcanInfo() gotMode = %v, want %v", gotMode, tt.wantMode)
 			}
 		})
 	}

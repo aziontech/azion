@@ -2,7 +2,6 @@ package init
 
 import (
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
@@ -85,7 +84,7 @@ func (cmd *initCmd) depsInstall() error {
 
 func (cmd *initCmd) getVulcanInfo() (string, string, error) {
 
-	fileContent, err := os.ReadFile(path.Join(cmd.pathWorkingDir, "info.json"))
+	fileContent, err := cmd.fileReader(path.Join(cmd.pathWorkingDir, "info.json"))
 	if err != nil {
 		logger.Debug("Error reading template info", zap.Error(err))
 		return "", "", err
