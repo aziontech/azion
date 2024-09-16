@@ -3,6 +3,7 @@ package init
 import (
 	"fmt"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -58,7 +59,7 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	preset, mode, err := cmd.getVulcanEnvInfo()
+	preset, mode, err := cmd.getVulcanInfo()
 	if err != nil {
 		return err
 	}
@@ -82,15 +83,21 @@ func (cmd *initCmd) depsInstall() error {
 	return nil
 }
 
-func (cmd *initCmd) getVulcanEnvInfo() (string, string, error) {
-	err := cmd.load(cmd.pathWorkingDir + "/.vulcan")
+func (cmd *initCmd) getVulcanInfo() (string, string, error) {
+
+	fileContent, err := os.ReadFile(path.Join(cmd.pathWorkingDir, "info.json"))
 	if err != nil {
-		logger.Debug("Error loading .vulcan file", zap.Error(err))
+		logger.Debug("Error reading template info", zap.Error(err))
 		return "", "", err
 	}
 
-	// Access environment variables
-	preset := os.Getenv("preset")
-	mode := os.Getenv("mode")
-	return preset, mode, nil
+	var infoJson map[string]string
+	err = cmd.unmarshal(fileContent, &infoJson)
+	if err != nil {
+		logger.Debug("Error unmarshalling template info", zap.Error(err))
+		return "", "", err
+	}
+
+	logger.Debug("Information about the template:", zap.Any("preset", infoJson["preset"]), zap.Any("mode", infoJson["mode"]))
+	return infoJson["preset"], infoJson["mode"], nil
 }

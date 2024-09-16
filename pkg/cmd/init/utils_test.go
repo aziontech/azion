@@ -440,7 +440,7 @@ func Test_initCmd_getVulcanEnvInfo(t *testing.T) {
 			cmd := &initCmd{
 				load: tt.fields.load,
 			}
-			got, got1, err := cmd.getVulcanEnvInfo()
+			got, got1, err := cmd.getVulcanInfo()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("initCmd.getVulcanEnvInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return

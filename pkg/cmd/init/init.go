@@ -24,7 +24,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	helpers "github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/go-git/go-git/v5"
 	"github.com/joho/godotenv"
@@ -266,10 +265,10 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	vul := vulcanPkg.NewVulcan()
 	err = cmd.selectVulcanTemplates(vul)
 	if err != nil {
-		return err
+		return msg.ErrorGetProjectInfo
 	}
 
-	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
+	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
 	} else {
@@ -285,7 +284,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	if cmd.auto || !helpers.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
+	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
 		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
@@ -318,7 +317,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !helpers.Confirm(cmd.globalFlagAll, m, true) {
+		if !utils.Confirm(cmd.globalFlagAll, m, true) {
 			return nil
 		}
 
