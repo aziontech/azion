@@ -9,16 +9,10 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
-	helpers "github.com/aziontech/azion-cli/utils"
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
-func shouldDevDeploy(msg string, globalFlagAll bool, defaultYes bool) bool {
-	return helpers.Confirm(globalFlagAll, msg, defaultYes)
-}
-
-func askForInput(msg string, defaultIn string) (string, error) {
+func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{
 		Message: msg,
@@ -26,7 +20,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	}
 
 	// Prompt the user for input
-	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true))
+	err := cmd.askOne(prompt, &userInput, survey.WithKeepFilter(true))
 	if err != nil {
 		return "", err
 	}
@@ -34,14 +28,13 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	return userInput, nil
 }
 
-func (cmd *initCmd) selectVulcanTemplates() error {
+func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
 		return err
 	}
 
-	vul := vulcanPkg.NewVulcan()
 	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
 	if err != nil {
 		return err
@@ -65,7 +58,7 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 		return err
 	}
 
-	preset, mode, err := getVulcanEnvInfo(cmd)
+	preset, mode, err := cmd.getVulcanEnvInfo()
 	if err != nil {
 		return err
 	}
@@ -79,19 +72,18 @@ func (cmd *initCmd) selectVulcanTemplates() error {
 	return nil
 }
 
-func depsInstall(cmd *initCmd, packageManager string) error {
-	command := fmt.Sprintf("%s install", packageManager)
+func (cmd *initCmd) depsInstall() error {
+	command := fmt.Sprintf("%s install", cmd.packageManager)
 	err := cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
 		logger.Debug("Error while running command with simultaneous output", zap.Error(err))
 		return msg.ErrorDeps
 	}
-
 	return nil
 }
 
-func getVulcanEnvInfo(cmd *initCmd) (string, string, error) {
-	err := godotenv.Load(cmd.pathWorkingDir + "/.vulcan")
+func (cmd *initCmd) getVulcanEnvInfo() (string, string, error) {
+	err := cmd.load(cmd.pathWorkingDir + "/.vulcan")
 	if err != nil {
 		logger.Debug("Error loading .vulcan file", zap.Error(err))
 		return "", "", err
