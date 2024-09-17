@@ -24,13 +24,10 @@ func Test_Validate(t *testing.T) {
 			httpmock.StatusStringResponse(http.StatusUnauthorized, "{}"),
 		)
 
-		token, err := New(&Config{
+		token := New(&Config{
 			Client: &http.Client{Transport: mock},
 			Out:    os.Stdout,
 		})
-		if err != nil {
-			t.Fatalf("NewToken() = %v; want nil", err)
-		}
 
 		token.Endpoint = "http://api.azion.net/token"
 		tokenString := "thisIsNotTheValidToken"
@@ -48,13 +45,10 @@ func Test_Validate(t *testing.T) {
 			httpmock.StatusStringResponse(http.StatusOK, "{}"),
 		)
 
-		token, err := New(&Config{
+		token := New(&Config{
 			Client: &http.Client{Transport: mock},
 			Out:    os.Stdout,
 		})
-		if err != nil {
-			t.Fatalf("NewToken() = %v; want nil", err)
-		}
 
 		token.Endpoint = "http://api.azion.net/token"
 		tokenString := "rightToken"
@@ -76,13 +70,9 @@ func Test_Save(t *testing.T) {
 	}
 
 	t.Run("save token to disk", func(t *testing.T) {
-		token, err := New(&Config{
+		token := New(&Config{
 			Out: os.Stdout,
 		})
-
-		if err != nil {
-			t.Fatalf("New() = %v; want nil", err)
-		}
 
 		settings := Settings{
 			Token: "asdfdsafsdfasd",
@@ -108,13 +98,10 @@ func Test_Create(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
-		token, err := New(&Config{
+		token := New(&Config{
 			Client: &http.Client{Transport: mock},
 			Out:    os.Stdout,
 		})
-		if err != nil {
-			t.Fatalf("NewToken() = %v; want nil", err)
-		}
 
 		token.Endpoint = "http://api.azion.net/token"
 		response, err := token.Create("base64Credentials")
@@ -147,9 +134,7 @@ func Test_WriteSettings(t *testing.T) {
 			t.Fatalf("WriteSettings() = %v; want nil", err)
 		}
 
-		dir, err := config.Dir()
-		require.NoError(t, err)
-
+		dir := config.Dir()
 		data, err := os.ReadFile(filepath.Join(dir.Dir, dir.Settings))
 		require.NoError(t, err)
 

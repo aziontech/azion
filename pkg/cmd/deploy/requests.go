@@ -565,13 +565,10 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 func checkToken(f *cmdutil.Factory) error {
 	configureToken := f.Config.GetString("token")
 
-	t, err := token.New(&token.Config{
+	t := token.New(&token.Config{
 		Client: f.HttpClient,
 		Out:    f.IOStreams.Out,
 	})
-	if err != nil {
-		return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
-	}
 
 	if configureToken == "" {
 		return utils.ErrorTokenNotProvided

@@ -66,7 +66,7 @@ type initCmd struct {
 	changeDir             func(dir string) error
 	askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
 	load                  func(filenames ...string) (err error)
-	dir                   func() (config.DirPath, error)
+	dir                   func() config.DirPath
 	mkdirTemp             func(dir, pattern string) (string, error)
 	readAll               func(r io.Reader) ([]byte, error)
 	get                   func(url string) (resp *http.Response, err error)
@@ -211,10 +211,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	dirPath, err := cmd.dir()
-	if err != nil {
-		return err
-	}
+	dirPath := cmd.dir()
 
 	// Create a temporary directory
 	tempDir, err := cmd.mkdirTemp(dirPath.Dir, "tempclonesamples")

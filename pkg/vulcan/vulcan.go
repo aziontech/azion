@@ -77,11 +77,7 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		}
 
 		config.LastVulcanVersion = currentVersion
-		client, err := token.New(&token.Config{Client: f.HttpClient})
-		if err != nil {
-			return err
-		}
-
+		client := token.New(&token.Config{Client: f.HttpClient})
 		byteSettings, err := toml.Marshal(config)
 		if err != nil {
 			logger.Debug("Error while marshalling settings.toml", zap.Error(err))
