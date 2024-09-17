@@ -14,6 +14,9 @@ const (
 	urlSsoNext = "https://sso.azion.com/login?next=cli"
 )
 
+// quando for test unitario setar true
+var enableHandlerRouter = true
+
 type Server interface {
 	ListenAndServe() error
 	Shutdown(ctx context.Context) error
@@ -38,14 +41,16 @@ func (l *login) browserLogin(srv Server) error {
 	initializeContext()
 	defer shutdownContext()
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		paramValue := r.URL.Query().Get("c")
-		_, _ = io.WriteString(w, msg.BrowserMsg)
-		if paramValue != "" {
-			tokenValue = paramValue
-		}
-		globalCancel()
-	})
+	if enableHandlerRouter {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			paramValue := r.URL.Query().Get("c")
+			_, _ = io.WriteString(w, msg.BrowserMsg)
+			if paramValue != "" {
+				tokenValue = paramValue
+			}
+			globalCancel()
+		})
+	}
 
 	err := l.openBrowser()
 	if err != nil {

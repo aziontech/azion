@@ -18,7 +18,7 @@ import (
 
 func (l *login) terminalLogin(cmd *cobra.Command) error {
 	if !cmd.Flags().Changed("username") {
-		answer, err := utils.AskInput(msg.AskUsername)
+		answer, err := l.askInput(msg.AskUsername)
 		if err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 	}
 
 	if !cmd.Flags().Changed("password") {
-		answer, err := utils.AskPassword(msg.AskPassword)
+		answer, err := l.askPassword(msg.AskPassword)
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,6 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 	request := api.Request{}
 	request.SetName(username)
 	request.SetExpiresAt(date)
-
 	clientPersonalToken := api.NewClient(l.factory.HttpClient, l.factory.Config.GetString("api_url"), l.factory.Config.GetString("token"))
 	response, err := clientPersonalToken.Create(context.Background(), &request)
 	if err != nil {

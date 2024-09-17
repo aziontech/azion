@@ -5,11 +5,25 @@ import (
 	"net/http"
 )
 
-type ServerMock struct{}
+type ServerMock struct {
+	Cancel               bool
+	ErrorListenAndServer error
+	ErrorShutdown        error
+}
 
 func (s *ServerMock) ListenAndServe() error {
-	shutdownContext()
+	if s.Cancel {
+		shutdownContext()
+	}
+	if s.ErrorListenAndServer != nil {
+		return s.ErrorListenAndServer
+	}
 	return http.ErrServerClosed
 }
 
-func (ServerMock) Shutdown(ctx context.Context) error { return nil }
+func (s *ServerMock) Shutdown(ctx context.Context) error {
+	if s.ErrorShutdown != nil {
+		return s.ErrorShutdown
+	}
+	return nil
+}

@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -31,6 +32,8 @@ type login struct {
 	server      Server
 	token       token.TokenInterface
 	marshalToml func(v interface{}) ([]byte, error)
+	askInput    func(msg string) (string, error)
+	askPassword func(msg string) (string, error)
 }
 
 func New(f *cmdutil.Factory) *cobra.Command {
@@ -46,6 +49,8 @@ func factory(f *cmdutil.Factory) *login {
 		server:      &http.Server{Addr: ":8080"},
 		token:       tk,
 		marshalToml: toml.Marshal,
+		askInput:    utils.AskInput,
+		askPassword: utils.AskPassword,
 	}
 }
 
