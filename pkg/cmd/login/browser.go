@@ -14,7 +14,7 @@ const (
 	urlSsoNext = "https://sso.azion.com/login?next=cli"
 )
 
-// quando for test unitario setar true
+// when it's a single test set true
 var enableHandlerRouter = true
 
 type Server interface {
