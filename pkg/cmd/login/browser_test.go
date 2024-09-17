@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -17,7 +16,6 @@ func Test_login_browserLogin(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	type fields struct {
-		factory     *cmdutil.Factory
 		askOne      func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
 		run         func(input string) error
 		server      Server
