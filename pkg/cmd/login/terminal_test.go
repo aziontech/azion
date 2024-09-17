@@ -55,6 +55,35 @@ func Test_login_terminalLogin(t *testing.T) {
 					}
 					return nil
 				},
+				token: &token.TokenMock{},
+				marshalToml: func(v interface{}) ([]byte, error) {
+					return []byte(""), nil
+				},
+			},
+			flags: []string{"--username", "max", "--password", "1235"},
+			register: register{
+				httpmock.REST("POST", "iam/personal_tokens"),
+				httpmock.JSONFromFile("./.fixtures/response.json"),
+			},
+			wantErr: false,
+		},
+		{
+			name: "success flow, no informed flags",
+			fields: fields{
+				run: func(input string) error {
+					return nil
+				},
+				askOne: func(
+					p survey.Prompt,
+					response interface{},
+					opts ...survey.AskOpt,
+				) error {
+					// Usamos type assertion para garantir que 'response' seja um ponteiro para string
+					if respPtr, ok := response.(*string); ok {
+						*respPtr = "terminal"
+					}
+					return nil
+				},
 				askInput: func(msg string) (string, error) {
 					return "admin", nil
 				},
@@ -62,11 +91,14 @@ func Test_login_terminalLogin(t *testing.T) {
 					return "admin", nil
 				},
 				token: &token.TokenMock{},
+				marshalToml: func(v interface{}) ([]byte, error) {
+					return []byte(""), nil
+				},
 			},
-			flags: []string{"--username", "max", "--password", "1235"},
+			flags: []string{},
 			register: register{
 				httpmock.REST("POST", "iam/personal_tokens"),
-				httpmock.JSONFromFile("./fixtures/response.json"),
+				httpmock.JSONFromFile("./.fixtures/response.json"),
 			},
 			wantErr: false,
 		},
@@ -88,8 +120,8 @@ func Test_login_terminalLogin(t *testing.T) {
 			}
 			cmd := cmd(l)
 			cmd.SetArgs(tt.flags)
-			if err := l.terminalLogin(cmd); (err != nil) != tt.wantErr {
-				t.Errorf("login.terminalLogin() error = %v, wantErr %v", err, tt.wantErr)
+			if err := cmd.Execute(); (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
