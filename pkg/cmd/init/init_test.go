@@ -25,6 +25,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var infoJsonData = `{"preset":"astro","mode":"deliver"}`
+
 func TestNewCmd(t *testing.T) {
 	mock := &httpmock.Registry{}
 	f, _, _ := testutils.NewFactory(mock)
@@ -87,6 +89,9 @@ func Test_initCmd_Run(t *testing.T) {
 			name: "success flow",
 			fields: fields{
 				auto: true,
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,
@@ -160,6 +165,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error getWorkDir",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -235,6 +243,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error http.Get",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -310,6 +321,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error askForInput",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -385,6 +399,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error expected status OK",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -460,6 +477,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error readAll",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -537,6 +557,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error unmarshal",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -614,6 +637,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error askOne",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -795,6 +821,9 @@ func Test_initCmd_deps(t *testing.T) {
 		{
 			name: "success flow",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,
@@ -823,6 +852,9 @@ func Test_initCmd_deps(t *testing.T) {
 		{
 			name: "error depsInstall",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,

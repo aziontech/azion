@@ -21,6 +21,7 @@ var (
 	EdgeApplicationDeployPathFlag        = "Path to where your static files are stored"
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
+	EdgeApplicationDeployDryrun          = "Simulates the deploy process without carrying out any actual action"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
 	OriginsSuccessful                    = "Created Origin for Edge Application\n"
 	OriginsUpdateSuccessful              = "Updated Origin for Edge Application %v with ID %v \n"

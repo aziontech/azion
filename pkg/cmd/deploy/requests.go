@@ -227,11 +227,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return nil
 }
 
-func (cmd *DeployCmd) doRulesDeploy(
-	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
-	client *apiapp.Client,
-	msgs *[]string) error {
+func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client, msgs *[]string) error {
 	if conf.NotFirstRun {
 		return nil
 	}

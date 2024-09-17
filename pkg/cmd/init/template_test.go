@@ -24,6 +24,7 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		writeFile     func(filename string, data []byte, perm fs.FileMode) error
 		mkdir         func(path string, perm os.FileMode) error
 		marshalIndent func(v any, prefix, indent string) ([]byte, error)
+		fileReader    func(path string) ([]byte, error)
 	}
 	tests := []struct {
 		name    string
@@ -33,6 +34,9 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		{
 			name: "success flow",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				name:   "project_piece",
 				preset: "vite",
 				mode:   "deliver",
@@ -49,6 +53,9 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		{
 			name: "error mkdir",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				name:   "project_piece",
 				preset: "vite",
 				mode:   "deliver",
@@ -65,6 +72,9 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		{
 			name: "error marshalIndent",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				name:   "project_piece",
 				preset: "vite",
 				mode:   "deliver",
@@ -83,6 +93,9 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		{
 			name: "error writeFile",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				name:   "project_piece",
 				preset: "vite",
 				mode:   "deliver",
@@ -106,6 +119,7 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 				writeFile:     tt.fields.writeFile,
 				mkdir:         tt.fields.mkdir,
 				marshalIndent: tt.fields.marshalIndent,
+				fileReader:    tt.fields.fileReader,
 			}
 			if err := cmd.createTemplateAzion(); (err != nil) != tt.wantErr {
 				t.Errorf("initCmd.createTemplateAzion() error = %v, wantErr %v", err, tt.wantErr)
