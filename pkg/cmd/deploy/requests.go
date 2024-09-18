@@ -227,11 +227,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	return nil
 }
 
-func (cmd *DeployCmd) doRulesDeploy(
-	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
-	client *apiapp.Client,
-	msgs *[]string) error {
+func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client, msgs *[]string) error {
 	if conf.NotFirstRun {
 		return nil
 	}
@@ -569,13 +565,10 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 func checkToken(f *cmdutil.Factory) error {
 	configureToken := f.Config.GetString("token")
 
-	t, err := token.New(&token.Config{
+	t := token.New(&token.Config{
 		Client: f.HttpClient,
 		Out:    f.IOStreams.Out,
 	})
-	if err != nil {
-		return fmt.Errorf("%s: %w", utils.ErrorTokenManager, err)
-	}
 
 	if configureToken == "" {
 		return utils.ErrorTokenNotProvided

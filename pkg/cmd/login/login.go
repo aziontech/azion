@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -11,16 +12,49 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+
+	"github.com/skratchdot/open-golang/open"
 )
 
-var username, password, tokenValue, uuid string
-var userInfo token.UserInfo
+var (
+	username, password, tokenValue, uuid string
+	userInfo                             token.UserInfo
+)
 
-func NewCmd(f *cmdutil.Factory) *cobra.Command {
+type login struct {
+	factory     *cmdutil.Factory
+	askOne      func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+	run         func(input string) error
+	server      Server
+	token       token.TokenInterface
+	marshalToml func(v interface{}) ([]byte, error)
+	askInput    func(msg string) (string, error)
+	askPassword func(msg string) (string, error)
+}
 
+func New(f *cmdutil.Factory) *cobra.Command {
+	return cmd(factory(f))
+}
+
+func factory(f *cmdutil.Factory) *login {
+	tk := token.New(&token.Config{Client: f.HttpClient})
+	return &login{
+		factory:     f,
+		askOne:      survey.AskOne,
+		run:         open.Run,
+		server:      &http.Server{Addr: ":8080"},
+		token:       tk,
+		marshalToml: toml.Marshal,
+		askInput:    utils.AskInput,
+		askPassword: utils.AskPassword,
+	}
+}
+
+func cmd(l *login) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   msg.Usage,
 		Short: msg.ShortDescription,
@@ -30,20 +64,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion login --username fulanodasilva@gmail.com --password "senhasecreta"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			answer, err := selectLoginMode()
+			answer, err := l.selectLoginMode()
 			if err != nil {
 				return err
 			}
 
 			switch {
 			case strings.Contains(answer, "browser"):
-				err := browserLogin(f)
+				err := l.browserLogin(l.server)
 				if err != nil {
 					return err
 				}
 			case strings.Contains(answer, "terminal"):
-				err := terminalLogin(cmd, f)
+				err := l.terminalLogin(cmd)
 				if err != nil {
 					return err
 				}
@@ -51,25 +84,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorInvalidLogin
 			}
 
-			client, err := token.New(&token.Config{Client: f.HttpClient})
+			err = l.validateToken(tokenValue)
 			if err != nil {
 				return err
 			}
 
-			err = validateToken(client, tokenValue)
-			if err != nil {
-				return err
-			}
-
-			err = saveSettings(client)
+			err = l.saveSettings()
 			if err != nil {
 				return err
 			}
 
 			loginOut := output.GeneralOutput{
 				Msg:   fmt.Sprintf(msg.Success),
-				Out:   f.IOStreams.Out,
-				Flags: f.Flags,
+				Out:   l.factory.IOStreams.Out,
+				Flags: l.factory.Flags,
 			}
 			return output.Print(&loginOut)
 		},
@@ -83,20 +111,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func selectLoginMode() (string, error) {
-	answer := ""
+func (l *login) selectLoginMode() (answer string, err error) {
 	prompt := &survey.Select{
 		Message: "Choose a login method:",
 		Options: []string{"Log in via browser", "Log in via terminal"},
 	}
-	err := survey.AskOne(prompt, &answer)
+	err = l.askOne(prompt, &answer)
 	if err != nil {
 		return "", err
 	}
 	return answer, nil
 }
 
-func saveSettings(client *token.Token) error {
+func (l *login) saveSettings() error {
 	settings := token.Settings{
 		UUID:     uuid,
 		Token:    tokenValue,
@@ -104,13 +131,13 @@ func saveSettings(client *token.Token) error {
 		Email:    userInfo.Results.Email,
 	}
 
-	byteSettings, err := toml.Marshal(settings)
+	byteSettings, err := l.marshalToml(settings)
 	if err != nil {
 		logger.Debug("Error while marshalling toml file", zap.Error(err))
 		return err
 	}
 
-	_, err = client.Save(byteSettings)
+	_, err = l.token.Save(byteSettings)
 	if err != nil {
 		logger.Debug("Error while saving settings", zap.Error(err))
 		return err
@@ -118,8 +145,8 @@ func saveSettings(client *token.Token) error {
 	return nil
 }
 
-func validateToken(client *token.Token, token string) error {
-	tokenValid, user, err := client.Validate(&token)
+func (l *login) validateToken(token string) error {
+	tokenValid, user, err := l.token.Validate(&token)
 	userInfo = user
 	if err != nil {
 		logger.Debug("Error while validating the token", zap.Error(err))

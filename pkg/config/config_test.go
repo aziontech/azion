@@ -122,13 +122,6 @@ func TestDir(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name:    "error getting home dir",
-			setPath: "",
-			envHome: "",
-			wantDir: DirPath{},
-			wantErr: true,
-		},
 	}
 
 	for _, tt := range tests {
@@ -151,11 +144,7 @@ func TestDir(t *testing.T) {
 				}
 			}
 
-			gotDir, err := Dir()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Dir() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
+			gotDir := Dir()
 			if gotDir != tt.wantDir {
 				t.Errorf("Dir() = %v, want %v", gotDir, tt.wantDir)
 			}
