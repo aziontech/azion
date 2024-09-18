@@ -34,11 +34,7 @@ func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime fl
 		success = false
 	}
 
-	dir, err := config.Dir()
-	if err != nil {
-		return err
-	}
-
+	dir := config.Dir()
 	ignoredWords := map[string]bool{
 		"__complete": true,
 		"completion": true,

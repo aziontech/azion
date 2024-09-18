@@ -25,6 +25,8 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var infoJsonData = `{"preset":"astro","mode":"deliver"}`
+
 func TestNewCmd(t *testing.T) {
 	mock := &httpmock.Registry{}
 	f, _, _ := testutils.NewFactory(mock)
@@ -64,7 +66,7 @@ func Test_initCmd_Run(t *testing.T) {
 		changeDir             func(dir string) error
 		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
 		load                  func(filenames ...string) (err error)
-		dir                   func() (config.DirPath, error)
+		dir                   func() config.DirPath
 		mkdirTemp             func(dir, pattern string) (string, error)
 		readAll               func(r io.Reader) ([]byte, error)
 		get                   func(url string) (resp *http.Response, err error)
@@ -87,6 +89,9 @@ func Test_initCmd_Run(t *testing.T) {
 			name: "success flow",
 			fields: fields{
 				auto: true,
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,
@@ -160,6 +165,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error getWorkDir",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -235,6 +243,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error http.Get",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -310,6 +321,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error askForInput",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -385,6 +399,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error expected status OK",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -460,6 +477,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error readAll",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -537,6 +557,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error unmarshal",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -614,6 +637,9 @@ func Test_initCmd_Run(t *testing.T) {
 		{
 			name: "error askOne",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				auto: true,
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
@@ -654,160 +680,6 @@ func Test_initCmd_Run(t *testing.T) {
 					return errors.New("error askOne")
 				},
 				dir: config.Dir,
-				mkdirTemp: func(dir, pattern string) (string, error) {
-					return "", nil
-				},
-				removeAll: os.RemoveAll,
-				rename: func(oldpath, newpath string) error {
-					return nil
-				},
-				mkdir:         func(path string, perm os.FileMode) error { return nil },
-				marshalIndent: json.MarshalIndent,
-				writeFile: func(filename string, data []byte, perm fs.FileMode) error {
-					return nil
-				},
-				changeDir: func(dir string) error { return nil },
-				commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
-					return "3.2.1", nil
-				},
-				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-					return nil
-				},
-				load: func(filenames ...string) (err error) {
-					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
-					return nil
-				},
-				git: github.Github{
-					Clone: func(url, path string) error {
-						return nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error dir",
-			fields: fields{
-				auto: true,
-				f: &cmdutil.Factory{
-					Flags: cmdutil.Flags{
-						GlobalFlagAll: false,
-						Format:        "",
-						Out:           "",
-						NoColor:       false,
-					},
-					IOStreams: iostreams.System(),
-				},
-				globalFlagAll: false,
-				name:          "",
-				preset:        "vite",
-				mode:          "deliver",
-				getWorkDir: func() (string, error) {
-					return "/path/full", nil
-				},
-				get: func(url string) (resp *http.Response, err error) {
-					b, err := os.ReadFile("./.fixtures/project_samples.json")
-					if err != nil {
-						return nil, err
-					}
-
-					responseBody := io.NopCloser(bytes.NewReader(b))
-					resp = &http.Response{
-						StatusCode: 200,
-						Body:       responseBody,
-						Header:     make(http.Header),
-					}
-					return resp, nil
-				},
-				readAll:   io.ReadAll,
-				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return nil
-				},
-				dir: func() (config.DirPath, error) {
-					return config.DirPath{}, errors.New("error dir")
-				},
-				mkdirTemp: func(dir, pattern string) (string, error) {
-					return "", nil
-				},
-				removeAll: os.RemoveAll,
-				rename: func(oldpath, newpath string) error {
-					return nil
-				},
-				mkdir:         func(path string, perm os.FileMode) error { return nil },
-				marshalIndent: json.MarshalIndent,
-				writeFile: func(filename string, data []byte, perm fs.FileMode) error {
-					return nil
-				},
-				changeDir: func(dir string) error { return nil },
-				commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
-					return "3.2.1", nil
-				},
-				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-					return nil
-				},
-				load: func(filenames ...string) (err error) {
-					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
-					return nil
-				},
-				git: github.Github{
-					Clone: func(url, path string) error {
-						return nil
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error mkdirTemp",
-			fields: fields{
-				auto: true,
-				f: &cmdutil.Factory{
-					Flags: cmdutil.Flags{
-						GlobalFlagAll: false,
-						Format:        "",
-						Out:           "",
-						NoColor:       false,
-					},
-					IOStreams: iostreams.System(),
-				},
-				globalFlagAll: false,
-				name:          "",
-				preset:        "vite",
-				mode:          "deliver",
-				getWorkDir: func() (string, error) {
-					return "/path/full", nil
-				},
-				get: func(url string) (resp *http.Response, err error) {
-					b, err := os.ReadFile("./.fixtures/project_samples.json")
-					if err != nil {
-						return nil, err
-					}
-
-					responseBody := io.NopCloser(bytes.NewReader(b))
-					resp = &http.Response{
-						StatusCode: 200,
-						Body:       responseBody,
-						Header:     make(http.Header),
-					}
-					return resp, nil
-				},
-				readAll:   io.ReadAll,
-				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return nil
-				},
-				dir: func() (config.DirPath, error) {
-					return config.DirPath{}, errors.New("error dir")
-				},
 				mkdirTemp: func(dir, pattern string) (string, error) {
 					return "", nil
 				},
@@ -920,7 +792,7 @@ func Test_initCmd_deps(t *testing.T) {
 		changeDir             func(dir string) error
 		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
 		load                  func(filenames ...string) (err error)
-		dir                   func() (config.DirPath, error)
+		dir                   func() config.DirPath
 		mkdirTemp             func(dir, pattern string) (string, error)
 		readAll               func(r io.Reader) ([]byte, error)
 		get                   func(url string) (resp *http.Response, err error)
@@ -949,6 +821,9 @@ func Test_initCmd_deps(t *testing.T) {
 		{
 			name: "success flow",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,
@@ -977,6 +852,9 @@ func Test_initCmd_deps(t *testing.T) {
 		{
 			name: "error depsInstall",
 			fields: fields{
+				fileReader: func(filename string) ([]byte, error) {
+					return nil, nil
+				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
 						GlobalFlagAll: false,

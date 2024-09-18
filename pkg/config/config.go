@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/aziontech/azion-cli/messages/root"
 )
@@ -45,11 +46,8 @@ type DirPath struct {
 	Schedule string
 }
 
-func Dir() (DirPath, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return DirPath{}, err
-	}
+func Dir() DirPath {
+	home := userHomeDir()
 
 	if pathDir != DEFAULT_DIR {
 		home = ""
@@ -61,5 +59,26 @@ func Dir() (DirPath, error) {
 		Metrics:  DEFAULT_METRICS,
 		Schedule: DEFAULT_SCHEDULE,
 	}
-	return dirPath, nil
+	return dirPath
+}
+
+func userHomeDir() string {
+	env := "HOME"
+	switch runtime.GOOS {
+	case "windows":
+		env = "USERPROFILE"
+	case "plan9":
+		env = "home"
+	}
+	if v := os.Getenv(env); v != "" {
+		return v
+	}
+	// On some geese the home directory is not always defined.
+	switch runtime.GOOS {
+	case "android":
+		return "/sdcard"
+	case "ios":
+		return "/"
+	}
+	return ""
 }

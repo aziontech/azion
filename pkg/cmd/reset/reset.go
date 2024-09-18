@@ -45,9 +45,7 @@ func NewCobraCmd(reset *ResetCmd, f *cmdutil.Factory) *cobra.Command {
 			return reset.run()
 		},
 	}
-
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAGHELP)
-
 	return cobraCmd
 }
 

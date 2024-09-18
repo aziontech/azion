@@ -100,15 +100,14 @@ func TestReset(t *testing.T) {
 			mock := &httpmock.Registry{}
 
 			f, out, _ := testutils.NewFactory(mock)
-
 			resetCmd := &ResetCmd{
 				Io:            f.IOStreams,
 				ReadSettings:  mockReadSettings,
 				WriteSettings: mockWriteSettings,
 				DeleteToken:   mockDeleteToken,
 			}
-			cmd := NewCobraCmd(resetCmd, f)
 
+			cmd := NewCobraCmd(resetCmd, f)
 			_, err := cmd.ExecuteC()
 			if tt.expectedError != nil {
 				require.Error(t, err)

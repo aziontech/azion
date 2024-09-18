@@ -116,7 +116,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(unlink.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(completion.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(describe.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(login.NewCmd(fact.Factory))
+	cobraCmd.AddCommand(login.New(fact.Factory))
 	cobraCmd.AddCommand(logout.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(create.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(list.NewCmd(fact.Factory))
