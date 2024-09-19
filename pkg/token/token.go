@@ -18,18 +18,21 @@ import (
 	"github.com/aziontech/azion-cli/pkg/constants"
 )
 
-func New(c *Config) (*Token, error) {
-	dir, err := config.Dir()
-	if err != nil {
-		return nil, err
-	}
+type TokenInterface interface {
+	Validate(token *string) (bool, UserInfo, error)
+	Save(b []byte) (string, error)
+	Create(b64 string) (*Response, error)
+}
+
+func New(c *Config) *Token {
+	dir := config.Dir()
 
 	return &Token{
 		client:   c.Client,
 		Endpoint: constants.AuthURL,
 		filePath: filepath.Join(dir.Dir, dir.Settings),
 		out:      c.Out,
-	}, nil
+	}
 }
 
 func (t *Token) Validate(token *string) (bool, UserInfo, error) {
@@ -63,12 +66,8 @@ func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 }
 
 func (t *Token) Save(b []byte) (string, error) {
-	dir, err := config.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	err = os.MkdirAll(dir.Dir, os.ModePerm)
+	dir := config.Dir()
+	err := os.MkdirAll(dir.Dir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
@@ -120,11 +119,7 @@ func (t *Token) Create(b64 string) (*Response, error) {
 }
 
 func WriteSettings(settings Settings) error {
-	dir, err := config.Dir()
-	if err != nil {
-		return fmt.Errorf("Failed to get token dir: %w", err)
-	}
-
+	dir := config.Dir()
 	b, err := toml.Marshal(settings)
 	if err != nil {
 		return err
@@ -143,11 +138,7 @@ func WriteSettings(settings Settings) error {
 }
 
 func ReadSettings() (Settings, error) {
-	dir, err := config.Dir()
-	if err != nil {
-		return Settings{}, fmt.Errorf("failed to get token dir: %w", err)
-	}
-
+	dir := config.Dir()
 	filePath := filepath.Join(dir.Dir, dir.Settings)
 
 	// Check if the file exists

@@ -29,6 +29,23 @@ func TestNewCmd(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.Error(t, err)
 	})
+	t.Run("list - page 0 should generate an error", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		mock.Register(
+			httpmock.REST("GET", "domains"),
+			httpmock.StatusStringResponse(404, "Not Found"),
+		)
+
+		f, _, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--page", "0"})
+
+		_, err := cmd.ExecuteC()
+		require.Error(t, err)
+	})
 	t.Run("list all domains", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 

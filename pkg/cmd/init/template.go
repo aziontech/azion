@@ -1,7 +1,6 @@
 package init
 
 import (
-	"encoding/json"
 	"path"
 
 	msg "github.com/aziontech/azion-cli/messages/init"
@@ -10,7 +9,6 @@ import (
 )
 
 func (cmd *initCmd) createTemplateAzion() error {
-
 	err := cmd.mkdir(path.Join(cmd.pathWorkingDir, "azion"), 0755) // 0755 is the permission mode for the new directories
 	if err != nil {
 		return msg.ErrorFailedCreatingAzionDirectory
@@ -37,7 +35,7 @@ func (cmd *initCmd) createTemplateAzion() error {
 }
 
 func (cmd *initCmd) createJsonFile(options *contracts.AzionApplicationOptions) error {
-	data, err := json.MarshalIndent(options, "", "  ")
+	data, err := cmd.marshalIndent(options, "", "  ")
 	if err != nil {
 		return msg.ErrorUnmarshalAzionFile
 	}
