@@ -26,6 +26,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"github.com/briandowns/spinner"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -37,7 +38,6 @@ type DeployCmd struct {
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
-	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
@@ -45,6 +45,13 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
+	CallScript            func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error)
+	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
+	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
+	CheckToken            func(f *cmdutil.Factory) error
+	ReadSettings          func() (token.Settings, error)
+	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
+	OpenBrowserFunc       func(input string) error
 }
 
 var (
@@ -55,6 +62,8 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
+	Logs        = contracts.Logs{}
+	Result      = contracts.Results{}
 	DeployURL   = "https://console.azion.com"
 	ScriptID    = "92480a31-b88b-495b-8615-3ed5eff6314e"
 )
@@ -65,7 +74,6 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		GetWorkDir:            utils.GetWorkingDir,
 		FileReader:            os.ReadFile,
 		WriteFile:             os.WriteFile,
-		EnvLoader:             utils.LoadEnvVarsFromFile,
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
@@ -75,6 +83,13 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
 		VersionID:             utils.Timestamp,
+		CallScript:            callScript,
+		OpenBrowser:           openBrowser,
+		CaptureLogs:           captureLogs,
+		UploadFiles:           uploadFiles,
+		CheckToken:            checkToken,
+		OpenBrowserFunc:       open.Run,
+		ReadSettings:          token.ReadSettings,
 	}
 }
 
@@ -120,12 +135,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	err := checkToken(f)
+	err := cmd.CheckToken(f)
 	if err != nil {
 		return err
 	}
 
-	settings, err := token.ReadSettings()
+	settings, err := cmd.ReadSettings()
 	if err != nil {
 		return err
 	}
@@ -178,22 +193,22 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.Prefix = cmd.VersionID()
 
-	err = cmd.uploadFiles(f, conf, &msgs, localDir, settings.S3Bucket)
+	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd)
 	if err != nil {
 		return err
 	}
 
-	id, err := callScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, cmd)
 	if err != nil {
 		return err
 	}
 
-	err = openBrowser(f, fmt.Sprintf("%s/create/deploy/%s", DeployURL, id))
+	err = cmd.OpenBrowser(f, fmt.Sprintf("%s/create/deploy/%s", DeployURL, id), cmd)
 	if err != nil {
 		return err
 	}
 
-	err = caputeLogs(id, settings.Token, cmd)
+	err = cmd.CaptureLogs(id, settings.Token, cmd)
 	if err != nil {
 		return err
 	}
@@ -201,7 +216,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	return nil
 }
 
-func caputeLogs(execId, token string, cmd *DeployCmd) error {
+func captureLogs(execId, token string, cmd *DeployCmd) error {
 	logsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/logs", DeployURL, execId)
 	resultsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/results", DeployURL, execId)
 
@@ -233,20 +248,18 @@ func caputeLogs(execId, token string, cmd *DeployCmd) error {
 		}
 		defer resp.Body.Close()
 
-		logs := contracts.Logs{}
-
 		// Read the response
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
 
-		if err := json.Unmarshal(body, &logs); err != nil {
+		if err := cmd.Unmarshal(body, &Logs); err != nil {
 			logger.Debug("Error unmarshalling response", zap.Error(err))
 			return err
 		}
 
-		switch logs.Status {
+		switch Logs.Status {
 		case "queued", "running", "started", "pending finish":
 			time.Sleep(7 * time.Second)
 			continue
@@ -279,23 +292,22 @@ func caputeLogs(execId, token string, cmd *DeployCmd) error {
 				return err
 			}
 
-			result := contracts.Results{}
-			if err := json.Unmarshal(body, &result); err != nil {
+			if err := cmd.Unmarshal(body, &Result); err != nil {
 				logger.Debug("Error unmarshalling response", zap.Error(err))
 				return err
 			}
 
-			if result.Result.Errors != nil {
-				return errors.New(result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+			if Result.Result.Errors != nil {
+				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
 			}
 
-			err = cmd.WriteAzionJsonContent(result.Result.Azion, ProjectConf)
+			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
 			if err != nil {
 				return err
 			}
 		default:
 			s.Stop()
-			return msg.ErrorDeployRemote //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+			return msg.ErrorDeployRemote
 		}
 		s.Stop()
 		break

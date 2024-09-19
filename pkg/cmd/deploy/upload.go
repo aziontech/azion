@@ -7,6 +7,7 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
+	remote "github.com/aziontech/azion-cli/pkg/cmd/deploy_remote"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,8 +21,7 @@ var (
 	Retries int64
 )
 
-func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string) error {
+func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
@@ -58,7 +58,7 @@ func (cmd *DeployCmd) uploadFiles(
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go worker(Jobs, results, &currentFile, clientUpload, conf, bucket)
+		go remote.Worker(Jobs, results, &currentFile, clientUpload, conf, bucket)
 	}
 
 	bar := progressbar.NewOptions(

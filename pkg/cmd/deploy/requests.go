@@ -3,8 +3,6 @@ package deploy
 import (
 	"fmt"
 
-	"github.com/skratchdot/open-golang/open"
-
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -38,9 +36,9 @@ func checkToken(f *cmdutil.Factory) error {
 	return nil
 }
 
-func openBrowser(f *cmdutil.Factory, urlConsoleDeploy string) error {
+func openBrowser(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error {
 	logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.VisitMsg, urlConsoleDeploy))
-	err := open.Run(urlConsoleDeploy)
+	err := cmd.OpenBrowserFunc(urlConsoleDeploy)
 	if err != nil {
 		return err
 	}

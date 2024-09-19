@@ -12,6 +12,8 @@ import (
 	"go.uber.org/zap"
 )
 
+var ResponseMap map[string]string
+
 // Response represents the structure of the response from the API.
 type Response struct {
 	UUID  string    `json:"uuid"`
@@ -19,7 +21,7 @@ type Response struct {
 	Start time.Time `json:"start"`
 }
 
-func callScript(token, id, secret, prefix, name string) (string, error) {
+func callScript(token, id, secret, prefix, name string, cmd *DeployCmd) (string, error) {
 	logger.Debug("Calling script runner api")
 	instantiateURL := fmt.Sprintf("%s/api/template-engine/templates/%s/instantiate", DeployURL, ScriptID)
 
@@ -87,11 +89,10 @@ func callScript(token, id, secret, prefix, name string) (string, error) {
 	}
 
 	// Unmarshal the response body into the Response struct
-	var responseMap map[string]string
-	if err := json.Unmarshal(body, &responseMap); err != nil {
+	if err := cmd.Unmarshal(body, &ResponseMap); err != nil {
 		logger.Debug("Error unmarshalling response", zap.Error(err))
 		return "", err
 	}
 
-	return responseMap["uuid"], nil
+	return ResponseMap["uuid"], nil
 }
