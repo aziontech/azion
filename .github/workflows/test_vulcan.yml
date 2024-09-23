@@ -30,6 +30,10 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      - name: test vulcan
+      # - name: test vulcan
+      #   run: |
+      #     bash ./scripts/test.sh
+
+      - name: e2e test
         run: |
-          bash ./scripts/test.sh
+          bash ./scripts/e2e.sh
