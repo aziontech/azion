@@ -6,12 +6,24 @@
 current_directory=$(pwd)
 # Set the path to the main.go file
 main_go_path="cmd/azion/main.go"
+# use bin_path instead of main_go_path, if you want to run the script using a built binary file
+# bin_path="bin/azion" 
 # Combine the current_directory and main_go_path
 full_main_go_path="${current_directory}/${main_go_path}"
 # Set the path to the expected folder after the link command
 expected_folder="azion"
 # Set the path to the expected folder after the build command
 expected_edge_folder=".edge"
+# token from secrets
+token=$TOKEN
+
+# Function to list and delete edge storage buckets
+delete_edge_storage_buckets() {
+  # List the buckets with page size 1000, skip the header line, and delete each bucket
+  "$full_main_go_path" list edge-storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
+    "$full_main_go_path" delete edge-storage bucket --name "$name" --force
+  done
+}
 
 # Function to check if a folder exists
 check_folder_exists() {
@@ -27,12 +39,6 @@ check_folder_exists() {
 check_azion_json() {
     json_file="${current_directory}/react-static/azion/azion.json"
 
-    # Check if jq is installed
-    if ! command -v jq &> /dev/null; then
-        echo "Error: jq is not installed. Please install jq to use this function."
-        exit 1
-    fi
-
     # Extract the application_id from the JSON file
     local application_id
     application_id=$(jq -r '.application.id' "$json_file")
@@ -45,13 +51,18 @@ check_azion_json() {
 
     # Check if application_id is greater than zero
     if (( application_id > 0 )); then
-        echo "Application ID is valid and greater than zero: $application_id"
+        echo "Application ID retrieved, is valid and greater than zero: $application_id"
         return 0
     else
         echo "Error: azion.json was not retrieved successfully"
         exit 1
     fi
 }
+
+delete_edge_storage_buckets
+go run "$full_main_go_path" -t "$token"
+# uncomment the line below and comment the line above if using a built binary file
+# "$full_main_go_path" -t "$token"
 
 # Check if the main.go file exists
 if [ -f "$full_main_go_path" ]; then
@@ -68,6 +79,8 @@ if [ -f "$full_main_go_path" ]; then
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset react --mode deliver --auto --debug"
     go run "$full_main_go_path" link --preset react --mode deliver --auto --debug
+    # uncomment the line below and comment the line above if using a built binary file
+    # "$full_main_go_path" link --preset react --mode deliver --auto --debug
 
     # Check the exit status of the last command
     if [ $? -eq 0 ]; then
@@ -77,6 +90,8 @@ if [ -f "$full_main_go_path" ]; then
         # Run the build command
         echo "Running cmd/azion/main.go build --debug"
         go run "$full_main_go_path" build --debug
+        # uncomment the line below and comment the line above if using a built binary file
+        # "$full_main_go_path" build --debug
 
         # Check the exit status of the build command
         if [ $? -eq 0 ]; then
@@ -88,6 +103,8 @@ if [ -f "$full_main_go_path" ]; then
              # Run the build command
             echo "Running cmd/azion/main.go deploy --debug"
             go run "$full_main_go_path" deploy --debug
+            # uncomment the line below and comment the line above if using a built binary file
+            # "$full_main_go_path" deploy --debug
 
             # Check the exit status of the deploy command
             if [ $? -eq 0 ]; then

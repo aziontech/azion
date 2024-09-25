@@ -1,7 +1,7 @@
-API_URL=https://api.azionapi.net
-AUTH_URL=https://sso.azion.com/api
-STORAGE_URL=https://api.azion.com
-CONSOLE=https://console.azion.com
+API_URL=https://stage-api.azion.net
+AUTH_URL=https://stage-sso.azion.com/api
+STORAGE_URL=https://stage-api.azion.com
+CONSOLE=https://stage-console.azion.com
 SCRIPT_ID=92480a31-b88b-495b-8615-3ed5eff6314e
 TEMPLATE_BRANCH=main
 TEMPLATE_MAJOR=0
