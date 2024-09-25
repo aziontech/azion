@@ -349,7 +349,7 @@ func TestCallScript(t *testing.T) {
 
 			// Register the mock API responses for logs and results
 			mock.Register(
-				httpmock.REST(http.MethodPost, "/api/template-engine/templates/92480a31-b88b-495b-8615-3ed5eff6314e/instantiate"),
+				httpmock.REST(http.MethodPost, "/api/template-engine/templates/17ac912d-5ce9-4806-9fa7-480779e43f58/instantiate"),
 				httpmock.JSONFromString(tt.resultsResponse),
 			)
 

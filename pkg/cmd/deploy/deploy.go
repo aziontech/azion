@@ -67,7 +67,7 @@ var (
 	Logs        = contracts.Logs{}
 	Result      = contracts.Results{}
 	DeployURL   = "https://console.azion.com"
-	ScriptID    = "92480a31-b88b-495b-8615-3ed5eff6314e"
+	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
