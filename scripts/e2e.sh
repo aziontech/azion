@@ -7,9 +7,10 @@ current_directory=$(pwd)
 # Set the path to the main.go file
 main_go_path="cmd/azion/main.go"
 # use bin_path instead of main_go_path, if you want to run the script using a built binary file
-# bin_path="bin/azion" 
+bin_path="bin/azion" 
 # Combine the current_directory and main_go_path
 full_main_go_path="${current_directory}/${main_go_path}"
+full_bin_path="${current_directory}/${bin_path}"
 # Set the path to the expected folder after the link command
 expected_folder="azion"
 # Set the path to the expected folder after the build command
@@ -59,9 +60,9 @@ check_azion_json() {
     fi
 }
 
-go run "$full_main_go_path" -t "$token"
-# uncomment the line below and comment the line above if using a built binary file
-# "$full_main_go_path" -t "$token"
+make build
+"$full_bin_path" -t "$token"
+# go run "$full_main_go_path" -t "$token"
 delete_edge_storage_buckets
 
 
