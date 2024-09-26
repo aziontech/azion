@@ -66,9 +66,9 @@ const (
 	ASK_NOT_EMPTY_BUCKET           = "Your bucket can't be deleted because it's not empty. Do you want to empty it? (y/N)"
 
 	OUTPUT_CREATE_BUCKET = "Bucket created successfully"
-	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully"
-	OUTPUT_UPDATE_BUCKET = "Bucket updated successfully"
-	OUTPUT_UPDATE_OBJECT = "Object updated successfully"
-	OUTPUT_CREATE_OBJECT = "Object created successfully"
-	OUTPUT_DELETE_OBJECT = "Object %s was deleted successfully"
+	OUTPUT_DELETE_BUCKET = "Bucket %s was deleted successfully\n"
+	OUTPUT_UPDATE_BUCKET = "Bucket updated successfully\n"
+	OUTPUT_UPDATE_OBJECT = "Object updated successfully\n"
+	OUTPUT_CREATE_OBJECT = "Object created successfully\n"
+	OUTPUT_DELETE_OBJECT = "Object %s was deleted successfully\n"
 )
