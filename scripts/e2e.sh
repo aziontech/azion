@@ -59,10 +59,11 @@ check_azion_json() {
     fi
 }
 
-delete_edge_storage_buckets
 go run "$full_main_go_path" -t "$token"
 # uncomment the line below and comment the line above if using a built binary file
 # "$full_main_go_path" -t "$token"
+delete_edge_storage_buckets
+
 
 # Check if the main.go file exists
 if [ -f "$full_main_go_path" ]; then
