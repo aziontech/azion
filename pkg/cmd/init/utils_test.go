@@ -96,7 +96,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 	type fields struct {
 		preset                string
 		auto                  bool
-		mode                  string
 		packageManager        string
 		pathWorkingDir        string
 		commandRunner         func(envVars []string, comm string) (string, int, error)
@@ -134,7 +133,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vanilla")
-					os.Setenv("mode", "compute")
 					return nil
 				},
 			},
@@ -162,7 +160,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 					return []byte(infoJsonData), nil
 				},
 				preset:         "vanilla",
-				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
@@ -176,7 +173,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 			},
@@ -200,7 +196,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			name: "error command runner output",
 			fields: fields{
 				preset:         "vanilla",
-				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
@@ -214,7 +209,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vanilla")
-					os.Setenv("mode", "compute")
 					return nil
 				},
 			},
@@ -238,7 +232,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			name: "error CheckVulcanMajor",
 			fields: fields{
 				preset:         "vanilla",
-				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
@@ -252,7 +245,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vanilla")
-					os.Setenv("mode", "compute")
 					return nil
 				},
 			},
@@ -276,7 +268,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			name: "error commandRunInteractive",
 			fields: fields{
 				preset:         "vanilla",
-				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
@@ -290,7 +281,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vanilla")
-					os.Setenv("mode", "compute")
 					return nil
 				},
 			},
@@ -314,7 +304,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			name: "error getVulcanEnvInfo",
 			fields: fields{
 				preset:         "vanilla",
-				mode:           "compute",
 				pathWorkingDir: "./azion/pathmock",
 				commandRunnerOutput: func(
 					f *cmdutil.Factory,
@@ -355,7 +344,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			cmd := &initCmd{
 				preset:                tt.fields.preset,
 				auto:                  tt.fields.auto,
-				mode:                  tt.fields.mode,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
 				commandRunner:         tt.fields.commandRunner,
@@ -430,7 +418,6 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 		fields     fields
 		mockFile   string
 		wantPreset string
-		wantMode   string
 		wantErr    bool
 		readFile   func(filename string) ([]byte, error)
 	}{
@@ -442,16 +429,14 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 					// Mocking unmarshalling process
 					*(v.(*map[string]string)) = map[string]string{
 						"preset": "astro",
-						"mode":   "deliver",
 					}
 					return nil
 				},
 			},
 			wantPreset: "astro",
-			wantMode:   "deliver",
 			wantErr:    false,
 			readFile: func(filename string) ([]byte, error) {
-				return []byte(`{"preset": "astro", "mode": "deliver"}`), nil
+				return []byte(`{"preset": "astro"}`), nil
 			},
 		},
 		{
@@ -463,7 +448,6 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 				},
 			},
 			wantPreset: "",
-			wantMode:   "",
 			wantErr:    true,
 			readFile: func(filename string) ([]byte, error) {
 				return nil, errors.New("error reading json")
@@ -478,16 +462,13 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 				fileReader:     tt.readFile,
 			}
 
-			gotPreset, gotMode, err := cmd.getVulcanInfo()
+			gotPreset, err := cmd.getVulcanInfo()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("initCmd.getVulcanInfo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if gotPreset != tt.wantPreset {
 				t.Errorf("initCmd.getVulcanInfo() gotPreset = %v, want %v", gotPreset, tt.wantPreset)
-			}
-			if gotMode != tt.wantMode {
-				t.Errorf("initCmd.getVulcanInfo() gotMode = %v, want %v", gotMode, tt.wantMode)
 			}
 		})
 	}

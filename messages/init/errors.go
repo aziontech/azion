@@ -6,7 +6,6 @@ var (
 	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azion-template and try again")
 
 	ErrorVulcanExecute                 = errors.New("Error executing Vulcan: %s")
-	ErrorModeNotSent                   = errors.New("You must send the --mode flag when --template is not nextjs/simple/static")
 	ErrorUpdatingVulcan                = errors.New("Failed to update Vulcan: %s")
 	ErrorInstallVulcan                 = errors.New("Failed to install Vulcan: %s")
 	ErrorOpeningConfigFile             = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
@@ -21,8 +20,7 @@ var (
 	ErrorFailedCreatingAzionDirectory  = errors.New("Failed to create the azion directory. The public's parent directory is read-only and/or isn't accessible. Change the permissions of the parent directory to read and write and/or give access to it")
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
 	ErrorWorkingDir                    = errors.New("Failed to change current working directory")
-	ErrorModeNotFound                  = errors.New("No mode was found for the selected template. For more information, run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
 	ErrorReadingGitignore              = errors.New("Failed to read your .gitignore file")
 	ErrorWritingGitignore              = errors.New("Failed to write to your .gitignore file")
-	ErrorGetProjectInfo                = errors.New("Failed to get project info (preset and mode)")
+	ErrorGetProjectInfo                = errors.New("Failed to get project preset")
 )

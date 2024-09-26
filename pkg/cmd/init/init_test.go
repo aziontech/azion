@@ -25,7 +25,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var infoJsonData = `{"preset":"astro","mode":"deliver"}`
+var infoJsonData = `{"preset":"astro"}`
 
 func TestNewCmd(t *testing.T) {
 	mock := &httpmock.Registry{}
@@ -40,7 +40,6 @@ func Test_initCmd_Run(t *testing.T) {
 		name                  string
 		preset                string
 		auto                  bool
-		mode                  string
 		packageManager        string
 		pathWorkingDir        string
 		globalFlagAll         bool
@@ -104,7 +103,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "project-piece",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -152,7 +150,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -181,7 +178,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "project-piece",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", errors.New("error getWorkDir")
 				},
@@ -229,7 +225,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -259,7 +254,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: true,
 				name:          "",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -307,7 +301,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -337,7 +330,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -385,7 +377,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -415,7 +406,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -463,7 +453,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -493,7 +482,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -543,7 +531,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -573,7 +560,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "project-piece",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -623,7 +609,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -653,7 +638,6 @@ func Test_initCmd_Run(t *testing.T) {
 				globalFlagAll: false,
 				name:          "",
 				preset:        "vite",
-				mode:          "deliver",
 				getWorkDir: func() (string, error) {
 					return "/path/full", nil
 				},
@@ -701,7 +685,6 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				load: func(filenames ...string) (err error) {
 					os.Setenv("preset", "vite")
-					os.Setenv("mode", "deliver")
 					return nil
 				},
 				git: github.Github{
@@ -719,7 +702,6 @@ func Test_initCmd_Run(t *testing.T) {
 				name:                  tt.fields.name,
 				preset:                tt.fields.preset,
 				auto:                  tt.fields.auto,
-				mode:                  tt.fields.mode,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
 				globalFlagAll:         tt.fields.globalFlagAll,
@@ -766,7 +748,6 @@ func Test_initCmd_deps(t *testing.T) {
 		name                  string
 		preset                string
 		auto                  bool
-		mode                  string
 		packageManager        string
 		pathWorkingDir        string
 		globalFlagAll         bool
@@ -888,7 +869,6 @@ func Test_initCmd_deps(t *testing.T) {
 				name:                  tt.fields.name,
 				preset:                tt.fields.preset,
 				auto:                  tt.fields.auto,
-				mode:                  tt.fields.mode,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
 				globalFlagAll:         tt.fields.globalFlagAll,

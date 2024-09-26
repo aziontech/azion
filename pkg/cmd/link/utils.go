@@ -92,23 +92,18 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	copy(listPresets, outputInline[:noLastItem])
 
 	prompt := &survey.Select{
-		Message:  "Choose a preset and mode:",
+		Message:  "Choose a preset:",
 		Options:  listPresets,
 		PageSize: len(listPresets),
 	}
 
-	var answer, template, mode string
+	var answer string
 	err = survey.AskOne(prompt, &answer)
 	if err != nil {
 		return err
 	}
 
-	modeSplit := strings.Split(answer, " ")
-	template = modeSplit[0]
-	mode = strings.Replace(strings.Replace(modeSplit[1], "(", "", -1), ")", "", -1)
-
-	info.Preset = template
-	info.Mode = mode
+	info.Preset = answer
 
 	return nil
 }

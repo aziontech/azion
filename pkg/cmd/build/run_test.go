@@ -117,7 +117,6 @@ func TestBuildCmd_run(t *testing.T) {
 				fields: &contracts.BuildInfo{
 					ProjectPath:   "",
 					Preset:        "vanilla",
-					Mode:          "compute",
 					Entry:         "no",
 					NodePolyfills: "true",
 					OwnWorker:     "true",
@@ -163,7 +162,6 @@ func TestBuildCmd_run(t *testing.T) {
 				fields: &contracts.BuildInfo{
 					ProjectPath:   "",
 					Preset:        "vanilla",
-					Mode:          "compute",
 					Entry:         "no",
 					NodePolyfills: "true",
 					OwnWorker:     "true",
@@ -210,7 +208,6 @@ func TestBuildCmd_run(t *testing.T) {
 				fields: &contracts.BuildInfo{
 					ProjectPath:   "",
 					Preset:        "vanilla",
-					Mode:          "compute",
 					Entry:         "no",
 					NodePolyfills: "adf",
 					OwnWorker:     "true",
@@ -257,7 +254,6 @@ func TestBuildCmd_run(t *testing.T) {
 				fields: &contracts.BuildInfo{
 					ProjectPath:   "",
 					Preset:        "vanilla",
-					Mode:          "compute",
 					Entry:         "no",
 					NodePolyfills: "true",
 					OwnWorker:     "adf",
