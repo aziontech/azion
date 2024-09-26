@@ -21,8 +21,8 @@ token=$TOKEN
 # Function to list and delete edge storage buckets
 delete_edge_storage_buckets() {
   # List the buckets with page size 1000, skip the header line, and delete each bucket
-  go run "$full_main_go_path" list edge-storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
-    go run "$full_main_go_path" delete edge-storage bucket --name "$name" --force
+  "$full_bin_path" list edge-storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
+    "$full_bin_path" delete edge-storage bucket --name "$name" --force
   done
 }
 
@@ -80,9 +80,9 @@ if [ -f "$full_main_go_path" ]; then
     npm install
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset react --mode deliver --auto --debug"
-    go run "$full_main_go_path" link --preset react --mode deliver --auto --debug
+    # go run "$full_main_go_path" link --preset react --mode deliver --auto --debug
     # uncomment the line below and comment the line above if using a built binary file
-    # "$full_main_go_path" link --preset react --mode deliver --auto --debug
+    "$full_bin_path" link --preset react --mode deliver --auto --debug
 
     # Check the exit status of the last command
     if [ $? -eq 0 ]; then
@@ -91,9 +91,9 @@ if [ -f "$full_main_go_path" ]; then
 
         # Run the build command
         echo "Running cmd/azion/main.go build --debug"
-        go run "$full_main_go_path" build --debug
+        # go run "$full_main_go_path" build --debug
         # uncomment the line below and comment the line above if using a built binary file
-        # "$full_main_go_path" build --debug
+        "$full_bin_path" build --debug
 
         # Check the exit status of the build command
         if [ $? -eq 0 ]; then
@@ -104,9 +104,9 @@ if [ -f "$full_main_go_path" ]; then
 
              # Run the build command
             echo "Running cmd/azion/main.go deploy --debug"
-            go run "$full_main_go_path" deploy --debug
+            # go run "$full_main_go_path" deploy --debug
             # uncomment the line below and comment the line above if using a built binary file
-            # "$full_main_go_path" deploy --debug
+            "$full_bin_path"deploy --debug
 
             # Check the exit status of the deploy command
             if [ $? -eq 0 ]; then
