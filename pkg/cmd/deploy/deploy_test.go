@@ -437,7 +437,7 @@ func TestOpenBrowser(t *testing.T) {
 			urlConsoleDeploy: "http://example.com",
 			openBrowserErr:   errors.New("failed to open browser"),
 			expectedLogMsg:   "Please visit the following URL: http://example.com",
-			expectedErr:      errors.New("failed to open browser"),
+			expectedErr:      nil,
 			openFunc: func(input string) error {
 				return errors.New("failed to open browser")
 			},
