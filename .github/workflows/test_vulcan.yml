@@ -34,6 +34,10 @@ jobs:
       #   run: |
       #     bash ./scripts/test.sh
 
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+
       - name: e2e test
         run: |
           bash ./scripts/e2e.sh
