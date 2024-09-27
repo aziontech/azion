@@ -8,6 +8,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
+	"go.uber.org/zap"
 )
 
 func checkToken(f *cmdutil.Factory) error {
@@ -37,7 +38,7 @@ func openBrowser(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) er
 	logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.VisitMsg, urlConsoleDeploy))
 	err := cmd.OpenBrowserFunc(urlConsoleDeploy)
 	if err != nil {
-		return err
+		logger.Debug("Error opening browser", zap.Error(err))
 	}
 	return nil
 }
