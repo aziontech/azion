@@ -237,6 +237,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	s.Suffix = " Deploying your project..."
 	s.FinalMSG = "Deployed finished executing\n"
 	s.Start() // Start the spinner
+	defer s.Stop()
 
 	// Create a new HTTP request
 	req, err := http.NewRequest("GET", logsURL, bytes.NewBuffer([]byte{}))
@@ -311,7 +312,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(fmt.Sprintf("\n%s", Result.Result.Errors.Stack)) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
