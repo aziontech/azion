@@ -20,7 +20,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 	type fields struct {
 		name          string
 		preset        string
-		mode          string
 		writeFile     func(filename string, data []byte, perm fs.FileMode) error
 		mkdir         func(path string, perm os.FileMode) error
 		marshalIndent func(v any, prefix, indent string) ([]byte, error)
@@ -39,7 +38,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 				},
 				name:   "project_piece",
 				preset: "vite",
-				mode:   "deliver",
 				mkdir: func(path string, perm os.FileMode) error {
 					return nil
 				},
@@ -58,7 +56,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 				},
 				name:   "project_piece",
 				preset: "vite",
-				mode:   "deliver",
 				mkdir: func(path string, perm os.FileMode) error {
 					return msg.ErrorFailedCreatingAzionDirectory
 				},
@@ -77,7 +74,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 				},
 				name:   "project_piece",
 				preset: "vite",
-				mode:   "deliver",
 				mkdir: func(path string, perm os.FileMode) error {
 					return nil
 				},
@@ -98,7 +94,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 				},
 				name:   "project_piece",
 				preset: "vite",
-				mode:   "deliver",
 				mkdir: func(path string, perm os.FileMode) error {
 					return nil
 				},
@@ -115,7 +110,6 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 			cmd := &initCmd{
 				name:          tt.fields.name,
 				preset:        tt.fields.preset,
-				mode:          tt.fields.mode,
 				writeFile:     tt.fields.writeFile,
 				mkdir:         tt.fields.mkdir,
 				marshalIndent: tt.fields.marshalIndent,

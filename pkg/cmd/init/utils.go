@@ -42,13 +42,7 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 
 	cmdVulcanInit := "init"
 	if len(cmd.preset) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s'", cmdVulcanInit, cmd.preset)
-	}
-	if len(cmd.mode) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --mode '%s'", cmdVulcanInit, cmd.mode)
-	}
-	if len(cmd.pathWorkingDir) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --scope '%s'", cmdVulcanInit, cmd.pathWorkingDir)
+		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, cmd.preset)
 	}
 
 	command := vul.Command("", cmdVulcanInit, cmd.f)
@@ -58,7 +52,7 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	preset, mode, err := cmd.getVulcanInfo()
+	preset, err := cmd.getVulcanInfo()
 	if err != nil {
 		return err
 	}
@@ -68,7 +62,6 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 	}
 
 	cmd.preset = strings.ToLower(preset)
-	cmd.mode = strings.ToLower(mode)
 	return nil
 }
 
@@ -82,21 +75,21 @@ func (cmd *initCmd) depsInstall() error {
 	return nil
 }
 
-func (cmd *initCmd) getVulcanInfo() (string, string, error) {
+func (cmd *initCmd) getVulcanInfo() (string, error) {
 
 	fileContent, err := cmd.fileReader(path.Join(cmd.pathWorkingDir, "info.json"))
 	if err != nil {
 		logger.Debug("Error reading template info", zap.Error(err))
-		return "", "", err
+		return "", err
 	}
 
 	var infoJson map[string]string
 	err = cmd.unmarshal(fileContent, &infoJson)
 	if err != nil {
 		logger.Debug("Error unmarshalling template info", zap.Error(err))
-		return "", "", err
+		return "", err
 	}
 
-	logger.Debug("Information about the template:", zap.Any("preset", infoJson["preset"]), zap.Any("mode", infoJson["mode"]))
-	return infoJson["preset"], infoJson["mode"], nil
+	logger.Debug("Information about the template:", zap.Any("preset", infoJson["preset"]))
+	return infoJson["preset"], nil
 }

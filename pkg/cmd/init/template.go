@@ -18,7 +18,6 @@ func (cmd *initCmd) createTemplateAzion() error {
 		Name:   cmd.name,
 		Env:    "production",
 		Preset: cmd.preset,
-		Mode:   cmd.mode,
 		Prefix: "",
 	}
 

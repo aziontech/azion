@@ -51,7 +51,6 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 
 	buildCmd.Flags().BoolP("help", "h", false, msg.BuildFlagHelp)
 	buildCmd.Flags().StringVar(&fields.Preset, "preset", "", msg.FlagTemplate)
-	buildCmd.Flags().StringVar(&fields.Mode, "mode", "", msg.FlagMode)
 	buildCmd.Flags().StringVar(&fields.Entry, "entry", "", msg.FlagEntry)
 	buildCmd.Flags().StringVar(&fields.NodePolyfills, "use-node-polyfills", "", msg.FlagPolyfill)
 	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)

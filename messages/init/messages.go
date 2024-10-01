@@ -18,7 +18,7 @@ var (
 	EdgeApplicationsInitFlagNo            = "Answers all yes/no interactions automatically with no"
 	WebAppInitContentOverridden           = "This application was already configured. Do you want to override the previous configuration? <yes | no> (default: no) "
 	WebAppInitCmdSuccess                  = "Template successfully fetched and configured\n"
-	InitGettingTemplates                  = "\nGetting modes available (Some dependencies may need to be installed)\n"
+	InitGettingTemplates                  = "\nGetting presets available (Some dependencies may need to be installed)\n"
 	InitGettingVulcan                     = "\nGetting templates available\n"
 	InitProjectQuestion                   = "Your application's name: "
 	EdgeApplicationsInitFlagHelp          = "Displays more information about the init command"
