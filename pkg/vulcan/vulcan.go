@@ -16,10 +16,10 @@ import (
 const (
 	currentMajor         = 4
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@v4.0.0"
+	firstTimeExecuting   = "@v4.0.1"
 )
 
-var versionVulcan = "@4.0.0"
+var versionVulcan = "@4.0.1"
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
@@ -65,14 +65,6 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 
 		if firstNumber > currentMajor {
 			logger.FInfo(f.IOStreams.Out, msg.NewMajorVersion)
-
-			if config.LastVulcanVersion == "" {
-				// new version update please
-				versionVulcan = firstTimeExecuting
-				return nil
-			}
-
-			versionVulcan = "@" + strings.TrimRight(config.LastVulcanVersion, "\n")
 			return nil
 		}
 
