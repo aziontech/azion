@@ -40,7 +40,6 @@ type initCmd struct {
 	name                  string
 	preset                string
 	auto                  bool
-	mode                  string
 	packageManager        string
 	pathWorkingDir        string
 	globalFlagAll         bool
@@ -244,7 +243,6 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
-	cmd.mode = strings.ToLower(templateOptionsMap[answerTemplate].Mode)
 
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err

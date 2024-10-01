@@ -255,7 +255,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	}
 
 	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, conf.Mode, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, authorize)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err

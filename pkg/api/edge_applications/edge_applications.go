@@ -495,7 +495,7 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	return &resp.Results, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, mode string, authorize bool) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, authorize bool) error {
 	logger.Debug("Create Rules Engine Next Application")
 
 	req := CreateRulesEngineRequest{}

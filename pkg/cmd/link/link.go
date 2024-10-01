@@ -29,7 +29,6 @@ import (
 type LinkInfo struct {
 	Name           string
 	Preset         string
-	Mode           string
 	packageManager string
 	PathWorkingDir string
 	GlobalFlagAll  bool
@@ -101,8 +100,8 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 		$ azion link
 		$ azion link --help
-		$ azion link --name "thisisatest" --preset hexo --mode deliver
-		$ azion link --preset astro --mode deliver
+		$ azion link --name "thisisatest" --preset hexo
+		$ azion link --preset astro
 		$ azion link --name "thisisatest" --preset nextjs
 		$ azion link --name "thisisatest" --preset static
 		`),
@@ -115,7 +114,6 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.Name, "name", "", msg.EdgeApplicationsLinkFlagName)
 	cobraCmd.Flags().StringVar(&info.Preset, "preset", "", msg.EdgeApplicationsLinkFlagTemplate)
 	cobraCmd.Flags().StringVar(&info.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
-	cobraCmd.Flags().StringVar(&info.Mode, "mode", "", msg.EdgeApplicationsLinkFlagMode)
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
 	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
@@ -186,7 +184,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 		}
 
-		if info.Preset == "" || info.Mode == "" {
+		if info.Preset == "" {
 			err = cmd.selectVulcanMode(info)
 			if err != nil {
 				return err
@@ -216,7 +214,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 		//run init before calling build
 		cmdVulcanInit := "init"
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --mode '%s' --scope '%s'", cmdVulcanInit, strings.ToLower(info.Preset), strings.ToLower(info.Mode), info.PathWorkingDir)
+		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
 
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", cmdVulcanInit, cmd.F)

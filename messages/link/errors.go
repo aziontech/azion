@@ -6,7 +6,6 @@ var (
 	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azion-template and try again")
 
 	ErrorVulcanExecute                 = errors.New("Error executing Vulcan: %s")
-	ErrorModeNotSent                   = errors.New("You must send the --mode flag when --template is not nextjs/simple/static")
 	ErrorUpdatingVulcan                = errors.New("Failed to update Vulcan: %s")
 	ErrorInstallVulcan                 = errors.New("Failed to install Vulcan: %s")
 	ErrorOpeningConfigFile             = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")

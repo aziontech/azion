@@ -12,7 +12,6 @@ var (
 	BuildStatic           = "Skipping build step. Build isn't applied to the type 'static'\n"
 	BuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
 	FlagTemplate          = "The Edge Application's preset; Inform this flag if you wish to change the project's preset during build"
-	FlagMode              = "The Edge Application's mode; Inform this flag if you wish to change the project's mode during build"
 	FlagWorker            = "Indicates that the constructed code inserts its own worker expression, such as addEventListener(\"fetch\") or similar, without the need to inject a provider"
 	FlagPolyfill          = "Use node polyfills in build"
 	FlagEntry             = "Code entrypoint; (default: ./main.js)"
