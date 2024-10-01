@@ -311,7 +311,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return errors.New(fmt.Sprintf("\n%s", Result.Result.Errors.Stack)) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
