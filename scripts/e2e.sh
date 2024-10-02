@@ -73,9 +73,10 @@ if [ -f "$full_main_go_path" ]; then
     rm -rf vulcan
     rm -rf react-static
 
-    git clone https://github.com/aziontech/vulcan-examples.git
-    cp -r vulcan-examples/examples/react-static ./ 
-    cd react-static
+    git clone https://github.com/aziontech/azion-samples.git
+    # cp -r vulcan-examples/examples/react-static ./ 
+    cp -r azion-samples/templates/react/reactjs-boilerplate ./
+    cd reactjs-boilerplate
 
     npm install
     # Run the link command with the specified options
