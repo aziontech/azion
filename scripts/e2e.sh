@@ -80,7 +80,7 @@ if [ -f "$full_main_go_path" ]; then
     npm install
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset react --auto --debug"
-    # go run "$full_main_go_path" link --preset react deliver --auto --debug
+    # go run "$full_main_go_path" link --preset react --auto --debug
     # uncomment the line below and comment the line above if using a built binary file
     "$full_bin_path" link --preset react --auto --debug
 
