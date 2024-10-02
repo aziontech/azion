@@ -1,0 +1,35 @@
+name: Code linters
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+concurrency:
+  # only one job per reference (branch or tag)
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  Static-linters:
+    runs-on: [self-hosted, stage]
+    container:
+      image: python:3.8-alpine
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Checkout jira-issue-key-checker repo
+      uses: actions/checkout@v3
+      with:
+        repository: aziontech/jira-issue-key-checker
+        token: ${{ secrets.GLOBAL_TOKEN }}
+        path: jira-issue-key-checker
+
+    - name: Issue checker
+      uses: ./jira-issue-key-checker
+      with:
+        github_token: ${{ secrets.GLOBAL_TOKEN }}
+        jira-prefix: 'QA|ENG|SRE'
