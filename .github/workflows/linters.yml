@@ -14,9 +14,9 @@ concurrency:
 
 jobs:
   Static-linters:
-    runs-on: [self-hosted, stage]
+    runs-on: ubuntu-latest
     container:
-      image: python:3.8-alpine
+      image: golang:1.22.5
 
     steps:
     - uses: actions/checkout@v3
