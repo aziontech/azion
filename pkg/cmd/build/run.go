@@ -29,11 +29,6 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		conf.Preset = fields.Preset
 	}
 
-	if fields.Mode != "" {
-		vulcanParams += " --mode " + fields.Mode
-		conf.Mode = fields.Mode
-	}
-
 	if fields.Entry != "" {
 		vulcanParams += " --entry " + fields.Entry
 	}
@@ -43,7 +38,7 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		if err != nil {
 			return fmt.Errorf("%w: %s", msg.ErrorPolyfills, fields.NodePolyfills)
 		}
-		vulcanParams += " --useNodePolyfills " + fields.NodePolyfills
+		vulcanParams += " --polyfills " + fields.NodePolyfills
 	}
 
 	if fields.OwnWorker != "" {
@@ -51,7 +46,7 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		if err != nil {
 			return fmt.Errorf("%w: %s", msg.ErrorWorker, fields.OwnWorker)
 		}
-		vulcanParams += " --useOwnWorker " + fields.OwnWorker
+		vulcanParams += " --worker " + fields.OwnWorker
 	}
 
 	if fields.IsFirewall {

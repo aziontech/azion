@@ -15,7 +15,6 @@ type FileOps struct {
 
 type BuildInfo struct {
 	Preset        string
-	Mode          string
 	Entry         string
 	NodePolyfills string
 	OwnWorker     string
@@ -48,7 +47,6 @@ type AzionApplicationOptions struct {
 	Name          string                       `json:"name"`
 	Bucket        string                       `json:"bucket"`
 	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
-	Mode          string                       `json:"mode"`   // deliver == ssg, compute == ssr
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
 	NotFirstRun   bool                         `json:"not-first-run"`

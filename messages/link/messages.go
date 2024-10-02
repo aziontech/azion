@@ -12,7 +12,6 @@ var (
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
 	EdgeApplicationsLinkFlagName          = "The Edge Application's name"
 	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's template"
-	EdgeApplicationsLinkFlagMode          = "The Edge Application's mode"
 	WebAppLinkCmdSuccess                  = "Project successfully configured\n"
 	LinkGettingTemplates                  = "Getting templates available\n"
 	LinkProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your application's name: "

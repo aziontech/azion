@@ -21,7 +21,6 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		Name:   info.Name,
 		Env:    "production",
 		Preset: strings.ToLower(info.Preset),
-		Mode:   strings.ToLower(info.Mode),
 		Prefix: "",
 	}
 	azionJson.Function.Name = "__DEFAULT__"
