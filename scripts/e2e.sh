@@ -38,7 +38,7 @@ check_folder_exists() {
 }
 
 check_azion_json() {
-    json_file="${current_directory}/react-static/azion/azion.json"
+    json_file="${current_directory}/reactjs-boilerplate/azion/azion.json"
 
     # Extract the application_id from the JSON file
     local application_id
@@ -71,7 +71,7 @@ if [ -f "$full_main_go_path" ]; then
     echo "Current Directory: $current_directory"
 
     rm -rf vulcan
-    rm -rf react-static
+    rm -rf reactjs-boilerplate
 
     git clone https://github.com/aziontech/azion-samples.git
     # cp -r vulcan-examples/examples/react-static ./ 
