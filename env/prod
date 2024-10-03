@@ -1,5 +1,7 @@
 API_URL=https://api.azionapi.net
 AUTH_URL=https://sso.azion.com/api
 STORAGE_URL=https://api.azion.com
+CONSOLE=https://console.azion.com
+SCRIPT_ID=17ac912d-5ce9-4806-9fa7-480779e43f58
 TEMPLATE_BRANCH=main
 TEMPLATE_MAJOR=0

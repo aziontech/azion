@@ -1,29 +1,33 @@
 package deploy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
+	"time"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
-	"github.com/aziontech/azion-cli/pkg/cmd/sync"
-
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	dryrun "github.com/aziontech/azion-cli/pkg/dry_run"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
-	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	"github.com/briandowns/spinner"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -35,7 +39,6 @@ type DeployCmd struct {
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
-	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
@@ -43,6 +46,13 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
+	CallScript            func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error)
+	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
+	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
+	CheckToken            func(f *cmdutil.Factory) error
+	ReadSettings          func() (token.Settings, error)
+	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
+	OpenBrowserFunc       func(input string) error
 }
 
 var (
@@ -54,6 +64,10 @@ var (
 	Sync        bool
 	DryRun      bool
 	Env         string
+	Logs        = contracts.Logs{}
+	Result      = contracts.Results{}
+	DeployURL   = "https://console.azion.com"
+	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -62,7 +76,6 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		GetWorkDir:            utils.GetWorkingDir,
 		FileReader:            os.ReadFile,
 		WriteFile:             os.WriteFile,
-		EnvLoader:             utils.LoadEnvVarsFromFile,
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
@@ -72,6 +85,13 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
 		VersionID:             utils.Timestamp,
+		CallScript:            callScript,
+		OpenBrowser:           openBrowser,
+		CaptureLogs:           captureLogs,
+		UploadFiles:           uploadFiles,
+		CheckToken:            checkToken,
+		OpenBrowserFunc:       open.Run,
+		ReadSettings:          token.ReadSettings,
 	}
 }
 
@@ -128,28 +148,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	err := checkToken(f)
+	err := cmd.CheckToken(f)
 	if err != nil {
 		return err
 	}
 
-	if Sync {
-		sync.ProjectConf = ProjectConf
-		syncCmd := sync.NewSyncCmd(f)
-		syncCmd.EnvPath = Env
-		if err := sync.Run(syncCmd); err != nil {
-			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
-			return err
-		}
-	}
-
-	if !SkipBuild {
-		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
+	settings, err := cmd.ReadSettings()
+	if err != nil {
+		return err
 	}
 
 	conf, err := cmd.GetAzionJsonContent(ProjectConf)
@@ -158,127 +164,168 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	versionID := cmd.VersionID()
+	//create credentials if they are not found on settings file
+	if settings.S3AccessKey == "" || settings.S3SecreKey == "" {
+		nameBucket := fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID())
+		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: sdk.READ_WRITE}})
+		if err != nil {
+			return err
+		}
 
-	conf.Prefix = versionID
+		// Get the current time
+		now := time.Now()
 
-	err = checkArgsJson(cmd, ProjectConf)
-	if err != nil {
-		return err
-	}
+		// Add one year to the current time
+		oneYearLater := now.AddDate(1, 0, 0)
 
-	clients := NewClients(f)
-	interpreter := cmd.Interpreter()
+		request := new(storage.RequestCredentials)
+		request.Name = &nameBucket
+		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
+		request.Bucket = &nameBucket
+		request.ExpirationDate = &oneYearLater
 
-	pathManifest, err := interpreter.ManifestPath()
-	if err != nil {
-		return err
-	}
+		creds, err := storageClient.CreateCredentials(ctx, *request)
+		if err != nil {
+			return err
+		}
+		settings.S3AccessKey = creds.Data.GetAccessKey()
+		settings.S3SecreKey = creds.Data.GetSecretKey()
+		settings.S3Bucket = nameBucket
 
-	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.uploadFiles(f, conf, &msgs)
+		err = token.WriteSettings(settings)
 		if err != nil {
 			return err
 		}
 	}
 
-	conf.Function.File = ".edge/worker.js"
-	err = cmd.doFunction(clients, ctx, conf, &msgs)
+	localDir, err := cmd.GetWorkDir()
 	if err != nil {
 		return err
 	}
 
-	if !conf.NotFirstRun {
-		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
-		if err != nil {
-			logger.Debug("Error while getting default rules engine", zap.Error(err))
-			return err
-		}
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
+	conf.Prefix = cmd.VersionID()
 
-		var behString sdk.RulesEngineBehaviorString
-		behString.SetName("set_origin")
-
-		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
-
-		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-			IdApplication: conf.Application.ID,
-			Phase:         "request",
-			Id:            ruleDefaultID,
-		}
-
-		reqUpdateRulesEngine.SetBehaviors(behaviors)
-
-		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-		if err != nil {
-			logger.Debug("Error while updating default rules engine", zap.Error(err))
-			return err
-		}
-	}
-
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
+	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd)
 	if err != nil {
 		return err
 	}
 
-	if len(conf.RulesEngine.Rules) == 0 {
-		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, cmd)
 	if err != nil {
 		return err
 	}
 
-	if manifestStructure.Domain.Name == "" {
-		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
+	err = cmd.OpenBrowser(f, fmt.Sprintf("%s/create/deploy/%s", DeployURL, id), cmd)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.CaptureLogs(id, settings.Token, cmd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func captureLogs(execId, token string, cmd *DeployCmd) error {
+	logsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/logs", DeployURL, execId)
+	resultsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/results", DeployURL, execId)
+
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
+	s.Suffix = " Deploying your project..."
+	s.FinalMSG = "Deployed finished executing\n"
+	s.Start() // Start the spinner
+	defer s.Stop()
+
+	// Create a new HTTP request
+	req, err := http.NewRequest("GET", logsURL, bytes.NewBuffer([]byte{}))
+	if err != nil {
+		logger.Debug("Error creating request", zap.Error(err))
+		return err
+	}
+
+	// Set headers
+	req.Header.Set("accept", "application/json; version=3")
+	req.Header.Set("content-type", "application/json; version=3")
+	req.Header.Set("Authorization", "Token "+token)
+
+	// Send the request
+	client := &http.Client{}
+
+	for {
+		resp, err := client.Do(req)
+		if err != nil {
+			logger.Debug("Error sending request", zap.Error(err))
+			return err
+		}
+		defer resp.Body.Close()
+
+		// Read the response
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
+
+		if err := cmd.Unmarshal(body, &Logs); err != nil {
+			logger.Debug("Error unmarshalling response", zap.Error(err))
+			return err
+		}
+
+		switch Logs.Status {
+		case "queued", "running", "started", "pending finish":
+			time.Sleep(7 * time.Second)
+			continue
+		case "succeeded":
+			// Create a new HTTP request
+			requestResults, err := http.NewRequest("GET", resultsURL, bytes.NewBuffer([]byte{}))
+			if err != nil {
+				logger.Debug("Error creating request", zap.Error(err))
+				return err
+			}
+
+			// Set headers
+			requestResults.Header.Set("accept", "application/json; version=3")
+			requestResults.Header.Set("content-type", "application/json; version=3")
+			requestResults.Header.Set("Authorization", "Token "+token)
+
+			// Send the request
+			clientResults := &http.Client{}
+
+			respResults, err := clientResults.Do(requestResults)
+			if err != nil {
+				logger.Debug("Error sending request", zap.Error(err))
+				return err
+			}
+			defer respResults.Body.Close()
+
+			// Read the response
+			body, err := io.ReadAll(respResults.Body)
+			if err != nil {
+				return err
+			}
+
+			if err := cmd.Unmarshal(body, &Result); err != nil {
+				logger.Debug("Error unmarshalling response", zap.Error(err))
+				return err
+			}
+
+			if Result.Result.Errors != nil {
+				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+			}
+
+			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
+			if err != nil {
+				return err
+			}
+		default:
+			s.Stop()
+			return msg.ErrorDeployRemote
+		}
+		s.Stop()
+		break
 	}
 
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
-	msgs = append(msgs, msg.DeploySuccessful)
-
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
-	msgs = append(msgs, msgfOutputDomainSuccess)
-
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
-	msgs = append(msgs, msg.DeployPropagation)
-
-	outSlice := output.SliceOutput{
-		Messages: msgs,
-		GeneralOutput: output.GeneralOutput{
-			Out:   cmd.F.IOStreams.Out,
-			Flags: cmd.F.Flags,
-		},
-	}
-
-	return output.Print(&outSlice)
+	return nil
 }

@@ -59,6 +59,26 @@ type AzionApplicationOptions struct {
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 }
 
+type Results struct {
+	Result Result `json:"result"`
+}
+
+type Result struct {
+	Azion  *AzionApplicationOptions `json:"azion,omitempty"`  // Pointer and omitempty tag
+	Extras []interface{}            `json:"extras"`           // Assuming Extras can contain any data
+	Errors *ErrorDetails            `json:"errors,omitempty"` // Pointer and omitempty for optional errors
+}
+
+type ErrorDetails struct {
+	Error   int    `json:"error"`
+	Message string `json:"message"`
+	Stack   string `json:"stack"`
+}
+
+type Logs struct {
+	Status string `json:"status"`
+}
+
 type AzionApplicationSimple struct {
 	Name        string                   `json:"name"`
 	Type        string                   `json:"type"`

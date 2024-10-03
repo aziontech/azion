@@ -287,10 +287,6 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
-		if err := cmd.deps(c, msg.AskInstallDepsDeploy, &msgs); err != nil {
-			return err
-		}
-
 		logger.Debug("Running deploy command from init command")
 		deploy := cmd.deployCmd(cmd.f)
 		err = deploy.Run(cmd.f)
