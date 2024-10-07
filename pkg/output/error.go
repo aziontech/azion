@@ -32,6 +32,5 @@ func (e *ErrorOutput) Output() {
 			format = color.New(color.FgRed).SprintfFunc()
 		}
 		logger.FInfo(os.Stderr, format("Error: %s\n", e.Err.Error()))
-		os.Exit(1)
 	}
 }

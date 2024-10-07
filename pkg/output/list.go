@@ -41,7 +41,7 @@ func (c *ListOutput) Output() {
 	}
 
 	format := strings.Repeat("%s", len(tbl.GetHeader())) + "\n"
-	tbl.CalculateWidths([]string{})
+	tbl.CalculateWidths(c.Columns)
 
 	logger.PrintHeader(tbl, format)
 	for _, row := range tbl.GetRows() {
