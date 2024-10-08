@@ -28,27 +28,27 @@ func callScript(token, id, secret, prefix, name string, cmd *DeployCmd) (string,
 	// Define the request payload
 	payload := []map[string]string{
 		{
-			"field":                   "PROJECT_NAME",
+			"field":                   "AZCLI_PROJECT_NAME",
 			"instantiation_data_path": "envs.[0].value",
 			"value":                   name,
 		},
 		{
-			"field":                   "B2_APP_KEY_ID",
+			"field":                   "AZCLI_B2_APP_KEY_ID",
 			"instantiation_data_path": "envs.[1].value",
 			"value":                   id,
 		},
 		{
-			"field":                   "B2_APP_KEY",
+			"field":                   "AZCLI_B2_APP_KEY",
 			"instantiation_data_path": "envs.[2].value",
 			"value":                   secret,
 		},
 		{
-			"field":                   "PREFIX",
+			"field":                   "AZCLI_PREFIX",
 			"instantiation_data_path": "envs.[3].value",
 			"value":                   prefix,
 		},
 		{
-			"field":                   "TOKEN",
+			"field":                   "AZCLI_TOKEN",
 			"instantiation_data_path": "envs.[4].value",
 			"value":                   token,
 		},
