@@ -1,4 +1,4 @@
-name: Test Vulcan Functionalities
+name: End-to-End test
 
 on:
   pull_request:
@@ -30,6 +30,14 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      - name: test vulcan
+      - name: Install jq
         run: |
-          bash ./scripts/test.sh
+          apt update
+          apt install -y jq
+
+
+      - name: e2e test
+        run: |
+          bash ./scripts/e2e.sh
+        env:
+          TOKEN: ${{ secrets.E2E_TOKEN }}

@@ -17,10 +17,8 @@ import (
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -564,29 +562,6 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 	}
 
 	return resp, nil
-}
-
-func checkToken(f *cmdutil.Factory) error {
-	configureToken := f.Config.GetString("token")
-
-	t := token.New(&token.Config{
-		Client: f.HttpClient,
-		Out:    f.IOStreams.Out,
-	})
-
-	if configureToken == "" {
-		return utils.ErrorTokenNotProvided
-	}
-
-	valid, _, err := t.Validate(&configureToken)
-	if err != nil {
-		return err
-	}
-	if !valid {
-		return msg.ErrorInvalidToken
-	}
-
-	return nil
 }
 
 func checkArgsJson(cmd *DeployCmd, projectPath string) error {

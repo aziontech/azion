@@ -96,18 +96,18 @@ func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contra
 	return resp, nil
 }
 
-func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions) error {
+func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions, bucket string) error {
 	file := fileOps.Path
 	if conf.Prefix != "" {
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, conf.Bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	req := c.apiClient.StorageAPI.StorageApiBucketsObjectsCreate(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while uploading file <"+fileOps.Path+"> to storage api", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			err = utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return err
 			}
