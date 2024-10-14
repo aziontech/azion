@@ -25,7 +25,7 @@ func vulcan(cmd *DevCmd, isFirewall bool) error {
 }
 
 func runCommand(cmd *DevCmd, command string) error {
-	logger.Debug("Running vulcan run command")
+	logger.Debug("Running Bundler run command")
 	logger.Debug(fmt.Sprintf("$ %s\n", command))
 
 	err := cmd.CommandRunInteractive(cmd.F, command)

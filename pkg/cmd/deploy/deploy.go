@@ -48,7 +48,7 @@ type DeployCmd struct {
 	VersionID             func() string
 	CallScript            func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error)
 	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
-	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
+	CaptureLogs           func(execId string, token string, cmd *DeployCmd) (string, error)
 	CheckToken            func(f *cmdutil.Factory) error
 	ReadSettings          func() (token.Settings, error)
 	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
@@ -221,15 +221,25 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.CaptureLogs(id, settings.Token, cmd)
+	url, err := cmd.CaptureLogs(id, settings.Token, cmd)
 	if err != nil {
 		return err
 	}
 
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
+	msgs = append(msgs, msg.DeploySuccessful)
+
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, url)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
+	msgs = append(msgs, msgfOutputDomainSuccess)
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
+	msgs = append(msgs, msg.DeployPropagation)
+
 	return nil
 }
 
-func captureLogs(execId, token string, cmd *DeployCmd) error {
+func captureLogs(execId, token string, cmd *DeployCmd) (string, error) {
 	logsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/logs", DeployURL, execId)
 	resultsURL := fmt.Sprintf("%s/api/script-runner/executions/%s/results", DeployURL, execId)
 
@@ -243,7 +253,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	req, err := http.NewRequest("GET", logsURL, bytes.NewBuffer([]byte{}))
 	if err != nil {
 		logger.Debug("Error creating request", zap.Error(err))
-		return err
+		return "", err
 	}
 
 	// Set headers
@@ -258,19 +268,19 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 		resp, err := client.Do(req)
 		if err != nil {
 			logger.Debug("Error sending request", zap.Error(err))
-			return err
+			return "", err
 		}
 		defer resp.Body.Close()
 
 		// Read the response
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return err
+			return "", err
 		}
 
 		if err := cmd.Unmarshal(body, &Logs); err != nil {
 			logger.Debug("Error unmarshalling response", zap.Error(err))
-			return err
+			return "", err
 		}
 
 		switch Logs.Status {
@@ -282,7 +292,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			requestResults, err := http.NewRequest("GET", resultsURL, bytes.NewBuffer([]byte{}))
 			if err != nil {
 				logger.Debug("Error creating request", zap.Error(err))
-				return err
+				return "", err
 			}
 
 			// Set headers
@@ -296,36 +306,36 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			respResults, err := clientResults.Do(requestResults)
 			if err != nil {
 				logger.Debug("Error sending request", zap.Error(err))
-				return err
+				return "", err
 			}
 			defer respResults.Body.Close()
 
 			// Read the response
 			body, err := io.ReadAll(respResults.Body)
 			if err != nil {
-				return err
+				return "", err
 			}
 
 			if err := cmd.Unmarshal(body, &Result); err != nil {
 				logger.Debug("Error unmarshalling response", zap.Error(err))
-				return err
+				return "", err
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return "", errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
 			if err != nil {
-				return err
+				return "", err
 			}
 		default:
 			s.Stop()
-			return msg.ErrorDeployRemote
+			return "", msg.ErrorDeployRemote
 		}
 		s.Stop()
 		break
 	}
 
-	return nil
+	return Result.Result.Azion.Domain.Url, nil
 }

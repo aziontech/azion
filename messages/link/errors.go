@@ -5,9 +5,9 @@ import "errors"
 var (
 	EdgeApplicationsOutputErr = errors.New("This output-ctrl option is not available. Read the readme files found in the repository https://github.com/aziontech/azion-template and try again")
 
-	ErrorVulcanExecute                 = errors.New("Error executing Vulcan: %s")
-	ErrorUpdatingVulcan                = errors.New("Failed to update Vulcan: %s")
-	ErrorInstallVulcan                 = errors.New("Failed to install Vulcan: %s")
+	ErrorVulcanExecute                 = errors.New("Error executing Bundler: %s")
+	ErrorUpdatingVulcan                = errors.New("Failed to update Bundler: %s")
+	ErrorInstallVulcan                 = errors.New("Failed to install Bundler: %s")
 	ErrorOpeningConfigFile             = errors.New("Failed to open the config.json file. The file doesn't exist, is corrupted, or has an invalid JSON format. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorUnmarshalConfigFile           = errors.New("Failed to unmarshal the config.json file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorGetAllTags                    = errors.New("Failed to return all reference tags in a repository. Verify your repository tags and try again. If the error persists, contact Azion support.")
