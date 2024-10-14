@@ -52,10 +52,64 @@ func TestNewSchedule(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "error readding file schedule",
+			args: args{
+				name: "arthur-morgan",
+				kind: DELETE_BUCKET,
+			},
+			factory: Factory{
+				Dir:  func() config.DirPath { return config.DirPath{} },
+				Join: func(elem ...string) string { return "" },
+				Stat: func(name string) (os.FileInfo, error) {
+					return nil, errors.New("file not found")
+				},
+				IsNotExist: func(err error) bool {
+					return false
+				},
+				WriteFile: func(name string, data []byte, perm os.FileMode) error {
+					return nil
+				},
+				Unmarshal:     json.Unmarshal,
+				MarshalIndent: json.MarshalIndent,
+				Marshal:       json.Marshal,
+				ReadFile: func(name string) ([]byte, error) {
+					return []byte(""), errors.New("Error file schedule")
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error MarshalIndent creating file",
+			args: args{
+				name: "arthur-morgan",
+				kind: DELETE_BUCKET,
+			},
+			factory: Factory{
+				Dir:  func() config.DirPath { return config.DirPath{} },
+				Join: func(elem ...string) string { return "" },
+				Stat: os.Stat,
+				IsNotExist: func(err error) bool {
+					return true
+				},
+				WriteFile: func(name string, data []byte, perm os.FileMode) error {
+					return nil
+				},
+				Unmarshal: json.Unmarshal,
+				MarshalIndent: func(v any, prefix, indent string) ([]byte, error) {
+					return []byte(""), errors.New("error MarshalIndent")
+				},
+				Marshal: json.Marshal,
+				ReadFile: func(name string) ([]byte, error) {
+					return []byte(""), nil
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := NewSchedule(nil, tt.args.name, tt.args.kind); (err != nil) != tt.wantErr {
+			if err := NewSchedule(&tt.factory, tt.args.name, tt.args.kind); (err != nil) != tt.wantErr {
 				t.Errorf("NewSchedule() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

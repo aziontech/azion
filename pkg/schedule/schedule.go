@@ -72,7 +72,7 @@ func NewSchedule(fact *Factory, name string, kind string) error {
 
 	schedules = append(schedules, factory.Schedule)
 
-	err = fact.createFileSchedule(schedules)
+	err = factory.createFileSchedule(schedules)
 	if err != nil {
 		logger.Debug("Scheduling error", zap.Error(err))
 		return err
