@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,7 +19,6 @@ func TestNewSchedule(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	type args struct {
-		fact *Factory
 		name string
 		kind string
 	}
@@ -119,15 +117,11 @@ func TestNewSchedule(t *testing.T) {
 func TestExecSchedules(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
-	type args struct {
-		factory *cmdutil.Factory
-	}
 	tests := []struct {
 		name      string
 		requests  []httpmock.Matcher
 		responses []httpmock.Responder
 		factory   Factory
-		args      args
 	}{
 		{
 			name: "happy road",
