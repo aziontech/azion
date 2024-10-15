@@ -226,6 +226,22 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	conf, err = cmd.GetAzionJsonContent(ProjectConf)
+	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
+	}
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
+	msgs = append(msgs, msg.DeploySuccessful)
+
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
+	msgs = append(msgs, msgfOutputDomainSuccess)
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
+	msgs = append(msgs, msg.DeployPropagation)
+
 	return nil
 }
 

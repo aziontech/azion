@@ -83,7 +83,7 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		}
 
 	} else {
-		logger.Debug("Failed to parse information on current vulcan version")
+		logger.Debug("Failed to parse information on current Bundler version")
 		versionVulcan = firstTimeExecuting
 		return nil
 	}

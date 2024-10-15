@@ -265,7 +265,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
+		msgs = append(msgs, msg.ChangeWorkingDir)
 	} else {
 		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
 			return err
@@ -281,7 +283,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
+		msgs = append(msgs, msg.ChangeWorkingDir)
 		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
 			cmd.f.Format, cmd.f.Out)

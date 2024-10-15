@@ -66,7 +66,7 @@ func TestDev(t *testing.T) {
 				return errors.New("failed to run command")
 			},
 			isFirewall:    false,
-			expectedError: errors.New("Error executing Vulcan: Failed to run dev command. Verify if the command is correct and check the output above for more details. Run the 'azion dev' command again or contact Azion's support"),
+			expectedError: errors.New("Error executing Bundler: Failed to run dev command. Verify if the command is correct and check the output above for more details. Run the 'azion dev' command again or contact Azion's support"),
 		},
 	}
 
