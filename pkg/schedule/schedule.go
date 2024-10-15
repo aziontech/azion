@@ -12,27 +12,67 @@ import (
 	"go.uber.org/zap"
 )
 
+type Factory struct {
+	Schedule      Schedule
+	Dir           func() config.DirPath
+	Join          func(elem ...string) string
+	Stat          func(name string) (os.FileInfo, error)
+	IsNotExist    func(err error) bool
+	Marshal       func(v any) ([]byte, error)
+	WriteFile     func(name string, data []byte, perm os.FileMode) error
+	ReadFile      func(name string) ([]byte, error)
+	Unmarshal     func(data []byte, v any) error
+	MarshalIndent func(v any, prefix, indent string) ([]byte, error)
+}
+
+var factoryShedule Factory
+
+func init() {
+	InjectFactory(nil)
+}
+
+func InjectFactory(fact *Factory) *Factory {
+	if fact != nil {
+		factoryShedule = *fact
+		return fact
+	}
+
+	f := &Factory{
+		Dir:           config.Dir,
+		Join:          filepath.Join,
+		Stat:          os.Stat,
+		IsNotExist:    os.IsNotExist,
+		Marshal:       json.Marshal,
+		WriteFile:     os.WriteFile,
+		ReadFile:      os.ReadFile,
+		Unmarshal:     json.Unmarshal,
+		MarshalIndent: json.MarshalIndent,
+	}
+	factoryShedule = *f
+	return f
+}
+
 type Schedule struct {
 	Name string    `json:"name"`
 	Time time.Time `json:"time"` // schedule creation time
 	Kind string    `json:"kind"`
 }
 
-func NewSchedule(name string, kind string) error {
-	schedule := Schedule{
-		Name: name,
-		Time: time.Now(),
-		Kind: kind,
-	}
+func NewSchedule(fact *Factory, name string, kind string) error {
+	factory := InjectFactory(fact)
+	factory.Schedule.Name = name
+	factory.Schedule.Time = time.Now()
+	factory.Schedule.Kind = kind
 
-	schedules, err := readFileSchedule()
+	schedules, err := factory.readFileSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return err
 	}
-	schedules = append(schedules, schedule)
 
-	err = createFileSchedule(schedules)
+	schedules = append(schedules, factory.Schedule)
+
+	err = factory.createFileSchedule(schedules)
 	if err != nil {
 		logger.Debug("Scheduling error", zap.Error(err))
 		return err
@@ -40,28 +80,29 @@ func NewSchedule(name string, kind string) error {
 	return nil
 }
 
-func createFileSchedule(shedule []Schedule) error {
-	b, err := json.MarshalIndent(shedule, "	", " ")
+func (s *Factory) createFileSchedule(shedules []Schedule) error {
+	b, err := s.MarshalIndent(shedules, "  ", " ")
 	if err != nil {
 		return err
 	}
-	configPath := config.Dir()
-	path := filepath.Join(configPath.Dir, configPath.Schedule)
-	return os.WriteFile(path, b, os.FileMode(os.O_CREATE))
+	configPath := s.Dir()
+	path := s.Join(configPath.Dir, configPath.Schedule)
+	return s.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
-func readFileSchedule() ([]Schedule, error) {
+func (s *Factory) readFileSchedule() ([]Schedule, error) {
 	configPath := config.Dir()
 	schedules := []Schedule{}
 
-	path := filepath.Join(configPath.Dir, configPath.Schedule)
+	path := s.Join(configPath.Dir, configPath.Schedule)
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		data, err := json.Marshal(&schedules)
+	// Checks if the file exists in the given path
+	if _, err := s.Stat(path); s.IsNotExist(err) {
+		data, err := s.Marshal(&schedules)
 		if err != nil {
 			return nil, err
 		}
-		err = os.WriteFile(path, data, 0666)
+		err = s.WriteFile(path, data, 0666)
 		if err != nil {
 			return nil, err
 		}
@@ -69,16 +110,12 @@ func readFileSchedule() ([]Schedule, error) {
 		return schedules, nil
 	}
 
-	file, err := os.ReadFile(path)
+	file, err := s.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(file) == 0 {
-		return schedules, nil
-	}
-
-	err = json.Unmarshal(file, &schedules)
+	err = s.Unmarshal(file, &schedules)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +124,7 @@ func readFileSchedule() ([]Schedule, error) {
 
 func ExecSchedules(factory *cmdutil.Factory) {
 	logger.Debug("Exec Schedules")
-	schedules, err := readFileSchedule()
+	schedules, err := factoryShedule.readFileSchedule()
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return
@@ -105,7 +142,7 @@ func ExecSchedules(factory *cmdutil.Factory) {
 		}
 	}
 
-	if err := createFileSchedule(scheds); err != nil {
+	if err := factoryShedule.createFileSchedule(scheds); err != nil {
 		logger.Debug("Scheduling error", zap.Error(err))
 	}
 }
