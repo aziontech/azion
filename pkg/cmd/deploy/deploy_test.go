@@ -97,8 +97,8 @@ func MockOpenBrowser(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd
 }
 
 // MockCaptureLogs mocks captureLogs behavior
-func MockCaptureLogs(execId string, token string, cmd *DeployCmd) (string, error) {
-	return "", nil
+func MockCaptureLogs(execId string, token string, cmd *DeployCmd) error {
+	return nil
 }
 
 func TestDeploy_Run(t *testing.T) {
@@ -269,7 +269,7 @@ func TestCaptureLogs(t *testing.T) {
 			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confConf string) error {
 				return nil
 			}
-			_, err := cmd.CaptureLogs(execID, token, cmd)
+			err := cmd.CaptureLogs(execID, token, cmd)
 
 			// Check for expected error
 			if tt.expectError {
