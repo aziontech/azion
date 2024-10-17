@@ -252,7 +252,9 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
 	s.Suffix = " Deploying your project..."
 	s.FinalMSG = "Deployed finished executing\n"
-	s.Start() // Start the spinner
+	if !cmd.F.Debug {
+		s.Start() // Start the spinner
+	}
 	defer s.Stop()
 
 	// Create a new HTTP request
@@ -269,6 +271,10 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 
 	// Send the request
 	client := &http.Client{}
+	logTime := time.Now()
+	lastLog := ""
+	// Custom layout for parsing the timestamp
+	layout := "2006-01-02 15:04:05.000" // Layout must match your timestamp format exactly
 
 	for {
 		resp, err := client.Do(req)
@@ -291,6 +297,21 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 
 		switch Logs.Status {
 		case "queued", "running", "started", "pending finish":
+			for _, event := range Logs.Logs {
+				if event.Content != "" && event.Content != lastLog {
+					// Parse the timestamp
+					parsedTimestamp, err := time.Parse(layout, event.Timestamp)
+					if err != nil {
+						return err
+					}
+					if logTime.After(parsedTimestamp) {
+						continue
+					}
+					lastLog = event.Content
+					logger.Debug(event.Content)
+					logTime = parsedTimestamp
+				}
+			}
 			time.Sleep(7 * time.Second)
 			continue
 		case "succeeded":
