@@ -75,8 +75,20 @@ type ErrorDetails struct {
 	Stack   string `json:"stack"`
 }
 
+// type Logs struct {
+// 	Status string `json:"status"`
+// }
+
+// LogEntry represents each log entry with content and timestamp.
+type LogEntry struct {
+	Content   string `json:"content,omitempty"`
+	Timestamp string `json:"timestamp,omitempty"`
+}
+
+// StatusResponse represents the overall status and logs of the deployment process.
 type Logs struct {
-	Status string `json:"status"`
+	Status string     `json:"status"`
+	Logs   []LogEntry `json:"logs"`
 }
 
 type AzionApplicationSimple struct {
