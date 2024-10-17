@@ -75,10 +75,6 @@ type ErrorDetails struct {
 	Stack   string `json:"stack"`
 }
 
-// type Logs struct {
-// 	Status string `json:"status"`
-// }
-
 // LogEntry represents each log entry with content and timestamp.
 type LogEntry struct {
 	Content   string `json:"content,omitempty"`
