@@ -27,7 +27,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/schedule"
 
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
-	deployremote "github.com/aziontech/azion-cli/pkg/cmd/deploy_remote"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
 	linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link"
@@ -127,7 +126,6 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(purge.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(reset.NewCmd(fact.Factory))
 	cobraCmd.AddCommand(sync.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(deployremote.NewCmd(fact.Factory))
 }
 
 func CmdRoot(fact *factoryRoot) *cobra.Command {
