@@ -101,7 +101,10 @@ func (l *login) browserLogin(srv Server) error {
 
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(htmlResponse))
+			_, err := w.Write([]byte(htmlResponse))
+			if err != nil {
+				logger.Error("Error render html", zap.Error(err))
+			}
 
 			if paramValue != "" {
 				tokenValue = paramValue
