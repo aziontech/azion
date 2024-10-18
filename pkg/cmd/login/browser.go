@@ -2,7 +2,6 @@ package login
 
 import (
 	"context"
-	"io"
 	"net/http"
 
 	msg "github.com/aziontech/azion-cli/messages/login"
@@ -44,7 +43,66 @@ func (l *login) browserLogin(srv Server) error {
 	if enableHandlerRouter {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			paramValue := r.URL.Query().Get("c")
-			_, _ = io.WriteString(w, msg.BrowserMsg)
+
+			htmlResponse := `
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<link rel="icon" type="image/png" sizes="32x32" href="https://avatars.githubusercontent.com/u/6660972?s=200&v=4">
+			<title>Azion</title>
+			<style>
+				body {
+					display: flex;
+					flex-direction: column;
+					justify-content: center;
+					align-items: center;
+					height: 100vh;
+					margin: 0;
+					font-family: Arial, sans-serif;
+					background-color: #f4f4f4;
+				}
+				.container {
+					text-align: center;
+				}
+				.logo {
+					width: 150px;
+				}
+				.text {
+					color: #4CAF50;
+					font-size: 12px;
+					margin-top: 20px;
+				}
+				.footer {
+					position: fixed;
+					bottom: 10px;
+					text-align: center;
+					width: 100%;
+					font-size: 14px;
+					color: #888;
+				}
+				.footer a {
+					color: #4CAF50;
+					text-decoration: none;
+				}
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<img src="https://avatars.githubusercontent.com/u/6660972?s=200&v=4" alt="Logo" class="logo">
+				<div class="text">Authenticated, you can now close this page and return to your terminal</div>
+			</div>
+			<div class="footer">
+				<p>Made with <span style="color: #e25555;">&#x2764;</span> by <a href="https://github.com/maxwelbm" target="_blank">MaxwelBM</a></p>
+			</div>
+		</body>
+		</html>`
+
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(htmlResponse))
+
 			if paramValue != "" {
 				tokenValue = paramValue
 			}
