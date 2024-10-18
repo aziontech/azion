@@ -2,6 +2,8 @@ package link
 
 const (
 	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"
+	FLAG_SYNC           = "Synchronizes the local azion.json file with remote resources. Use this flag when deploying your project from this command"
+	FLAG_LOCAL          = "Runs the entire build and deploy process locally. Use this flag when deploying your project from this command"
 )
 
 var (
