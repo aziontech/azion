@@ -18,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/cheggaaa/pb/v3"
 )
 
 const maxZipSize = 1 * 1024 * 1024 // 1MB
@@ -169,12 +170,12 @@ func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string
 		return fmt.Errorf("failed to upload file to bucket %s: %w", bucketName, err)
 	}
 
-	fmt.Printf("File %s uploaded successfully to bucket %s\n", fileName, bucketName)
+	// fmt.Printf("File %s uploaded successfully to bucket %s\n", fileName, bucketName)
 	return nil
 }
 
 // Worker responsável por zipar e fazer o upload de arquivos
-func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string, wg *sync.WaitGroup, baseDir string, workerID int, atomicCounter *int32, bucketName string) {
+func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string, wg *sync.WaitGroup, baseDir string, workerID int, atomicCounter *int32, bucketName string, progressBar *pb.ProgressBar) {
 	defer wg.Done()
 
 	var (
@@ -199,7 +200,7 @@ func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string, wg *sy
 		// Se o tamanho atual exceder o limite (1MB), zipar e fazer upload
 		if currentSize >= maxZipSize {
 			// Criar o arquivo zip e fazer o upload
-			err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName)
+			err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName, progressBar)
 			if err != nil {
 				log.Printf("Failed to zip and upload files: %v", err)
 			}
@@ -212,14 +213,14 @@ func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string, wg *sy
 
 	// Se ainda houver arquivos no final, zipar e fazer upload
 	if len(filesToZip) > 0 {
-		err := zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName)
+		err := zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName, progressBar)
 		if err != nil {
 			log.Printf("Failed to zip and upload files: %v", err)
 		}
 	}
 }
 
-func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string, zipFileName, baseDir string, atomicCounter *int32, bucketName string) error {
+func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string, zipFileName, baseDir string, atomicCounter *int32, bucketName string, progressBar *pb.ProgressBar) error {
 	// Incrementar contador atomic para gerar nome de arquivo zip único
 	counter := atomic.AddInt32(atomicCounter, 1)
 	zipFileName = fmt.Sprintf("%s_%d.zip", strings.TrimSuffix(zipFileName, ".zip"), counter)
@@ -260,6 +261,8 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string, zipF
 		return fmt.Errorf("failed to upload zip file %s: %w", zipFileName, err)
 	}
 
+	progressBar.Increment()
+
 	return nil
 }
 
@@ -286,6 +289,8 @@ func uploadFiles(pathStatic string, settings token.Settings) error {
 
 	ctx := context.TODO()
 
+	progressBar := pb.StartNew(len(files))
+
 	// Canal para enviar arquivos para os workers
 	filesChan := make(chan string)
 
@@ -298,7 +303,7 @@ func uploadFiles(pathStatic string, settings token.Settings) error {
 	// Iniciar os workers
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go worker(ctx, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket)
+		go worker(ctx, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, progressBar)
 	}
 
 	// Enviar arquivos para os workers
@@ -309,6 +314,8 @@ func uploadFiles(pathStatic string, settings token.Settings) error {
 	// Fechar o canal e aguardar os workers
 	close(filesChan)
 	wg.Wait()
+
+	progressBar.Finish()
 
 	fmt.Println("Upload completed... ")
 	return nil
