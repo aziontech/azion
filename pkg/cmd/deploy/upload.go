@@ -23,9 +23,6 @@ import (
 const maxZipSize = 1 * 1024 * 1024 // 1MB
 
 var (
-	// accessKeyID     = "0054328fe4c4a64000000004e"
-	// secretAccessKey = "K005jq/rAc5XKDYLIsGSp8TKjW7ytP4"
-	// bucketName      = "illuminating-forest-20241015105308"
 	region     = "us-east"
 	endpoint   = "https://s3.us-east-005.azionstorage.net"
 	numWorkers = 5
