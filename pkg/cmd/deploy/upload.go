@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -123,9 +122,9 @@ func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string
 }
 
 // Worker responsible for zipping and uploading files
-func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string,
+func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, filesChan <-chan string,
 	wg *sync.WaitGroup, baseDir string, workerID int, atomicCounter *int32,
-	bucketName string, progressBar *progressbar.ProgressBar) {
+	bucketName string, progressBar *progressbar.ProgressBar, errChan chan error) {
 	defer wg.Done()
 
 	var (
@@ -135,43 +134,62 @@ func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string,
 
 	zipFileName := fmt.Sprintf("project_part_%d.zip", workerID)
 
-	for file := range filesChan {
-		filesToZip = append(filesToZip, file)
-
-		// Get the file size and add it to the current size
-		fileInfo, err := os.Stat(file)
-		if err != nil {
-			log.Printf("Failed to get file info for %s: %v", file, err)
-			continue
-		}
-		currentSize += fileInfo.Size()
-
-		// If the current size exceeds the limit (1MB), zip and upload
-		if currentSize >= maxZipSize {
-			err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir,
-				atomicCounter, bucketName, progressBar)
-			if err != nil {
-				log.Printf("Failed to zip and upload files: %v", err)
+	for {
+		select {
+		case file, ok := <-filesChan:
+			if !ok {
+				if len(filesToZip) > 0 {
+					err := zipAndUpload(ctx, cfg, filesToZip, zipFileName,
+						baseDir, atomicCounter, bucketName)
+					if err != nil {
+						errChan <- err
+						cancel()
+						return
+					}
+					if progressBar != nil {
+						progressBar.Add(len(filesToZip))
+					}
+				}
+				return
 			}
 
-			// Reset the size counter and clear the file list
-			currentSize = 0
-			filesToZip = nil
-		}
-	}
+			filesToZip = append(filesToZip, file)
 
-	// If there are still files at the end, zip them up and upload them
-	if len(filesToZip) > 0 {
-		err := zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName, progressBar)
-		if err != nil {
-			log.Printf("Failed to zip and upload files: %v", err)
+			fileInfo, err := os.Stat(file)
+			if err != nil {
+				errChan <- fmt.Errorf("failed to get file info for %s: %v", file, err)
+				cancel()
+				return
+			}
+			currentSize += fileInfo.Size()
+
+			// If the current size exceeds the limit (1MB), zip and upload
+			if currentSize >= maxZipSize {
+				err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir,
+					atomicCounter, bucketName)
+				if err != nil {
+					errChan <- err
+					cancel()
+					return
+				}
+
+				if progressBar != nil {
+					progressBar.Add(len(filesToZip))
+				}
+
+				// Reset the size counter and clear the file list
+				currentSize = 0
+				filesToZip = nil
+			}
+		case <-ctx.Done():
+			continue
 		}
 	}
 }
 
 func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	zipFileName, baseDir string, atomicCounter *int32,
-	bucketName string, progressBar *progressbar.ProgressBar) error {
+	bucketName string) error {
 
 	// Increment atomic counter to generate unique zip file name
 	counter := atomic.AddInt32(atomicCounter, 1)
@@ -210,13 +228,6 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 		return fmt.Errorf("failed to upload zip file %s: %w", zipFileName, err)
 	}
 
-	if progressBar != nil {
-		err := progressBar.Set(int(len(filesToZip)))
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -240,43 +251,69 @@ func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings
 		return errors.New("unable to load SDK config, " + err.Error())
 	}
 
-	ctx := context.TODO()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	bar := progressbar.NewOptions(
-		len(files),
-		progressbar.OptionSetDescription("Uploading files"),
-		progressbar.OptionShowCount(),
-		progressbar.OptionSetWriter(f.IOStreams.Out),
-		progressbar.OptionClearOnFinish(),
-	)
+	errChan := make(chan error, 1)
 
-	if f.Silent {
-		bar = nil
+	var bar *progressbar.ProgressBar = nil
+	if !f.Silent {
+		bar = progressbar.NewOptions(
+			len(files),
+			progressbar.OptionSetDescription("Uploading files"),
+			progressbar.OptionShowCount(),
+			progressbar.OptionSetWriter(f.IOStreams.Out),
+			progressbar.OptionClearOnFinish(),
+		)
 	}
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	filesChan := make(chan string)
+	filesChan := make(chan string, len(files))
 
 	var wg sync.WaitGroup
+	var errWg sync.WaitGroup
 
 	// Atomic counter to guarantee unique zip file names
 	var atomicCounter int32
 
+	var uploadErr error
+	errWg.Add(1)
+	go func() {
+		defer errWg.Done()
+		for err := range errChan {
+			if err != nil {
+				uploadErr = err
+				cancel()
+				break
+			}
+		}
+	}()
+
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go worker(ctx, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar)
+		go worker(ctx, cancel, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar, errChan)
 	}
 
-	for _, file := range files {
-		filesChan <- file
-	}
+	go func() {
+		defer close(filesChan)
+		for _, file := range files {
+			filesChan <- file
+		}
+	}()
 
-	close(filesChan)
 	wg.Wait()
+	close(errChan)
+	errWg.Wait()
+
+	if uploadErr != nil {
+		fmt.Printf("An error occurred: %v\n", uploadErr)
+		return uploadErr
+	}
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadSuccessful)
+
 	return nil
 }
