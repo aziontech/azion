@@ -38,8 +38,8 @@ type CustomEndpointResolver struct {
 }
 
 // ResolveEndpoint is the method that defines the custom endpoint
-func (e *CustomEndpointResolver) ResolveEndpoint(service, region string) (aws.Endpoint, error) {
-	return aws.Endpoint{
+func (e *CustomEndpointResolver) ResolveEndpoint(service, region string) (aws.Endpoint, error) { // nolint
+	return aws.Endpoint{ //nolint
 		URL:           e.URL,
 		SigningRegion: e.SigningRegion,
 	}, nil
@@ -234,7 +234,7 @@ func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings
 	cfg, err := config.LoadDefaultConfig(context.TODO(),
 		config.WithRegion(region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(settings.S3AccessKey, settings.S3SecreKey, "")),
-		config.WithEndpointResolver(endpointResolver),
+		config.WithEndpointResolver(endpointResolver), // nolint
 	)
 	if err != nil {
 		return errors.New("unable to load SDK config, " + err.Error())

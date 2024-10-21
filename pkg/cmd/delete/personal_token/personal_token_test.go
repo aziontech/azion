@@ -69,7 +69,7 @@ func TestDeleteCmd(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalid,
-			mockError:      fmt.Errorf(utils.ErrorParseResponse.Error()),
+			mockError:      utils.ErrorParseResponse,
 		},
 	}
 

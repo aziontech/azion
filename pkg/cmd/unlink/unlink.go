@@ -61,7 +61,7 @@ func (cmd *UnlinkCmd) run() error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(cmd.F.IOStreams.Out, msg.UnlinkSuccess)
+		fmt.Fprintf(cmd.F.IOStreams.Out, "%s", msg.UnlinkSuccess)
 	}
 	return nil
 }
