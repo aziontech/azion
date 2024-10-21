@@ -17,7 +17,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/schollz/progressbar/v3"
 )
@@ -35,7 +37,7 @@ type CustomEndpointResolver struct {
 	SigningRegion string
 }
 
-// ResolveEndpoint é o método que define o endpoint customizado
+// ResolveEndpoint is the method that defines the custom endpoint
 func (e *CustomEndpointResolver) ResolveEndpoint(service, region string) (aws.Endpoint, error) {
 	return aws.Endpoint{
 		URL:           e.URL,
@@ -43,17 +45,15 @@ func (e *CustomEndpointResolver) ResolveEndpoint(service, region string) (aws.En
 	}, nil
 }
 
-// Função que lê todos os arquivos de um diretório e retorna um slice com os caminhos completos
+// getFilesFromDir func that reads all the files in a directory and returns a slice with the full paths
 func getFilesFromDir(dirPath string) ([]string, error) {
 	var files []string
 
-	// Função que será aplicada a cada item encontrado no diretório
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Verifica se o item é um arquivo (e não um diretório)
 		if !info.IsDir() {
 			files = append(files, path)
 		}
@@ -67,54 +67,7 @@ func getFilesFromDir(dirPath string) ([]string, error) {
 	return files, nil
 }
 
-// Função para zipar arquivos com limite de tamanho de 1MB
-func zipFilesInChunks(baseDir string, files []string, baseZipName string) ([]string, error) {
-	var zipFiles []string
-	var zipFileName string
-	var zipFile *os.File
-	var zipWriter *zip.Writer
-	var currentSize int64
-
-	for _, file := range files {
-		// Se o arquivo zip não existir ou excedeu o tamanho, cria um novo
-		if zipFile == nil || currentSize >= maxZipSize {
-			if zipFile != nil {
-				zipWriter.Close()
-				zipFile.Close()
-				zipFiles = append(zipFiles, zipFileName)
-			}
-
-			zipFileName = fmt.Sprintf("%s_part%d.zip", baseZipName, len(zipFiles)+1)
-			var err error
-			zipFile, err = os.Create(zipFileName)
-			if err != nil {
-				return nil, err
-			}
-			zipWriter = zip.NewWriter(zipFile)
-			currentSize = 0
-		}
-
-		// Adiciona o arquivo ao zip
-		fileInfo, err := addFileToZip(zipWriter, file, baseDir)
-		if err != nil {
-			return nil, err
-		}
-
-		// Atualiza o tamanho atual
-		currentSize += fileInfo.Size()
-	}
-
-	// Fecha o último zip e adiciona à lista
-	if zipFile != nil {
-		zipWriter.Close()
-		zipFile.Close()
-		zipFiles = append(zipFiles, zipFileName)
-	}
-
-	return zipFiles, nil
-}
-
-// Função para adicionar um arquivo individual ao arquivo zip, preservando o caminho relativo
+// addFileToZip func to add an individual file to the zip archive, preserving the relative path
 func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -127,14 +80,14 @@ func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo,
 		return nil, err
 	}
 
-	// Criar uma entrada no zip com o caminho relativo
+	// Create an entry in the zip with the relative path
 	relativePath := strings.TrimPrefix(filePath, baseDir)
 	writer, err := zipWriter.Create(relativePath)
 	if err != nil {
 		return nil, err
 	}
 
-	// Copiar o conteúdo do arquivo para o zip
+	// Copy the contents of the file to the zip
 	_, err = io.Copy(writer, file)
 	if err != nil {
 		return nil, err
@@ -143,39 +96,33 @@ func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo,
 	return fileInfo, nil
 }
 
-// Função para fazer o upload de um arquivo para o bucket
+// uploadFile func to upload a file to the bucket
 func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string) error {
-	// Criar o cliente S3 com a configuração fornecida
 	s3Client := s3.NewFromConfig(cfg)
 
-	// Abrir o arquivo para upload
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to open file %s: %w", filePath, err)
 	}
 	defer file.Close()
 
-	// Obter o nome do arquivo
 	fileName := filepath.Base(filePath)
 
-	// Configurar os parâmetros do upload, sem a ACL
 	uploadInput := &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String(fileName), // Nome do arquivo no bucket
-		Body:   file,                 // Conteúdo do arquivo
+		Key:    aws.String(fileName), // Name of the file in the bucket
+		Body:   file,
 	}
 
-	// Fazer o upload do arquivo
 	_, err = s3Client.PutObject(ctx, uploadInput)
 	if err != nil {
 		return fmt.Errorf("failed to upload file to bucket %s: %w", bucketName, err)
 	}
 
-	// fmt.Printf("File %s uploaded successfully to bucket %s\n", fileName, bucketName)
 	return nil
 }
 
-// Worker responsável por zipar e fazer o upload de arquivos
+// Worker responsible for zipping and uploading files
 func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string,
 	wg *sync.WaitGroup, baseDir string, workerID int, atomicCounter *int32,
 	bucketName string, progressBar *progressbar.ProgressBar) {
@@ -189,10 +136,9 @@ func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string,
 	zipFileName := fmt.Sprintf("project_part_%d.zip", workerID)
 
 	for file := range filesChan {
-		// Adiciona o arquivo à lista de arquivos a serem zipados
 		filesToZip = append(filesToZip, file)
 
-		// Obter o tamanho do arquivo e adicionar ao tamanho atual
+		// Get the file size and add it to the current size
 		fileInfo, err := os.Stat(file)
 		if err != nil {
 			log.Printf("Failed to get file info for %s: %v", file, err)
@@ -200,22 +146,21 @@ func worker(ctx context.Context, cfg aws.Config, filesChan <-chan string,
 		}
 		currentSize += fileInfo.Size()
 
-		// Se o tamanho atual exceder o limite (1MB), zipar e fazer upload
+		// If the current size exceeds the limit (1MB), zip and upload
 		if currentSize >= maxZipSize {
-			// Criar o arquivo zip e fazer o upload
 			err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir,
 				atomicCounter, bucketName, progressBar)
 			if err != nil {
 				log.Printf("Failed to zip and upload files: %v", err)
 			}
 
-			// Reiniciar o contador de tamanho e limpar a lista de arquivos
+			// Reset the size counter and clear the file list
 			currentSize = 0
 			filesToZip = nil
 		}
 	}
 
-	// Se ainda houver arquivos no final, zipar e fazer upload
+	// If there are still files at the end, zip them up and upload them
 	if len(filesToZip) > 0 {
 		err := zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir, atomicCounter, bucketName, progressBar)
 		if err != nil {
@@ -228,11 +173,10 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	zipFileName, baseDir string, atomicCounter *int32,
 	bucketName string, progressBar *progressbar.ProgressBar) error {
 
-	// Incrementar contador atomic para gerar nome de arquivo zip único
+	// Increment atomic counter to generate unique zip file name
 	counter := atomic.AddInt32(atomicCounter, 1)
 	zipFileName = fmt.Sprintf("%s_%d.zip", strings.TrimSuffix(zipFileName, ".zip"), counter)
 
-	// Criar o arquivo zip
 	zipFilePath := filepath.Join(baseDir, zipFileName)
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
@@ -243,7 +187,7 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	zipWriter := zip.NewWriter(zipFile)
 	defer zipWriter.Close()
 
-	// Adicionar arquivos ao zip
+	// Add files to the zip
 	for _, file := range filesToZip {
 		_, err = addFileToZip(zipWriter, file, baseDir)
 		if err != nil {
@@ -251,18 +195,16 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 		}
 	}
 
-	// Fechar o zipWriter antes de tentar fazer o upload
 	err = zipWriter.Close()
 	if err != nil {
 		return fmt.Errorf("failed to close zip file %s: %w", zipFileName, err)
 	}
 
-	// Verificar se o arquivo zip foi criado
+	// Check if the zip file was created
 	if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
 		return fmt.Errorf("zip file %s does not exist", zipFileName)
 	}
 
-	// Fazer o upload do arquivo zipado
 	err = uploadFile(ctx, cfg, bucketName, zipFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to upload zip file %s: %w", zipFileName, err)
@@ -278,13 +220,12 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	return nil
 }
 
-func uploadFiles(f *cmdutil.Factory, pathStatic string, settings token.Settings) error {
+func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings token.Settings) error {
 	files, err := getFilesFromDir(pathStatic)
 	if err != nil {
-		return errors.New("")
+		return err
 	}
 
-	// Criar a configuração AWS com o endpoint correto
 	endpointResolver := &CustomEndpointResolver{
 		URL:           endpoint,
 		SigningRegion: region,
@@ -296,12 +237,10 @@ func uploadFiles(f *cmdutil.Factory, pathStatic string, settings token.Settings)
 		config.WithEndpointResolver(endpointResolver),
 	)
 	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
+		return errors.New("unable to load SDK config, " + err.Error())
 	}
 
 	ctx := context.TODO()
-
-	// progressBar := pb.StartNew(len(files))
 
 	bar := progressbar.NewOptions(
 		len(files),
@@ -315,32 +254,29 @@ func uploadFiles(f *cmdutil.Factory, pathStatic string, settings token.Settings)
 		bar = nil
 	}
 
-	// Canal para enviar arquivos para os workers
+	logger.FInfoFlags(f.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
+	*msgs = append(*msgs, msg.UploadStart)
+
 	filesChan := make(chan string)
 
-	// WaitGroup para aguardar todos os workers terminarem
 	var wg sync.WaitGroup
 
-	// Atomic counter para garantir nomes únicos dos arquivos zip
+	// Atomic counter to guarantee unique zip file names
 	var atomicCounter int32
 
-	// Iniciar os workers
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go worker(ctx, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar)
 	}
 
-	// Enviar arquivos para os workers
 	for _, file := range files {
 		filesChan <- file
 	}
 
-	// Fechar o canal e aguardar os workers
 	close(filesChan)
 	wg.Wait()
 
-	// progressBar.Finish()
-
-	fmt.Println("Upload completed... ")
+	logger.FInfoFlags(f.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
+	*msgs = append(*msgs, msg.UploadSuccessful)
 	return nil
 }
