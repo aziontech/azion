@@ -54,8 +54,6 @@ github.com/aziontech/azionapi-go-sdk v0.133.0 h1:xwDJd0kY3oQBMwnSZifVry43x46qnhO
 github.com/aziontech/azionapi-go-sdk v0.133.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f h1:b0IX6tpiiG+QzCVOBqwYEHP5gPeeESq57A5ZXiYyDS4=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
-github.com/aziontech/tablecli v0.0.0-20240513193320-c4dbf16b013a h1:jKR7y/1ePDPZkfKgqj7gUK9XB7KRHsyHci8tJXD3YTM=
-github.com/aziontech/tablecli v0.0.0-20240513193320-c4dbf16b013a/go.mod h1:1GXfg8O4vlOUrZRtMShaaUjJ0d9CQ5acecAMkpZ+fOo=
 github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e h1:4jnF5abLeCo+SqWNvegJjFuK1FUpIuuy09Fsfj2Ys+0=
 github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e/go.mod h1:1GXfg8O4vlOUrZRtMShaaUjJ0d9CQ5acecAMkpZ+fOo=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 h1:DDGfHa7BWjL4YnC6+E63dPcxHo2sUxDIu8g3QgEJdRY=
@@ -276,8 +274,8 @@ github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/tidwall/gjson v1.14.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
-github.com/tidwall/gjson v1.17.3 h1:bwWLZU7icoKRG+C+0PNwIKC6FCJO/Q3p2pZvuP0jN94=
-github.com/tidwall/gjson v1.17.3/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
+github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
+github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
 github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
 github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
