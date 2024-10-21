@@ -101,7 +101,7 @@ func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return fmt.Errorf("failed to open file %s: %w", filePath, err)
+		return fmt.Errorf(msg.ErrorOpenFile, filePath, err)
 	}
 	defer file.Close()
 
@@ -115,7 +115,7 @@ func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string
 
 	_, err = s3Client.PutObject(ctx, uploadInput)
 	if err != nil {
-		return fmt.Errorf("failed to upload file to bucket %s: %w", bucketName, err)
+		return fmt.Errorf(msg.ErrorUploadFileBucket, bucketName, err)
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 						return
 					}
 					if progressBar != nil {
-						progressBar.Add(len(filesToZip))
+						progressBar.Add(len(filesToZip)) // nolint
 					}
 				}
 				return
@@ -157,7 +157,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 
 			fileInfo, err := os.Stat(file)
 			if err != nil {
-				errChan <- fmt.Errorf("failed to get file info for %s: %v", file, err)
+				errChan <- fmt.Errorf(msg.ErrorGetFileInfo, file, err)
 				cancel()
 				return
 			}
@@ -174,7 +174,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 				}
 
 				if progressBar != nil {
-					progressBar.Add(len(filesToZip))
+					progressBar.Add(len(filesToZip)) // nolint
 				}
 
 				// Reset the size counter and clear the file list
@@ -198,7 +198,7 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	zipFilePath := filepath.Join(baseDir, zipFileName)
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
-		return fmt.Errorf("failed to create zip file %s: %w", zipFileName, err)
+		return fmt.Errorf(msg.ErrorCreateZip, zipFileName, err)
 	}
 	defer zipFile.Close()
 
@@ -209,23 +209,23 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	for _, file := range filesToZip {
 		_, err = addFileToZip(zipWriter, file, baseDir)
 		if err != nil {
-			return fmt.Errorf("failed to add file to zip %s: %w", file, err)
+			return fmt.Errorf(msg.ErrorAddFileZip, file, err)
 		}
 	}
 
 	err = zipWriter.Close()
 	if err != nil {
-		return fmt.Errorf("failed to close zip file %s: %w", zipFileName, err)
+		return fmt.Errorf(msg.ErrorCloseFileZip, zipFileName, err)
 	}
 
 	// Check if the zip file was created
 	if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
-		return fmt.Errorf("zip file %s does not exist", zipFileName)
+		return fmt.Errorf(msg.ErrorZipNotExist, zipFileName)
 	}
 
 	err = uploadFile(ctx, cfg, bucketName, zipFilePath)
 	if err != nil {
-		return fmt.Errorf("failed to upload zip file %s: %w", zipFileName, err)
+		return fmt.Errorf(msg.ErrorUploadZip, zipFileName, err)
 	}
 
 	return nil
@@ -248,7 +248,7 @@ func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings
 		config.WithEndpointResolver(endpointResolver), // nolint
 	)
 	if err != nil {
-		return errors.New("unable to load SDK config, " + err.Error())
+		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -308,7 +308,6 @@ func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings
 	errWg.Wait()
 
 	if uploadErr != nil {
-		fmt.Printf("An error occurred: %v\n", uploadErr)
 		return uploadErr
 	}
 
