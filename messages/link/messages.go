@@ -37,4 +37,6 @@ var (
 const (
 	FLAG_REMOTE  = "Clones a remote repository to be linked to an Azion Edge Application"
 	FLAGPATHCONF = "Relative path to where your custom azion.json and args.json files are stored"
+	ASKPREBUILD  = "Do you allow Azion to build your project in order to generate configuration files? (Y/n)"
+	BUILDLATER   = "Please, remember to run azion build --preset [preset-name], in order to generate the necessary configuration files\n"
 )
