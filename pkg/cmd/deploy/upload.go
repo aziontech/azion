@@ -53,6 +53,11 @@ func getFilesFromDir(dirPath string) ([]string, error) {
 			return err
 		}
 
+		if info.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
+			logger.Debug("Skipping directory: " + path)
+			return filepath.SkipDir
+		}
+
 		if !info.IsDir() {
 			files = append(files, path)
 		}
