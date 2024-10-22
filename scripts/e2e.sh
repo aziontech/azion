@@ -74,7 +74,6 @@ if [ -f "$full_main_go_path" ]; then
     rm -rf reactjs-boilerplate
 
     git clone https://github.com/aziontech/azion-samples.git
-    # cp -r vulcan-examples/examples/react-static ./ 
     cp -r azion-samples/templates/react/reactjs-boilerplate ./
     cd reactjs-boilerplate
 

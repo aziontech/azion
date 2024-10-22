@@ -17,6 +17,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
+	deploy "github.com/aziontech/azion-cli/pkg/cmd/deploy_remote"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	dryrun "github.com/aziontech/azion-cli/pkg/dry_run"
@@ -63,6 +64,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	DryRun      bool
+	Local       bool
 	Env         string
 	Logs        = contracts.Logs{}
 	Result      = contracts.Results{}
@@ -118,6 +120,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
+	deployCmd.Flags().BoolVar(&Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().BoolVar(&DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
@@ -127,7 +130,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, local bool) error {
+	Local = local
+	Sync = sync
 	ProjectConf = configPath
 	return cmd.Run(f)
 }
@@ -141,6 +146,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		return dryStructure.SimulateDeploy(pathWorkingDir, ProjectConf)
+	}
+
+	if Local {
+		deployLocal := deploy.NewDeployCmd(f)
+		return deployLocal.ExternalRun(f, ProjectConf, Sync)
 	}
 
 	msgs := []string{}
@@ -226,6 +236,22 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	conf, err = cmd.GetAzionJsonContent(ProjectConf)
+	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
+	}
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
+	msgs = append(msgs, msg.DeploySuccessful)
+
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
+	msgs = append(msgs, msgfOutputDomainSuccess)
+
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
+	msgs = append(msgs, msg.DeployPropagation)
+
 	return nil
 }
 
@@ -236,7 +262,9 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
 	s.Suffix = " Deploying your project..."
 	s.FinalMSG = "Deployed finished executing\n"
-	s.Start() // Start the spinner
+	if !cmd.F.Debug {
+		s.Start() // Start the spinner
+	}
 	defer s.Stop()
 
 	// Create a new HTTP request
@@ -253,6 +281,10 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 
 	// Send the request
 	client := &http.Client{}
+	logTime := time.Now()
+	lastLog := ""
+	// Custom layout for parsing the timestamp
+	layout := "2006-01-02 15:04:05.000" // Layout must match your timestamp format exactly
 
 	for {
 		resp, err := client.Do(req)
@@ -275,6 +307,21 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 
 		switch Logs.Status {
 		case "queued", "running", "started", "pending finish":
+			for _, event := range Logs.Logs {
+				if event.Content != "" && event.Content != lastLog {
+					// Parse the timestamp
+					parsedTimestamp, err := time.Parse(layout, event.Timestamp)
+					if err != nil {
+						return err
+					}
+					if logTime.After(parsedTimestamp) {
+						continue
+					}
+					lastLog = event.Content
+					logger.Debug(event.Content)
+					logTime = parsedTimestamp
+				}
+			}
 			time.Sleep(7 * time.Second)
 			continue
 		case "succeeded":

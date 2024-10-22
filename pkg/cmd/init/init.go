@@ -40,6 +40,8 @@ type initCmd struct {
 	name                  string
 	preset                string
 	auto                  bool
+	sync                  bool
+	local                 bool
 	packageManager        string
 	pathWorkingDir        string
 	globalFlagAll         bool
@@ -122,6 +124,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().StringVar(&init.name, "name", "", msg.FLAG_NAME)
 	cmd.Flags().StringVar(&init.packageManager, "package-manager", "", msg.FLAG_PACKAGE_MANAGE)
 	cmd.Flags().BoolVar(&init.auto, "auto", false, msg.FLAG_AUTO)
+	cmd.Flags().BoolVar(&init.sync, "sync", false, msg.FLAG_SYNC)
+	cmd.Flags().BoolVar(&init.local, "local", false, msg.FLAG_LOCAL)
 	return cmd
 }
 
@@ -265,7 +269,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
+		msgs = append(msgs, msg.ChangeWorkingDir)
 	} else {
 		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
 			return err
@@ -281,15 +287,20 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
+		msgs = append(msgs, msg.ChangeWorkingDir)
 		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
+		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
+			return err
+		}
 		logger.Debug("Running deploy command from init command")
 		deploy := cmd.deployCmd(cmd.f)
-		err = deploy.Run(cmd.f)
+		err = deploy.ExternalRun(cmd.f, "azion", cmd.sync, cmd.local)
 		if err != nil {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err

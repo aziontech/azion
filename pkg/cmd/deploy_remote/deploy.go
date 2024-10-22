@@ -78,9 +78,6 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		Long:          msg.DeployLongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Annotations: map[string]string{
-			"Category": "skip",
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return deploy.Run(deploy.F)
 		},
@@ -100,8 +97,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, shouldSync bool) error {
 	ProjectConf = configPath
+	Sync = shouldSync
 	return cmd.Run(f)
 }
 

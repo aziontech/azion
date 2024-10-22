@@ -2,12 +2,14 @@ package link
 
 const (
 	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"
+	FLAG_SYNC           = "Synchronizes the local azion.json file with remote resources. Use this flag when deploying your project from this command"
+	FLAG_LOCAL          = "Runs the entire build and deploy process locally. Use this flag when deploying your project from this command"
 )
 
 var (
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
-	EdgeApplicationsLinkShortDescription  = "Links a local repo or project folder to an existing application on Azion"
+	EdgeApplicationsLinkShortDescription  = "Creates configuration used to build and deploy applications on Azion"
 	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project to an Azion Edge Application"
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
 	EdgeApplicationsLinkFlagName          = "The Edge Application's name"
@@ -35,4 +37,6 @@ var (
 const (
 	FLAG_REMOTE  = "Clones a remote repository to be linked to an Azion Edge Application"
 	FLAGPATHCONF = "Relative path to where your custom azion.json and args.json files are stored"
+	ASKPREBUILD  = "Do you allow Azion to build your project in order to generate configuration files? (Y/n)"
+	BUILDLATER   = "Please, remember to run azion build --preset [preset-name], in order to generate the necessary configuration files\n"
 )

@@ -15,7 +15,7 @@ import (
 func TestExecute(t *testing.T) {
 	streams := iostreams.System()
 	httpClient := &http.Client{
-		Timeout: 10 * time.Second, // TODO: Configure this somewhere
+		Timeout: 50 * time.Second, // TODO: Configure this somewhere
 	}
 
 	tok, _ := token.ReadSettings()

@@ -18,6 +18,8 @@ const (
 	TOML = "toml"
 )
 
+var WriteDetailsToFile = cmdutil.WriteDetailsToFile
+
 func format(v any, g GeneralOutput) error {
 	var b []byte
 	var err error
@@ -46,7 +48,7 @@ func format(v any, g GeneralOutput) error {
 	}
 
 	if len(g.Flags.Out) > 0 {
-		err = cmdutil.WriteDetailsToFile(b, g.Flags.Out)
+		err = WriteDetailsToFile(b, g.Flags.Out)
 		if err != nil {
 			return fmt.Errorf("%s: %w", utils.ErrorWriteFile, err)
 		}

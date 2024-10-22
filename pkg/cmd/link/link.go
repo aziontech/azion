@@ -11,9 +11,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -35,6 +37,8 @@ type LinkInfo struct {
 	remote         string
 	Auto           bool
 	projectPath    string
+	Sync           bool
+	Local          bool
 }
 
 type LinkCmd struct {
@@ -57,6 +61,7 @@ type LinkCmd struct {
 	ShouldDevDeploy       func(info *LinkInfo, msg string, defaultYes bool) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
+	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
 }
 
@@ -80,6 +85,7 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
 		DeployCmd:       deploy.NewDeployCmd,
+		BuildCmd:        build.NewBuildCmd,
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
@@ -117,6 +123,8 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().BoolVar(&info.Auto, "auto", false, msg.LinkFlagAuto)
 	cobraCmd.Flags().StringVar(&info.remote, "remote", "", msg.FLAG_REMOTE)
 	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
+	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
+	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
 
 	return cobraCmd
 }
@@ -224,6 +232,19 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return err
 		}
 
+		if cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
+			logger.Debug("Running build command from link command")
+			buildCmd := cmd.BuildCmd(cmd.F)
+			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: info.Preset}, info.projectPath, &msgs)
+			if err != nil {
+				logger.Debug("Error while running build command called by link command", zap.Error(err))
+				return err
+			}
+		} else {
+			logger.FInfoFlags(cmd.Io.Out, msg.BUILDLATER, cmd.F.Format, cmd.F.Out)
+			msgs = append(msgs, msg.BUILDLATER)
+		}
+
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
 				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
@@ -249,7 +270,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.ExternalRun(cmd.F, info.projectPath)
+				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err
