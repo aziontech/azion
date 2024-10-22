@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,8 +73,8 @@ func getFilesFromDir(dirPath string) ([]string, error) {
 }
 
 // addFileToZip func to add an individual file to the zip archive, preserving the relative path
-func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo, error) {
-	file, err := os.Open(filePath)
+func addFileToZip(zipWriter *zip.Writer, fileNameZip, baseDir string) (os.FileInfo, error) {
+	file, err := os.Open(fileNameZip)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,7 @@ func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo,
 	}
 
 	// Create an entry in the zip with the relative path
-	relativePath := strings.TrimPrefix(filePath, baseDir)
+	relativePath := strings.TrimPrefix(fileNameZip, baseDir)
 	writer, err := zipWriter.Create(relativePath)
 	if err != nil {
 		return nil, err
@@ -101,16 +102,17 @@ func addFileToZip(zipWriter *zip.Writer, filePath, baseDir string) (os.FileInfo,
 }
 
 // uploadFile func to upload a file to the bucket
-func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string) error {
+func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath, prefix string, fileInfo fs.FileInfo) error {
 	s3Client := s3.NewFromConfig(cfg)
 
 	file, err := os.Open(filePath)
+
 	if err != nil {
 		return fmt.Errorf(msg.ErrorOpenFile, filePath, err)
 	}
 	defer file.Close()
 
-	fileName := filepath.Base(filePath)
+	fileName := filepath.Join(prefix, fileInfo.Name())
 
 	uploadInput := &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
@@ -127,9 +129,10 @@ func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath string
 }
 
 // Worker responsible for zipping and uploading files
-func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, filesChan <-chan string,
-	wg *sync.WaitGroup, baseDir string, workerID int, atomicCounter *int32,
-	bucketName string, progressBar *progressbar.ProgressBar, errChan chan error) {
+func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config,
+	filesChan <-chan string, wg *sync.WaitGroup, baseDir string, workerID int,
+	atomicCounter *int32, bucketName string, progressBar *progressbar.ProgressBar,
+	errChan chan error, prefix string) {
 	defer wg.Done()
 
 	var (
@@ -145,7 +148,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 			if !ok {
 				if len(filesToZip) > 0 {
 					err := zipAndUpload(ctx, cfg, filesToZip, zipFileName,
-						baseDir, atomicCounter, bucketName)
+						baseDir, atomicCounter, bucketName, prefix)
 					if err != nil {
 						errChan <- err
 						cancel()
@@ -171,7 +174,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 			// If the current size exceeds the limit (1MB), zip and upload
 			if currentSize >= maxZipSize {
 				err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir,
-					atomicCounter, bucketName)
+					atomicCounter, bucketName, prefix)
 				if err != nil {
 					errChan <- err
 					cancel()
@@ -194,7 +197,7 @@ func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config, file
 
 func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	zipFileName, baseDir string, atomicCounter *int32,
-	bucketName string) error {
+	bucketName string, prefix string) error {
 
 	// Increment atomic counter to generate unique zip file name
 	counter := atomic.AddInt32(atomicCounter, 1)
@@ -224,11 +227,12 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	}
 
 	// Check if the zip file was created
-	if _, err := os.Stat(zipFilePath); os.IsNotExist(err) {
+	fileInfo, err := os.Stat(zipFilePath)
+	if os.IsNotExist(err) {
 		return fmt.Errorf(msg.ErrorZipNotExist, zipFileName)
 	}
 
-	err = uploadFile(ctx, cfg, bucketName, zipFilePath)
+	err = uploadFile(ctx, cfg, bucketName, zipFilePath, prefix, fileInfo)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorUploadZip, zipFileName, err)
 	}
@@ -241,7 +245,7 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 	return nil
 }
 
-func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings token.Settings) error {
+func uploadFiles(f *cmdutil.Factory, msgs *[]string, prefix string, pathStatic string, settings token.Settings) error {
 	files, err := getFilesFromDir(pathStatic)
 	if err != nil {
 		return err
@@ -303,7 +307,7 @@ func uploadFiles(f *cmdutil.Factory, msgs *[]string, pathStatic string, settings
 
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go worker(ctx, cancel, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar, errChan)
+		go worker(ctx, cancel, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar, errChan, prefix)
 	}
 
 	go func() {
