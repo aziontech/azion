@@ -25,4 +25,5 @@ var (
 	ErrorCloseFileZip      = "Failed to close zip file %s: %w"
 	ErrorZipNotExist       = "Zip file %s does not exist"
 	ErrorUploadZip         = "Failed to upload zip file %s: %w"
+	ErrorDelFileZip        = "Deleting zip file %s: %v"
 )

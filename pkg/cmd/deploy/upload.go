@@ -233,6 +233,11 @@ func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
 		return fmt.Errorf(msg.ErrorUploadZip, zipFileName, err)
 	}
 
+	err = os.Remove(zipFilePath)
+	if err != nil {
+		return fmt.Errorf(msg.ErrorDelFileZip, zipFileName, err)
+	}
+
 	return nil
 }
 
