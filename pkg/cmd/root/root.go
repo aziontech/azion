@@ -2,6 +2,7 @@ package root
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -184,5 +185,6 @@ func Execute(factUtil *cmdutil.Factory) {
 			},
 			Err: err,
 		})
+		os.Exit(1)
 	}
 }
