@@ -28,13 +28,13 @@ func Test_checkNode(t *testing.T) {
 			name:    "case 03",
 			args:    "v",
 			wantErr: true,
-			err:     NODE_OLDER_VERSION,
+			err:     "EOF",
 		},
 		{
 			name:    "case 04",
 			args:    "",
 			wantErr: true,
-			err:     NODE_OLDER_VERSION,
+			err:     "EOF",
 		},
 		{
 			name:    "case 05",
@@ -55,7 +55,7 @@ func Test_checkNode(t *testing.T) {
 			name:    "case 08",
 			args:    "vX.Y.Z",
 			wantErr: true,
-			err:     NODE_OLDER_VERSION,
+			err:     "expected integer",
 		},
 		{
 			name:    "case 09",

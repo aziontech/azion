@@ -47,7 +47,10 @@ func checkNode(str string) error {
 		majorVersion := versionParts[0]
 
 		var major int
-		fmt.Sscanf(majorVersion, "%d", &major)
+		_, err := fmt.Sscanf(majorVersion, "%d", &major)
+		if err != nil {
+			return err
+		}
 
 		if major < 18 {
 			return errors.New(NODE_OLDER_VERSION)

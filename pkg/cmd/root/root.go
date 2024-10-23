@@ -44,19 +44,13 @@ import (
 const PREFIX_FLAG = "--"
 
 type factoryRoot struct {
-	*cmdutil.Factory
+	factory           *cmdutil.Factory
 	doPreCommandCheck func(cmd *cobra.Command, fact *factoryRoot) error //this package
 	execSchedules     func(factory *cmdutil.Factory)                    //schedule.ExecShedules
+	command           cmdutil.Command
+	osExit            func(code int)
 	flags
 	globals
-}
-
-func NewFactoryRoot(fact *cmdutil.Factory) *factoryRoot {
-	return &factoryRoot{
-		Factory:           fact,
-		doPreCommandCheck: doPreCommandCheck,
-		execSchedules:     schedule.ExecSchedules,
-	}
 }
 
 type flags struct {
@@ -72,7 +66,7 @@ type globals struct {
 
 func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	fact.startTime = time.Now()
-	logger.LogLevel(fact.Factory.Logger)
+	logger.LogLevel(fact.factory.Logger)
 
 	if strings.HasPrefix(fact.configFlag, PREFIX_FLAG) {
 		return msg.ErrorPrefix
@@ -82,7 +76,7 @@ func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error
 		return err
 	}
 
-	fact.execSchedules(fact.Factory)
+	fact.execSchedules(fact.factory)
 	return nil
 }
 
@@ -96,40 +90,40 @@ func (fact *factoryRoot) runE(cmd *cobra.Command, _ []string) error {
 func (fact *factoryRoot) setFlags(cobraCmd *cobra.Command) {
 	cobraCmd.PersistentFlags().StringVarP(&fact.tokenFlag, "token", "t", "", msg.RootTokenFlag)
 	cobraCmd.PersistentFlags().StringVarP(&fact.configFlag, "config", "c", "", msg.RootConfigFlag)
-	cobraCmd.PersistentFlags().BoolVarP(&fact.Factory.Debug, "debug", "d", false, msg.RootLogDebug)
-	cobraCmd.PersistentFlags().BoolVarP(&fact.Factory.Silent, "silent", "s", false, msg.RootLogSilent)
-	cobraCmd.PersistentFlags().StringVarP(&fact.Factory.LogLevel, "log-level", "l", "info", msg.RootLogLevel)
-	cobraCmd.PersistentFlags().BoolVarP(&fact.Factory.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
-	cobraCmd.PersistentFlags().StringVar(&fact.Factory.Out, "out", "", msg.RootFlagOut)
-	cobraCmd.PersistentFlags().StringVar(&fact.Factory.Format, "format", "", msg.RootFlagFormat)
-	cobraCmd.PersistentFlags().BoolVar(&fact.Factory.NoColor, "no-color", false, msg.RootFlagFormat)
+	cobraCmd.PersistentFlags().BoolVarP(&fact.factory.Debug, "debug", "d", false, msg.RootLogDebug)
+	cobraCmd.PersistentFlags().BoolVarP(&fact.factory.Silent, "silent", "s", false, msg.RootLogSilent)
+	cobraCmd.PersistentFlags().StringVarP(&fact.factory.LogLevel, "log-level", "l", "info", msg.RootLogLevel)
+	cobraCmd.PersistentFlags().BoolVarP(&fact.factory.GlobalFlagAll, "yes", "y", false, msg.RootYesFlag)
+	cobraCmd.PersistentFlags().StringVar(&fact.factory.Out, "out", "", msg.RootFlagOut)
+	cobraCmd.PersistentFlags().StringVar(&fact.factory.Format, "format", "", msg.RootFlagFormat)
+	cobraCmd.PersistentFlags().BoolVar(&fact.factory.NoColor, "no-color", false, msg.RootFlagFormat)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 }
 
 func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
-	cobraCmd.AddCommand(initcmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(logcmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(deploycmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(buildCmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(devcmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(linkcmd.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(unlink.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(completion.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(describe.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(login.New(fact.Factory))
-	cobraCmd.AddCommand(logout.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(create.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(list.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(delete.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(update.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(version.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(whoami.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(purge.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(reset.NewCmd(fact.Factory))
-	cobraCmd.AddCommand(sync.NewCmd(fact.Factory))
+	cobraCmd.AddCommand(initcmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(logcmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(deploycmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(buildCmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(devcmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(linkcmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(unlink.NewCmd(fact.factory))
+	cobraCmd.AddCommand(completion.NewCmd(fact.factory))
+	cobraCmd.AddCommand(describe.NewCmd(fact.factory))
+	cobraCmd.AddCommand(login.New(fact.factory))
+	cobraCmd.AddCommand(logout.NewCmd(fact.factory))
+	cobraCmd.AddCommand(create.NewCmd(fact.factory))
+	cobraCmd.AddCommand(list.NewCmd(fact.factory))
+	cobraCmd.AddCommand(delete.NewCmd(fact.factory))
+	cobraCmd.AddCommand(update.NewCmd(fact.factory))
+	cobraCmd.AddCommand(version.NewCmd(fact.factory))
+	cobraCmd.AddCommand(whoami.NewCmd(fact.factory))
+	cobraCmd.AddCommand(purge.NewCmd(fact.factory))
+	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
+	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
 }
 
-func CmdRoot(fact *factoryRoot) *cobra.Command {
+func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 	cobraCmd := &cobra.Command{
 		Use:               msg.RootUsage,
 		Long:              msg.RootDescription,
@@ -142,9 +136,9 @@ func CmdRoot(fact *factoryRoot) *cobra.Command {
 		SilenceUsage:      true, // Silence usage on error
 	}
 
-	cobraCmd.SetIn(fact.Factory.IOStreams.In)
-	cobraCmd.SetOut(fact.Factory.IOStreams.Out)
-	cobraCmd.SetErr(fact.Factory.IOStreams.Err)
+	cobraCmd.SetIn(fact.factory.IOStreams.In)
+	cobraCmd.SetOut(fact.factory.IOStreams.Out)
+	cobraCmd.SetErr(fact.factory.IOStreams.Err)
 
 	cobraCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		rootHelpFunc(cmd, args)
@@ -159,18 +153,27 @@ func CmdRoot(fact *factoryRoot) *cobra.Command {
 	return cobraCmd
 }
 
-func Execute(factUtil *cmdutil.Factory) {
+func NewFactoryRoot(fact *cmdutil.Factory) *factoryRoot {
+	return &factoryRoot{
+		factory:           fact,
+		doPreCommandCheck: doPreCommandCheck,
+		execSchedules:     schedule.ExecSchedules,
+		command:           &cobra.Command{},
+		osExit:            os.Exit,
+	}
+}
+
+func Execute(f *factoryRoot) {
 	logger.New(zapcore.InfoLevel)
 
-	fact := NewFactoryRoot(factUtil)
-	cmd := CmdRoot(fact)
+	cmd := f.CmdRoot()
 	err := cmd.Execute()
-	executionTime := time.Since(fact.startTime).Seconds()
+	executionTime := time.Since(f.startTime).Seconds()
 
 	// 1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
-	if fact.globalSettings != nil {
-		if fact.globalSettings.AuthorizeMetricsCollection == 1 {
-			errMetrics := metric.TotalCommandsCount(cmd, fact.commandName, executionTime, err)
+	if f.globalSettings != nil {
+		if f.globalSettings.AuthorizeMetricsCollection == 1 {
+			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err)
 			if errMetrics != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}
@@ -180,11 +183,11 @@ func Execute(factUtil *cmdutil.Factory) {
 	if err != nil {
 		output.Print(&output.ErrorOutput{
 			GeneralOutput: output.GeneralOutput{
-				Out:   factUtil.IOStreams.Out,
-				Flags: factUtil.Flags,
+				Out:   f.factory.IOStreams.Out,
+				Flags: f.factory.Flags,
 			},
 			Err: err,
 		})
-		os.Exit(1)
+		f.osExit(1)
 	}
 }

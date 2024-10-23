@@ -48,8 +48,8 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 	fact.globalSettings = &settings
 
 	t := token.New(&token.Config{
-		Client: fact.Factory.HttpClient,
-		Out:    fact.Factory.IOStreams.Out,
+		Client: fact.factory.HttpClient,
+		Out:    fact.factory.IOStreams.Out,
 	})
 
 	if cmd.Flags().Changed("token") {
@@ -58,12 +58,12 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 		}
 	}
 
-	if err := checkAuthorizeMetricsCollection(cmd, fact.Factory.GlobalFlagAll, fact.globalSettings); err != nil {
+	if err := checkAuthorizeMetricsCollection(cmd, fact.factory.GlobalFlagAll, fact.globalSettings); err != nil {
 		return err
 	}
 
 	//both verifications occurs if 24 hours have passed since the last execution
-	if err := checkForUpdateAndMetrics(version.BinVersion, fact.Factory, fact.globalSettings); err != nil {
+	if err := checkForUpdateAndMetrics(version.BinVersion, fact.factory, fact.globalSettings); err != nil {
 		return err
 	}
 
@@ -103,8 +103,8 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 
 	fact.globalSettings = &strToken
 
-	logger.FInfo(fact.Factory.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
-	logger.FInfo(fact.Factory.IOStreams.Out, msg.TokenUsedIn+"\n")
+	logger.FInfo(fact.factory.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
+	logger.FInfo(fact.factory.IOStreams.Out, msg.TokenUsedIn+"\n")
 	return nil
 }
 

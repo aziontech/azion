@@ -26,12 +26,15 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 	}
 
 	// If the string contains a suffix, it is a range format
-	lastChar := expirationString[len(expirationString) - 1]
+	lastChar := expirationString[len(expirationString)-1]
 	if interval, ok := suffixMapping[lastChar]; ok {
 		intervalValue := 0
-		fmt.Sscanf(string(expirationString[0]), "%d", &intervalValue)
+		_, err := fmt.Sscanf(string(expirationString[0]), "%d", &intervalValue)
+		if err != nil {
+			return time.Time{}, err
+		}
 		expirationDate := currentDate.Add(time.Duration(intervalValue) * interval)
-		return time.Parse(constants.FORMAT_DATE, expirationDate.Format(constants.FORMAT_DATE))	
+		return time.Parse(constants.FORMAT_DATE, expirationDate.Format(constants.FORMAT_DATE))
 	}
 
 	// Try to analyze as full date (yyyy-mm-dd) or (dd/mm/yyyy)
