@@ -104,7 +104,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalid,
-			mockError:      fmt.Errorf(msg.ErrorConvertId.Error()),
+			mockError:      msg.ErrorConvertId,
 		},
 		{
 			name:           "error - parse answer",

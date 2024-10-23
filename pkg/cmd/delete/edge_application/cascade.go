@@ -33,7 +33,10 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	}
 
 	if azionJson.Function.ID == 0 {
-		fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
+		_, err := fmt.Fprint(del.f.IOStreams.Out, msg.MissingFunction)
+		if err != nil {
+			return err
+		}
 	} else {
 		err = clientfunc.Delete(ctx, azionJson.Function.ID)
 		if err != nil {

@@ -31,5 +31,5 @@ func main() {
 		Config:     viper.GetViper(),
 	}
 
-	cmd.Execute(factory)
+	cmd.Execute(cmd.NewFactoryRoot(factory))
 }
