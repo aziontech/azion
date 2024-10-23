@@ -66,7 +66,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 
 			err = delete.DeleteFunc(ctx, tokenID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				return fmt.Errorf(msg.ErrorFailToDelete, err)
 			}
 
 			deleteOut := output.GeneralOutput{

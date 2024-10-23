@@ -173,7 +173,7 @@ func TestCheckTokenSent(t *testing.T) {
 			mock.Register(tt.request, tt.response)
 
 			f, _, _ := testutils.NewFactory(mock)
-			tt.args.fact.Factory = f
+			tt.args.fact.factory = f
 
 			token := token.New(&token.Config{
 				Client: &http.Client{Transport: mock},
