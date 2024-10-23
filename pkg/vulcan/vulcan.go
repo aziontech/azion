@@ -16,10 +16,10 @@ import (
 const (
 	currentMajor         = 4
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@4.0.1"
+	firstTimeExecuting   = "@4.2.0"
 )
 
-var versionVulcan = "@4.0.1"
+var versionVulcan = "@4.2.0"
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string

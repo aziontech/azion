@@ -11,9 +11,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
+	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -59,6 +61,7 @@ type LinkCmd struct {
 	ShouldDevDeploy       func(info *LinkInfo, msg string, defaultYes bool) bool
 	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
+	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
 }
 
@@ -82,6 +85,7 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
 		DeployCmd:       deploy.NewDeployCmd,
+		BuildCmd:        build.NewBuildCmd,
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
@@ -226,6 +230,19 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		_, err = cmd.CommandRunner(cmd.F, command, []string{})
 		if err != nil {
 			return err
+		}
+
+		if cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
+			logger.Debug("Running build command from link command")
+			buildCmd := cmd.BuildCmd(cmd.F)
+			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: info.Preset}, info.projectPath, &msgs)
+			if err != nil {
+				logger.Debug("Error while running build command called by link command", zap.Error(err))
+				return err
+			}
+		} else {
+			logger.FInfoFlags(cmd.Io.Out, msg.BUILDLATER, cmd.F.Format, cmd.F.Out)
+			msgs = append(msgs, msg.BUILDLATER)
 		}
 
 		if !info.Auto {

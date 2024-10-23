@@ -11,6 +11,7 @@ import (
 	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/pflag"
 )
@@ -45,15 +46,20 @@ func run(args []string) error {
 		IOStreams: iostreams.System(),
 	})
 
-	rootCmd := cmd.CmdRoot(fact)
+	rootCmd := fact.CmdRoot()
 	rootCmd.InitDefaultHelpCmd()
+
+	cobraCmd, ok := rootCmd.(*cobra.Command)
+	if !ok {
+		return errors.New("the provided command does not implement *cobra.Command")
+	}
 
 	switch {
 	case *filetype == "yaml":
 		if err := os.MkdirAll(*dir, 0755); err != nil {
 			return err
 		}
-		err := doc.GenYamlTree(rootCmd, *dir)
+		err := doc.GenYamlTree(cobraCmd, *dir)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +71,7 @@ func run(args []string) error {
 		removeMdSuffix := func(s string) string { return strings.TrimRight(s, ".md") }
 		dontPreprendFile := func(s string) string { return "" }
 
-		err := doc.GenMarkdownTreeCustom(rootCmd, *dir, dontPreprendFile, removeMdSuffix)
+		err := doc.GenMarkdownTreeCustom(cobraCmd, *dir, dontPreprendFile, removeMdSuffix)
 		if err != nil {
 			log.Fatal(err)
 		}

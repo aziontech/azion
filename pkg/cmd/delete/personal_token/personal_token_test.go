@@ -58,7 +58,7 @@ func TestDeleteCmd(t *testing.T) {
 			responseBody: "Not Found",
 			expectError:  true,
 			mockInputs:   mockTokenID,
-			mockError:    fmt.Errorf(msg.ErrorFailToDelete.Error(), utils.ErrorNotFound404),
+			mockError:    fmt.Errorf(msg.ErrorFailToDelete, utils.ErrorNotFound404),
 		},
 		{
 			name:           "error - parse answer",

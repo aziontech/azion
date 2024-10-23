@@ -31,9 +31,8 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 		intervalValue := 0
 		_, err := fmt.Sscanf(string(expirationString[0]), "%d", &intervalValue)
 		if err != nil {
-			return time.Now(), err
+			return time.Time{}, err
 		}
-
 		expirationDate := currentDate.Add(time.Duration(intervalValue) * interval)
 		return time.Parse(constants.FORMAT_DATE, expirationDate.Format(constants.FORMAT_DATE))
 	}

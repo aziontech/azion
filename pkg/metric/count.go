@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/riywo/loginshell"
 
 	"github.com/aziontech/azion-cli/pkg/config"
-	"github.com/spf13/cobra"
 )
 
 type command struct {
@@ -24,7 +24,7 @@ type command struct {
 	Shell         string
 }
 
-func TotalCommandsCount(cmd *cobra.Command, commandName string, executionTime float64, errExec error) error {
+func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error) error {
 	if commandName == "" {
 		return nil
 	}
