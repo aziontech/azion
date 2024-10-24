@@ -233,6 +233,10 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 
 		if cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
+			if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
+				return err
+			}
+
 			logger.Debug("Running build command from link command")
 			buildCmd := cmd.BuildCmd(cmd.F)
 			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: info.Preset}, info.projectPath, &msgs)
