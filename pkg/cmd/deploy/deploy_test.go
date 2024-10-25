@@ -123,7 +123,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.ReadSettings = func() (token.Settings, error) {
 					return token.Settings{}, nil
 				}
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, msgs *[]string, prefix, pathStatic string, settings token.Settings) error {
 					return nil
 				}
 			},
@@ -142,7 +142,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, msgs *[]string, prefix, pathStatic string, settings token.Settings) error {
 					return nil
 				}
 			},
@@ -158,7 +158,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.WriteAzionJsonContent = MockWriteAzionJsonContent
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, msgs *[]string, prefix, pathStatic string, settings token.Settings) error {
 					return nil
 				}
 				cmd.CallScript = func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error) {
