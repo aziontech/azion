@@ -52,7 +52,7 @@ type DeployCmd struct {
 	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
 	CheckToken            func(f *cmdutil.Factory) error
 	ReadSettings          func() (token.Settings, error)
-	UploadFiles           func(f *cmdutil.Factory, msgs *[]string, prefix string, pathStatic string, settings token.Settings) error
+	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error
 	OpenBrowserFunc       func(input string) error
 }
 
@@ -216,7 +216,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.Prefix = cmd.VersionID()
 
-	err = cmd.UploadFiles(f, &msgs, conf.Prefix, localDir, settings)
+	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd, settings)
 	if err != nil {
 		return err
 	}

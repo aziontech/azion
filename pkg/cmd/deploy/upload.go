@@ -2,331 +2,257 @@ package deploy
 
 import (
 	"archive/zip"
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
+	"mime"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"sync/atomic"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	"github.com/aziontech/azion-cli/pkg/api/s3"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/schollz/progressbar/v3"
+	"github.com/zRedShift/mimemagic"
+	"go.uber.org/zap"
+)
+
+var (
+	Jobs    chan contracts.FileOps
+	Retries int64
 )
 
 const maxZipSize = 1 * 1024 * 1024 // 1MB
 
-var (
-	region     = "us-east"
-	endpoint   = "https://s3.us-east-005.azionstorage.net"
-	numWorkers = 5
-)
+func criarZipEmMemoria(arquivos []contracts.FileOps) ([]byte, error) {
+	// Cria um buffer para armazenar o ZIP em memória
+	var buffer bytes.Buffer
 
-type CustomEndpointResolver struct {
-	URL           string
-	SigningRegion string
+	// Cria um novo writer para o ZIP
+	zipWriter := zip.NewWriter(&buffer)
+	defer func() {
+		if err := zipWriter.Close(); err != nil {
+			fmt.Println("Erro ao fechar o writer do ZIP:", err)
+		}
+	}()
+
+	// Itera sobre os arquivos e os adiciona ao ZIP
+	for _, arquivo := range arquivos {
+		// Cria o cabeçalho do arquivo no ZIP
+		header := &zip.FileHeader{
+			Name:   filepath.Base(arquivo.Path),
+			Method: zip.Deflate, // Método de compressão
+		}
+
+		// Define o MIME type como comentário (opcional)
+		if arquivo.MimeType != "" {
+			header.Comment = arquivo.MimeType
+		} else {
+			// Tenta detectar o MIME type com base na extensão
+			mimeType := mime.TypeByExtension(filepath.Ext(arquivo.Path))
+			header.Comment = mimeType
+		}
+
+		// Cria o writer para o arquivo dentro do ZIP
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return nil, fmt.Errorf("não foi possível criar o writer para o arquivo %s: %v", arquivo.Path, err)
+		}
+
+		// Reposiciona o cursor do arquivo para o início
+		_, err = arquivo.FileContent.Seek(0, io.SeekStart)
+		if err != nil {
+			return nil, fmt.Errorf("não foi possível reposicionar o cursor do arquivo %s: %v", arquivo.Path, err)
+		}
+
+		// Copia o conteúdo do arquivo para o writer do ZIP
+		_, err = io.Copy(writer, arquivo.FileContent)
+		if err != nil {
+			return nil, fmt.Errorf("não foi possível copiar o conteúdo do arquivo %s para o ZIP: %v", arquivo.Path, err)
+		}
+	}
+
+	return buffer.Bytes(), nil
 }
 
-// ResolveEndpoint is the method that defines the custom endpoint
-func (e *CustomEndpointResolver) ResolveEndpoint(service, region string) (aws.Endpoint, error) { // nolint
-	return aws.Endpoint{ //nolint
-		URL:           e.URL,
-		SigningRegion: e.SigningRegion,
-	}, nil
-}
+func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error) {
+	var listFiles []contracts.FileOps
 
-// getFilesFromDir func that reads all the files in a directory and returns a slice with the full paths
-func getFilesFromDir(dirPath string) ([]string, error) {
-	var files []string
-
-	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
+		// Skip node_modules and .edge directories
 		if info.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
 			logger.Debug("Skipping directory: " + path)
 			return filepath.SkipDir
 		}
 
 		if !info.IsDir() {
-			files = append(files, path)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return files, nil
-}
-
-// addFileToZip func to add an individual file to the zip archive, preserving the relative path
-func addFileToZip(zipWriter *zip.Writer, fileNameZip, baseDir string) (os.FileInfo, error) {
-	file, err := os.Open(fileNameZip)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	fileInfo, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-
-	// Create an entry in the zip with the relative path
-	relativePath := strings.TrimPrefix(fileNameZip, baseDir)
-	writer, err := zipWriter.Create(relativePath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Copy the contents of the file to the zip
-	_, err = io.Copy(writer, file)
-	if err != nil {
-		return nil, err
-	}
-
-	return fileInfo, nil
-}
-
-// uploadFile func to upload a file to the bucket
-func uploadFile(ctx context.Context, cfg aws.Config, bucketName, filePath, prefix string, fileInfo fs.FileInfo) error {
-	s3Client := s3.NewFromConfig(cfg)
-
-	file, err := os.Open(filePath)
-
-	if err != nil {
-		return fmt.Errorf(msg.ErrorOpenFile, filePath, err)
-	}
-	defer file.Close()
-
-	fileName := filepath.Join(prefix, fileInfo.Name())
-
-	uploadInput := &s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(fileName), // Name of the file in the bucket
-		Body:   file,
-	}
-
-	_, err = s3Client.PutObject(ctx, uploadInput)
-	if err != nil {
-		return fmt.Errorf(msg.ErrorUploadFileBucket, bucketName, err)
-	}
-
-	return nil
-}
-
-// Worker responsible for zipping and uploading files
-func worker(ctx context.Context, cancel context.CancelFunc, cfg aws.Config,
-	filesChan <-chan string, wg *sync.WaitGroup, baseDir string, workerID int,
-	atomicCounter *int32, bucketName string, progressBar *progressbar.ProgressBar,
-	errChan chan error, prefix string) {
-	defer wg.Done()
-
-	var (
-		currentSize int64
-		filesToZip  []string
-	)
-
-	zipFileName := fmt.Sprintf("project_part_%d.zip", workerID)
-
-	for {
-		select {
-		case file, ok := <-filesChan:
-			if !ok {
-				if len(filesToZip) > 0 {
-					err := zipAndUpload(ctx, cfg, filesToZip, zipFileName,
-						baseDir, atomicCounter, bucketName, prefix)
-					if err != nil {
-						errChan <- err
-						cancel()
-						return
-					}
-					if progressBar != nil {
-						progressBar.Add(len(filesToZip)) // nolint
-					}
-				}
-				return
-			}
-
-			filesToZip = append(filesToZip, file)
-
-			fileInfo, err := os.Stat(file)
+			fileContent, err := cmd.Open(path)
 			if err != nil {
-				errChan <- fmt.Errorf(msg.ErrorGetFileInfo, file, err)
-				cancel()
-				return
+				logger.Debug("Error while trying to read file <"+path+"> about to be uploaded", zap.Error(err))
+				return err
 			}
-			currentSize += fileInfo.Size()
 
-			// If the current size exceeds the limit (1MB), zip and upload
-			if currentSize >= maxZipSize {
-				err = zipAndUpload(ctx, cfg, filesToZip, zipFileName, baseDir,
-					atomicCounter, bucketName, prefix)
-				if err != nil {
-					errChan <- err
-					cancel()
-					return
-				}
-
-				if progressBar != nil {
-					progressBar.Add(len(filesToZip)) // nolint
-				}
-
-				// Reset the size counter and clear the file list
-				currentSize = 0
-				filesToZip = nil
+			fileString := strings.TrimPrefix(path, pathStatic)
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				logger.Debug("Error while matching file path", zap.Error(err))
+				return err
 			}
-		case <-ctx.Done():
-			continue
+
+			fileOptions := contracts.FileOps{
+				Path:        fileString,
+				MimeType:    mimeType.MediaType(),
+				FileContent: fileContent,
+			}
+
+			listFiles = append(listFiles, fileOptions)
 		}
+
+		return nil
+	}); err != nil {
+		logger.Debug("Error while reading files", zap.Error(err))
+
+		return nil, err
 	}
+
+	return listFiles, nil
 }
 
-func zipAndUpload(ctx context.Context, cfg aws.Config, filesToZip []string,
-	zipFileName, baseDir string, atomicCounter *int32,
-	bucketName string, prefix string) error {
-
-	// Increment atomic counter to generate unique zip file name
-	counter := atomic.AddInt32(atomicCounter, 1)
-	zipFileName = fmt.Sprintf("%s_%d.zip", strings.TrimSuffix(zipFileName, ".zip"), counter)
-
-	zipFilePath := filepath.Join(baseDir, zipFileName)
-	zipFile, err := os.Create(zipFilePath)
-	if err != nil {
-		return fmt.Errorf(msg.ErrorCreateZip, zipFileName, err)
-	}
-	defer zipFile.Close()
-
-	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
-
-	// Add files to the zip
-	for _, file := range filesToZip {
-		_, err = addFileToZip(zipWriter, file, baseDir)
-		if err != nil {
-			return fmt.Errorf(msg.ErrorAddFileZip, file, err)
-		}
-	}
-
-	err = zipWriter.Close()
-	if err != nil {
-		return fmt.Errorf(msg.ErrorCloseFileZip, zipFileName, err)
-	}
-
-	// Check if the zip file was created
-	fileInfo, err := os.Stat(zipFilePath)
-	if os.IsNotExist(err) {
-		return fmt.Errorf(msg.ErrorZipNotExist, zipFileName)
-	}
-
-	err = uploadFile(ctx, cfg, bucketName, zipFilePath, prefix, fileInfo)
-	if err != nil {
-		return fmt.Errorf(msg.ErrorUploadZip, zipFileName, err)
-	}
-
-	err = os.Remove(zipFilePath)
-	if err != nil {
-		return fmt.Errorf(msg.ErrorDelFileZip, zipFileName, err)
-	}
-
-	return nil
-}
-
-func uploadFiles(f *cmdutil.Factory, msgs *[]string, prefix string, pathStatic string, settings token.Settings) error {
-	files, err := getFilesFromDir(pathStatic)
-	if err != nil {
-		return err
-	}
-
-	endpointResolver := &CustomEndpointResolver{
-		URL:           endpoint,
-		SigningRegion: region,
-	}
-
-	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(settings.S3AccessKey, settings.S3SecreKey, "")),
-		config.WithEndpointResolver(endpointResolver), // nolint
-	)
+func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
+	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecreKey)
 	if err != nil {
 		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	errChan := make(chan error, 1)
-
-	var bar *progressbar.ProgressBar = nil
-	if !f.Silent {
-		bar = progressbar.NewOptions(
-			len(files),
-			progressbar.OptionSetDescription("Uploading files"),
-			progressbar.OptionShowCount(),
-			progressbar.OptionSetWriter(f.IOStreams.Out),
-			progressbar.OptionClearOnFinish(),
-		)
-	}
-
-	logger.FInfoFlags(f.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	filesChan := make(chan string, len(files))
+	// create lots zip files
+	allFiles, err := ReadAllFiles(pathStatic, cmd)
+	if err != nil {
+		return err
+	}
 
-	var wg sync.WaitGroup
-	var errWg sync.WaitGroup
+	err = CreateZipsInBatches(allFiles)
+	if err != nil {
+		return err
+	}
 
-	// Atomic counter to guarantee unique zip file names
-	var atomicCounter int32
+	listZip, err := ReadZip()
+	if err != nil {
+		return err
+	}
 
-	var uploadErr error
-	errWg.Add(1)
-	go func() {
-		defer errWg.Done()
-		for err := range errChan {
+	numFiles := len(listZip)
+
+	noOfWorkers := 5
+	var currentFile int64
+	results := make(chan error, noOfWorkers)
+	Jobs := make(chan contracts.FileOps, numFiles)
+
+	// Create worker goroutines
+	for i := 1; i <= noOfWorkers; i++ {
+		go Worker(Jobs, results, &currentFile, cfg, bucket, conf.Prefix)
+	}
+
+	bar := progressbar.NewOptions(
+		numFiles,
+		progressbar.OptionSetDescription("Uploading files"),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetWriter(cmd.F.IOStreams.Out),
+		progressbar.OptionClearOnFinish(),
+	)
+
+	if f.Silent {
+		bar = nil
+	}
+
+	for _, f := range listZip {
+		Jobs <- f
+	}
+
+	close(Jobs)
+
+	// Check for errors from workers
+	for a := 1; a <= numFiles; a++ {
+		result := <-results
+		if result != nil {
+			return result
+		}
+
+		if bar != nil {
+			err := bar.Set(int(currentFile))
 			if err != nil {
-				uploadErr = err
-				cancel()
-				break
+				return err
 			}
 		}
-	}()
-
-	for i := 0; i < numWorkers; i++ {
-		wg.Add(1)
-		go worker(ctx, cancel, cfg, filesChan, &wg, pathStatic, i+1, &atomicCounter, settings.S3Bucket, bar, errChan, prefix)
 	}
 
-	go func() {
-		defer close(filesChan)
-		for _, file := range files {
-			filesChan <- file
-		}
-	}()
-
-	wg.Wait()
-	close(errChan)
-	errWg.Wait()
-
-	if uploadErr != nil {
-		return uploadErr
-	}
-
-	logger.FInfoFlags(f.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
+	// All jobs are processed, no more values will be sent on results:
+	close(results)
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadSuccessful)
 
 	return nil
+}
+
+// worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
+func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload aws.Config, bucket, prefix string) {
+	for job := range jobs {
+		// Once ENG-27343 is completed, we might be able to remove this piece of code
+		fileInfo, err := job.FileContent.Stat()
+		if err != nil {
+			logger.Debug("Error while worker tried to read file stats", zap.Error(err))
+			results <- err
+			return
+		}
+
+		// Check if the file size is zero
+		if fileInfo.Size() == 0 {
+			logger.Debug("\nSkipping upload of empty file: " + job.Path)
+			results <- nil
+			atomic.AddInt64(currentFile, 1)
+			return
+		}
+
+		if err := s3.UploadFile(context.Background(), clientUpload, &job, bucket, prefix); err != nil {
+			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
+			for Retries < 5 {
+				atomic.AddInt64(&Retries, 1)
+				_, err := job.FileContent.Seek(0, 0)
+				if err != nil {
+					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))
+					break
+				}
+
+				logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
+				err = s3.UploadFile(context.Background(), clientUpload, &job, bucket, prefix)
+				if err != nil {
+					continue
+				}
+				break
+			}
+
+			if Retries >= 5 {
+				logger.Debug("There have been 5 retries already, quitting upload")
+				results <- err
+				return
+			}
+		}
+
+		atomic.AddInt64(currentFile, 1)
+		results <- nil
+	}
 }
