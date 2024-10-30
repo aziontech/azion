@@ -26,4 +26,7 @@ var (
 	ErrorZipNotExist       = "Zip file %s does not exist"
 	ErrorUploadZip         = "Failed to upload zip file %s: %w"
 	ErrorDelFileZip        = "Deleting zip file %s: %v"
+	ErrorRelPath           = "Error determining relative path for %s: %v"
+	ErrorResetPointFile    = "Error resetting file pointer %s: %v"
+	ErrorCopyContentFile   = "Error copying contents of file %s to ZIP: %v"
 )
