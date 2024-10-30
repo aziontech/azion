@@ -1,17 +1,13 @@
 package deploy
 
 import (
-	"archive/zip"
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"io"
-	"mime"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -29,59 +25,6 @@ var (
 	Jobs    chan contracts.FileOps
 	Retries int64
 )
-
-const maxZipSize = 1 * 1024 * 1024 // 1MB
-
-func criarZipEmMemoria(arquivos []contracts.FileOps) ([]byte, error) {
-	// Cria um buffer para armazenar o ZIP em memória
-	var buffer bytes.Buffer
-
-	// Cria um novo writer para o ZIP
-	zipWriter := zip.NewWriter(&buffer)
-	defer func() {
-		if err := zipWriter.Close(); err != nil {
-			fmt.Println("Erro ao fechar o writer do ZIP:", err)
-		}
-	}()
-
-	// Itera sobre os arquivos e os adiciona ao ZIP
-	for _, arquivo := range arquivos {
-		// Cria o cabeçalho do arquivo no ZIP
-		header := &zip.FileHeader{
-			Name:   filepath.Base(arquivo.Path),
-			Method: zip.Deflate, // Método de compressão
-		}
-
-		// Define o MIME type como comentário (opcional)
-		if arquivo.MimeType != "" {
-			header.Comment = arquivo.MimeType
-		} else {
-			// Tenta detectar o MIME type com base na extensão
-			mimeType := mime.TypeByExtension(filepath.Ext(arquivo.Path))
-			header.Comment = mimeType
-		}
-
-		// Cria o writer para o arquivo dentro do ZIP
-		writer, err := zipWriter.CreateHeader(header)
-		if err != nil {
-			return nil, fmt.Errorf("não foi possível criar o writer para o arquivo %s: %v", arquivo.Path, err)
-		}
-
-		// Reposiciona o cursor do arquivo para o início
-		_, err = arquivo.FileContent.Seek(0, io.SeekStart)
-		if err != nil {
-			return nil, fmt.Errorf("não foi possível reposicionar o cursor do arquivo %s: %v", arquivo.Path, err)
-		}
-
-		// Copia o conteúdo do arquivo para o writer do ZIP
-		_, err = io.Copy(writer, arquivo.FileContent)
-		if err != nil {
-			return nil, fmt.Errorf("não foi possível copiar o conteúdo do arquivo %s para o ZIP: %v", arquivo.Path, err)
-		}
-	}
-
-	return buffer.Bytes(), nil
-}
 
 func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error) {
 	var listFiles []contracts.FileOps
@@ -231,6 +174,9 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
 			for Retries < 5 {
 				atomic.AddInt64(&Retries, 1)
+
+				time.Sleep(time.Second * time.Duration(Retries))
+
 				_, err := job.FileContent.Seek(0, 0)
 				if err != nil {
 					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))

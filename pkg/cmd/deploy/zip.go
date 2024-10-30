@@ -4,15 +4,18 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
+	msg "github.com/aziontech/azion-cli/messages/deploy"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap"
 )
 
-// Função para dividir os arquivos em lotes de até 1MB e criar ZIPs mantendo a estrutura de diretórios
+// CreateZipsInBatches Function to split files into batches of up to 1MB and
+// create ZIPs keeping the directory structure
 func CreateZipsInBatches(files []contracts.FileOps) error {
 	const maxBatchSize = 1 * 1024 * 1024 // 1MB em bytes
 	var currentBatch []contracts.FileOps
@@ -22,32 +25,32 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 	batchNumber := 1
 
 	for _, fileOp := range files {
-		// Obter o tamanho do arquivo
 		info, err := fileOp.FileContent.Stat()
 		if err != nil {
-			return fmt.Errorf("erro ao obter info do arquivo %s: %v", fileOp.Path, err)
+			return fmt.Errorf("error getting info from file %s: %v", fileOp.Path, err)
 		}
 		fileSize := info.Size()
 
-		// Verificar se adicionar este arquivo excede o tamanho máximo do lote
+		// Check if adding this file exceeds the maximum batch size
 		if currentSize+fileSize > maxBatchSize && len(currentBatch) > 0 {
-			// Criar ZIP para o lote atual
+			// Create ZIP for the current batch
 			if err := createZip(currentBatch, tempDir, batchNumber); err != nil {
 				return err
 			}
 
 			batchNumber++
-			// Resetar o lote atual
+
+			// reset batch
 			currentBatch = []contracts.FileOps{}
 			currentSize = 0
 		}
 
-		// Adicionar o arquivo ao lote atual
+		// Add the file to the current batch
 		currentBatch = append(currentBatch, fileOp)
 		currentSize += fileSize
 	}
 
-	// Criar ZIP para quaisquer arquivos restantes
+	// Create ZIP for any remaining files
 	if len(currentBatch) > 0 {
 		if err := createZip(currentBatch, tempDir, batchNumber); err != nil {
 			return err
@@ -57,15 +60,14 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 	return nil
 }
 
-// Função auxiliar para criar um arquivo ZIP a partir de um lote de FileOps mantendo a estrutura de diretórios
+// createZip Helper function to create a ZIP file from a batch of FileOps while maintaining the directory structure
 func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
 
-	// Criar o arquivo ZIP
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
-		return fmt.Errorf("erro ao criar arquivo ZIP %s: %v", zipFilePath, err)
+		return fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
 	}
 	defer zipFile.Close()
 
@@ -75,35 +77,34 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error
 	for _, fileOp := range batch {
 		relPath, err := filepath.Rel(destDir, fileOp.Path)
 		if err != nil {
-			return fmt.Errorf("erro ao determinar caminho relativo para %s: %v", fileOp.Path, err)
+			return fmt.Errorf(msg.ErrorRelPath, fileOp.Path, err)
 		}
 
-		// Substituir separadores de diretório para compatibilidade com ZIP
+		// Replace directory separators for ZIP compatibility
 		zipPath := filepath.ToSlash(relPath)
 
-		// Adicionar um arquivo ao ZIP com o caminho relativo
+		// Add a file to the ZIP with the relative path
 		writer, err := zipWriter.Create(zipPath)
 		if err != nil {
-			return fmt.Errorf("erro ao adicionar arquivo %s ao ZIP: %v", zipPath, err)
+			return fmt.Errorf(msg.ErrorCreateZip, zipPath, err)
 		}
 
 		if _, err := fileOp.FileContent.Seek(0, io.SeekStart); err != nil {
-			return fmt.Errorf("erro ao resetar ponteiro do arquivo %s: %v", fileOp.Path, err)
+			return fmt.Errorf(msg.ErrorResetPointFile, fileOp.Path, err)
 		}
 
-		// Copiar o conteúdo do arquivo para o ZIP
 		_, err = io.Copy(writer, fileOp.FileContent)
 		if err != nil {
-			return fmt.Errorf("erro ao copiar conteúdo do arquivo %s para o ZIP: %v", fileOp.Path, err)
+			return fmt.Errorf(msg.ErrorCopyContentFile, fileOp.Path, err)
 		}
 	}
 
-	fmt.Printf("Criado %s com %d arquivos\n", zipFilePath, len(batch))
+	logger.Debug("Create ZIP file", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
 	return nil
 }
 
-// ReadZip lê os arquivos ZIP no diretório pathStatic que começam com prefix e terminam com .zip.
-// Retorna uma lista de contracts.FileOps ou um erro.
+// ReadZip reads the ZIP files in the pathStatic directory that start with
+// prefix and end with .zip.  Returns a list of contracts.FileOps or an error.
 func ReadZip() ([]contracts.FileOps, error) {
 	var listZIP []contracts.FileOps
 
@@ -111,33 +112,24 @@ func ReadZip() ([]contracts.FileOps, error) {
 
 	files, err := os.ReadDir(tempDir)
 	if err != nil {
-		return []contracts.FileOps{}, fmt.Errorf("erro ao ler o diretório: %v", err)
+		return []contracts.FileOps{}, err
 	}
 
 	for _, f := range files {
 		if strings.ToLower(filepath.Ext(f.Name())) == ".zip" &&
 			strings.HasPrefix(f.Name(), "batch") {
 			pathZIP := filepath.Join(tempDir, f.Name())
-			fmt.Printf("Processando arquivo ZIP: %s\n", pathZIP)
-
-			fmt.Println(">>> ", tempDir)
-			fmt.Println(">>> ", pathZIP)
+			logger.Debug("Processing ZIP file " + pathZIP)
 
 			f, err := os.Open(pathZIP)
 			if err != nil {
-				log.Printf("Erro ao abrir o ZIP %s: %v\n", pathZIP, err)
+				logger.Debug("Error opening ZIP "+pathZIP, zap.Error(err))
 				continue
 			}
 
 			fileString := strings.TrimPrefix(pathZIP, tempDir)
-			// mimeType, err := mimemagic.MatchFilePath(fileString, -1)
-			// // if err != nil {
-			// // 	return []contracts.FileOps{}, err
-			// // }
-			//
 			fileOptions := contracts.FileOps{
-				Path: fileString,
-				// 	MimeType:    mimeType.MediaType(),
+				Path:        fileString,
 				FileContent: f,
 			}
 			//

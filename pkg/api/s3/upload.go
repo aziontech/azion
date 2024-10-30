@@ -53,7 +53,6 @@ func New(s3AccessKey, s3SecretKey string) (aws.Config, error) {
 }
 
 func UploadFile(ctx context.Context, cfg aws.Config, fileOps *contracts.FileOps, bucketName, prefix string) error {
-	fmt.Println("rodou o upload")
 	file := fileOps.Path
 	if prefix != "" {
 		file = fmt.Sprintf("%s%s", prefix, fileOps.Path)
