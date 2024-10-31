@@ -67,10 +67,10 @@ func (l *login) browserLogin(srv Server) error {
 					text-align: center;
 				}
 				.logo {
-					width: 150px;
+					width: 100px;
 				}
 				.text {
-					color: #4CAF50;
+					color: #000;
 					font-size: 12px;
 					margin-top: 20px;
 				}
@@ -83,18 +83,18 @@ func (l *login) browserLogin(srv Server) error {
 					color: #888;
 				}
 				.footer a {
-					color: #4CAF50;
+					color: #000;
 					text-decoration: none;
 				}
 			</style>
 		</head>
-		<body>
+		<body style="background: #ffffff;"> 
 			<div class="container">
 				<img src="https://avatars.githubusercontent.com/u/6660972?s=200&v=4" alt="Logo" class="logo">
 				<div class="text">Authenticated, you can now close this page and return to your terminal</div>
 			</div>
 			<div class="footer">
-				<p>Made with <span style="color: #e25555;">&#x2764;</span> by <a href="https://github.com/maxwelbm" target="_blank">MaxwelBM</a></p>
+				<p>&copy; 2024 <a href="https://github.com/aziontech", >Azion</a>. Licensed under the <a href="https://opensource.org/license/mit" target="_blank" style="color: #000;">Mit License</a>. All rights reserved.</p>
 			</div>
 		</body>
 		</html>`
