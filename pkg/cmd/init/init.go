@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
@@ -25,6 +26,7 @@ import (
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
+	"github.com/briandowns/spinner"
 	"github.com/go-git/go-git/v5"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -230,11 +232,20 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}()
 
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
+	s.Suffix = " Fetching selected template..."
+	s.FinalMSG = "Template successfully fetched\n"
+	if !cmd.f.Debug {
+		s.Start() // Start the spinner
+	}
+
 	err = cmd.git.Clone(SAMPLESURL, tempDir)
 	if err != nil {
 		logger.Debug("Error while cloning the repository", zap.Error(err))
 		return err
 	}
+
+	s.Stop()
 
 	oldPath := path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path)
 	newPath := path.Join(pathWorkingDirHere, cmd.name)
