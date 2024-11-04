@@ -154,6 +154,15 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 
 	for _, variable := range resp {
 		if v := envs[variable.GetKey()]; v != "" {
+			updateRequest := &varApi.Request{}
+			updateRequest.SetKey(variable.GetKey())
+			updateRequest.SetValue(v)
+			updateRequest.Uuid = variable.GetUuid()
+			_, err := client.Update(ctx, updateRequest)
+			if err != nil {
+				return err
+			}
+			logger.FInfoFlags(synch.Io.Out, fmt.Sprintf(msg.SYNCUPDATEENV, variable.GetKey()), synch.F.Format, synch.F.Out)
 			delete(envs, variable.GetKey())
 		}
 	}
@@ -167,8 +176,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 			logger.Debug("Error while creating variables during sync process", zap.Error(err))
 			return err
 		}
-		logger.FInfoFlags(
-			synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGEENV, key), synch.F.Format, synch.F.Out)
+		logger.FInfoFlags(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGEENV, key), synch.F.Format, synch.F.Out)
 	}
 	return nil
 }
