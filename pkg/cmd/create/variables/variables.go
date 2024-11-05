@@ -18,6 +18,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	words = []string{"PASSWORD", "PWD", "SECRET", "HASH", "ENCRYPTED", "PASSCODE", "AUTH", "TOKEN", "SECRET"}
+)
+
 type Fields struct {
 	Key      string
 	Value    string
@@ -105,6 +109,10 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			return fmt.Errorf("%w: %q", msg.ErrorSecretFlag, fields.Secret)
 		}
 		request.SetSecret(secret)
+	} else {
+		if utils.ContainSubstring(fields.Key, words) {
+			request.SetSecret(true)
+		}
 	}
 
 	request.SetKey(fields.Key)
