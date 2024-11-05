@@ -161,6 +161,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 			updateRequest.SetValue(v)
 			updateRequest.Uuid = variable.GetUuid()
 			if utils.ContainSubstring(variable.GetKey(), words) {
+				logger.FInfo(f.IOStreams.Out, msg.VARIABLESETSECRET)
 				updateRequest.SetSecret(true)
 			}
 			_, err := client.Update(ctx, updateRequest)
@@ -177,6 +178,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 		createReq.Key = key
 		createReq.Value = value
 		if utils.ContainSubstring(key, words) {
+			logger.FInfo(f.IOStreams.Out, msg.VARIABLESETSECRET)
 			createReq.SetSecret(true)
 		}
 		_, err := client.Create(ctx, *createReq)

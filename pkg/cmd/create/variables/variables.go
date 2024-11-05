@@ -52,7 +52,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				err := createRequestFromFlags(cmd, fields, &request)
+				err := createRequestFromFlags(cmd, f, fields, &request)
 				if err != nil {
 					return err
 				}
@@ -80,7 +80,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return cmd
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
+func createRequestFromFlags(cmd *cobra.Command, f *cmdutil.Factory, fields *Fields, request *api.Request) error {
 	if !cmd.Flags().Changed("key") {
 		answers, err := utils.AskInput(msg.AskKey)
 
@@ -111,6 +111,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		request.SetSecret(secret)
 	} else {
 		if utils.ContainSubstring(fields.Key, words) {
+			logger.FInfo(f.IOStreams.Out, msg.VariableSetSecret)
 			request.SetSecret(true)
 		}
 	}
