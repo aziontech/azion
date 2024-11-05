@@ -643,3 +643,12 @@ func FileExists(filename string) bool {
 	}
 	return !info.IsDir()
 }
+
+func ContainSubstring(word string, words []string) bool {
+	for _, item := range words {
+		if item == word || strings.Contains(item, word) {
+			return true // Return immediately if a match is found
+		}
+	}
+	return false
+}

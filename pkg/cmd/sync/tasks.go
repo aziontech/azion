@@ -11,12 +11,14 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
 
 var (
-	opts *contracts.ListOptions
-	ctx  context.Context = context.Background()
+	opts  *contracts.ListOptions
+	ctx   context.Context = context.Background()
+	words                 = []string{"PASSWORD", "PWD", "SECRET", "HASH", "ENCRYPTED", "PASSCODE", "AUTH", "TOKEN", "SECRET"}
 )
 
 func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
@@ -158,6 +160,10 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 			updateRequest.SetKey(variable.GetKey())
 			updateRequest.SetValue(v)
 			updateRequest.Uuid = variable.GetUuid()
+			if utils.ContainSubstring(variable.GetKey(), words) {
+				logger.FInfo(f.IOStreams.Out, msg.VARIABLESETSECRET)
+				updateRequest.SetSecret(true)
+			}
 			_, err := client.Update(ctx, updateRequest)
 			if err != nil {
 				return err
@@ -171,6 +177,10 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 		createReq := &varApi.Request{}
 		createReq.Key = key
 		createReq.Value = value
+		if utils.ContainSubstring(key, words) {
+			logger.FInfo(f.IOStreams.Out, msg.VARIABLESETSECRET)
+			createReq.SetSecret(true)
+		}
 		_, err := client.Create(ctx, *createReq)
 		if err != nil {
 			logger.Debug("Error while creating variables during sync process", zap.Error(err))
