@@ -106,11 +106,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 	return nil
 }
 
-func (cmd *DeployCmd) doApplication(
-	client *apiapp.Client,
-	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
-	msgs *[]string) error {
+func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	if conf.Application.ID == 0 {
 		var projName string
 		for {
