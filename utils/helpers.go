@@ -646,7 +646,7 @@ func FileExists(filename string) bool {
 
 func ContainSubstring(word string, words []string) bool {
 	for _, item := range words {
-		if item == word || strings.Contains(item, word) {
+		if item == word || strings.Contains(word, item) {
 			return true // Return immediately if a match is found
 		}
 	}
