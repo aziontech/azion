@@ -56,4 +56,6 @@ var (
 	AskValue      = "Enter the Variable's value:"
 	AskSecret     = "Enter the Variable's secret:"
 	AskVariableID = "Enter the Variable's variable ID:"
+
+	VariableSetSecret = "Setting secret to true due to the variable key using one of the following words: 'PASSWORD', 'PWD', 'SECRET', 'HASH', 'ENCRYPTED', 'PASSCODE', 'AUTH', 'TOKEN', 'SECRET'\n"
 )

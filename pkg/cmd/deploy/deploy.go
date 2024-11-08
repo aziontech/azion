@@ -150,7 +150,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if Local {
 		deployLocal := deploy.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, ProjectConf, Sync)
+		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild)
 	}
 
 	msgs := []string{}
