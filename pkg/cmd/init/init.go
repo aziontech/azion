@@ -46,7 +46,6 @@ type initCmd struct {
 	local                 bool
 	packageManager        string
 	pathWorkingDir        string
-	globalFlagAll         bool
 	f                     *cmdutil.Factory
 	git                   github.Github
 	getWorkDir            func() (string, error)
@@ -141,7 +140,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	msgs := []string{}
 
 	// Checks for global --yes flag and that name flag was not sent
-	if cmd.globalFlagAll && cmd.name == "" {
+	if cmd.f.GlobalFlagAll && cmd.name == "" {
 		cmd.name = thoth.GenerateName()
 	} else {
 		// if name was not sent we ask for input, otherwise info.Name already has the value
@@ -278,7 +277,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorGetProjectInfo
 	}
 
-	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
+	if cmd.auto || !utils.Confirm(cmd.f.GlobalFlagAll, msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
@@ -296,7 +295,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
+	if cmd.auto || !utils.Confirm(cmd.f.GlobalFlagAll, msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
@@ -330,7 +329,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !utils.Confirm(cmd.globalFlagAll, m, true) {
+		if !utils.Confirm(cmd.f.GlobalFlagAll, m, false) {
 			return nil
 		}
 
