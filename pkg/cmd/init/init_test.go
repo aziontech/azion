@@ -749,7 +749,6 @@ func Test_initCmd_deps(t *testing.T) {
 		auto                  bool
 		packageManager        string
 		pathWorkingDir        string
-		globalFlagAll         bool
 		f                     *cmdutil.Factory
 		git                   github.Github
 		getWorkDir            func() (string, error)
