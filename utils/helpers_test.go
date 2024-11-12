@@ -603,7 +603,7 @@ func TestErrorPerStatusCode(t *testing.T) {
 		expectedError error
 	}{
 		{
-			name: "status code 401",
+			name: "status code 401 - unauthorized",
 			httpResp: &http.Response{
 				StatusCode: 401,
 			},
@@ -611,7 +611,7 @@ func TestErrorPerStatusCode(t *testing.T) {
 			expectedError: ErrorToken401,
 		},
 		{
-			name: "status code 403",
+			name: "status code 403 - forbidden",
 			httpResp: &http.Response{
 				StatusCode: 403,
 			},
@@ -619,7 +619,7 @@ func TestErrorPerStatusCode(t *testing.T) {
 			expectedError: ErrorForbidden403,
 		},
 		{
-			name: "status code 404",
+			name: "status code 404 - not found",
 			httpResp: &http.Response{
 				StatusCode: 404,
 			},
@@ -627,7 +627,7 @@ func TestErrorPerStatusCode(t *testing.T) {
 			expectedError: ErrorNotFound404,
 		},
 		{
-			name: "status code 409",
+			name: "status code 409 - conflict",
 			httpResp: &http.Response{
 				StatusCode: 409,
 			},

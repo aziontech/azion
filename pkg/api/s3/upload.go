@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -55,7 +56,7 @@ func New(s3AccessKey, s3SecretKey string) (aws.Config, error) {
 func UploadFile(ctx context.Context, cfg aws.Config, fileOps *contracts.FileOps, bucketName, prefix string) error {
 	file := fileOps.Path
 	if prefix != "" {
-		file = fmt.Sprintf("%s%s", prefix, fileOps.Path)
+		file = path.Join(prefix, fileOps.Path)
 	}
 
 	s3Client := s3.NewFromConfig(cfg)
