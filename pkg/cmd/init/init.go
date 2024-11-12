@@ -330,7 +330,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !utils.Confirm(cmd.globalFlagAll, m, true) {
+		if !utils.Confirm(cmd.globalFlagAll, m, false) {
 			return nil
 		}
 
