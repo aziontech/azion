@@ -704,7 +704,6 @@ func Test_initCmd_Run(t *testing.T) {
 				auto:                  tt.fields.auto,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
-				globalFlagAll:         tt.fields.globalFlagAll,
 				f:                     tt.fields.f,
 				getWorkDir:            tt.fields.getWorkDir,
 				fileReader:            tt.fields.fileReader,
@@ -838,7 +837,7 @@ func Test_initCmd_deps(t *testing.T) {
 				},
 				f: &cmdutil.Factory{
 					Flags: cmdutil.Flags{
-						GlobalFlagAll: false,
+						GlobalFlagAll: true,
 						Format:        "",
 						Out:           "",
 						NoColor:       false,
@@ -871,7 +870,6 @@ func Test_initCmd_deps(t *testing.T) {
 				auto:                  tt.fields.auto,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
-				globalFlagAll:         tt.fields.globalFlagAll,
 				f:                     tt.fields.f,
 				git:                   tt.fields.git,
 				getWorkDir:            tt.fields.getWorkDir,
