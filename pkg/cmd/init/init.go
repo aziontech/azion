@@ -305,7 +305,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
-		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
+		if err := cmd.deps(c, msg.AskInstallDepsDeploy, &msgs); err != nil {
 			return err
 		}
 		logger.Debug("Running deploy command from init command")
@@ -329,7 +329,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !utils.Confirm(cmd.f.GlobalFlagAll, m, false) {
+		if !utils.Confirm(cmd.f.GlobalFlagAll, m, true) {
 			return nil
 		}
 
