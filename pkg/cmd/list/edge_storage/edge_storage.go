@@ -12,8 +12,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.USAGE,
-		Short:         msg.SHORT_DESCRIPTION,
-		Long:          msg.LONG_DESCRIPTION,
+		Short:         msg.SHORT_DESCRIPTION_LIST,
+		Long:          msg.LONG_DESCRIPTION_LIST,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       msg.EXAMPLE_LIST,

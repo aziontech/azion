@@ -2,7 +2,7 @@ package edgeapplication
 
 var (
 	Usage                       = "edge-application"
-	ShortDescription            = "Modifies an Edge Application"
+	ShortDescription            = "Updates an Edge Application"
 	LongDescription             = "Modifies an Edge Application's name, activity status, and other attributes based on the given ID"
 	FlagID                      = "The Edge Application's id"
 	FlagName                    = "The Edge Application's name"
