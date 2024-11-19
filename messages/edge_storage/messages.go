@@ -1,7 +1,7 @@
 package edge_storage
 
 const (
-	USAGE         = "edge-storage"
+	USAGE         = "edge-storage <subcommand>"
 	USAGE_BUCKET  = "bucket"
 	USAGE_OBJECTS = "object"
 
