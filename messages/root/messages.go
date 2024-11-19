@@ -25,6 +25,7 @@ var (
 	TokenUsedIn     = "This token will be used by default with all commands"
 
 	// update messages
+	NotSupported      = "OS currently not supported"
 	NewVersion        = "There is a new version of Azion CLI available\n"
 	BrewUpdate        = "Please run: 'brew upgrade azion' to update it to v%s\n"
 	ReleasePage       = "Please visit our Releases page and download the appropriate file\n"
