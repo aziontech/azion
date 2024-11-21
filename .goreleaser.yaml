@@ -16,9 +16,18 @@ builds:
       - linux
       - darwin
       - freebsd
+      - windows
     goarch:
+      - "386"
       - amd64
+      - arm
       - arm64
+      - ppc64
+    goarm:
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm
 
 archives:
   - files:
