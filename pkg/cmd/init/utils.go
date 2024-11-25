@@ -2,6 +2,7 @@ package init
 
 import (
 	"fmt"
+	"os"
 	"path"
 	"strings"
 
@@ -20,7 +21,7 @@ func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 	}
 
 	// Prompt the user for input
-	err := cmd.askOne(prompt, &userInput, survey.WithKeepFilter(true))
+	err := cmd.askOne(prompt, &userInput, survey.WithKeepFilter(true), survey.WithStdio(os.Stdin, os.Stderr, os.Stdout))
 	if err != nil {
 		return "", err
 	}
