@@ -27,8 +27,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const shell = "/bin/sh"
-
 var NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict"}
 
 func CleanDirectory(dir string) error {
