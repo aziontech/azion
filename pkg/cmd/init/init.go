@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -96,9 +97,9 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		devCmd:                dev.NewDevCmd,
 		deployCmd:             deploy.NewDeployCmd,
 		changeDir:             os.Chdir,
-		commandRunner:         utils.RunCommandWithOutput,
-		commandRunInteractive: utils.CommandRunInteractive,
-		commandRunnerOutput:   utils.CommandRunInteractiveWithOutput,
+		commandRunner:         command.RunCommandWithOutput,
+		commandRunInteractive: command.CommandRunInteractive,
+		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
 		askOne:                survey.AskOne,
 		load:                  godotenv.Load,
 		dir:                   config.Dir,

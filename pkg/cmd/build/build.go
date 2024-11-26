@@ -9,6 +9,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/build"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/utils"
@@ -65,13 +66,13 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 		Io:         f.IOStreams,
 		FileReader: os.ReadFile,
 		CommandRunnerStream: func(out io.Writer, cmd string, envs []string) error {
-			return utils.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
+			return command.RunCommandStreamOutput(f.IOStreams.Out, envs, cmd)
 		},
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-			return utils.CommandRunInteractive(f, comm)
+			return command.CommandRunInteractive(f, comm)
 		},
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
-			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
+			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 		EnvLoader:             utils.LoadEnvVarsFromFile,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,

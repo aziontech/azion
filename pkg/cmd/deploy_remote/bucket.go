@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 
 	"github.com/aziontech/azionapi-go-sdk/storage"
@@ -67,7 +68,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	}
 
 	// Prompt the user for input
-	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true))
+	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true), survey.WithStdio(os.Stdin, os.Stderr, os.Stdout))
 	if err != nil {
 		return "", err
 	}

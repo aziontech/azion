@@ -2,6 +2,7 @@ package link
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -54,7 +55,7 @@ func askForInput(msg string, defaultIn string) (string, error) {
 	}
 
 	// Prompt the user for input
-	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true))
+	err := survey.AskOne(prompt, &userInput, survey.WithKeepFilter(true), survey.WithStdio(os.Stdin, os.Stderr, os.Stdout))
 	if err != nil {
 		return "", err
 	}

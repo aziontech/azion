@@ -7,11 +7,11 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
-	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +35,7 @@ func NewDevCmd(f *cmdutil.Factory) *DevCmd {
 		Io:       f.IOStreams,
 		BuildCmd: build.NewBuildCmd,
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-			return utils.CommandRunInteractive(f, comm)
+			return command.CommandRunInteractive(f, comm)
 		},
 		Vulcan: vulcanPkg.NewVulcan,
 	}
