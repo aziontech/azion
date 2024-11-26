@@ -351,7 +351,7 @@ func AskInputEmpty(msg string) (string, error) {
 
 	answer := ""
 
-	err := ask(qs, &answer)
+	err := ask(qs, &answer, survey.WithKeepFilter(true), survey.WithStdio(os.Stdin, os.Stderr, os.Stdout))
 	if err == terminal.InterruptErr {
 		logger.Error(ErrorCancelledContextInput.Error())
 		os.Exit(0)
