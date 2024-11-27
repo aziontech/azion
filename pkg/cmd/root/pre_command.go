@@ -190,10 +190,8 @@ func format(input string) (int, error) {
 	return number, nil
 }
 
-// Mock para utils.Confirm
-var confirmFn = func(globalFlagAll bool, msg string, defaultValue bool) bool {
-	return defaultValue
-}
+// Mock for utils.Confirm
+var confirmFn = utils.Confirm
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
 func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {
