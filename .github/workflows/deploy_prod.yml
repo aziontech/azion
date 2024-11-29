@@ -131,7 +131,7 @@ jobs:
           $toolsDir = "$(Resolve-Path .\chocolatey\tools)"
           New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null
           $outputFile = Join-Path $toolsDir 'azion.exe'
-          $url = 'http://downloads.azion.com/stage/windows/x86_64/azion'
+          $url = 'http://downloads.azion.com/windows/x86_64/azion'
           Invoke-WebRequest -Uri $url -OutFile $outputFile
         shell: pwsh
 
