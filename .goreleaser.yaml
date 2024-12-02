@@ -16,7 +16,6 @@ builds:
       - linux
       - darwin
       - freebsd
-      - windows
     goarch:
       - "386"
       - amd64
@@ -28,6 +27,24 @@ builds:
     ignore:
       - goos: windows
         goarch: arm
+
+  - env:
+      - CGO_ENABLED=0
+    main: ./cmd/azion
+    ldflags:
+      - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
+      - -X github.com/aziontech/azion-cli/pkg/metric/metric.SegmentKey={{ .Env.SEGMENT_KEY }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/pkg/cmd/edge_applications/init.TemplateBranch={{ .Env.TEMPLATE_BRANCH }}
+    binary: azion.exe
+    goos:
+      - windows
+    goarch:
+      - "386"
+      - amd64
+      - arm64
 
 archives:
   - files:
@@ -43,7 +60,7 @@ nfpms:
     license: MIT
     maintainer: Azion Technologies <https://github.com/aziontech>
     package_name: azion
-    homepage: https://github.com/aziontech/azion-cli
+    homepage: https://github.com/aziontech/azion
     bindir: /usr/local/bin
     formats:
       - apk
