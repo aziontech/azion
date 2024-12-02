@@ -159,3 +159,14 @@ jobs:
           choco pack chocolatey/azion.nuspec
           choco push chocolatey/azion.${{ needs.build.outputs.binver }}.nupkg --source https://push.chocolatey.org/ --api-key $env:CHOCO_API_KEY
         shell: pwsh
+
+  Publish-to-WinGet:
+    runs-on: windows-latest
+    steps:
+      - uses: vedantmgoyal9/winget-releaser@main
+        with:
+          identifier: azion.azion
+          installers-regex: '\.exe$'  # Only `.exe` files
+          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+      
+      
