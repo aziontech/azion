@@ -43,6 +43,8 @@ import (
 
 const PREFIX_FLAG = "--"
 
+var TimeoutSecs int
+
 type factoryRoot struct {
 	factory           *cmdutil.Factory
 	doPreCommandCheck func(cmd *cobra.Command, fact *factoryRoot) error //this package
@@ -97,6 +99,7 @@ func (fact *factoryRoot) setFlags(cobraCmd *cobra.Command) {
 	cobraCmd.PersistentFlags().StringVar(&fact.factory.Out, "out", "", msg.RootFlagOut)
 	cobraCmd.PersistentFlags().StringVar(&fact.factory.Format, "format", "", msg.RootFlagFormat)
 	cobraCmd.PersistentFlags().BoolVar(&fact.factory.NoColor, "no-color", false, msg.RootFlagFormat)
+	cobraCmd.PersistentFlags().IntVar(&TimeoutSecs, "timeout", 50, msg.RootFlagTimeout)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 }
 

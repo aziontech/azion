@@ -168,5 +168,5 @@ jobs:
           identifier: azion.azion
           installers-regex: '\.exe$'  # Only `.exe` files
           token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      
-      
+
+          
