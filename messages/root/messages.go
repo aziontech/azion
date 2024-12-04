@@ -16,7 +16,7 @@ var (
 	RootLogLevel    = "Set the logging level, \"debug\", \"info\", or \"error\"."
 	RootFlagOut     = "Exports the output to the given <file_path/file_name.ext>"
 	RootFlagFormat  = "Changes the output format passing the json value to the flag"
-	RootFlagTimeout = "Defines how much time the CLI will wait before timing out from the HTTP connection"
+	RootFlagTimeout = "Defines how much time in seconds the CLI will wait before timing out from the HTTP connection"
 	RootFlagNoColor = "Disables colored output, ensuring plain text format."
 	RootLogSilent   = "Silences log completely; mostly used for automation purposes"
 	RootTokenFlag   = "Saves a given Personal Token locally to authorize CLI commands"
