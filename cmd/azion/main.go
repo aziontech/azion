@@ -15,7 +15,7 @@ import (
 func main() {
 	streams := iostreams.System()
 	httpClient := &http.Client{
-		Timeout: 50 * time.Second, // TODO: Configure this somewhere
+		Timeout: 50 * time.Second,
 	}
 
 	tok, _ := token.ReadSettings()
