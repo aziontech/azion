@@ -239,7 +239,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 			logger.Debug("Running build command from link command")
 			buildCmd := cmd.BuildCmd(cmd.F)
-			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: info.Preset}, info.projectPath, &msgs)
+			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: strings.ToLower(info.Preset)}, info.projectPath, &msgs)
 			if err != nil {
 				logger.Debug("Error while running build command called by link command", zap.Error(err))
 				return err
