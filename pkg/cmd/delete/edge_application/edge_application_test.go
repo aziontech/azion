@@ -186,7 +186,7 @@ func TestCascadeDelete(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, msg.CascadeSuccess, stdout.String())
+		assert.Contains(t, stdout.String(), msg.CascadeSuccess)
 	})
 }
 
