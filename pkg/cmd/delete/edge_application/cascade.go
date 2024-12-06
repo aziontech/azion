@@ -10,10 +10,12 @@ import (
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	store "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_storage/bucket"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 )
 
 func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
+	logger.FInfo(del.f.IOStreams.Out, "Cascade deleting resources\n")
 	azionJson, err := del.GetAzion(ProjectConf)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
