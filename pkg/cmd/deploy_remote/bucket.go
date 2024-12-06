@@ -31,7 +31,7 @@ func (cmd *DeployCmd) doBucket(
 	nameBucket := replaceInvalidChars(conf.Name)
 
 	err := client.CreateBucket(ctx, api.RequestBucket{
-		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
+		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_ONLY}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
@@ -40,7 +40,7 @@ func (cmd *DeployCmd) doBucket(
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
 			err := client.CreateBucket(ctx, api.RequestBucket{
-				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
+				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_ONLY}})
 			if err != nil {
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 					continue

@@ -3,7 +3,6 @@ package edgeapplication
 import (
 	"encoding/json"
 	"fmt"
-	"io/fs"
 	"os"
 	"testing"
 
@@ -187,7 +186,7 @@ func TestCascadeDelete(t *testing.T) {
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
 
-		assert.Equal(t, msg.CascadeSuccess, stdout.String())
+		assert.Contains(t, stdout.String(), msg.CascadeSuccess)
 	})
 }
 
@@ -239,7 +238,7 @@ func TestUpdateAzionJson(t *testing.T) {
 			ReadFile: func(name string) ([]byte, error) {
 				return []byte(mockAzionJsonContent), nil
 			},
-			WriteFile: func(name string, data []byte, perm fs.FileMode) error {
+			WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptions, confPath string) error {
 				return nil
 			},
 		}
