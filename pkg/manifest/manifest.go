@@ -81,6 +81,7 @@ func (man *ManifestInterpreter) CreateResources(
 	manifest *contracts.Manifest,
 	f *cmdutil.Factory,
 	projectConf string,
+	prune bool,
 	msgs *[]string) error {
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
@@ -335,9 +336,11 @@ func (man *ManifestInterpreter) CreateResources(
 		}
 	}
 
-	err = deleteResources(ctx, f, conf, msgs)
-	if err != nil {
-		return err
+	if !prune {
+		err = deleteResources(ctx, f, conf, msgs)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
