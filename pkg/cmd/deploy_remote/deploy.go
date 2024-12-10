@@ -49,6 +49,7 @@ var (
 	SkipBuild   bool
 	ProjectConf string
 	Sync        bool
+	Prune       bool
 	Env         string
 )
 
@@ -97,11 +98,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, prune bool) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
 	Auto = auto
+	Prune = prune
 	SkipBuild = skipBuild
 	return cmd.Run(f)
 }
@@ -229,7 +231,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, Prune, &msgs)
 	if err != nil {
 		return err
 	}

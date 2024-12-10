@@ -22,6 +22,7 @@ var (
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
 	EdgeApplicationDeployLocal           = "Runs the entire build and deploy process locally"
 	EdgeApplicationDeployDryrun          = "Simulates the deploy process without carrying out any actual action"
+	EdgeApplicationDeployPrune           = "If passed, resources no longer found in the manifest.json file will not be deleted"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
 	OriginsSuccessful                    = "Created Origin for Edge Application\n"
 	OriginsUpdateSuccessful              = "Updated Origin for Edge Application %v with ID %v \n"
