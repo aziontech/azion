@@ -114,5 +114,9 @@ cross-build: ## cross-compile for all platforms/architectures.
 		arch=$$(echo $${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$$/arm32/g');\
 		echo $$distro/$$arch;\
 		mkdir -p dist/$$distro/$$arch;\
-		CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags "$(LDFLAGS)" -o ./dist/$$distro/$$arch/$(NAME_WITH_VERSION) ./cmd/$(BIN); \
+		binary_name=$(NAME_WITH_VERSION);\
+		if [ "$$distro" = "windows" ]; then \
+			binary_name=$$binary_name.exe; \
+		fi; \
+		CGO_ENABLED=0 GOOS=$$distro GOARCH=$$goarch $(GO) build -ldflags "$(LDFLAGS)" -o ./dist/$$distro/$$arch/$$binary_name ./cmd/$(BIN); \
 	done < BUILD

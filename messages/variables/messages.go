@@ -32,7 +32,7 @@ var (
 	DeleteLongDescription  = "Deletes a variable based on its UUID"
 
 	//update cmd
-	UpdateShortDescription = "Modifies a variable's attributes"
+	UpdateShortDescription = "Updates a variable's attributes"
 	UpdateLongDescription  = "Modifies a variable's attributes based on its UUID"
 	UpdateFlagKey          = "The variable's key"
 	UpdateFlagValue        = "The variable's value"

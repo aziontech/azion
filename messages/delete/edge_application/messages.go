@@ -2,7 +2,7 @@ package edgeapplication
 
 var (
 	Usage            = "edge-application"
-	ShortDescription = "Removes an Edge Application"
+	ShortDescription = "Deletes an Edge Application"
 	LongDescription  = "Removes an Edge Application from the Edge Applications library based on a given ID"
 	OutputSuccess    = "Edge Application %d was successfully deleted"
 	HelpFlag         = "Displays more information about the delete edge-application command"

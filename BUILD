@@ -6,3 +6,6 @@ linux/386
 linux/amd64 
 linux/arm
 linux/arm64
+windows/amd64
+windows/386
+windows/arm64

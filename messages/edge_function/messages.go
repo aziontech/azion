@@ -13,7 +13,7 @@ var (
 	CreateOutputSuccess    = "Created Edge Function with ID %d"
 
 	//delete cmd
-	DeleteShortDescription = "Removes an Edge Function"
+	DeleteShortDescription = "Deletes an Edge Function"
 	DeleteLongDescription  = "Removes an Edge Function from the Edge Functions library based on its given ID"
 	DeleteOutputSuccess    = "Edge Function %d was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete edge-function command"
@@ -33,7 +33,7 @@ var (
 	ListHelpFlag         = "Displays more information about the list edge-function command"
 
 	//update cmd
-	UpdateShortDescription  = "Modifies an Edge Function"
+	UpdateShortDescription  = "Updates an Edge Function"
 	UpdateLongDescription   = "Modifies an Edge Function based on its ID to update its name, activity status, code path, and other attributes"
 	UpdateFlagName          = "The Edge Function's name"
 	UpdateFlagCode          = "Path and name to the file containing the Edge Function's code"

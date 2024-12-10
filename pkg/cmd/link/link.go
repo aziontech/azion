@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -87,10 +88,10 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		DeployCmd:       deploy.NewDeployCmd,
 		BuildCmd:        build.NewBuildCmd,
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
-			return utils.CommandRunInteractiveWithOutput(f, comm, envVars)
+			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-			return utils.CommandRunInteractive(f, comm)
+			return command.CommandRunInteractive(f, comm)
 		},
 	}
 }

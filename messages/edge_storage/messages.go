@@ -1,11 +1,20 @@
 package edge_storage
 
 const (
-	USAGE         = "edge-storage"
+	USAGE         = "edge-storage <subcommand>"
 	USAGE_BUCKET  = "bucket"
 	USAGE_OBJECTS = "object"
 
-	SHORT_DESCRIPTION                = "Manages Edge Storage buckets and objects directly through the command line"
+	SHORT_DESCRIPTION_CREATE         = "Creates Edge Storage buckets and objects"
+	SHORT_DESCRIPTION_LIST           = "Displays your Edge Storage buckets and objects"
+	SHORT_DESCRIPTION_DELETE         = "Deletes Edge Storage buckets and objects"
+	SHORT_DESCRIPTION_UPDATE         = "Updates Edge Storage buckets and objects"
+	SHORT_DESCRIPTION_DESCRIBE       = "Returns Edge Storage buckets and objects"
+	LONG_DESCRIPTION_CREATE          = "Allows users to create a bucket or object in Edge Storage"
+	LONG_DESCRIPTION_LIST            = "Allows users to list buckets or objects in Edge Storage"
+	LONG_DESCRIPTION_DELETE          = "Allows users to delete a bucket or object in Edge Storage"
+	LONG_DESCRIPTION_UPDATE          = "Allows users to update a bucket or object in Edge Storage"
+	LONG_DESCRIPTION_DESCRIBE        = "Allows users to describe a bucket or object in Edge Storage"
 	SHORT_DESCRIPTION_CREATE_BUCKET  = "Creates a bucket in Edge Storage"
 	SHORT_DESCRIPTION_LIST_BUCKET    = "List the buckets in Edge Storage"
 	SHORT_DESCRIPTION_LIST_OBJECT    = "List the objects in Edge Storage"
@@ -13,7 +22,6 @@ const (
 	SHORT_DESCRIPTION_CREATE_OBJECTS = "Creates objects in Edge Storage"
 	SHORT_DESCRIPTION_DELETE_OBJECTS = "Deletes an object in Edge Storage"
 
-	LONG_DESCRIPTION                = "Allows users to perform a wide range of operations, from creating and deleting buckets to adding, removing, and manipulating objects."
 	LONG_DESCRIPTION_CREATE_BUCKET  = "Allows users to create a bucket in Edge Storage"
 	LONG_DESCRIPTION_LIST_BUCKET    = "Allows users to list their buckets in Edge Storage"
 	LONG_DESCRIPTION_LIST_OBJECT    = "Allows users to list their objects in Edge Storage"

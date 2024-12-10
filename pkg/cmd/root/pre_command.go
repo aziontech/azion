@@ -30,6 +30,14 @@ type OSInfo struct {
 // doPreCommandCheck carry out all pre-cmd checks needed
 func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 
+	// Apply timeout based on the parsed flags
+	timeout, err := cmd.Flags().GetInt("timeout")
+	if err != nil {
+		return msg.ErrorParseTimeout
+	}
+
+	fact.factory.HttpClient.Timeout = time.Duration(timeout) * time.Second
+
 	// get full command run and rewrite with our metrics pattern
 	fact.commandName = cmd.CommandPath()
 	rewrittenCommand := strings.ReplaceAll(strings.TrimPrefix(fact.commandName, "azion "), " ", "-")
@@ -190,10 +198,8 @@ func format(input string) (int, error) {
 	return number, nil
 }
 
-// Mock para utils.Confirm
-var confirmFn = func(globalFlagAll bool, msg string, defaultValue bool) bool {
-	return defaultValue
-}
+// Mock for utils.Confirm
+var confirmFn = utils.Confirm
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
 func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {

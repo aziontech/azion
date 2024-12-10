@@ -43,12 +43,10 @@ var (
 	AskInputName                         = "Type the new name:"
 	ProjectNameMessage                   = "Using the same name as your project to create the bucket\n"
 	AskCreateCacheSettings               = `Azion CLI offers to create the following Cache Settings specifications:
-  - Browser Cache Settings: Override Cache Settings
-  - Maximum TTL for Browser Cache Settings (in seconds): 7200
-  - Edge Application Cache Settings: Override Cache Settings
-  - Maximum TTL for Edge Application Cache Settings (in seconds): 7200
+  - Browser Cache Settings: Override Cache Settings - Maximum TTL in seconds: 7200
+  - Edge Application Cache Settings: Override Cache Settings - Maximum TTL in seconds: 7200
 
-Do you wish to create a Cache Settings configuration with the above specifications? (y/N)`
+Create a Cache Settings configuration with the above specifications? (y/N)`
 	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
 	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
 	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"

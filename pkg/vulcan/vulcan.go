@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	msg "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
@@ -64,7 +63,6 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		}
 
 		if firstNumber > currentMajor {
-			logger.FInfo(f.IOStreams.Out, msg.NewMajorVersion)
 			return nil
 		}
 

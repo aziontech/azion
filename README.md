@@ -84,14 +84,14 @@ You can provide the token in two ways:
 
 - Using `azion -t [tokenvalue]` command, which saves the token in a configuration file for further use:
 
-```
+```sh
 $ azion -t <authentication token>
 ```
 
-- Using environment variable, which the token is cleared when the terminal is closed:
+- Using the login command:
 
 ```sh
-$ export AZIONCLI_TOKEN=<authentication token>
+$ azion login
 ```
 
 ### Commands
@@ -102,7 +102,7 @@ Check all reference documentation for the available [commands](https://github.co
 
 It's possible to enable the autocompletion to be used with the `azion` CLI. To learn more about its settings and installation based on your OS, check the [autocompletion page](https://github.com/aziontech/azion-cli/wiki/Azion-CLI-autocomplete).
 
-### Go Lang Update Policy
+### Golang Update Policy
 
 Our update policy for the Go language aims to ensure that all developers benefit from new features, bug fixes and improvements. To this end, we have adopted the practice of maintaining our project at [Release](https://go.dev/doc/devel/release) - 1 (Go 1.21 -1). We allow exceptions when vulnerabilities are found. 
 
