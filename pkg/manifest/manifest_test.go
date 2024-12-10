@@ -61,7 +61,7 @@ func TestDeployCmd(t *testing.T) {
 		pathManifest := "fixtures/manifest.json"
 		manifest, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 		require.NoError(t, err)
-		err = interpreter.CreateResources(options, manifest, f, "azion", true, &msgs)
+		err = interpreter.CreateResources(options, manifest, f, "azion", &msgs)
 		require.NoError(t, err)
 	})
 
