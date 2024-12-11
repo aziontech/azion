@@ -121,7 +121,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := path.Join(paths, "azion/azion.json")
+	azionJson := path.Join(paths, "azion", "azion.json")
 
 	azionJsonFile := &contracts.AzionApplicationOptions{
 		Env:    "production",
