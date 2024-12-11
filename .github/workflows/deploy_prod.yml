@@ -104,7 +104,7 @@ jobs:
 
   publish-choco-package:
     runs-on: windows-latest
-    needs: build
+    needs: bump_formula
     steps:
       # Step 1: Check out the code
       - name: Checkout code
@@ -162,6 +162,7 @@ jobs:
 
   Publish-to-WinGet:
     runs-on: windows-latest
+    needs: publish-choco-package
     steps:
       - uses: vedantmgoyal9/winget-releaser@main
         with:
