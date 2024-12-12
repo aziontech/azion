@@ -108,7 +108,7 @@ chocolateys:
 
     project_url: https://github.com/aziontech/azion
 
-    url_template: "https://github.com/aziontech/azion/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "http://downloads.azion.com/windows/x86_64/azion"
 
     license_url: https://github.com/aziontech/azion/blob/dev/LICENSE
 
