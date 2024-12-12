@@ -10,8 +10,8 @@ import (
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           msg.USAGE,
-		Short:         msg.SHORT_DESCRIPTION,
-		Long:          msg.LONG_DESCRIPTION,
+		Short:         msg.SHORT_DESCRIPTION_DESCRIBE,
+		Long:          msg.LONG_DESCRIPTION_DESCRIBE,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example:       msg.EXAMPLE_DESCRIBE,

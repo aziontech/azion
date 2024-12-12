@@ -3,8 +3,8 @@ package edgeapplication
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"os"
+	"path"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
@@ -17,21 +17,20 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-	"github.com/tidwall/sjson"
 	"go.uber.org/zap"
 )
 
 var ProjectConf string
 
 type DeleteCmd struct {
-	Io         *iostreams.IOStreams
-	GetAzion   func(confPath string) (*contracts.AzionApplicationOptions, error)
-	f          *cmdutil.Factory
-	UpdateJson func(cmd *DeleteCmd) error
-	Cascade    func(ctx context.Context, del *DeleteCmd) error
-	AskInput   func(string) (string, error)
-	ReadFile   func(name string) ([]byte, error)
-	WriteFile  func(name string, data []byte, perm fs.FileMode) error
+	Io                    *iostreams.IOStreams
+	GetAzion              func(confPath string) (*contracts.AzionApplicationOptions, error)
+	f                     *cmdutil.Factory
+	UpdateJson            func(cmd *DeleteCmd) error
+	Cascade               func(ctx context.Context, del *DeleteCmd) error
+	AskInput              func(string) (string, error)
+	ReadFile              func(name string) ([]byte, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -40,14 +39,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	return &DeleteCmd{
-		Io:         f.IOStreams,
-		GetAzion:   utils.GetAzionJsonContent,
-		f:          f,
-		UpdateJson: updateAzionJson,
-		Cascade:    CascadeDelete,
-		AskInput:   utils.AskInput,
-		ReadFile:   os.ReadFile,
-		WriteFile:  os.WriteFile,
+		Io:                    f.IOStreams,
+		GetAzion:              utils.GetAzionJsonContent,
+		f:                     f,
+		UpdateJson:            updateAzionJson,
+		Cascade:               CascadeDelete,
+		AskInput:              utils.AskInput,
+		ReadFile:              os.ReadFile,
+		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 	}
 }
 
@@ -118,32 +117,24 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 }
 
 func updateAzionJson(cmd *DeleteCmd) error {
-	path, err := utils.GetWorkingDir()
+	paths, err := utils.GetWorkingDir()
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := path + "/azion/azion.json"
-	byteAzionJson, err := cmd.ReadFile(azionJson)
-	if err != nil {
-		logger.Debug("Error while parsing json", zap.Error(err))
-		return utils.ErrorUnmarshalAzionJsonFile
-	}
-	jsonReplaceFunc, err := sjson.Set(string(byteAzionJson), "function.id", 0)
-	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
-	}
+	azionJson := path.Join(paths, "azion", "azion.json")
 
-	jsonReplaceApp, err := sjson.Set(jsonReplaceFunc, "application.id", 0)
-	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
+	azionJsonFile := &contracts.AzionApplicationOptions{
+		Env:    "production",
+		Prefix: "",
 	}
+	azionJsonFile.Function.Name = "__DEFAULT__"
+	azionJsonFile.Function.InstanceName = "__DEFAULT__"
+	azionJsonFile.Function.File = "./out/worker.js"
+	azionJsonFile.Domain.Name = "__DEFAULT__"
+	azionJsonFile.Application.Name = "__DEFAULT__"
+	azionJsonFile.RtPurge.PurgeOnPublish = true
 
-	jsonReplaceDomain, err := sjson.Set(jsonReplaceApp, "domain.id", 0)
-	if err != nil {
-		return msg.ErrorFailedUpdateAzionJson
-	}
-
-	err = cmd.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
+	err = cmd.WriteAzionJsonContent(azionJsonFile, ProjectConf)
 	if err != nil {
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
 	}

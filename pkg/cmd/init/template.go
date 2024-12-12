@@ -39,7 +39,7 @@ func (cmd *initCmd) createJsonFile(options *contracts.AzionApplicationOptions) e
 		return msg.ErrorUnmarshalAzionFile
 	}
 
-	err = cmd.writeFile(cmd.pathWorkingDir+"/azion/azion.json", data, 0644)
+	err = cmd.writeFile(path.Join(cmd.pathWorkingDir, "azion", "azion.json"), data, 0644)
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}

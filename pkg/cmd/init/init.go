@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/github"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -96,9 +97,9 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		devCmd:                dev.NewDevCmd,
 		deployCmd:             deploy.NewDeployCmd,
 		changeDir:             os.Chdir,
-		commandRunner:         utils.RunCommandWithOutput,
-		commandRunInteractive: utils.CommandRunInteractive,
-		commandRunnerOutput:   utils.CommandRunInteractiveWithOutput,
+		commandRunner:         command.RunCommandWithOutput,
+		commandRunInteractive: command.CommandRunInteractive,
+		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
 		askOne:                survey.AskOne,
 		load:                  godotenv.Load,
 		dir:                   config.Dir,
@@ -305,7 +306,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msgEdgeAppInitSuccessFull)
 	} else {
-		if err := cmd.deps(c, msg.AskInstallDepsDev, &msgs); err != nil {
+		if err := cmd.deps(c, msg.AskInstallDepsDeploy, &msgs); err != nil {
 			return err
 		}
 		logger.Debug("Running deploy command from init command")
@@ -329,7 +330,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !utils.Confirm(cmd.f.GlobalFlagAll, m, false) {
+		if !utils.Confirm(cmd.f.GlobalFlagAll, m, true) {
 			return nil
 		}
 
