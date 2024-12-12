@@ -2,6 +2,7 @@ project_name: azion
 
 builds:
   - env:
+    id: azion-unit
       - CGO_ENABLED=0
     main: ./cmd/azion
     ldflags:
@@ -29,6 +30,7 @@ builds:
         goarch: arm
 
   - env:
+    id: azion-windows
       - CGO_ENABLED=0
     main: ./cmd/azion
     ldflags:
