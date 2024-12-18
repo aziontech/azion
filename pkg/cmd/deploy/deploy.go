@@ -47,7 +47,7 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
-	CallScript            func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error)
+	CallScript            func(token string, id string, secret string, prefix string, name, confDir string, cmd *DeployCmd) (string, error)
 	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
 	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
 	CheckToken            func(f *cmdutil.Factory) error
@@ -221,7 +221,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, cmd)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
 	if err != nil {
 		return err
 	}

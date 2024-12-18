@@ -91,6 +91,8 @@ jobs:
           AUTH_URL: https://sso.azion.com/api
           TEMPLATE_BRANCH: main
           SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
+          CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
+
 
   bump_formula:
     runs-on: ubuntu-latest
@@ -102,63 +104,67 @@ jobs:
           formula: azion
           tag: ${{needs.build.outputs.binver}}
 
-  publish-choco-package:
-    runs-on: windows-latest
-    needs: bump_formula
-    steps:
-      # Step 1: Check out the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # publish-choco-package:
+  #   runs-on: windows-latest
+  #   needs: build
+  #   steps:
+  #     # Step 1: Check out the code
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      # Step 2: Set up Chocolatey
-      - name: Set up Chocolatey
-        run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-          Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
+  #     # Step 2: Set up Chocolatey
+  #     - name: Set up Chocolatey
+  #       run: |
+  #         Set-ExecutionPolicy Bypass -Scope Process -Force
+  #         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+  #         Invoke-WebRequest https://chocolatey.org/install.ps1 -UseBasicParsing | Invoke-Expression
 
-      # Step 3: Update version in nuspec
-      - name: Update version in azion.nuspec
-        run: |
-          $version = '${{ needs.build.outputs.binver }}'
-          # Update the version tag in azion.nuspec
-          (Get-Content chocolatey/azion.nuspec) -replace '<version>.*</version>', "<version>$version</version>" | Set-Content chocolatey/azion.nuspec
-        shell: pwsh
+  #     # Step 3: Update version in azion.nuspec
+  #     - name: Update version in azion.nuspec
+  #       run: |
+  #         $version = '${{ needs.build.outputs.binver }}'
+  #         if (-Not $version) {
+  #           Write-Error "Version is not defined! Check the output from bump_formula."
+  #           exit 1
+  #         }
+  #         Write-Host "Updating nuspec version to $version"
+  #         (Get-Content chocolatey/azion.nuspec) -replace '<version>.*</version>', "<version>$version</version>" | Set-Content chocolatey/azion.nuspec
+  #       shell: pwsh
 
-      # Step 4: Download the Azion executable
-      - name: Download Azion executable
-        run: |
-          $toolsDir = "$(Resolve-Path .\chocolatey\tools)"
-          New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null
-          $outputFile = Join-Path $toolsDir 'azion.exe'
-          $url = 'http://downloads.azion.com/windows/x86_64/azion'
-          Invoke-WebRequest -Uri $url -OutFile $outputFile
-        shell: pwsh
+  #     # Step 4: Download the Azion executable
+  #     - name: Download Azion executable
+  #       run: |
+  #         $toolsDir = "$(Resolve-Path .\chocolatey\tools)"
+  #         New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null
+  #         $outputFile = Join-Path $toolsDir 'azion.exe'
+  #         $url = 'http://downloads.azion.com/windows/x86_64/azion'
+  #         Invoke-WebRequest -Uri $url -OutFile $outputFile
+  #       shell: pwsh
 
-      # Step 5: Calculate checksum
-      - name: Calculate checksum
-        id: calculate-checksum
-        run: |
-          $outputFile = "$(Resolve-Path .\chocolatey\tools\azion.exe)"
-          $checksum = (Get-FileHash -Path $outputFile -Algorithm SHA256).Hash
-          echo "::set-output name=checksum::$checksum"
-        shell: pwsh
+  #     # Step 5: Calculate checksum
+  #     - name: Calculate checksum
+  #       id: calculate-checksum
+  #       run: |
+  #         $outputFile = "$(Resolve-Path .\chocolatey\tools\azion.exe)"
+  #         $checksum = (Get-FileHash -Path $outputFile -Algorithm SHA256).Hash
+  #         echo "::set-output name=checksum::$checksum"
+  #       shell: pwsh
 
-      # Step 6: Replace checksum in chocolateyinstall.ps1
-      - name: Replace checksum in chocolateyinstall.ps1
-        run: |
-          (Get-Content .\chocolatey\tools\chocolateyinstall.ps1) -replace '{{CHECKSUM}}', '${{ steps.calculate-checksum.outputs.checksum }}' | Set-Content .\chocolatey\tools\chocolateyinstall.ps1
-        shell: pwsh
+  #     # Step 6: Replace checksum in chocolateyinstall.ps1
+  #     - name: Replace checksum in chocolateyinstall.ps1
+  #       run: |
+  #         (Get-Content .\chocolatey\tools\chocolateyinstall.ps1) -replace '{{CHECKSUM}}', '${{ steps.calculate-checksum.outputs.checksum }}' | Set-Content .\chocolatey\tools\chocolateyinstall.ps1
+  #       shell: pwsh
 
-      # Step 7: Pack and push the Chocolatey package
-      - name: Publish Chocolatey package
-        env:
-          CHOCO_API_KEY: ${{ secrets.CHOCO_TOKEN }}
-        run: |
-          # Ensure that the Chocolatey package is packed and pushed correctly
-          choco pack chocolatey/azion.nuspec
-          choco push chocolatey/azion.${{ needs.build.outputs.binver }}.nupkg --source https://push.chocolatey.org/ --api-key $env:CHOCO_API_KEY
-        shell: pwsh
+  #     # Step 7: Pack and push the Chocolatey package
+  #     - name: Publish Chocolatey package
+  #       env:
+  #         CHOCO_API_KEY: ${{ secrets.CHOCO_TOKEN }}
+  #       run: |
+  #         # Ensure that the Chocolatey package is packed and pushed correctly
+  #         choco pack chocolatey/azion.nuspec
+  #         choco push chocolatey/azion.${{ needs.build.outputs.binver }}.nupkg --source https://push.chocolatey.org/ --api-key $env:CHOCO_API_KEY
+  #       shell: pwsh
 
   Publish-to-WinGet:
     runs-on: windows-latest
