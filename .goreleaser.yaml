@@ -49,21 +49,23 @@ builds:
       - arm64
 
 archives:
-  # For non-Windows platforms (Linux, macOS, etc.), include completions and other files
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_v{{ .Tag }}"
+  # Non-Windows platforms (Linux, macOS, etc.)
+  - id: non-windows
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_v{{ .Tag }}"
     format: tar.gz
     files:
       - completions/*
-    if: "{{ .Os != 'windows' }}"
+      - ./dist/azion-{{ .Os }}_{{ .Arch }}/azion
 
-  # For Windows, create a zip file containing all the .exe binaries for various architectures
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_v{{ .Tag }}.zip"
+  # Windows platforms
+  - id: windows
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_v{{ .Tag }}.zip"
     format: zip
     files:
       - ./dist/azion-windows - CGO_ENABLED=0_windows_386_sse2/azion.exe    # 32-bit Windows (386)
       - ./dist/azion-windows - CGO_ENABLED=0_windows_amd64_v1/azion.exe    # 64-bit Windows (amd64)
       - ./dist/azion-windows - CGO_ENABLED=0_windows_arm64_v8.0/azion.exe  # ARM64 Windows
-    if: "{{ .Os == 'windows' }}"
+
 
 before:
   hooks:
