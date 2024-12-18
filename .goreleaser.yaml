@@ -62,9 +62,9 @@ archives:
     name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_v{{ .Tag }}.zip"
     format: zip
     files:
-      - ./dist/azion-windows_386/azion.exe
-      - ./dist/azion-windows_amd64/azion.exe
-      - ./dist/azion-windows_arm64/azion.exe
+      - ./dist/azion-windows - CGO_ENABLED=0_windows_386_sse2/azion.exe    # 32-bit Windows (386)
+      - ./dist/azion-windows - CGO_ENABLED=0_windows_amd64_v1/azion.exe    # 64-bit Windows (amd64)
+      - ./dist/azion-windows - CGO_ENABLED=0_windows_arm64_v8.0/azion.exe  # ARM64 Windows
 
 
 before:
