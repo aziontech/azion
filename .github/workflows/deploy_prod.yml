@@ -28,12 +28,12 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      # - name: Bump version and push tag
-      #   id: tag_ver
-      #   uses: anothrNick/github-tag-action@1.37.0
-      #   env:
-      #     RELEASE_BRANCHES: main
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump version and push tag
+        id: tag_ver
+        uses: anothrNick/github-tag-action@1.37.0
+        env:
+          RELEASE_BRANCHES: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Refresh git
         run: git fetch --tags
@@ -79,30 +79,30 @@ jobs:
       - name: set bin version to github env
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
 
-      # - uses: goreleaser/goreleaser-action@v6
-      #   with:
-      #     distribution: goreleaser
-      #     version: 2.3.2
-      #     args: release --clean
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      #     API_URL: https://api.azionapi.net
-      #     STORAGE_URL: https://api.azion.com
-      #     AUTH_URL: https://sso.azion.com/api
-      #     TEMPLATE_BRANCH: main
-      #     SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
-      #     CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: 2.3.2
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          API_URL: https://api.azionapi.net
+          STORAGE_URL: https://api.azion.com
+          AUTH_URL: https://sso.azion.com/api
+          TEMPLATE_BRANCH: main
+          SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
+          CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
 
 
-  # bump_formula:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - uses: dawidd6/action-homebrew-bump-formula@v3
-  #       with:
-  #         token: ${{secrets.RELEASE_GITHUB_TOKEN}}
-  #         formula: azion
-  #         tag: ${{needs.build.outputs.binver}}
+  bump_formula:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.RELEASE_GITHUB_TOKEN}}
+          formula: azion
+          tag: ${{needs.build.outputs.binver}}
 
   publish-choco-package:
     runs-on: windows-latest
