@@ -81,45 +81,6 @@ nfpms:
         file_info:
           mode: 0644
 
-chocolateys:
-  - name: azion
-
-    package_source_url: https://github.com/aziontech/azion/releases
-
-    owners: aziontech
-
-    title: azion
-
-    authors: PatrickMenoti
-
-    project_url: https://github.com/aziontech/azion
-
-    url_template: "http://downloads.azion.com/windows/x86_64/azion"
-
-    license_url: https://github.com/aziontech/azion/blob/dev/LICENSE
-
-    require_license_acceptance: false
-
-    project_source_url: https://github.com/aziontech/azion
-
-    docs_url: https://www.azion.com/en/documentation/products/azion-cli/overview
-
-    bug_tracker_url: https://github.com/aziontech/azion/issues
-
-    tags: "azion cli go publish deploy build jamstack"
-
-    summary: Use Azion CLI for managing Azion services via command-line.
-
-    description: Azion CLI is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands.
-
-    release_notes: "https://github.com/aziontech/azion/releases/tag/{{ .Version }}"
-
-    api_key: "{{ .Env.CHOCOLATEY_TOKEN }}"
-
-    source_repo: "https://push.chocolatey.org/"
-
-    goamd64: v1
-
 checksum:
   name_template: "{{ .ProjectName }}_v{{ .Env.BIN_VERSION }}_checksum"
 snapshot:
