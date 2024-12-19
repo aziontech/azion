@@ -172,13 +172,9 @@ jobs:
     runs-on: windows-latest
     needs: [build, bump_formula]
     steps:
-      - name: install cargo
-        run: |
-          Set-ExecutionPolicy Unrestricted -Scope Process; iex (iwr "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.ps1").Content
-        shell: pwsh
       - name: install komac
         run: |
-          cargo binstall komac --no-confirm
+          winget install komac
         shell: pwsh
       - name: Update Azion Package
         shell: pwsh
