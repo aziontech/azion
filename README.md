@@ -40,7 +40,7 @@ The developer-friendly way to interact with Azion!
 There are two ways to download and use the `azion` CLI:
 
 - Cloning this repository and [building](#building) the project manually.
-- Package managers, since `azion` is also available as `homebrew`, `rpm`, `deb` and `apk` packages.
+- Package managers, since `azion` is also available as `homebrew`, `WinGet`, `Chocolatey`, `rpm`, `deb` and `apk` packages.
 
 To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://github.com/aziontech/azion-cli/releases) page, and download the desired package.
 
@@ -48,6 +48,12 @@ To download azion CLI through Homebrew, run:
 
 ```sh
 brew install azion
+``````
+
+To download azion CLI through WinGet, run:
+
+```sh
+winget install aziontech.azion
 ``````
 
 ## Using Azion CLI with docker

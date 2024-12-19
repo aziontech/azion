@@ -124,7 +124,7 @@ jobs:
         run: |
           $version = '${{ needs.build.outputs.binver }}'
           if (-Not $version) {
-            Write-Error "Version is not defined! Check the output from bump_formula."
+            Write-Error "Version is not defined! Check the output from build job."
             exit 1
           }
           Write-Host "Updating nuspec version to $version"
@@ -170,11 +170,22 @@ jobs:
 
   Publish-to-WinGet:
     runs-on: windows-latest
-    needs: build
+    needs: [build, bump_formula]
     steps:
-      - uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: azion.azion
-          installers-regex: '\.exe$'  # Only `.exe` files
-          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+      - name: install komac
+        run: |
+          winget install komac
+        shell: pwsh
+      - name: Update Azion Package
+        shell: pwsh
+        run: |
+          $version = "${{ needs.build.outputs.binver }}"
+          komac update aziontech.azion `
+            --urls https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_386.zip `
+                  https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_amd64.zip `
+                  https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_arm64.zip `
+            --version $version `
+            --submit `
+            -t ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
 
