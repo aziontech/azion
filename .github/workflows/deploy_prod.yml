@@ -28,12 +28,12 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      # - name: Bump version and push tag
-      #   id: tag_ver
-      #   uses: anothrNick/github-tag-action@1.37.0
-      #   env:
-      #     RELEASE_BRANCHES: main
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Bump version and push tag
+        id: tag_ver
+        uses: anothrNick/github-tag-action@1.37.0
+        env:
+          RELEASE_BRANCHES: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Refresh git
         run: git fetch --tags
@@ -79,30 +79,30 @@ jobs:
       - name: set bin version to github env
         run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
 
-      # - uses: goreleaser/goreleaser-action@v6
-      #   with:
-      #     distribution: goreleaser
-      #     version: 2.3.2
-      #     args: release --clean
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-      #     API_URL: https://api.azionapi.net
-      #     STORAGE_URL: https://api.azion.com
-      #     AUTH_URL: https://sso.azion.com/api
-      #     TEMPLATE_BRANCH: main
-      #     SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
-      #     CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: 2.3.2
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          API_URL: https://api.azionapi.net
+          STORAGE_URL: https://api.azion.com
+          AUTH_URL: https://sso.azion.com/api
+          TEMPLATE_BRANCH: main
+          SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
+          CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
 
 
-  # bump_formula:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - uses: dawidd6/action-homebrew-bump-formula@v3
-  #       with:
-  #         token: ${{secrets.RELEASE_GITHUB_TOKEN}}
-  #         formula: azion
-  #         tag: ${{needs.build.outputs.binver}}
+  bump_formula:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: dawidd6/action-homebrew-bump-formula@v3
+        with:
+          token: ${{secrets.RELEASE_GITHUB_TOKEN}}
+          formula: azion
+          tag: ${{needs.build.outputs.binver}}
 
   publish-choco-package:
     runs-on: windows-latest
@@ -124,7 +124,7 @@ jobs:
         run: |
           $version = '${{ needs.build.outputs.binver }}'
           if (-Not $version) {
-            Write-Error "Version is not defined! Check the output from bump_formula."
+            Write-Error "Version is not defined! Check the output from build job."
             exit 1
           }
           Write-Host "Updating nuspec version to $version"
@@ -170,11 +170,22 @@ jobs:
 
   Publish-to-WinGet:
     runs-on: windows-latest
-    needs: build
+    needs: [build, bump_formula]
     steps:
-      - uses: vedantmgoyal9/winget-releaser@main
-        with:
-          identifier: azion.azion
-          installers-regex: '\.exe$'  # Only `.exe` files
-          token: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+      - name: install komac
+        run: |
+          winget install komac
+        shell: pwsh
+      - name: Update Azion Package
+        shell: pwsh
+        run: |
+          $version = "${{ needs.build.outputs.binver }}"
+          komac update aziontech.azion `
+            --urls https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_386.zip `
+                  https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_amd64.zip `
+                  https://github.com/aziontech/azion/releases/download/$version/azion_${version}_windows_arm64.zip `
+            --version $version `
+            --submit `
+            -t ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
 
