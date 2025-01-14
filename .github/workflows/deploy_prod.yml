@@ -172,6 +172,27 @@ jobs:
     runs-on: windows-latest
     needs: [build, bump_formula]
     steps:
+      
+      - name: Register WinGet if not available
+        run: |
+          # Check if Winget is installed
+          if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
+            Write-Host "Winget not found. Attempting to register..."
+            try {
+              Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+              Write-Host "Winget registration triggered successfully."
+            } catch {
+              Write-Error "Failed to register Winget. Ensure administrative privileges are available."
+              exit 1
+            }
+          } else {
+            Write-Host "Winget is already installed."
+          }
+
+      - name: Verify Winget installation
+        run: |
+          winget --version
+          
       - name: install komac
         run: |
           winget install komac
