@@ -72,8 +72,15 @@ jobs:
             distro=$(echo ${spec} | cut -d/ -f1);\
             goarch=$(echo ${spec} | cut -d/ -f2);\
             arch=$(echo ${goarch} | sed 's/386/x86_32/g; s/amd64/x86_64/g; s/arm$/arm32/g;');\
-            cp dist/$distro/$arch/azion* dist/$distro/$arch/azion;
-            aws s3 cp --no-progress --recursive \
-              --exclude "*" --include "azion*" \
-              dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/; \
+            if [ "$distro" = "windows" ]; then\
+              cp dist/$distro/$arch/azion* dist/$distro/$arch/azion.exe;\
+              aws s3 cp --no-progress --recursive \
+                --exclude "*" --include "azion*.exe" \
+                dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/;\
+            else\
+              cp dist/$distro/$arch/azion* dist/$distro/$arch/azion;\
+              aws s3 cp --no-progress --recursive \
+                --exclude "*" --include "azion*" \
+                dist/$distro/$arch/ s3://azion-downloads/stage/$distro/$arch/;\
+            fi;\
           done < BUILD
