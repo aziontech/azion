@@ -6,7 +6,7 @@
     <title>azion</title>
     <authors>Azion Technologies</authors>
     <projectUrl>https://github.com/aziontech/azion</projectUrl>
-    <tags>azion cli golang</tags>
+    <tags>azion aziontech cli golang</tags>
     <licenseUrl>https://github.com/aziontech/azion/blob/dev/LICENSE</licenseUrl>
     <releaseNotes>https://github.com/aziontech/azion/releases</releaseNotes>
     <docsUrl>https://www.azion.com/en/documentation/products/azion-cli/overview</docsUrl>
