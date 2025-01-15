@@ -6,7 +6,14 @@
     <title>azion</title>
     <authors>Azion Technologies</authors>
     <projectUrl>https://github.com/aziontech/azion</projectUrl>
-    <tags>azion cli golang</tags>
+    <tags>azion aziontech cli golang</tags>
+    <licenseUrl>https://github.com/aziontech/azion/blob/dev/LICENSE</licenseUrl>
+    <releaseNotes>https://github.com/aziontech/azion/releases</releaseNotes>
+    <docsUrl>https://www.azion.com/en/documentation/products/azion-cli/overview</docsUrl>
+    <mailingListUrl>https://www.azion.com/en/documentation/products/get-help</mailingListUrl>
+    <bugTrackerUrl>https://github.com/aziontech/azion/issues</bugTrackerUrl>
+    <packageSourceUrl>https://github.com/aziontech/azion/tree/dev/chocolatey</packageSourceUrl>
+    <projectSourceUrl>https://github.com/aziontech/azion</projectSourceUrl>
     <summary>Azion CLI is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands</summary>
     <description>Use Azion CLI for managing Azion services via command-line</description>
   </metadata>
