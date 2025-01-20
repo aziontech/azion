@@ -71,94 +71,94 @@ var (
 	DeployURL   = "https://console.azion.com"
 	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 	AzionEdges  = []string{
-		"Africa, Angola, Luanda (LAD)",
-		"Asia, China, Hong Kong - (HKG)",
-		"Europe, France, Paris (CDG)",
-		"Europe, Germany, Frankfurt (FRA)",
-		"Europe, Italy, Milan (MXP)",
-		"Europe, London, United Kingdom (LYC)",
-		"Europe, Spain, Madrid (MAD)",
-		"Europe, Sweden, Stockholm (ARN)",
-		"Latin America, Argentina, Buenos Aires 1 (AEP)",
-		"Latin America, Argentina, Buenos Aires 2 (AEP)",
-		"Latin America, Brazil, Aracaju 1 (AJU)",
-		"Latin America, Brazil, Aracaju 2 (AJU)",
-		"Latin America, Brazil, Barueri (CGH)",
-		"Latin America, Brazil, Belem (BEL)",
-		"Latin America, Brazil, Belo Horizonte 1 (PLU)",
-		"Latin America, Brazil, Belo Horizonte 2 (PLU)",
-		"Latin America, Brazil, Belo Horizonte 3 (PLU)",
-		"Latin America, Brazil, Brasília (BSB)",
-		"Latin America, Brazil, Campo Grande (CGR)",
-		"Latin America, Brazil, Campinas (VCP)",
-		"Latin America, Brazil, Cotia (CGH)",
-		"Latin America, Brazil, Cuiabá 1 (CGB)",
-		"Latin America, Brazil, Cuiabá 2 (CGB)",
-		"Latin America, Brazil, Curitiba 1 (CWB)",
-		"Latin America, Brazil, Curitiba 2 (CWB)",
-		"Latin America, Brazil, Florianópolis 1 (FLN)",
-		"Latin America, Brazil, Florianópolis 2 (FLN)",
-		"Latin America, Brazil, Fortaleza 1 (FOR)",
-		"Latin America, Brazil, Fortaleza 2 (FOR)",
-		"Latin America, Brazil, Fortaleza 3 (FOR)",
-		"Latin America, Brazil, Franca (FRC)",
-		"Latin America, Brazil, Goiania (GYN)",
-		"Latin America, Brazil, João Pessoa (JPA)",
-		"Latin America, Brazil, Juazeiro do Norte (JDO)",
-		"Latin America, Brazil, Linhares (VIX)",
-		"Latin America, Brazil, Londrina (LDB)",
-		"Latin America, Brazil, Macapá 1 (MCP)",
-		"Latin America, Brazil, Macapá 2 (MCP)",
-		"Latin America, Brazil, Maceió (MCZ)",
-		"Latin America, Brazil, Manaus 1 (MAO)",
-		"Latin America, Brazil, Manaus 2 (MAO)",
-		"Latin America, Brazil, Natal (NAT)",
-		"Latin America, Brazil, Osasco (CGH)",
-		"Latin America, Brazil, Porto Alegre 1 (POA)",
-		"Latin America, Brazil, Porto Alegre 2 (POA)",
-		"Latin America, Brazil, Porto Alegre 3 (POA)",
-		"Latin America, Brazil, Recife 1 (REC)",
-		"Latin America, Brazil, Recife 2 (REC)",
-		"Latin America, Brazil, Recife 3 (REC)",
-		"Latin America, Brazil, Rio Branco (RBR)",
-		"Latin America, Brazil, Rio de Janeiro 1 (SDU)",
-		"Latin America, Brazil, Rio de Janeiro 2 (SDU)",
-		"Latin America, Brazil, Rio de Janeiro 3 (SDU)",
-		"Latin America, Brazil, Rio de Janeiro 4 (GIG)",
-		"Latin America, Brazil, Rio de Janeiro 5 (GIG)",
-		"Latin America, Brazil, Rio de Janeiro 6 (SDU)",
-		"Latin America, Brazil, Salvador 1 (SSA)",
-		"Latin America, Brazil, Salvador 2 (SSA)",
-		"Latin America, Brazil, Salvador 4 (SSA)",
-		"Latin America, Brazil, São Luis (SLZ)",
-		"Latin America, Brazil, São Paulo 1 (CGH)",
-		"Latin America, Brazil, São Paulo 2 (CGH)",
-		"Latin America, Brazil, São Paulo 3 (CGH)",
-		"Latin America, Brazil, São Paulo 4 (CGH)",
-		"Latin America, Brazil, São Paulo 5 (CGH)",
-		"Latin America, Brazil, Sorocaba 1 (SOD)",
-		"Latin America, Brazil, Sorocaba 2 (SOD)",
-		"Latin America, Chile, Santiago (SCL)",
-		"Latin America, Brazil, Santos (SSZ)",
-		"Latin America, Brazil, Vitória (VIX)",
-		"Latin America, Colombia, Bogota (BOG)",
-		"Latin America, Mexico, Queretaro (QRO)",
-		"Latin America, Peru, Lima (LIM)",
-		"Latin America, Brazil, Manaus 3 (MAO)",
-		"North America, USA, Ashburn (IAD)",
-		"North America, USA, Atlanta (ATL)",
-		"North America, USA, Chicago (MDW)",
-		"North America, USA, Dallas (DAL)",
-		"North America, USA, Denver (DEN)",
-		"North America, USA, Los Angeles (LAX)",
-		"North America, USA, McAllen (MFE)",
-		"North America, USA, Miami (MIA)",
-		"North America, USA, New York (EWR)",
-		"North America, USA, Orlando (MCO)",
-		"North America, USA, Phoenix (PHX)",
-		"North America, USA, Santa Clara (SJC)",
-		"North America, USA, Seattle (SEA)",
-		"Oceania, Sydney, Australia - (SYD)",
+		"Africa, Angola, Luanda (LAD) 🇦🇴",
+		"Asia, China, Hong Kong - (HKG) 🇭🇰",
+		"Europe, France, Paris (CDG) 🇫🇷",
+		"Europe, Germany, Frankfurt (FRA) 🇩🇪",
+		"Europe, Italy, Milan (MXP) 🇮🇹",
+		"Europe, London, United Kingdom (LYC) 🇬🇧",
+		"Europe, Spain, Madrid (MAD) 🇪🇸",
+		"Europe, Sweden, Stockholm (ARN) 🇸🇪",
+		"Latin America, Argentina, Buenos Aires 1 (AEP) 🇦🇷",
+		"Latin America, Argentina, Buenos Aires 2 (AEP) 🇦🇷",
+		"Latin America, Brazil, Aracaju 1 (AJU) 🇧🇷",
+		"Latin America, Brazil, Aracaju 2 (AJU) 🇧🇷",
+		"Latin America, Brazil, Barueri (CGH) 🇧🇷",
+		"Latin America, Brazil, Belem (BEL) 🇧🇷",
+		"Latin America, Brazil, Belo Horizonte 1 (PLU) 🇧🇷",
+		"Latin America, Brazil, Belo Horizonte 2 (PLU) 🇧🇷",
+		"Latin America, Brazil, Belo Horizonte 3 (PLU) 🇧🇷",
+		"Latin America, Brazil, Brasília (BSB) 🇧🇷",
+		"Latin America, Brazil, Campo Grande (CGR) 🇧🇷",
+		"Latin America, Brazil, Campinas (VCP) 🇧🇷",
+		"Latin America, Brazil, Cotia (CGH) 🇧🇷",
+		"Latin America, Brazil, Cuiabá 1 (CGB) 🇧🇷",
+		"Latin America, Brazil, Cuiabá 2 (CGB) 🇧🇷",
+		"Latin America, Brazil, Curitiba 1 (CWB) 🇧🇷",
+		"Latin America, Brazil, Curitiba 2 (CWB) 🇧🇷",
+		"Latin America, Brazil, Florianópolis 1 (FLN) 🇧🇷",
+		"Latin America, Brazil, Florianópolis 2 (FLN) 🇧🇷",
+		"Latin America, Brazil, Fortaleza 1 (FOR) 🇧🇷",
+		"Latin America, Brazil, Fortaleza 2 (FOR) 🇧🇷",
+		"Latin America, Brazil, Fortaleza 3 (FOR) 🇧🇷",
+		"Latin America, Brazil, Franca (FRC) 🇧🇷",
+		"Latin America, Brazil, Goiania (GYN) 🇧🇷",
+		"Latin America, Brazil, João Pessoa (JPA) 🇧🇷",
+		"Latin America, Brazil, Juazeiro do Norte (JDO) 🇧🇷",
+		"Latin America, Brazil, Linhares (VIX) 🇧🇷",
+		"Latin America, Brazil, Londrina (LDB) 🇧🇷",
+		"Latin America, Brazil, Macapá 1 (MCP) 🇧🇷",
+		"Latin America, Brazil, Macapá 2 (MCP) 🇧🇷",
+		"Latin America, Brazil, Maceió (MCZ) 🇧🇷",
+		"Latin America, Brazil, Manaus 1 (MAO) 🇧🇷",
+		"Latin America, Brazil, Manaus 2 (MAO) 🇧🇷",
+		"Latin America, Brazil, Natal (NAT) 🇧🇷",
+		"Latin America, Brazil, Osasco (CGH) 🇧🇷",
+		"Latin America, Brazil, Porto Alegre 1 (POA) 🇧🇷",
+		"Latin America, Brazil, Porto Alegre 2 (POA) 🇧🇷",
+		"Latin America, Brazil, Porto Alegre 3 (POA) 🇧🇷",
+		"Latin America, Brazil, Recife 1 (REC) 🇧🇷",
+		"Latin America, Brazil, Recife 2 (REC) 🇧🇷",
+		"Latin America, Brazil, Recife 3 (REC) 🇧🇷",
+		"Latin America, Brazil, Rio Branco (RBR) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 1 (SDU) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 2 (SDU) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 3 (SDU) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 4 (GIG) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 5 (GIG) 🇧🇷",
+		"Latin America, Brazil, Rio de Janeiro 6 (SDU) 🇧🇷",
+		"Latin America, Brazil, Salvador 1 (SSA) 🇧🇷",
+		"Latin America, Brazil, Salvador 2 (SSA) 🇧🇷",
+		"Latin America, Brazil, Salvador 4 (SSA) 🇧🇷",
+		"Latin America, Brazil, São Luis (SLZ) 🇧🇷",
+		"Latin America, Brazil, São Paulo 1 (CGH) 🇧🇷",
+		"Latin America, Brazil, São Paulo 2 (CGH) 🇧🇷",
+		"Latin America, Brazil, São Paulo 3 (CGH) 🇧🇷",
+		"Latin America, Brazil, São Paulo 4 (CGH) 🇧🇷",
+		"Latin America, Brazil, São Paulo 5 (CGH) 🇧🇷",
+		"Latin America, Brazil, Sorocaba 1 (SOD) 🇧🇷",
+		"Latin America, Brazil, Sorocaba 2 (SOD) 🇧🇷",
+		"Latin America, Chile, Santiago (SCL) 🇨🇱",
+		"Latin America, Brazil, Santos (SSZ) 🇧🇷",
+		"Latin America, Brazil, Vitória (VIX) 🇧🇷",
+		"Latin America, Colombia, Bogota (BOG) 🇨🇴",
+		"Latin America, Mexico, Queretaro (QRO) 🇲🇽",
+		"Latin America, Peru, Lima (LIM) 🇵🇪",
+		"Latin America, Brazil, Manaus 3 (MAO) 🇧🇷",
+		"North America, USA, Ashburn (IAD) 🇺🇸",
+		"North America, USA, Atlanta (ATL) 🇺🇸",
+		"North America, USA, Chicago (MDW) 🇺🇸",
+		"North America, USA, Dallas (DAL) 🇺🇸",
+		"North America, USA, Denver (DEN) 🇺🇸",
+		"North America, USA, Los Angeles (LAX) 🇺🇸",
+		"North America, USA, McAllen (MFE) 🇺🇸",
+		"North America, USA, Miami (MIA) 🇺🇸",
+		"North America, USA, New York (EWR) 🇺🇸",
+		"North America, USA, Orlando (MCO) 🇺🇸",
+		"North America, USA, Phoenix (PHX) 🇺🇸",
+		"North America, USA, Santa Clara (SJC) 🇺🇸",
+		"North America, USA, Seattle (SEA) 🇺🇸",
+		"Oceania, Sydney, Australia - (SYD) 🇦🇺",
 	}
 )
 
@@ -228,6 +228,38 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, l
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
+	DeployVersion, err := utils.GenerateDeployVersion()
+	if err != nil {
+		return err
+	}
+
+	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
+	}
+
+	isFirstDeploy := conf.DeployVersion == ""
+
+	if Local {
+		logger.Debug("Starting local deploy", zap.Bool("Local", Local))
+		deployLocal := deploy.NewDeployCmd(f)
+		err := deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild, DeployVersion)
+		if err != nil {
+			return err
+		}
+
+		conf, err = cmd.GetAzionJsonContent(ProjectConf)
+		if err != nil {
+			logger.Debug("Failed to get updated Azion JSON content", zap.Error(err))
+			return err
+		}
+
+		if isFirstDeploy {
+			return waitForDomainPropagation(conf.Domain.Url)
+		}
+		return nil
+	}
 
 	if DryRun {
 		dryStructure := dryrun.NewDryrunCmd(f)
@@ -238,36 +270,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return dryStructure.SimulateDeploy(pathWorkingDir, ProjectConf)
 	}
 
-	if Local {
-		deployLocal := deploy.NewDeployCmd(f)
-		err := deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild)
-		if err != nil {
-			return err
-		}
-
-		// Obter a configuração após o deploy local
-		conf, err := cmd.GetAzionJsonContent(ProjectConf)
-		if err != nil {
-			logger.Debug("Failed to get Azion JSON content", zap.Error(err))
-			return err
-		}
-
-		// Verificar a propagação do domínio
-		err = checkDomainPropagation(conf.Domain.Url)
-		if err != nil {
-			logger.Debug("Error checking domain propagation", zap.Error(err))
-			return err
-		}
-
-		return nil
-	}
-
 	msgs := []string{}
 	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	err := cmd.CheckToken(f)
+	err = cmd.CheckToken(f)
 	if err != nil {
 		return err
 	}
@@ -277,7 +285,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	conf, err = cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -358,8 +366,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
-	msgs = append(msgs, msg.DeployPropagation)
+	if !isFirstDeploy && Local {
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
+		msgs = append(msgs, msg.DeployPropagation)
+	}
+
+	if Result.Result.Errors != nil {
+		return errors.New(Result.Result.Errors.Stack)
+	}
 
 	return nil
 }
@@ -486,70 +500,61 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	return nil
 }
 
-func checkDomainPropagation(url string) error {
-	maxAttempts := 180
-	remainingEdges := make([]string, len(AzionEdges))
-	copy(remainingEdges, AzionEdges)
-
-	currentIndex := 0
-	ticker := time.NewTicker(5 * time.Second)
+func waitForDomainPropagation(url string) error {
+	timeout := 10 * time.Minute
+	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-
-	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
-	s.Suffix = fmt.Sprintf(" Propagating to %s", remainingEdges[currentIndex])
-	s.Start()
-
 	startTime := time.Now()
 
-	for i := 0; i < maxAttempts; i++ {
-		resp, err := http.Get(url)
-		if err != nil {
-			logger.Debug("HTTP request error", zap.Error(err))
-			time.Sleep(time.Second)
-			continue
-		}
+	currentEdgeIndex := 0
+	s := spinner.New(spinner.CharSets[11], 100*time.Millisecond)
+	s.Prefix = "🌍 "
+	s.Start()
+	defer s.Stop()
 
-		if resp != nil && resp.Body != nil {
-			defer resp.Body.Close()
-		}
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
 
-		logger.Debug(
-			"Checking propagation",
-			zap.Int("attempt", i+1),
-			zap.Int("status", resp.StatusCode),
-			zap.Duration("elapsed", time.Since(startTime)),
-		)
-
-		if resp.StatusCode != 404 {
-			s.Stop()
-
-			fmt.Print("\r\033[K")
-
-			for _, edge := range remainingEdges {
-				s.Suffix = fmt.Sprintf(" Propagating to %s", edge)
-				s.Start()
-				time.Sleep(100 * time.Millisecond)
+	for time.Since(startTime) < timeout {
+		req, err := http.NewRequest("GET", url, nil)
+		if err == nil {
+			resp, err := client.Do(req)
+			if err == nil && resp.StatusCode != 404 {
+				resp.Body.Close()
 				s.Stop()
-			}
+				fmt.Print("\r\033[K")
 
-			fmt.Print("\r\033[K")
-			fmt.Println("🎉 Domain propagation completed successfully!")
+				// Mostra rapidamente as edges restantes
+				for i := currentEdgeIndex; i < len(AzionEdges); i++ {
+					fmt.Printf("\r🌍 Propagated to %s", AzionEdges[i])
+					time.Sleep(100 * time.Millisecond)
+					fmt.Print("\r\033[K")
+				}
 
-			err = open.Run(url)
-			if err != nil {
-				return fmt.Errorf("error opening browser: %w", err)
+				fmt.Printf("\n🚀 Domain propagation completed successfully in %.1f minutes!\n", time.Since(startTime).Minutes())
+
+				// Abre a URL no navegador padrão
+				if err := open.Run(url); err != nil {
+					return fmt.Errorf("failed to open browser: %w", err)
+				}
+
+				return nil
 			}
-			return nil
+			if resp != nil {
+				resp.Body.Close()
+			}
 		}
 
 		select {
 		case <-ticker.C:
-			currentIndex = (currentIndex + 1) % len(remainingEdges)
-			s.Suffix = fmt.Sprintf(" Propagating to %s", remainingEdges[currentIndex])
+			if currentEdgeIndex < len(AzionEdges) {
+				s.Suffix = fmt.Sprintf(" Propagating to %s", AzionEdges[currentEdgeIndex])
+				currentEdgeIndex = (currentEdgeIndex + 1) % len(AzionEdges)
+			}
+		default:
 		}
 	}
 
-	s.Stop()
-	elapsedMinutes := time.Since(startTime).Minutes()
-	return fmt.Errorf("timeout waiting for domain propagation after %.1f minutes", elapsedMinutes)
+	return fmt.Errorf("timeout waiting for domain propagation after %.1f minutes", time.Since(startTime).Minutes())
 }

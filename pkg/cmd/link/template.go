@@ -18,10 +18,11 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 	}
 
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:   info.Name,
-		Env:    "production",
-		Preset: strings.ToLower(info.Preset),
-		Prefix: "",
+		Name:          info.Name,
+		Env:           "production",
+		Preset:        strings.ToLower(info.Preset),
+		Prefix:        "",
+		DeployVersion: "",
 	}
 	azionJson.Function.Name = "__DEFAULT__"
 	azionJson.Function.InstanceName = "__DEFAULT__"
