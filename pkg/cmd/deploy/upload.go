@@ -34,13 +34,21 @@ func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error
 			return err
 		}
 
-		// Skip node_modules and .edge directories
-		if info.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
+		// Handle symlinks and resolve actual path type
+		resolvedInfo, statErr := os.Stat(path)
+		if statErr != nil {
+			logger.Debug("Error resolving path", zap.String("path", path), zap.Error(statErr))
+			return statErr
+		}
+
+		// Skip directories like node_modules or .edge
+		if resolvedInfo.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
 			logger.Debug("Skipping directory: " + path)
 			return filepath.SkipDir
 		}
 
-		if !info.IsDir() {
+		// Process files
+		if !resolvedInfo.IsDir() {
 			fileContent, err := cmd.Open(path)
 			if err != nil {
 				logger.Debug("Error while trying to read file <"+path+"> about to be uploaded", zap.Error(err))
@@ -66,7 +74,6 @@ func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error
 		return nil
 	}); err != nil {
 		logger.Debug("Error while reading files", zap.Error(err))
-
 		return nil, err
 	}
 
