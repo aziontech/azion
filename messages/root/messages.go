@@ -26,7 +26,7 @@ var (
 	TokenUsedIn     = "This token will be used by default with all commands"
 
 	// update messages
-	NotSupported      = "OS currently not supported"
+	// NotSupported      = "OS currently not supported"
 	NewVersion        = "There is a new version of Azion CLI available\n"
 	BrewUpdate        = "Please run: 'brew upgrade azion' to update it to v%s\n"
 	ReleasePage       = "Please visit our Releases page and download the appropriate file\n"
@@ -36,6 +36,7 @@ var (
 	DpkgUpdate        = "Please run: 'sudo dpkg -i <downloaded_file>' to update it to v%s\n"
 	PkgUpdate         = "Please run: 'sudo pkg install <downloaded_file>' to update it to v%s\n"
 	ApkUpdate         = "Please run: 'sudo apk add <downloaded_file>' to update it to v%s\n"
+	WindowsUpdate     = "Please use Winget or Chocolatey to update it to v%s\n"
 	AskCollectMetrics = "To better understand user needs and enhance our application, we gather anonymous data. Do you agree to participate? (Y/n)"
 	UnsupportedOS     = "Unsupported Operating System\n"
 )
