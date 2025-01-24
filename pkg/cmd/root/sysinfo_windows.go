@@ -11,6 +11,6 @@ import (
 )
 
 func showUpdadeMessageSystem(f *cmdutil.Factory, vNumber string) error {
-	logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.NotSupported))
+	logger.FInfo(f.IOStreams.Out, fmt.Sprintf(msg.WindowsUpdate, vNumber))
 	return nil
 }
