@@ -14,6 +14,7 @@
     <bugTrackerUrl>https://github.com/aziontech/azion/issues</bugTrackerUrl>
     <packageSourceUrl>https://github.com/aziontech/azion/tree/dev/chocolatey</packageSourceUrl>
     <projectSourceUrl>https://github.com/aziontech/azion</projectSourceUrl>
+    <iconUrl>https://assets.azion.com/global/images/brand/monogram.png</iconUrl>
     <summary>Azion CLI is a user-friendly way to work with the Azion Edge Platform, allowing you to create and manage applications through simple commands</summary>
     <description>Use Azion CLI for managing Azion services via command-line</description>
   </metadata>
