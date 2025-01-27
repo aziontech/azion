@@ -106,7 +106,7 @@ if [ -f "$full_main_go_path" ]; then
             echo "Running cmd/azion/main.go deploy --debug"
             # go run "$full_main_go_path" deploy --debug
             # uncomment the line below and comment the line above if using a built binary file
-            "$full_bin_path" deploy --debug
+            "$full_bin_path" deploy --debug --local
 
             # Check the exit status of the deploy command
             if [ $? -eq 0 ]; then
