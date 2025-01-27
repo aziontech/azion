@@ -330,7 +330,11 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 			request.SetHostHeader(origin.HostHeader)
 		}
 		if len(origin.Addresses) > 0 {
-			request.SetAddresses(origin.Addresses)
+			addresses := make([]sdk.CreateOriginsRequestAddresses, len(origin.Addresses))
+			for i, item := range origin.Addresses {
+				addresses[i].Address = item.Address
+			}
+			request.SetAddresses(addresses)
 		}
 		if origin.HmacAccessKey != nil {
 			request.SetHmacAccessKey(*origin.HmacSecretKey)
@@ -377,7 +381,11 @@ func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 			request.SetHostHeader(origin.HostHeader)
 		}
 		if len(origin.Addresses) > 0 {
-			request.SetAddresses(origin.Addresses)
+			addresses := make([]sdk.CreateOriginsRequestAddresses, len(origin.Addresses))
+			for i, item := range origin.Addresses {
+				addresses[i].Address = item.Address
+			}
+			request.SetAddresses(addresses)
 		}
 		if origin.HmacAccessKey != nil {
 			request.SetHmacAccessKey(*origin.HmacSecretKey)

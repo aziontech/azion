@@ -8,7 +8,7 @@ $outputFile = Join-Path $toolsDir 'azion.exe'
 # Define package details
 $url        = 'http://downloads.azion.com/windows/x86_64/azion'
 $checksum = '{{CHECKSUM}}'
-$silentArgs = ''
+$silentArgs = '-s -y'
 $packageArgs = @{
     packageName   = 'azion'
     unzipLocation = $toolsDir

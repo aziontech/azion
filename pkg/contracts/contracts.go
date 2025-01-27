@@ -228,18 +228,23 @@ type CacheSetting struct {
 }
 
 type Origin struct {
-	Name                 string                              `json:"name"`
-	OriginType           string                              `json:"origin_type,omitempty"`
-	Bucket               string                              `json:"bucket,omitempty"`
-	Prefix               string                              `json:"prefix,omitempty"`
-	Addresses            []sdk.CreateOriginsRequestAddresses `json:"addresses,omitempty"`
-	HostHeader           string                              `json:"host_header,omitempty"`
-	OriginProtocolPolicy *string                             `json:"origin_protocol_policy,omitempty"`
-	OriginPath           *string                             `json:"origin_path,omitempty"`
-	HmacAuthentication   *bool                               `json:"hmac_authentication,omitempty"`
-	HmacRegionName       *string                             `json:"hmac_region_name,omitempty"`
-	HmacAccessKey        *string                             `json:"hmac_access_key,omitempty"`
-	HmacSecretKey        *string                             `json:"hmac_secret_key,omitempty"`
+	Name                 string    `json:"name"`
+	OriginType           string    `json:"origin_type,omitempty"`
+	Bucket               string    `json:"bucket,omitempty"`
+	Prefix               string    `json:"prefix,omitempty"`
+	Addresses            []Address `json:"addresses,omitempty"`
+	HostHeader           string    `json:"host_header,omitempty"`
+	OriginProtocolPolicy *string   `json:"origin_protocol_policy,omitempty"`
+	OriginPath           *string   `json:"origin_path,omitempty"`
+	HmacAuthentication   *bool     `json:"hmac_authentication,omitempty"`
+	HmacRegionName       *string   `json:"hmac_region_name,omitempty"`
+	HmacAccessKey        *string   `json:"hmac_access_key,omitempty"`
+	HmacSecretKey        *string   `json:"hmac_secret_key,omitempty"`
+}
+
+type Address struct {
+	Address string `json:"address"`
+	Weight  int    `json:"weight,omitempty"`
 }
 
 type RuleEngine struct {

@@ -171,7 +171,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 		request.SetHttpsPort(fields.HttpsPort)
 	}
 
-	if !utils.IsEmpty(fields.DeliveryProtocol) {
+	if !utils.IsEmpty(fields.OriginType) {
 		request.SetOriginType(fields.OriginType)
 	}
 
