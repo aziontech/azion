@@ -15,10 +15,11 @@ func (cmd *initCmd) createTemplateAzion() error {
 	}
 
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:   cmd.name,
-		Env:    "production",
-		Preset: cmd.preset,
-		Prefix: "",
+		Name:          cmd.name,
+		Env:           "production",
+		Preset:        cmd.preset,
+		Prefix:        "",
+		DeployVersion: "",
 	}
 
 	azionJson.Function.Name = "__DEFAULT__"

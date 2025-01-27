@@ -557,3 +557,8 @@ func ContainSubstring(word string, words []string) bool {
 	}
 	return false
 }
+
+func GenerateDeployVersion() (string, error) {
+	timestamp := time.Now().Format("20060102150405")
+	return fmt.Sprintf("azion-%s", timestamp), nil
+}

@@ -495,48 +495,155 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	return &resp.Results, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, authorize bool) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, authorize bool, DeployVersion string) error {
 	logger.Debug("Create Rules Engine Next Application")
 
-	req := CreateRulesEngineRequest{}
-	criteria := make([][]sdk.RulesEngineCriteria, 1)
-	for i := 0; i < 1; i++ {
-		criteria[i] = make([]sdk.RulesEngineCriteria, 1)
+	// Verificar se as regras já existem
+	opts := &contracts.ListOptions{
+		Page:     1,
+		PageSize: 100,
+		OrderBy:  "id",
+		Sort:     "asc",
 	}
 
-	req.SetName("enable gzip")
-
-	behaviorsGZIP := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-	var behString sdk.RulesEngineBehaviorString
-	behString.SetName("enable_gzip")
-	behString.SetTarget("")
-
-	behaviorsGZIP = append(behaviorsGZIP, sdk.RulesEngineBehaviorEntry{
-		RulesEngineBehaviorString: &behString,
-	})
-
-	req.SetBehaviors(behaviorsGZIP)
-
-	criteria[0][0].SetConditional("if")
-	criteria[0][0].SetVariable("${request_uri}")
-	criteria[0][0].SetOperator("exists")
-	criteria[0][0].SetInputValue("")
-	req.SetCriteria(criteria)
-
-	_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
-		EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
-		CreateRulesEngineRequest(req.CreateRulesEngineRequest).Execute()
+	rulesResp, err := c.ListRulesEngine(ctx, opts, applicationId, "response")
 	if err != nil {
-		if httpResp != nil {
-			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
-			if err != nil {
-				return err
-			}
+		return err
+	}
+
+	// Verificar se as regras já existem
+	var gzipExists, debugExists bool
+	for _, rule := range rulesResp.Results {
+		if rule.Name == "enable_gzip" {
+			gzipExists = true
+		}
+		if rule.Name == "azion_deploy_debug" {
+			debugExists = true
+		}
+	}
+
+	// Criar regra gzip apenas se não existir
+	if !gzipExists {
+		reqGzip := CreateRulesEngineRequest{}
+		criteriaGzip := make([][]sdk.RulesEngineCriteria, 1)
+		criteriaGzip[0] = make([]sdk.RulesEngineCriteria, 1)
+
+		reqGzip.SetName("enable_gzip")
+
+		var behGzip sdk.RulesEngineBehaviorString
+		behGzip.SetName("enable_gzip")
+		behGzip.SetTarget("")
+
+		behaviorsGzip := []sdk.RulesEngineBehaviorEntry{
+			{
+				RulesEngineBehaviorString: &behGzip,
+			},
+		}
+		reqGzip.SetBehaviors(behaviorsGzip)
+
+		criteriaGzip[0][0].SetConditional("if")
+		criteriaGzip[0][0].SetVariable("${request_uri}")
+		criteriaGzip[0][0].SetOperator("exists")
+		criteriaGzip[0][0].SetInputValue("")
+		reqGzip.SetCriteria(criteriaGzip)
+
+		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
+			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
+			CreateRulesEngineRequest(reqGzip.CreateRulesEngineRequest).Execute()
+		if err != nil {
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	// Criar regra debug apenas se não existir
+	if !debugExists {
+		reqDebug := CreateRulesEngineRequest{}
+		criteriaDebug := make([][]sdk.RulesEngineCriteria, 1)
+		criteriaDebug[0] = make([]sdk.RulesEngineCriteria, 1)
+
+		reqDebug.SetName("azion_deploy_debug")
+		reqDebug.SetDescription("Adds a response header with the deployment version ID to track changes propagation across the edge network, allowing users to verify if their updates have reached each edge location, even when content is cached.")
+
+		var behDebug sdk.RulesEngineBehaviorString
+		behDebug.SetName("add_response_header")
+		behDebug.SetTarget(fmt.Sprintf("X-Azion-CLI-Deploy-Version: %s", DeployVersion))
+
+		behaviorsDebug := []sdk.RulesEngineBehaviorEntry{
+			{
+				RulesEngineBehaviorString: &behDebug,
+			},
+		}
+		reqDebug.SetBehaviors(behaviorsDebug)
+
+		criteriaDebug[0][0].SetConditional("if")
+		criteriaDebug[0][0].SetVariable("${request_uri}")
+		criteriaDebug[0][0].SetOperator("exists")
+		criteriaDebug[0][0].SetInputValue("")
+		reqDebug.SetCriteria(criteriaDebug)
+
+		_, httpResp, err := c.apiClient.EdgeApplicationsRulesEngineAPI.
+			EdgeApplicationsEdgeApplicationIdRulesEnginePhaseRulesPost(ctx, applicationId, "response").
+			CreateRulesEngineRequest(reqDebug.CreateRulesEngineRequest).Execute()
+		if err != nil {
+			return utils.ErrorPerStatusCode(httpResp, err)
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateDebugRule(ctx context.Context, applicationId int64, DeployVersion string) error {
+	logger.Debug("Updating azion_deploy_debug rule")
+
+	// Listar todas as regras para encontrar a azion_deploy_debug
+	opts := &contracts.ListOptions{
+		Page:     1,
+		PageSize: 100,
+		OrderBy:  "id",
+		Sort:     "asc",
+	}
+
+	rulesResp, err := c.ListRulesEngine(ctx, opts, applicationId, "response")
+	if err != nil {
+		logger.Debug("Error listing rules engine", zap.Error(err))
+		return err
+	}
+
+	// Procurar a regra azion_deploy_debug
+	var debugRuleID int64
+	for _, rule := range rulesResp.Results {
+		if rule.Name == "azion_deploy_debug" {
+			debugRuleID = rule.Id
+			break
+		}
+	}
+
+	if debugRuleID == 0 {
+		logger.Debug("azion_deploy_debug rule not found")
+		return fmt.Errorf("azion_deploy_debug rule not found")
+	}
+
+	var behResponseHeader sdk.RulesEngineBehaviorString
+	behResponseHeader.SetName("add_response_header")
+	behResponseHeader.SetTarget(fmt.Sprintf("Azion-CLI-Deploy-Version: %s", DeployVersion))
+
+	behaviors := []sdk.RulesEngineBehaviorEntry{
+		{
+			RulesEngineBehaviorString: &behResponseHeader,
+		},
+	}
+
+	updateReq := &UpdateRulesEngineRequest{
+		IdApplication: applicationId,
+		Phase:         "response",
+		Id:            debugRuleID,
+	}
+	updateReq.SetBehaviors(behaviors)
+
+	_, err = c.UpdateRulesEngine(ctx, updateReq)
+	if err != nil {
+		logger.Debug("Error updating azion_deploy_debug rule", zap.Error(err))
+		return err
 	}
 
 	return nil

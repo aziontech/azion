@@ -43,13 +43,15 @@ type DeployCmd struct {
 }
 
 var (
-	Path        string
-	Auto        bool
-	NoPrompt    bool
-	SkipBuild   bool
-	ProjectConf string
-	Sync        bool
-	Env         string
+	Path          string
+	Auto          bool
+	NoPrompt      bool
+	SkipBuild     bool
+	ProjectConf   string
+	Sync          bool
+	Env           string
+	DeployVersion string
+	IsLocal       bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -97,12 +99,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool, deployVersion string) error {
+	DeployVersion = deployVersion
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
 	Auto = auto
 	SkipBuild = skipBuild
+
 	return cmd.Run(f)
 }
 
@@ -111,6 +115,20 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
+
+	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	if err != nil {
+		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
+		return err
+	}
+
+	conf.DeployVersion = DeployVersion
+
+	err = cmd.WriteAzionJsonContent(conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error updating build ID in azion.json", zap.Error(err))
+		return err
+	}
 
 	if Sync {
 		sync.ProjectConf = ProjectConf
@@ -129,12 +147,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
 		}
-	}
-
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
-	if err != nil {
-		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
-		return err
 	}
 
 	versionID := cmd.VersionID()
@@ -193,14 +205,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
-		var behString sdk.RulesEngineBehaviorString
-		behString.SetName("set_origin")
+		var behOrigin sdk.RulesEngineBehaviorString
+		behOrigin.SetName("set_origin")
+		behOrigin.SetTarget(strconv.Itoa(int(singleOriginId)))
 
-		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
+		behaviors = append(behaviors,
+			sdk.RulesEngineBehaviorEntry{
+				RulesEngineBehaviorString: &behOrigin,
+			},
+		)
 
 		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
 			IdApplication: conf.Application.ID,
@@ -213,6 +226,20 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
 		if err != nil {
 			logger.Debug("Error while updating default rules engine", zap.Error(err))
+			return err
+		}
+
+		logger.Debug("Creating new rules engine with Deploy Version", zap.String("DeployVersion", DeployVersion))
+		err = clients.EdgeApplication.CreateRulesEngineNextApplication(ctx, conf.Application.ID, 0, "", false, DeployVersion)
+		if err != nil {
+			logger.Debug("Error while creating response rules", zap.Error(err))
+			return err
+		}
+	} else {
+		logger.Debug("Updating debug rule with Deploy Version", zap.String("DeployVersion", DeployVersion))
+		err = clients.EdgeApplication.UpdateDebugRule(ctx, conf.Application.ID, DeployVersion)
+		if err != nil {
+			logger.Debug("Error while updating debug rule", zap.Error(err))
 			return err
 		}
 	}
@@ -250,6 +277,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
 	msgs = append(msgs, msg.DeployPropagation)
+	msgs = append(msgs, "")
 
 	outSlice := output.SliceOutput{
 		Messages: msgs,

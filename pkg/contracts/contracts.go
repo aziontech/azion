@@ -50,6 +50,7 @@ type AzionApplicationOptions struct {
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
 	NotFirstRun   bool                         `json:"not-first-run"`
+	DeployVersion string                       `json:"deploy-version"`
 	Function      AzionJsonDataFunction        `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`
