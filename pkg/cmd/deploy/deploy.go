@@ -177,6 +177,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	//create credentials if they are not found on settings file
 	if settings.S3AccessKey == "" || settings.S3SecreKey == "" {
 		nameBucket := fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID())
+		nameBucket = utils.ReplaceInvalidCharsBucket(nameBucket)
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: sdk.READ_ONLY}})
 		if err != nil {

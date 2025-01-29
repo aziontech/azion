@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"regexp"
 
 	"github.com/aziontech/azionapi-go-sdk/storage"
 
@@ -28,7 +27,7 @@ func (cmd *DeployCmd) doBucket(
 
 	logger.FInfoFlags(cmd.Io.Out, msg.ProjectNameMessage, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msg.ProjectNameMessage)
-	nameBucket := replaceInvalidChars(conf.Name)
+	nameBucket := utils.ReplaceInvalidCharsBucket(conf.Name)
 
 	err := client.CreateBucket(ctx, api.RequestBucket{
 		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_ONLY}})
@@ -73,10 +72,4 @@ func askForInput(msg string, defaultIn string) (string, error) {
 		return "", err
 	}
 	return userInput, nil
-}
-
-// replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
-func replaceInvalidChars(str string) string {
-	re := regexp.MustCompile(`(?i)(?:azion-|b2-)|[^a-z0-9\-]`)
-	return re.ReplaceAllString(str, "")
 }

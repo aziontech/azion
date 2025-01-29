@@ -2,6 +2,8 @@ package deploy
 
 import (
 	"testing"
+
+	"github.com/aziontech/azion-cli/utils"
 )
 
 func Test_replaceInvalidChars(t *testing.T) {
@@ -53,7 +55,7 @@ func Test_replaceInvalidChars(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := replaceInvalidChars(tt.args); got != tt.want {
+			if got := utils.ReplaceInvalidCharsBucket(tt.args); got != tt.want {
 				t.Errorf("replaceInvalidChars() = %v, want %v", got, tt.want)
 			}
 		})
