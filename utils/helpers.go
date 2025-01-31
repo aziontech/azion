@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -556,4 +557,10 @@ func ContainSubstring(word string, words []string) bool {
 		}
 	}
 	return false
+}
+
+// replaceInvalidChars Regular expression to find disallowed characters: "[^a-zA-Z0-9]+" replace invalid characters with -
+func ReplaceInvalidCharsBucket(str string) string {
+	re := regexp.MustCompile(`(?i)(?:azion-|b2-)|[^a-z0-9\-]`)
+	return re.ReplaceAllString(str, "")
 }

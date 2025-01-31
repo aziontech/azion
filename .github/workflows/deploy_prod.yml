@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.22.5
+      image: golang:1.22.11
     outputs:
       binver: ${{ steps.binversion.outputs.BIN_VERSION }}
     env:
@@ -172,31 +172,26 @@ jobs:
     runs-on: windows-latest
     needs: [build, bump_formula]
     steps:
-      
-      - name: Register WinGet if not available
+      # 1. Install Scoop
+      - name: Install Scoop
         run: |
-          # Check if Winget is installed
-          if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
-            Write-Host "Winget not found. Attempting to register..."
-            try {
-              Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
-              Write-Host "Winget registration triggered successfully."
-            } catch {
-              Write-Error "Failed to register Winget. Ensure administrative privileges are available."
-              exit 1
-            }
-          } else {
-            Write-Host "Winget is already installed."
-          }
-
-      - name: Verify Winget installation
-        run: |
-          winget --version
-          
-      - name: install komac
-        run: |
-          winget install komac
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+          Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
         shell: pwsh
+
+      # 2. Add the 'extras' bucket
+      - name: Add Extras Bucket
+        run: |
+          scoop bucket add extras
+        shell: pwsh
+
+      # 3. Install Komac using Scoop
+      - name: Install Komac
+        run: |
+          scoop install komac
+        shell: pwsh
+
+      # 4. Use Komac to update the Azion package
       - name: Update Azion Package
         shell: pwsh
         run: |
@@ -208,5 +203,4 @@ jobs:
             --version $version `
             --submit `
             -t ${{ secrets.RELEASE_GITHUB_TOKEN }}
-
 
