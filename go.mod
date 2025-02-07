@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.22.11
+go 1.22.12
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
