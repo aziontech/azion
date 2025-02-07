@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -15,6 +16,7 @@ import (
 
 var (
 	ProjectConf string
+	AppId       int64
 )
 
 type SyncCmd struct {
@@ -25,6 +27,8 @@ type SyncCmd struct {
 	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
 	EnvPath               string
 	ReadEnv               func(filenames ...string) (envMap map[string]string, err error)
+	WriteManifest         func(manifest *contracts.Manifest, pathMan string) error
+	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 }
 
 func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
@@ -35,6 +39,8 @@ func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		SyncResources:         SyncLocalResources,
 		ReadEnv:               godotenv.Read,
+		WriteManifest:         WriteManifest,
+		CommandRunInteractive: command.CommandRunInteractive,
 	}
 }
 

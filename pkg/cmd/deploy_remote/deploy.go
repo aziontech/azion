@@ -234,7 +234,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	if manifestStructure.Domain.Name == "" {
+	if manifestStructure.Domain != nil && manifestStructure.Domain.Name == "" {
 		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
 		if err != nil {
 			return err

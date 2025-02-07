@@ -57,8 +57,7 @@ func (man *ManifestInterpreter) ManifestPath() (string, error) {
 	return utils.Concat(pathWorkingDir, manifestFilePath), nil
 }
 
-func (man *ManifestInterpreter) ReadManifest(
-	path string, f *cmdutil.Factory, msgs *[]string) (*contracts.Manifest, error) {
+func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, msgs *[]string) (*contracts.Manifest, error) {
 	logger.FInfoFlags(f.IOStreams.Out, msg.ReadingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.ReadingManifest)
 	manifest := &contracts.Manifest{}
@@ -114,7 +113,7 @@ func (man *ManifestInterpreter) CreateResources(
 		OriginIds[originConf.Name] = originConf.OriginId
 	}
 
-	if manifest.Domain.Name != "" {
+	if manifest.Domain != nil && manifest.Domain.Name != "" {
 		if conf.Domain.Id > 0 {
 			requestUpdate := makeDomainUpdateRequest(manifest.Domain, conf)
 			updated, err := clientDomain.Update(ctx, requestUpdate)
