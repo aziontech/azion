@@ -143,7 +143,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 			OriginIds[originConf.Name] = originConf.OriginId
 		}
 
-		if manifestStructure.Domain.Name != "" {
+		if manifestStructure.Domain != nil && manifestStructure.Domain.Name != "" {
 			skip = true
 			logger.Debug("", zap.Any("Domain Payload", manifestStructure.Domain))
 			if conf.Domain.Id > 0 {

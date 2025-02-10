@@ -129,6 +129,12 @@ func TestSyncFull(t *testing.T) {
 				},
 			}, nil
 		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
+		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
 		}
@@ -175,6 +181,12 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
 		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
@@ -226,6 +238,12 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
 		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil

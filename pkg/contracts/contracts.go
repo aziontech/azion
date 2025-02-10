@@ -178,7 +178,7 @@ type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
-	Domain        Domains        `json:"domain"`
+	Domain        *Domains       `json:"domain,omitempty"`
 	Purge         []Purges       `json:"purge"`
 }
 
@@ -204,27 +204,27 @@ type Domains struct {
 }
 
 type CacheSetting struct {
-	Name                           *string  `json:"name,omitempty"`
-	BrowserCacheSettings           *string  `json:"browser_cache_settings,omitempty"`
-	BrowserCacheSettingsMaximumTtl *int64   `json:"browser_cache_settings_maximum_ttl,omitempty"`
-	CdnCacheSettings               *string  `json:"cdn_cache_settings,omitempty"`
-	CdnCacheSettingsMaximumTtl     *int64   `json:"cdn_cache_settings_maximum_ttl,omitempty"`
-	CacheByQueryString             *string  `json:"cache_by_query_string,omitempty"`
-	QueryStringFields              []string `json:"query_string_fields,omitempty"`
-	EnableQueryStringSort          *bool    `json:"enable_query_string_sort,omitempty"`
-	CacheByCookies                 *string  `json:"cache_by_cookies,omitempty"`
-	CookieNames                    []string `json:"cookie_names,omitempty"`
-	AdaptiveDeliveryAction         *string  `json:"adaptive_delivery_action,omitempty"`
-	DeviceGroup                    []int32  `json:"device_group,omitempty"`
-	EnableCachingForPost           *bool    `json:"enable_caching_for_post,omitempty"`
-	L2CachingEnabled               *bool    `json:"l2_caching_enabled,omitempty"`
-	IsSliceConfigurationEnabled    *bool    `json:"is_slice_configuration_enabled,omitempty"`
-	IsSliceEdgeCachingEnabled      *bool    `json:"is_slice_edge_caching_enabled,omitempty"`
-	IsSliceL2CachingEnabled        *bool    `json:"is_slice_l2_caching_enabled,omitempty"`
-	SliceConfigurationRange        *int64   `json:"slice_configuration_range,omitempty"`
-	EnableCachingForOptions        *bool    `json:"enable_caching_for_options,omitempty"`
-	EnableStaleCache               *bool    `json:"enable_stale_cache,omitempty"`
-	L2Region                       *string  `json:"l2_region,omitempty"`
+	Name                           *string   `json:"name,omitempty"`
+	BrowserCacheSettings           *string   `json:"browser_cache_settings,omitempty"`
+	BrowserCacheSettingsMaximumTtl *int64    `json:"browser_cache_settings_maximum_ttl,omitempty"`
+	CdnCacheSettings               *string   `json:"cdn_cache_settings,omitempty"`
+	CdnCacheSettingsMaximumTtl     *int64    `json:"cdn_cache_settings_maximum_ttl,omitempty"`
+	CacheByQueryString             *string   `json:"cache_by_query_string,omitempty"`
+	QueryStringFields              []string  `json:"query_string_fields,omitempty"`
+	EnableQueryStringSort          *bool     `json:"enable_query_string_sort,omitempty"`
+	CacheByCookies                 *string   `json:"cache_by_cookies,omitempty"`
+	CookieNames                    []*string `json:"cookie_names,omitempty"`
+	AdaptiveDeliveryAction         *string   `json:"adaptive_delivery_action,omitempty"`
+	DeviceGroup                    []int32   `json:"device_group,omitempty"`
+	EnableCachingForPost           *bool     `json:"enable_caching_for_post,omitempty"`
+	L2CachingEnabled               *bool     `json:"l2_caching_enabled,omitempty"`
+	IsSliceConfigurationEnabled    *bool     `json:"is_slice_configuration_enabled,omitempty"`
+	IsSliceEdgeCachingEnabled      *bool     `json:"is_slice_edge_caching_enabled,omitempty"`
+	IsSliceL2CachingEnabled        *bool     `json:"is_slice_l2_caching_enabled,omitempty"`
+	SliceConfigurationRange        *int64    `json:"slice_configuration_range,omitempty"`
+	EnableCachingForOptions        *bool     `json:"enable_caching_for_options,omitempty"`
+	EnableStaleCache               *bool     `json:"enable_stale_cache,omitempty"`
+	L2Region                       *string   `json:"l2_region,omitempty"`
 }
 
 type Origin struct {

@@ -40,7 +40,13 @@ func makeCacheRequestUpdate(cache contracts.CacheSetting) *apiCache.UpdateReques
 		request.SetCdnCacheSettingsMaximumTtl(*cache.CdnCacheSettingsMaximumTtl)
 	}
 	if cache.CookieNames != nil {
-		request.SetCookieNames(cache.CookieNames)
+		var cookieNames []string
+		for _, name := range cache.CookieNames {
+			if name != nil {
+				cookieNames = append(cookieNames, *name)
+			}
+		}
+		request.SetCookieNames(cookieNames)
 	}
 	if cache.EnableCachingForOptions != nil {
 		request.SetEnableCachingForOptions(*cache.EnableCachingForOptions)
@@ -101,7 +107,13 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 		request.SetCdnCacheSettingsMaximumTtl(*cache.CdnCacheSettingsMaximumTtl)
 	}
 	if cache.CookieNames != nil {
-		request.SetCookieNames(cache.CookieNames)
+		var cookieNames []string
+		for _, name := range cache.CookieNames {
+			if name != nil {
+				cookieNames = append(cookieNames, *name)
+			}
+		}
+		request.SetCookieNames(cookieNames)
 	}
 	if cache.DeviceGroup != nil {
 		request.SetDeviceGroup(cache.DeviceGroup)
@@ -447,7 +459,7 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	return cache.GetId(), nil
 }
 
-func makeDomainUpdateRequest(domain contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.UpdateRequest {
+func makeDomainUpdateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.UpdateRequest {
 	request := &apiDomain.UpdateRequest{}
 
 	if domain.CnameAccessOnly != nil {
@@ -487,7 +499,7 @@ func makeDomainUpdateRequest(domain contracts.Domains, conf *contracts.AzionAppl
 	return request
 }
 
-func makeDomainCreateRequest(domain contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.CreateRequest {
+func makeDomainCreateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.CreateRequest {
 	request := &apiDomain.CreateRequest{}
 
 	if domain.CnameAccessOnly != nil {
