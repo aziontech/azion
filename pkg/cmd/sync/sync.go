@@ -16,7 +16,6 @@ import (
 
 var (
 	ProjectConf string
-	AppId       int64
 )
 
 type SyncCmd struct {
