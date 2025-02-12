@@ -134,9 +134,6 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 				prevTimestamp = timestamp
 				continue
 			}
-			// if timestamp != referenceTimestamp {
-			// 	return timestamp, nil
-			// }
 		}
 	}
 
