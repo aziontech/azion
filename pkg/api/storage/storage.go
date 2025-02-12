@@ -90,7 +90,13 @@ func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contra
 		MaxObjectCount(int32(opts.PageSize)).ContinuationToken(opts.ContinuationToken)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Error("Error while listing objects", zap.Error(err))
+		if httpResp != nil {
+			logger.Debug("Error while listing Objects from Bucket", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return resp, nil

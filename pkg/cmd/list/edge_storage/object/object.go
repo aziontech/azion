@@ -51,10 +51,7 @@ func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 		}
 		b.BucketName = answer
 	}
-	client := api.NewClient(
-		b.Factory.HttpClient,
-		b.Factory.Config.GetString("storage_url"),
-		b.Factory.Config.GetString("token"))
+	client := api.NewClient(b.Factory.HttpClient, b.Factory.Config.GetString("storage_url"), b.Factory.Config.GetString("token"))
 	return b.PrintTable(client)
 }
 
