@@ -2,6 +2,7 @@ package rollback
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -11,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -57,7 +59,7 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 
 			conf, err := rollback.GetAzionJsonContent(projectPath)
 			if err != nil {
-				logger.Debug("Error while building your project", zap.Error(err))
+				logger.Debug("Error while reading azion.json file", zap.Error(err))
 				return msg.ERRORAZION
 			}
 
@@ -85,7 +87,12 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 				return msg.ERRORROLLBACK
 			}
 
-			return nil
+			rollbackOut := output.GeneralOutput{
+				Msg:   msg.SUCCESS,
+				Out:   f.IOStreams.Out,
+				Flags: f.Flags,
+			}
+			return output.Print(&rollbackOut)
 		},
 	}
 
@@ -112,6 +119,7 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 
 	resp, err := client.ListObject(c, bucketName, options)
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", err
 	}
 
