@@ -8,6 +8,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -16,6 +17,8 @@ import (
 
 var (
 	ProjectConf string
+	IaC         bool
+	IaCFormat   string
 )
 
 type SyncCmd struct {
@@ -62,6 +65,8 @@ func NewCobraCmd(sync *SyncCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
 	cobraCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	cobraCmd.Flags().StringVar(&sync.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
+	cobraCmd.Flags().BoolVar(&IaC, "iac", false, msg.IACFLAG)
+	cobraCmd.Flags().StringVar(&IaCFormat, "format", "mjs", msg.IACFORMATFLAG)
 
 	return cobraCmd
 }
@@ -116,5 +121,11 @@ func Run(cmdFac *SyncCmd) error {
 		return err
 	}
 
-	return nil
+	syncOut := output.GeneralOutput{
+		Msg:   msg.SYNCSUCCESS,
+		Out:   cmdFac.F.IOStreams.Out,
+		Flags: cmdFac.F.Flags,
+	}
+	return output.Print(&syncOut)
+
 }

@@ -75,12 +75,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(
-	conf *contracts.AzionApplicationOptions,
-	manifest *contracts.Manifest,
-	f *cmdutil.Factory,
-	projectConf string,
-	msgs *[]string) error {
+func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.CreatingManifest)
