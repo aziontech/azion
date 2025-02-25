@@ -59,17 +59,23 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
 
-	err = synch.WriteManifest(manifest, "")
-	if err != nil {
-		return err
-	}
-	defer os.Remove("manifesttoconvert.json")
+	if IaC {
+		if IaCFormat != "mjs" && IaCFormat != "cjs" && IaCFormat != "js" && IaCFormat != "ts" {
+			return msg.INVALIDFORMAT
+		}
 
-	vul := vulcanPkg.NewVulcan()
-	command := vul.Command("", "manifest -o %s transform %s", f)
-	err = synch.CommandRunInteractive(f, fmt.Sprintf(command, "azion.config.mjs", "manifesttoconvert.json"))
-	if err != nil {
-		return err
+		err = synch.WriteManifest(manifest, "")
+		if err != nil {
+			return err
+		}
+		defer os.Remove("manifesttoconvert.json")
+
+		vul := vulcanPkg.NewVulcan()
+		command := vul.Command("", "manifest -o %s transform %s", f)
+		err = synch.CommandRunInteractive(f, fmt.Sprintf(command, "azion.config.mjs", "manifesttoconvert.json"))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -82,6 +88,9 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory, ma
 	if err != nil {
 		return remoteOriginIds, err
 	}
+
+	originsAzion := []contracts.AzionJsonDataOrigin{}
+	info.Conf.Origin = originsAzion
 
 	for _, origin := range resp.Results {
 		remoteOriginIds[strconv.FormatInt(*origin.OriginId, 10)] = contracts.AzionJsonDataOrigin{
@@ -110,25 +119,18 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory, ma
 			oEntry.OriginType = *origin.OriginType
 		}
 		manifest.Origins = append(manifest.Origins, oEntry)
-		if r := info.OriginIds[origin.Name]; r.OriginId > 0 {
-			continue
-		}
 		newOrigin := contracts.AzionJsonDataOrigin{
 			OriginId:  origin.GetOriginId(),
 			OriginKey: origin.GetOriginKey(),
 			Name:      origin.GetName(),
 		}
-		info.Conf.Origin = append(info.Conf.Origin, newOrigin)
-		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return remoteOriginIds, err
-		}
-		logger.FInfoFlags(
-			synch.Io.Out,
-			fmt.Sprintf(msg.SYNCMESSAGEORIGIN, origin.Name),
-			synch.F.Format,
-			synch.F.Out)
+		originsAzion = append(originsAzion, newOrigin)
+		info.Conf.Origin = originsAzion
+	}
+	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return remoteOriginIds, err
 	}
 	return remoteOriginIds, nil
 }
@@ -140,6 +142,9 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	if err != nil {
 		return remoteCacheIds, err
 	}
+
+	cacheAzion := []contracts.AzionJsonDataCacheSettings{}
+	info.Conf.CacheSettings = cacheAzion
 	for _, cache := range resp {
 		remoteCacheIds[strconv.FormatInt(cache.Id, 10)] = contracts.AzionJsonDataCacheSettings{
 			Id:   cache.Id,
@@ -170,20 +175,17 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		}
 		manifest.CacheSettings = append(manifest.CacheSettings, cEntry)
 
-		if r := info.CacheIds[cache.Name]; r.Id > 0 {
-			continue
-		}
 		newCache := contracts.AzionJsonDataCacheSettings{
 			Id:   cache.GetId(),
 			Name: cache.GetName(),
 		}
-		info.Conf.CacheSettings = append(info.Conf.CacheSettings, newCache)
-		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return remoteCacheIds, err
-		}
-		logger.FInfoFlags(synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGECACHE, cache.Name), synch.F.Format, synch.F.Out)
+		cacheAzion = append(cacheAzion, newCache)
+		info.Conf.CacheSettings = cacheAzion
+	}
+	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return remoteCacheIds, err
 	}
 	return remoteCacheIds, nil
 }
@@ -191,13 +193,19 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.Manifest,
 	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings,
 	remoteOriginIds map[string]contracts.AzionJsonDataOrigin) error {
+	// Get request rules first
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	resp, err := client.ListRulesEngine(context.Background(), opts, info.Conf.Application.ID, "request")
 	if err != nil {
 		return err
 	}
-
+	rulesAzion := []contracts.AzionJsonDataRules{}
+	info.Conf.RulesEngine.Rules = rulesAzion
 	for _, rule := range resp.Results {
+		if rule.Name == "Default Rule" {
+			//default rule is not added to azion.json or azion.config
+			continue
+		}
 		mEntry := contracts.RuleEngine{
 			Name:        rule.GetName(),
 			IsActive:    rule.GetIsActive(),
@@ -209,32 +217,76 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		}
 
 		for i, beh := range mEntry.Behaviors {
-			if beh.RulesEngineBehaviorString.Name == "set_origin" {
+			if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "set_origin" {
 				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = remoteOriginIds[beh.RulesEngineBehaviorString.Target].Name
-			} else if beh.RulesEngineBehaviorString.Name == "set_cache_policy" {
+			} else if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "set_cache_policy" {
 				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = remoteCacheIds[beh.RulesEngineBehaviorString.Target].Name
+			} else if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "run_function" {
+				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = info.Conf.Function.Name
 			}
 		}
 		manifest.Rules = append(manifest.Rules, mEntry)
 
-		if r := info.RuleIds[rule.Name]; r.Id > 0 || rule.Name == "Default Rule" {
-			// if remote rule is also on local environment, no action is needed
-			continue
-		}
 		newRule := contracts.AzionJsonDataRules{
 			Id:    rule.GetId(),
 			Name:  rule.GetName(),
 			Phase: rule.GetPhase(),
 		}
-		info.Conf.RulesEngine.Rules = append(info.Conf.RulesEngine.Rules, newRule)
-		err := synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return err
-		}
-		logger.FInfoFlags(
-			synch.Io.Out, fmt.Sprintf(msg.SYNCMESSAGERULE, rule.Name), synch.F.Format, synch.F.Out)
+		rulesAzion = append(rulesAzion, newRule)
+		info.Conf.RulesEngine.Rules = rulesAzion
 	}
+	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	respResponse, err := client.ListRulesEngine(context.Background(), opts, info.Conf.Application.ID, "response")
+	if err != nil {
+		return err
+	}
+
+	for _, rule := range respResponse.Results {
+		if rule.Name == "enable gzip" {
+			// we do not add the enable gzip rule created by CLI to azion.json or azion.config
+			continue
+		}
+		mEntry := contracts.RuleEngine{
+			Name:        rule.GetName(),
+			IsActive:    rule.GetIsActive(),
+			Order:       rule.GetOrder(),
+			Phase:       rule.GetPhase(),
+			Description: rule.Description,
+			Behaviors:   rule.GetBehaviors(),
+			Criteria:    rule.GetCriteria(),
+		}
+
+		for i, beh := range mEntry.Behaviors {
+			if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "set_origin" {
+				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = remoteOriginIds[beh.RulesEngineBehaviorString.Target].Name
+			} else if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "set_cache_policy" {
+				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = remoteCacheIds[beh.RulesEngineBehaviorString.Target].Name
+			} else if beh.RulesEngineBehaviorString != nil && beh.RulesEngineBehaviorString.Name == "run_function" {
+				mEntry.Behaviors[i].RulesEngineBehaviorString.Target = info.Conf.Function.Name
+			}
+		}
+		manifest.Rules = append(manifest.Rules, mEntry)
+
+		newRule := contracts.AzionJsonDataRules{
+			Id:    rule.GetId(),
+			Name:  rule.GetName(),
+			Phase: rule.GetPhase(),
+		}
+		rulesAzion = append(rulesAzion, newRule)
+		info.Conf.RulesEngine.Rules = rulesAzion
+	}
+
+	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
 	return nil
 }
 
