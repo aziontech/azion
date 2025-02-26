@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.22.12
+      image: golang:1.23.0
     outputs:
       binver: ${{ steps.binversion.outputs.BIN_VERSION }}
     env:
