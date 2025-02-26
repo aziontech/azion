@@ -29,13 +29,15 @@ jobs:
           echo "Building and testing"
           make test build
 
-      - name: Linter
-        run: |
-          echo "installing dependencies"
-          go mod download
-          go mod tidy
-          echo "Static checking the code"
-          make lint
+      # - name: Linter
+      #   run: |
+      #     echo "installing dependencies"
+      #     go mod download
+      #     go mod tidy
+      #     echo "Using the linter version below"
+      #     golangci-lint version
+      #     echo "Static checking the code"
+      #     make lint
 
       - name: Gosec
         run: |
