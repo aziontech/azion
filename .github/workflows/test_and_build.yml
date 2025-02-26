@@ -31,6 +31,9 @@ jobs:
 
       - name: Linter
         run: |
+          echo "installing dependencies"
+          go mod download
+          go mod tidy
           echo "Static checking the code"
           make lint
 
