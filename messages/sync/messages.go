@@ -11,6 +11,6 @@ const (
 	CONFDIRFLAG       = "Relative path to where your custom azion.json and args.json files are stored"
 	ENVFLAG           = "Relative path to where your custom .env file is stored"
 	IACFLAG           = "If sent, sync command will also generate azion.config file"
-	IACFORMATFLAG     = "Format used to generate the azion.config file. Possible options: mjs, cjs, ts, js"
+	IACFORMATFLAG     = "Extension used to generate the azion.config file. Possible options: mjs, cjs, ts, js"
 	VARIABLESETSECRET = "Setting secret to true due to the variable key using one of the following words: 'PASSWORD', 'PWD', 'SECRET', 'HASH', 'ENCRYPTED', 'PASSCODE', 'AUTH', 'TOKEN', 'SECRET'\n"
 )
