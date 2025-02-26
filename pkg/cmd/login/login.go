@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	survey "github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/login"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
