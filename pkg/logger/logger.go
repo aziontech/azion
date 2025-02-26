@@ -79,7 +79,7 @@ func New(level zapcore.Level) {
 func FInfo(w io.Writer, message string) {
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
-		fmt.Fprintf(w, message) // nolint:all
+		fmt.Fprintf(w, "%s", message) // nolint:all
 	}
 }
 
@@ -90,7 +90,7 @@ func FInfoFlags(w io.Writer, message, format, out string) {
 
 	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
 		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
-		fmt.Fprintf(w, message) // nolint:all
+		fmt.Fprintf(w, "%s", message) // nolint:all
 	}
 }
 
