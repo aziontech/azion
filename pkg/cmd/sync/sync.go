@@ -66,7 +66,7 @@ func NewCobraCmd(sync *SyncCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	cobraCmd.Flags().StringVar(&sync.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
 	cobraCmd.Flags().BoolVar(&IaC, "iac", false, msg.IACFLAG)
-	cobraCmd.Flags().StringVar(&IaCFormat, "format", "mjs", msg.IACFORMATFLAG)
+	cobraCmd.Flags().StringVar(&IaCFormat, "extension", "mjs", msg.IACFORMATFLAG)
 
 	return cobraCmd
 }
