@@ -19,6 +19,7 @@ import (
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 	"github.com/aziontech/azion-cli/pkg/cmd/reset"
+	"github.com/aziontech/azion-cli/pkg/cmd/rollback"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
@@ -124,6 +125,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(purge.NewCmd(fact.factory))
 	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
+	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {

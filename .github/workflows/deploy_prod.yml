@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.22.11
+      image: golang:1.24.0
     outputs:
       binver: ${{ steps.binversion.outputs.BIN_VERSION }}
     env:
@@ -178,6 +178,11 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
           Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
         shell: pwsh
+
+      - name: Refresh Environment Variables
+        shell: pwsh
+        run: |
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
 
       # 2. Add the 'extras' bucket
       - name: Add Extras Bucket

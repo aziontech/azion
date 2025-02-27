@@ -104,6 +104,11 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/response/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
+
+		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
@@ -129,6 +134,15 @@ func TestSyncFull(t *testing.T) {
 				},
 			}, nil
 		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
+		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
 		}
@@ -147,6 +161,10 @@ func TestSyncFull(t *testing.T) {
 
 		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/response/rules"),
 			httpmock.JSONFromFile("./fixtures/rules_results.json"),
 		)
 
@@ -175,6 +193,12 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
 		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
@@ -226,6 +250,12 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
 		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
