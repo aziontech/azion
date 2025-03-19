@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/domain"
-	api "github.com/aziontech/azion-cli/pkg/api/domain"
+	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 
@@ -89,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 				request.SetName(fields.Name)
 				request.SetCnames(fields.Cnames)
-				request.SetEdgeApplicationId(int64(fields.EdgeApplicationID))
+				request.SetEdgeApplication(int64(fields.EdgeApplicationID))
 
 				if cmd.Flags().Changed("digital-certificate-id") {
 					request.SetDigitalCertificateId(fields.DigitalCertificateID)
