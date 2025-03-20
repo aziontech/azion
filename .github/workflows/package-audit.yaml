@@ -9,7 +9,7 @@ jobs:
     name: Package Auditor (GoVulnCheck)
     runs-on: ubuntu-latest
     container:
-      image: golang:1.24.0
+      image: golang:1.24.1
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
