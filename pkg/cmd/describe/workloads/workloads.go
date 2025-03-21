@@ -1,4 +1,4 @@
-package domains
+package workloads
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/describe/domain"
-	api "github.com/aziontech/azion-cli/pkg/api/domain"
+	msg "github.com/aziontech/azion-cli/messages/describe/workloads"
+	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -17,13 +17,13 @@ import (
 )
 
 var (
-	domainID string
+	workloadID string
 )
 
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (api.DomainResponse, error)
+	Get      func(context.Context, string) (api.WorkloadResponse, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -32,9 +32,9 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, domainID string) (api.DomainResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			return client.Get(ctx, domainID)
+		Get: func(ctx context.Context, workloadID string) (api.WorkloadResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			return client.Get(ctx, workloadID)
 		},
 	}
 }
@@ -48,22 +48,22 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion describe domain --domain-id 4312
-		$ azion describe domain --domain-id 1337 --out "./tmp/test.json" --format json
-		$ azion describe domain --domain-id 1337 --format json
+		$ azion describe workload --workload-id 4312
+		$ azion describe workload --workload-id 1337 --out "./tmp/test.json" --format json
+		$ azion describe workload --workload-id 1337 --format json
 		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			if !cmd.Flags().Changed("domain-id") {
-				answer, err := describe.AskInput(msg.AskInputDomainID)
+			if !cmd.Flags().Changed("workload-id") {
+				answer, err := describe.AskInput(msg.AskInputWorkloadID)
 				if err != nil {
 					return err
 				}
 
-				domainID = answer
+				workloadID = answer
 			}
 
 			ctx := context.Background()
-			domain, err := describe.Get(ctx, domainID)
+			workload, err := describe.Get(ctx, workloadID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
@@ -84,13 +84,13 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					Out:   f.IOStreams.Out,
 				},
 				Fields: fields,
-				Values: domain,
+				Values: workload,
 			}
 			return output.Print(&describeOut)
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&domainID, "domain-id", "", msg.FlagDomainID)
+	cobraCmd.Flags().StringVar(&workloadID, "workload-id", "", msg.FlagDomainID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

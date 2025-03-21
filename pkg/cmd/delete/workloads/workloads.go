@@ -1,4 +1,4 @@
-package domain
+package workloads
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/delete/domain"
-	api "github.com/aziontech/azion-cli/pkg/api/domain"
+	msg "github.com/aziontech/azion-cli/messages/delete/workloads"
+	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var domainID int64
+var workloadID int64
 
 type DeleteCmd struct {
-	Io           *iostreams.IOStreams
-	ReadInput    func(string) (string, error)
-	DeleteDomain func(context.Context, int64) error
-	AskInput     func(string) (string, error)
+	Io        *iostreams.IOStreams
+	ReadInput func(string) (string, error)
+	AskInput  func(string) (string, error)
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -31,10 +30,6 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		Io: f.IOStreams,
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
-		},
-		DeleteDomain: func(ctx context.Context, domainID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			return client.Delete(ctx, domainID)
 		},
 		AskInput: utils.AskInput,
 	}
@@ -48,12 +43,12 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion delete domain --domain-id 1234
+		$ azion delete workload --workload-id 1234
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
-			if !cmd.Flags().Changed("domain-id") {
+			if !cmd.Flags().Changed("workload-id") {
 				answer, err := delete.AskInput(msg.AskDeleteInput)
 				if err != nil {
 					return err
@@ -65,20 +60,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				domainID = num
+				workloadID = num
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, domainID)
+			err = client.Delete(ctx, workloadID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
+				return fmt.Errorf(msg.ErrorFailToDeleteWorkload.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, domainID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, workloadID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -86,7 +81,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&domainID, "domain-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

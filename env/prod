@@ -1,4 +1,5 @@
 API_URL=https://api.azionapi.net
+API_V4_URL=https://api.azion.com/v4
 AUTH_URL=https://sso.azion.com/api
 STORAGE_URL=https://api.azion.com
 CONSOLE=https://console.azion.com

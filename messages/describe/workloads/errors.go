@@ -1,4 +1,4 @@
-package domain
+package workloads
 
 import "errors"
 
