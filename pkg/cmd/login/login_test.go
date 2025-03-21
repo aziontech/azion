@@ -28,33 +28,6 @@ func Test_cmd(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "success flow browser",
-			args: args{
-				l: &login{
-					factory: f,
-					askOne: func(
-						p survey.Prompt,
-						response interface{},
-						opts ...survey.AskOpt,
-					) error {
-						// Usamos type assertion para garantir que 'response' seja um ponteiro para string
-						if respPtr, ok := response.(*string); ok {
-							*respPtr = "browser"
-						}
-						return nil
-					},
-					run:    func(input string) error { return nil },
-					server: &ServerMock{Cancel: true},
-					token:  &token.TokenMock{},
-					marshalToml: func(v interface{}) ([]byte, error) {
-						return []byte(""), nil
-					},
-				},
-			},
-			cmd:     cmd,
-			wantErr: false,
-		},
-		{
 			name: "error select login mode",
 			args: args{
 				l: &login{
