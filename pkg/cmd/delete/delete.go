@@ -4,7 +4,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/delete/cache_setting"
-	domain "github.com/aziontech/azion-cli/pkg/cmd/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
 	function "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_storage"
@@ -12,6 +11,7 @@ import (
 	token "github.com/aziontech/azion-cli/pkg/cmd/delete/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/delete/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete/variables"
+	"github.com/aziontech/azion-cli/pkg/cmd/delete/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.AddCommand(edgeApplication.NewCmd(f))
 	cmd.AddCommand(rulesEngine.NewCmd(f))
-	cmd.AddCommand(domain.NewCmd(f))
+	cmd.AddCommand(workloads.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))

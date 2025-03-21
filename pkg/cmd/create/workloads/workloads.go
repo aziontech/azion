@@ -8,7 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/domain"
+	msg "github.com/aziontech/azion-cli/messages/create/workloads"
 	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -38,10 +38,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create domain --application-id 1231 --name domainName --cnames "asdf.com,asdfsdf.com,asdfd.com" --cname-access-only false
-        $ azion create domain --name withargs --application-id 1231 --active true
-		$ azion create domain --digital-certificate-id "lets_encrypt" --cnames "www.thisismycname.com" --application-id 1231
-        $ azion create domain --file "create.json"
+        $ azion create workload --application-id 1231 --name workloadName
+        $ azion create workload --name withargs --application-id 1231 --active true
+		$ azion create workload --alternate-domains "www.thisismydomain.com" --application-id 1231
+        $ azion create workload --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := new(api.CreateRequest)
@@ -89,7 +89,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.SetActive(isActive)
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			response, err := client.Create(context.Background(), request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
@@ -107,7 +107,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringSliceVar(&fields.AlternateDomains, "alternate-domains", []string{}, msg.FlagAlternateDomains)
-	flags.Int64Var(&fields.EdgeFirewall, "edge_firewall", 0, msg.FlagDigitalCertificateID)
+	flags.Int64Var(&fields.EdgeFirewall, "edge-firewall", 0, msg.FlagEdgeFirewall)
 	flags.Int64Var(&fields.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.Active, "active", "true", msg.FlagIsActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)

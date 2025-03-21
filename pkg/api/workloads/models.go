@@ -1,7 +1,7 @@
 package workloads
 
 import (
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 )
 
 type Client struct {
