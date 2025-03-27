@@ -14,9 +14,9 @@ import (
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 
-	apiDomain "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
+	apiDomain "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -109,25 +109,26 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	if manifest.Domain != nil && manifest.Domain.Name != "" {
-		if conf.Domain.Id > 0 {
+		if conf.Workloads.Id > 0 {
 			requestUpdate := makeDomainUpdateRequest(manifest.Domain, conf)
-			updated, err := clientDomain.Update(ctx, requestUpdate)
+			req := &apiDomain.UpdateRequest{}
+			updated, err := clientDomain.Update(ctx, req)
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, *requestUpdate.Name, err.Error())
 			}
-			conf.Domain.Name = updated.GetName()
-			conf.Domain.DomainName = updated.GetDomainName()
-			conf.Domain.Url = utils.Concat("https://", updated.GetDomainName())
+			conf.Workloads.Domains = updated.GetDomains()
+			conf.Workloads.Url = utils.Concat("https://", conf.Workloads.Domains[0].GetDomain())
 		} else {
 			requestCreate := makeDomainCreateRequest(manifest.Domain, conf)
-			created, err := clientDomain.Create(ctx, requestCreate)
+			req := &apiDomain.CreateRequest{}
+			created, err := clientDomain.Create(ctx, req)
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, requestCreate.Name, err.Error())
 			}
-			conf.Domain.Name = created.GetName()
-			conf.Domain.DomainName = created.GetDomainName()
-			conf.Domain.Url = utils.Concat("https://", created.GetDomainName())
-			conf.Domain.Id = created.GetId()
+			conf.Workloads.Name = created.GetName()
+			conf.Workloads.Domains = created.GetDomains()
+			conf.Workloads.Url = utils.Concat("https://", created.GetDomains()[0].GetDomain())
+			conf.Workloads.Id = created.GetId()
 		}
 	}
 

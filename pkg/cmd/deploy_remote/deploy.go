@@ -235,7 +235,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if manifestStructure.Domain == nil || manifestStructure.Domain.Name == "" {
-		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
+		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
 		if err != nil {
 			return err
 		}

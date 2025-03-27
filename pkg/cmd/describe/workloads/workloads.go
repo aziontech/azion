@@ -71,11 +71,9 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			fields := make(map[string]string)
 			fields["Id"] = "ID"
 			fields["Name"] = "Name"
-			fields["DomainName"] = "Domain"
-			fields["CnameAccessOnly"] = "Cname Access Only"
-			fields["Cnames"] = "Cnames"
-			fields["EdgeApplicationId"] = "Application ID"
-			fields["DigitalCertificateId"] = "Digital Certificate ID"
+			fields["Active"] = "Active"
+			fields["LastEditor"] = "Last Editor"
+			fields["LastModified"] = "Last Modified"
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{

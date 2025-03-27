@@ -1,26 +1,26 @@
-package domain
+package workloads
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/list/domain"
-	api "github.com/aziontech/azion-cli/pkg/api/domain"
+	msg "github.com/aziontech/azion-cli/messages/list/workloads"
+	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/domains"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
-	Io          *iostreams.IOStreams
-	ReadInput   func(string) (string, error)
-	ListDomains func(context.Context, *contracts.ListOptions) (*domains.DomainResponseWithResults, error)
-	AskInput    func(string) (string, error)
+	Io            *iostreams.IOStreams
+	ReadInput     func(string) (string, error)
+	ListWorkloads func(context.Context, *contracts.ListOptions) (*sdk.PaginatedResponseListWorkloadList, error)
+	AskInput      func(string) (string, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -29,8 +29,8 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListDomains: func(ctx context.Context, opts *contracts.ListOptions) (*domains.DomainResponseWithResults, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		ListWorkloads: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListWorkloadList, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
 		AskInput: func(prompt string) (string, error) {
@@ -48,8 +48,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion list domain
-			$ azion list domain --details
+			$ azion list workload
+			$ azion list workload --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {
@@ -68,7 +68,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
 
-	response, err := list.ListDomains(ctx, opts)
+	response, err := list.ListWorkloads(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "EDGE DOMAIN", "DIGITAL CERTIFICATE ID", "EDGE APPLICATION ID", "CNAME ACCESS ONLY", "CNAMES", "ACTIVE"}
+		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED"}
 	}
 
 	for _, v := range response.Results {
@@ -88,12 +88,9 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				utils.TruncateString(v.GetName()),
-				v.GetDomainName(),
-				fmt.Sprintf("%d", v.GetDigitalCertificateId()),
-				fmt.Sprintf("%d", v.GetEdgeApplicationId()), // corrected this line
-				fmt.Sprintf("%v", v.GetCnameAccessOnly()),
-				fmt.Sprintf("%v", v.GetCnames()),
-				fmt.Sprintf("%v", v.GetIsActive()),
+				fmt.Sprintf("%v", v.GetActive()),
+				v.GetLastEditor(),
+				v.GetLastModified().String(),
 			}
 		} else {
 			ln = []string{

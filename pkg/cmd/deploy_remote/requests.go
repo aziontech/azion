@@ -13,10 +13,10 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
+	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
@@ -154,15 +154,15 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	return nil
 }
 
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	var domain apidom.DomainResponse
+func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	var workload apiworkload.WorkloadResponse
 	var err error
 
-	newDomain := false
-	if conf.Domain.Id == 0 {
+	newWorkload := false
+	if conf.Workloads.Id == 0 {
 		var projName string
 		for {
-			domain, err = cmd.createDomain(client, ctx, conf, msgs)
+			workload, err = cmd.createWorkload(client, ctx, conf, msgs)
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
@@ -188,11 +188,11 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 				}
 				return err
 			}
-			conf.Domain.Id = domain.GetId()
-			conf.Domain.Name = domain.GetName()
-			conf.Domain.DomainName = domain.GetDomainName()
-			conf.Domain.Url = utils.Concat("https://", domain.GetDomainName())
-			newDomain = true
+			conf.Workloads.Id = workload.GetId()
+			conf.Workloads.Name = workload.GetName()
+			conf.Workloads.Domains = workload.GetDomains()
+			conf.Workloads.Url = utils.Concat("https://", workload.GetDomains()[0].GetDomain())
+			newWorkload = true
 			break
 		}
 
@@ -203,17 +203,17 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 		}
 
 	} else {
-		domain, err = cmd.updateDomain(client, ctx, conf, msgs)
+		workload, err = cmd.updateWorkload(client, ctx, conf, msgs)
 		if err != nil {
-			logger.Debug("Error while updating domain", zap.Error(err))
+			logger.Debug("Error while updating workload", zap.Error(err))
 			return err
 		}
 	}
 
-	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf, msgs)
+	if conf.RtPurge.PurgeOnPublish && !newWorkload {
+		err = PurgeForUpdatedFiles(cmd, workload, ProjectConf, msgs)
 		if err != nil {
-			logger.Debug("Error while purging domain", zap.Error(err))
+			logger.Debug("Error while purging workload", zap.Error(err))
 			return err
 		}
 	}
@@ -440,44 +440,42 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	return nil
 }
 
-func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
-	reqDom := apidom.CreateRequest{}
-	if conf.Domain.Name == "__DEFAULT__" {
-		reqDom.SetName(conf.Name)
+func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apiworkload.WorkloadResponse, error) {
+	reqWork := apiworkload.CreateRequest{}
+	if conf.Workloads.Name == "__DEFAULT__" {
+		reqWork.SetName(conf.Name)
 	} else {
-		reqDom.SetName(conf.Domain.Name)
+		reqWork.SetName(conf.Workloads.Name)
 	}
-	reqDom.SetCnames([]string{})
-	reqDom.SetCnameAccessOnly(false)
-	reqDom.SetIsActive(true)
-	reqDom.SetEdgeApplicationId(conf.Application.ID)
-	domain, err := client.Create(ctx, &reqDom)
+	reqWork.SetAlternateDomains([]string{})
+	reqWork.SetActive(true)
+	reqWork.SetEdgeApplication(conf.Application.ID)
+	workload, err := client.Create(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	msgf := fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, domain.GetId())
+	msgf := fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
-	return domain, nil
+	return workload, nil
 }
 
-func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
-	reqDom := apidom.UpdateRequest{}
-	if conf.Domain.Name == "__DEFAULT__" {
-		reqDom.SetName(conf.Name)
+func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apiworkload.WorkloadResponse, error) {
+	reqWork := apiworkload.UpdateRequest{}
+	if conf.Workloads.Name == "__DEFAULT__" {
+		reqWork.SetName(conf.Name)
 	} else {
-		reqDom.SetName(conf.Domain.Name)
+		reqWork.SetName(conf.Workloads.Name)
 	}
-	reqDom.SetEdgeApplicationId(conf.Application.ID)
-	reqDom.Id = conf.Domain.Id
-	domain, err := client.Update(ctx, &reqDom)
+	reqWork.Id = conf.Workloads.Id
+	workload, err := client.Update(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	msgf := fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, domain.GetId())
+	msgf := fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
-	return domain, nil
+	return workload, nil
 }
 
 func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {

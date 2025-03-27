@@ -23,4 +23,5 @@ type WorkloadResponse interface {
 	GetDomains() []sdk.DomainInfo
 	GetLastEditor() string
 	GetActive() bool
+	GetAlternateDomains() []string
 }
