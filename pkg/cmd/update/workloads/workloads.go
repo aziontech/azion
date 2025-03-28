@@ -21,7 +21,6 @@ type Fields struct {
 	WorkloadId        int64
 	AlternateDomains  []string
 	Active            string
-	NetworkMap        string
 	EdgeApplicationID int64
 	EdgeFirewall      int64
 	Path              string

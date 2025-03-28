@@ -22,7 +22,6 @@ type Fields struct {
 	Name              string   `json:"name"`
 	AlternateDomains  []string `json:"alternate_domains"`
 	Active            string   `json:"active"`
-	NetworkMap        string   `json:"network_map"`
 	EdgeApplicationID int64    `json:"edge_application"`
 	EdgeFirewall      int64    `json:"edge_firewall"`
 	Path              string
@@ -40,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create workload --application-id 1231 --name workloadName
         $ azion create workload --name withargs --application-id 1231 --active true
-		$ azion create workload --alternate-domains "www.thisismydomain.com" --application-id 1231
+        $ azion create workload --alternate-domains "www.thisismydomain.com" --application-id 1231
         $ azion create workload --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -52,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("application-id") {
+				if !cmd.Flags().Changed("edge-application-") {
 					answer, err := utils.AskInput(msg.AskInputApplicationID)
 					if err != nil {
 						return err
@@ -87,6 +86,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return fmt.Errorf("%w: %q", msg.ErrorIsActiveFlag, fields.Active)
 				}
 				request.SetActive(isActive)
+
+				if fields.EdgeFirewall > 0 {
+					request.SetEdgeFirewall(fields.EdgeFirewall)
+				}
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -108,7 +111,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringSliceVar(&fields.AlternateDomains, "alternate-domains", []string{}, msg.FlagAlternateDomains)
 	flags.Int64Var(&fields.EdgeFirewall, "edge-firewall", 0, msg.FlagEdgeFirewall)
-	flags.Int64Var(&fields.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationId)
+	flags.Int64Var(&fields.EdgeApplicationID, "edge-application", 0, msg.FlagEdgeApplicationId)
 	flags.StringVar(&fields.Active, "active", "true", msg.FlagIsActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
