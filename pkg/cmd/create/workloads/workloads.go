@@ -37,9 +37,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create workload --application-id 1231 --name workloadName
-        $ azion create workload --name withargs --application-id 1231 --active true
-        $ azion create workload --alternate-domains "www.thisismydomain.com" --application-id 1231
+        $ azion create workload --edge-application 1231 --name workloadName
+        $ azion create workload --name withargs --edge-application 1231 --active true
+        $ azion create workload --alternate-domains "www.thisismydomain.com" --edge-application 1231
         $ azion create workload --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -51,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("edge-application-") {
+				if !cmd.Flags().Changed("edge-application") {
 					answer, err := utils.AskInput(msg.AskInputApplicationID)
 					if err != nil {
 						return err
