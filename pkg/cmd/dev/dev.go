@@ -16,8 +16,7 @@ import (
 )
 
 var (
-	isFirewall bool
-	port       int
+	port int
 )
 
 type DevCmd struct {
@@ -57,7 +56,6 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		},
 	}
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
-	devCmd.Flags().BoolVar(&isFirewall, "firewall", false, msg.IsFirewall)
 	devCmd.Flags().IntVar(&port, "port", 0, msg.PortFlag)
 	return devCmd
 }
@@ -78,7 +76,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		return output.Print(&outGen)
 	}
 
-	err := vulcan(cmd, isFirewall, port)
+	err := vulcan(cmd, port)
 	if err != nil {
 		return err
 	}
