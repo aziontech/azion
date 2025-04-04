@@ -20,11 +20,10 @@ func TestDev(t *testing.T) {
 		name           string
 		mockVulcan     func() *vulcanPkg.VulcanPkg
 		mockCommandRun func(f *cmdutil.Factory, comm string) error
-		isFirewall     bool
 		expectedError  error
 	}{
 		{
-			name: "dev - successful execution without firewall",
+			name: "dev - successful execution",
 			mockVulcan: func() *vulcanPkg.VulcanPkg {
 				return &vulcanPkg.VulcanPkg{
 					Command: func(flags, params string, f *cmdutil.Factory) string {
@@ -35,22 +34,6 @@ func TestDev(t *testing.T) {
 			mockCommandRun: func(f *cmdutil.Factory, comm string) error {
 				return nil
 			},
-			isFirewall:    false,
-			expectedError: nil,
-		},
-		{
-			name: "dev - successful execution with firewall",
-			mockVulcan: func() *vulcanPkg.VulcanPkg {
-				return &vulcanPkg.VulcanPkg{
-					Command: func(flags, params string, f *cmdutil.Factory) string {
-						return "echo 1"
-					},
-				}
-			},
-			mockCommandRun: func(f *cmdutil.Factory, comm string) error {
-				return nil
-			},
-			isFirewall:    true,
 			expectedError: nil,
 		},
 		{
@@ -65,7 +48,6 @@ func TestDev(t *testing.T) {
 			mockCommandRun: func(f *cmdutil.Factory, comm string) error {
 				return errors.New("failed to run command")
 			},
-			isFirewall:    false,
 			expectedError: errors.New("Error executing Bundler: Failed to run dev command. Verify if the command is correct and check the output above for more details. Run the 'azion dev' command again or contact Azion's support"),
 		},
 	}
@@ -78,8 +60,6 @@ func TestDev(t *testing.T) {
 			devCmd := NewDevCmd(f)
 			devCmd.Vulcan = tt.mockVulcan
 			devCmd.CommandRunInteractive = tt.mockCommandRun
-
-			isFirewall = tt.isFirewall
 
 			err := devCmd.Run(f)
 			if tt.expectedError != nil {
