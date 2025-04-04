@@ -19,7 +19,6 @@ type BuildInfo struct {
 	NodePolyfills string
 	OwnWorker     string
 	ProjectPath   string
-	IsFirewall    bool
 }
 
 type DevInfo struct {
