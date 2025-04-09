@@ -36,7 +36,7 @@ func TestNewObject(t *testing.T) {
 	}{
 		{
 			name:    "delete object command - edge-storage",
-			request: httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan/objects/revolver38"),
+			request: httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan/objects/revolver38"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusNoContent,
@@ -47,7 +47,7 @@ func TestNewObject(t *testing.T) {
 		},
 		{
 			name:    "failed delete object internal error status 500",
-			request: httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan/objects/revolver38"),
+			request: httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan/objects/revolver38"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
@@ -60,7 +60,7 @@ func TestNewObject(t *testing.T) {
 		},
 		{
 			name:    "delete object ask for input",
-			request: httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan/objects/revolver38"),
+			request: httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan/objects/revolver38"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusNoContent,
