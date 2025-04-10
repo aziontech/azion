@@ -175,11 +175,11 @@ func TestDeploy_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/storage/buckets"),
+				httpmock.REST(http.MethodPost, "v4/edge_storage/buckets"),
 				httpmock.JSONFromFile("fixtures/response.json"),
 			)
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/storage/s3-credentials"),
+				httpmock.REST(http.MethodPost, "v4/edge_storage/s3-credentials"),
 				httpmock.JSONFromFile("fixtures/responses3.json"),
 			)
 
