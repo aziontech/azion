@@ -21,7 +21,7 @@ func (cmd *DeployCmd) doBucket(
 	ctx context.Context,
 	conf *contracts.AzionApplicationOptions,
 	msgs *[]string) error {
-	if conf.Bucket != "" || (conf.Preset == "javascript" || conf.Preset == "typescript") {
+	if conf.Bucket != "" {
 		return nil
 	}
 
