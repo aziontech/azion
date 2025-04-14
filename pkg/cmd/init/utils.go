@@ -30,6 +30,7 @@ func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 }
 
 func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
+	logger.Debug("Running bundler store init")
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
@@ -41,12 +42,13 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	cmdVulcanInit := "init"
+	cmdVulcanInit := "store init"
 	if len(cmd.preset) > 0 {
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, cmd.preset)
 	}
 
 	command := vul.Command("", cmdVulcanInit, cmd.f)
+	logger.Debug("Running the following command", zap.Any("Command", command))
 
 	err = cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {

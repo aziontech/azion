@@ -32,14 +32,14 @@ func TestNewBucket(t *testing.T) {
 	}{
 		{
 			name:     "update bucket command bucket of the edge-storage",
-			request:  httpmock.REST(http.MethodPatch, "v4/storage/buckets/John-Marston"),
+			request:  httpmock.REST(http.MethodPatch, "v4/edge_storage/buckets/John-Marston"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--name", "John-Marston", "--edge-access", "read_only"},
 			output:   msg.OUTPUT_UPDATE_BUCKET,
 		},
 		{
 			name:     "create new bucket command bucket of the edge-storage using flag --file",
-			request:  httpmock.REST(http.MethodPatch, "v4/storage/buckets/John-Marston"),
+			request:  httpmock.REST(http.MethodPatch, "v4/edge_storage/buckets/John-Marston"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{"--file", "fixtures/create.json"},
 			output:   msg.OUTPUT_UPDATE_BUCKET,
@@ -53,7 +53,7 @@ func TestNewBucket(t *testing.T) {
 		},
 		{
 			name:    "failed internal error status 500",
-			request: httpmock.REST(http.MethodPost, "v4/storage/buckets"),
+			request: httpmock.REST(http.MethodPost, "v4/edge_storage/buckets"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,

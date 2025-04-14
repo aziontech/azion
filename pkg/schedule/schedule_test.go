@@ -126,7 +126,7 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "happy road",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -166,7 +166,7 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "second happy road",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -207,7 +207,7 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "error flow serializer func marshal for when path does not exist file in path ",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -250,7 +250,7 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "error flow Write file for when path does not exist file in path",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {

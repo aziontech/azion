@@ -41,7 +41,7 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket command bucket of the edge-storage",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -56,7 +56,7 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket ask for name input",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -71,7 +71,7 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "failed delete bucket internal error status 500",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodPost, "v4/storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodPost, "v4/edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {

@@ -222,11 +222,12 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 
 		//run init before calling build
-		cmdVulcanInit := "init"
+		cmdVulcanInit := "store init"
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
 
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", cmdVulcanInit, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
 
 		_, err = cmd.CommandRunner(cmd.F, command, []string{})
 		if err != nil {

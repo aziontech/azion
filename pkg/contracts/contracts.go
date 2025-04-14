@@ -4,6 +4,7 @@ import (
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"github.com/aziontech/azionapi-v4-go-sdk/edge"
 )
 
 type FileOps struct {
@@ -19,7 +20,6 @@ type BuildInfo struct {
 	NodePolyfills string
 	OwnWorker     string
 	ProjectPath   string
-	IsFirewall    bool
 }
 
 type DevInfo struct {
@@ -57,6 +57,7 @@ type AzionApplicationOptions struct {
 	Origin        []AzionJsonDataOrigin        `json:"origin"`
 	RulesEngine   AzionJsonDataRulesEngine     `json:"rules-engine"`
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
+	Workloads     AzionJsonDataWorkload        `json:"workloads"`
 }
 
 type Results struct {
@@ -152,6 +153,13 @@ type AzionJsonDataDomain struct {
 	Name       string `json:"name"`
 	DomainName string `json:"domain_name"`
 	Url        string `json:"url"`
+}
+
+type AzionJsonDataWorkload struct {
+	Id      int64             `json:"id"`
+	Name    string            `json:"name"`
+	Domains []edge.DomainInfo `json:"domains"`
+	Url     string            `json:"url"`
 }
 
 type AzionJsonDataPurge struct {

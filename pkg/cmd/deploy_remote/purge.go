@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -52,13 +52,16 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string, msgs *[]string) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse, confPath string, msgs *[]string) error {
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		return nil
 	}
-	listURLsDomains := domain.GetCnames()
-	if !domain.GetCnameAccessOnly() {
-		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
+	listURLsDomains := []string{}
+	for _, domain := range workload.GetDomains() {
+		listURLsDomains = append(listURLsDomains, domain.GetDomain())
+	}
+	for _, alternate := range workload.GetAlternateDomains() {
+		listURLsDomains = append(listURLsDomains, alternate)
 	}
 
 	currentDataMap, err := ReadFilesJSONL()

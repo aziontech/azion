@@ -1,43 +1,15 @@
-﻿$ErrorActionPreference = 'Stop'; # Stop on all errors
+﻿$ErrorActionPreference = 'Stop' # Stop on all errors
 
 # Define paths
-$toolsDir   = "$(Split-Path -parent $MyInvocation.MyCommand.Definition)"
-$binDir     = Join-Path $env:ChocolateyInstall 'bin'
+$toolsDir   = "$(Split-Path -Parent $MyInvocation.MyCommand.Definition)"
 $outputFile = Join-Path $toolsDir 'azion.exe'
 
 # Define package details
 $url        = 'http://downloads.azion.com/windows/x86_64/azion'
-$checksum = '{{CHECKSUM}}'
-$silentArgs = '-s -y'
-$packageArgs = @{
-    packageName   = 'azion'
-    unzipLocation = $toolsDir
-    fileType      = 'exe'
-    url           = $url
+$checksum   = '{{CHECKSUM}}' # Replaced with actual checksum during deploy
 
-    softwareName  = 'azion*'
+# Download the CLI binary using Chocolatey helper
+Get-ChocolateyWebFile -PackageName 'azion' -FileFullPath $outputFile -Url $url -Checksum $checksum -ChecksumType 'sha256'
 
-    checksum      = $checksum         
-    checksumType  = 'sha256'   
-
-    silentArgs    = $silentArgs
-}
-
-# Install the package
-Install-ChocolateyPackage @packageArgs
-
-# Download the file
-Write-Host "Downloading azion executable from $url to $outputFile"
-Invoke-WebRequest -Uri $url -OutFile $outputFile
-
-# Ensure Chocolatey's bin directory exists
-if (-Not (Test-Path $binDir)) {
-    New-Item -ItemType Directory -Path $binDir | Out-Null
-}
-
-# Copy the executable to Chocolatey's bin directory
-Write-Host "Copying $outputFile to $binDir"
-Copy-Item -Path $outputFile -Destination $binDir -Force
-
-# Ensure the executable is available globally
-Write-Host "Installation complete. Azion executable is now available globally."
+# No need to manually copy or shim - Chocolatey will shim the .exe in the tools directory automatically
+Write-Host "Installation complete. The Azion CLI is now available globally via the command line."
