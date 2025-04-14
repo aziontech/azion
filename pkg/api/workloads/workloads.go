@@ -112,3 +112,47 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 
 	return resp, nil
 }
+
+func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOptions, id int64) (*sdk.PaginatedResponseListWorkloadDeploymentList, error) {
+	logger.Debug("List Workload Deployments")
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+	stringId := strconv.FormatInt(id, 10)
+	resp, httpResp, err := c.apiClient.WorkloadDeploymentsAPI.ListWorkloadDeployments(ctx, stringId).
+		Ordering(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Search(opts.Sort).
+		Execute()
+
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while listing workload deployments", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetDeployment(ctx context.Context, id, deploymentid string) (DeploymentResponse, error) {
+	logger.Debug("Get Workload Deployment")
+	request := c.apiClient.WorkloadDeploymentsAPI.RetrieveWorkloadDeployment(ctx, id, deploymentid)
+	res, httpResp, err := request.Execute()
+	if err != nil {
+		if httpResp != nil {
+			logger.Debug("Error while describing a Workload Deployment", zap.Error(err))
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+	return &res.Data, nil
+}

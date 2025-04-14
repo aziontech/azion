@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.24.0
+go 1.24.2
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -9,8 +9,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.28.7
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.54
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.73.2
-	github.com/aziontech/azionapi-go-sdk v0.133.0
-	github.com/aziontech/azionapi-v4-go-sdk v0.19.0
+	github.com/aziontech/azionapi-go-sdk v0.142.0
+	github.com/aziontech/azionapi-v4-go-sdk v0.23.0
 	github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
 	github.com/briandowns/spinner v1.23.2
@@ -97,14 +97,14 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/mod v0.19.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/term v0.29.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/sync v0.12.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.23.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect

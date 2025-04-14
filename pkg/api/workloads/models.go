@@ -25,3 +25,10 @@ type WorkloadResponse interface {
 	GetActive() bool
 	GetAlternateDomains() []string
 }
+
+type DeploymentResponse interface {
+	GetId() int64
+	GetTag() string
+	GetCurrent() bool
+	GetBinds() sdk.WorkloadDeploymentBinds
+}

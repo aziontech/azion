@@ -11,6 +11,7 @@ import (
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
+	wdeployments "github.com/aziontech/azion-cli/pkg/cmd/list/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/workloads"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -35,6 +36,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(rule.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(wdeployments.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))

@@ -55,7 +55,6 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd.Flags().StringVar(&fields.Entry, "entry", "", msg.FlagEntry)
 	buildCmd.Flags().StringVar(&fields.NodePolyfills, "use-node-polyfills", "", msg.FlagPolyfill)
 	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)
-	buildCmd.Flags().BoolVar(&fields.IsFirewall, "firewall", false, msg.IsFirewall)
 	buildCmd.Flags().StringVar(&fields.ProjectPath, "config-dir", "azion", msg.ProjectConfFlag)
 
 	return buildCmd
