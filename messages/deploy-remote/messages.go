@@ -46,7 +46,7 @@ var (
   - Edge Application Cache Settings: Override Cache Settings - Maximum TTL in seconds: 7200
 
 Create a Cache Settings configuration with the above specifications? (y/N)`
-	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket upload of static files"
+	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket and upload of static files"
 	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
 	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"
 	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
