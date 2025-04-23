@@ -26,7 +26,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_applications"),
+					httpmock.REST("GET", "edge_application/applications"),
 					httpmock.JSONFromFile("./fixtures/response.json"),
 				)
 				return &mock
@@ -38,7 +38,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_applications"),
+					httpmock.REST("GET", "edge_application/applications"),
 					httpmock.JSONFromFile("./fixtures/no_items.json"),
 				)
 				return &mock
@@ -50,7 +50,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_applications"),
+					httpmock.REST("GET", "edge_application/applications"),
 					httpmock.JSONFromString("{'name': 'some name',}"),
 				)
 				return &mock

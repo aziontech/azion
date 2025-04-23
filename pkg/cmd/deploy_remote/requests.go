@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 
@@ -242,7 +244,8 @@ func (cmd *DeployCmd) doRulesDeploy(
 		reqCache.SetName(conf.Name)
 
 		// create Cache Settings
-		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
+		strApp := strconv.FormatInt(conf.Application.ID, 10)
+		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, strApp)
 		if err != nil {
 			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
@@ -252,8 +255,10 @@ func (cmd *DeployCmd) doRulesDeploy(
 		cacheId = cache.GetId()
 	}
 
+	appId := fmt.Sprintf("%d", conf.Application.ID)
+
 	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, appId, cacheId, conf.Preset, authorize)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
@@ -395,7 +400,6 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	} else {
 		reqApp.SetName(conf.Application.Name)
 	}
-	reqApp.SetDeliveryProtocol("http,https")
 
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
@@ -408,8 +412,10 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	*msgs = append(*msgs, msgf)
 
 	reqUpApp := apiapp.UpdateRequest{}
-	reqUpApp.SetEdgeFunctions(true)
-	reqUpApp.SetApplicationAcceleration(true)
+	mods := sdk.EdgeApplicationModulesRequest{}
+	mods.SetEdgeFunctionsEnabled(true)
+	mods.SetApplicationAcceleratorEnabled(true)
+	reqUpApp.SetModules(mods)
 	reqUpApp.Id = application.GetId()
 
 	application, err = client.Update(ctx, &reqUpApp)
@@ -478,8 +484,8 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 	return workload, nil
 }
 
-func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddresses) {
-	var addr sdk.CreateOriginsRequestAddresses
+func prepareAddresses(addrs []string) (addresses []sdkv3.CreateOriginsRequestAddresses) {
+	var addr sdkv3.CreateOriginsRequestAddresses
 	for _, v := range addrs {
 		addr.Address = v
 		addresses = append(addresses, addr)
@@ -487,12 +493,12 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 	return
 }
 
-func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (sdk.EdgeApplicationFunctionInstance, error) {
 	logger.Debug("Create Instance")
 
 	// create instance function
 	reqIns := apiapp.CreateInstanceRequest{}
-	reqIns.SetEdgeFunctionId(conf.Function.ID)
+	reqIns.SetEdgeFunction(conf.Function.ID)
 
 	if conf.Function.InstanceName == "__DEFAULT__" {
 		reqIns.SetName(conf.Name)
@@ -505,29 +511,30 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
 		logger.Debug("Error while reding args.json file <"+conf.Function.Args+">", zap.Error(err))
-		return nil, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+		return sdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
-		return nil, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+		return sdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
-	reqIns.SetArgs(args)
+	reqIns.SetJsonArgs(args)
 
-	resp, err := client.CreateFuncInstances(ctx, &reqIns, conf.Application.ID)
+	appId := fmt.Sprintf("%d", conf.Application.ID)
+	resp, err := client.CreateFuncInstances(ctx, &reqIns, appId)
 	if err != nil {
-		return nil, err
+		return sdk.EdgeApplicationFunctionInstance{}, err
 	}
 
 	return resp, nil
 }
 
-func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (sdk.EdgeApplicationFunctionInstance, error) {
 	logger.Debug("Update Instance")
 
 	// create instance function
 	reqIns := apiapp.UpdateInstanceRequest{}
-	reqIns.SetEdgeFunctionId(conf.Function.ID)
+	reqIns.SetEdgeFunction(conf.Function.ID)
 
 	if conf.Function.InstanceName == "__DEFAULT__" {
 		reqIns.SetName(conf.Name)
@@ -539,20 +546,20 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 	marshalledArgs, err := cmd.FileReader(conf.Function.Args)
 	if err != nil {
 		logger.Debug("Error while reding args.json file <"+conf.Function.Args+">", zap.Error(err))
-		return nil, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+		return sdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+conf.Function.Args+">", zap.Error(err))
-		return nil, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+		return sdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
-	reqIns.SetArgs(args)
+	reqIns.SetJsonArgs(args)
 
 	instID := strconv.FormatInt(conf.Function.InstanceID, 10)
 	appID := strconv.FormatInt(conf.Application.ID, 10)
 	resp, err := client.UpdateInstance(ctx, &reqIns, appID, instID)
 	if err != nil {
-		return nil, err
+		return sdk.EdgeApplicationFunctionInstance{}, err
 	}
 
 	return resp, nil

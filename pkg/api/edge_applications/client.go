@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 )
 
 type Client struct {
@@ -16,7 +16,7 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "token "+token)
-	conf.AddDefaultHeader("Accept", "application/json;version=3")
+	conf.AddDefaultHeader("Accept", "application/json")
 	conf.UserAgent = "Azion_CLI/" + version.BinVersion
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},

@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -19,22 +20,18 @@ import (
 
 // Fields struct of inputs
 type Fields struct {
-	ID                      int64
-	Name                    string
-	DeliveryProtocol        string
-	HTTPPort                int64
-	HTTPSPort               int64
-	MinimumTLSVersion       string
-	ApplicationAcceleration string
-	DeviceDetection         string
-	EdgeFirewall            string
-	EdgeFunctions           string
-	ImageOptimization       string
-	L2Caching               string
-	LoadBalancer            string
-	RawLogs                 string
-	WebApplicationFirewall  string
-	InPath                  string
+	ID                            int64  `json:"id,omitempty"`
+	Name                          string `json:"name,omitempty"`
+	EdgeCacheEnabled              string `json:"edge_cache_enabled,omitempty"`
+	EdgeFunctionsEnabled          string `json:"edge_functions_enabled,omitempty"`
+	ApplicationAcceleratorEnabled string `json:"application_accelerator_enabled,omitempty"`
+	ImageProcessorEnabled         string `json:"image_processor_enabled,omitempty"`
+	TieredCacheEnabled            string `json:"tiered_cache_enabled,omitempty"`
+	Active                        string `json:"active,omitempty"`
+	DebugRules                    string `json:"debug,omitempty"`
+	Path                          string
+	OutPath                       string
+	Format                        string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -73,110 +70,95 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRequest{}
 			if cmd.Flags().Changed("file") {
-				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
-					logger.Debug("Error while parsing <"+fields.InPath+"> file", zap.Error(err))
+					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-
 				request.Id = fields.ID
 
 				if cmd.Flags().Changed("name") {
 					request.SetName(fields.Name)
 				}
 
-				if cmd.Flags().Changed("http-port") {
-					request.SetHttpPort(fields.HTTPPort)
-				}
-
-				if cmd.Flags().Changed("https-port") {
-					request.SetHttpsPort(fields.HTTPSPort)
-				}
-
-				if cmd.Flags().Changed("delivery-protocol") {
-					request.SetDeliveryProtocol(fields.DeliveryProtocol)
-				}
-
-				if cmd.Flags().Changed("min-tsl-ver") {
-					request.SetMinimumTlsVersion(fields.MinimumTLSVersion)
-				}
-
-				if cmd.Flags().Changed("application-acceleration") {
-					converted, err := strconv.ParseBool(fields.ApplicationAcceleration)
+				if !utils.IsEmpty(fields.DebugRules) {
+					debugRules, err := strconv.ParseBool(fields.DebugRules)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorApplicationAccelerationFlag, fields.ApplicationAcceleration)
+						logger.Debug("Error while parsing <"+fields.DebugRules+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetApplicationAcceleration(converted)
+
+					request.SetDebug(debugRules)
 				}
 
-				if cmd.Flags().Changed("device-detection") {
-					converted, err := strconv.ParseBool(fields.DeviceDetection)
+				modules := sdk.EdgeApplicationModulesRequest{}
+
+				if !utils.IsEmpty(fields.EdgeCacheEnabled) {
+					edgeCache, err := strconv.ParseBool(fields.EdgeCacheEnabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorDeviceDetectionFlag, fields.DeviceDetection)
+						logger.Debug("Error while parsing <"+fields.EdgeCacheEnabled+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetDeviceDetection(converted)
+
+					modules.SetEdgeCacheEnabled(edgeCache)
 				}
 
-				if cmd.Flags().Changed("edge-firewall") {
-					converted, err := strconv.ParseBool(fields.EdgeFirewall)
+				if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
+					edgeFunctions, err := strconv.ParseBool(fields.EdgeFunctionsEnabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFirewallFlag, fields.EdgeFirewall)
+						logger.Debug("Error while parsing <"+fields.EdgeFunctionsEnabled+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetEdgeFirewall(converted)
+
+					modules.SetEdgeFunctionsEnabled(edgeFunctions)
 				}
 
-				if cmd.Flags().Changed("edge-functions") {
-					converted, err := strconv.ParseBool(fields.EdgeFunctions)
+				if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
+					applicationAcc, err := strconv.ParseBool(fields.ApplicationAcceleratorEnabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorEdgeFunctionsFlag, fields.EdgeFunctions)
+						logger.Debug("Error while parsing <"+fields.ApplicationAcceleratorEnabled+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetEdgeFunctions(converted)
+
+					modules.SetApplicationAcceleratorEnabled(applicationAcc)
 				}
 
-				if cmd.Flags().Changed("image-optimization") {
-					converted, err := strconv.ParseBool(fields.ImageOptimization)
+				if !utils.IsEmpty(fields.ImageProcessorEnabled) {
+					imageProcessor, err := strconv.ParseBool(fields.ImageProcessorEnabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorImageOptimizationFlag, fields.ImageOptimization)
+						logger.Debug("Error while parsing <"+fields.ImageProcessorEnabled+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetImageOptimization(converted)
+
+					modules.SetImageProcessorEnabled(imageProcessor)
 				}
 
-				if cmd.Flags().Changed("l2-caching") {
-					converted, err := strconv.ParseBool(fields.L2Caching)
+				if !utils.IsEmpty(fields.TieredCacheEnabled) {
+					tieredCache, err := strconv.ParseBool(fields.TieredCacheEnabled)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorL2CachingFlag, fields.L2Caching)
+						logger.Debug("Error while parsing <"+fields.TieredCacheEnabled+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetL2Caching(converted)
+
+					modules.SetTieredCacheEnabled(tieredCache)
 				}
 
-				if cmd.Flags().Changed("load-balancer") {
-					converted, err := strconv.ParseBool(fields.LoadBalancer)
-					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorLoadBalancerFlag, fields.LoadBalancer)
-					}
-					request.SetLoadBalancer(converted)
-				}
+				request.SetModules(modules)
 
-				if cmd.Flags().Changed("raw-logs") {
-					converted, err := strconv.ParseBool(fields.RawLogs)
+				if !utils.IsEmpty(fields.Active) {
+					active, err := strconv.ParseBool(fields.Active)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorRawLogsFlag, fields.RawLogs)
+						logger.Debug("Error while parsing <"+fields.Active+"> ", zap.Error(err))
+						return utils.ErrorConvertingStringToBool
 					}
-					request.SetRawLogs(converted)
-				}
 
-				if cmd.Flags().Changed("webapp-firewall") {
-					converted, err := strconv.ParseBool(fields.WebApplicationFirewall)
-					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorWebApplicationFirewallFlag, fields.WebApplicationFirewall)
-					}
-					request.SetWebApplicationFirewall(converted)
+					request.SetActive(active)
 				}
 
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 			response, err := client.Update(ctx, &request)
@@ -197,20 +179,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
-	flags.Int64Var(&fields.HTTPPort, "http-port", 80, msg.FlagHttpPort)
-	flags.Int64Var(&fields.HTTPSPort, "https-port", 443, msg.FlagHttpsPort)
-	flags.StringVar(&fields.MinimumTLSVersion, "min-tsl-ver", "", msg.FlagMinimumTlsVersion)
-	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
-	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.FlagDeviceDetection)
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagEdgeFirewall)
-	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.FlagEdgeFunctions)
-	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", msg.FlagImageOptimization)
-	flags.StringVar(&fields.L2Caching, "l2-caching", "", msg.FlagL2Caching)
-	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.FlagLoadBalancer)
-	flags.StringVar(&fields.RawLogs, "raw-logs", "", msg.RawLogs)
-	flags.StringVar(&fields.WebApplicationFirewall, "webapp-firewall", "", msg.WebApplicationFirewall)
-	flags.StringVar(&fields.InPath, "file", "", msg.FlagFile)
+	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
+	flags.StringVar(&fields.EdgeFunctionsEnabled, "edge-function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
+	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
+	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)
+	flags.StringVar(&fields.Active, "active", "", msg.FlagName)
+	flags.StringVar(&fields.DebugRules, "debug-enabled", "", msg.FlagDebugRules)
+	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }

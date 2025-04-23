@@ -252,11 +252,11 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			if err != nil {
 				return err
 			}
-			requestUpdate.Id = r.Id
+			// requestUpdate.Id = r.Id
 			requestUpdate.Phase = rule.Phase
-			requestUpdate.IsActive = &rule.IsActive
-			requestUpdate.Order = &rule.Order
-			requestUpdate.IdApplication = conf.Application.ID
+			// requestUpdate.IsActive = &rule.IsActive
+			// requestUpdate.Order = &rule.Order
+			// requestUpdate.IdApplication = conf.Application.ID //TODO: correct these fields
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateRule, rule.Name, err.Error())
@@ -281,9 +281,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			} else {
 				requestCreate.Name = conf.Name + thoth.GenerateName()
 			}
-			requestCreate.IsActive = &rule.IsActive
-			requestCreate.Order = &rule.Order
-			created, err := client.CreateRulesEngine(ctx, conf.Application.ID, rule.Phase, requestCreate)
+			// requestCreate.IsActive = &rule.IsActive
+			// requestCreate.Order = &rule.Order //TODO: correct these fields
+			created, err := client.CreateRulesEngine(ctx, "conf.Application.ID", rule.Phase, requestCreate)
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorCreateRule, requestCreate.Name, err.Error())
 			}
@@ -351,7 +351,7 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if value.Phase != "" {
 			phase = value.Phase
 		}
-		err := client.DeleteRulesEngine(ctx, conf.Application.ID, phase, value.Id)
+		err := client.DeleteRulesEngine(ctx, "conf.Application.ID", phase, "value.Id")
 		if err != nil {
 			return err
 		}

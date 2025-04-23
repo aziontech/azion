@@ -165,10 +165,12 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 		return err
 	}
 
+	acc := application.GetModules()
+
 	if (request.GetEnableCachingForOptions() ||
 		request.GetEnableCachingForPost() ||
 		request.GetEnableQueryStringSort()) &&
-		!application.GetApplicationAcceleration() {
+		!acc.GetApplicationAcceleratorEnabled() {
 		return msg.ErrorApplicationAccelerationNotEnabled
 	}
 	return nil

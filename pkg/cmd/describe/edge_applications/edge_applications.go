@@ -33,7 +33,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		Get: func(ctx context.Context, applicationID string) (api.EdgeApplicationResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, applicationID)
 		},
 	}
@@ -69,23 +69,10 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			fields := map[string]string{
-				"Id":                      "ID",
-				"Name":                    "Name",
-				"Active":                  "Active",
-				"ApplicationAcceleration": "Application Acceleration",
-				"Caching":                 "Caching",
-				"DeliveryProtocol":        "Delivery Protocol",
-				"DeviceDetection":         "Device Detection",
-				"EdgeFirewall":            "Edge Firewall",
-				"EdgeFunctions":           "Edge Functions",
-				"HttpPort":                "Http Port",
-				"HttpsPort":               "HttpsPort",
-				"ImageOptimization":       "Image Optimization",
-				"L2Caching":               "L2 Caching",
-				"LoadBalancer":            "Load Balancer",
-				"MinimumTlsVersion":       "Minimum TLS Version",
-				"RawLogs":                 "Raw Logs",
-				"WebApplicationFirewall":  "Web Application Firewall",
+				"Id":     "ID",
+				"Name":   "Name",
+				"Active": "Active",
+				"Debug":  "Debug",
 			}
 
 			describeOut := output.DescribeOutput{
