@@ -20,7 +20,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -186,26 +186,29 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if !conf.NotFirstRun {
-		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
+		strApp := strconv.FormatInt(conf.Application.ID, 10)
+		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, strApp, "request")
 		if err != nil {
 			logger.Debug("Error while getting default rules engine", zap.Error(err))
 			return err
 		}
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
 
-		var behString sdk.RulesEngineBehaviorString
+		behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
+
+		var behString sdk.EdgeApplicationBehaviorFieldRequest
+		var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
+		originId := strconv.Itoa(int(singleOriginId))
+		behSet.String = &originId
 		behString.SetName("set_origin")
+		behString.SetArgument(behSet)
 
-		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
+		behaviors = append(behaviors, behString)
 
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
-
+		strRule := strconv.FormatInt(ruleDefaultID, 10)
 		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-			IdApplication: conf.Application.ID,
+			IdApplication: strApp,
 			Phase:         "request",
-			Id:            ruleDefaultID,
+			Id:            strRule,
 		}
 
 		reqUpdateRulesEngine.SetBehaviors(behaviors)
@@ -235,7 +238,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if manifestStructure.Domain == nil || manifestStructure.Domain.Name == "" {
-		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
+		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
 		if err != nil {
 			return err
 		}

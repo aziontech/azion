@@ -4,7 +4,7 @@ SHELL := env PATH=$(PATH) /bin/bash
 NAME := azion
 
 ifeq (, $(GO))
-$(error "No go binary found in your system, please install go 1.24.1 before continuing")
+$(error "No go binary found in your system, please install go 1.24.2 before continuing")
 endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)
@@ -26,6 +26,7 @@ LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSI
 		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
+		-X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL=$$API_V4_URL \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$CONSOLE \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID=$$SCRIPT_ID \
 		-X github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init.TemplateBranch=$$TEMPLATE_BRANCH \

@@ -3,9 +3,6 @@ package ruleengine
 import (
 	"context"
 	"fmt"
-	"strconv"
-
-	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
@@ -13,20 +10,18 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io                *iostreams.IOStreams
 	ReadInput         func(string) (string, error)
-	ListRulesEngine   func(context.Context, *contracts.ListOptions, int64, string) (*edgeapplications.RulesEngineResponse, error)
+	ListRulesEngine   func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error)
 	AskInput          func(string) (string, error)
-	EdgeApplicationID int64
-	Phase             string
+	EdgeApplicationID string
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -35,9 +30,9 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListRulesEngine: func(ctx context.Context, opts *contracts.ListOptions, appID int64, phase string) (*edgeapplications.RulesEngineResponse, error) {
+		ListRulesEngine: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			return client.ListRulesEngine(ctx, opts, appID, phase)
+			return client.ListRulesEngine(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
@@ -63,20 +58,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
-				}
-				list.EdgeApplicationID = num
-			}
 
-			if !cmd.Flags().Changed("phase") {
-				answer, err := list.AskInput(msg.AskInputPhase)
-				if err != nil {
-					return err
-				}
-				list.Phase = answer
+				list.EdgeApplicationID = answer
 			}
 
 			if err := PrintTable(cmd, f, opts, list); err != nil {
@@ -87,8 +70,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
-	cmd.Flags().StringVar(&list.Phase, "phase", "request", msg.RulesEnginePhase)
+	cmd.Flags().StringVar(&list.EdgeApplicationID, "application-id", "", msg.ApplicationFlagId)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
 
 	return cmd
@@ -97,7 +79,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, list *ListCmd) error {
 	ctx := context.Background()
 
-	rules, err := list.ListRulesEngine(ctx, opts, list.EdgeApplicationID, list.Phase)
+	rules, err := list.ListRulesEngine(ctx, opts, list.EdgeApplicationID)
 	if err != nil {
 		return err
 	}
@@ -119,7 +101,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 				v.Name,
 				fmt.Sprintf("%d", v.Order),
 				v.Phase,
-				fmt.Sprintf("%v", v.IsActive),
+				fmt.Sprintf("%v", v.Active),
 			}
 		} else {
 			ln = []string{

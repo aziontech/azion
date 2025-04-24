@@ -3,9 +3,6 @@ package rulesengine
 import (
 	"context"
 	"fmt"
-	"strconv"
-
-	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/rules_engine"
@@ -13,22 +10,20 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
 
 var (
-	applicationID int64
-	ruleID        int64
-	phase         string
+	applicationID string
+	ruleID        string
 )
 
 type DescribeCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
-	GetRulesEngine func(context.Context, int64, int64, string) (api.RulesEngineResponse, error)
+	GetRulesEngine func(context.Context, string, string) (api.RulesEngineResponse, error)
 	AskInput       func(string) (string, error)
 }
 
@@ -38,9 +33,9 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		GetRulesEngine: func(ctx context.Context, appID, ruleID int64, phase string) (api.RulesEngineResponse, error) {
+		GetRulesEngine: func(ctx context.Context, appID, ruleID string) (api.RulesEngineResponse, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			return client.GetRulesEngine(ctx, appID, ruleID, phase)
+			return client.GetRulesEngine(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,
 	}
@@ -67,13 +62,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
-				}
-
-				ruleID = num
+				ruleID = answer
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -82,26 +71,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdRule
-				}
-
-				applicationID = num
-			}
-
-			if !cmd.Flags().Changed("phase") {
-				answer, err := describe.AskInput(msg.AskInputPhase)
-				if err != nil {
-					return err
-				}
-
-				phase = answer
+				applicationID = answer
 			}
 
 			ctx := context.Background()
-			rules, err := describe.GetRulesEngine(ctx, applicationID, ruleID, phase)
+			rules, err := describe.GetRulesEngine(ctx, applicationID, ruleID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
 			}
@@ -111,7 +85,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			fields["Name"] = "Name"
 			fields["Description"] = "Description"
 			fields["Order"] = "Order"
-			fields["IsActive"] = "Active"
+			fields["Active"] = "Active"
 			fields["Behaviors"] = "Behaviours"
 			fields["Criteria"] = "Criteria"
 
@@ -127,9 +101,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cobraCmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
+	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagAppID)
+	cobraCmd.Flags().StringVar(&ruleID, "rule-id", "", msg.FlagRuleID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

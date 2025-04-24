@@ -181,7 +181,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 		rulesEngineCriteria = append(rulesEngineCriteria, criterias)
 	}
 
-	request.Criteria = rulesEngineCriteria
+	// request.Criteria = rulesEngineCriteria //TODO: correct criteria
 	var behaviors []sdk.RulesEngineBehaviorEntry
 	for _, v := range rule.Behaviors {
 		if v.RulesEngineBehaviorObject != nil {
@@ -235,7 +235,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 
 	}
 
-	request.Behaviors = behaviors
+	// request.Behaviors = behaviors //TODO: correct behaviors
 
 	return request, nil
 }
@@ -263,7 +263,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 		rulesEngineCriteria = append(rulesEngineCriteria, criterias)
 	}
 
-	request.Criteria = rulesEngineCriteria
+	// request.Criteria = rulesEngineCriteria //TODO: correct criteria
 	var behaviors []sdk.RulesEngineBehaviorEntry
 
 	for _, v := range rule.Behaviors {
@@ -328,7 +328,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 
 	}
 
-	request.Behaviors = behaviors
+	// request.Behaviors = behaviors //TODO: correct behaviors
 
 	return request, nil
 }
@@ -441,14 +441,15 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	}
 	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 	reqCache.SetName("function-policy")
-	reqCache.SetBrowserCacheSettings("honor")
-	reqCache.SetCdnCacheSettings("honor")
-	reqCache.SetCdnCacheSettingsMaximumTtl(0)
-	reqCache.SetCacheByQueryString("all")
-	reqCache.SetCacheByCookies("all")
+	// reqCache.SetBrowserCacheSettings("honor")
+	// reqCache.SetCdnCacheSettings("honor")
+	// reqCache.SetCdnCacheSettingsMaximumTtl(0)
+	// reqCache.SetCacheByQueryString("all")
+	// reqCache.SetCacheByCookies("all")
 
 	// create cache to function next
-	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, conf.Application.ID)
+	str := strconv.FormatInt(conf.Application.ID, 10)
+	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, str)
 	if err != nil {
 		logger.Debug("Error while creating Cache Settings", zap.Error(err))
 		return 0, err

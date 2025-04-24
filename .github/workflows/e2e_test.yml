@@ -5,12 +5,14 @@ on:
     types: [opened, synchronize]
     branches-ignore:
       - main 
+      - workload-v4
+      - pre-release-v4
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.24.1
+      image: golang:1.24.2
     env:
       CGO_ENABLED: 0 # Statically linked
 

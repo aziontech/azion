@@ -11,13 +11,13 @@ import (
 func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
 	logger.Debug("Get Edge Application")
 
-	res, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsAPI.
-		EdgeApplicationsIdGet(ctx, id).Execute()
+	res, httpResp, err := c.apiClient.EdgeApplicationsAPI.
+		RetrieveEdgeApplication(ctx, id).Execute()
 
 	if err != nil {
 		logger.Debug("Error while getting an Edge Application", zap.Error(err))
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return &res.Results, nil
+	return &res.Data, nil
 }

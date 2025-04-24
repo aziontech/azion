@@ -4,7 +4,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_setting"
-	domain "github.com/aziontech/azion-cli/pkg/cmd/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/list/edge_applications"
 	function "github.com/aziontech/azion-cli/pkg/cmd/list/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/list/edge_storage"
@@ -12,6 +11,8 @@ import (
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
+	wdeployments "github.com/aziontech/azion-cli/pkg/cmd/list/workload_deployment"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/workloads"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -24,7 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:  msg.LongDescription, Example: heredoc.Doc(`
 		$ azion list --help
 		$ azion list edge-application -h
-		$ azion list domain -h
+		$ azion list workload -h
 		$ azion list origin -h
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -34,7 +35,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(rule.NewCmd(f))
-	cmd.AddCommand(domain.NewCmd(f))
+	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(wdeployments.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))

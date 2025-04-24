@@ -1,21 +1,16 @@
 {
-  "name": "ExampleApp",
-  "application_acceleration": true,
-  "delivery_protocol": "http",
-  "origin_type": "custom",
-  "address": "https://example.com",
-  "minimum_tls_version": "TLSv1.2",
-  "origin_protocol_policy": "https-only",
-  "host_header": "example.com",
-  "browser_cache_settings": "max-age=3600",
-  "cdn_cache_settings": "max-age=3600",
-  "browser_cache_settings_maximum_ttl": 3600,
-  "cdn_cache_settings_maximum_ttl": 3600,
-  "debug_rules": false,
-  "supported_ciphers": "AES256-GCM-SHA384",
-  "http_port": 80,
-  "https_port": 443,
-  "l2_caching": true,
-  "http3": false,
-  "websocket": true
-}
+  "active": true,
+  "debug": false,
+  "id": 1694434702,
+  "last_editor": "patrickmenott+test@gmail.com",
+  "last_modified": "2025-04-23T14:38:57.61548Z",
+  "modules": {
+   "application_accelerator_enabled": true,
+   "edge_cache_enabled": true,
+   "edge_functions_enabled": true,
+   "image_processor_enabled": true,
+   "tiered_cache_enabled": true
+  },
+  "name": "updatepeloarquivoagorinha",
+  "product_version": "3.0"
+ }

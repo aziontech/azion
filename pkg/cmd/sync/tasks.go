@@ -139,7 +139,8 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOpts, f *cmdutil.Factory, ma
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.Manifest) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID)
+	str := strconv.FormatInt(info.Conf.Application.ID, 10)
+	resp, err := client.ListCacheEdgeApp(context.Background(), str)
 	if err != nil {
 		return remoteCacheIds, err
 	}
@@ -152,27 +153,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 			Name: cache.Name,
 		}
 		cEntry := contracts.CacheSetting{
-			Name:                           &cache.Name,
-			BrowserCacheSettings:           &cache.BrowserCacheSettings,
-			BrowserCacheSettingsMaximumTtl: &cache.BrowserCacheSettingsMaximumTtl,
-			CdnCacheSettings:               &cache.CdnCacheSettings,
-			CdnCacheSettingsMaximumTtl:     &cache.CdnCacheSettingsMaximumTtl,
-			CacheByQueryString:             &cache.CacheByQueryString,
-			QueryStringFields:              cache.QueryStringFields,
-			EnableQueryStringSort:          &cache.EnableCachingForOptions,
-			CacheByCookies:                 &cache.CacheByCookies,
-			CookieNames:                    cache.CookieNames,
-			AdaptiveDeliveryAction:         &cache.AdaptiveDeliveryAction,
-			DeviceGroup:                    cache.DeviceGroup,
-			EnableCachingForPost:           &cache.EnableCachingForPost,
-			L2CachingEnabled:               &cache.L2CachingEnabled,
-			IsSliceConfigurationEnabled:    cache.IsSliceConfigurationEnabled,
-			IsSliceEdgeCachingEnabled:      cache.IsSliceEdgeCachingEnabled,
-			IsSliceL2CachingEnabled:        cache.IsSliceL2CachingEnabled,
-			SliceConfigurationRange:        cache.SliceConfigurationRange,
-			EnableCachingForOptions:        &cache.EnableCachingForOptions,
-			EnableStaleCache:               &cache.EnableStaleCache,
-			L2Region:                       cache.L2Region.Get(),
+			Name: &cache.Name,
 		}
 		manifest.CacheSettings = append(manifest.CacheSettings, cEntry)
 
@@ -196,7 +177,8 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 	remoteOriginIds map[string]contracts.AzionJsonDataOrigin) error {
 	// Get request rules first
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	resp, err := client.ListRulesEngine(context.Background(), opts, info.Conf.Application.ID, "request")
+	str := strconv.FormatInt(info.Conf.Application.ID, 10)
+	resp, err := client.ListRulesEngine(context.Background(), opts, str)
 	if err != nil {
 		return err
 	}
@@ -209,12 +191,12 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		}
 		mEntry := contracts.RuleEngine{
 			Name:        rule.GetName(),
-			IsActive:    rule.GetIsActive(),
+			IsActive:    rule.GetActive(),
 			Order:       rule.GetOrder(),
 			Phase:       rule.GetPhase(),
 			Description: rule.Description,
-			Behaviors:   rule.GetBehaviors(),
-			Criteria:    rule.GetCriteria(),
+			// Behaviors:   rule.GetBehaviors(),
+			// Criteria:    rule.GetCriteria(),
 		}
 
 		for i, beh := range mEntry.Behaviors {
@@ -242,7 +224,8 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		return err
 	}
 
-	respResponse, err := client.ListRulesEngine(context.Background(), opts, info.Conf.Application.ID, "response")
+	strApp := strconv.FormatInt(info.Conf.Application.ID, 10)
+	respResponse, err := client.ListRulesEngine(context.Background(), opts, strApp)
 	if err != nil {
 		return err
 	}
@@ -254,12 +237,12 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		}
 		mEntry := contracts.RuleEngine{
 			Name:        rule.GetName(),
-			IsActive:    rule.GetIsActive(),
+			IsActive:    rule.GetActive(),
 			Order:       rule.GetOrder(),
 			Phase:       rule.GetPhase(),
 			Description: rule.Description,
-			Behaviors:   rule.GetBehaviors(),
-			Criteria:    rule.GetCriteria(),
+			// Behaviors:   rule.GetBehaviors(),
+			// Criteria:    rule.GetCriteria(),
 		}
 
 		for i, beh := range mEntry.Behaviors {

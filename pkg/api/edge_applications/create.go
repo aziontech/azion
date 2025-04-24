@@ -3,7 +3,7 @@ package edge_applications
 import (
 	"context"
 
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -36,14 +36,14 @@ type EdgeApplicationsResponse interface {
 }
 
 type CreateRequest struct {
-	sdk.CreateApplicationRequest
+	sdk.EdgeApplicationRequest
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest,
 ) (EdgeApplicationsResponse, error) {
 	logger.Debug("Create Edge Application")
-	request := c.apiClient.EdgeApplicationsMainSettingsAPI.
-		EdgeApplicationsPost(ctx).CreateApplicationRequest(req.CreateApplicationRequest)
+	request := c.apiClient.EdgeApplicationsAPI.
+		CreateEdgeApplication(ctx).EdgeApplicationRequest(req.EdgeApplicationRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -57,5 +57,5 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest,
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return &edgeApplicationsResponse.Results, nil
+	return &edgeApplicationsResponse.Data, nil
 }
