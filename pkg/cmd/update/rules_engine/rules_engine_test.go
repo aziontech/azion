@@ -1,9 +1,10 @@
 package rules_engine
 
 import (
-	"github.com/aziontech/azion-cli/utils"
 	"net/http"
 	"testing"
+
+	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
@@ -19,7 +20,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST(http.MethodPatch, "edge_applications/1673635839/rules_engine/request/rules/1234"),
+			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/rules/1234"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -28,7 +29,6 @@ func TestUpdate(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
-			"--phase", "request",
 			"--rule-id", "1234",
 			"--file", "./fixtures/update.json",
 		})
@@ -40,7 +40,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("missing fields", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST(http.MethodPatch, "edge_applications/1673635839/rules_engine/request/rules/1234"),
+			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/rules/1234"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, `{}`),
 		)
 
@@ -51,7 +51,6 @@ func TestUpdate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
 			"--rule-id", "1234",
-			"--phase", "request",
 			"--file", "./fixtures/missing.json",
 		})
 

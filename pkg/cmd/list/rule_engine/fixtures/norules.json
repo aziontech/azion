@@ -1,10 +1,4 @@
 {
-    "count": 1,
-    "total_pages": 0,
-    "schema_version": 3,
-    "links": {
-        "previous": null,
-        "next": null
-    },
+    "count": 0,
     "results": []
-}
+  }

@@ -4,7 +4,7 @@ var (
 	AskInputRulesId       = "Enter the ID of the Rules Engine you wish to delete:"
 	AskInputApplicationId = "Enter the ID of the Edge Application this rule is linked to:"
 	AskInputPhase         = "Enter the phase of the Rules Engine (request/response):"
-	DeleteOutputSuccess   = "Rule Engine %d was successfully deleted"
+	DeleteOutputSuccess   = "Rule Engine %s was successfully deleted"
 	FlagRuleID            = "Your Rules Engine's ID"
 	FlagAppID             = "Your Edge Application's ID"
 	FlagPhase             = "The phase of your Rule Engine (request/response)"
