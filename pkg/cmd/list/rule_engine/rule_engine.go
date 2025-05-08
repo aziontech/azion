@@ -31,7 +31,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListRulesEngine: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngine(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {
@@ -49,8 +49,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion list rules-engine --application-id 1673635839 --phase request
-			$ azion list rules-engine --application-id 1673635839 --phase response --details
+			$ azion list rules-engine --application-id 1673635839
+			$ azion list rules-engine --application-id 1673635839 --details
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {

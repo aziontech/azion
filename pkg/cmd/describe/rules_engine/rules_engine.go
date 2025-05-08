@@ -34,7 +34,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		GetRulesEngine: func(ctx context.Context, appID, ruleID string) (api.RulesEngineResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.GetRulesEngine(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,
@@ -49,9 +49,9 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase request
-      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase response --format json
-      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --phase request --out "./tmp/test.json"
+      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223
+      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --format json
+      $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --out "./tmp/test.json"
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error

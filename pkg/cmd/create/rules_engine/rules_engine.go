@@ -3,7 +3,6 @@ package rules_engine
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -12,7 +11,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -20,7 +19,7 @@ import (
 )
 
 type Fields struct {
-	ApplicationID int64
+	ApplicationID string
 	Phase         string
 	Path          string
 }
@@ -44,22 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdApplication
-				}
-
-				fields.ApplicationID = num
-			}
-
-			if !cmd.Flags().Changed("phase") {
-				answer, err := utils.AskInput(msg.AskInputPhase)
-				if err != nil {
-					return err
-				}
-
-				fields.Phase = answer
+				fields.ApplicationID = answer
 			}
 
 			if !cmd.Flags().Changed("file") {
@@ -79,14 +63,24 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return utils.ErrorUnmarshalReader
 			}
 
-			reqSdk := dtoStructRequest(request.CreateRulesEngineRequest)
+			if request.Phase == "" {
+				if !cmd.Flags().Changed("phase") {
+					answer, err := utils.AskInput(msg.AskInputPhase)
+					if err != nil {
+						return err
+					}
 
-			if err := validateRequest(reqSdk); err != nil {
+					fields.Phase = answer
+				}
+				request.SetPhase(fields.Phase)
+			}
+
+			if err := validateRequest(request.EdgeApplicationRuleEngineRequest); err != nil {
 				return err
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			response, err := client.Create(context.Background(), fields.ApplicationID, fields.Phase, reqSdk)
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			response, err := client.Create(context.Background(), fields.ApplicationID, request.EdgeApplicationRuleEngineRequest)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 			}
@@ -100,14 +94,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	flags.StringVar(&fields.ApplicationID, "application-id", "", msg.FlagEdgeApplicationID)
 	flags.StringVar(&fields.Phase, "phase", "", msg.FlagPhase)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 
-func validateRequest(request sdk.CreateRulesEngineRequest) error {
+func validateRequest(request sdk.EdgeApplicationRuleEngineRequest) error {
 	if request.GetName() == "" {
 		return msg.ErrorNameEmpty
 	}
@@ -130,7 +124,7 @@ func validateRequest(request sdk.CreateRulesEngineRequest) error {
 				return msg.ErrorOperatorEmpty
 			}
 
-			if item.InputValue == nil {
+			if !item.Argument.IsSet() {
 				return msg.ErrorInputValueEmpty
 			}
 		}
@@ -141,76 +135,14 @@ func validateRequest(request sdk.CreateRulesEngineRequest) error {
 	}
 
 	for _, item := range request.GetBehaviors() {
-		if item.RulesEngineBehaviorString != nil {
-			if item.RulesEngineBehaviorString.Name == "" {
-				return msg.ErrorNameBehaviorsEmpty
-
-			}
+		if item.Name == "" {
+			return msg.ErrorNameBehaviorsEmpty
 		}
-		if item.RulesEngineBehaviorObject != nil && (item.RulesEngineBehaviorObject.Target.CapturedArray == nil || item.RulesEngineBehaviorObject.Target.Regex == nil || item.RulesEngineBehaviorObject.Target.Subject == nil) {
-			if item.RulesEngineBehaviorObject.Name == "" {
-				return msg.ErrorNameBehaviorsEmpty
-			}
+
+		if !item.Argument.IsSet() {
+			return msg.ErrorArgumentBehaviorsEmpty
 		}
 	}
 
 	return nil
-}
-
-func dtoStructRequest(request sdk.CreateRulesEngineRequest) sdk.CreateRulesEngineRequest {
-	var req sdk.CreateRulesEngineRequest
-
-	req.Name = request.Name
-	req.Description = request.Description
-
-	var rulesEngineCriteria [][]sdk.RulesEngineCriteria
-	for _, itemCriterias := range request.Criteria {
-		var criterias []sdk.RulesEngineCriteria
-		for _, itemCriteria := range itemCriterias {
-			var criteria sdk.RulesEngineCriteria
-
-			criteria.Conditional = itemCriteria.Conditional
-			criteria.Variable = itemCriteria.Variable
-			criteria.Operator = itemCriteria.Operator
-			criteria.InputValue = itemCriteria.InputValue
-
-			criterias = append(criterias, criteria)
-		}
-		rulesEngineCriteria = append(rulesEngineCriteria, criterias)
-	}
-
-	req.Criteria = rulesEngineCriteria
-	var behaviors []sdk.RulesEngineBehaviorEntry
-	for _, v := range request.Behaviors {
-		if v.RulesEngineBehaviorObject != nil {
-			if v.RulesEngineBehaviorObject.Target.CapturedArray != nil && v.RulesEngineBehaviorObject.Target.Regex != nil && v.RulesEngineBehaviorObject.Target.Subject != nil {
-				var behaviorObject sdk.RulesEngineBehaviorObject
-				behaviorObject.SetName(v.RulesEngineBehaviorObject.Name)
-				behaviorObject.SetTarget(v.RulesEngineBehaviorObject.Target)
-				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-					RulesEngineBehaviorObject: &behaviorObject,
-				})
-			} else {
-				var behaviorString sdk.RulesEngineBehaviorString
-				behaviorString.SetName(v.RulesEngineBehaviorObject.Name)
-				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-					RulesEngineBehaviorString: &behaviorString,
-				})
-			}
-		} else {
-			if v.RulesEngineBehaviorString != nil {
-				var behaviorString sdk.RulesEngineBehaviorString
-				behaviorString.SetName(v.RulesEngineBehaviorString.Name)
-				behaviorString.SetTarget(v.RulesEngineBehaviorString.Target)
-				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-					RulesEngineBehaviorString: &behaviorString,
-				})
-			}
-		}
-
-	}
-
-	req.Behaviors = behaviors
-
-	return req
 }

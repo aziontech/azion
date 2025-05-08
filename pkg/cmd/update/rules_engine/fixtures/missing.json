@@ -1,21 +1,23 @@
 {
-    "id": 1234,
-    "name": "UpdatedRule",
-    "phase": "request",
-    "behaviors": [
+  "name": "string",
+  "phase": "default",
+  "active": true,
+  "behaviors": [
+    {
+      "name": "deny",
+      "argument": 0
+    }
+  ],
+  "criteria": [
+    [
       {
-        "name": "run_function",
-        "target": "9045"
+        "argument": 0,
+        "variable": "${arg_<name>}",
+        "conditional": "if",
+        "operator": "does_not_exist",
+        "blingiding": "yeap"
       }
-    ],
-    "criteria": [
-      [
-        {
-          "operator": "starts_with",
-          "conditional": "if",
-          "input_value": "/"
-        }
-      ]
     ]
-  }
-  
+  ],
+  "description": "string"
+}
