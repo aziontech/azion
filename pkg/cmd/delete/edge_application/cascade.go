@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -42,7 +43,8 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 			return err
 		}
 	} else {
-		err = clientfunc.Delete(ctx, azionJson.Function.ID)
+		str := strconv.FormatInt(azionJson.Function.ID, 10)
+		err = clientfunc.Delete(ctx, str)
 		if err != nil {
 			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
 		}

@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	tblWithFunc string = "ID    NAME             LANGUAGE    ACTIVE  \n2995  20220124-batata  javascript  false   \n3032  TestandoCLI4     javascript  false   \n"
-	tblNoFunc   string = "ID    NAME             LANGUAGE    ACTIVE  \n"
+	tblWithFunc string = "ID    NAME    LANGUAGE    ACTIVE  \n1337  string  javascript  true    \n"
+	tblNoFunc   string = "ID    NAME    LANGUAGE    ACTIVE  \n"
 )
 
 func TestList(t *testing.T) {
@@ -23,7 +23,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions"),
+			httpmock.REST("GET", "edge_functions/functions"),
 			httpmock.JSONFromFile("./fixtures/functions.json"),
 		)
 
@@ -42,7 +42,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions"),
+			httpmock.REST("GET", "edge_functions/functions"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -60,7 +60,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions"),
+			httpmock.REST("GET", "edge_functions/functions"),
 			httpmock.JSONFromFile("./fixtures/nofunction.json"),
 		)
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
@@ -12,21 +11,20 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var (
-	functionID int64
+	functionID string
 )
 
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (api.EdgeFunctionResponse, error)
+	Get      func(context.Context, string) (sdk.EdgeFunctions, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -35,8 +33,8 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, functionID int64) (api.EdgeFunctionResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		Get: func(ctx context.Context, functionID string) (sdk.EdgeFunctions, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, functionID)
 		},
 	}
@@ -63,13 +61,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdFunction
-				}
-
-				functionID = num
+				functionID = answer
 			}
 
 			ctx := context.Background()
@@ -98,7 +90,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					Flags: f.Flags,
 				},
 				Fields: fields,
-				Values: resp,
+				Values: &resp,
 			}
 
 			if cmd.Flags().Changed("with-code") {
@@ -109,7 +101,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&functionID, "function-id", 0, msg.FlagID)
+	cobraCmd.Flags().StringVar(&functionID, "function-id", "", msg.FlagID)
 	cobraCmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
