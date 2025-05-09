@@ -1,11 +1,11 @@
 package edgefunction
 
 import (
-	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 )
 
 type CreateRequest struct {
-	sdk.CreateEdgeFunctionRequest
+	sdk.EdgeFunctionsRequest
 }
 
 func NewCreateRequest() *CreateRequest {
@@ -13,23 +13,9 @@ func NewCreateRequest() *CreateRequest {
 }
 
 type UpdateRequest struct {
-	sdk.PatchEdgeFunctionRequest
+	sdk.PatchedEdgeFunctionsRequest
 }
 
 func NewUpdateRequest() *UpdateRequest {
 	return &UpdateRequest{}
-}
-
-type EdgeFunctionResponse interface {
-	GetId() int64
-	GetName() string
-	GetActive() bool
-	GetLanguage() string
-	GetReferenceCount() int64
-	GetModified() string
-	GetInitiatorType() string
-	GetLastEditor() string
-	GetFunctionToRun() string
-	GetJsonArgs() interface{}
-	GetCode() string
 }

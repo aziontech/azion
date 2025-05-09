@@ -49,6 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
 				if err != nil {
+					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
@@ -58,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 			response, err := client.Create(ctx, request)
