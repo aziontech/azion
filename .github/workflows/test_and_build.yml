@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
     branches-ignore:
       - main 
-      - rule-v4
+      - functions-v
       - pre-release-v4
 
 jobs:
