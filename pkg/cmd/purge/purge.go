@@ -64,6 +64,7 @@ func NewCobraCmd(purge *PurgeCmd, f *cmdutil.Factory) *cobra.Command {
 
 func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.Factory) error {
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	//if none of the flags were sent
 	if !cmd.Flags().Changed("urls") && !cmd.Flags().Changed("wildcard") && !cmd.Flags().Changed("cachekey") {
 		answer, err := purge.GetPurgeType()
 		if err != nil {
