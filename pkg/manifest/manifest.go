@@ -12,7 +12,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
-	"github.com/aziontech/azion-cli/pkg/cmd/purge"
+	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
@@ -306,26 +306,26 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
-	purgeCmd := purge.NewPurgeCmd(f)
+	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	for _, purgeObj := range manifest.Purge {
 		switch purgeObj.Type {
 		case "url":
-			err := purgeCmd.PurgeUrls(purgeObj.Urls, f)
+			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "url", "edge_cache")
 			if err != nil {
-				logger.Debug("Error while purging urls", zap.Error(err))
-				return nil
+				logger.Debug("Error while purging domains", zap.Error(err))
+				return err
 			}
 		case "cachekey":
-			err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, f)
+			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "cachekey", "edge_cache")
 			if err != nil {
-				logger.Debug("Error while purging cache keys", zap.Error(err))
-				return nil
+				logger.Debug("Error while purging domains", zap.Error(err))
+				return err
 			}
 		case "wildcard":
-			err := purgeCmd.PurgeWildcard(purgeObj.Urls, f)
+			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "wildcard", "edge_cache")
 			if err != nil {
-				logger.Debug("Error while purging wildcards", zap.Error(err))
-				return nil
+				logger.Debug("Error while purging domains", zap.Error(err))
+				return err
 			}
 		}
 	}

@@ -28,8 +28,8 @@ func (cmd *DeployCmd) PurgeWildcard(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
-	err := clipurge.PurgeWildcard(ctx, purgeDomains)
+	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	err := clipurge.PurgeCache(ctx, purgeDomains, "wildcard", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging wildcard domain", zap.Error(err))
 		return err
@@ -43,8 +43,8 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
-	err := clipurge.PurgeUrls(ctx, purgeDomains)
+	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	err := clipurge.PurgeCache(ctx, purgeDomains, "url", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging urls domain", zap.Error(err))
 		return err
