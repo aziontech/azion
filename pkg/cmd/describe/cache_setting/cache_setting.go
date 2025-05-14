@@ -29,7 +29,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, int64) (api.GetResponse, error)
+	Get      func(context.Context, int64, int64) (api.GetItemResponseV4, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -38,8 +38,8 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, appID, cacheID int64) (api.GetResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		Get: func(ctx context.Context, appID, cacheID int64) (api.GetItemResponseV4, error) {
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			return client.Get(ctx, appID, cacheID)
 		},
 	}

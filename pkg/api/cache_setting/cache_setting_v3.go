@@ -2,22 +2,20 @@ package cachesetting
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"go.uber.org/zap"
 )
 
-func (c *ClientV4) Create(ctx context.Context, req *Request, applicationID int64) (ResponseV4, error) {
+func (c *ClientV3) Create(ctx context.Context, req *CreateRequest, applicationId int64) (Response, error) {
 	logger.Debug("Create Cache Settings")
 
-	applicationIDStr := strconv.Itoa(int(applicationID))
-
 	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		CreateCacheSetting(ctx, applicationIDStr).
-		CacheSettingRequest(req.CacheSettingRequest)
+		EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, applicationId).
+		ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a Cache Setting", zap.Error(err))
@@ -29,18 +27,15 @@ func (c *ClientV4) Create(ctx context.Context, req *Request, applicationID int64
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return cacheResponse, nil
+	return cacheResponse.Results, nil
 }
 
-func (c *ClientV4) Update(ctx context.Context, req *Request, applicationID, cacheSettingID int64) (ResponseV4, error) {
+func (c *ClientV3) Update(ctx context.Context, req *UpdateRequest, applicationID, cacheSettingID int64) (Response, error) {
 	logger.Debug("Update Cache Settings")
 
-	applicationIDStr := strconv.Itoa(int(applicationID))
-	cacheSettingIDStr := strconv.Itoa(int(cacheSettingID))
-
 	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		UpdateCacheSetting(ctx, applicationIDStr, cacheSettingIDStr).
-		CacheSettingRequest(req.CacheSettingRequest)
+		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdPatch(ctx, applicationID, cacheSettingID).
+		ApplicationCachePatchRequest(req.ApplicationCachePatchRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
@@ -52,45 +47,39 @@ func (c *ClientV4) Update(ctx context.Context, req *Request, applicationID, cach
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
-	return cacheResponse, nil
+	return cacheResponse.Results, nil
 }
 
-func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64,
-) (GetResponseV4, error) {
-
+func (c *ClientV3) List(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64,
+) (*sdk.ApplicationCacheGetResponse, error) {
 	logger.Debug("List Cache Settings")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
 
-	applicationIDStr := strconv.Itoa(int(edgeApplicationID))
-
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		ListCacheSettings(ctx, applicationIDStr).
-		Ordering(opts.OrderBy).
+		EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).
+		OrderBy(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
-		Execute()
+		Sort(opts.Sort).Execute()
+
 	if err != nil {
 		logger.Debug("Error while listing Cache Settings", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
 		if err != nil {
 			return nil, err
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
 
 	return resp, nil
 }
-func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (GetItemResponseV4, error) {
+func (c *ClientV3) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (GetResponse, error) {
 	logger.Debug("Get Cache Settings")
-
-	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
-	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
-
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		RetrieveCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr).
-		Execute()
+		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdGet(
+			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
 		err = utils.LogAndRewindBody(httpResp)
@@ -100,23 +89,17 @@ func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	return resp, nil
+	return &resp.Results, nil
 }
 
-func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
+func (c *ClientV3) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
 	logger.Debug("Delete Cache Settings")
-
-	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
-	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
-
-	_, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr).
-		Execute()
+	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(
+			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
-
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
-
 	return nil
 }
