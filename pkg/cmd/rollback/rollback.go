@@ -2,7 +2,6 @@ package rollback
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -119,7 +118,6 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 
 	resp, err := client.ListObject(c, bucketName, options)
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
 

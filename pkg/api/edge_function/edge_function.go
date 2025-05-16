@@ -2,7 +2,6 @@ package edgefunction
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -99,7 +98,6 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	fmt.Println(opts.PageSize)
 	resp, httpResp, err := c.apiClient.EdgeFunctionsAPI.ListEdgeFunctions(ctx).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
