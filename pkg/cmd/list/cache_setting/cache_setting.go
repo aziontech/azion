@@ -16,14 +16,13 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io                *iostreams.IOStreams
 	ReadInput         func(string) (string, error)
-	ListCaches        func(context.Context, *contracts.ListOptions, int64) (*edgeapplications.ApplicationCacheGetResponse, error)
+	ListCaches        func(context.Context, *contracts.ListOptions, int64) (api.GetResponseV4, error)
 	AskInput          func(string) (string, error)
 	EdgeApplicationID int64
 }
@@ -34,8 +33,8 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListCaches: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*edgeapplications.ApplicationCacheGetResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		ListCaches: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (api.GetResponseV4, error) {
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {
@@ -98,25 +97,26 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE SETTINGS", "CDN CACHE SETTINGS", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
+		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
 	}
 
-	for _, v := range response.Results {
+	for _, v := range response.GetResults() {
 		var ln []string
 		if opts.Details {
+			cache := v.GetEdgeCache()
+			applicationControls := v.GetApplicationControls()
 			ln = []string{
 				fmt.Sprintf("%d", v.Id),
 				v.Name,
-				v.BrowserCacheSettings,
-				v.CdnCacheSettings,
-				v.CacheByCookies,
-				fmt.Sprintf("%v", v.EnableCachingForPost),
+				v.BrowserCache.GetBehavior(),
+				applicationControls.GetCacheByCookies(),
+				fmt.Sprintf("%v", cache.GetCachingForPostEnabled()),
 			}
 		} else {
 			ln = []string{
 				fmt.Sprintf("%d", v.Id),
 				v.Name,
-				v.BrowserCacheSettings,
+				v.BrowserCache.GetBehavior(),
 			}
 		}
 

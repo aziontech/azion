@@ -24,14 +24,14 @@ func TestDescribe(t *testing.T) {
 	}{
 		{
 			name:      "describe a cache setting",
-			request:   httpmock.REST("GET", "edge_applications/1673635839/cache_settings/107313"),
+			request:   httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings/107313"),
 			response:  httpmock.JSONFromFile("./fixtures/cache_settings.json"),
 			args:      []string{"--application-id", "1673635839", "--cache-setting-id", "107313"},
 			expectErr: false,
 		},
 		{
 			name:      "describe a cache setting - no app id",
-			request:   httpmock.REST("GET", "edge_applications/1673635839/cache_settings/107313"),
+			request:   httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings/107313"),
 			response:  httpmock.JSONFromFile("./fixtures/cache_settings.json"),
 			args:      []string{"--cache-setting-id", "107313"},
 			expectErr: false,
@@ -41,7 +41,7 @@ func TestDescribe(t *testing.T) {
 		},
 		{
 			name:      "describe a cache setting - no cache id",
-			request:   httpmock.REST("GET", "edge_applications/1673635839/cache_settings/107313"),
+			request:   httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings/107313"),
 			response:  httpmock.JSONFromFile("./fixtures/cache_settings.json"),
 			args:      []string{"--application-id", "1673635839"},
 			expectErr: false,
@@ -51,14 +51,14 @@ func TestDescribe(t *testing.T) {
 		},
 		{
 			name:      "not found",
-			request:   httpmock.REST("GET", "edge_applications/1673635839/cache_settings/107313"),
+			request:   httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings/107313"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{"--application-id", "1673635839", "--cache-setting-id", "107313"},
 			expectErr: true,
 		},
 		{
 			name:      "no id sent",
-			request:   httpmock.REST("GET", "edge_applications/1673635839/cache_settings/0"),
+			request:   httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings/0"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{"--application-id", "1673635839", "--cache-setting-id", "0"},
 			expectErr: true,
