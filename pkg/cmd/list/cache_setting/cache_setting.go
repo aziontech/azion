@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListCaches: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (api.GetResponseV4, error) {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {

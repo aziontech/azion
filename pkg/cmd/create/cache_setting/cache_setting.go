@@ -3,8 +3,9 @@ package cachesetting
 import (
 	"context"
 	"fmt"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"strconv"
+
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -54,8 +55,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create cache-setting --application-id 1673635839 --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			request := api.Request{}
 
@@ -109,9 +110,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
 			}
 
-			data := response.GetData()
 			creatOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.CreateOutputSuccess, data.GetId()),
+				Msg:   fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -166,7 +166,7 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
 	request.SetName(fields.Name)
 	if cmd.Flags().Changed("browser-cache-behavior") {
-		if fields.browserCacheBehavior == "override" && !cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
+		if fields.browserCacheBehavior == "override" && !cmd.Flags().Changed("browser-cache-max-age") {
 			return msg.ErrorBrowserMaximumTtlNotSent
 		}
 

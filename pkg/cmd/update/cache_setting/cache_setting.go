@@ -3,8 +3,9 @@ package cachesetting
 import (
 	"context"
 	"fmt"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"strconv"
+
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -61,10 +62,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
-			request := api.Request{}
+			request := api.RequestUpdate{}
 
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.CreateAskInputApplicationID)
@@ -119,7 +120,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			response, err := client.Update(context.Background(), &request, fields.ApplicationID, fields.CacheSettingID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
+				return fmt.Errorf(msg.ErrorUpdateCacheSettings.Error(), err)
 			}
 
 			data := response.GetData()
@@ -151,12 +152,13 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
 	flags.StringVar(&fields.isSliceConfigurationEnabled, "slice-configuration-enabled", "", msg.FlagSliceConfigurationEnabled)
 	flags.Int64Var(&fields.sliceConfigurationRange, "slice-configuration-range", 0, msg.FlagSliceConfigurationRange)
+	flags.Int64Var(&fields.browserCacheMaxAge, "browser-cache-max-age", 0, msg.FlagBrowserCacheMaxAge)
 	flags.StringVar(&fields.adaptiveDeliveryAction, "adaptive-delivery-action", "ignore", msg.FlagAdaptiveDeliveryAction)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.Request) error {
+func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.RequestUpdate) error {
 	ctx := context.Background()
 	str := strconv.FormatInt(fields.ApplicationID, 10)
 	application, err := client.Get(ctx, str)
@@ -176,10 +178,10 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 	return nil
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.RequestUpdate) error {
 	request.SetName(fields.Name)
 	if cmd.Flags().Changed("browser-cache-settings") {
-		if fields.browserCacheSettings == "override" && !cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
+		if fields.browserCacheSettings == "override" && !cmd.Flags().Changed("browser-cache-max-age") {
 			return msg.ErrorBrowserMaximumTtlNotSent
 		}
 

@@ -36,7 +36,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteCache: func(ctx context.Context, appID int64, cacheID int64) error {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Delete(ctx, appID, cacheID)
 		},
 		AskInput: utils.AskInput,

@@ -9,6 +9,10 @@ type Request struct {
 	sdk.CacheSettingRequest
 }
 
+type RequestUpdate struct {
+	sdk.PatchedCacheSettingRequest
+}
+
 type ResponseV4 interface {
 	GetState() string
 	GetData() sdk.CacheSetting
@@ -17,10 +21,6 @@ type ResponseV4 interface {
 type GetResponseV4 interface {
 	GetCount() int64
 	GetResults() []sdk.ResponseListCacheSetting
-}
-
-type GetItemResponseV4 interface {
-	GetData() sdk.CacheSetting
 }
 
 type UpdateRequest struct {
