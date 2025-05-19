@@ -1,30 +1,18 @@
 {
-	"results": {
+	"data": {
 	  "id": 1673635841,
-	  "name": "New Edge Application",
-	  "delivery_protocol": "http,https",
-	  "http_port": [
-		80
-	  ],
-	  "https_port": [
-		443
-	  ],
-	  "minimum_tls_version": "",
+	  "name": "string",
+	  "last_editor": "string",
+	  "last_modified": "2019-08-24T14:15:22Z",
+	  "modules": {
+		"edge_cache_enabled": true,
+		"edge_functions_enabled": false,
+		"application_accelerator_enabled": false,
+		"image_processor_enabled": false,
+		"tiered_cache_enabled": false
+	  },
 	  "active": true,
-	  "debug_rules": false,
-	  "http3": false,
-	  "websocket": null,
-	  "supported_ciphers": "all",
-	  "application_acceleration": true,
-	  "caching": true,
-	  "device_detection": false,
-	  "edge_firewall": false,
-	  "edge_functions": false,
-	  "image_optimization": false,
-	  "l2_caching": false,
-	  "load_balancer": false,
-	  "raw_logs": false,
-	  "web_application_firewall": false
-	},
-	"schema_version": 3
+	  "debug": false,
+	  "product_version": "string"
+	}
   }

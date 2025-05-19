@@ -81,7 +81,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	*msgs = append(*msgs, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientDomain := apiDomain.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	ctx := context.Background()
@@ -341,7 +341,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 // this is called to delete resources no longer present in manifest.json
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 	for _, value := range RuleIds {

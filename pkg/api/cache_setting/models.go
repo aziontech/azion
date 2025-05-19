@@ -1,13 +1,34 @@
 package cachesetting
 
-import sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+import (
+	sdkOld "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+)
 
-type CreateRequest struct {
-	sdk.ApplicationCacheCreateRequest
+type Request struct {
+	sdk.CacheSettingRequest
+}
+
+type RequestUpdate struct {
+	sdk.PatchedCacheSettingRequest
+}
+
+type ResponseV4 interface {
+	GetState() string
+	GetData() sdk.CacheSetting
+}
+
+type GetResponseV4 interface {
+	GetCount() int64
+	GetResults() []sdk.ResponseListCacheSetting
 }
 
 type UpdateRequest struct {
-	sdk.ApplicationCachePatchRequest
+	sdkOld.ApplicationCachePatchRequest
+}
+
+type CreateRequest struct {
+	sdkOld.ApplicationCacheCreateRequest
 }
 
 type Response interface {
