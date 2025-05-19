@@ -114,7 +114,7 @@ func cmd(l *login) *cobra.Command {
 func (l *login) selectLoginMode() (answer string, err error) {
 	prompt := &survey.Select{
 		Message: "Choose a login method:",
-		Options: []string{"Log in via terminal"},
+		Options: []string{"Log in via browser", "Log in via terminal"},
 	}
 	err = l.askOne(prompt, &answer)
 	if err != nil {
