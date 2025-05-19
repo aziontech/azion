@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	urlSsoNext = "https://sso.azion.com/login?next=cli"
+	urlSsoNext = "https://console.azion.com/login?next=cli"
 )
 
 // when it's a single test set true
