@@ -164,15 +164,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Check if directory exists; if not, we skip uploading static files
+	// Check if directory exists; if not, we skip creating bucket and uploading static files
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		logger.Debug(msg.SkipUpload)
 	} else {
+		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
+		if err != nil {
+			return err
+		}
+
 		err = cmd.uploadFiles(f, conf, &msgs)
 		if err != nil {
 			return err
