@@ -1,0 +1,16 @@
+{
+    "results": {
+        "id": 1337,
+        "name": "ZA WARUDO",
+        "cnames": [
+            "www.test123.com",
+            "www.pudim.com"
+        ],
+        "cname_access_only": true,
+        "digital_certificate_id": null,
+        "edge_application_id": 1674767911,
+        "is_active": true,
+        "domain_name": "euxhjonxrr.map.azionedge.net"
+    },
+    "schema_version": 3
+}

@@ -1,0 +1,61 @@
+{
+    "count": 2,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+        "previous": null,
+        "next": null
+    },
+    "results": [
+        {
+            "origin_id": 88144,
+            "origin_key": "0cee30cd-1743-4202-b0dd-da9b636a6035",
+            "name": "Default Origin",
+            "origin_type": "single_origin",
+            "addresses": [
+                {
+                    "address": "www.new.api",
+                    "weight": null,
+                    "server_role": "primary",
+                    "is_active": true
+                }
+            ],
+            "origin_protocol_policy": "preserve",
+            "is_origin_redirection_enabled": false,
+            "host_header": "www.new.api",
+            "method": "",
+            "origin_path": "",
+            "connection_timeout": 60,
+            "timeout_between_bytes": 120,
+            "hmac_authentication": false,
+            "hmac_region_name": "",
+            "hmac_access_key": "",
+            "hmac_secret_key": ""
+        },
+        {
+            "origin_id": 91799,
+            "origin_key": "e4f0761b-d2ac-4168-aa4b-f525d08396fd",
+            "name": "Create Origin",
+            "origin_type": "single_origin",
+            "addresses": [
+                {
+                    "address": "httpbin.org",
+                    "weight": null,
+                    "server_role": "primary",
+                    "is_active": true
+                }
+            ],
+            "origin_protocol_policy": "http",
+            "is_origin_redirection_enabled": false,
+            "host_header": "${host}",
+            "method": "",
+            "origin_path": "/requests",
+            "connection_timeout": 60,
+            "timeout_between_bytes": 120,
+            "hmac_authentication": false,
+            "hmac_region_name": "",
+            "hmac_access_key": "",
+            "hmac_secret_key": ""
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+{
+    "results": {
+        "id": 210543,
+        "name": "nomezinhomatotinho",
+        "phase": "request",
+        "behaviors": [
+            {
+                "target": null,
+                "name": "forward_cookies"
+            },
+            {
+                "target": "138729",
+                "name": "set_cache_policy"
+            }
+        ],
+        "criteria": [
+            [
+                {
+                    "variable": "${uri}",
+                    "operator": "starts_with",
+                    "conditional": "if",
+                    "input_value": "/"
+                }
+            ]
+        ],
+        "is_active": true,
+        "order": 2
+    },
+    "schema_version": 3
+}

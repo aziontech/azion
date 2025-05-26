@@ -13,8 +13,53 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"go.uber.org/zap"
 )
+
+func transformEdgeApplicationRequest(edgeapprequest edgesdk.EdgeApplicationRequest) *apiEdgeApplications.UpdateRequest {
+	request := &apiEdgeApplications.UpdateRequest{}
+
+	if edgeapprequest.Active != nil {
+		request.SetActive(*edgeapprequest.Active)
+	}
+	if edgeapprequest.Debug != nil {
+		request.SetDebug(*edgeapprequest.Debug)
+	}
+	if edgeapprequest.Modules != nil {
+		request.SetModules(*edgeapprequest.Modules)
+	}
+	if edgeapprequest.Name != "" {
+		request.SetName(edgeapprequest.Name)
+	}
+
+	return request
+}
+
+func transformRuleRequest(rule edgesdk.EdgeApplicationRuleEngineRequest) *apiEdgeApplications.UpdateRulesEngineRequest {
+	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
+
+	if rule.Active != nil {
+		request.SetActive(*rule.Active)
+	}
+	if rule.Behaviors != nil {
+		request.SetBehaviors(rule.Behaviors)
+	}
+	if rule.Criteria != nil {
+		request.SetCriteria(rule.Criteria)
+	}
+	if rule.Description != nil {
+		request.SetDescription(*rule.Description)
+	}
+	if rule.Name != "" {
+		request.SetName(rule.Name)
+	}
+	if rule.Phase != "" {
+		request.SetPhase(rule.Phase)
+	}
+
+	return request
+}
 
 func makeCacheRequestUpdate(cache contracts.CacheSetting) *apiCache.UpdateRequest {
 	request := &apiCache.UpdateRequest{}
@@ -42,8 +87,8 @@ func makeCacheRequestUpdate(cache contracts.CacheSetting) *apiCache.UpdateReques
 	if cache.CookieNames != nil {
 		var cookieNames []string
 		for _, name := range cache.CookieNames {
-			if name != nil {
-				cookieNames = append(cookieNames, *name)
+			if name != "" {
+				cookieNames = append(cookieNames, name)
 			}
 		}
 		request.SetCookieNames(cookieNames)
@@ -109,8 +154,8 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 	if cache.CookieNames != nil {
 		var cookieNames []string
 		for _, name := range cache.CookieNames {
-			if name != nil {
-				cookieNames = append(cookieNames, *name)
+			if name != "" {
+				cookieNames = append(cookieNames, name)
 			}
 		}
 		request.SetCookieNames(cookieNames)

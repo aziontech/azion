@@ -1,0 +1,36 @@
+{
+    "count": 1,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+      "previous": null,
+      "next": null
+    },
+    "results": [
+      {
+        "origin_id": 111111,
+        "origin_key": "11111-0000-11111-111111-11111",
+        "name": "Origin 2",
+        "origin_type": "single_origin",
+        "addresses": [
+            {
+                "address": "httpbin.org",
+                "weight": null,
+                "server_role": "primary",
+                "is_active": true
+            }
+        ],
+        "origin_protocol_policy": "http",
+        "is_origin_redirection_enabled": false,
+        "host_header": "${host}",
+        "method": "",
+        "origin_path": "/requests",
+        "connection_timeout": 60,
+        "timeout_between_bytes": 120,
+        "hmac_authentication": false,
+        "hmac_region_name": "",
+        "hmac_access_key": "",
+        "hmac_secret_key": ""
+      }
+    ]
+}
