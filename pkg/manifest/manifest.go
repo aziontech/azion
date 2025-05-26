@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
@@ -57,10 +58,10 @@ func (man *ManifestInterpreter) ManifestPath() (string, error) {
 	return utils.Concat(pathWorkingDir, manifestFilePath), nil
 }
 
-func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, msgs *[]string) (*contracts.Manifest, error) {
+func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, msgs *[]string) (*contracts.ManifestV4, error) {
 	logger.FInfoFlags(f.IOStreams.Out, msg.ReadingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.ReadingManifest)
-	manifest := &contracts.Manifest{}
+	manifest := &contracts.ManifestV4{}
 
 	byteManifest, err := man.FileReader(path)
 	if err != nil {
@@ -75,15 +76,15 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.Manifest, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
+func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.CreatingManifest)
 
-	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientDomain := apiDomain.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientDomain := apiDomain.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
 	CacheIds = make(map[string]int64)
@@ -106,6 +107,51 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	for _, originConf := range conf.Origin {
 		OriginKeys[originConf.Name] = originConf.OriginKey
 		OriginIds[originConf.Name] = originConf.OriginId
+	}
+
+	if len(manifest.EdgeApplications) > 0 {
+		edgeappman := manifest.EdgeApplications[0]
+		if conf.Application.ID > 0 {
+			req := transformEdgeApplicationRequest(edgeappman.EdgeApplicationRequest)
+			_, err := client.Update(ctx, req)
+			if err != nil {
+				return err
+			}
+		} else {
+			req := &apiEdgeApplications.CreateRequest{
+				EdgeApplicationRequest: edgeappman.EdgeApplicationRequest,
+			}
+			resp, err := client.Create(ctx, req)
+			if err != nil {
+				return err
+			}
+			conf.Application.ID = resp.GetId()
+		}
+
+		if len(edgeappman.Rules) > 0 {
+			for _, rule := range edgeappman.Rules {
+				if r := RuleIds[rule.Name]; r.Id > 0 {
+					req := transformRuleRequest(rule)
+					_, err := client.UpdateRulesEngine(ctx, req)
+					if err != nil {
+						return err
+					}
+				} else {
+					req := &apiEdgeApplications.CreateRulesEngineRequest{
+						EdgeApplicationRuleEngineRequest: rule,
+					}
+					appstring := strconv.FormatInt(conf.Application.ID, 10)
+					_, err := client.CreateRulesEngine(ctx, appstring, rule.Phase, req)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
+
+	if len(manifest.EdgeStorage) > 0 {
+		storageman := manifest.EdgeStorage[0]
 	}
 
 	if manifest.Domain != nil && manifest.Domain.Name != "" {

@@ -4,7 +4,9 @@ import (
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdkstorage "github.com/aziontech/azionapi-go-sdk/storage"
 	"github.com/aziontech/azionapi-v4-go-sdk/edge"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 )
 
 type FileOps struct {
@@ -20,6 +22,15 @@ type BuildInfo struct {
 	NodePolyfills string
 	OwnWorker     string
 	ProjectPath   string
+}
+
+type BuildInfoV3 struct {
+	Preset        string
+	Entry         string
+	NodePolyfills string
+	OwnWorker     string
+	ProjectPath   string
+	IsFirewall    bool
 }
 
 type DevInfo struct {
@@ -190,6 +201,48 @@ type Manifest struct {
 	Purge         []Purges       `json:"purge"`
 }
 
+type ManifestV4 struct {
+	Build            BuildConf                                 `json:"build"`
+	EdgeStorage      []sdkstorage.BucketCreate                 `json:"edgeStorage"`
+	EdgeFunctions    []EdgeFunction                            `json:"edgeFunctions"`
+	EdgeApplications []EdgeApplications                        `json:"edgeApplications"`
+	EdgeConnectors   []edgesdk.EdgeConnectorPolymorphicRequest `json:"edgeConnectors"`
+}
+
+type WorkloadManifest struct {
+	edgesdk.WorkloadRequest
+	EdgeApplicationName *string `json:"edgeApplicationName"`
+	EdgeFirewallnName   *string `json:"edgeFirewallName"`
+}
+
+type EdgeApplications struct {
+	edgesdk.EdgeApplicationRequest
+	Rules []edgesdk.EdgeApplicationRuleEngineRequest `json:"rules"`
+}
+
+type EdgeFunction struct {
+	Name     string                 `json:"name"`
+	Target   string                 `json:"target"`
+	Args     map[string]interface{} `json:"args"`
+	Bindings Bindings               `json:"bindings"`
+}
+
+type Bindings struct {
+	EdgeStorage EdgeStorage `json:"edge_storage"`
+}
+
+type EdgeStorage struct {
+	Bucket string `json:"bucket"`
+	Prefix string `json:"prefix"`
+}
+
+type BuildConfig struct {
+	Preset    string   `json:"preset"`
+	Entry     []string `json:"entry"`
+	Polyfills bool     `json:"polyfills"`
+	Worker    bool     `json:"worker"`
+}
+
 type Purges struct {
 	Type   string   `json:"type"`
 	Urls   []string `json:"urls"`
@@ -212,27 +265,27 @@ type Domains struct {
 }
 
 type CacheSetting struct {
-	Name                           *string   `json:"name,omitempty"`
-	BrowserCacheSettings           *string   `json:"browser_cache_settings,omitempty"`
-	BrowserCacheSettingsMaximumTtl *int64    `json:"browser_cache_settings_maximum_ttl,omitempty"`
-	CdnCacheSettings               *string   `json:"cdn_cache_settings,omitempty"`
-	CdnCacheSettingsMaximumTtl     *int64    `json:"cdn_cache_settings_maximum_ttl,omitempty"`
-	CacheByQueryString             *string   `json:"cache_by_query_string,omitempty"`
-	QueryStringFields              []string  `json:"query_string_fields,omitempty"`
-	EnableQueryStringSort          *bool     `json:"enable_query_string_sort,omitempty"`
-	CacheByCookies                 *string   `json:"cache_by_cookies,omitempty"`
-	CookieNames                    []*string `json:"cookie_names,omitempty"`
-	AdaptiveDeliveryAction         *string   `json:"adaptive_delivery_action,omitempty"`
-	DeviceGroup                    []int32   `json:"device_group,omitempty"`
-	EnableCachingForPost           *bool     `json:"enable_caching_for_post,omitempty"`
-	L2CachingEnabled               *bool     `json:"l2_caching_enabled,omitempty"`
-	IsSliceConfigurationEnabled    *bool     `json:"is_slice_configuration_enabled,omitempty"`
-	IsSliceEdgeCachingEnabled      *bool     `json:"is_slice_edge_caching_enabled,omitempty"`
-	IsSliceL2CachingEnabled        *bool     `json:"is_slice_l2_caching_enabled,omitempty"`
-	SliceConfigurationRange        *int64    `json:"slice_configuration_range,omitempty"`
-	EnableCachingForOptions        *bool     `json:"enable_caching_for_options,omitempty"`
-	EnableStaleCache               *bool     `json:"enable_stale_cache,omitempty"`
-	L2Region                       *string   `json:"l2_region,omitempty"`
+	Name                           *string  `json:"name,omitempty"`
+	BrowserCacheSettings           *string  `json:"browser_cache_settings,omitempty"`
+	BrowserCacheSettingsMaximumTtl *int64   `json:"browser_cache_settings_maximum_ttl,omitempty"`
+	CdnCacheSettings               *string  `json:"cdn_cache_settings,omitempty"`
+	CdnCacheSettingsMaximumTtl     *int64   `json:"cdn_cache_settings_maximum_ttl,omitempty"`
+	CacheByQueryString             *string  `json:"cache_by_query_string,omitempty"`
+	QueryStringFields              []string `json:"query_string_fields,omitempty"`
+	EnableQueryStringSort          *bool    `json:"enable_query_string_sort,omitempty"`
+	CacheByCookies                 *string  `json:"cache_by_cookies,omitempty"`
+	CookieNames                    []string `json:"cookie_names,omitempty"`
+	AdaptiveDeliveryAction         *string  `json:"adaptive_delivery_action,omitempty"`
+	DeviceGroup                    []int32  `json:"device_group,omitempty"`
+	EnableCachingForPost           *bool    `json:"enable_caching_for_post,omitempty"`
+	L2CachingEnabled               *bool    `json:"l2_caching_enabled,omitempty"`
+	IsSliceConfigurationEnabled    *bool    `json:"is_slice_configuration_enabled,omitempty"`
+	IsSliceEdgeCachingEnabled      *bool    `json:"is_slice_edge_caching_enabled,omitempty"`
+	IsSliceL2CachingEnabled        *bool    `json:"is_slice_l2_caching_enabled,omitempty"`
+	SliceConfigurationRange        *int64   `json:"slice_configuration_range,omitempty"`
+	EnableCachingForOptions        *bool    `json:"enable_caching_for_options,omitempty"`
+	EnableStaleCache               *bool    `json:"enable_stale_cache,omitempty"`
+	L2Region                       *string  `json:"l2_region,omitempty"`
 }
 
 type Origin struct {
