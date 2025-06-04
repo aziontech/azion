@@ -7,6 +7,7 @@ var (
 	ErrorCacheNotFound          = errors.New("Could not find this cache setting")
 	ErrorFunctionNotFound       = errors.New("Could not find this edge function")
 	ErrorOriginNotFound         = errors.New("Could not find this origin")
+	ErrorConnectorNotFound      = errors.New("Could not find this edge connector")
 	ErrorCreateOrigin           = errors.New("Failed to create the origin")
 	ErrorCreateCache            = errors.New("Failed to create the cache setting")
 	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine")

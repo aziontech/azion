@@ -13,6 +13,11 @@ import (
 	"go.uber.org/zap"
 )
 
+var jsonTemplate = `{
+  "scope": "global",
+  "preset": "%s"
+}`
+
 func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{
@@ -44,7 +49,8 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 
 	cmdVulcanInit := "store init"
 	if len(cmd.preset) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, cmd.preset)
+		formatted := fmt.Sprintf(jsonTemplate, cmd.preset)
+		cmdVulcanInit = fmt.Sprintf("%s --config '%s'", cmdVulcanInit, formatted)
 	}
 
 	command := vul.Command("", cmdVulcanInit, cmd.f)

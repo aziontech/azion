@@ -69,6 +69,13 @@ type AzionApplicationOptions struct {
 	RulesEngine   AzionJsonDataRulesEngine     `json:"rules-engine"`
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 	Workloads     AzionJsonDataWorkload        `json:"workloads"`
+	Connectors    []AzionJsonDataConnectors    `json:"connectors"`
+}
+
+type AzionJsonDataConnectors struct {
+	Id      int64    `json:"id"`
+	Name    string   `json:"name"`
+	Address []string `json:"address,omitempty"`
 }
 
 type Results struct {
@@ -207,17 +214,44 @@ type ManifestV4 struct {
 	EdgeFunctions    []EdgeFunction                            `json:"edgeFunctions"`
 	EdgeApplications []EdgeApplications                        `json:"edgeApplications"`
 	EdgeConnectors   []edgesdk.EdgeConnectorPolymorphicRequest `json:"edgeConnectors"`
+	Workloads        []WorkloadManifest                        `json:"workloads"`
+	Purge            []PurgeManifest                           `json:"purge"`
+}
+
+type PurgeManifest struct {
+	Items []string `json:"items"`
+	Layer *string  `json:"layer,omitempty"`
+	Type  string   `json:"type"`
 }
 
 type WorkloadManifest struct {
-	edgesdk.WorkloadRequest
-	EdgeApplicationName *string `json:"edgeApplicationName"`
-	EdgeFirewallnName   *string `json:"edgeFirewallName"`
+	Name             string                      `json:"name" validate:"regexp=.*"`
+	AlternateDomains []string                    `json:"alternate_domains,omitempty"`
+	EdgeApplication  int64                       `json:"edge_application"`
+	Active           *bool                       `json:"active,omitempty"`
+	NetworkMap       *string                     `json:"network_map,omitempty"`
+	EdgeFirewall     *int64                      `json:"edge_firewall,omitempty"`
+	Tls              *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
+	Protocols        *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
+	Mtls             *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
+	Domains          []edgesdk.DomainInfoRequest `json:"domains,omitempty"`
+}
+
+type Modules struct {
+	EdgeCacheEnabled              *bool `json:"edge_cache_enabled,omitempty"`
+	EdgeFunctionsEnabled          *bool `json:"edge_functions_enabled,omitempty"`
+	ApplicationAcceleratorEnabled *bool `json:"application_accelerator_enabled,omitempty"`
+	ImageProcessorEnabled         *bool `json:"image_processor_enabled,omitempty"`
+	TieredCacheEnabled            *bool `json:"tiered_cache_enabled,omitempty"`
 }
 
 type EdgeApplications struct {
-	edgesdk.EdgeApplicationRequest
-	Rules []edgesdk.EdgeApplicationRuleEngineRequest `json:"rules"`
+	Name    string                                     `json:"name"`
+	Modules *Modules                                   `json:"modules,omitempty"`
+	Active  *bool                                      `json:"active,omitempty"`
+	Debug   *bool                                      `json:"debug,omitempty"`
+	Rules   []edgesdk.EdgeApplicationRuleEngineRequest `json:"rules"`
+	Cache   []edgesdk.CacheSettingRequest              `json:"cache"`
 }
 
 type EdgeFunction struct {

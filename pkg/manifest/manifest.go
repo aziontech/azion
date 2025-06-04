@@ -13,16 +13,19 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
+	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
+	functionsApi "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	"github.com/davecgh/go-spew/spew"
 
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
-	apiDomain "github.com/aziontech/azion-cli/pkg/api/workloads"
+	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
 )
 
@@ -32,6 +35,7 @@ var (
 	RuleIds          map[string]contracts.RuleIdsStruct
 	OriginKeys       map[string]string
 	OriginIds        map[string]int64
+	ConnectorIds     map[string]int64
 	manifestFilePath = "/.edge/manifest.json"
 )
 
@@ -72,6 +76,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 	if err != nil {
 		return nil, err
 	}
+	spew.Dump(manifest.EdgeApplications)
 
 	return manifest, nil
 }
@@ -82,9 +87,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	*msgs = append(*msgs, msg.CreatingManifest)
 
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	clientDomain := apiDomain.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientWorkload := apiWorkloads.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	connectorClient := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	functionClient := functionsApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
 	CacheIds = make(map[string]int64)
@@ -92,6 +98,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	RuleIds = make(map[string]contracts.RuleIdsStruct)
 	OriginKeys = make(map[string]string)
 	OriginIds = make(map[string]int64)
+	ConnectorIds = make(map[string]int64)
 
 	for _, cacheConf := range conf.CacheSettings {
 		CacheIds[cacheConf.Name] = cacheConf.Id
@@ -109,243 +116,328 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		OriginIds[originConf.Name] = originConf.OriginId
 	}
 
-	if len(manifest.EdgeApplications) > 0 {
-		edgeappman := manifest.EdgeApplications[0]
-		if conf.Application.ID > 0 {
-			req := transformEdgeApplicationRequest(edgeappman.EdgeApplicationRequest)
-			_, err := client.Update(ctx, req)
+	for _, connectorConf := range conf.Connectors {
+		ConnectorIds[connectorConf.Name] = connectorConf.Id
+	}
+
+	if len(manifest.EdgeFunctions) > 0 {
+		funcMan := manifest.EdgeFunctions[0]
+		code, err := os.ReadFile(funcMan.Target)
+		if err != nil {
+			return fmt.Errorf("Failed to read target code file: %w", err)
+		}
+		if conf.Function.ID > 0 {
+			request := functionsApi.UpdateRequest{}
+			request.SetActive(true)
+			request.SetJsonArgs(funcMan.Args)
+			request.SetName(funcMan.Name)
+			request.SetCode(string(code))
+			idString := strconv.FormatInt(conf.Function.ID, 10)
+			_, err := functionClient.Update(ctx, &request, idString)
 			if err != nil {
 				return err
 			}
 		} else {
-			req := &apiEdgeApplications.CreateRequest{
-				EdgeApplicationRequest: edgeappman.EdgeApplicationRequest,
-			}
-			resp, err := client.Create(ctx, req)
+			request := functionsApi.CreateRequest{}
+			request.SetActive(true)
+			request.SetJsonArgs(funcMan.Args)
+			request.SetName(funcMan.Name)
+			request.SetCode(string(code))
+			resp, err := functionClient.Create(ctx, &request)
 			if err != nil {
 				return err
 			}
-			conf.Application.ID = resp.GetId()
-		}
-
-		if len(edgeappman.Rules) > 0 {
-			for _, rule := range edgeappman.Rules {
-				if r := RuleIds[rule.Name]; r.Id > 0 {
-					req := transformRuleRequest(rule)
-					_, err := client.UpdateRulesEngine(ctx, req)
-					if err != nil {
-						return err
-					}
-				} else {
-					req := &apiEdgeApplications.CreateRulesEngineRequest{
-						EdgeApplicationRuleEngineRequest: rule,
-					}
-					appstring := strconv.FormatInt(conf.Application.ID, 10)
-					_, err := client.CreateRulesEngine(ctx, appstring, rule.Phase, req)
-					if err != nil {
-						return err
-					}
-				}
-			}
+			conf.Function.ID = resp.GetId()
+			conf.Function.Name = resp.GetName()
+			conf.Function.File = funcMan.Target
 		}
 	}
 
-	if len(manifest.EdgeStorage) > 0 {
-		storageman := manifest.EdgeStorage[0]
-	}
-
-	if manifest.Domain != nil && manifest.Domain.Name != "" {
-		if conf.Workloads.Id > 0 {
-			requestUpdate := makeDomainUpdateRequest(manifest.Domain, conf)
-			req := &apiDomain.UpdateRequest{}
-			updated, err := clientDomain.Update(ctx, req)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, *requestUpdate.Name, err.Error())
-			}
-			conf.Workloads.Domains = updated.GetDomains()
-			conf.Workloads.Url = utils.Concat("https://", conf.Workloads.Domains[0].GetDomain())
-		} else {
-			requestCreate := makeDomainCreateRequest(manifest.Domain, conf)
-			req := &apiDomain.CreateRequest{}
-			created, err := clientDomain.Create(ctx, req)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateDomain, requestCreate.Name, err.Error())
-			}
-			conf.Workloads.Name = created.GetName()
-			conf.Workloads.Domains = created.GetDomains()
-			conf.Workloads.Url = utils.Concat("https://", created.GetDomains()[0].GetDomain())
-			conf.Workloads.Id = created.GetId()
-		}
-	}
-
-	originConf := []contracts.AzionJsonDataOrigin{}
-	for _, origin := range manifest.Origins {
-		if id := OriginIds[origin.Name]; id > 0 {
-			requestUpdate := makeOriginUpdateRequest(origin, conf)
-			if origin.Name != "" {
-				requestUpdate.Name = &origin.Name
-			} else {
-				requestUpdate.Name = &conf.Name
-			}
-			updated, err := clientOrigin.Update(ctx, conf.Application.ID, OriginKeys[origin.Name], requestUpdate)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateOrigin, origin.Name, err.Error())
-			}
-
-			newEntry := contracts.AzionJsonDataOrigin{
-				OriginId:  updated.GetOriginId(),
-				OriginKey: updated.GetOriginKey(),
-				Name:      updated.GetName(),
-			}
-			originConf = append(originConf, newEntry)
-
-			msgf := fmt.Sprintf(msg.ManifestUpdateOrigin, origin.Name, updated.GetOriginKey())
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
-		} else {
-			requestCreate := makeOriginCreateRequest(origin, conf)
-			if origin.Name != "" {
-				requestCreate.Name = origin.Name
-			} else {
-				requestCreate.Name = conf.Name
-			}
-			created, err := clientOrigin.Create(ctx, conf.Application.ID, requestCreate)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorCreateOrigin, requestCreate.Name, err.Error())
-			}
-			newOrigin := contracts.AzionJsonDataOrigin{
-				OriginId:  created.GetOriginId(),
-				OriginKey: created.GetOriginKey(),
-				Name:      created.GetName(),
-			}
-
-			originConf = append(originConf, newOrigin)
-			OriginIds[created.GetName()] = created.GetOriginId()
-			OriginKeys[created.GetName()] = created.GetOriginKey()
-			msgf := fmt.Sprintf(msg.ManifestCreateOrigin, origin.Name, created.GetOriginId())
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
-		}
-	}
-
-	conf.Origin = originConf
 	err := man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
-	cacheConf := []contracts.AzionJsonDataCacheSettings{}
-	for _, cache := range manifest.CacheSettings {
-		if id := CacheIds[*cache.Name]; id > 0 {
-			requestUpdate := makeCacheRequestUpdate(cache)
-			if cache.Name != nil {
-				requestUpdate.Name = cache.Name
-			} else {
-				requestUpdate.Name = &conf.Name
-			}
-			updated, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
+	if len(manifest.EdgeApplications) > 0 {
+		edgeappman := manifest.EdgeApplications[0]
+		if conf.Application.ID > 0 {
+			req := transformEdgeApplicationRequestUpdate(edgeappman)
+			req.Id = conf.Application.ID
+			_, err := client.Update(ctx, req)
 			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateCache, *cache.Name, err.Error())
+				return err
 			}
-			newCache := contracts.AzionJsonDataCacheSettings{
-				Id:   updated.GetId(),
-				Name: updated.GetName(),
-			}
-			cacheConf = append(cacheConf, newCache)
-			msgf := fmt.Sprintf(msg.ManifestUpdateCache, *cache.Name, id)
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
 		} else {
-			requestCreate := makeCacheRequestCreate(cache)
-			if cache.Name != nil {
-				requestCreate.Name = *cache.Name
-			} else {
-				requestCreate.Name = conf.Name + thoth.GenerateName()
-			}
-			created, err := clientCache.Create(ctx, requestCreate, conf.Application.ID)
+			createreq := transformEdgeApplicationRequestCreate(edgeappman)
+			resp, err := client.Create(ctx, createreq)
 			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorCreateCache, requestCreate.Name, err.Error())
+				return err
 			}
-			newCache := contracts.AzionJsonDataCacheSettings{
-				Id:   created.GetId(),
-				Name: created.GetName(),
-			}
-			cacheConf = append(cacheConf, newCache)
-			CacheIds[newCache.Name] = newCache.Id
-			msgf := fmt.Sprintf(msg.ManifestCreateCache, *cache.Name, newCache.Id)
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
+			conf.Application.ID = resp.GetId()
 		}
+
+		cacheConf := []contracts.AzionJsonDataCacheSettings{}
+		if len(edgeappman.Cache) > 0 {
+			for _, cache := range edgeappman.Cache {
+				if r := CacheIds[cache.Name]; r > 0 {
+					request := transformCacheRequest(cache)
+					updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
+					if err != nil {
+						return err
+					}
+					newCache := contracts.AzionJsonDataCacheSettings{
+						Id:   updated.GetData().Id,
+						Name: updated.GetData().Name,
+					}
+					cacheConf = append(cacheConf, newCache)
+				} else {
+					request := apiCache.Request{
+						CacheSettingRequest: cache,
+					}
+					responseCache, err := clientCache.Create(ctx, &request, conf.Application.ID)
+					if err != nil {
+						return err
+					}
+					newCache := contracts.AzionJsonDataCacheSettings{
+						Id:   responseCache.GetId(),
+						Name: responseCache.GetName(),
+					}
+					cacheConf = append(cacheConf, newCache)
+					CacheIds[newCache.Name] = newCache.Id
+
+				}
+			}
+		}
+
+		//backup cache ids
+		for k, v := range CacheIds {
+			CacheIdsBackup[k] = v
+		}
+
+		conf.CacheSettings = cacheConf
+		err = man.WriteAzionJsonContent(conf, projectConf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+
+		ruleConf := []contracts.AzionJsonDataRules{}
+		if len(edgeappman.Rules) > 0 {
+			for _, rule := range edgeappman.Rules {
+				if r := RuleIds[rule.Name]; r.Id > 0 {
+					req := transformRuleRequest(rule)
+					strid := strconv.FormatInt(r.Id, 10)
+					req.Id = strid
+					behaviorsRequest := []edgesdk.EdgeApplicationBehaviorFieldRequest{}
+					for _, behavior := range rule.Behaviors {
+						if behavior.Name == "run_function" {
+							var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+							cacheId, err := doCacheForRule(ctx, client, conf)
+							if err != nil {
+								return err
+							}
+							beh.SetName("set_cache_policy")
+							beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+								Int64: &cacheId,
+							})
+							behaviorsRequest = append(behaviorsRequest, beh)
+							str := strconv.FormatInt(conf.Function.InstanceID, 10)
+							beh.SetName("run_function")
+							beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+								String: &str,
+							})
+							behaviorsRequest = append(behaviorsRequest, beh)
+						} else if behavior.Name == "set_cache_policy" {
+							if id := CacheIdsBackup[*behavior.GetArgument().String]; id > 0 {
+								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+								beh.SetName("set_cache_policy")
+								beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+									Int64: &id,
+								})
+								delete(CacheIds, *behavior.GetArgument().String)
+							} else {
+								logger.Debug("Cache Setting not found", zap.Any("Target", *behavior.GetArgument().String))
+								return msg.ErrorCacheNotFound
+							}
+						} else if behavior.Name == "set_edge_connector" {
+							if id := ConnectorIds[*behavior.GetArgument().String]; id > 0 {
+								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+								beh.SetName("set_edge_connector")
+								beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+									Int64: &id,
+								})
+								delete(ConnectorIds, *behavior.GetArgument().String)
+							} else {
+								logger.Debug("Edge Connector not found", zap.Any("Target", id))
+								return msg.ErrorConnectorNotFound
+							}
+						} else {
+							behaviorsRequest = append(behaviorsRequest, behavior)
+						}
+					}
+					req.Behaviors = behaviorsRequest
+					updated, err := client.UpdateRulesEngine(ctx, req)
+					if err != nil {
+						return err
+					}
+					newRule := contracts.AzionJsonDataRules{
+						Id:    updated.GetId(),
+						Name:  updated.GetName(),
+						Phase: updated.GetPhase(),
+					}
+					ruleConf = append(ruleConf, newRule)
+				} else {
+					req := &apiEdgeApplications.CreateRulesEngineRequest{
+						EdgeApplicationRuleEngineRequest: rule,
+					}
+					appstring := strconv.FormatInt(conf.Application.ID, 10)
+					behaviorsRequest := []edgesdk.EdgeApplicationBehaviorFieldRequest{}
+					for _, behavior := range rule.Behaviors {
+						if behavior.Name == "run_function" {
+							var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+							cacheId, err := doCacheForRule(ctx, client, conf)
+							if err != nil {
+								return err
+							}
+							beh.SetName("set_cache_policy")
+							beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+								Int64: &cacheId,
+							})
+							behaviorsRequest = append(behaviorsRequest, beh)
+							str := strconv.FormatInt(conf.Function.InstanceID, 10)
+							beh.SetName("run_function")
+							beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+								String: &str,
+							})
+							behaviorsRequest = append(behaviorsRequest, beh)
+						} else if behavior.Name == "set_cache_policy" {
+							if id := CacheIdsBackup[*behavior.GetArgument().String]; id > 0 {
+								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+								beh.SetName("set_cache_policy")
+								beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+									Int64: &id,
+								})
+								delete(CacheIds, *behavior.GetArgument().String)
+							} else {
+								logger.Debug("Cache Setting not found", zap.Any("Target", *behavior.GetArgument().String))
+								return msg.ErrorCacheNotFound
+							}
+						} else if behavior.Name == "set_edge_connector" {
+							if id := ConnectorIds[*behavior.GetArgument().String]; id > 0 {
+								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
+								beh.SetName("set_edge_connector")
+								beh.SetArgument(edgesdk.EdgeApplicationBehaviorPolymorphicArgumentRequest{
+									Int64: &id,
+								})
+								delete(ConnectorIds, *behavior.GetArgument().String)
+							} else {
+								logger.Debug("Edge Connector not found", zap.Any("Target", id))
+								return msg.ErrorConnectorNotFound
+							}
+						} else {
+							behaviorsRequest = append(behaviorsRequest, behavior)
+						}
+					}
+					req.Behaviors = behaviorsRequest
+					created, err := client.CreateRulesEngine(ctx, appstring, rule.Phase, req)
+					if err != nil {
+						return err
+					}
+					newRule := contracts.AzionJsonDataRules{
+						Id:    created.GetId(),
+						Name:  created.GetName(),
+						Phase: created.GetPhase(),
+					}
+					ruleConf = append(ruleConf, newRule)
+				}
+			}
+
+			conf.RulesEngine.Rules = ruleConf
+			err = man.WriteAzionJsonContent(conf, projectConf)
+			if err != nil {
+				logger.Debug("Error while writing azion.json file", zap.Error(err))
+				return err
+			}
+		}
+
 	}
 
-	//backup cache ids
-	for k, v := range CacheIds {
-		CacheIdsBackup[k] = v
-	}
-
-	conf.CacheSettings = cacheConf
 	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
 	}
 
-	ruleConf := []contracts.AzionJsonDataRules{}
-	for _, rule := range manifest.Rules {
-		if r := RuleIds[rule.Name]; r.Id > 0 {
-			requestUpdate, err := makeRuleRequestUpdate(rule, conf)
+	// if len(manifest.EdgeStorage) > 0 {
+	// 	storageman := manifest.EdgeStorage[0]
+
+	// }
+
+	connectorConf := []contracts.AzionJsonDataConnectors{}
+	if len(manifest.EdgeConnectors) > 0 {
+		connector := manifest.EdgeConnectors[0]
+		connName := getConnectorName(connector, conf.Name)
+		if id := ConnectorIds[connName]; id > 0 {
+			request := transformEdgeConnectorRequest(connector)
+			idstring := strconv.FormatInt(id, 10)
+			connectorResp, err := connectorClient.Update(ctx, request, idstring)
 			if err != nil {
 				return err
 			}
-			// requestUpdate.Id = r.Id
-			requestUpdate.Phase = rule.Phase
-			// requestUpdate.IsActive = &rule.IsActive
-			// requestUpdate.Order = &rule.Order
-			// requestUpdate.IdApplication = conf.Application.ID //TODO: correct these fields
-			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateRule, rule.Name, err.Error())
-			}
-			newRule := contracts.AzionJsonDataRules{
-				Id:    updated.GetId(),
-				Name:  updated.GetName(),
-				Phase: updated.GetPhase(),
-			}
-			msgf := fmt.Sprintf(msg.ManifestUpdateRule, newRule.Name, newRule.Id)
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
-			ruleConf = append(ruleConf, newRule)
-			delete(RuleIds, rule.Name)
+			conn := contracts.AzionJsonDataConnectors{}
+			// conn.Address = connectorResp.GetAddresses()
+			conn.Id = connectorResp.GetId()
+			conn.Name = connectorResp.GetName()
+			connectorConf = append(connectorConf, conn)
 		} else {
-			requestCreate, err := makeRuleRequestCreate(rule, conf, client, ctx)
+			request := apiConnector.CreateRequest{
+				EdgeConnectorPolymorphicRequest: connector,
+			}
+			connectorResp, err := connectorClient.Create(ctx, &request)
 			if err != nil {
 				return err
 			}
-			if rule.Name != "" {
-				requestCreate.Name = rule.Name
-			} else {
-				requestCreate.Name = conf.Name + thoth.GenerateName()
-			}
-			// requestCreate.IsActive = &rule.IsActive
-			// requestCreate.Order = &rule.Order //TODO: correct these fields
-			created, err := client.CreateRulesEngine(ctx, "conf.Application.ID", rule.Phase, requestCreate)
-			if err != nil {
-				return fmt.Errorf("%w - '%s': %s", msg.ErrorCreateRule, requestCreate.Name, err.Error())
-			}
-			newRule := contracts.AzionJsonDataRules{
-				Id:    created.GetId(),
-				Name:  created.GetName(),
-				Phase: created.GetPhase(),
-			}
-			ruleConf = append(ruleConf, newRule)
-			msgf := fmt.Sprintf(msg.ManifestCreateRule, newRule.Name, newRule.Id)
-			logger.FInfoFlags(f.IOStreams.Out, msgf, f.Format, f.Out)
-			*msgs = append(*msgs, msgf)
+			conn := contracts.AzionJsonDataConnectors{}
+			// conn.Address = connectorResp.GetAddresses()
+			conn.Id = connectorResp.GetId()
+			conn.Name = connectorResp.GetName()
+			connectorConf = append(connectorConf, conn)
 		}
 	}
 
-	conf.RulesEngine.Rules = ruleConf
+	conf.Connectors = connectorConf
+	err = man.WriteAzionJsonContent(conf, projectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	if len(manifest.Workloads) > 0 {
+		workloadMan := manifest.Workloads[0]
+		if conf.Workloads.Id > 0 {
+			request := transformWorkloadRequestUpdate(workloadMan)
+			request.Id = conf.Workloads.Id
+			updated, err := clientWorkload.Update(ctx, request)
+			if err != nil {
+				return err
+			}
+			conf.Workloads.Domains = updated.GetDomains()
+			conf.Workloads.Url = utils.Concat("https://", conf.Workloads.Domains[0].GetDomain())
+		} else {
+			request := transformWorkloadRequestCreate(workloadMan, conf.Application.ID)
+			request.EdgeApplication = conf.Application.ID
+			resp, err := clientWorkload.Create(ctx, request)
+			if err != nil {
+				return err
+			}
+			conf.Workloads.Id = resp.GetId()
+			conf.Workloads.Name = resp.GetName()
+			conf.Workloads.Domains = resp.GetDomains()
+			conf.Workloads.Url = utils.Concat("https://", resp.GetDomains()[0].GetDomain())
+		}
+	}
+
 	err = man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
@@ -354,25 +446,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	for _, purgeObj := range manifest.Purge {
-		switch purgeObj.Type {
-		case "url":
-			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "url", "edge_cache")
-			if err != nil {
-				logger.Debug("Error while purging domains", zap.Error(err))
-				return err
-			}
-		case "cachekey":
-			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "cachekey", "edge_cache")
-			if err != nil {
-				logger.Debug("Error while purging domains", zap.Error(err))
-				return err
-			}
-		case "wildcard":
-			err = clipurge.PurgeCache(ctx, purgeObj.Urls, "wildcard", "edge_cache")
-			if err != nil {
-				logger.Debug("Error while purging domains", zap.Error(err))
-				return err
-			}
+		err = clipurge.PurgeCache(ctx, purgeObj.Items, purgeObj.Type, *purgeObj.Layer)
+		if err != nil {
+			logger.Debug("Error while purging domains", zap.Error(err))
+			return err
 		}
 	}
 
