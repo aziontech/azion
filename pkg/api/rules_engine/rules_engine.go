@@ -5,6 +5,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"go.uber.org/zap"
 )
@@ -18,6 +19,10 @@ type UpdateRulesEngineRequest struct {
 
 type CreateRulesEngineRequest struct {
 	sdk.EdgeApplicationRuleEngineRequest
+}
+
+type CreateRulesEngineRequestV3 struct {
+	sdkv3.CreateRulesEngineRequest
 }
 
 type RulesEngineResponse interface {

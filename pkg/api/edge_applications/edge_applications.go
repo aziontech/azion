@@ -477,6 +477,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	}
 
 	req.SetName("enable gzip")
+	req.SetPhase("response")
 
 	behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
 
@@ -484,8 +485,8 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	behString.SetName("enable_gzip")
 
 	// var behString sdk.EdgeApplicationBehaviorFieldRequest
-	var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
-	behString.SetArgument(behSet)
+	// var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
+	// behString.SetArgument(behSet)
 	behaviors = append(behaviors, behString)
 
 	req.SetBehaviors(behaviors)
@@ -505,6 +506,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		CreateEdgeApplicationRule(ctx, applicationId).
 		EdgeApplicationRuleEngineRequest(req.EdgeApplicationRuleEngineRequest).Execute()
 	if err != nil {
+		fmt.Println(err.Error())
 		if httpResp != nil {
 			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)

@@ -28,7 +28,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict"}
+var NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict", "This name is already in use"}
 
 func CleanDirectory(dir string) error {
 	err := os.RemoveAll(dir)
@@ -205,6 +205,9 @@ func checkStatusCode500Error(err error) error {
 // read the body of the response and returns a personalized error or the body if the error is not identified
 func checkStatusCode400Error(httpResp *http.Response) error {
 	responseBody, _ := io.ReadAll(httpResp.Body)
+	if err := checkNameInUse(string(responseBody)); err != nil {
+		return err
+	}
 	if err := checkNoProduct(string(responseBody)); err != nil {
 		return err
 	}
@@ -218,9 +221,6 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 	if err := checkOrderField(string(responseBody)); err != nil {
-		return err
-	}
-	if err := checkNameInUse(string(responseBody)); err != nil {
 		return err
 	}
 

@@ -20,7 +20,7 @@ type Clients struct {
 
 func NewClients(f *cmdutil.Factory) *Clients {
 	httpClient := f.HttpClient
-	apiURL := f.Config.GetString("api_url")
+	apiURL := f.Config.GetString("api_v4_url")
 	storageURL := f.Config.GetString("storage_url")
 	token := f.Config.GetString("token")
 

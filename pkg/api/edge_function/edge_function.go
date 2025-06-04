@@ -75,7 +75,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeFunctions, error) {
-	logger.Debug("Update Edge Function")
+	logger.Debug("Update Edge Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
 	request := c.apiClient.EdgeFunctionsAPI.PartialUpdateEdgeFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()

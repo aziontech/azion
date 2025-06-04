@@ -29,4 +29,6 @@ var (
 	ErrorRelPath           = "Error determining relative path for %s: %v"
 	ErrorResetPointFile    = "Error resetting file pointer %s: %v"
 	ErrorCopyContentFile   = "Error copying contents of file %s to ZIP: %v"
+	ERRORMARSHALMANIFEST   = errors.New("Failed to marshal manifest structure.")
+	ERRORWRITEMANIFEST     = errors.New("Failed to write manifest.json file.")
 )
