@@ -13,8 +13,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	msgorigin "github.com/aziontech/azion-cli/messages/origin"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
-	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
-	functionsApi "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/davecgh/go-spew/spew"
@@ -89,8 +87,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientWorkload := apiWorkloads.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	connectorClient := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	functionClient := functionsApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	// connectorClient := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	// functionClient := functionsApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	ctx := context.Background()
 
 	CacheIds = make(map[string]int64)
@@ -120,38 +118,38 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		ConnectorIds[connectorConf.Name] = connectorConf.Id
 	}
 
-	if len(manifest.EdgeFunctions) > 0 {
-		funcMan := manifest.EdgeFunctions[0]
-		code, err := os.ReadFile(funcMan.Target)
-		if err != nil {
-			return fmt.Errorf("Failed to read target code file: %w", err)
-		}
-		if conf.Function.ID > 0 {
-			request := functionsApi.UpdateRequest{}
-			request.SetActive(true)
-			request.SetJsonArgs(funcMan.Args)
-			request.SetName(funcMan.Name)
-			request.SetCode(string(code))
-			idString := strconv.FormatInt(conf.Function.ID, 10)
-			_, err := functionClient.Update(ctx, &request, idString)
-			if err != nil {
-				return err
-			}
-		} else {
-			request := functionsApi.CreateRequest{}
-			request.SetActive(true)
-			request.SetJsonArgs(funcMan.Args)
-			request.SetName(funcMan.Name)
-			request.SetCode(string(code))
-			resp, err := functionClient.Create(ctx, &request)
-			if err != nil {
-				return err
-			}
-			conf.Function.ID = resp.GetId()
-			conf.Function.Name = resp.GetName()
-			conf.Function.File = funcMan.Target
-		}
-	}
+	// if len(manifest.EdgeFunctions) > 0 {
+	// 	funcMan := manifest.EdgeFunctions[0]
+	// 	code, err := os.ReadFile(funcMan.Argument)
+	// 	if err != nil {
+	// 		return fmt.Errorf("Failed to read target code file: %w", err)
+	// 	}
+	// 	if conf.Function.ID > 0 {
+	// 		request := functionsApi.UpdateRequest{}
+	// 		request.SetActive(true)
+	// 		request.SetJsonArgs(funcMan.Args)
+	// 		request.SetName(funcMan.Name)
+	// 		request.SetCode(string(code))
+	// 		idString := strconv.FormatInt(conf.Function.ID, 10)
+	// 		_, err := functionClient.Update(ctx, &request, idString)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 	} else {
+	// 		request := functionsApi.CreateRequest{}
+	// 		request.SetActive(true)
+	// 		request.SetJsonArgs(funcMan.Args)
+	// 		request.SetName(funcMan.Name)
+	// 		request.SetCode(string(code))
+	// 		resp, err := functionClient.Create(ctx, &request)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		conf.Function.ID = resp.GetId()
+	// 		conf.Function.Name = resp.GetName()
+	// 		conf.Function.File = funcMan.Argument
+	// 	}
+	// }
 
 	err := man.WriteAzionJsonContent(conf, projectConf)
 	if err != nil {
@@ -374,44 +372,44 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	// }
 
-	connectorConf := []contracts.AzionJsonDataConnectors{}
-	if len(manifest.EdgeConnectors) > 0 {
-		connector := manifest.EdgeConnectors[0]
-		connName := getConnectorName(connector, conf.Name)
-		if id := ConnectorIds[connName]; id > 0 {
-			request := transformEdgeConnectorRequest(connector)
-			idstring := strconv.FormatInt(id, 10)
-			connectorResp, err := connectorClient.Update(ctx, request, idstring)
-			if err != nil {
-				return err
-			}
-			conn := contracts.AzionJsonDataConnectors{}
-			// conn.Address = connectorResp.GetAddresses()
-			conn.Id = connectorResp.GetId()
-			conn.Name = connectorResp.GetName()
-			connectorConf = append(connectorConf, conn)
-		} else {
-			request := apiConnector.CreateRequest{
-				EdgeConnectorPolymorphicRequest: connector,
-			}
-			connectorResp, err := connectorClient.Create(ctx, &request)
-			if err != nil {
-				return err
-			}
-			conn := contracts.AzionJsonDataConnectors{}
-			// conn.Address = connectorResp.GetAddresses()
-			conn.Id = connectorResp.GetId()
-			conn.Name = connectorResp.GetName()
-			connectorConf = append(connectorConf, conn)
-		}
-	}
+	// connectorConf := []contracts.AzionJsonDataConnectors{}
+	// if len(manifest.EdgeConnectors) > 0 {
+	// 	connector := manifest.EdgeConnectors[0]
+	// 	connName := getConnectorName(connector, conf.Name)
+	// 	if id := ConnectorIds[connName]; id > 0 {
+	// 		request := transformEdgeConnectorRequest(connector)
+	// 		idstring := strconv.FormatInt(id, 10)
+	// 		connectorResp, err := connectorClient.Update(ctx, request, idstring)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		conn := contracts.AzionJsonDataConnectors{}
+	// 		// conn.Address = connectorResp.GetAddresses()
+	// 		conn.Id = connectorResp.GetId()
+	// 		conn.Name = connectorResp.GetName()
+	// 		connectorConf = append(connectorConf, conn)
+	// 	} else {
+	// 		request := apiConnector.CreateRequest{
+	// 			EdgeConnectorPolymorphicRequest: connector,
+	// 		}
+	// 		connectorResp, err := connectorClient.Create(ctx, &request)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		conn := contracts.AzionJsonDataConnectors{}
+	// 		// conn.Address = connectorResp.GetAddresses()
+	// 		conn.Id = connectorResp.GetId()
+	// 		conn.Name = connectorResp.GetName()
+	// 		connectorConf = append(connectorConf, conn)
+	// 	}
+	// }
 
-	conf.Connectors = connectorConf
-	err = man.WriteAzionJsonContent(conf, projectConf)
-	if err != nil {
-		logger.Debug("Error while writing azion.json file", zap.Error(err))
-		return err
-	}
+	// conf.Connectors = connectorConf
+	// err = man.WriteAzionJsonContent(conf, projectConf)
+	// if err != nil {
+	// 	logger.Debug("Error while writing azion.json file", zap.Error(err))
+	// 	return err
+	// }
 
 	if len(manifest.Workloads) > 0 {
 		workloadMan := manifest.Workloads[0]

@@ -73,9 +73,9 @@ type AzionApplicationOptions struct {
 }
 
 type AzionJsonDataConnectors struct {
-	Id      int64    `json:"id"`
-	Name    string   `json:"name"`
-	Address []string `json:"address,omitempty"`
+	Id      int64             `json:"id"`
+	Name    string            `json:"name"`
+	Address []edgesdk.Address `json:"address,omitempty"`
 }
 
 type Results struct {
@@ -256,7 +256,7 @@ type EdgeApplications struct {
 
 type EdgeFunction struct {
 	Name     string                 `json:"name"`
-	Target   string                 `json:"target"`
+	Argument string                 `json:"argument"`
 	Args     map[string]interface{} `json:"args"`
 	Bindings Bindings               `json:"bindings"`
 }

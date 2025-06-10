@@ -57,7 +57,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.BaseEdgeCo
 	response, httpResp, err := request.Execute()
 	if err != nil {
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function", zap.Error(err))
+			logger.Debug("Error while creating an Edge Connector", zap.Error(err))
 			err := utils.LogAndRewindBody(httpResp)
 			if err != nil {
 				return sdk.BaseEdgeConnector{}, err

@@ -17,6 +17,8 @@ var (
 	DeployOutputEdgeApplicationUpdate    = "Updated Edge Application %v with ID %v\n"
 	DeployOutputDomainCreate             = "Created Domain %v with ID %v\n"
 	DeployOutputDomainUpdate             = "Updated Domain %v with ID %v\n"
+	DeployOutputWorkloadCreate           = "Created Workload %v with ID %v\n"
+	DeployOutputWorkloadUpdate           = "Updated Workload %v with ID %v\n"
 	EdgeApplicationDeployPathFlag        = "Path to where your static files are stored"
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"

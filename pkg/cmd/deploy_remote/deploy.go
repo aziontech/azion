@@ -190,15 +190,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if !conf.NotFirstRun {
-		format, err := findAzionConfig()
-		if err != nil {
-			format = ".mjs"
-		}
-		fileName := fmt.Sprintf("azion.config%s", format)
-		err = os.Remove(fileName)
-		if err != nil {
-			return err
-		}
+		// format, err := findAzionConfig()
+		// if err != nil {
+		// 	format = ".mjs"
+		// }
+		// fileName := fmt.Sprintf("azion.config%s", format)
+		// err = os.Remove(fileName)
+		// if err != nil {
+		// 	return err
+		// }
 		// err = cmd.firstRunManifestToConfig(conf)
 		// if err != nil {
 		// 	return nil
@@ -208,7 +208,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return nil
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

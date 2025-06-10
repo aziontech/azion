@@ -33,6 +33,8 @@ func TestNewCmd(t *testing.T) {
 	NewCmd(f)
 }
 
+var cloneOptions git.CloneOptions
+
 func Test_initCmd_Run(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
@@ -153,7 +155,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -228,7 +230,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -304,7 +306,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -380,7 +382,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -456,7 +458,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -534,7 +536,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -612,7 +614,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -688,7 +690,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},

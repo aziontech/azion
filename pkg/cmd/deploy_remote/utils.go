@@ -57,8 +57,8 @@ func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationO
 	}
 
 	functionMan := contracts.EdgeFunction{
-		Name:   conf.Name,
-		Target: ".edge/worker.js",
+		Name:     conf.Name,
+		Argument: ".edge/worker.js",
 		Bindings: contracts.Bindings{
 			EdgeStorage: contracts.EdgeStorage{
 				Bucket: conf.Bucket,
