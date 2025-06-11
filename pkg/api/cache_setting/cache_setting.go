@@ -22,12 +22,12 @@ func (c *ClientV4) Create(ctx context.Context, req *Request, applicationID int64
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return sdk.CacheSetting{}, err
 		}
 
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return cacheResponse.Data, nil
@@ -45,12 +45,12 @@ func (c *ClientV4) Update(ctx context.Context, req *RequestUpdate, applicationID
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return nil, err
 		}
 
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return cacheResponse, nil
@@ -75,11 +75,11 @@ func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeAp
 		Execute()
 	if err != nil {
 		logger.Debug("Error while listing Cache Settings", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return nil, err
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -95,12 +95,12 @@ func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 		Execute()
 	if err != nil {
 		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return sdk.CacheSetting{}, err
 		}
 
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Data, nil
 }

@@ -1040,7 +1040,7 @@ func TestLogAndRewindBody(t *testing.T) {
 				Body:       body,
 			}
 
-			err := LogAndRewindBody(httpResp)
+			_, err := LogAndRewindBody(httpResp)
 			if test.expectedError != nil {
 				assert.EqualError(t, err, test.expectedError.Error())
 			} else {

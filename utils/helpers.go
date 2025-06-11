@@ -28,6 +28,30 @@ import (
 	"go.uber.org/zap"
 )
 
+type ErrorResponse struct {
+	Errors []ErrorDetail `json:"errors"`
+}
+
+type ErrorDetail struct {
+	Status string      `json:"status"`
+	Code   string      `json:"code"`
+	Title  string      `json:"title"`
+	Detail string      `json:"detail"`
+	Source ErrorSource `json:"source"`
+	Meta   ErrorMeta   `json:"meta"`
+}
+
+type ErrorSource struct {
+	Pointer   string `json:"pointer"`
+	Parameter string `json:"parameter"`
+	Header    string `json:"header"`
+}
+
+type ErrorMeta struct {
+	Property1 interface{} `json:"property1"`
+	Property2 interface{} `json:"property2"`
+}
+
 var NameTaken = []string{"already taken", "name taken", "name already in use", "already in use", "already exists", "with the name", "409 Conflict", "This name is already in use"}
 
 func CleanDirectory(dir string) error {
@@ -158,7 +182,6 @@ func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confPath str
 	return nil
 }
 
-// Returns the correct error message for each HTTP Status code
 func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	// when the CLI times out, probably due to SSO communication, httpResp is null and/or http status is 500;
@@ -188,6 +211,40 @@ func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	default:
 		return err
+
+	}
+}
+
+// Returns the correct error message for each HTTP Status code
+func ErrorPerStatusCodeV4(errorResp string, httpResp *http.Response, err error) error {
+
+	// when the CLI times out, probably due to SSO communication, httpResp is null and/or http status is 500;
+	// that's why we need this verification first
+	if httpResp == nil || httpResp.StatusCode >= 500 {
+		return checkStatusCode500Error(err)
+	}
+
+	statusCode := httpResp.StatusCode
+
+	switch statusCode {
+
+	case 400:
+		return checkStatusCode400Error(httpResp)
+
+	case 401:
+		return ErrorToken401
+
+	case 403:
+		return ErrorForbidden403
+
+	case 404:
+		return ErrorNotFound404
+
+	case 409:
+		return ErrorNameInUse
+
+	default:
+		return errors.New(errorResp)
 
 	}
 }
@@ -427,6 +484,33 @@ func LogAndRewindBody(httpResp *http.Response) error {
 	httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	return nil
+}
+
+func LogAndRewindBodyV4(httpResp *http.Response) (string, error) {
+	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
+	logger.Debug("", zap.Any("Headers", httpResp.Header))
+	var errResp ErrorResponse
+	bodyBytes, err := io.ReadAll(httpResp.Body)
+	if err != nil {
+		logger.Debug("Error while reading body of the http response", zap.Error(err))
+		return "", ErrorPerStatusCodeV4("", httpResp, err)
+	}
+
+	if err := json.Unmarshal(bodyBytes, &errResp); err != nil {
+		logger.Debug("Error unmarshalling error response body", zap.Error(err))
+		return "", ErrorPerStatusCodeV4("", httpResp, err)
+	}
+
+	errorMessage := ""
+	for _, errorObject := range errResp.Errors {
+		errorMessage = errorMessage + errorObject.Detail + "\n"
+	}
+	logger.Debug("", zap.Any("Detailed error message from API", errorMessage))
+
+	// Rewind the response body to the beginning
+	httpResp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	return errorMessage, nil
 }
 
 // FlagINUnmarshalFileJSON
