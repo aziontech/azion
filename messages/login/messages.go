@@ -17,6 +17,6 @@ const (
 	AskPassword = "Enter your password:"
 
 	//browser
-	VisitMsg   = "Please visit https://sso.azion.com/login?next=cli in case it did not open automatically\n"
+	VisitMsg   = "Please visit https://console.azion.com/login?next=cli in case it did not open automatically\n"
 	BrowserMsg = "You may now close this page and return to your terminal"
 )
