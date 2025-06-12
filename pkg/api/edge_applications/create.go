@@ -47,14 +47,15 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest,
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating an Edge Application", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Data, nil

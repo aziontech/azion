@@ -36,29 +36,19 @@ type RulesEngineResponse interface {
 	GetName() string
 }
 
-// behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
-
-// var behString sdk.EdgeApplicationBehaviorFieldRequest
-// var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
-// funcId := fmt.Sprintf("%d", idFunc)
-// behSet.String = &funcId
-// behString.SetName("run_function")
-// behString.SetArgument(behSet)
-
-// req.SetBehaviors(behaviors)
-
 func (c *Client) Delete(ctx context.Context, edgeApplicationID string, ruleID string) error {
 	logger.Debug("Delete Rules Engine")
 	_, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.DestroyEdgeApplicationRule(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while deleting a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return nil
 }
@@ -69,14 +59,15 @@ func (c *Client) Update(ctx context.Context, req *UpdateRulesEngineRequest) (Rul
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Data, nil
@@ -89,14 +80,15 @@ func (c *Client) Create(ctx context.Context, edgeApplicationID string, req sdk.E
 		EdgeApplicationRuleEngineRequest(req).Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &resp.Data, nil
 }

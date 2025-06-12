@@ -17,14 +17,15 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (WorkloadRespon
 	// request := c.apiClient.DomainsAPI.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	workloadsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a workload", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &workloadsResponse.Data, nil
 }
@@ -36,14 +37,15 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while deleting a workload", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil
@@ -54,14 +56,15 @@ func (c *Client) Get(ctx context.Context, id string) (WorkloadResponse, error) {
 	request := c.apiClient.WorkloadsAPI.RetrieveWorkload(ctx, id)
 	res, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while describing a Workload", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &res.Data, nil
 }
@@ -74,14 +77,15 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (WorkloadRespon
 	workloadsResponse, httpResp, err := request.Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a workload (PATCH)", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &workloadsResponse.Data, nil
@@ -100,14 +104,15 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 		Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing workloads", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -127,14 +132,15 @@ func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOption
 		Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing workload deployments", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -145,14 +151,15 @@ func (c *Client) GetDeployment(ctx context.Context, id, deploymentid string) (De
 	request := c.apiClient.WorkloadDeploymentsAPI.RetrieveWorkloadDeployment(ctx, id, deploymentid)
 	res, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while describing a Workload Deployment", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &res.Data, nil
 }

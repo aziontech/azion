@@ -244,8 +244,10 @@ func ErrorPerStatusCodeV4(errorResp string, httpResp *http.Response, err error) 
 		return ErrorNameInUse
 
 	default:
-		return errors.New(errorResp)
-
+		if errorResp != "" {
+			return errors.New(errorResp)
+		}
+		return err
 	}
 }
 

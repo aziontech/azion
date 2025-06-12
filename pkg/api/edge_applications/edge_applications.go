@@ -109,14 +109,15 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating an Edge Application", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Data, nil
@@ -128,11 +129,15 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating an Edge Function instance", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return sdk.EdgeApplicationFunctionInstance{}, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while updating an Edge Function instance", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return sdk.EdgeApplicationFunctionInstance{}, err
+			}
+		}
+		return sdk.EdgeApplicationFunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeApplicationsResponse.Data, nil
@@ -145,15 +150,16 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while deleting an Edge Application", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 		}
 
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil
@@ -172,14 +178,15 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 		Search(opts.Sort).Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -189,14 +196,15 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	logger.Debug("Get Rules Engine")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.RetrieveEdgeApplicationRule(ctx, edgeApplicationID, rulesID).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while describing a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &resp.Data, nil
 }
@@ -205,14 +213,15 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID string
 	logger.Debug("Delete Rules Engine")
 	_, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.DestroyEdgeApplicationRule(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while deleting a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return nil
 }
@@ -222,14 +231,15 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phas
 	request := c.apiClient.EdgeApplicationsRulesAPI.ListEdgeApplicationRule(ctx, applicationID)
 	rules, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while retrieving a Rule Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return 0, err
 			}
 		}
-		return 0, utils.ErrorPerStatusCode(httpResp, err)
+		return 0, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return rules.Results[0].Id, nil
 }
@@ -240,14 +250,15 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	edgeApplicationRules, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	idRule := edgeApplicationRules.Results[0].Id
@@ -268,14 +279,15 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Data, nil
@@ -287,14 +299,15 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a rules engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &edgeApplicationsResponse.Data, nil
@@ -307,13 +320,14 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID string
 		CreateEdgeApplicationRule(ctx, edgeApplicationID).
 		EdgeApplicationRuleEngineRequest(req.EdgeApplicationRuleEngineRequest).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-			errLog := utils.LogAndRewindBody(httpResp)
-			if errLog != nil {
-				return nil, errLog
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
 			}
-			return nil, utils.ErrorPerStatusCode(httpResp, err)
+			return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 		}
 		return nil, err
 	}
@@ -334,11 +348,15 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 		Search(opts.Sort).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing Edge Function instances", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while listing Edge Function instances", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp, nil
 }
@@ -349,11 +367,15 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while deleting an Edge Function instance", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while deleting an Edge Function instance", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil
@@ -364,11 +386,15 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceReq
 	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.CreateEdgeFirewallFunctionInstance(ctx, applicationID).
 		EdgeApplicationFunctionInstanceRequest(req.EdgeApplicationFunctionInstanceRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating an Edge Function instance", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return sdk.EdgeApplicationFunctionInstance{}, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while creating an Edge Function instance", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return sdk.EdgeApplicationFunctionInstance{}, err
+			}
+		}
+		return sdk.EdgeApplicationFunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Data, nil
 }
@@ -377,12 +403,17 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	logger.Debug("Get Edge Function Instance")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.RetrieveFunctionInstance(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting an Edge Function instance", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while getting an Edge Function instance", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
+
 	return &resp.Data, nil
 }
 
@@ -398,12 +429,17 @@ func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptio
 		PageSize(opts.PageSize).
 		Search(opts.Sort).Execute()
 	if err != nil {
-		logger.Debug("Error while listing device groups", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while listing device groups", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
+
 	return resp, nil
 }
 
@@ -413,11 +449,15 @@ func (c *Client) DeleteDeviceGroup(ctx context.Context, appID string, groupID st
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while deleting a device group", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while deleting a device group", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil
@@ -427,11 +467,15 @@ func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID
 	logger.Debug("Get Device Groups")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.RetrieveDeviceGroup(ctx, edgeApplicationID, groupID).Execute()
 	if err != nil {
-		logger.Debug("Error while getting a device group", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while getting a device group", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &resp.Data, nil
 }
@@ -442,11 +486,15 @@ func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchedEdgeAppli
 
 	deviceGroup, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a device group", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while updating a device group", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &deviceGroup.Data, nil
@@ -457,11 +505,15 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.CreateDeviceGroup(ctx, applicationID).
 		EdgeApplicationDeviceGroupsRequest(req.EdgeApplicationDeviceGroupsRequest).Execute()
 	if err != nil {
-		logger.Debug("Error while creating a device group", zap.Error(err))
-		logger.Debug("Status Code", zap.Any("http", httpResp.StatusCode))
-		logger.Debug("Headers", zap.Any("http", httpResp.Header))
-		logger.Debug("Response body", zap.Any("http", httpResp.Body))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while creating a device group", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &resp.Data, nil
@@ -506,16 +558,16 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 		CreateEdgeApplicationRule(ctx, applicationId).
 		EdgeApplicationRuleEngineRequest(req.EdgeApplicationRuleEngineRequest).Execute()
 	if err != nil {
-		fmt.Println(err.Error())
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 			return utils.ErrorPerStatusCode(httpResp, err)
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil
