@@ -103,10 +103,10 @@ if [ -f "$full_main_go_path" ]; then
             check_folder_exists "$expected_edge_folder"
 
              # Run the build command
-            echo "Running cmd/azion/main.go deploy --debug"
+            echo "Running cmd/azion/main.go deploy --debug --local --auto"
             # go run "$full_main_go_path" deploy --debug
             # uncomment the line below and comment the line above if using a built binary file
-            "$full_bin_path" deploy --debug --local
+            "$full_bin_path" deploy --debug --local --auto
 
             # Check the exit status of the deploy command
             if [ $? -eq 0 ]; then
