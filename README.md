@@ -9,13 +9,25 @@
 
 It makes possible the initialization, build, and deployment of applications, from simple static pages to different frameworks, such as:
 
-- Next.js 
-- Vue
 - Angular
 - Astro
+- Docusaurus
+- Eleventy (11.ty)
+- Gatsby
 - Hexo
+- Hugo
+- Jekyll
+- Next.js
+- Nuxt
+- Preact
+- Qwik
 - React
+- Stencil
+- Svelte
 - Vite
+- Vitepress
+- Vue
+- Vuepress
 
 Through it, you can manage all Azion products, create automation using CI/CD scripts or pipelines, provision multiple services that make up your application with a few commands, and also manage your Azion configurations as code.
 
