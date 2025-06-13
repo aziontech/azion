@@ -404,91 +404,30 @@ func normalizeURL(link, baseURL string) string {
 		}
 	}
 	
-	var fullURL string
-	
 	baseURLParsed, err := url.Parse(baseURL)
 	if err != nil {
 		return ""
 	}
 	
-	if strings.HasPrefix(link, "http://") || strings.HasPrefix(link, "https://") {
-		linkParsed, err := url.Parse(link)
-		if err != nil {
-			return ""
-		}
-		if linkParsed.Host != baseURLParsed.Host {
-			return ""
-		}
-		fullURL = link
-	} else if strings.HasPrefix(link, "//") {
-		fullURL = baseURLParsed.Scheme + ":" + link
-		linkParsed, err := url.Parse(fullURL)
-		if err != nil {
-			return ""
-		}
-		if linkParsed.Host != baseURLParsed.Host {
-			return ""
-		}
-	} else if strings.HasPrefix(link, "/") {
-		fullURL = baseURLParsed.Scheme + "://" + baseURLParsed.Host + link
-	} else if strings.HasPrefix(link, "./") {
-		link = strings.TrimPrefix(link, "./")
-		basePath := strings.TrimSuffix(baseURLParsed.Path, "/")
-		fullURL = baseURLParsed.Scheme + "://" + baseURLParsed.Host + basePath + "/" + link
-	} else if strings.HasPrefix(link, "../") {
-		basePath := baseURLParsed.Path
-		for strings.HasPrefix(link, "../") {
-			link = strings.TrimPrefix(link, "../")
-			if basePath == "/" || basePath == "" {
-				basePath = "/"
-			} else {
-				parts := strings.Split(strings.Trim(basePath, "/"), "/")
-				if len(parts) > 1 {
-					basePath = "/" + strings.Join(parts[:len(parts)-1], "/")
-				} else {
-					basePath = "/"
-				}
-			}
-		}
-		if basePath == "/" {
-			fullURL = baseURLParsed.Scheme + "://" + baseURLParsed.Host + "/" + link
-		} else {
-			fullURL = baseURLParsed.Scheme + "://" + baseURLParsed.Host + basePath + "/" + link
-		}
-	} else {
-		basePath := strings.TrimSuffix(baseURLParsed.Path, "/")
-		if basePath == "" {
-			basePath = "/"
-		}
-		if !strings.HasSuffix(basePath, "/") {
-			if strings.Contains(basePath, ".") {
-				parts := strings.Split(basePath, "/")
-				if len(parts) > 1 {
-					basePath = strings.Join(parts[:len(parts)-1], "/")
-				} else {
-					basePath = "/"
-				}
-			}
-			if basePath != "/" {
-				basePath += "/"
-			}
-		}
-		fullURL = baseURLParsed.Scheme + "://" + baseURLParsed.Host + basePath + link
-	}
-	
-	parsedURL, err := url.Parse(fullURL)
+	// Use url.ResolveReference for proper URL resolution
+	linkURL, err := url.Parse(link)
 	if err != nil {
 		return ""
 	}
 	
-	if parsedURL.Host == "" {
+	resolvedURL := baseURLParsed.ResolveReference(linkURL)
+	
+	// Only allow same-host URLs
+	if resolvedURL.Host != baseURLParsed.Host {
 		return ""
 	}
 	
-	parsedURL.Fragment = ""
+	// Clean up the URL
+	resolvedURL.Fragment = ""
 	
+	// Keep only important query parameters for cache warming
 	paramsToKeep := []string{"id", "category", "product", "page", "search", "q", "query", "filter", "sort", "lang", "locale"}
-	query := parsedURL.Query()
+	query := resolvedURL.Query()
 	newQuery := make(url.Values)
 	
 	for _, param := range paramsToKeep {
@@ -497,8 +436,7 @@ func normalizeURL(link, baseURL string) string {
 		}
 	}
 	
-	parsedURL.RawQuery = newQuery.Encode()
+	resolvedURL.RawQuery = newQuery.Encode()
 	
-
-	return parsedURL.String()
+	return resolvedURL.String()
 } 
