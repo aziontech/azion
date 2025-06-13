@@ -76,7 +76,9 @@ if [ -f "$full_main_go_path" ]; then
     git clone --single-branch --branch v3 https://github.com/aziontech/azion-samples.git
     cp -r azion-samples/templates/react/reactjs-boilerplate ./
     cd reactjs-boilerplate
+    echo "Finished cloning and copying to destination directory"
 
+    echo "Installing project dependencies using 'npm install'"
     npm install
     # Run the link command with the specified options
     echo "Running cmd/azion/main.go link --preset react --auto --debug"
