@@ -208,34 +208,26 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 	if err := checkNoProduct(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("1")
 	if err := checkTlsVersion(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("2")
 	if err := checkOriginlessCacheSettings(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("3")
 	if err := checkDetail(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("4")
 	if err := checkOrderField(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("5")
 	if err := checkNameInUse(string(responseBody)); err != nil {
 		return err
 	}
-	fmt.Println("6")
 
 	result := strings.ReplaceAll(string(responseBody), "{", "")
 	result = strings.ReplaceAll(result, "}", "")
 	result = strings.ReplaceAll(result, "[", "")
 	result = strings.ReplaceAll(result, "]", "")
-	fmt.Println("_________________")
-	fmt.Println(result)
 
 	return fmt.Errorf("%s", result)
 }
