@@ -9,7 +9,7 @@ var (
 	FlagMaxUrls      = "Maximum number of URLs to process (default: 1500)"
 	FlagMaxConcurrent = "Maximum number of concurrent requests (default: 2)"
 	FlagTimeout      = "Timeout in milliseconds for each request (default: 8000)"
-	WarmupSuccessful = "Cache warming completed successfully"
+	WarmupSuccessful = "Cache warming completed successfully!"
 	AskForUrl        = "Enter the base URL to warm cache (e.g., https://example.com):"
 	
 	// Log messages

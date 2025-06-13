@@ -77,7 +77,7 @@ func (warmup *WarmupCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil
 		return err
 	}
 
-	logger.FInfo(f.IOStreams.Out, "\n"+msg.WarmupSuccessful)
+	logger.FInfo(f.IOStreams.Out, "\n"+msg.WarmupSuccessful+"\n")
 	return nil
 }
 
