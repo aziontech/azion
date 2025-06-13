@@ -29,6 +29,7 @@ import (
 	thoth "github.com/aziontech/go-thoth"
 	"github.com/briandowns/spinner"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -239,7 +240,11 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		s.Start() // Start the spinner
 	}
 
-	err = cmd.git.Clone(SAMPLESURL, tempDir)
+	options := &git.CloneOptions{
+		SingleBranch:  true,
+		ReferenceName: plumbing.ReferenceName("v3"),
+	}
+	err = cmd.git.Clone(options, SAMPLESURL, tempDir)
 	if err != nil {
 		logger.Debug("Error while cloning the repository", zap.Error(err))
 		return err

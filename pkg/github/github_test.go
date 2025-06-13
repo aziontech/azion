@@ -8,8 +8,11 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/go-git/go-git/v5"
 	"go.uber.org/zap/zapcore"
 )
+
+var cloneOptions git.CloneOptions
 
 func TestGetVersionGitHub(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
@@ -111,7 +114,7 @@ func TestClone(t *testing.T) {
 			gh := NewGithub()
 			gh.Clone = clone
 
-			if err := gh.Clone(tt.url, path); (err != nil) != tt.wantErr {
+			if err := gh.Clone(&cloneOptions, tt.url, path); (err != nil) != tt.wantErr {
 				t.Errorf("Clone() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

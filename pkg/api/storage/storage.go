@@ -25,6 +25,12 @@ func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error 
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while creating the project Bucket", zap.Error(err))
+		if httpResp != nil {
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
@@ -36,6 +42,12 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 		Page(int32(opts.Page)).PageSize(int32(opts.PageSize)).Execute()
 	if err != nil {
 		logger.Error("Error while listing buckets", zap.Error(err))
+		if httpResp != nil {
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return resp, nil
@@ -67,8 +79,15 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess sdk.E
 		StorageApiBucketsPartialUpdate(ctx, name).BucketUpdate(bucket).Execute()
 	if err != nil {
 		logger.Debug("Error while updating the project Bucket", zap.Error(err))
+		if httpResp != nil {
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
+
 	return nil
 }
 
@@ -79,6 +98,12 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while creating object in the edge storage", zap.Error(err))
+		if httpResp != nil {
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
 	return nil
@@ -156,7 +181,6 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 			if err != nil {
 				return err
 			}
-			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -169,7 +193,14 @@ func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, conten
 		ContentType(contentType).Body(body).Execute()
 	if err != nil {
 		logger.Debug("Error while updating the object of the bucket", zap.Error(err))
+		if httpResp != nil {
+			err := utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
+		}
 		return utils.ErrorPerStatusCode(httpResp, err)
 	}
+
 	return nil
 }

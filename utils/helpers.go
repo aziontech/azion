@@ -265,6 +265,10 @@ func checkNameInUse(body string) error {
 func checkDetail(body string) error {
 	if strings.Contains(body, "detail") {
 		msgDetail := gjson.Get(body, "detail")
+		if msgDetail.String() == "" {
+			msgArrayDetail := gjson.Get(body, "errors.#.detail")
+			return fmt.Errorf("%s", msgArrayDetail.String())
+		}
 		return fmt.Errorf("%s", msgDetail.String())
 	}
 	return nil
