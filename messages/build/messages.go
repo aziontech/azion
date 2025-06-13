@@ -13,6 +13,7 @@ var (
 	BuildNotNecessary     = "Skipping build step. There were no changes detected in your project"
 	FlagTemplate          = "The Edge Application's preset; Inform this flag if you wish to change the project's preset during build"
 	FlagWorker            = "Indicates that the constructed code inserts its own worker expression, such as addEventListener(\"fetch\") or similar, without the need to inject a provider"
+	IsFirewall            = "Indicates whether the function to be run is intended for the Edge Firewall"
 	FlagPolyfill          = "Use node polyfills in build"
 	FlagEntry             = "Code entrypoint; (default: ./main.js)"
 	ProjectConfFlag       = "Relative path to where your custom azion.json and args.json files are stored"

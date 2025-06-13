@@ -21,6 +21,7 @@ import (
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -35,21 +36,153 @@ var injectIntoFunction = `
 
 `
 
+var applicationUpdate = `
+{
+	"name": "%s",
+	"active": true,
+	"modules": {
+		"edgeFunctionsEnabled": true
+	}
+}`
+
+var connectorUpdate = `
+{
+	"name": "%s",
+	"active": true,
+	"type": "edge_storage",
+	"typeProperties": {
+		"bucket": "%s",
+		"prefix": "%s"
+	},
+	"modules": {
+		"loadBalancerEnabled": false,
+		"originShieldEnabled": false
+	}
+}`
+
+var functionUpdate = `
+{
+	"name": "%s",
+	"path": ".edge/worker.js",
+	"bindings": {
+		"storage": {
+		"bucket": "%s",
+		"prefix": "%s"
+		}
+	}
+}`
+
+var storageUpdate = `
+{
+	"name": "%s",
+	"edgeAccess": "read_only",
+	"dir": ".edge/storage"
+}`
+
+var jsonTemplate = `{
+	"scope": "global",
+  	"preset": "%s",
+	"edgeApplications": [
+	{
+		"name": "%s",
+		"active": true,
+		"modules": {
+    		"edgeFunctionsEnabled": true
+  		}
+	}
+	],
+	"edgeConnectors": [
+	{
+		"name": "%s",
+		"active": true,
+		"type": "edge_storage",
+		"typeProperties": {
+			"bucket": "%s",
+			"prefix": "%s"
+		},
+		"modules": {
+			"loadBalancerEnabled": true,
+			"originShieldEnabled": true
+		}
+	}
+	],
+	"edgeFunctions": [
+	  {
+		"name": "%s",
+		"path": ".edge/worker.js",
+		"bindings": {
+		  "storage": {
+			"bucket": "%s",
+			"prefix": "%s"
+		  }
+		}
+	  }
+	],
+	"edgeStorage": [
+	  {
+		"name": "%s",
+		"edgeAccess": "read_only",
+		"dir": ".edge/storage"
+	  }
+	]
+  }`
+
+func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) error {
+	logger.Debug("Running bundler config update to update azion.config")
+	// checking if vulcan major is correct
+	vulcanVer, err := cmd.commandRunnerOutput(cmd.F, "npm show edge-functions version", []string{})
+	if err != nil {
+		return err
+	}
+
+	vul := vulcanPkg.NewVulcan()
+
+	err = vul.CheckVulcanMajor(vulcanVer, cmd.F, vul)
+	if err != nil {
+		return err
+	}
+
+	// cmdVulcanInit := "config update"
+	applicationUpdate = fmt.Sprintf(applicationUpdate, conf.Name)
+	connectorUpdate = fmt.Sprintf(connectorUpdate, conf.Name, conf.Bucket, conf.Prefix)
+	functionUpdate = fmt.Sprintf(functionUpdate, conf.Name, conf.Bucket, conf.Prefix)
+	storageUpdate = fmt.Sprintf(storageUpdate, conf.Bucket)
+	commands := []string{
+		fmt.Sprintf("config update -k 'edgeApplications[0]' -v '%s'", applicationUpdate),
+		fmt.Sprintf("config update -k 'edgeFunctions[0]' -v '%s'", functionUpdate),
+		fmt.Sprintf("config update -k 'edgeConnectors[0]' -v '%s'", connectorUpdate),
+		fmt.Sprintf("config update -k 'edgeStorage[0]' -v '%s'", storageUpdate),
+	}
+
+	for _, cmdStr := range commands {
+		command := vul.Command("", cmdStr, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+
+		err := cmd.commandRunInteractive(cmd.F, command)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	if conf.Function.ID == 0 {
 		var projName string
 		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, msgs)
 		if err != nil {
 			for i := 0; i < 10; i++ {
-				projName = fmt.Sprintf("%s-%s", conf.Function.Name, utils.Timestamp())
+				projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
+				conf.Function.Name = projName
 				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, msgs)
 				if err != nil {
+					fmt.Println(err)
 					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 						continue
 					}
-					return err
+					return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
 				}
-				conf.Function.Name = projName
 				conf.Function.ID = functionId
 				break
 			}
@@ -223,11 +356,7 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 	return nil
 }
 
-func (cmd *DeployCmd) doRulesDeploy(
-	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
-	client *apiapp.Client,
-	msgs *[]string) error {
+func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionApplicationOptions, client *apiapp.Client, msgs *[]string) error {
 	if conf.NotFirstRun {
 		return nil
 	}
@@ -268,11 +397,7 @@ func (cmd *DeployCmd) doRulesDeploy(
 	return nil
 }
 
-func (cmd *DeployCmd) doOriginSingle(
-	clientOrigin *apiori.Client,
-	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
-	msgs *[]string) (int64, error) {
+func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	var DefaultOrigin = [1]string{"api.azion.net"}
 
 	if conf.NotFirstRun {
@@ -340,7 +465,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
 		logger.Debug("Error while creating Edge Function", zap.Error(err))
-		return 0, fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
+		return 0, err
 	}
 	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -449,7 +574,7 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apiworkload.WorkloadResponse, error) {
 	reqWork := apiworkload.CreateRequest{}
-	if conf.Workloads.Name == "__DEFAULT__" {
+	if conf.Workloads.Name == "__DEFAULT__" || conf.Workloads.Name == "" {
 		reqWork.SetName(conf.Name)
 	} else {
 		reqWork.SetName(conf.Workloads.Name)
@@ -461,7 +586,7 @@ func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Con
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
-	msgf := fmt.Sprintf(msg.DeployOutputDomainCreate, conf.Name, workload.GetId())
+	msgf := fmt.Sprintf(msg.DeployOutputWorkloadCreate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return workload, nil
@@ -479,7 +604,7 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
-	msgf := fmt.Sprintf(msg.DeployOutputDomainUpdate, conf.Name, workload.GetId())
+	msgf := fmt.Sprintf(msg.DeployOutputWorkloadUpdate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return workload, nil

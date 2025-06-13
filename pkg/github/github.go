@@ -21,7 +21,7 @@ import (
 
 type Github struct {
 	GetVersionGitHub func(name string) (string, error)
-	Clone            func(url, path string) error
+	Clone            func(cloneOptions *git.CloneOptions, url, path string) error
 	GetNameRepo      func(url string) string
 	CheckGitignore   func(path string) (bool, error)
 	WriteGitignore   func(path string) error
@@ -75,10 +75,9 @@ func getVersionGitHub(name string) (string, error) {
 	return release.TagName, nil
 }
 
-func clone(url, path string) error {
-	_, err := git.PlainClone(path, false, &git.CloneOptions{
-		URL: url,
-	})
+func clone(cloneOptions *git.CloneOptions, url, path string) error {
+	cloneOptions.URL = url
+	_, err := git.PlainClone(path, false, cloneOptions)
 	if err != nil {
 		return err
 	}

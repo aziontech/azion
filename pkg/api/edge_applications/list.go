@@ -18,8 +18,15 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 		ListEdgeApplications(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
 
 	if err != nil {
-		logger.Debug("Error while listing Edge Applications", zap.Error(err))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while listing Edge Applications", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil

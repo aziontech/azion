@@ -46,14 +46,15 @@ func (c *Client) CreateCacheEdgeApplication(
 		CreateCacheSetting(ctx, edgeApplicationID).
 		CacheSettingRequest(req.CacheSettingRequest).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a cache setting", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.CacheSetting{}, err
 			}
 		}
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Data, nil
 }
@@ -65,14 +66,15 @@ func (c *Client) ListCacheEdgeApp(
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
 		ListCacheSettings(ctx, edgeApplicationID).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing a cache setting", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Results, nil
 }

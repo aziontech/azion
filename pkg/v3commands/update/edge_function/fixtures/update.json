@@ -1,0 +1,13 @@
+{
+    "active": true,
+    "code": "async function handleRequest(request) {\n return new Response(\"Pimba!\",\n   {\n       status:204\n   })\n}\naddEventListener(\"fetch\", event =\u003e {\n event.respondWith(handleRequest(event.request))\n})",
+    "function_to_run": "",
+    "id": 1337,
+    "initiator_type": "edge_application",
+    "json_args": {},
+    "language": "javascript",
+    "last_editor": "doesit@work.com",
+    "modified": "2022-02-14T16:11:01.027123Z",
+    "name": "TESTA AEEEEW",
+    "reference_count": 0
+   }

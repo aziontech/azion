@@ -1,0 +1,18 @@
+{
+  "links": {
+    "next": null,
+    "previous": null
+  },
+  "count": 2,
+  "results": [
+    {
+      "name": "arthur-morgan02",
+      "edge_access": "read_only"
+    },
+    {
+      "name": "arthur-morgan03",
+      "edge_access": "read_only"
+    }
+  ]
+}
+

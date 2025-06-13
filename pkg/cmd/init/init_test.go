@@ -26,6 +26,7 @@ import (
 )
 
 var infoJsonData = `{"preset":"astro"}`
+var cloneOptions git.CloneOptions
 
 func TestNewCmd(t *testing.T) {
 	mock := &httpmock.Registry{}
@@ -153,7 +154,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -228,7 +229,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -304,7 +305,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -380,7 +381,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -456,7 +457,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -534,7 +535,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -612,7 +613,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},
@@ -688,7 +689,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return nil
 				},
 				git: github.Github{
-					Clone: func(url, path string) error {
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
 						return nil
 					},
 				},

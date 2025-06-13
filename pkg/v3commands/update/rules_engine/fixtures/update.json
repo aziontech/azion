@@ -1,0 +1,22 @@
+{
+    "id": 1234,
+    "name": "UpdatedRule",
+    "phase": "request",
+    "behaviors": [
+      {
+        "name": "run_function",
+        "target": "9045"
+      }
+    ],
+    "criteria": [
+      [
+        {
+          "variable": "${uri}",
+          "operator": "starts_with",
+          "conditional": "if",
+          "input_value": "/"
+        }
+      ]
+    ]
+  }
+  
