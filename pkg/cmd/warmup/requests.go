@@ -75,6 +75,20 @@ var blacklist = []string{
 	"javascript:", "data:", "#",
 }
 
+// Pre-compiled regex patterns for better performance
+var (
+	linkRegex      = regexp.MustCompile(`<a[^>]+href=["']([^"']+)["'][^>]*>`)
+	formRegex      = regexp.MustCompile(`<form[^>]+action=["']([^"']+)["'][^>]*>`)
+	cssRegex       = regexp.MustCompile(`<link[^>]+href=["']([^"']+\.css[^"']*)["'][^>]*>`)
+	jsRegex        = regexp.MustCompile(`<script[^>]+src=["']([^"']+\.js[^"']*)["'][^>]*>`)
+	metaRegex      = regexp.MustCompile(`<meta[^>]+http-equiv=["']refresh["'][^>]+content=["'][^;]*;\s*url=([^"']+)["'][^>]*>`)
+	canonicalRegex = regexp.MustCompile(`<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>`)
+	imgRegex       = regexp.MustCompile(`<img[^>]+src=["']([^"']+)["'][^>]*>`)
+	iconRegex      = regexp.MustCompile(`<link[^>]+rel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]+href=["']([^"']+)["'][^>]*>`)
+	fontRegex      = regexp.MustCompile(`@font-face[^}]*url\(["']?([^"')]+)["']?\)`)
+	bgRegex        = regexp.MustCompile(`background(?:-image)?:\s*url\(["']?([^"')]+)["']?\)`)
+)
+
 
 func formatLog(format string, args ...interface{}) string {
 	return fmt.Sprintf(format, args...)
@@ -226,83 +240,19 @@ func processURL(currentURL string, timeoutMs int, cache *urlCache, processed int
 func extractLinks(html, baseURL string, out io.Writer, logMutex *sync.Mutex) []string {
 	foundLinks := make(map[string]bool)
 	
-	linkRegex := regexp.MustCompile(`<a[^>]+href=["']([^"']+)["'][^>]*>`)
-	matches := linkRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
+	// List of regex patterns to process
+	regexPatterns := []*regexp.Regexp{
+		linkRegex, formRegex, cssRegex, jsRegex, metaRegex,
+		canonicalRegex, imgRegex, iconRegex, fontRegex, bgRegex,
 	}
 	
-	formRegex := regexp.MustCompile(`<form[^>]+action=["']([^"']+)["'][^>]*>`)
-	matches = formRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	cssRegex := regexp.MustCompile(`<link[^>]+href=["']([^"']+\.css[^"']*)["'][^>]*>`)
-	matches = cssRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	jsRegex := regexp.MustCompile(`<script[^>]+src=["']([^"']+\.js[^"']*)["'][^>]*>`)
-	matches = jsRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	metaRegex := regexp.MustCompile(`<meta[^>]+http-equiv=["']refresh["'][^>]+content=["'][^;]*;\s*url=([^"']+)["'][^>]*>`)
-	matches = metaRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-
-	canonicalRegex := regexp.MustCompile(`<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>`)
-	matches = canonicalRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	imgRegex := regexp.MustCompile(`<img[^>]+src=["']([^"']+)["'][^>]*>`)
-	matches = imgRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	iconRegex := regexp.MustCompile(`<link[^>]+rel=["'](?:icon|shortcut icon|apple-touch-icon)["'][^>]+href=["']([^"']+)["'][^>]*>`)
-	matches = iconRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	fontRegex := regexp.MustCompile(`@font-face[^}]*url\(["']?([^"')]+)["']?\)`)
-	matches = fontRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
-		}
-	}
-	
-	bgRegex := regexp.MustCompile(`background(?:-image)?:\s*url\(["']?([^"')]+)["']?\)`)
-	matches = bgRegex.FindAllStringSubmatch(html, -1)
-	for _, match := range matches {
-		if len(match) >= 2 {
-			processFoundLink(match[1], baseURL, foundLinks)
+	// Process all regex patterns
+	for _, regex := range regexPatterns {
+		matches := regex.FindAllStringSubmatch(html, -1)
+		for _, match := range matches {
+			if len(match) >= 2 {
+				processFoundLink(match[1], baseURL, foundLinks)
+			}
 		}
 	}
 	
@@ -342,7 +292,7 @@ func processFoundLink(link, baseURL string, foundLinks map[string]bool) {
 func isBlacklisted(url string) bool {
 	urlLower := strings.ToLower(url)
 	for _, pattern := range blacklist {
-		if strings.Contains(urlLower, strings.ToLower(pattern)) {
+		if strings.Contains(urlLower, pattern) {
 			return true
 		}
 	}
@@ -350,11 +300,13 @@ func isBlacklisted(url string) bool {
 }
 
 func formatURL(fullURL string, baseURL string) string {
-	result := strings.Replace(fullURL, baseURL, "", 1)
-	if result == "" {
-		return "/"
+	if result := strings.TrimPrefix(fullURL, baseURL); result != fullURL {
+		if result == "" {
+			return "/"
+		}
+		return result
 	}
-	return result
+	return fullURL
 }
 
 func contains(slice []string, item string) bool {
