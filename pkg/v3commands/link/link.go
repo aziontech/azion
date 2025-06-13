@@ -24,7 +24,6 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -159,10 +158,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 		nameRepo := git.GetNameRepo(info.remote)
 		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
-		options := &gitlib.CloneOptions{
-			SingleBranch:  true,
-			ReferenceName: plumbing.ReferenceName("v3"),
-		}
+		options := &gitlib.CloneOptions{}
 		err = git.Clone(options, info.remote, filepath.Join(path, nameRepo))
 		if err != nil {
 			logger.Debug("Error while cloning the repository", zap.Error(err))
