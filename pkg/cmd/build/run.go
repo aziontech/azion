@@ -49,6 +49,10 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		vulcanParams += " --worker " + fields.OwnWorker
 	}
 
+	if fields.SkipFramework {
+		vulcanParams += " --skip-framework-build"
+	}
+
 	vul := vulcanPkg.NewVulcan()
 	return b.vulcan(vul, conf, vulcanParams, fields, msgs)
 }
