@@ -1,0 +1,5 @@
+{
+  "bucket-name": "nomedobucket",
+  "object-key": "nomedoobject",
+  "source": "fixtures/index.html"
+}

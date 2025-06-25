@@ -1,0 +1,28 @@
+{
+	"results": {
+	  "id": 1673635841,
+	  "name": "Edited Edge Application",
+	  "delivery_protocol": "http,https",
+	  "http_port": 8008,
+	  "https_port": 9443,
+	  "minimum_tls_version": "tls_1_3",
+	  "active": true,
+	  "debug_rules": false,
+	  "http3": false,
+	  "websocket": null,
+	  "supported_ciphers": "TLSv1.3_2022",
+	  "application_acceleration": true,
+	  "caching": true,
+	  "device_detection": false,
+	  "edge_firewall": false,
+	  "edge_functions": true,
+	  "image_optimization": true,
+	  "l2_caching": false,
+	  "load_balancer": false,
+		"http3": false,
+		"supported_ciphers": "",
+	  "raw_logs": false,
+	  "web_application_firewall": false
+	},
+	"schema_version": 3
+  }

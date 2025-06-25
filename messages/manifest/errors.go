@@ -7,6 +7,7 @@ var (
 	ErrorCacheNotFound          = errors.New("Could not find this cache setting")
 	ErrorFunctionNotFound       = errors.New("Could not find this edge function")
 	ErrorOriginNotFound         = errors.New("Could not find this origin")
+	ErrorConnectorNotFound      = errors.New("Could not find this edge connector")
 	ErrorCreateOrigin           = errors.New("Failed to create the origin")
 	ErrorCreateCache            = errors.New("Failed to create the cache setting")
 	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine")
@@ -15,4 +16,5 @@ var (
 	ErrorCreateDomain           = errors.New("Failed to create the domain")
 	ErrorUpdateCache            = errors.New("Failed to update the cache setting")
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine")
+	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Edge Function to your azion.config file")
 )

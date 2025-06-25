@@ -134,7 +134,7 @@ func TestSyncFull(t *testing.T) {
 				},
 			}, nil
 		}
-		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+		syncCmd.WriteManifest = func(manifest *contracts.ManifestV4, pathMan string) error {
 			return nil
 		}
 		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
@@ -194,7 +194,7 @@ func TestSyncFull(t *testing.T) {
 				},
 			}, nil
 		}
-		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+		syncCmd.WriteManifest = func(manifest *contracts.ManifestV4, pathMan string) error {
 			return nil
 		}
 		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
@@ -251,7 +251,7 @@ func TestSyncFull(t *testing.T) {
 				},
 			}, nil
 		}
-		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+		syncCmd.WriteManifest = func(manifest *contracts.ManifestV4, pathMan string) error {
 			return nil
 		}
 		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {

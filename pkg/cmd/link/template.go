@@ -23,10 +23,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		Preset: strings.ToLower(info.Preset),
 		Prefix: "",
 	}
-	azionJson.Function.Name = "__DEFAULT__"
-	azionJson.Function.InstanceName = "__DEFAULT__"
-	azionJson.Function.File = "./out/worker.js"
-	azionJson.Function.Args = path.Join(info.projectPath, "args.json")
+	azionJson.Function = []contracts.AzionJsonDataFunction{}
 	azionJson.Domain.Name = "__DEFAULT__"
 	azionJson.Application.Name = "__DEFAULT__"
 	azionJson.RtPurge.PurgeOnPublish = true

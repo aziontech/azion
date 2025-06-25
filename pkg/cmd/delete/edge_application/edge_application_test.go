@@ -49,7 +49,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "delete application by id",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_applications/1234",
+			endpoint:       "edge_application/applications/1234",
 			statusCode:     204,
 			responseBody:   "",
 			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
@@ -61,7 +61,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "delete application - not found",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_applications/1234",
+			endpoint:       "edge_application/applications/1234",
 			statusCode:     404,
 			responseBody:   "Not Found",
 			expectedOutput: "",
@@ -73,7 +73,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "error in input",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_applications/invalid",
+			endpoint:       "edge_application/applications/invalid",
 			statusCode:     400,
 			responseBody:   "Bad Request",
 			expectedOutput: "",
@@ -85,7 +85,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "ask for application id success",
 			applicationID:  "",
 			method:         "DELETE",
-			endpoint:       "edge_applications/1234",
+			endpoint:       "edge_application/applications/1234",
 			statusCode:     204,
 			responseBody:   "",
 			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
@@ -159,11 +159,11 @@ func TestCascadeDelete(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("DELETE", "edge_applications/666"),
+			httpmock.REST("DELETE", "edge_application/applications/666"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 		mock.Register(
-			httpmock.REST("DELETE", "edge_functions/123"),
+			httpmock.REST("DELETE", "edge_functions/functions/123"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 
@@ -227,7 +227,11 @@ func TestUpdateAzionJson(t *testing.T) {
 			Io: f.IOStreams,
 			GetAzion: func(confPath string) (*contracts.AzionApplicationOptions, error) {
 				conf := &contracts.AzionApplicationOptions{}
-				conf.Function.ID = 1
+				conf.Function = []contracts.AzionJsonDataFunction{
+					{
+						ID: 1,
+					},
+				}
 				conf.Application.ID = 2
 				conf.Domain.Id = 3
 				return conf, nil
