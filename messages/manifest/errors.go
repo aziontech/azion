@@ -16,4 +16,5 @@ var (
 	ErrorCreateDomain           = errors.New("Failed to create the domain")
 	ErrorUpdateCache            = errors.New("Failed to update the cache setting")
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine")
+	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Edge Function to your azion.config file")
 )

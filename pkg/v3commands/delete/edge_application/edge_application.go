@@ -25,7 +25,7 @@ var ProjectConf string
 
 type DeleteCmd struct {
 	Io         *iostreams.IOStreams
-	GetAzion   func(confPath string) (*contracts.AzionApplicationOptions, error)
+	GetAzion   func(confPath string) (*contracts.AzionApplicationOptionsV3, error)
 	f          *cmdutil.Factory
 	UpdateJson func(cmd *DeleteCmd) error
 	Cascade    func(ctx context.Context, del *DeleteCmd) error
@@ -41,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	return &DeleteCmd{
 		Io:         f.IOStreams,
-		GetAzion:   utils.GetAzionJsonContent,
+		GetAzion:   utils.GetAzionJsonContentV3,
 		f:          f,
 		UpdateJson: updateAzionJson,
 		Cascade:    CascadeDelete,

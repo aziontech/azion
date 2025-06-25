@@ -71,7 +71,7 @@ func TestDeployCmd(t *testing.T) {
 	t.Run("failed to create application", func(t *testing.T) {
 
 		mock := &httpmock.Registry{}
-		options := &contracts.AzionApplicationOptions{
+		options := &contracts.AzionApplicationOptionsV3{
 			Name: "NotAVeryGoodName",
 		}
 
@@ -97,7 +97,7 @@ func TestDeployCmd(t *testing.T) {
 	t.Run("create application success", func(t *testing.T) {
 
 		mock := &httpmock.Registry{}
-		options := &contracts.AzionApplicationOptions{
+		options := &contracts.AzionApplicationOptionsV3{
 			Name: "LovelyName",
 		}
 

@@ -17,7 +17,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
 
-	azionJson := &contracts.AzionApplicationOptions{
+	azionJson := &contracts.AzionApplicationOptionsV3{
 		Name:   info.Name,
 		Env:    "production",
 		Preset: strings.ToLower(info.Preset),
@@ -35,7 +35,7 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 
 }
 
-func (cmd *LinkCmd) createJsonFile(options *contracts.AzionApplicationOptions, info *LinkInfo) error {
+func (cmd *LinkCmd) createJsonFile(options *contracts.AzionApplicationOptionsV3, info *LinkInfo) error {
 	data, err := json.MarshalIndent(options, "", "  ")
 	if err != nil {
 		return msg.ErrorUnmarshalAzionFile

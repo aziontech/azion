@@ -37,14 +37,14 @@ var (
 type ManifestInterpreter struct {
 	FileReader            func(path string) ([]byte, error)
 	GetWorkDir            func() (string, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confPath string) error
 }
 
 func NewManifestInterpreter() *ManifestInterpreter {
 	return &ManifestInterpreter{
 		FileReader:            os.ReadFile,
 		GetWorkDir:            utils.GetWorkingDir,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
 	}
 }
 
@@ -77,7 +77,7 @@ func (man *ManifestInterpreter) ReadManifest(
 }
 
 func (man *ManifestInterpreter) CreateResources(
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	manifest *contracts.Manifest,
 	f *cmdutil.Factory,
 	projectConf string,
@@ -344,7 +344,7 @@ func (man *ManifestInterpreter) CreateResources(
 }
 
 // this is called to delete resources no longer present in manifest.json
-func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
 	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))

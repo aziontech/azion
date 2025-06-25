@@ -11,7 +11,7 @@ import (
 )
 
 // worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
-func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client, conf *contracts.AzionApplicationOptions, bucket string) {
+func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client, conf *contracts.AzionApplicationOptionsV3, bucket string) {
 	for job := range jobs {
 		// Once ENG-27343 is completed, we might be able to remove this piece of code
 		fileInfo, err := job.FileContent.Stat()

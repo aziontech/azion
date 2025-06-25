@@ -30,8 +30,8 @@ type DeployCmd struct {
 	GetWorkDir            func() (string, error)
 	FileReader            func(path string) ([]byte, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
+	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptionsV3, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confConf string) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
@@ -60,8 +60,8 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		WriteFile:             os.WriteFile,
 		EnvLoader:             utils.LoadEnvVarsFromFile,
 		BuildCmd:              build.NewBuildCmd,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,

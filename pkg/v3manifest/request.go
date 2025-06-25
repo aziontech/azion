@@ -146,7 +146,7 @@ func makeCacheRequestCreate(cache contracts.CacheSetting) *apiCache.CreateReques
 	return request
 }
 
-func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
+func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptionsV3) (*apiEdgeApplications.UpdateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -228,7 +228,7 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 	return request, nil
 }
 
-func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptions, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
+func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionApplicationOptionsV3, client *apiEdgeApplications.Client, ctx context.Context) (*apiEdgeApplications.CreateRulesEngineRequest, error) {
 	request := &apiEdgeApplications.CreateRulesEngineRequest{}
 
 	if rule.Description != nil {
@@ -321,7 +321,7 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 	return request, nil
 }
 
-func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.CreateRequest {
+func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptionsV3) *apiOrigin.CreateRequest {
 	request := &apiOrigin.CreateRequest{}
 
 	switch origin.OriginType {
@@ -372,7 +372,7 @@ func makeOriginCreateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 	return request
 }
 
-func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptions) *apiOrigin.UpdateRequest {
+func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionApplicationOptionsV3) *apiOrigin.UpdateRequest {
 	request := &apiOrigin.UpdateRequest{}
 
 	switch origin.OriginType {
@@ -423,7 +423,7 @@ func makeOriginUpdateRequest(origin contracts.Origin, conf *contracts.AzionAppli
 	return request
 }
 
-func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptions) (int64, error) {
+func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptionsV3) (int64, error) {
 	if conf.Function.CacheId > 0 {
 		return conf.Function.CacheId, nil
 	}
@@ -447,7 +447,7 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	return cache.GetId(), nil
 }
 
-func makeDomainUpdateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.UpdateRequest {
+func makeDomainUpdateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptionsV3) *apiDomain.UpdateRequest {
 	request := &apiDomain.UpdateRequest{}
 
 	if domain.CnameAccessOnly != nil {
@@ -487,7 +487,7 @@ func makeDomainUpdateRequest(domain *contracts.Domains, conf *contracts.AzionApp
 	return request
 }
 
-func makeDomainCreateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptions) *apiDomain.CreateRequest {
+func makeDomainCreateRequest(domain *contracts.Domains, conf *contracts.AzionApplicationOptionsV3) *apiDomain.CreateRequest {
 	request := &apiDomain.CreateRequest{}
 
 	if domain.CnameAccessOnly != nil {

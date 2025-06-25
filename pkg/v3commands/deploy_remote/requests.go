@@ -33,7 +33,7 @@ var injectIntoFunction = `
 
 `
 
-func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
 	if conf.Function.ID == 0 {
 		var projName string
 		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, msgs)
@@ -109,7 +109,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 func (cmd *DeployCmd) doApplication(
 	client *apiapp.Client,
 	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	msgs *[]string) error {
 	if conf.Application.ID == 0 {
 		var projName string
@@ -158,7 +158,7 @@ func (cmd *DeployCmd) doApplication(
 	return nil
 }
 
-func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
 	var domain apidom.DomainResponse
 	var err error
 
@@ -227,7 +227,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 
 func (cmd *DeployCmd) doRulesDeploy(
 	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	client *apiapp.Client,
 	msgs *[]string) error {
 	if conf.NotFirstRun {
@@ -270,7 +270,7 @@ func (cmd *DeployCmd) doRulesDeploy(
 func (cmd *DeployCmd) doOriginSingle(
 	clientOrigin *apiori.Client,
 	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	msgs *[]string) (int64, error) {
 	var DefaultOrigin = [1]string{"api.azion.net"}
 
@@ -302,7 +302,7 @@ func (cmd *DeployCmd) doOriginSingle(
 	return newOrigin.OriginId, nil
 }
 
-func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
+func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) (int64, error) {
 	reqCre := api.CreateRequest{}
 
 	code, err := cmd.FileReader(conf.Function.File)
@@ -347,7 +347,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	return response.GetId(), nil
 }
 
-func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
+func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) (int64, error) {
 	reqUpd := api.UpdateRequest{}
 
 	code, err := cmd.FileReader(conf.Function.File)
@@ -392,7 +392,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 	return response.GetId(), nil
 }
 
-func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
+func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
 	if conf.Application.Name == "__DEFAULT__" {
 		reqApp.SetName(conf.Name)
@@ -425,7 +425,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	return application.GetId(), nil
 }
 
-func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
 	reqApp := apiapp.UpdateRequest{}
 	if conf.Application.Name == "__DEFAULT__" {
 		reqApp.SetName(conf.Name)
@@ -444,7 +444,7 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 	return nil
 }
 
-func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
+func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.CreateRequest{}
 	if conf.Domain.Name == "__DEFAULT__" {
 		reqDom.SetName(conf.Name)
@@ -465,7 +465,7 @@ func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, c
 	return domain, nil
 }
 
-func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
+func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
 	if conf.Domain.Name == "__DEFAULT__" {
 		reqDom.SetName(conf.Name)
@@ -493,7 +493,7 @@ func prepareAddresses(addrs []string) (addresses []sdk.CreateOriginsRequestAddre
 	return
 }
 
-func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptionsV3) (apiapp.FunctionsInstancesResponse, error) {
 	logger.Debug("Create Instance")
 
 	// create instance function
@@ -528,7 +528,7 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	return resp, nil
 }
 
-func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions) (apiapp.FunctionsInstancesResponse, error) {
+func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptionsV3) (apiapp.FunctionsInstancesResponse, error) {
 	logger.Debug("Update Instance")
 
 	// create instance function

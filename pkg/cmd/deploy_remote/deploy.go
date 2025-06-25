@@ -51,6 +51,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
+	FunctionIds map[string]contracts.AzionJsonDataFunction
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -183,7 +184,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	conf.Function.File = ".edge/worker.js"
 	err = cmd.doFunction(clients, ctx, conf, &msgs)
 	if err != nil {
 		return err
@@ -262,7 +262,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}

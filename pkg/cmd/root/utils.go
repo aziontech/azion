@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	msg "github.com/aziontech/azion-cli/messages/root"
+	"github.com/aziontech/azion-cli/pkg/logger"
 )
 
 // Response structure with only the needed field
@@ -12,7 +15,11 @@ type AccountInfo struct {
 	ClientFlags []string `json:"client_flags"`
 }
 
-func HasBlockAPIV4Flag(token string) (bool, error) {
+func HasBlockAPIV4Flag(token string, f *factoryRoot) (bool, error) {
+	if token == "" {
+		logger.FInfoFlags(f.factory.IOStreams.Out, msg.LoginMessage, f.factory.Format, f.factory.Out)
+		return false, nil
+	}
 	url := "https://sso.azion.com/api/account/info"
 
 	req, err := http.NewRequest("GET", url, nil)

@@ -33,7 +33,7 @@ func TestDeployCmd(t *testing.T) {
 
 	t.Run("create resources", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		options := &contracts.AzionApplicationOptions{
+		options := &contracts.AzionApplicationOptionsV3{
 			Name: "NotAVeryGoodName",
 			Application: contracts.AzionJsonDataApplication{
 				ID: 1673635841,
@@ -54,7 +54,7 @@ func TestDeployCmd(t *testing.T) {
 
 		interpreter := NewManifestInterpreter()
 
-		interpreter.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+		interpreter.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 			return nil
 		}
 

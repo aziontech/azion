@@ -74,8 +74,8 @@ func MockFilepathWalk(root string, fn filepath.WalkFunc) error {
 }
 
 // MockGetAzionJsonContent mocks GetAzionJsonContent
-func MockGetAzionJsonContent(pathConfig string) (*contracts.AzionApplicationOptions, error) {
-	return &contracts.AzionApplicationOptions{
+func MockGetAzionJsonContent(pathConfig string) (*contracts.AzionApplicationOptionsV3, error) {
+	return &contracts.AzionApplicationOptionsV3{
 		Name:   "MockApp",
 		Prefix: "MockPrefix",
 	}, nil
@@ -123,7 +123,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.ReadSettings = func() (token.Settings, error) {
 					return token.Settings{}, nil
 				}
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
 					return nil
 				}
 			},
@@ -142,7 +142,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
 					return nil
 				}
 			},
@@ -158,7 +158,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.WriteAzionJsonContent = MockWriteAzionJsonContent
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
 					return nil
 				}
 				cmd.CallScript = func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error) {
@@ -175,11 +175,11 @@ func TestDeploy_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/storage/buckets"),
+				httpmock.REST(http.MethodPost, "v4/edge_storage/buckets"),
 				httpmock.JSONFromFile("fixtures/response.json"),
 			)
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/storage/s3-credentials"),
+				httpmock.REST(http.MethodPost, "v4/edge_storage/s3-credentials"),
 				httpmock.JSONFromFile("fixtures/responses3.json"),
 			)
 

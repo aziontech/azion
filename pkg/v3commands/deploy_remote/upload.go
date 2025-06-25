@@ -21,7 +21,7 @@ var (
 )
 
 func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
 	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {

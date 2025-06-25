@@ -61,7 +61,7 @@ type AzionApplicationOptions struct {
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
 	NotFirstRun   bool                         `json:"not-first-run"`
-	Function      AzionJsonDataFunction        `json:"function"`
+	Function      []AzionJsonDataFunction      `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`
 	RtPurge       AzionJsonDataPurge           `json:"rt-purge"`
@@ -70,6 +70,23 @@ type AzionApplicationOptions struct {
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 	Workloads     AzionJsonDataWorkload        `json:"workloads"`
 	Connectors    []AzionJsonDataConnectors    `json:"connectors"`
+}
+
+type AzionApplicationOptionsV3 struct {
+	Test          func(path string) error      `json:"-"`
+	Name          string                       `json:"name"`
+	Bucket        string                       `json:"bucket"`
+	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
+	Env           string                       `json:"env"`
+	Prefix        string                       `json:"prefix"`
+	NotFirstRun   bool                         `json:"not-first-run"`
+	Function      AzionJsonDataFunction        `json:"function"`
+	Application   AzionJsonDataApplication     `json:"application"`
+	Domain        AzionJsonDataDomain          `json:"domain"`
+	RtPurge       AzionJsonDataPurge           `json:"rt-purge"`
+	Origin        []AzionJsonDataOrigin        `json:"origin"`
+	RulesEngine   AzionJsonDataRulesEngine     `json:"rules-engine"`
+	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 }
 
 type AzionJsonDataConnectors struct {

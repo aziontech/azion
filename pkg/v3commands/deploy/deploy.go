@@ -37,7 +37,7 @@ type DeployCmd struct {
 	GetWorkDir            func() (string, error)
 	FileReader            func(path string) ([]byte, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
+	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptionsV3, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
@@ -51,7 +51,7 @@ type DeployCmd struct {
 	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
 	CheckToken            func(f *cmdutil.Factory) error
 	ReadSettings          func() (token.Settings, error)
-	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
+	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
 	OpenBrowserFunc       func(input string) error
 }
 
@@ -77,7 +77,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		FileReader:            os.ReadFile,
 		WriteFile:             os.WriteFile,
 		BuildCmd:              build.NewBuildCmd,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
+		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,

@@ -154,7 +154,7 @@ func TestCascadeDelete(t *testing.T) {
 
 	t.Run("cascade delete application", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		options := &contracts.AzionApplicationOptions{}
+		options := &contracts.AzionApplicationOptionsV3{}
 
 		dat, _ := os.ReadFile("./fixtures/azion.json")
 		_ = json.Unmarshal(dat, options)
@@ -171,7 +171,7 @@ func TestCascadeDelete(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		del := NewDeleteCmd(f)
-		del.GetAzion = func(confPath string) (*contracts.AzionApplicationOptions, error) {
+		del.GetAzion = func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
 			return options, nil
 		}
 		del.UpdateJson = func(cmd *DeleteCmd) error {
@@ -226,8 +226,8 @@ func TestUpdateAzionJson(t *testing.T) {
 		del := &DeleteCmd{
 			f:  f,
 			Io: f.IOStreams,
-			GetAzion: func(confPath string) (*contracts.AzionApplicationOptions, error) {
-				conf := &contracts.AzionApplicationOptions{}
+			GetAzion: func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+				conf := &contracts.AzionApplicationOptionsV3{}
 				conf.Function.ID = 1
 				conf.Application.ID = 2
 				conf.Domain.Id = 3

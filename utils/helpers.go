@@ -162,7 +162,55 @@ func GetAzionJsonContent(confPath string) (*contracts.AzionApplicationOptions, e
 	return conf, nil
 }
 
+func GetAzionJsonContentV3(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = os.Stat(path.Join(wd, confPath, "azion.json"))
+	if err != nil {
+		logger.Debug("Error reading stats of azion.json file", zap.Error(err))
+		return nil, ErrorOpeningAzionJsonFile
+	}
+
+	file, err := os.ReadFile(path.Join(wd, confPath, "azion.json"))
+	if err != nil {
+		logger.Debug("Error reading azion.json file", zap.Error(err))
+		return nil, ErrorOpeningAzionJsonFile
+	}
+
+	conf := &contracts.AzionApplicationOptionsV3{}
+	err = json.Unmarshal(file, &conf)
+	if err != nil {
+		logger.Debug("Error reading unmarshalling azion.json file", zap.Error(err))
+		return nil, ErrorUnmarshalAzionJsonFile
+	}
+
+	return conf, nil
+}
+
 func WriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confPath string) error {
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		logger.Debug("Error marshalling response", zap.Error(err))
+		return ErrorMarshalAzionJsonFile
+	}
+
+	err = os.WriteFile(path.Join(wd, confPath, "azion.json"), data, 0644)
+	if err != nil {
+		logger.Debug("Error writing file", zap.Error(err))
+		return ErrorWritingAzionJsonFile
+	}
+
+	return nil
+}
+
+func WriteAzionJsonContentV3(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 	wd, err := GetWorkingDir()
 	if err != nil {
 		return err
@@ -324,6 +372,10 @@ func checkNameInUse(body string) error {
 func checkDetail(body string) error {
 	if strings.Contains(body, "detail") {
 		msgDetail := gjson.Get(body, "detail")
+		if msgDetail.String() == "" {
+			msgArrayDetail := gjson.Get(body, "errors.#.detail")
+			return fmt.Errorf("%s", msgArrayDetail.String())
+		}
 		return fmt.Errorf("%s", msgDetail.String())
 	}
 	return nil

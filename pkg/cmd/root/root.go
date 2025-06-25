@@ -201,7 +201,7 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 	// set template for -v flag
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
-	hasFlag, err := HasBlockAPIV4Flag(fact.factory.Config.GetString("token"))
+	hasFlag, err := HasBlockAPIV4Flag(fact.factory.Config.GetString("token"), fact)
 	if err != nil {
 		logger.Debug("Failed to get client flags for this user", zap.Error(err))
 		panic("Failed to read client flags for this user. Check your settings and/or token and try again. If the error persists, contact Azion support.")

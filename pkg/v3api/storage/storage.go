@@ -96,7 +96,7 @@ func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contra
 	return resp, nil
 }
 
-func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions, bucket string) error {
+func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptionsV3, bucket string) error {
 	file := fileOps.Path
 	if conf.Prefix != "" {
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)

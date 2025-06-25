@@ -19,7 +19,7 @@ import (
 func (cmd *DeployCmd) doBucket(
 	client *api.Client,
 	ctx context.Context,
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	msgs *[]string) error {
 	if conf.Bucket != "" || (conf.Preset == "javascript" || conf.Preset == "typescript") {
 		return nil
