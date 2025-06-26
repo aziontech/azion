@@ -66,6 +66,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDevCmd(f))
 }
 
+func (cmd *DevCmd) ExternalRun(f *cmdutil.Factory, skipFramework bool) error {
+	SkipFramework = skipFramework
+	return cmd.Run(f)
+}
+
 func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 	logger.Debug("Running dev command")
 

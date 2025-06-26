@@ -27,6 +27,8 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 	if fields.Preset != "" {
 		vulcanParams = " --preset " + fields.Preset
 		conf.Preset = fields.Preset
+	} else {
+		vulcanParams = " --preset " + conf.Preset
 	}
 
 	if fields.Entry != "" {

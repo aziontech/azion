@@ -296,7 +296,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 		logger.Debug("Running dev command from init command")
 		dev := cmd.devCmd(cmd.f)
-		err = dev.Run(cmd.f)
+		err = dev.ExternalRun(cmd.f, cmd.SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running dev command called by init command", zap.Error(err))
 			return err
