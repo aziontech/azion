@@ -42,19 +42,6 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	cmdVulcanInit := "store init"
-	if len(cmd.preset) > 0 {
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, cmd.preset)
-	}
-
-	command := vul.Command("", cmdVulcanInit, cmd.f)
-	logger.Debug("Running the following command", zap.Any("Command", command))
-
-	err = cmd.commandRunInteractive(cmd.f, command)
-	if err != nil {
-		return err
-	}
-
 	preset, err := cmd.getVulcanInfo()
 	if err != nil {
 		return err

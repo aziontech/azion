@@ -265,42 +265,6 @@ func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "error commandRunInteractive",
-			fields: fields{
-				preset:         "vanilla",
-				pathWorkingDir: "./azion/pathmock",
-				commandRunnerOutput: func(
-					f *cmdutil.Factory,
-					comm string,
-					envVars []string,
-				) (string, error) {
-					return "3.2.1", nil
-				},
-				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
-					return errors.New("error commandRunInteractive")
-				},
-				load: func(filenames ...string) (err error) {
-					os.Setenv("preset", "vanilla")
-					return nil
-				},
-			},
-			args: args{
-				vul: &vulcanPkg.VulcanPkg{
-					CheckVulcanMajor: func(
-						currentVersion string,
-						f *cmdutil.Factory,
-						vulcan *vulcanPkg.VulcanPkg,
-					) error {
-						return nil
-					},
-					Command: func(flags, params string, f *cmdutil.Factory) string {
-						return "init"
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
 			name: "error getVulcanEnvInfo",
 			fields: fields{
 				preset:         "vanilla",

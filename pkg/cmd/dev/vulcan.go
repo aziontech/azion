@@ -17,6 +17,10 @@ func vulcan(cmd *DevCmd, port int) error {
 		command = fmt.Sprintf("%s --port %d", command, port)
 	}
 
+	if SkipFramework {
+		command = fmt.Sprintf("%s --skip-framework-build", command)
+	}
+
 	err := runCommand(cmd, command)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())

@@ -16,7 +16,8 @@ import (
 )
 
 var (
-	port int
+	port          int
+	SkipFramework bool
 )
 
 type DevCmd struct {
@@ -57,11 +58,17 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	}
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
 	devCmd.Flags().IntVar(&port, "port", 0, msg.PortFlag)
+	devCmd.Flags().BoolVar(&SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	return devCmd
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDevCmd(f))
+}
+
+func (cmd *DevCmd) ExternalRun(f *cmdutil.Factory, skipFramework bool) error {
+	SkipFramework = skipFramework
+	return cmd.Run(f)
 }
 
 func (cmd *DevCmd) Run(f *cmdutil.Factory) error {

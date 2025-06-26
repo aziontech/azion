@@ -111,7 +111,7 @@ func TestBuildCmd_ExternalRun(t *testing.T) {
 				GetWorkDir:            tt.fields.GetWorkDir,
 				f:                     tt.fields.f,
 			}
-			if err := b.ExternalRun(tt.args.fields, tt.args.confPath, tt.args.msgs); (err != nil) != tt.wantErr {
+			if err := b.ExternalRun(tt.args.fields, tt.args.confPath, tt.args.msgs, false); (err != nil) != tt.wantErr {
 				t.Errorf("BuildCmd.ExternalRun() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
