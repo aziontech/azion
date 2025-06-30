@@ -50,6 +50,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
+	WriteBucket bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -97,12 +98,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket bool) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
 	Auto = auto
 	SkipBuild = skipBuild
+	WriteBucket = writeBucket
 	return cmd.Run(f)
 }
 
