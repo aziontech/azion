@@ -64,6 +64,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	DryRun      bool
+	WriteBucket bool
 	Local       bool
 	Env         string
 	Logs        = contracts.Logs{}
@@ -122,6 +123,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().BoolVar(&Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().BoolVar(&DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
+	deployCmd.Flags().BoolVar(&WriteBucket, "writable-bucket", false, msg.WritableBucketFlag)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
@@ -150,7 +152,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if Local {
 		deployLocal := deploy.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild)
+		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild, WriteBucket)
 	}
 
 	msgs := []string{}
