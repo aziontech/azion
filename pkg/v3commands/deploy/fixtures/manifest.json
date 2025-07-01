@@ -1,0 +1,38 @@
+{
+  "cache": [
+    {
+      "name": "zoooop",
+      "browser_cache_settings": "override",
+      "browser_cache_settings_maximum_ttl": 5000,
+      "cdn_cache_settings_maximum_ttl": 1000,
+      "enable_caching_for_post": false,
+      "enable_caching_for_options": false,
+      "enable_query_string_sort": false
+    }
+  ],
+  "rules": [
+    { 
+      "name": "nomezinhomatotinho",
+      "criteria": [
+        [
+          {
+            "variable": "${uri}",
+            "operator": "starts_with",
+            "conditional": "if",
+            "input_value": "/"
+          }
+        ]
+      ],
+      "behaviors": [
+        {
+          "name": "forward_cookies",
+          "target": null
+        }, 
+        {          
+          "name": "set_cache_policy",
+          "target": "zoooop"
+        }
+      ]
+    }
+  ]
+}

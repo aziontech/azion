@@ -110,8 +110,10 @@ func TestSimulateDeploy(t *testing.T) {
 				Domain: contracts.AzionJsonDataDomain{
 					Id: 12345,
 				},
-				Function: contracts.AzionJsonDataFunction{
-					ID: 123321,
+				Function: []contracts.AzionJsonDataFunction{
+					{
+						ID: 123321,
+					},
 				},
 				CacheSettings: []contracts.AzionJsonDataCacheSettings{
 					{

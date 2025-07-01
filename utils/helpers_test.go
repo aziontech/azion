@@ -220,9 +220,9 @@ func TestGetWorkingDir(t *testing.T) {
 				require.NoError(t, err)
 				var azJsonData contracts.AzionApplicationOptions
 				azJsonData.Name = "Test01"
-				azJsonData.Function.Name = "MyFunc"
-				azJsonData.Function.File = "myfile.js"
-				azJsonData.Function.ID = 476
+				azJsonData.Function[0].Name = "MyFunc"
+				azJsonData.Function[0].File = "myfile.js"
+				azJsonData.Function[0].ID = 476
 				err = WriteAzionJsonContent(&azJsonData, "azion")
 				require.NoError(t, err)
 			},
@@ -272,9 +272,9 @@ func TestGetAzionJsonContent(t *testing.T) {
 				azJsonData, err := GetAzionJsonContent("azion")
 				require.NoError(t, err)
 				require.Contains(t, azJsonData.Name, "Test01")
-				require.Contains(t, azJsonData.Function.Name, "MyFunc")
-				require.Contains(t, azJsonData.Function.File, "myfile.js")
-				require.EqualValues(t, azJsonData.Function.ID, 476)
+				require.Contains(t, azJsonData.Function[0].Name, "MyFunc")
+				require.Contains(t, azJsonData.Function[0].File, "myfile.js")
+				require.EqualValues(t, azJsonData.Function[0].ID, 476)
 			},
 		},
 	}

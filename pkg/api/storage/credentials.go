@@ -18,8 +18,16 @@ func (c *Client) CreateCredentials(ctx context.Context, request RequestCredentia
 	req := c.apiClient.StorageAPI.StorageApiS3CredentialsCreate(ctx).S3CredentialCreate(request.S3CredentialCreate)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while creating the user's s3 credentials", zap.Error(err))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while creating the user's s3 credentials", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp, nil
 }

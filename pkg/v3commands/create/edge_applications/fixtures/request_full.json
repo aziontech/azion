@@ -1,0 +1,21 @@
+{
+  "name": "ExampleApp",
+  "application_acceleration": true,
+  "delivery_protocol": "http",
+  "origin_type": "custom",
+  "address": "https://example.com",
+  "minimum_tls_version": "TLSv1.2",
+  "origin_protocol_policy": "https-only",
+  "host_header": "example.com",
+  "browser_cache_settings": "max-age=3600",
+  "cdn_cache_settings": "max-age=3600",
+  "browser_cache_settings_maximum_ttl": 3600,
+  "cdn_cache_settings_maximum_ttl": 3600,
+  "debug_rules": false,
+  "supported_ciphers": "AES256-GCM-SHA384",
+  "http_port": 80,
+  "https_port": 443,
+  "l2_caching": true,
+  "http3": false,
+  "websocket": true
+}

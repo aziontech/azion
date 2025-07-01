@@ -1,0 +1,29 @@
+{
+    "results": {
+        "id": 1694434702,
+        "name": "borus",
+        "delivery_protocol": "http",
+        "http_port": [
+            80
+        ],
+        "https_port": [
+            443
+        ],
+        "minimum_tls_version": "",
+        "active": true,
+        "debug_rules": false,
+        "http3": false,
+        "websocket": false,
+        "supported_ciphers": "all",
+        "application_acceleration": false,
+        "caching": true,
+        "device_detection": false,
+        "edge_firewall": false,
+        "edge_functions": false,
+        "image_optimization": false,
+        "load_balancer": false,
+        "raw_logs": false,
+        "web_application_firewall": false
+    },
+    "schema_version": 3
+}

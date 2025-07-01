@@ -1,0 +1,28 @@
+{
+  "results": {
+      "origin_id": 92779,
+      "origin_key": "176fa5e2-a895-4862-9657-e2e37d9125a7",
+      "name": "Create Or22i21231222n2",
+      "origin_type": "single_origin",
+      "addresses": [
+          {
+              "address": "httpbin.org",
+              "weight": null,
+              "server_role": "primary",
+              "is_active": true
+          }
+      ],
+      "origin_protocol_policy": "http",
+      "is_origin_redirection_enabled": false,
+      "host_header": "asdf.asdfom",
+      "method": "",
+      "origin_path": "/requests",
+      "connection_timeout": 60,
+      "timeout_between_bytes": 120,
+      "hmac_authentication": false,
+      "hmac_region_name": "",
+      "hmac_access_key": "",
+      "hmac_secret_key": ""
+  },
+  "schema_version": 3
+}

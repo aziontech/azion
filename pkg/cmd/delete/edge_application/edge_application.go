@@ -127,9 +127,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		Env:    "production",
 		Prefix: "",
 	}
-	azionJsonFile.Function.Name = "__DEFAULT__"
-	azionJsonFile.Function.InstanceName = "__DEFAULT__"
-	azionJsonFile.Function.File = "./out/worker.js"
+	azionJsonFile.Function = []contracts.AzionJsonDataFunction{}
 	azionJsonFile.Domain.Name = "__DEFAULT__"
 	azionJsonFile.Application.Name = "__DEFAULT__"
 	azionJsonFile.RtPurge.PurgeOnPublish = true

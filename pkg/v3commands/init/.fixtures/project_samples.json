@@ -1,0 +1,673 @@
+[
+  {
+    "name": "Angular",
+    "items": [
+      {
+        "name": "Angular Boilerplate",
+        "message": "Automate your Angular.js deployment process on the edge",
+        "preset": "angular",
+        "path": "/angular/angular-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/angular/angular-boilerplate"
+      }
+    ]
+  },
+  {
+    "name": "Astro",
+    "items": [
+      {
+        "name": "Astro Basics",
+        "message": "Astro Starter Kit: Basics",
+        "preset": "astro",
+        "path": "/astro/astro-basics",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-basics"
+      },
+      {
+        "name": "Astro Blog Starter Kit",
+        "message": "Deploy a blog page based on the Astro framework in a few steps",
+        "preset": "astro",
+        "path": "/astro/astro-blog",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-blog"
+      },
+      {
+        "name": "Astro Boilerplate",
+        "message": "Automate your Astro.js deployment process on the edge",
+        "preset": "astro",
+        "path": "/astro/astro-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-boilerplate"
+      },
+      {
+        "name": "Astro with Framework Alpine",
+        "message": "This example showcases Astro working with AlpineJS",
+        "preset": "astro",
+        "path": "/astro/astro-framework-alpine",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-alpine"
+      },
+      {
+        "name": "Astro with Framework Lit",
+        "message": "This example showcases Astro working with Lit",
+        "preset": "astro",
+        "path": "/astro/astro-framework-lit",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-lit"
+      },
+      {
+        "name": "Astro with Multiple Frameworks",
+        "message": "This example showcases Astro's built-in support for multiple frameworks",
+        "preset": "astro",
+        "path": "/astro/astro-framework-multiple",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-multiple"
+      },
+      {
+        "name": "Astro with Framework Preact",
+        "message": "This example showcases Astro working with Preact",
+        "preset": "astro",
+        "path": "/astro/astro-framework-preact",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-preact"
+      },
+      {
+        "name": "Astro with Framework React",
+        "message": "This example showcases Astro working with React",
+        "preset": "astro",
+        "path": "/astro/astro-framework-react",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-react"
+      },
+      {
+        "name": "Astro with Framework Solid",
+        "message": "This example showcases Astro working with Solid",
+        "preset": "astro",
+        "path": "/astro/astro-framework-solid",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-solid"
+      },
+      {
+        "name": "Astro with Framework Svelte",
+        "message": "This example showcases Astro working with Svelte",
+        "preset": "astro",
+        "path": "/astro/astro-framework-svelte",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-svelte"
+      },
+      {
+        "name": "Astro with Framework Vue",
+        "message": "This example showcases Astro working with Vue",
+        "preset": "astro",
+        "path": "/astro/astro-framework-vue",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-framework-vue"
+      },
+      {
+        "name": "Astro Init",
+        "message": "Astro Starter template",
+        "preset": "astro",
+        "path": "/astro/astro-init",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-init"
+      },
+      {
+        "name": "Astro Minimal",
+        "message": "A minimal template to start a new Astro project",
+        "preset": "astro",
+        "path": "/astro/astro-minimal",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-minimal"
+      },
+      {
+        "name": "Astro with Non-HTML Pages",
+        "message": "This example showcases Astro working with Non-HTML pages",
+        "preset": "astro",
+        "path": "/astro/astro-non-html-pages",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-non-html-pages"
+      },
+      {
+        "name": "Astro Portfolio",
+        "message": "Astro portfolio example",
+        "preset": "astro",
+        "path": "/astro/astro-portfolio",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-portfolio"
+      },
+      {
+        "name": "Astro Starlog",
+        "message": "Release notes theme for Astro",
+        "preset": "astro",
+        "path": "/astro/astro-starlog",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-starlog"
+      },
+      {
+        "name": "Astro with Markdoc",
+        "message": "This starter showcases the experimental Markdoc integration",
+        "preset": "astro",
+        "path": "/astro/astro-with-markdoc",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-markdoc"
+      },
+      {
+        "name": "Astro Markdown with Plugins",
+        "message": "This example showcases Astro's built-in Markdown support with additional, user-provided plugins",
+        "preset": "astro",
+        "path": "/astro/astro-with-markdown-plugins",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-markdown-plugins"
+      },
+      {
+        "name": "Astro Markdown with Shiki",
+        "message": "This example showcases Astro's built-in Markdown support",
+        "preset": "astro",
+        "path": "/astro/astro-with-markdown-shiki",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-markdown-shiki"
+      },
+      {
+        "name": "Astro with MDX",
+        "message": "This example showcases using @astrojs/mdx to author content using MDX",
+        "preset": "astro",
+        "path": "/astro/astro-with-mdx",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-mdx"
+      },
+      {
+        "name": "Astro with Nano Stores",
+        "message": "This example showcases using nanostores to provide shared state between components of any framework",
+        "preset": "astro",
+        "path": "/astro/astro-with-nanostores",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-nanostores"
+      },
+      {
+        "name": "Astro with Tailwind CSS",
+        "message": "This example showcases how to style your Astro project with Tailwind",
+        "preset": "astro",
+        "path": "/astro/astro-with-tailwindcss",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-tailwindcss"
+      },
+      {
+        "name": "Astro with Vitest",
+        "message": "This example showcases Astro working with Vitest",
+        "preset": "astro",
+        "path": "/astro/astro-with-vitest",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/astro-with-vitest"
+      },
+      {
+        "name": "Deploy at the Edge",
+        "message": "Challenge BrazilJS 2024",
+        "preset": "astro",
+        "path": "/astro/challenge-braziljs-2024",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/challenge-braziljs-2024"
+      },
+      {
+        "name": "Devscard",
+        "message": "A fully customizable template to create your online (and paper) resume without writing a single line of code",
+        "preset": "astro",
+        "path": "/astro/devscard",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/devscard"
+      },
+      {
+        "name": "Webpage to PDF Resume",
+        "message": "A tasteful, printable resume written with Astro and PandaCSS",
+        "preset": "astro",
+        "path": "/astro/webpage-pdf-resume",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/astro/webpage-pdf-resume"
+      }
+    ]
+  },
+  {
+    "name": "Docusaurus",
+    "items": [
+      {
+        "name": "Docusaurus Blog Template",
+        "message": "Deploy a blog page based on the Docusaurus framework in a few steps",
+        "preset": "docusaurus",
+        "path": "/docusaurus/docusaurus-blog-template",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/docusaurus/docusaurus-blog-template"
+      },
+      {
+        "name": "Docusaurus Boilerplate (JS)",
+        "message": "Deploy new Docusaurus applications to run directly on the edge",
+        "preset": "docusaurus",
+        "path": "/docusaurus/docusaurus-boilerplate-js",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/docusaurus/docusaurus-boilerplate-js"
+      },
+      {
+        "name": "Docusaurus Boilerplate (TS)",
+        "message": "Deploy new Docusaurus applications to run directly on the edge",
+        "preset": "docusaurus",
+        "path": "/docusaurus/docusaurus-boilerplate-ts",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/docusaurus/docusaurus-boilerplate-ts"
+      },
+      {
+        "name": "Docusaurus with Material UI",
+        "message": "This example showcases how to style your Docusaurus project with Material UI",
+        "preset": "docusaurus",
+        "path": "/docusaurus/docusaurus-material-ui-template",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/docusaurus/docusaurus-material-ui-template"
+      }
+    ]
+  },
+  {
+    "name": "Eleventy",
+    "items": [
+      {
+        "name": "11ty Starter Kit",
+        "message": "Start your own 11ty application with this template. Powered by Vite, Tailwind CSS and Alpine.js",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-11st-starter-kit",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-11st-starter-kit"
+      },
+      {
+        "name": "11ty Landing Page",
+        "message": "A simple landing page template built with 11ty and Tailwind CSS",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-11ty-landing-page",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-11ty-landing-page"
+      },
+      {
+        "name": "11ty Shop",
+        "message": "Starter online shop template build with 11ty",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-11ty-shop",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-11ty-shop"
+      },
+      {
+        "name": "11ty Portfolio",
+        "message": "A starter repository showing how to build a portfolio with the 11ty static site generator",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-dark-portfolio-template-11ty",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-dark-portfolio-template-11ty"
+      },
+      {
+        "name": "11ty Link in Bio",
+        "message": "A list of links, built with 11ty",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-link-in-bio-11ty",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-link-in-bio-11ty"
+      },
+      {
+        "name": "11ty Micro Site",
+        "message": "Opinionated micro front-end that can be used to create a one-pager",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-micro-site",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-micro-site"
+      },
+      {
+        "name": "Mobile 11ty",
+        "message": "Build Generator static site and android app all in one with mobile11ty",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-mobile11ty",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-mobile11ty"
+      },
+      {
+        "name": "11ty Photo Gallery",
+        "message": "A starter site for creating your own photo or art gallery using the Eleventy static site generator",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-photo-gallery",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-photo-gallery"
+      },
+      {
+        "name": "11ty Base Blog",
+        "message": "A starter template showing how to build a blog with the Eleventy site generator",
+        "preset": "eleventy",
+        "path": "/eleventy/eleventy-static",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/eleventy/eleventy-static"
+      }
+    ]
+  },
+  {
+    "name": "Emscripten",
+    "items": [
+      {
+        "name": "EMScripten WASM",
+        "message": "The Azion EMScripten WASM is designed to simplify and enhance the deployment process for EMScripten WASM applications directly on the edge of the network.",
+        "preset": "emscripten",
+        "path": "/emscripten/emscripten-wasm",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/emscripten/emscripten-wasm"
+      }
+    ]
+  },
+  {
+    "name": "Gatsby",
+    "items": [
+      {
+        "name": "Gatsby Blog Starter Kit",
+        "message": "Deploy a blog page based on the Gatsby framework in a few steps",
+        "preset": "gatsby",
+        "path": "/gatsby/gatsby-blog",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/gatsby/gatsby-blog"
+      },
+      {
+        "name": "Gatsby Boilerplate",
+        "message": "Deploy new Gatsby applications to run directly on the edge",
+        "preset": "gatsby",
+        "path": "/gatsby/gatsby-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/gatsby/gatsby-boilerplate"
+      }
+    ]
+  },
+  {
+    "name": "Hexo",
+    "items": [
+      {
+        "name": "Hexo Boilerplate",
+        "message": "Deploy new Hexo applications to run directly on the edge",
+        "preset": "hexo",
+        "path": "/hexo/hexo-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/hexo/hexo-boilerplate"
+      }
+    ]
+  },
+  {
+    "name": "Hono",
+    "items": [
+      {
+        "name": "Hono Boilerplate",
+        "message": "Test how the Hono framework works on the edge",
+        "preset": "javascript",
+        "path": "/hono/hono-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/hono/hono-boilerplate"
+      }
+    ]
+  },
+  {
+    "name": "Hugo",
+    "items": [
+      {
+        "name": "Hugo Boilerplate",
+        "message": "Deploy new Hugo applications to run directly on the edge",
+        "preset": "hugo",
+        "path": "/hugo/hugo-static",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/hugo/hugo-static"
+      },
+      {
+        "name": "Influencer Hugo",
+        "message": "A modern and elegant crafted responsive Hugo theme for book authors and writer",
+        "preset": "hugo",
+        "path": "/hugo/influencer-hugo",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/hugo/influencer-hugo"
+      },
+      {
+        "name": "Vex Hugo",
+        "message": "A clean multipurpose e-commerce theme that makes building your first online store easier than ever",
+        "preset": "hugo",
+        "path": "/hugo/vex-hugo",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/hugo/vex-hugo"
+      }
+    ]
+  },
+  {
+    "name": "Javascript",
+    "items": [
+      {
+        "name": "Azion Edge SQL",
+        "message": "The Azion Edge SQL accelerates the integration of a Azion edge SQL database into an edge function. It also provides an interface to easily create, update, and delete items in your database",
+        "preset": "javascript",
+        "path": "/javascript/azion-edge-sql",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/azion-edge-sql"
+      },
+      {
+        "name": "Drizzle + Neon Sample",
+        "message": "Integrate a Neon database, using the Drizzle ORM",
+        "preset": "javascript",
+        "path": "/javascript/drizzle-neondb-sample",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/drizzle-neondb-sample"
+      },
+      {
+        "name": "Drizzle + TiDB Sample",
+        "message": "Integrate a TiDB database, using the Drizzle ORM",
+        "preset": "javascript",
+        "path": "/javascript/drizzle-tidb-sample",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/drizzle-tidb-sample"
+      },
+      {
+        "name": "Drizzle + Turso Sample",
+        "message": "Integrate a Turso database, using the Drizzle ORM",
+        "preset": "javascript",
+        "path": "/javascript/drizzle-turso-sample",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/drizzle-turso-sample"
+      },
+      {
+        "name": "Edge Function GitHub AutoDeploy",
+        "message": "Automate the deployment of edge functions integrated with GitHub Actions",
+        "preset": "javascript",
+        "path": "/javascript/edge-function-github-autodeploy",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/edge-function-github-autodeploy"
+      },
+      {
+        "name": "Fauna DB Boilerplate",
+        "message": "Easily deploy and manage an application integrated with Fauna on the edge",
+        "preset": "javascript",
+        "path": "/javascript/faunadb-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/faunadb-boilerplate"
+      },
+      {
+        "name": "Hello World",
+        "message": "Deploy a Hello World application to test edge computing capabilities",
+        "preset": "javascript",
+        "path": "/javascript/hello-world",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/hello-world"
+      },
+      {
+        "name": "HTMX Boilerplate",
+        "message": "Test how the HTMX library works on the edge",
+        "preset": "javascript",
+        "path": "/javascript/htmx-minimal",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/htmx-minimal"
+      },
+      {
+        "name": "Simple Javascript Router Node",
+        "message": "The Azion Simple Javascript Router Node is designed to simplify and enhance the deployment process for Javascript applications with Node polyfills directly on the edge of the network",
+        "preset": "javascript",
+        "path": "/javascript/javascript-simple-router-node",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/javascript-simple-router-node"
+      },
+      {
+        "name": "Simple Javascript Router",
+        "message": "The Azion Simple Javascript Router is designed to simplify and enhance the deployment process for Javascript applications directly on the edge of the network.",
+        "preset": "javascript",
+        "path": "/javascript/javascript-simple-router",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/javascript-simple-router"
+      },
+      {
+        "name": "Prisma Accelerate",
+        "message": "Integrate a database using the Prisma ORM Accelerate",
+        "preset": "javascript",
+        "path": "/javascript/prisma-accelerate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/prisma-accelerate"
+      },
+      {
+        "name": "QStash EdgeFunction Scheduler",
+        "message": "Schedule and dispatch tasks using a custom edge function and QStash.",
+        "preset": "javascript",
+        "path": "/javascript/qstash-scheduler",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/qstash-scheduler"
+      },
+      {
+        "name": "Turso Starter Kit",
+        "message": "Integrate a Turso database, created using Turso's LibSQL SDK, into an edge function",
+        "preset": "javascript",
+        "path": "/javascript/turso-starter-kit",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/turso-starter-kit"
+      },
+      {
+        "name": "Upstash Geolocation",
+        "message": "Provide a personalized and localized user experience on the edge",
+        "preset": "javascript",
+        "path": "/javascript/upstash-geolocation",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/upstash-geolocation"
+      },
+      {
+        "name": "Upstash Rate Limit",
+        "message": "Implement rate limiting in a serverless environment",
+        "preset": "javascript",
+        "path": "/javascript/upstash-ratelimit",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/javascript/upstash-ratelimit"
+      }
+    ]
+  },
+  {
+    "name": "Jekyll",
+    "items": [
+      {
+        "name": "Jekyll Boilerplate",
+        "message": "Simplify the deployment of a static Jekyll project on the edge.",
+        "preset": "jekyll",
+        "path": "/jekyll/jekyll-blog",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/jekyll/jekyll-blog"
+      },
+      {
+        "name": "Supply",
+        "message": "An e-commerce Jekyll theme with Gumroad integration.",
+        "preset": "jekyll",
+        "path": "/jekyll/supply",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/jekyll/supply"
+      }
+    ]
+  },
+  {
+    "name": "Next",
+    "items": [
+      {
+        "name": "Next JS App + Configurations",
+        "message": "Deploy a Next.js application with App Router and custom configurations.",
+        "preset": "next",
+        "path": "/nextjs/nextjs-app-13-5-6-config",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-app-13-5-6-config"
+      },
+      {
+        "name": "Next JS App + Middleware",
+        "message": "Deploy a Next.js application including a Middleware, App Router, and custom configuration.",
+        "preset": "next",
+        "path": "/nextjs/nextjs-app-13-5-6-middleware",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-app-13-5-6-middleware"
+      },
+      {
+        "name": "Next JS App + Turso",
+        "message": "Deploy a Next.js application including a connection to a Turso database",
+        "preset": "next",
+        "path": "/nextjs/nextjs-app-13-5-6-turso",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-app-13-5-6-turso"
+      },
+      {
+        "name": "Next JS Faststore Boilerplate",
+        "message": "The Azion Next.js FastStore Boilerplate is designed to simplify and enhance the deployment process for Next.js FastStore.js applications directly on the edge of the network",
+        "preset": "next",
+        "path": "/nextjs/nextjs-faststore-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-faststore-boilerplate"
+      },
+      {
+        "name": "Next JS Pages + Configurations",
+        "message": "Build a new Next.js application including Pages Router format and custom configurations",
+        "preset": "next",
+        "path": "/nextjs/nextjs-pages-13-5-6-config",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-pages-13-5-6-config"
+      },
+      {
+        "name": "Next JS Pages + Middleware",
+        "message": "Build a Next.js application including a Middleware, Pages Router, and custom configuration",
+        "preset": "next",
+        "path": "/nextjs/nextjs-pages-13-5-6-middleware",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-pages-13-5-6-middleware"
+      },
+      {
+        "name": "Next JS Static Boilerplate (13.5.3)",
+        "message": "Automate your Next.js deployment process on the edge",
+        "preset": "next",
+        "path": "/nextjs/nextjs-static-boilerplate-13",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-static-boilerplate-13"
+      },
+      {
+        "name": "Next JS Static Boilerplate (14.1.4)",
+        "message": "Automate your Next.js deployment process on the edge",
+        "preset": "next",
+        "path": "/nextjs/nextjs-static-boilerplate-14",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/nextjs-static-boilerplate-14"
+      },
+      {
+        "name": "Next Node Pages",
+        "message": "Next.js v12.3.1 project example using node runtime and pages format",
+        "preset": "next",
+        "path": "/nextjs/node-pages-12-3-1",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/nextjs/node-pages-12-3-1"
+      }
+    ]
+  },
+  {
+    "name": "React",
+    "items": [
+      {
+        "name": "React Boilerplate",
+        "message": "Automate your React.js deployment process on the edge",
+        "preset": "react",
+        "path": "/react/reactjs-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/react/reactjs-boilerplate"
+      }
+    ]
+  },
+  {
+    "name": "Rustwasm",
+    "items": [
+      {
+        "name": "Rust WASM Yew SSR",
+        "message": "The Azion Rust WASM Yew SSR is designed to simplify and enhance the deployment process for Rust WASM Yew SSR applications directly on the edge of the network.",
+        "preset": "rustwasm",
+        "path": "/rustwasm/rust-wasm-yew-ssr",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/rustwasm/rust-wasm-yew-ssr"
+      }
+    ]
+  },
+  {
+    "name": "Svelte",
+    "items": [
+      {
+        "name": "Svelte Boilerplate",
+        "message": "Accelerate the deployment of Svelte static applications to run directly on the edge",
+        "preset": "svelte",
+        "path": "/svelte/svelte-static",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/svelte/svelte-static"
+      }
+    ]
+  },
+  {
+    "name": "Typescript",
+    "items": [
+      {
+        "name": "MongoDB Atlas Boilerplate",
+        "message": "Deploy an application integrated with MongoDB Atlas on the edge and manage it via API",
+        "preset": "typescript",
+        "path": "/typescript/azion-atlas",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/typescript/azion-atlas"
+      },
+      {
+        "name": "Simple Typescript Router",
+        "message": "The Azion Simple Typescript Router is designed to simplify and enhance the deployment process for Typescript applications directly on the edge of the network",
+        "preset": "typescript",
+        "path": "/typescript/simple-ts-router",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/typescript/simple-ts-router"
+      }
+    ]
+  },
+  {
+    "name": "Vitepress",
+    "items": [
+      {
+        "name": "VitePress Boilerplate (JS)",
+        "message": "Deploy new VitePress applications to run directly on the edge",
+        "preset": "vitepress",
+        "path": "/vitepress/vitepress-boilerplate-js",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/vitepress/vitepress-boilerplate-js"
+      },
+      {
+        "name": "VitePress Boilerplate (TS)",
+        "message": "Deploy new VitePress applications to run directly on the edge",
+        "preset": "vitepress",
+        "path": "/vitepress/vitepress-boilerplate-ts",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/vitepress/vitepress-boilerplate-ts"
+      }
+    ]
+  },
+  {
+    "name": "Vue",
+    "items": [
+      {
+        "name": "Vue3/Vite Boilerplate",
+        "message": "Accelerate the deployment of Vue3/Vite applications ready to run on the edge",
+        "preset": "vue",
+        "path": "/vue/vue3-vite-static",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/vue/vue3-vite-static"
+      },
+      {
+        "name": "Vue Boilerplate",
+        "message": "Automate your Vue.js deployment process on the edge",
+        "preset": "vue",
+        "path": "/vue/vuejs-boilerplate",
+        "link": "https://github.com/aziontech/azion-samples/tree/dev/templates/vue/vuejs-boilerplate"
+      }
+    ]
+  }
+]
