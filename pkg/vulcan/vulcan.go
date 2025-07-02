@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	currentMajor         = 4
+	currentMajor         = 5
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
 	firstTimeExecuting   = "@5.2.0"
 )
