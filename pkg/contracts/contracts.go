@@ -19,6 +19,7 @@ type BuildInfo struct {
 	NodePolyfills string
 	OwnWorker     string
 	ProjectPath   string
+	SkipFramework bool
 }
 
 type DevInfo struct {

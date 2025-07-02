@@ -43,14 +43,15 @@ type DeployCmd struct {
 }
 
 var (
-	Path        string
-	Auto        bool
-	NoPrompt    bool
-	SkipBuild   bool
-	ProjectConf string
-	Sync        bool
-	Env         string
-	WriteBucket bool
+	Path          string
+	Auto          bool
+	NoPrompt      bool
+	SkipBuild     bool
+	SkipFramework bool
+	ProjectConf   string
+	Sync          bool
+	Env           string
+	WriteBucket   bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -98,12 +99,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
 	Auto = auto
 	SkipBuild = skipBuild
+	SkipFramework = skipFramework
 	WriteBucket = writeBucket
 	return cmd.Run(f)
 }
@@ -126,7 +128,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

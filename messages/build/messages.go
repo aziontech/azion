@@ -16,4 +16,5 @@ var (
 	FlagPolyfill          = "Use node polyfills in build"
 	FlagEntry             = "Code entrypoint; (default: ./main.js)"
 	ProjectConfFlag       = "Relative path to where your custom azion.json and args.json files are stored"
+	SkipFrameworkBuild    = "Indicates whether to bypass the framework build phase before executing 'azion build'."
 )
