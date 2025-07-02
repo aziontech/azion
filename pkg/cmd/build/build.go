@@ -56,6 +56,7 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd.Flags().StringVar(&fields.NodePolyfills, "use-node-polyfills", "", msg.FlagPolyfill)
 	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)
 	buildCmd.Flags().StringVar(&fields.ProjectPath, "config-dir", "azion", msg.ProjectConfFlag)
+	buildCmd.Flags().BoolVar(&fields.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 
 	return buildCmd
 }
@@ -83,7 +84,8 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 	}
 }
 
-func (b *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string, msgs *[]string) error {
+func (b *BuildCmd) ExternalRun(fields *contracts.BuildInfo, confPath string, msgs *[]string, skipFramework bool) error {
 	fields.ProjectPath = confPath
+	fields.SkipFramework = skipFramework
 	return b.run(fields, msgs)
 }
