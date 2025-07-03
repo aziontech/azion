@@ -166,7 +166,7 @@ func TestCheckGitignore(t *testing.T) {
 			setup: func() string {
 				path := t.TempDir()
 				file := filepath.Join(path, ".gitignore")
-				err := os.WriteFile(file, []byte(".edge/\n.vulcan\n"), 0644)
+				err := os.WriteFile(file, []byte(".edge/\n.vulcan\n.open-next\n"), 0644)
 				if err != nil {
 					panic(err)
 				}
@@ -226,7 +226,7 @@ func TestWriteGitignore(t *testing.T) {
 				return t.TempDir()
 			},
 			wantErr:  false,
-			wantFile: "#Paths added by Azion CLI\n.edge/\n.vulcan\n",
+			wantFile: "#Paths added by Azion CLI\n.edge/\n.vulcan\n.open-next\n",
 			cleanup: func(path string) {
 				os.RemoveAll(path)
 			},
