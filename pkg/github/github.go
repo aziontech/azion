@@ -108,7 +108,7 @@ func checkGitignore(path string) (bool, error) {
 		return false, err
 	}
 
-	if !object.MatchesPath(".edge/") || !object.MatchesPath(".vulcan") {
+	if !object.MatchesPath(".edge/") || !object.MatchesPath(".vulcan") || !object.MatchesPath(".open-next") {
 		return false, nil
 	}
 
@@ -119,7 +119,7 @@ func writeGitignore(path string) error {
 	logger.Debug("Writing .gitignore file")
 	path = filepath.Join(path, ".gitignore")
 
-	linesToAdd := []string{"#Paths added by Azion CLI", ".edge/", ".vulcan"}
+	linesToAdd := []string{"#Paths added by Azion CLI", ".edge/", ".vulcan", ".open-next"}
 
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
