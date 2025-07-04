@@ -1,0 +1,3 @@
+{
+    "html": "<!DOCTYPE html><html><head><title>Test Page</title></head><body><a href=\"/page1\">Page 1</a><a href=\"/page2\">Page 2</a><a href=\"https://external.com\">External</a><a href=\"/image.jpg\">Image</a></body></html>"
+} 
