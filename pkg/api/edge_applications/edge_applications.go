@@ -314,6 +314,27 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 
 }
 
+func (c *Client) Clone(ctx context.Context, name, id string) error {
+	logger.Debug("Cloning Edge Application")
+	req := sdk.CloneEdgeApplicationRequest{
+		Name: name,
+	}
+	request := c.apiClient.EdgeApplicationsAPI.CloneEdgeApplication(ctx, id).CloneEdgeApplicationRequest(req)
+	_, httpResp, err := request.Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while cloning an Edge Application", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
 func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.

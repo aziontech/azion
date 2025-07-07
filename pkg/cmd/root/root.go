@@ -9,6 +9,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/root"
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
+	"github.com/aziontech/azion-cli/pkg/cmd/clone"
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
@@ -173,6 +174,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
+	cobraCmd.AddCommand(clone.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {
