@@ -127,6 +127,10 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		request.SetJsonArgs(args)
 	}
 
+	if cmd.Flags().Changed("initiator-type") {
+		request.SetInitiatorType(fields.InitiatorType)
+	}
+
 	if cmd.Flags().Changed("name") {
 		request.SetName(fields.Name)
 	}
@@ -140,6 +144,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
 	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)
 	flags.StringVar(&fields.Active, "active", "", msg.UpdateFlagActive)
+	flags.StringVar(&fields.InitiatorType, "initiator-type", "", msg.FlagInitiatorType)
 	flags.StringVar(&fields.InPath, "file", "", msg.UpdateFlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
 }

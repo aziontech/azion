@@ -45,16 +45,18 @@ var (
 	UpdateAskEdgeFunctionID = "Enter the ID of the Edge Function you wish to update:"
 
 	// flags
-	FlagID         = "Unique identifier of the Edge Function"
-	FlagName       = "The Edge Function's name"
-	FlagCode       = "Path to the Edge Function's code"
-	FlagActive     = "Whether the Edge Function is active or not"
-	FlagArgs       = "Path to the Edge Function's arguments JSON file"
-	FlagIn         = "Given file path to create an Edge Function; you can use - for reading from stdin"
-	CreateFlagHelp = "Displays more information about the create edge-function command"
+	FlagID            = "Unique identifier of the Edge Function"
+	FlagName          = "The Edge Function's name"
+	FlagCode          = "Path to the Edge Function's code"
+	FlagActive        = "Whether the Edge Function is active or not"
+	FlagArgs          = "Path to the Edge Function's arguments JSON file"
+	FlagIn            = "Given file path to create an Edge Function; you can use - for reading from stdin"
+	FlagInitiatorType = "Either 'edge_application' or 'edge_firewall'"
+	CreateFlagHelp    = "Displays more information about the create edge-function command"
 
 	// ask
 	AskName           = "Enter the new Edge Function's name:"
+	AskInitiator      = "Enter the new Edge Function's initiator type:"
 	AskCode           = "Enter the file path of the Edge Function's source code:"
 	AskActive         = "Select whether the Edge Function is active or not"
 	AskEdgeFunctionID = "Enter the Edge Function's ID:"

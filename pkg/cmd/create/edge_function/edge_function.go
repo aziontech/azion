@@ -86,6 +86,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.FlagCode)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.Args, "args", "", msg.FlagArgs)
+	flags.StringVar(&fields.InitiatorType, "initiator-type", "", msg.FlagInitiatorType)
 	flags.StringVar(&fields.InPath, "file", "", msg.FlagIn)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
@@ -147,6 +148,10 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 			return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 		}
 		request.SetJsonArgs(args)
+	}
+
+	if cmd.Flags().Changed("initiator-type") {
+		request.SetInitiatorType(fields.InitiatorType)
 	}
 
 	request.SetName(fields.Name)
