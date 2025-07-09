@@ -26,7 +26,7 @@ func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error 
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating the project Bucket", zap.Error(err))
+			logger.Debug("Error while creating the project Bucket", zap.Error(err), zap.Any("Name", request.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -85,7 +85,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess sdk.E
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating the project Bucket", zap.Error(err))
+			logger.Debug("Error while updating the project Bucket", zap.Error(err), zap.Any("Name", name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err

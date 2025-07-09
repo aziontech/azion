@@ -65,7 +65,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function", zap.Error(err))
+			logger.Debug("Error while creating an Edge Function", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeFunctions{}, err
@@ -85,7 +85,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Function", zap.Error(err))
+			logger.Debug("Error while updating an Edge Function", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeFunctions{}, err

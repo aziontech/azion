@@ -111,7 +111,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Application", zap.Error(err))
+			logger.Debug("Error while updating an Edge Application", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -131,7 +131,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Function instance", zap.Error(err))
+			logger.Debug("Error while updating an Edge Function instance", zap.Error(err), zap.Any("ID", instanceID), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeApplicationFunctionInstance{}, err
@@ -152,7 +152,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Application", zap.Error(err))
+			logger.Debug("Error while deleting an Edge Application", zap.Error(err), zap.Any("ID", str))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -209,21 +209,21 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	return &resp.Data, nil
 }
 
-func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID string, phase string, ruleID string) error {
+func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
 	logger.Debug("Delete Rules Engine")
 	_, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.DestroyEdgeApplicationRule(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting a Rules Engine", zap.Error(err))
+			logger.Debug("Error while deleting a Rules Engine", zap.Error(err), zap.Any("ID", ruleID))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return err
+				return httpResp.StatusCode, err
 			}
 		}
-		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
-	return nil
+	return 0, nil
 }
 
 func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phase string) (int64, error) {
@@ -233,7 +233,7 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phas
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while retrieving a Rule Engine", zap.Error(err))
+			logger.Debug("Error while retrieving a Rule Engine", zap.Error(err), zap.Any("Application ID", applicationID))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return 0, err
@@ -252,7 +252,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while updating a Rules Engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -281,7 +281,7 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while updating a Rules Engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -301,7 +301,7 @@ func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRe
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a rules engine", zap.Error(err))
+			logger.Debug("Error while updating a rules engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -324,7 +324,7 @@ func (c *Client) Clone(ctx context.Context, name, id string) error {
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while cloning an Edge Application", zap.Error(err))
+			logger.Debug("Error while cloning an Edge Application", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -343,7 +343,7 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID string
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while creating a Rules Engine", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -409,7 +409,7 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceReq
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function instance", zap.Error(err))
+			logger.Debug("Error while creating an Edge Function instance", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeApplicationFunctionInstance{}, err
@@ -509,7 +509,7 @@ func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchedEdgeAppli
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a device group", zap.Error(err))
+			logger.Debug("Error while updating a device group", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -528,7 +528,7 @@ func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroups
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating a device group", zap.Error(err))
+			logger.Debug("Error while creating a device group", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -581,7 +581,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating a Rules Engine", zap.Error(err))
+			logger.Debug("Error while creating a Rules Engine", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err

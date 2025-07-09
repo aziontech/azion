@@ -80,7 +80,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Connector", zap.Error(err))
+			logger.Debug("Error while updating an Edge Connector", zap.Error(err), zap.Any("ID", id))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.BaseEdgeConnector{}, err

@@ -92,14 +92,14 @@ func (c *ClientV3) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 	return &resp.Results, nil
 }
 
-func (c *ClientV3) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
+func (c *ClientV3) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (int, error) {
 	logger.Debug("Delete Cache Settings")
 	httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
 		EdgeApplicationsEdgeApplicationIdCacheSettingsCacheSettingsIdDelete(
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return httpResp.StatusCode, utils.ErrorPerStatusCode(httpResp, err)
 	}
-	return nil
+	return 0, nil
 }

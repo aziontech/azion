@@ -239,7 +239,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					req.Id = strid
 					behaviorsRequest := []edgesdk.EdgeApplicationBehaviorFieldRequest{}
 					for _, behavior := range rule.Behaviors {
-						if behavior.Name == "run_function" {
+						switch behavior.Name {
+						case "run_function":
 							if _, ok := FunctionIds[*behavior.GetArgument().String]; !ok {
 								return msg.ErrorFuncNotFound
 							}
@@ -260,7 +261,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								String: &str,
 							})
 							behaviorsRequest = append(behaviorsRequest, beh)
-						} else if behavior.Name == "set_cache_policy" {
+						case "set_cache_policy":
 							if id := CacheIdsBackup[*behavior.GetArgument().String]; id > 0 {
 								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
 								beh.SetName("set_cache_policy")
@@ -272,7 +273,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								logger.Debug("Cache Setting not found", zap.Any("Target", *behavior.GetArgument().String))
 								return msg.ErrorCacheNotFound
 							}
-						} else if behavior.Name == "set_edge_connector" {
+						case "set_edge_connector":
 							if id := ConnectorIds[*behavior.GetArgument().String]; id > 0 {
 								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
 								beh.SetName("set_edge_connector")
@@ -284,7 +285,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								logger.Debug("Edge Connector not found", zap.Any("Target", id))
 								return msg.ErrorConnectorNotFound
 							}
-						} else {
+						default:
 							behaviorsRequest = append(behaviorsRequest, behavior)
 						}
 					}
@@ -306,7 +307,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					appstring := strconv.FormatInt(conf.Application.ID, 10)
 					behaviorsRequest := []edgesdk.EdgeApplicationBehaviorFieldRequest{}
 					for _, behavior := range rule.Behaviors {
-						if behavior.Name == "run_function" {
+						switch behavior.Name {
+						case "run_function":
 							if _, ok := FunctionIds[*behavior.GetArgument().String]; !ok {
 								return msg.ErrorFuncNotFound
 							}
@@ -327,7 +329,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								String: &str,
 							})
 							behaviorsRequest = append(behaviorsRequest, beh)
-						} else if behavior.Name == "set_cache_policy" {
+						case "set_cache_policy":
 							if id := CacheIdsBackup[*behavior.GetArgument().String]; id > 0 {
 								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
 								beh.SetName("set_cache_policy")
@@ -339,7 +341,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								logger.Debug("Cache Setting not found", zap.Any("Target", *behavior.GetArgument().String))
 								return msg.ErrorCacheNotFound
 							}
-						} else if behavior.Name == "set_edge_connector" {
+						case "set_edge_connector":
 							if id := ConnectorIds[*behavior.GetArgument().String]; id > 0 {
 								var beh edgesdk.EdgeApplicationBehaviorFieldRequest
 								beh.SetName("set_edge_connector")
@@ -351,7 +353,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 								logger.Debug("Edge Connector not found", zap.Any("Target", id))
 								return msg.ErrorConnectorNotFound
 							}
-						} else {
+						default:
 							behaviorsRequest = append(behaviorsRequest, behavior)
 						}
 					}
@@ -479,8 +481,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 // this is called to delete resources no longer present in manifest.json
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClientV3(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	// clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 	for _, value := range RuleIds {
@@ -490,7 +492,13 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if value.Phase != "" {
 			phase = value.Phase
 		}
-		err := client.DeleteRulesEngine(ctx, "conf.Application.ID", phase, "value.Id")
+		str := strconv.FormatInt(conf.Application.ID, 10)
+		strRule := strconv.FormatInt(value.Id, 10)
+		status, err := client.DeleteRulesEngine(ctx, str, phase, strRule)
+		if status == 404 {
+			logger.Debug("Rule Engine not found. Skipping delete")
+			continue
+		}
 		if err != nil {
 			return err
 		}
@@ -513,7 +521,11 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	// }
 
 	for _, value := range CacheIds {
-		err := clientCache.Delete(ctx, conf.Application.ID, value)
+		status, err := clientCache.Delete(ctx, conf.Application.ID, value)
+		if status == 404 {
+			logger.Debug("Cache Setting not found. Skipping delete")
+			continue
+		}
 		if err != nil {
 			return err
 		}
