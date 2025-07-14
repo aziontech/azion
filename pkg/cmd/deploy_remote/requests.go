@@ -316,7 +316,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	reqCre.SetCode(string(newCode))
 
 	reqCre.SetActive(true)
-	if conf.Function.Name == "__DEFAULT__" {
+	if conf.Function.Name == "__DEFAULT__" || conf.Function.Name == "" {
 		reqCre.SetName(conf.Name)
 	} else {
 		reqCre.SetName(conf.Function.Name)
@@ -361,7 +361,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 	reqUpd.SetCode(string(newCode))
 
 	reqUpd.SetActive(true)
-	if conf.Function.Name == "__DEFAULT__" {
+	if conf.Function.Name == "__DEFAULT__" || conf.Function.Name == "" {
 		reqUpd.SetName(conf.Name)
 	} else {
 		reqUpd.SetName(conf.Function.Name)
@@ -393,7 +393,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 
 func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
-	if conf.Application.Name == "__DEFAULT__" {
+	if conf.Application.Name == "__DEFAULT__" || conf.Application.Name == "" {
 		reqApp.SetName(conf.Name)
 	} else {
 		reqApp.SetName(conf.Application.Name)
@@ -426,7 +426,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	reqApp := apiapp.UpdateRequest{}
-	if conf.Application.Name == "__DEFAULT__" {
+	if conf.Application.Name == "__DEFAULT__" || conf.Application.Name == "" {
 		reqApp.SetName(conf.Name)
 	} else {
 		reqApp.SetName(conf.Application.Name)
@@ -445,7 +445,7 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.CreateRequest{}
-	if conf.Domain.Name == "__DEFAULT__" {
+	if conf.Domain.Name == "__DEFAULT__" || conf.Domain.Name == "" {
 		reqDom.SetName(conf.Name)
 	} else {
 		reqDom.SetName(conf.Domain.Name)
@@ -466,7 +466,7 @@ func (cmd *DeployCmd) createDomain(client *apidom.Client, ctx context.Context, c
 
 func (cmd *DeployCmd) updateDomain(client *apidom.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apidom.DomainResponse, error) {
 	reqDom := apidom.UpdateRequest{}
-	if conf.Domain.Name == "__DEFAULT__" {
+	if conf.Domain.Name == "__DEFAULT__" || conf.Domain.Name == "" {
 		reqDom.SetName(conf.Name)
 	} else {
 		reqDom.SetName(conf.Domain.Name)
@@ -499,7 +499,7 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	reqIns := apiapp.CreateInstanceRequest{}
 	reqIns.SetEdgeFunctionId(conf.Function.ID)
 
-	if conf.Function.InstanceName == "__DEFAULT__" {
+	if conf.Function.InstanceName == "__DEFAULT__" || conf.Function.InstanceName == "" {
 		reqIns.SetName(conf.Name)
 	} else {
 		reqIns.SetName(conf.Function.InstanceName)
@@ -534,7 +534,7 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetEdgeFunctionId(conf.Function.ID)
 
-	if conf.Function.InstanceName == "__DEFAULT__" {
+	if conf.Function.InstanceName == "__DEFAULT__" || conf.Function.InstanceName == "" {
 		reqIns.SetName(conf.Name)
 	} else {
 		reqIns.SetName(conf.Function.Name)
