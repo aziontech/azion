@@ -23,6 +23,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
+	"github.com/aziontech/azion-cli/pkg/cmd/warmup"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/metric"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -126,6 +127,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
+	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {
