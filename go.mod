@@ -38,6 +38,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.22.0 // indirect
+
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect

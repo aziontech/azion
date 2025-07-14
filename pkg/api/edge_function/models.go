@@ -1,7 +1,7 @@
 package edgefunction
 
 import (
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 )
 
 type CreateRequest struct {

@@ -153,13 +153,15 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 
 	acc := application.GetModules()
 
-	enabled := request.GetEdgeCache()
-
-	if (enabled.GetCachingForOptionsEnabled() ||
-		enabled.GetCachingForPostEnabled()) &&
-		!acc.GetApplicationAcceleratorEnabled() {
-		return msg.ErrorApplicationAccelerationNotEnabled
+	if request.GetModules().EdgeCache != nil {
+		enabled := request.GetModules().EdgeCache
+		if (enabled.GetCachingForOptionsEnabled() ||
+			enabled.GetCachingForPostEnabled()) &&
+			!acc.GetApplicationAcceleratorEnabled() {
+			return msg.ErrorApplicationAccelerationNotEnabled
+		}
 	}
+
 	return nil
 }
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 
 	thoth "github.com/aziontech/go-thoth"
@@ -477,7 +478,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqCre.SetJsonArgs(args)
+	reqCre.SetDefaultArgs(edgesdk.EdgeFunctionsDefaultArgs{Arg: args})
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
 		logger.Debug("Error while creating Edge Function", zap.Error(err), zap.Any("Name", reqCre.Name))
@@ -522,7 +523,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqUpd.SetJsonArgs(args)
+	reqUpd.SetDefaultArgs(edgesdk.EdgeFunctionsDefaultArgs{Arg: args})
 	funcId := strconv.FormatInt(funcToUpdate.ID, 10)
 	response, err := client.Update(ctx, &reqUpd, funcId)
 	if err != nil {

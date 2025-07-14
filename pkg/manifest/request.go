@@ -10,17 +10,17 @@ import (
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/aziontech/azionapi-v4-go-sdk/edge"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"go.uber.org/zap"
 )
 
 func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
 	request := &apiConnector.UpdateRequest{}
 
-	if connectorRequest.EdgeConnectorHTTPTypedRequest != nil {
-		bodyRequest := connectorRequest.EdgeConnectorHTTPTypedRequest
-		body := edgesdk.PatchedEdgeConnectorHTTPTypedRequest{}
+	if connectorRequest.EdgeConnectorHTTPRequest != nil {
+		bodyRequest := connectorRequest.EdgeConnectorHTTPRequest
+		body := edgesdk.PatchedEdgeConnectorHTTPRequest{}
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
@@ -55,18 +55,15 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 			body.SetType(bodyRequest.Type)
 		}
 		body.SetTypeProperties(bodyRequest.TypeProperties)
-		request.PatchedEdgeConnectorHTTPTypedRequest = &body
+		request.PatchedEdgeConnectorHTTPRequest = &body
 		return request
 	}
 
-	if connectorRequest.EdgeConnectorLiveIngestTypedRequest != nil {
-		body := edgesdk.PatchedEdgeConnectorLiveIngestTypedRequest{}
-		bodyRequest := connectorRequest.EdgeConnectorLiveIngestTypedRequest
+	if connectorRequest.EdgeConnectorLiveIngestRequest != nil {
+		body := edgesdk.PatchedEdgeConnectorLiveIngestRequest{}
+		bodyRequest := connectorRequest.EdgeConnectorLiveIngestRequest
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.Addresses) > 0 {
-			body.SetAddresses(bodyRequest.Addresses)
 		}
 		if len(bodyRequest.ConnectionPreference) > 0 {
 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
@@ -96,13 +93,13 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 			body.SetType(bodyRequest.Type)
 		}
 		body.SetTypeProperties(bodyRequest.TypeProperties)
-		request.PatchedEdgeConnectorLiveIngestTypedRequest = &body
+		request.PatchedEdgeConnectorLiveIngestRequest = &body
 		return request
 	}
 
-	if connectorRequest.EdgeConnectorS3TypedRequest != nil {
-		body := edgesdk.PatchedEdgeConnectorS3TypedRequest{}
-		bodyRequest := edgesdk.PatchedEdgeConnectorS3TypedRequest{}
+	if connectorRequest.EdgeConnectorS3Request != nil {
+		body := edgesdk.PatchedEdgeConnectorS3Request{}
+		bodyRequest := connectorRequest.EdgeConnectorS3Request
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
@@ -121,11 +118,10 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 		if bodyRequest.MaxRetries != nil {
 			body.SetMaxRetries(*bodyRequest.MaxRetries)
 		}
-		if bodyRequest.Modules != nil {
-			body.SetModules(*bodyRequest.Modules)
-		}
-		if bodyRequest.Name != nil {
-			body.SetName(*bodyRequest.Name)
+		body.SetModules(bodyRequest.Modules)
+
+		if bodyRequest.Name != "" {
+			body.SetName(bodyRequest.Name)
 		}
 		if bodyRequest.ReadWriteTimeout != nil {
 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
@@ -133,25 +129,20 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 		if bodyRequest.Tls != nil {
 			body.SetTls(*bodyRequest.Tls)
 		}
-		if bodyRequest.Type != nil {
-			body.SetType(*bodyRequest.Type)
+		if bodyRequest.Type != "" {
+			body.SetType(bodyRequest.Type)
 		}
-		if bodyRequest.TypeProperties != nil {
-			body.SetTypeProperties(*bodyRequest.TypeProperties)
-		}
+		body.SetTypeProperties(bodyRequest.TypeProperties)
 
-		request.PatchedEdgeConnectorS3TypedRequest = &body
+		request.PatchedEdgeConnectorS3Request = &body
 		return request
 	}
 
-	if connectorRequest.EdgeConnectorStorageTypedRequest != nil {
-		body := edgesdk.PatchedEdgeConnectorStorageTypedRequest{}
-		bodyRequest := edgesdk.PatchedEdgeConnectorStorageTypedRequest{}
+	if connectorRequest.EdgeConnectorStorageRequest != nil {
+		body := edgesdk.PatchedEdgeConnectorStorageRequest{}
+		bodyRequest := connectorRequest.EdgeConnectorStorageRequest
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.Addresses) > 0 {
-			body.SetAddresses(bodyRequest.Addresses)
 		}
 		if len(bodyRequest.ConnectionPreference) > 0 {
 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
@@ -165,11 +156,9 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 		if bodyRequest.MaxRetries != nil {
 			body.SetMaxRetries(*bodyRequest.MaxRetries)
 		}
-		if bodyRequest.Modules != nil {
-			body.SetModules(*bodyRequest.Modules)
-		}
-		if bodyRequest.Name != nil {
-			body.SetName(*bodyRequest.Name)
+		body.SetModules(bodyRequest.Modules)
+		if bodyRequest.Name != "" {
+			body.SetName(bodyRequest.Name)
 		}
 		if bodyRequest.ReadWriteTimeout != nil {
 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
@@ -177,14 +166,12 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymor
 		if bodyRequest.Tls != nil {
 			body.SetTls(*bodyRequest.Tls)
 		}
-		if bodyRequest.Type != nil {
-			body.SetType(*bodyRequest.Type)
+		if bodyRequest.Type != "" {
+			body.SetType(bodyRequest.Type)
 		}
-		if bodyRequest.TypeProperties != nil {
-			body.SetTypeProperties(*bodyRequest.TypeProperties)
-		}
+		body.SetTypeProperties(bodyRequest.TypeProperties)
 
-		request.PatchedEdgeConnectorStorageTypedRequest = &body
+		request.PatchedEdgeConnectorStorageRequest = &body
 		return request
 	}
 
@@ -271,26 +258,28 @@ func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.EdgeApplicat
 		ImageProcessorEnabled         bool `json:"image_processor_enabled"`
 		TieredCacheEnabled            bool `json:"tiered_cache_enabled"`
 	}
-	if edgeapprequest.Modules != nil {
-		modules := edgesdk.EdgeApplicationModulesRequest{}
-		if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
-			modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
-		}
-		if edgeapprequest.Modules.EdgeCacheEnabled != nil {
-			modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
-		}
-		if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
-			modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
-		}
-		if edgeapprequest.Modules.ImageProcessorEnabled != nil {
-			modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
-		}
-		if edgeapprequest.Modules.TieredCacheEnabled != nil {
-			modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
-		}
+	// if edgeapprequest.Modules != nil {
+	// 	modules := edgesdk.EdgeApplicationModulesRequest{}
+	// 	if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
+	// 		modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.EdgeCacheEnabled != nil {
+	// 		modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
+	// 		modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.ImageProcessorEnabled != nil {
+	// 		modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.TieredCacheEnabled != nil {
+	// 		modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
+	// 	}
 
-		request.SetModules(modules)
-	}
+	// 	request.SetModules(modules)
+	// }
+
+	//TODO: Fix Here
 	if edgeapprequest.Name != "" {
 		request.SetName(edgeapprequest.Name)
 	}
@@ -314,26 +303,28 @@ func transformEdgeApplicationRequestCreate(edgeapprequest contracts.EdgeApplicat
 		ImageProcessorEnabled         bool `json:"image_processor_enabled"`
 		TieredCacheEnabled            bool `json:"tiered_cache_enabled"`
 	}
-	if edgeapprequest.Modules != nil {
-		modules := edgesdk.EdgeApplicationModulesRequest{}
-		if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
-			modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
-		}
-		if edgeapprequest.Modules.EdgeCacheEnabled != nil {
-			modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
-		}
-		if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
-			modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
-		}
-		if edgeapprequest.Modules.ImageProcessorEnabled != nil {
-			modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
-		}
-		if edgeapprequest.Modules.TieredCacheEnabled != nil {
-			modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
-		}
+	// if edgeapprequest.Modules != nil {
+	// 	modules := edgesdk.EdgeApplicationModulesRequest{}
+	// 	if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
+	// 		modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.EdgeCacheEnabled != nil {
+	// 		modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
+	// 		modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.ImageProcessorEnabled != nil {
+	// 		modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
+	// 	}
+	// 	if edgeapprequest.Modules.TieredCacheEnabled != nil {
+	// 		modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
+	// 	}
 
-		request.SetModules(modules)
-	}
+	// 	request.SetModules(modules)
+	// }
+
+	//TODO: Fix Here
 	if edgeapprequest.Name != "" {
 		request.SetName(edgeapprequest.Name)
 	}
@@ -347,10 +338,12 @@ func transformCacheRequest(cache edgesdk.CacheSettingRequest) *apiCache.RequestU
 	if cache.Name != "" {
 		request.SetName(cache.Name)
 	}
-	request.SetApplicationControls(cache.ApplicationControls)
-	request.SetBrowserCache(cache.BrowserCache)
-	request.SetEdgeCache(cache.EdgeCache)
-	request.SetSliceControls(cache.SliceControls)
+	// request.SetApplicationControls(cache.ApplicationControls)
+	// request.SetBrowserCache(cache.BrowserCache)
+	// request.SetEdgeCache(cache.EdgeCache)
+	// request.SetSliceControls(cache.SliceControls)
+
+	//TODO: Fix Here
 
 	return &request
 }
@@ -361,12 +354,14 @@ func transformRuleRequest(rule edgesdk.EdgeApplicationRuleEngineRequest) *apiEdg
 	if rule.Active != nil {
 		request.SetActive(*rule.Active)
 	}
-	if rule.Behaviors != nil {
-		request.SetBehaviors(rule.Behaviors)
-	}
-	if rule.Criteria != nil {
-		request.SetCriteria(rule.Criteria)
-	}
+	// if rule.Behaviors != nil {
+	// 	request.SetBehaviors(rule.Behaviors)
+	// }
+	// if rule.Criteria != nil {
+	// 	request.SetCriteria(rule.Criteria)
+	// }
+
+	//TODO: Fix Here
 	if rule.Description != nil {
 		request.SetDescription(*rule.Description)
 	}
@@ -386,17 +381,19 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	}
 	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
 	reqCache.SetName("function-policy")
-	reqCache.BrowserCache = edgesdk.BrowserCacheModuleRequest{
-		Behavior: "honor",
-	}
-	reqCache.EdgeCache = edgesdk.EdgeCacheModuleRequest{
-		Behavior: "honor",
-		MaxAge:   0,
-	}
-	reqCache.ApplicationControls = edgesdk.ApplicationControlsModuleRequest{
-		CacheByQueryString: "all",
-		CacheByCookies:     "all",
-	}
+	// reqCache.BrowserCache = edgesdk.BrowserCacheModuleRequest{
+	// 	Behavior: "honor",
+	// }
+	// reqCache.EdgeCache = edgesdk.EdgeCacheModuleRequest{
+	// 	Behavior: "honor",
+	// 	MaxAge:   0,
+	// }
+	// reqCache.ApplicationControls = edgesdk.ApplicationControlsModuleRequest{
+	// 	CacheByQueryString: "all",
+	// 	CacheByCookies:     "all",
+	// }
+
+	//TODO: Fix Here
 
 	// create cache to function next
 	str := strconv.FormatInt(conf.Application.ID, 10)

@@ -14,6 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -124,7 +125,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		if err := json.Unmarshal(marshalledArgs, &args); err != nil {
 			return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 		}
-		request.SetJsonArgs(args)
+		request.SetDefaultArgs(sdk.EdgeFunctionsDefaultArgs{Arg: args})
 	}
 
 	if cmd.Flags().Changed("initiator-type") {

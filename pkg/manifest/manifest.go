@@ -13,6 +13,7 @@ import (
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	sdkedge "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/davecgh/go-spew/spew"
 
@@ -132,7 +133,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		if funcConf := FunctionIds[funcMan.Name]; funcConf.ID > 0 {
 			request := functionsApi.UpdateRequest{}
 			request.SetActive(true)
-			request.SetJsonArgs(funcMan.Args)
+			request.SetDefaultArgs(sdkedge.EdgeFunctionsDefaultArgs{Arg: funcMan.Args})
 			request.SetName(funcMan.Name)
 			request.SetCode(string(code))
 			idString := strconv.FormatInt(funcConf.ID, 10)
@@ -143,7 +144,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		} else {
 			request := functionsApi.CreateRequest{}
 			request.SetActive(true)
-			request.SetJsonArgs(funcMan.Args)
+			request.SetDefaultArgs(sdkedge.EdgeFunctionsDefaultArgs{Arg: funcMan.Args})
 			request.SetName(funcMan.Name)
 			request.SetCode(string(code))
 			resp, err := functionClient.Create(ctx, &request)

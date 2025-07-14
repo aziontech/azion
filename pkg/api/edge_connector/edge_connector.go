@@ -6,11 +6,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.BaseEdgeConnector, error) {
+func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeConnectorPolymorphic, error) {
 	logger.Debug("Get Edge Connector")
 	request := c.apiClient.EdgeConnectorsAPI.RetrieveEdgeConnector(ctx, id)
 
@@ -21,10 +21,10 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.BaseEdgeConnector, err
 			logger.Debug("Error while getting an Edge Connector", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.BaseEdgeConnector{}, err
+				return sdk.EdgeConnectorPolymorphic{}, err
 			}
 		}
-		return sdk.BaseEdgeConnector{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
@@ -51,7 +51,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.BaseEdgeConnector, error) {
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeConnectorPolymorphic, error) {
 	logger.Debug("Create Edge Connector")
 
 	request := c.apiClient.EdgeConnectorsAPI.CreateEdgeConnector(ctx).EdgeConnectorPolymorphicRequest(req.EdgeConnectorPolymorphicRequest)
@@ -63,16 +63,16 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.BaseEdgeCo
 			logger.Debug("Error while creating an Edge Connector", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.BaseEdgeConnector{}, err
+				return sdk.EdgeConnectorPolymorphic{}, err
 			}
 		}
-		return sdk.BaseEdgeConnector{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return response.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.BaseEdgeConnector, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeConnectorPolymorphic, error) {
 	logger.Debug("Update Edge Connector")
 	request := c.apiClient.EdgeConnectorsAPI.PartialUpdateEdgeConnector(ctx, id).PatchedEdgeConnectorPolymorphicRequest(req.PatchedEdgeConnectorPolymorphicRequest)
 
@@ -83,16 +83,16 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 			logger.Debug("Error while updating an Edge Connector", zap.Error(err), zap.Any("ID", id))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.BaseEdgeConnector{}, err
+				return sdk.EdgeConnectorPolymorphic{}, err
 			}
 		}
-		return sdk.BaseEdgeConnector{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return response.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListBaseEdgeConnectorList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error) {
 	logger.Debug("List Edge Connectors")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

@@ -6,13 +6,13 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
 const javascript = "javascript"
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) {
+func (c *Client) Get(ctx context.Context, id string) (sdk.GetEdgeFunctions, error) {
 	logger.Debug("Get Edge Function")
 	request := c.apiClient.EdgeFunctionsAPI.RetrieveEdgeFunction(ctx, id)
 
@@ -23,10 +23,10 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) 
 			logger.Debug("Error while getting an Edge Function", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeFunctions{}, err
+				return sdk.GetEdgeFunctions{}, err
 			}
 		}
-		return sdk.EdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.GetEdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
@@ -97,7 +97,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListEdgeFunctionsList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error) {
 	logger.Debug("List Edge Functions")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

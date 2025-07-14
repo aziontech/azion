@@ -71,8 +71,20 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorCreateConnector.Error(), err)
 			}
 
+			var id int64
+			switch fields.Type {
+			case "http":
+				id = response.EdgeConnectorHTTP.GetId()
+			case "s3":
+				id = response.EdgeConnectorS3.GetId()
+			case "edge_storage":
+				id = response.EdgeConnectorStorage.GetId()
+			case "live_ingest":
+				id = response.EdgeConnectorLiveIngest.GetId()
+			}
+
 			creatOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.CreateOutputSuccess, response.GetId()),
+				Msg: fmt.Sprintf(msg.CreateOutputSuccess, id),
 				Out: f.IOStreams.Out,
 			}
 			return output.Print(&creatOut)
