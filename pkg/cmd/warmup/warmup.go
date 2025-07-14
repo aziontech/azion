@@ -7,15 +7,15 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/warmup"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/spf13/cobra"
 )
 
 var (
-	baseUrl      string
-	maxUrls      int
+	baseUrl       string
+	maxUrls       int
 	maxConcurrent int
-	timeout      int
+	timeout       int
 )
 
 // WarmupCmd defines the command structure
@@ -77,11 +77,15 @@ func (warmup *WarmupCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil
 		return err
 	}
 
-	logger.FInfo(f.IOStreams.Out, "\n"+msg.WarmupSuccessful+"\n")
-	return nil
+	warmupOut := output.GeneralOutput{
+		Msg:   msg.WarmupSuccessful,
+		Out:   f.IOStreams.Out,
+		Flags: f.Flags,
+	}
+	return output.Print(&warmupOut)
 }
 
 // NewCmd creates a new cobra command for warmup
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewWarmupCmd(f), f)
-} 
+}

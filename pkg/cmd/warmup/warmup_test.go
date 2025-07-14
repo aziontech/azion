@@ -29,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 
 func TestWarmupCmd_Run(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	
+
 	tests := []struct {
 		name      string
 		mock      func(*WarmupCmd)
@@ -72,7 +72,7 @@ func TestWarmupCmd_Run(t *testing.T) {
 				}
 			} else {
 				assert.NoError(t, err)
-				assert.Contains(t, stdout.String(), "Cache warming completed successfully")
+				assert.Contains(t, stdout.String(), "Cache warming completed successfully!")
 			}
 		})
 	}
@@ -80,7 +80,7 @@ func TestWarmupCmd_Run(t *testing.T) {
 
 func TestWarmupCache(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	
+
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.html")
 	err := os.WriteFile(testFile, []byte(`<html><body><a href="/page1">Page 1</a></body></html>`), 0644)
@@ -95,7 +95,7 @@ func TestWarmupCache(t *testing.T) {
 
 func TestExtractLinks(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	
+
 	html := `<html><head>
 		<link rel="stylesheet" href="/styles/main.css">
 		<script src="/js/app.js"></script>
@@ -124,38 +124,38 @@ func TestExtractLinks(t *testing.T) {
 
 	var logMutex sync.Mutex
 	links := extractLinks(html, "https://example.com", f.IOStreams.Out, &logMutex)
-	
+
 	// Verify traditional links
 	assert.Contains(t, links, "https://example.com/page1")
 	assert.Contains(t, links, "https://example.com/page2")
-	
+
 	// Verify CSS/JS resources
 	assert.Contains(t, links, "https://example.com/styles/main.css")
 	assert.Contains(t, links, "https://example.com/js/app.js")
-	
+
 	// Verify forms
 	assert.Contains(t, links, "https://example.com/search")
-	
+
 	// Verify canonical
 	assert.Contains(t, links, "https://example.com/canonical-page")
-	
+
 	// Verify meta refresh
 	assert.Contains(t, links, "https://example.com/redirect-page")
-	
+
 	// Verify relative URLs
 	assert.Contains(t, links, "https://example.com/relative-page")
 	assert.Contains(t, links, "https://example.com/parent-page")
-	
+
 	// Verify images (new functionality)
 	assert.Contains(t, links, "https://example.com/images/logo.png")
 	assert.Contains(t, links, "https://example.com/images/banner.jpg")
-	
+
 	// Verify icons
 	assert.Contains(t, links, "https://example.com/favicon.ico")
-	
+
 	// Verify background images
 	assert.Contains(t, links, "https://example.com/images/hero-bg.jpg")
-	
+
 	// Verify blacklist still works
 	assert.NotContains(t, links, "mailto:test@example.com")
 	assert.NotContains(t, links, "https://example.com/test.pdf")
@@ -163,30 +163,30 @@ func TestExtractLinks(t *testing.T) {
 
 func TestIsBlacklisted(t *testing.T) {
 	tests := []struct {
-		url        string
+		url         string
 		blacklisted bool
 	}{
 		// Normal pages - should pass
 		{"https://example.com/page.html", false},
 		{"https://example.com/normal-page", false},
-		
+
 		// Images - should now pass (no longer in blacklist)
 		{"https://example.com/image.jpg", false},
 		{"https://example.com/photo.png", false},
 		{"https://example.com/icon.svg", false},
-		
+
 		// CSS and JS - should pass
 		{"https://example.com/style.css", false},
 		{"https://example.com/script.js", false},
-		
+
 		// Documents - should be blocked
 		{"https://example.com/file.pdf", true},
 		{"https://example.com/doc.docx", true},
-		
+
 		// Videos/audios - should be blocked
 		{"https://example.com/video.mp4", true},
 		{"https://example.com/audio.mp3", true},
-		
+
 		// Special links - should be blocked
 		{"mailto:test@example.com", true},
 		{"tel:+1234567890", true},
@@ -229,22 +229,22 @@ func TestNormalizeURL(t *testing.T) {
 		// Absolute URLs
 		{"/page1", "https://example.com", "https://example.com/page1"},
 		{"https://example.com/page2", "https://example.com", "https://example.com/page2"},
-		
+
 		// Relative URLs
 		{"./page3", "https://example.com/dir/", "https://example.com/dir/page3"},
 		{"../page4", "https://example.com/dir/subdir/", "https://example.com/dir/page4"},
 		{"page5.html", "https://example.com/dir/", "https://example.com/dir/page5.html"},
-		
+
 		// Protocol-relative
 		{"//example.com/page6", "https://example.com", "https://example.com/page6"},
-		
+
 		// URLs with anchors (should be removed)
 		{"/page7#section", "https://example.com", "https://example.com/page7"},
-		
+
 		// External URLs (should be ignored)
 		{"https://other.com/page", "https://example.com", ""},
 		{"//other.com/page", "https://example.com", ""},
-		
+
 		// Empty or invalid URLs
 		{"", "https://example.com", ""},
 		{"#", "https://example.com", ""},
@@ -261,16 +261,16 @@ func TestNormalizeURL(t *testing.T) {
 
 func TestProcessFoundLink(t *testing.T) {
 	foundLinks := make(map[string]bool)
-	
+
 	// Valid link
 	processFoundLink("/valid-page", "https://example.com", foundLinks)
 	assert.Contains(t, foundLinks, "https://example.com/valid-page")
-	
+
 	// Blacklisted link
 	processFoundLink("/document.pdf", "https://example.com", foundLinks)
 	assert.NotContains(t, foundLinks, "https://example.com/document.pdf")
-	
+
 	// External link
 	processFoundLink("https://other.com/page", "https://example.com", foundLinks)
 	assert.NotContains(t, foundLinks, "https://other.com/page")
-} 
+}
