@@ -12,14 +12,14 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io            *iostreams.IOStreams
 	ReadInput     func(string) (string, error)
-	ListWorkloads func(context.Context, *contracts.ListOptions) (*sdk.PaginatedResponseListWorkloadList, error)
+	ListWorkloads func(context.Context, *contracts.ListOptions) (*sdk.PaginatedWorkloadList, error)
 	AskInput      func(string) (string, error)
 }
 
@@ -29,7 +29,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListWorkloads: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListWorkloadList, error) {
+		ListWorkloads: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedWorkloadList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},

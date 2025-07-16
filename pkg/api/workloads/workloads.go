@@ -2,12 +2,11 @@ package workloads
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -32,8 +31,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (WorkloadRespon
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Workload")
-	str := strconv.FormatInt(id, 10)
-	req := c.apiClient.WorkloadsAPI.DestroyWorkload(ctx, str)
+	req := c.apiClient.WorkloadsAPI.DestroyWorkload(ctx, id)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -51,7 +49,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) Get(ctx context.Context, id string) (WorkloadResponse, error) {
+func (c *Client) Get(ctx context.Context, id int64) (WorkloadResponse, error) {
 	logger.Debug("Get Workload")
 	request := c.apiClient.WorkloadsAPI.RetrieveWorkload(ctx, id)
 	res, httpResp, err := request.Execute()
@@ -71,8 +69,7 @@ func (c *Client) Get(ctx context.Context, id string) (WorkloadResponse, error) {
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (WorkloadResponse, error) {
 	logger.Debug("Update Workload (PATCH)")
-	str := strconv.FormatInt(req.Id, 10)
-	request := c.apiClient.WorkloadsAPI.PartialUpdateWorkload(ctx, str).PatchedWorkloadRequest(req.PatchedWorkloadRequest)
+	request := c.apiClient.WorkloadsAPI.PartialUpdateWorkload(ctx, req.Id).PatchedWorkloadRequest(req.PatchedWorkloadRequest)
 
 	workloadsResponse, httpResp, err := request.Execute()
 
@@ -91,7 +88,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (WorkloadRespon
 	return &workloadsResponse.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListWorkloadList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedWorkloadList, error) {
 	logger.Debug("List Workloads")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -118,13 +115,12 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	return resp, nil
 }
 
-func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOptions, id int64) (*sdk.PaginatedResponseListWorkloadDeploymentList, error) {
+func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOptions, id int64) (*sdk.PaginatedWorkloadDeploymentList, error) {
 	logger.Debug("List Workload Deployments")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	stringId := strconv.FormatInt(id, 10)
-	resp, httpResp, err := c.apiClient.WorkloadDeploymentsAPI.ListWorkloadDeployments(ctx, stringId).
+	resp, httpResp, err := c.apiClient.WorkloadDeploymentsAPI.ListWorkloadDeployments(ctx, id).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -146,7 +142,7 @@ func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOption
 	return resp, nil
 }
 
-func (c *Client) GetDeployment(ctx context.Context, id, deploymentid string) (DeploymentResponse, error) {
+func (c *Client) GetDeployment(ctx context.Context, id, deploymentid int64) (DeploymentResponse, error) {
 	logger.Debug("Get Workload Deployment")
 	request := c.apiClient.WorkloadDeploymentsAPI.RetrieveWorkloadDeployment(ctx, id, deploymentid)
 	res, httpResp, err := request.Execute()
