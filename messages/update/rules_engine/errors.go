@@ -4,6 +4,7 @@ import "errors"
 
 var (
 	ErrorUpdate                 = errors.New("Failed to update the rule in Rules Engine: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorInvalidPhase           = errors.New("Invalid phase. Accepted values are 'request' or 'response'")
 	ErrorNameEmpty              = errors.New("The name field shouldn't be empty")
 	ErrorConditionalEmpty       = errors.New("The conditional field shouldn't be empty")
 	ErrorVariableEmpty          = errors.New("The variable field shouldn't be empty")

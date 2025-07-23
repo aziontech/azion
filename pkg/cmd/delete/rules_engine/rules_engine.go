@@ -17,13 +17,15 @@ import (
 var (
 	ruleID        string
 	applicationID string
+	phase         string
 )
 
 type DeleteCmd struct {
-	Io         *iostreams.IOStreams
-	ReadInput  func(string) (string, error)
-	DeleteRule func(context.Context, string, string) error
-	AskInput   func(string) (string, error)
+	Io                 *iostreams.IOStreams
+	ReadInput          func(string) (string, error)
+	DeleteRuleRequest  func(context.Context, string, string) error
+	DeleteRuleResponse func(context.Context, string, string) error
+	AskInput           func(string) (string, error)
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -32,9 +34,13 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		DeleteRule: func(ctx context.Context, ruleID, appID string) error {
+		DeleteRuleRequest: func(ctx context.Context, ruleID, appID string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			return client.Delete(ctx, appID, ruleID)
+			return client.DeleteRequest(ctx, appID, ruleID)
+		},
+		DeleteRuleResponse: func(ctx context.Context, ruleID, appID string) error {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			return client.DeleteResponse(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,
 	}
@@ -72,11 +78,31 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				applicationID = answer
 			}
 
+			if !cmd.Flags().Changed("phase") {
+				answer, err := delete.AskInput(msg.AskInputPhase)
+				if err != nil {
+					return err
+				}
+
+				phase = answer
+			}
+
 			ctx := context.Background()
 
-			err = delete.DeleteRule(ctx, ruleID, applicationID)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+			switch phase {
+			case "request":
+				err = delete.DeleteRuleRequest(ctx, ruleID, applicationID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				}
+			case "response":
+				err = delete.DeleteRuleResponse(ctx, ruleID, applicationID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
+				}
+			default:
+				return msg.ErrorInvalidPhase
+
 			}
 
 			deleteOut := output.GeneralOutput{
@@ -90,6 +116,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 
 	cobraCmd.Flags().StringVar(&ruleID, "rule-id", "", msg.FlagRuleID)
 	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagAppID)
+	cobraCmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

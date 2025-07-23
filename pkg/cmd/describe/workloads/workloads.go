@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/workloads"
@@ -17,13 +18,13 @@ import (
 )
 
 var (
-	workloadID string
+	workloadID int64
 )
 
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (api.WorkloadResponse, error)
+	Get      func(context.Context, int64) (api.WorkloadResponse, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -32,7 +33,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, workloadID string) (api.WorkloadResponse, error) {
+		Get: func(ctx context.Context, workloadID int64) (api.WorkloadResponse, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, workloadID)
 		},
@@ -59,7 +60,10 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				workloadID = answer
+				workloadID, err = strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					return msg.ErrorConvertWorkloadId
+				}
 			}
 
 			ctx := context.Background()
@@ -88,7 +92,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&workloadID, "workload-id", "", msg.FlagDomainID)
+	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagDomainID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

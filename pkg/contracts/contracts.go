@@ -5,8 +5,7 @@ import (
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	sdkstorage "github.com/aziontech/azionapi-go-sdk/storage"
-	"github.com/aziontech/azionapi-v4-go-sdk/edge"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 )
 
 type FileOps struct {
@@ -191,10 +190,10 @@ type AzionJsonDataDomain struct {
 }
 
 type AzionJsonDataWorkload struct {
-	Id      int64             `json:"id"`
-	Name    string            `json:"name"`
-	Domains []edge.DomainInfo `json:"domains"`
-	Url     string            `json:"url"`
+	Id      int64    `json:"id"`
+	Name    string   `json:"name"`
+	Domains []string `json:"domains"`
+	Url     string   `json:"url"`
 }
 
 type AzionJsonDataPurge struct {
@@ -242,16 +241,15 @@ type PurgeManifest struct {
 }
 
 type WorkloadManifest struct {
-	Name             string                      `json:"name" validate:"regexp=.*"`
-	AlternateDomains []string                    `json:"alternate_domains,omitempty"`
-	EdgeApplication  int64                       `json:"edge_application"`
-	Active           *bool                       `json:"active,omitempty"`
-	NetworkMap       *string                     `json:"network_map,omitempty"`
-	EdgeFirewall     *int64                      `json:"edge_firewall,omitempty"`
-	Tls              *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
-	Protocols        *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
-	Mtls             *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
-	Domains          []edgesdk.DomainInfoRequest `json:"domains,omitempty"`
+	Name            string                      `json:"name" validate:"regexp=.*"`
+	EdgeApplication int64                       `json:"edge_application"`
+	Active          *bool                       `json:"active,omitempty"`
+	NetworkMap      *string                     `json:"network_map,omitempty"`
+	EdgeFirewall    *int64                      `json:"edge_firewall,omitempty"`
+	Tls             *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
+	Protocols       *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
+	Mtls            *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
+	Domains         []string                    `json:"domains,omitempty"`
 }
 
 type Modules struct {
@@ -263,12 +261,12 @@ type Modules struct {
 }
 
 type EdgeApplications struct {
-	Name    string                                     `json:"name"`
-	Modules *Modules                                   `json:"modules,omitempty"`
-	Active  *bool                                      `json:"active,omitempty"`
-	Debug   *bool                                      `json:"debug,omitempty"`
-	Rules   []edgesdk.EdgeApplicationRuleEngineRequest `json:"rules"`
-	Cache   []edgesdk.CacheSettingRequest              `json:"cache"`
+	Name    string                                                         `json:"name"`
+	Modules *Modules                                                       `json:"modules,omitempty"`
+	Active  *bool                                                          `json:"active,omitempty"`
+	Debug   *bool                                                          `json:"debug,omitempty"`
+	Rules   []edgesdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest `json:"rules"`
+	Cache   []edgesdk.CacheSettingRequest                                  `json:"cache"`
 }
 
 type EdgeFunction struct {

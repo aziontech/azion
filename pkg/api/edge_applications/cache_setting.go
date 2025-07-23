@@ -5,30 +5,29 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"go.uber.org/zap"
 )
 
 // CreateCacheSettingsNextApplication this function creates the necessary Cache Settings for next applications
 // to work correctly on the edge
-func (c *Client) CreateCacheSettingsNextApplication(
-	ctx context.Context, req *CreateCacheSettingsRequest,
-	applicationID string,
-) (sdk.CacheSetting, error) {
+func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationID string) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Settings Next Application")
 
-	BCache := sdk.BrowserCacheModuleRequest{
-		Behavior: "override",
-		MaxAge:   7200,
-	}
-	ECache := sdk.EdgeCacheModuleRequest{
-		Behavior: "override",
-		MaxAge:   7200,
+	BCache := sdk.BrowserCacheModuleRequest{}
+	BCache.SetBehavior("override")
+	BCache.SetMaxAge(7200)
+	ECache := sdk.CacheSettingsEdgeCacheModuleRequest{}
+	ECache.SetBehavior("override")
+	ECache.SetMaxAge(7200)
+
+	cacheModules := sdk.CacheSettingsModulesRequest{
+		EdgeCache: &ECache,
 	}
 
+	req.SetModules(cacheModules)
 	req.SetBrowserCache(BCache)
-	req.SetEdgeCache(ECache)
 
 	resp, err := c.CreateCacheEdgeApplication(ctx, req, applicationID)
 	if err != nil {

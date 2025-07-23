@@ -27,7 +27,7 @@ type WorkloadResponse interface {
 
 type DeploymentResponse interface {
 	GetId() int64
-	GetTag() string
 	GetCurrent() bool
-	GetBinds() sdk.WorkloadDeploymentBinds
+	GetActive() bool
+	GetName() string
 }

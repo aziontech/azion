@@ -40,29 +40,47 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
-			request := api.UpdateRulesEngineRequest{}
-
-			err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
-			if err != nil {
-				logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
-				return utils.ErrorUnmarshalReader
-			}
-
-			if err := validateRequest(request); err != nil {
-				return err
-			}
-
-			request.ApplicationID = fields.ApplicationID
-			request.RulesID = fields.RuleID
-
+			var id int64
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			response, err := client.Update(context.Background(), &request)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdate.Error(), err)
+			switch fields.Phase {
+			case "request":
+				request := api.UpdateRulesEngineRequest{}
+
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
+				if err != nil {
+					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
+					return utils.ErrorUnmarshalReader
+				}
+
+				request.ApplicationID = fields.ApplicationID
+				request.RulesID = fields.RuleID
+				response, err := client.UpdateRequest(context.Background(), &request)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorUpdate.Error(), err)
+				}
+				id = response.GetId()
+			case "response":
+				request := api.UpdateRulesEngineResponse{}
+
+				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
+				if err != nil {
+					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
+					return utils.ErrorUnmarshalReader
+				}
+
+				request.ApplicationID = fields.ApplicationID
+				request.RulesID = fields.RuleID
+				response, err := client.UpdateResponse(context.Background(), &request)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorUpdate.Error(), err)
+				}
+				id = response.GetId()
+			default:
+				return msg.ErrorInvalidPhase
 			}
 
 			updateOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, response.GetId()),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, id),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -77,46 +95,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
-}
-
-func validateRequest(request api.UpdateRulesEngineRequest) error {
-	if request.GetCriteria() != nil {
-		for _, itemCriteria := range request.GetCriteria() {
-			for _, item := range itemCriteria {
-				if item.Conditional == "" {
-					return msg.ErrorConditionalEmpty
-				}
-
-				if item.Variable == "" {
-					return msg.ErrorVariableEmpty
-				}
-
-				if item.Operator == "" {
-					return msg.ErrorOperatorEmpty
-				}
-
-				if !item.Argument.IsSet() {
-					return msg.ErrorInputValueEmpty
-				}
-			}
-		}
-	}
-
-	if request.GetBehaviors() == nil {
-		return msg.ErrorStructBehaviorsNil
-	}
-
-	for _, item := range request.GetBehaviors() {
-		if item.Name == "" {
-			return msg.ErrorNameBehaviorsEmpty
-		}
-
-		if !item.Argument.IsSet() {
-			return msg.ErrorArgumentBehaviorsEmpty
-		}
-	}
-
-	return nil
 }
 
 func validateUserInput(cmd *cobra.Command, fields *Fields) error {
@@ -136,6 +114,15 @@ func validateUserInput(cmd *cobra.Command, fields *Fields) error {
 		}
 
 		fields.RuleID = answer
+	}
+
+	if !cmd.Flags().Changed("phase") {
+		answer, err := utils.AskInput(msg.AskInputPhase)
+		if err != nil {
+			return err
+		}
+
+		fields.Phase = answer
 	}
 
 	if !cmd.Flags().Changed("file") {

@@ -16,6 +16,7 @@ var (
 	ErrorCachingStringSortFlag  = errors.New("Invalid --enable-caching-string-sort flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorSliceConfigurationFlag = errors.New("Invalid --slice-configuration-enable flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorSliceL2CachingFlag     = errors.New("Invalid --slice-l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorTieredCachingFlag      = errors.New("Invalid --tiered-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorL2CachingEnabledFlag   = errors.New("Invalid --l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 
 	ErrorCreateCacheSettings               = errors.New("Failed to create the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")

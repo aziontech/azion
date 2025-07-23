@@ -75,8 +75,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			switch fields.Type {
 			case "http":
 				id = response.EdgeConnectorHTTP.GetId()
-			case "s3":
-				id = response.EdgeConnectorS3.GetId()
+			// case "s3":
+			// id = response.EdgeConnectorS3.GetId()
 			case "edge_storage":
 				id = response.EdgeConnectorStorage.GetId()
 			case "live_ingest":

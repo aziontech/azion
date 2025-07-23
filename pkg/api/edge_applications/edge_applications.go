@@ -2,13 +2,11 @@ package edge_applications
 
 import (
 	"context"
-	"fmt"
-	"strconv"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -41,7 +39,6 @@ type EdgeApplicationResponse interface {
 
 type RulesEngineResponse interface {
 	GetId() int64
-	GetPhase() string
 	GetDescription() string
 	// GetBehaviors() []sdk.RulesEngineBehaviorEntry
 	// GetCriteria() [][]sdk.RulesEngineCriteria
@@ -66,7 +63,14 @@ type CreateInstanceRequest struct {
 }
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedEdgeApplicationRuleEngineRequest
+	sdk.PatchedEdgeApplicationRequestPhaseRuleEngineRequest
+	IdApplication string
+	Phase         string
+	Id            string
+}
+
+type UpdateRulesEngineResponse struct {
+	sdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest
 	IdApplication string
 	Phase         string
 	Id            string
@@ -82,14 +86,18 @@ type UpdateCacheSettingsRequest struct {
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.EdgeApplicationRuleEngineRequest
+	sdk.EdgeApplicationRequestPhaseRuleEngineRequest
+}
+
+type CreateRulesEngineResponse struct {
+	sdk.EdgeApplicationResponsePhaseRuleEngineRequest
 }
 
 type FunctionsInstancesResponse interface {
 	GetId() int64
 	GetEdgeFunction() int64
 	GetName() string
-	GetJsonArgs() interface{}
+	GetArgs() sdk.EdgeApplicationFunctionInstanceArgs
 }
 
 type CreateDeviceGroupsRequest struct {
@@ -104,8 +112,7 @@ type DeviceGroupsResponse interface {
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
 	logger.Debug("Update Edge Application")
-	str := strconv.FormatInt(req.Id, 10)
-	request := c.apiClient.EdgeApplicationsAPI.PartialUpdateEdgeApplication(ctx, str).PatchedEdgeApplicationRequest(req.PatchedEdgeApplicationRequest)
+	request := c.apiClient.EdgeApplicationsAPI.PartialUpdateEdgeApplication(ctx, req.Id).PatchedEdgeApplicationRequest(req.PatchedEdgeApplicationRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -145,14 +152,13 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Edge Application")
-	str := strconv.FormatInt(id, 10)
-	req := c.apiClient.EdgeApplicationsAPI.DestroyEdgeApplication(ctx, str)
+	req := c.apiClient.EdgeApplicationsAPI.DestroyEdgeApplication(ctx, id)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Application", zap.Error(err), zap.Any("ID", str))
+			logger.Debug("Error while deleting an Edge Application", zap.Error(err), zap.Any("ID", id))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -165,13 +171,13 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error) {
+func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedEdgeApplicationResponsePhaseRuleEngineList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.ListEdgeApplicationRule(ctx, edgeApplicationID).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesList(ctx, edgeApplicationID).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -192,9 +198,36 @@ func (c *Client) ListRulesEngine(ctx context.Context, opts *contracts.ListOption
 	return resp, nil
 }
 
-func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID string) (RulesEngineResponse, error) {
+func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedEdgeApplicationRequestPhaseRuleEngineList, error) {
+	logger.Debug("List Rules Engine")
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesList(ctx, edgeApplicationID).
+		Ordering(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Search(opts.Sort).Execute()
+
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while listing Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+
+	return resp, nil
+}
+
+func (c *Client) GetRulesEngineRequest(ctx context.Context, edgeApplicationID, rulesID string) (RulesEngineResponse, error) {
 	logger.Debug("Get Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.RetrieveEdgeApplicationRule(ctx, edgeApplicationID, rulesID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesRetrieve(ctx, edgeApplicationID, rulesID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -209,9 +242,43 @@ func (c *Client) GetRulesEngine(ctx context.Context, edgeApplicationID, rulesID 
 	return &resp.Data, nil
 }
 
-func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
+func (c *Client) GetRulesEngineResponse(ctx context.Context, edgeApplicationID, rulesID string) (RulesEngineResponse, error) {
+	logger.Debug("Get Rules Engine")
+	resp, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesRetrieve(ctx, edgeApplicationID, rulesID).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while describing a Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return &resp.Data, nil
+}
+
+func (c *Client) DeleteRulesEngineRequest(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
 	logger.Debug("Delete Rules Engine")
-	_, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.DestroyEdgeApplicationRule(ctx, edgeApplicationID, ruleID).Execute()
+	_, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while deleting a Rules Engine", zap.Error(err), zap.Any("ID", ruleID))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return httpResp.StatusCode, err
+			}
+		}
+		return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return 0, nil
+}
+
+func (c *Client) DeleteRulesEngineResponse(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
+	logger.Debug("Delete Rules Engine")
+	_, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -228,7 +295,7 @@ func (c *Client) DeleteRulesEngine(ctx context.Context, edgeApplicationID string
 
 func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phase string) (int64, error) {
 	logger.Debug("Get Rules Engine Default")
-	request := c.apiClient.EdgeApplicationsRulesAPI.ListEdgeApplicationRule(ctx, applicationID)
+	request := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesList(ctx, applicationID)
 	rules, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
@@ -244,44 +311,15 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phas
 	return rules.Results[0].Id, nil
 }
 
-func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesEngineRequest, idFunc int64) (EdgeApplicationsResponse, error) {
-	logger.Debug("Update Rules Engine Publish")
-	request := c.apiClient.EdgeApplicationsRulesAPI.ListEdgeApplicationRule(ctx, req.IdApplication)
-
-	edgeApplicationRules, httpResp, err := request.Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	idRule := edgeApplicationRules.Results[0].Id
-	ruleId := fmt.Sprintf("%d", idRule)
-
-	behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
-
-	var behString sdk.EdgeApplicationBehaviorFieldRequest
-	var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
-	funcId := fmt.Sprintf("%d", idFunc)
-	behSet.String = &funcId
-	behString.SetName("run_function")
-	behString.SetArgument(behSet)
-
-	req.SetBehaviors(behaviors)
-
-	requestUpdate := c.apiClient.EdgeApplicationsRulesAPI.PartialUpdateEdgeApplicationRule(ctx, req.IdApplication, ruleId).PatchedEdgeApplicationRuleEngineRequest(req.PatchedEdgeApplicationRuleEngineRequest)
+func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
+	logger.Debug("Update Rules Engine")
+	requestUpdate := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesPartialUpdate(ctx, req.IdApplication, req.Id).PatchedEdgeApplicationRequestPhaseRuleEngineRequest(req.PatchedEdgeApplicationRequestPhaseRuleEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a Rules Engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating a rules engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -291,11 +329,12 @@ func (c *Client) UpdateRulesEnginePublish(ctx context.Context, req *UpdateRulesE
 	}
 
 	return &edgeApplicationsResponse.Data, nil
+
 }
 
-func (c *Client) UpdateRulesEngine(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) UpdateRulesEngineResponse(ctx context.Context, req *UpdateRulesEngineResponse) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.EdgeApplicationsRulesAPI.PartialUpdateEdgeApplicationRule(ctx, req.IdApplication, req.Id).PatchedEdgeApplicationRuleEngineRequest(req.PatchedEdgeApplicationRuleEngineRequest)
+	requestUpdate := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesPartialUpdate(ctx, req.IdApplication, req.Id).PatchedEdgeApplicationResponsePhaseRuleEngineRequest(req.PatchedEdgeApplicationResponsePhaseRuleEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -335,11 +374,11 @@ func (c *Client) Clone(ctx context.Context, name, id string) error {
 	return nil
 }
 
-func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.
-		CreateEdgeApplicationRule(ctx, edgeApplicationID).
-		EdgeApplicationRuleEngineRequest(req.EdgeApplicationRuleEngineRequest).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.
+		EdgeApplicationApiApplicationsRequestRulesCreate(ctx, edgeApplicationID).
+		EdgeApplicationRequestPhaseRuleEngineRequest(req.EdgeApplicationRequestPhaseRuleEngineRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -355,7 +394,27 @@ func (c *Client) CreateRulesEngine(ctx context.Context, edgeApplicationID string
 	return &resp.Data, nil
 }
 
-func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedResponseListEdgeApplicationFunctionInstanceList, error) {
+func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineResponse) (RulesEngineResponse, error) {
+	logger.Debug("Create Rules Engine")
+	resp, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.
+		EdgeApplicationApiApplicationsResponseRulesCreate(ctx, edgeApplicationID).
+		EdgeApplicationResponsePhaseRuleEngineRequest(req.EdgeApplicationResponsePhaseRuleEngineRequest).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while creating a Rules Engine", zap.Error(err), zap.Any("Name", req.Name))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+			return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		}
+		return nil, err
+	}
+	return &resp.Data, nil
+}
+
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedEdgeApplicationFunctionInstanceList, error) {
 	logger.Debug("List Edge Function Instances")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -404,7 +463,7 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 
 func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID string) (sdk.EdgeApplicationFunctionInstance, error) {
 	logger.Debug("Create Edge Function Instance")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.CreateEdgeFirewallFunctionInstance(ctx, applicationID).
+	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.CreateEdgeApplicationFunctionInstance(ctx, applicationID).
 		EdgeApplicationFunctionInstanceRequest(req.EdgeApplicationFunctionInstanceRequest).Execute()
 	if err != nil {
 		errBody := ""
@@ -422,7 +481,7 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceReq
 
 func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID string) (FunctionsInstancesResponse, error) {
 	logger.Debug("Get Edge Function Instance")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.RetrieveFunctionInstance(ctx, edgeApplicationID, instanceID).Execute()
+	resp, httpResp, err := c.apiClient.EdgeApplicationsFunctionAPI.RetrieveEdgeApplicationFunctionInstance(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -438,128 +497,24 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	return &resp.Data, nil
 }
 
-func (c *Client) DeviceGroupsList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedResponseListEdgeApplicationDeviceGroupsList, error) {
-	logger.Debug("List Device Groups")
-	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
-	}
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.
-		ListDeviceGroups(ctx, edgeApplicationID).
-		Ordering(opts.OrderBy).
-		Page(opts.Page).
-		PageSize(opts.PageSize).
-		Search(opts.Sort).Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while listing device groups", zap.Error(err))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	return resp, nil
-}
-
-func (c *Client) DeleteDeviceGroup(ctx context.Context, appID string, groupID string) error {
-	logger.Debug("Delete Device Group")
-	req := c.apiClient.EdgeApplicationsDeviceGroupsAPI.DestroyDeviceGroup(ctx, appID, groupID)
-
-	_, httpResp, err := req.Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while deleting a device group", zap.Error(err))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return err
-			}
-		}
-		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	return nil
-}
-
-func (c *Client) GetDeviceGroups(ctx context.Context, edgeApplicationID, groupID string) (DeviceGroupsResponse, error) {
-	logger.Debug("Get Device Groups")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.RetrieveDeviceGroup(ctx, edgeApplicationID, groupID).Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while getting a device group", zap.Error(err))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-	return &resp.Data, nil
-}
-
-func (c *Client) UpdateDeviceGroup(ctx context.Context, req sdk.PatchedEdgeApplicationDeviceGroupsRequest, appID string, groupID string) (DeviceGroupsResponse, error) {
-	logger.Debug("Update Device Group")
-	request := c.apiClient.EdgeApplicationsDeviceGroupsAPI.PartialUpdateDeviceGroup(ctx, appID, groupID).PatchedEdgeApplicationDeviceGroupsRequest(req)
-
-	deviceGroup, httpResp, err := request.Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while updating a device group", zap.Error(err), zap.Any("Name", req.Name))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	return &deviceGroup.Data, nil
-}
-
-func (c *Client) CreateDeviceGroups(ctx context.Context, req *CreateDeviceGroupsRequest, applicationID string) (DeviceGroupsResponse, error) {
-	logger.Debug("Create Device Groups")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsDeviceGroupsAPI.CreateDeviceGroup(ctx, applicationID).
-		EdgeApplicationDeviceGroupsRequest(req.EdgeApplicationDeviceGroupsRequest).Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while creating a device group", zap.Error(err), zap.Any("Name", req.Name))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return nil, err
-			}
-		}
-		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	return &resp.Data, nil
-}
-
 func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId string, cacheId int64, typeLang string, authorize bool) error {
 	logger.Debug("Create Rules Engine Next Application")
 
-	req := CreateRulesEngineRequest{}
+	req := CreateRulesEngineResponse{}
 	criteria := make([][]sdk.EdgeApplicationCriterionFieldRequest, 1)
 	for i := 0; i < 1; i++ {
 		criteria[i] = make([]sdk.EdgeApplicationCriterionFieldRequest, 1)
 	}
 
 	req.SetName("enable gzip")
-	req.SetPhase("response")
 
-	behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
+	behaviors := make([]sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest, 0)
 
-	var behString sdk.EdgeApplicationBehaviorFieldRequest
-	behString.SetName("enable_gzip")
+	var behString sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest
+	var behSet sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsEdgeApplicationRuleEngineResponseNoArgsRequest
+	behSet.SetType("enable_gzip")
+	behString.EdgeApplicationRuleEngineResponsePhaseBehaviorsEdgeApplicationRuleEngineResponseNoArgsRequest = &behSet
 
-	// var behString sdk.EdgeApplicationBehaviorFieldRequest
-	// var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
-	// behString.SetArgument(behSet)
 	behaviors = append(behaviors, behString)
 
 	req.SetBehaviors(behaviors)
@@ -575,9 +530,9 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	criteria[0][0].SetArgument(arg)
 	req.SetCriteria(criteria)
 
-	_, httpResp, err := c.apiClient.EdgeApplicationsRulesAPI.
-		CreateEdgeApplicationRule(ctx, applicationId).
-		EdgeApplicationRuleEngineRequest(req.EdgeApplicationRuleEngineRequest).Execute()
+	_, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.
+		EdgeApplicationApiApplicationsResponseRulesCreate(ctx, applicationId).
+		EdgeApplicationResponsePhaseRuleEngineRequest(req.EdgeApplicationResponsePhaseRuleEngineRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {

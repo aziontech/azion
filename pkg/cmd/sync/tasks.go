@@ -10,14 +10,13 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
 	edgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	connectorApi "github.com/aziontech/azion-cli/pkg/api/edge_connector"
 	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -40,20 +39,20 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	var err error
 	manifest := &contracts.ManifestV4{}
 
-	remoteCaches, err := synch.syncCache(info, f, manifest)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
+	// remoteCaches, err := synch.syncCache(info, f, manifest)
+	// if err != nil {
+	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	// }
 
-	remoteConnectors, err := synch.syncConnector(info, f, manifest)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
+	// remoteConnectors, err := synch.syncConnector(info, f, manifest)
+	// if err != nil {
+	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	// }
 
-	err = synch.syncRules(info, f, manifest, remoteCaches, remoteConnectors)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
+	// err = synch.syncRules(info, f, manifest, remoteCaches)
+	// if err != nil {
+	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	// }
 
 	err = synch.syncEnv(f)
 	if err != nil {
@@ -83,48 +82,48 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	return nil
 }
 
-func (synch *SyncCmd) syncConnector(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataConnectors, error) {
-	remoteConnectorIds := make(map[string]contracts.AzionJsonDataConnectors)
-	client := connectorApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	resp, err := client.List(ctx, opts)
-	if err != nil {
-		return remoteConnectorIds, err
-	}
+// func (synch *SyncCmd) syncConnector(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataConnectors, error) {
+// 	remoteConnectorIds := make(map[string]contracts.AzionJsonDataConnectors)
+// 	client := connectorApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+// 	resp, err := client.List(ctx, opts)
+// 	if err != nil {
+// 		return remoteConnectorIds, err
+// 	}
 
-	ConnectorsAzion := []contracts.AzionJsonDataConnectors{}
-	info.Conf.Connectors = ConnectorsAzion
+// 	ConnectorsAzion := []contracts.AzionJsonDataConnectors{}
+// 	info.Conf.Connectors = ConnectorsAzion
 
-	for _, connector := range resp.Results {
-		remoteConnectorIds[strconv.FormatInt(*&connector.Id, 10)] = contracts.AzionJsonDataConnectors{
-			Id:      connector.Id,
-			Name:    connector.Name,
-			Address: connector.Addresses,
-		}
-		jsonBytes, err := json.Marshal(connector)
-		if err != nil {
-			return remoteConnectorIds, err
-		}
-		oEntry := edgesdk.EdgeConnectorPolymorphicRequest{}
-		err = json.Unmarshal(jsonBytes, &oEntry)
-		if err != nil {
-			return remoteConnectorIds, err
-		}
-		manifest.EdgeConnectors = append(manifest.EdgeConnectors, oEntry)
-		newConnector := contracts.AzionJsonDataConnectors{
-			Id:      connector.Id,
-			Name:    connector.Name,
-			Address: connector.Addresses,
-		}
-		ConnectorsAzion = append(ConnectorsAzion, newConnector)
-		info.Conf.Connectors = ConnectorsAzion
-	}
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-	if err != nil {
-		logger.Debug("Error while writing azion.json file", zap.Error(err))
-		return remoteConnectorIds, err
-	}
-	return remoteConnectorIds, nil
-}
+// 	for _, connector := range resp.Results {
+// 		remoteConnectorIds[strconv.FormatInt(*&connector.Id, 10)] = contracts.AzionJsonDataConnectors{
+// 			Id:      connector.Id,
+// 			Name:    connector.Name,
+// 			Address: connector.Addresses,
+// 		}
+// 		jsonBytes, err := json.Marshal(connector)
+// 		if err != nil {
+// 			return remoteConnectorIds, err
+// 		}
+// 		oEntry := edgesdk.EdgeConnectorPolymorphicRequest{}
+// 		err = json.Unmarshal(jsonBytes, &oEntry)
+// 		if err != nil {
+// 			return remoteConnectorIds, err
+// 		}
+// 		manifest.EdgeConnectors = append(manifest.EdgeConnectors, oEntry)
+// 		newConnector := contracts.AzionJsonDataConnectors{
+// 			Id:      connector.Id,
+// 			Name:    connector.Name,
+// 			Address: connector.Addresses,
+// 		}
+// 		ConnectorsAzion = append(ConnectorsAzion, newConnector)
+// 		info.Conf.Connectors = ConnectorsAzion
+// 	}
+// 	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+// 	if err != nil {
+// 		logger.Debug("Error while writing azion.json file", zap.Error(err))
+// 		return remoteConnectorIds, err
+// 	}
+// 	return remoteConnectorIds, nil
+// }
 
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
@@ -168,51 +167,50 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	return remoteCacheIds, nil
 }
 
-func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4,
-	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings,
-	remoteConnectorIds map[string]contracts.AzionJsonDataConnectors) error {
-	// Get request rules first
-	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-	resp, err := client.ListRulesEngine(context.Background(), opts, str)
-	if err != nil {
-		return err
-	}
-	rulesAzion := []contracts.AzionJsonDataRules{}
-	info.Conf.RulesEngine.Rules = rulesAzion
-	for _, rule := range resp.Results {
-		if rule.Name == "Default Rule" || rule.Name == "enable gzip" {
-			//default rule or enable gzip rule are not added to azion.json or azion.config
-			continue
-		}
-		jsonBytes, err := json.Marshal(rule)
-		if err != nil {
-			return err
-		}
-		rEntry := edgesdk.EdgeApplicationRuleEngineRequest{}
-		err = json.Unmarshal(jsonBytes, &rEntry)
-		if err != nil {
-			return err
-		}
+// func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4,
+// 	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings) error {
+// 	// Get request rules first
+// 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+// 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
+// 	resp, err := client.ListRulesEngine(context.Background(), opts, str)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	rulesAzion := []contracts.AzionJsonDataRules{}
+// 	info.Conf.RulesEngine.Rules = rulesAzion
+// 	for _, rule := range resp.Results {
+// 		if rule.Name == "Default Rule" || rule.Name == "enable gzip" {
+// 			//default rule or enable gzip rule are not added to azion.json or azion.config
+// 			continue
+// 		}
+// 		jsonBytes, err := json.Marshal(rule)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		rEntry := edgesdk.EdgeApplicationRuleEngineRequest{}
+// 		err = json.Unmarshal(jsonBytes, &rEntry)
+// 		if err != nil {
+// 			return err
+// 		}
 
-		manifest.EdgeApplications[0].Rules = append(manifest.EdgeApplications[0].Rules, rEntry)
+// 		manifest.EdgeApplications[0].Rules = append(manifest.EdgeApplications[0].Rules, rEntry)
 
-		newRule := contracts.AzionJsonDataRules{
-			Id:    rule.GetId(),
-			Name:  rule.GetName(),
-			Phase: rule.GetPhase(),
-		}
-		rulesAzion = append(rulesAzion, newRule)
-		info.Conf.RulesEngine.Rules = rulesAzion
-	}
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-	if err != nil {
-		logger.Debug("Error while writing azion.json file", zap.Error(err))
-		return err
-	}
+// 		newRule := contracts.AzionJsonDataRules{
+// 			Id:    rule.GetId(),
+// 			Name:  rule.GetName(),
+// 			Phase: rule.GetPhase(),
+// 		}
+// 		rulesAzion = append(rulesAzion, newRule)
+// 		info.Conf.RulesEngine.Rules = rulesAzion
+// 	}
+// 	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+// 	if err != nil {
+// 		logger.Debug("Error while writing azion.json file", zap.Error(err))
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 

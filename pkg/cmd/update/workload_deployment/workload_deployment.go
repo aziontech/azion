@@ -19,7 +19,6 @@ import (
 type Fields struct {
 	Name              string
 	WorkloadId        int64
-	AlternateDomains  []string
 	Active            string
 	EdgeApplicationID int64
 	EdgeFirewall      int64
@@ -69,10 +68,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					request.SetName(fields.Name)
 				}
 
-				if len(fields.AlternateDomains) > 0 {
-					request.SetAlternateDomains(fields.AlternateDomains)
-				}
-
 				if cmd.Flags().Changed("active") {
 					isActive, err := strconv.ParseBool(fields.Active)
 					if err != nil {
@@ -102,7 +97,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64Var(&fields.WorkloadId, "domain-id", 0, msg.FlagWorkloadID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringSliceVar(&fields.AlternateDomains, "alternate-domains", []string{}, msg.FlagAlternateDomains)
 	flags.StringVar(&fields.Active, "active", "true", msg.FlagActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)

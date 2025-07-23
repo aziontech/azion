@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -37,7 +37,6 @@ type Fields struct {
 	enableCachingForPost        string
 	enableCachingForOptions     string
 	isSliceConfigurationEnabled string
-	sliceConfigurationRange     int64
 	Path                        string
 }
 
@@ -58,7 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
-			request := api.Request{}
+			request := sdk.CacheSettingRequest{}
 
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.CreateAskInputApplicationID)
@@ -101,11 +100,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			if err := appAccelerationNoEnabled(clientEdgeApp, fields, request); err != nil {
+			if err := appAccelerationNoEnabled(clientEdgeApp, fields, &request); err != nil {
 				return err
 			}
 
-			response, err := client.Create(context.Background(), &request, fields.ApplicationID)
+			response, err := client.Create(context.Background(), request, fields.ApplicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
 			}
@@ -136,28 +135,23 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.enableCachingForOptions, "enable-caching-for-options", "false", msg.FlagCachingForOptionsEnabled)
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
-	flags.StringVar(&fields.isSliceConfigurationEnabled, "slice-configuration-enabled", "", msg.FlagSliceConfigurationEnabled)
-	flags.Int64Var(&fields.sliceConfigurationRange, "slice-configuration-range", 0, msg.FlagSliceConfigurationRange)
-	flags.StringVar(&fields.adaptiveDeliveryAction, "adaptive-delivery-action", "ignore", msg.FlagAdaptiveDeliveryAction)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.Request) error {
+func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request *sdk.CacheSettingRequest) error {
 	ctx := context.Background()
-	str := strconv.FormatInt(fields.ApplicationID, 10)
-	application, err := client.Get(ctx, str)
+	application, err := client.Get(ctx, fields.ApplicationID)
 	if err != nil {
 		return err
 	}
 
 	acc := application.GetModules()
+	appAcc := acc.GetApplicationAccelerator()
 
 	if request.GetModules().EdgeCache != nil {
-		enabled := request.GetModules().EdgeCache
-		if (enabled.GetCachingForOptionsEnabled() ||
-			enabled.GetCachingForPostEnabled()) &&
-			!acc.GetApplicationAcceleratorEnabled() {
+		edgeCache := request.GetModules().ApplicationAccelerator
+		if len(edgeCache.CacheVaryByMethod) > 0 && !appAcc.GetEnabled() {
 			return msg.ErrorApplicationAccelerationNotEnabled
 		}
 	}
@@ -165,48 +159,37 @@ func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request
 	return nil
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Request) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *sdk.CacheSettingRequest) error {
 	request.SetName(fields.Name)
 	if cmd.Flags().Changed("browser-cache-behavior") {
 		if fields.browserCacheBehavior == "override" && !cmd.Flags().Changed("browser-cache-max-age") {
 			return msg.ErrorBrowserMaximumTtlNotSent
 		}
 
-		req := sdk.BrowserCacheModuleRequest{
-			Behavior: fields.browserCacheBehavior,
-			MaxAge:   fields.browserCacheMaxAge,
-		}
+		req := sdk.BrowserCacheModuleRequest{}
+		req.SetBehavior(fields.browserCacheBehavior)
+		req.SetMaxAge(fields.browserCacheMaxAge)
 		request.SetBrowserCache(req)
 	}
 
 	if cmd.Flags().Changed("query-string-fields") {
-		controls := request.GetApplicationControls()
-		controls.SetQueryStringFields(fields.queryStringFields)
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetFields(fields.queryStringFields)
 	}
 
 	if cmd.Flags().Changed("cookie-names") {
-		controls := request.GetApplicationControls()
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
 		controls.SetCookieNames(fields.cookieNames)
 	}
 
 	if cmd.Flags().Changed("cache-by-cookies") {
-		controls := request.GetApplicationControls()
-		controls.SetCacheByCookies(fields.cacheByCookies)
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
+		controls.SetBehavior(fields.cacheByCookies)
 	}
 
 	if cmd.Flags().Changed("cache-by-query-string") {
-		controls := request.GetApplicationControls()
-		controls.SetCacheByQueryString(fields.cacheByQueryString)
-	}
-
-	if cmd.Flags().Changed("slice-configuration-range") {
-		controls := request.GetSliceControls()
-		controls.SetSliceConfigurationRange(fields.sliceConfigurationRange)
-	}
-
-	if cmd.Flags().Changed("adaptive-delivery-action") {
-		controls := request.GetApplicationControls()
-		controls.SetAdaptiveDeliveryAction(fields.adaptiveDeliveryAction)
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetBehavior(fields.cacheByQueryString)
 	}
 
 	if cmd.Flags().Changed("enable-caching-for-options") {
@@ -215,8 +198,10 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
 		}
 
-		edgeCache := request.GetEdgeCache()
-		edgeCache.SetCachingForOptionsEnabled(cachingOptions)
+		edgeCache := request.GetModules().ApplicationAccelerator.CacheVaryByMethod
+		if cachingOptions {
+			edgeCache = append(edgeCache, "options")
+		}
 	}
 
 	if cmd.Flags().Changed("enable-caching-for-post") {
@@ -225,8 +210,10 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
 		}
 
-		edgeCache := request.GetEdgeCache()
-		edgeCache.SetCachingForPostEnabled(cachingPost)
+		appAcc := request.GetModules().ApplicationAccelerator.CacheVaryByMethod
+		if cachingPost {
+			appAcc = append(appAcc, "post")
+		}
 	}
 
 	if cmd.Flags().Changed("enable-caching-string-sort") {
@@ -235,19 +222,8 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
 		}
 
-		controls := request.GetApplicationControls()
-		controls.SetQueryStringSortEnabled(stringSort)
-	}
-
-	if cmd.Flags().Changed("slice-configuration-enabled") {
-		sliceEnable, err := strconv.ParseBool(fields.isSliceConfigurationEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorSliceConfigurationFlag, fields.isSliceConfigurationEnabled)
-		}
-
-		controls := request.GetSliceControls()
-		controls.SetSliceConfigurationEnabled(sliceEnable)
-		controls.SetSliceEdgeCachingEnabled(true) //Edge Cache is mandatory in this case
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetSortEnabled(stringSort)
 	}
 
 	return nil

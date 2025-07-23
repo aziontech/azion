@@ -11,14 +11,14 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *ClientV4) Create(ctx context.Context, req *Request, applicationID int64) (sdk.CacheSetting, error) {
+func (c *ClientV4) Create(ctx context.Context, req sdk.CacheSettingRequest, applicationID int64) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Settings")
 
 	applicationIDStr := strconv.Itoa(int(applicationID))
 
 	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
 		CreateCacheSetting(ctx, applicationIDStr).
-		CacheSettingRequest(req.CacheSettingRequest)
+		CacheSettingRequest(req)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a Cache Setting", zap.Error(err))

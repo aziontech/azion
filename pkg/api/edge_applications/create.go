@@ -3,7 +3,7 @@ package edge_applications
 import (
 	"context"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/logger"

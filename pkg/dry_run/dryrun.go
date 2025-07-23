@@ -20,6 +20,8 @@ import (
 	"go.uber.org/zap"
 )
 
+//TODO: FIX EVERYTHING
+
 type DryrunStruct struct {
 	Io                    *iostreams.IOStreams
 	GetWorkDir            func() (string, error)
@@ -90,12 +92,12 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
 	}
 
-	interpreter := dry.Interpreter()
+	// interpreter := dry.Interpreter()
 
-	pathManifest, err := interpreter.ManifestPath()
-	if err != nil {
-		return err
-	}
+	// pathManifest, err := interpreter.ManifestPath()
+	// if err != nil {
+	// 	return err
+	// }
 
 	//FUNCTION AND INSTANCE
 
@@ -112,15 +114,16 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 	}
 
 	var skipManifest bool
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, dry.F, &msgs)
-	if err != nil {
-		skipManifest = true
-	}
+	// manifestStructure, err := interpreter.ReadManifest(pathManifest, dry.F, &msgs)
+	// if err != nil {
+	// 	skipManifest = true
+	// }
 
-	if _, err := dry.Stat(pathManifest); os.IsNotExist(err) {
-		logger.FInfoFlags(dry.Io.Out, msg.SkipManifest, dry.F.Format, dry.F.Out)
-		msgs = append(msgs, msg.SkipManifest)
-	} else if !skipManifest {
+	// if _, err := dry.Stat(pathManifest); os.IsNotExist(err) {
+	// 	logger.FInfoFlags(dry.Io.Out, msg.SkipManifest, dry.F.Format, dry.F.Out)
+	// 	msgs = append(msgs, msg.SkipManifest)
+	// } else
+	if !skipManifest {
 		CacheIds := make(map[string]int64)
 		CacheIdsBackup := make(map[string]int64)
 		RuleIds := make(map[string]contracts.RuleIdsStruct)
@@ -143,19 +146,19 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 			OriginIds[originConf.Name] = originConf.OriginId
 		}
 
-		if len(manifestStructure.Workloads) > 0 && manifestStructure.Workloads[0].Name != "" {
-			skip = true
-			logger.Debug("", zap.Any("Workload Payload", manifestStructure.Workloads))
-			if conf.Domain.Id > 0 {
-				msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, manifestStructure.Workloads[0].Name)
-				msgs = append(msgs, msgf)
-				logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-			} else {
-				msgf := fmt.Sprintf(msg.CreateDomain, manifestStructure.Workloads[0].Name)
-				msgs = append(msgs, msgf)
-				logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-			}
-		}
+		// if len(manifestStructure.Workloads) > 0 && manifestStructure.Workloads[0].Name != "" {
+		// 	skip = true
+		// 	logger.Debug("", zap.Any("Workload Payload", manifestStructure.Workloads))
+		// 	if conf.Domain.Id > 0 {
+		// 		msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, manifestStructure.Workloads[0].Name)
+		// 		msgs = append(msgs, msgf)
+		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+		// 	} else {
+		// 		msgf := fmt.Sprintf(msg.CreateDomain, manifestStructure.Workloads[0].Name)
+		// 		msgs = append(msgs, msgf)
+		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+		// 	}
+		// }
 
 		// for _, connector := range manifestStructure.EdgeConnectors {
 		// 	logger.Debug("", zap.Any("Edge Connector Payload", connector))
@@ -170,20 +173,20 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		// 	}
 		// }
 
-		for _, app := range manifestStructure.EdgeApplications {
-			for _, cache := range app.Cache {
-				logger.Debug("", zap.Any("Cache Setting Payload", cache))
-				if id := CacheIds[cache.Name]; id > 0 {
-					msgf := fmt.Sprintf(msg.UpdateCacheSetting, id, cache.Name)
-					msgs = append(msgs, msgf)
-					logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-				} else {
-					msgf := fmt.Sprintf(msg.CreateCacheSetting, cache.Name)
-					msgs = append(msgs, msgf)
-					logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-				}
-			}
-		}
+		// for _, app := range manifestStructure.EdgeApplications {
+		// 	for _, cache := range app.Cache {
+		// 		logger.Debug("", zap.Any("Cache Setting Payload", cache))
+		// 		if id := CacheIds[cache.Name]; id > 0 {
+		// 			msgf := fmt.Sprintf(msg.UpdateCacheSetting, id, cache.Name)
+		// 			msgs = append(msgs, msgf)
+		// 			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+		// 		} else {
+		// 			msgf := fmt.Sprintf(msg.CreateCacheSetting, cache.Name)
+		// 			msgs = append(msgs, msgf)
+		// 			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+		// 		}
+		// 	}
+		// }
 
 		//backup cache ids
 		for k, v := range CacheIds {

@@ -26,7 +26,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -178,7 +178,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if settings.S3AccessKey == "" || settings.S3SecreKey == "" {
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: sdk.READ_ONLY}})
+		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: "read_only"}})
 		if err != nil {
 			return err
 		}
@@ -190,7 +190,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		oneYearLater := now.AddDate(1, 0, 0)
 
 		request := new(storage.RequestCredentials)
-		request.Name = &nameBucket
+		request.Name = nameBucket
 		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
 		request.Bucket = &nameBucket
 		request.ExpirationDate = &oneYearLater

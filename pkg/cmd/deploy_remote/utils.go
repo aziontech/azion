@@ -11,7 +11,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	sdkstorage "github.com/aziontech/azionapi-go-sdk/storage"
-	"github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"go.uber.org/zap"
 )
 
@@ -43,18 +42,20 @@ func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationO
 		Active: &truePointer,
 	}
 
-	storageType := edge.EdgeConnectorStorageTypePropertiesRequest{
-		Bucket: &conf.Bucket,
-		Prefix: &conf.Prefix,
-	}
-	storageConnector := edge.EdgeConnectorStorageTypedRequest{
-		Name:           conf.Name,
-		Active:         &truePointer,
-		TypeProperties: storageType,
-	}
-	connectorManifest := edge.EdgeConnectorPolymorphicRequest{
-		EdgeConnectorStorageTypedRequest: &storageConnector,
-	}
+	//TODO: FIX HRE
+
+	// storageType := edge.EdgeConnectorStorageTypePropertiesRequest{
+	// 	Bucket: &conf.Bucket,
+	// 	Prefix: &conf.Prefix,
+	// }
+	// storageConnector := edge.EdgeConnectorStorageTypedRequest{
+	// 	Name:           conf.Name,
+	// 	Active:         &truePointer,
+	// 	TypeProperties: storageType,
+	// }
+	// connectorManifest := edge.EdgeConnectorPolymorphicRequest{
+	// 	EdgeConnectorStorageTypedRequest: &storageConnector,
+	// }
 
 	functionMan := contracts.EdgeFunction{
 		Name:     conf.Name,
@@ -73,7 +74,7 @@ func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationO
 	}
 
 	manifestToConfig := &contracts.ManifestV4{}
-	manifestToConfig.EdgeConnectors = append(manifestToConfig.EdgeConnectors, connectorManifest)
+	// manifestToConfig.EdgeConnectors = append(manifestToConfig.EdgeConnectors, connectorManifest) //TODO: FIX HERE
 	manifestToConfig.EdgeApplications = append(manifestToConfig.EdgeApplications, appManifest)
 	manifestToConfig.EdgeFunctions = append(manifestToConfig.EdgeFunctions, functionMan)
 	manifestToConfig.EdgeStorage = append(manifestToConfig.EdgeStorage, storageMan)

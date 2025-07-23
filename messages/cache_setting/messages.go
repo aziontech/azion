@@ -57,6 +57,7 @@ var (
 	FlagFile                       = "Path to a JSON file containing the attributes of the Cache Settings configuration that will be created; you can use - for reading from stdin"
 	FlagBrowserCacheBehavior       = "Configures the amount of time that the content is cached in the web browser"
 	FlagBrowserCacheMaxAge         = "Defines how long content is cached by the web browser before it expires"
+	FlagTieredCachingEnabled       = "Whether tiered caching is active or not"
 	FlagQueryStringFields          = "Gives a list of query strings parameters to be considered in the Cache Settings configuration, that will segregate the cache to the same URL"
 	FlagCookieNames                = "Distinguishes objects in the Azion cache by name/value of cookies"
 	FlagCacheByCookiesEnabled      = "Whether cache by cookies is active or not"

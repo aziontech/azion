@@ -6,7 +6,6 @@ import (
 
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -15,168 +14,170 @@ import (
 	"go.uber.org/zap"
 )
 
-func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
-	request := &apiConnector.UpdateRequest{}
+//TODO: FIX HERE
 
-	if connectorRequest.EdgeConnectorHTTPRequest != nil {
-		bodyRequest := connectorRequest.EdgeConnectorHTTPRequest
-		body := edgesdk.PatchedEdgeConnectorHTTPRequest{}
-		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.Addresses) > 0 {
-			body.SetAddresses(bodyRequest.Addresses)
-		}
-		if len(bodyRequest.ConnectionPreference) > 0 {
-			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-		}
-		if bodyRequest.ConnectionTimeout != nil {
-			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-		}
-		if bodyRequest.LoadBalanceMethod != nil {
-			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-		}
-		if bodyRequest.MaxRetries != nil {
-			body.SetMaxRetries(*bodyRequest.MaxRetries)
-		}
+// func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
+// 	request := &apiConnector.UpdateRequest{}
 
-		body.SetModules(bodyRequest.Modules)
+// 	if connectorRequest.EdgeConnectorHTTPRequest != nil {
+// 		bodyRequest := connectorRequest.EdgeConnectorHTTPRequest
+// 		body := edgesdk.PatchedEdgeConnectorHTTPRequest{}
+// 		if bodyRequest.Active != nil {
+// 			body.SetActive(*bodyRequest.Active)
+// 		}
+// 		if len(bodyRequest.Addresses) > 0 {
+// 			body.SetAddresses(bodyRequest.Addresses)
+// 		}
+// 		if len(bodyRequest.ConnectionPreference) > 0 {
+// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
+// 		}
+// 		if bodyRequest.ConnectionTimeout != nil {
+// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
+// 		}
+// 		if bodyRequest.LoadBalanceMethod != nil {
+// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
+// 		}
+// 		if bodyRequest.MaxRetries != nil {
+// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
+// 		}
 
-		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
-		}
-		if bodyRequest.ReadWriteTimeout != nil {
-			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-		}
-		if bodyRequest.Tls != nil {
-			body.SetTls(*bodyRequest.Tls)
-		}
-		if bodyRequest.Type != "" {
-			body.SetType(bodyRequest.Type)
-		}
-		body.SetTypeProperties(bodyRequest.TypeProperties)
-		request.PatchedEdgeConnectorHTTPRequest = &body
-		return request
-	}
+// 		body.SetModules(bodyRequest.Modules)
 
-	if connectorRequest.EdgeConnectorLiveIngestRequest != nil {
-		body := edgesdk.PatchedEdgeConnectorLiveIngestRequest{}
-		bodyRequest := connectorRequest.EdgeConnectorLiveIngestRequest
-		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.ConnectionPreference) > 0 {
-			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-		}
-		if bodyRequest.ConnectionTimeout != nil {
-			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-		}
-		if bodyRequest.LoadBalanceMethod != nil {
-			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-		}
-		if bodyRequest.MaxRetries != nil {
-			body.SetMaxRetries(*bodyRequest.MaxRetries)
-		}
+// 		if bodyRequest.Name != "" {
+// 			body.SetName(bodyRequest.Name)
+// 		}
+// 		if bodyRequest.ReadWriteTimeout != nil {
+// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
+// 		}
+// 		if bodyRequest.Tls != nil {
+// 			body.SetTls(*bodyRequest.Tls)
+// 		}
+// 		if bodyRequest.Type != "" {
+// 			body.SetType(bodyRequest.Type)
+// 		}
+// 		body.SetTypeProperties(bodyRequest.TypeProperties)
+// 		request.PatchedEdgeConnectorHTTPRequest = &body
+// 		return request
+// 	}
 
-		body.SetModules(bodyRequest.Modules)
+// 	if connectorRequest.EdgeConnectorLiveIngestRequest != nil {
+// 		body := edgesdk.PatchedEdgeConnectorLiveIngestRequest{}
+// 		bodyRequest := connectorRequest.EdgeConnectorLiveIngestRequest
+// 		if bodyRequest.Active != nil {
+// 			body.SetActive(*bodyRequest.Active)
+// 		}
+// 		if len(bodyRequest.ConnectionPreference) > 0 {
+// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
+// 		}
+// 		if bodyRequest.ConnectionTimeout != nil {
+// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
+// 		}
+// 		if bodyRequest.LoadBalanceMethod != nil {
+// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
+// 		}
+// 		if bodyRequest.MaxRetries != nil {
+// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
+// 		}
 
-		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
-		}
-		if bodyRequest.ReadWriteTimeout != nil {
-			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-		}
-		if bodyRequest.Tls != nil {
-			body.SetTls(*bodyRequest.Tls)
-		}
-		if bodyRequest.Type != "" {
-			body.SetType(bodyRequest.Type)
-		}
-		body.SetTypeProperties(bodyRequest.TypeProperties)
-		request.PatchedEdgeConnectorLiveIngestRequest = &body
-		return request
-	}
+// 		body.SetModules(bodyRequest.Modules)
 
-	if connectorRequest.EdgeConnectorS3Request != nil {
-		body := edgesdk.PatchedEdgeConnectorS3Request{}
-		bodyRequest := connectorRequest.EdgeConnectorS3Request
-		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.Addresses) > 0 {
-			body.SetAddresses(bodyRequest.Addresses)
-		}
-		if len(bodyRequest.ConnectionPreference) > 0 {
-			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-		}
-		if bodyRequest.ConnectionTimeout != nil {
-			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-		}
-		if bodyRequest.LoadBalanceMethod != nil {
-			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-		}
-		if bodyRequest.MaxRetries != nil {
-			body.SetMaxRetries(*bodyRequest.MaxRetries)
-		}
-		body.SetModules(bodyRequest.Modules)
+// 		if bodyRequest.Name != "" {
+// 			body.SetName(bodyRequest.Name)
+// 		}
+// 		if bodyRequest.ReadWriteTimeout != nil {
+// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
+// 		}
+// 		if bodyRequest.Tls != nil {
+// 			body.SetTls(*bodyRequest.Tls)
+// 		}
+// 		if bodyRequest.Type != "" {
+// 			body.SetType(bodyRequest.Type)
+// 		}
+// 		body.SetTypeProperties(bodyRequest.TypeProperties)
+// 		request.PatchedEdgeConnectorLiveIngestRequest = &body
+// 		return request
+// 	}
 
-		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
-		}
-		if bodyRequest.ReadWriteTimeout != nil {
-			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-		}
-		if bodyRequest.Tls != nil {
-			body.SetTls(*bodyRequest.Tls)
-		}
-		if bodyRequest.Type != "" {
-			body.SetType(bodyRequest.Type)
-		}
-		body.SetTypeProperties(bodyRequest.TypeProperties)
+// 	if connectorRequest.EdgeConnectorS3Request != nil {
+// 		body := edgesdk.PatchedEdgeConnectorS3Request{}
+// 		bodyRequest := connectorRequest.EdgeConnectorS3Request
+// 		if bodyRequest.Active != nil {
+// 			body.SetActive(*bodyRequest.Active)
+// 		}
+// 		if len(bodyRequest.Addresses) > 0 {
+// 			body.SetAddresses(bodyRequest.Addresses)
+// 		}
+// 		if len(bodyRequest.ConnectionPreference) > 0 {
+// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
+// 		}
+// 		if bodyRequest.ConnectionTimeout != nil {
+// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
+// 		}
+// 		if bodyRequest.LoadBalanceMethod != nil {
+// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
+// 		}
+// 		if bodyRequest.MaxRetries != nil {
+// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
+// 		}
+// 		body.SetModules(bodyRequest.Modules)
 
-		request.PatchedEdgeConnectorS3Request = &body
-		return request
-	}
+// 		if bodyRequest.Name != "" {
+// 			body.SetName(bodyRequest.Name)
+// 		}
+// 		if bodyRequest.ReadWriteTimeout != nil {
+// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
+// 		}
+// 		if bodyRequest.Tls != nil {
+// 			body.SetTls(*bodyRequest.Tls)
+// 		}
+// 		if bodyRequest.Type != "" {
+// 			body.SetType(bodyRequest.Type)
+// 		}
+// 		body.SetTypeProperties(bodyRequest.TypeProperties)
 
-	if connectorRequest.EdgeConnectorStorageRequest != nil {
-		body := edgesdk.PatchedEdgeConnectorStorageRequest{}
-		bodyRequest := connectorRequest.EdgeConnectorStorageRequest
-		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
-		}
-		if len(bodyRequest.ConnectionPreference) > 0 {
-			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-		}
-		if bodyRequest.ConnectionTimeout != nil {
-			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-		}
-		if bodyRequest.LoadBalanceMethod != nil {
-			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-		}
-		if bodyRequest.MaxRetries != nil {
-			body.SetMaxRetries(*bodyRequest.MaxRetries)
-		}
-		body.SetModules(bodyRequest.Modules)
-		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
-		}
-		if bodyRequest.ReadWriteTimeout != nil {
-			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-		}
-		if bodyRequest.Tls != nil {
-			body.SetTls(*bodyRequest.Tls)
-		}
-		if bodyRequest.Type != "" {
-			body.SetType(bodyRequest.Type)
-		}
-		body.SetTypeProperties(bodyRequest.TypeProperties)
+// 		request.PatchedEdgeConnectorS3Request = &body
+// 		return request
+// 	}
 
-		request.PatchedEdgeConnectorStorageRequest = &body
-		return request
-	}
+// 	if connectorRequest.EdgeConnectorStorageRequest != nil {
+// 		body := edgesdk.PatchedEdgeConnectorStorageRequest{}
+// 		bodyRequest := connectorRequest.EdgeConnectorStorageRequest
+// 		if bodyRequest.Active != nil {
+// 			body.SetActive(*bodyRequest.Active)
+// 		}
+// 		if len(bodyRequest.ConnectionPreference) > 0 {
+// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
+// 		}
+// 		if bodyRequest.ConnectionTimeout != nil {
+// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
+// 		}
+// 		if bodyRequest.LoadBalanceMethod != nil {
+// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
+// 		}
+// 		if bodyRequest.MaxRetries != nil {
+// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
+// 		}
+// 		body.SetModules(bodyRequest.Modules)
+// 		if bodyRequest.Name != "" {
+// 			body.SetName(bodyRequest.Name)
+// 		}
+// 		if bodyRequest.ReadWriteTimeout != nil {
+// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
+// 		}
+// 		if bodyRequest.Tls != nil {
+// 			body.SetTls(*bodyRequest.Tls)
+// 		}
+// 		if bodyRequest.Type != "" {
+// 			body.SetType(bodyRequest.Type)
+// 		}
+// 		body.SetTypeProperties(bodyRequest.TypeProperties)
 
-	return request
-}
+// 		request.PatchedEdgeConnectorStorageRequest = &body
+// 		return request
+// 	}
+
+// 	return request
+// }
 
 func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *apiWorkloads.UpdateRequest {
 	request := &apiWorkloads.UpdateRequest{}
@@ -187,17 +188,11 @@ func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *a
 	if createRequest.Active != nil {
 		request.SetActive(*createRequest.Active)
 	}
-	if len(createRequest.AlternateDomains) > 0 {
-		request.SetAlternateDomains(createRequest.AlternateDomains)
-	}
 	if len(createRequest.Domains) > 0 {
 		request.SetDomains(createRequest.Domains)
 	}
 	if createRequest.Mtls != nil {
 		request.SetMtls(*createRequest.Mtls)
-	}
-	if createRequest.NetworkMap != nil {
-		request.SetNetworkMap(*createRequest.NetworkMap)
 	}
 	if createRequest.Protocols != nil {
 		request.SetProtocols(*createRequest.Protocols)
@@ -212,25 +207,17 @@ func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *a
 func transformWorkloadRequestCreate(createRequest contracts.WorkloadManifest, appid int64) *apiWorkloads.CreateRequest {
 	request := &apiWorkloads.CreateRequest{}
 
-	request.SetEdgeApplication(appid)
-
 	if createRequest.Name != "" {
 		request.SetName(createRequest.Name)
 	}
 	if createRequest.Active != nil {
 		request.SetActive(*createRequest.Active)
 	}
-	if len(createRequest.AlternateDomains) > 0 {
-		request.SetAlternateDomains(createRequest.AlternateDomains)
-	}
 	if len(createRequest.Domains) > 0 {
 		request.SetDomains(createRequest.Domains)
 	}
 	if createRequest.Mtls != nil {
 		request.SetMtls(*createRequest.Mtls)
-	}
-	if createRequest.NetworkMap != nil {
-		request.SetNetworkMap(*createRequest.NetworkMap)
 	}
 	if createRequest.Protocols != nil {
 		request.SetProtocols(*createRequest.Protocols)
@@ -348,7 +335,7 @@ func transformCacheRequest(cache edgesdk.CacheSettingRequest) *apiCache.RequestU
 	return &request
 }
 
-func transformRuleRequest(rule edgesdk.EdgeApplicationRuleEngineRequest) *apiEdgeApplications.UpdateRulesEngineRequest {
+func transformRuleRequest(rule edgesdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest) *apiEdgeApplications.UpdateRulesEngineRequest {
 	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
 
 	if rule.Active != nil {
@@ -365,11 +352,8 @@ func transformRuleRequest(rule edgesdk.EdgeApplicationRuleEngineRequest) *apiEdg
 	if rule.Description != nil {
 		request.SetDescription(*rule.Description)
 	}
-	if rule.Name != "" {
-		request.SetName(rule.Name)
-	}
-	if rule.Phase != "" {
-		request.SetPhase(rule.Phase)
+	if rule.Name != nil {
+		request.SetName(*rule.Name)
 	}
 
 	return request

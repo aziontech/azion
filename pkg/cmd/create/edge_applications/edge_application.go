@@ -12,7 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -123,8 +123,11 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			logger.Debug("Error while parsing <"+fields.EdgeCacheEnabled+"> ", zap.Error(err))
 			return utils.ErrorConvertingStringToBool
 		}
+		eCache := sdk.CacheModuleRequest{
+			Enabled: &edgeCache,
+		}
 
-		modules.SetEdgeCacheEnabled(edgeCache)
+		modules.SetEdgeCache(eCache)
 	}
 
 	if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
@@ -134,7 +137,11 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		modules.SetEdgeFunctionsEnabled(edgeFunctions)
+		eFunction := sdk.EdgeFunctionModuleRequest{
+			Enabled: &edgeFunctions,
+		}
+
+		modules.SetEdgeFunctions(eFunction)
 	}
 
 	if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
@@ -144,7 +151,11 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		modules.SetApplicationAcceleratorEnabled(applicationAcc)
+		aAcceleration := sdk.ApplicationAcceleratorModuleRequest{
+			Enabled: &applicationAcc,
+		}
+
+		modules.SetApplicationAccelerator(aAcceleration)
 	}
 
 	if !utils.IsEmpty(fields.ImageProcessorEnabled) {
@@ -154,7 +165,11 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		modules.SetImageProcessorEnabled(imageProcessor)
+		iProcessor := sdk.ImageProcessorModuleRequest{
+			Enabled: &imageProcessor,
+		}
+
+		modules.SetImageProcessor(iProcessor)
 	}
 
 	if !utils.IsEmpty(fields.TieredCacheEnabled) {
@@ -164,7 +179,11 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		modules.SetTieredCacheEnabled(tieredCache)
+		tCache := sdk.TieredCacheModuleRequest{
+			Enabled: &tieredCache,
+		}
+
+		modules.SetTieredCache(tCache)
 	}
 
 	request.SetModules(modules)

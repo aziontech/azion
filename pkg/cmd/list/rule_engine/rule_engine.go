@@ -3,6 +3,7 @@ package ruleengine
 import (
 	"context"
 	"fmt"
+	"io"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
@@ -12,16 +13,19 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 )
 
+var phase string
+
 type ListCmd struct {
-	Io                *iostreams.IOStreams
-	ReadInput         func(string) (string, error)
-	ListRulesEngine   func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error)
-	AskInput          func(string) (string, error)
-	EdgeApplicationID string
+	Io                      *iostreams.IOStreams
+	ReadInput               func(string) (string, error)
+	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedEdgeApplicationRequestPhaseRuleEngineList, error)
+	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedEdgeApplicationResponsePhaseRuleEngineList, error)
+	AskInput                func(string) (string, error)
+	EdgeApplicationID       string
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -30,9 +34,13 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListRulesEngine: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedResponseListEdgeApplicationRuleEngineList, error) {
+		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedEdgeApplicationRequestPhaseRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			return client.ListRulesEngine(ctx, opts, appID)
+			return client.ListRulesEngineRequest(ctx, opts, appID)
+		},
+		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedEdgeApplicationResponsePhaseRuleEngineList, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			return client.ListRulesEngineResponse(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
@@ -62,6 +70,15 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 				list.EdgeApplicationID = answer
 			}
 
+			if !cmd.Flags().Changed("phase") {
+				answer, err := list.AskInput(msg.AskInputPhase)
+				if err != nil {
+					return err
+				}
+
+				phase = answer
+			}
+
 			if err := PrintTable(cmd, f, opts, list); err != nil {
 				return msg.ErrorGetRulesEngines
 			}
@@ -71,6 +88,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().StringVar(&list.EdgeApplicationID, "application-id", "", msg.ApplicationFlagId)
+	cmd.Flags().StringVar(&phase, "phase", "request", msg.RulesEnginePhase)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
 
 	return cmd
@@ -79,41 +97,83 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, list *ListCmd) error {
 	ctx := context.Background()
 
-	rules, err := list.ListRulesEngine(ctx, opts, list.EdgeApplicationID)
-	if err != nil {
-		return err
-	}
+	switch phase {
+	case "request":
+		rules, err := list.ListRulesEngineRequest(ctx, opts, list.EdgeApplicationID)
+		if err != nil {
+			return err
+		}
 
-	listOut := output.ListOutput{}
-	listOut.Columns = []string{"ID", "NAME"}
-	listOut.Out = f.IOStreams.Out
-	listOut.Flags = f.Flags
-
-	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "ORDER", "PHASE", "ACTIVE"}
-	}
-
-	for _, v := range rules.Results {
-		var ln []string
-		if opts.Details {
-			ln = []string{
-				fmt.Sprintf("%d", v.Id),
-				v.Name,
-				fmt.Sprintf("%d", v.Order),
-				v.Phase,
-				fmt.Sprintf("%v", v.Active),
+		extractor := func(rule sdk.EdgeApplicationRequestPhaseRuleEngine, details bool) []string {
+			if details {
+				return []string{
+					fmt.Sprintf("%d", rule),
+					rule.Name,
+					fmt.Sprintf("%d", rule.Order),
+					phase,
+					fmt.Sprintf("%v", rule.Active),
+				}
 			}
-		} else {
-			ln = []string{
-				fmt.Sprintf("%d", v.Id),
-				v.Name,
+			return []string{
+				fmt.Sprintf("%d", rule.Id),
+				rule.Name,
 			}
 		}
-		listOut.Lines = append(listOut.Lines, ln)
+
+		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
+
+	case "response":
+		rules, err := list.ListRulesEngineResponse(ctx, opts, list.EdgeApplicationID)
+		if err != nil {
+			return err
+		}
+
+		extractor := func(rule sdk.EdgeApplicationResponsePhaseRuleEngine, details bool) []string {
+			if details {
+				return []string{
+					fmt.Sprintf("%d", rule),
+					rule.Name,
+					fmt.Sprintf("%d", rule.Order),
+					phase,
+					fmt.Sprintf("%v", rule.Active),
+				}
+			}
+			return []string{
+				fmt.Sprintf("%d", rule.Id),
+				rule.Name,
+			}
+		}
+
+		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
+	default:
+		return msg.ErrorInvalidPhase
+
 	}
-	return output.Print(&listOut)
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewListCmd(f), f)
+}
+
+type Rule interface{}
+
+type ExtractListDataFunc[T Rule] func(T, bool) []string
+
+func RenderList[T Rule](items []T, details bool, outWriter io.Writer, flags cmdutil.Flags, extract ExtractListDataFunc[T]) error {
+	listOut := output.ListOutput{}
+	listOut.Out = outWriter
+	listOut.Flags = flags
+
+	if details {
+		listOut.Columns = []string{"ID", "NAME", "ORDER", "PHASE", "ACTIVE"}
+	} else {
+		listOut.Columns = []string{"ID", "NAME"}
+	}
+
+	for _, item := range items {
+		line := extract(item, details)
+		listOut.Lines = append(listOut.Lines, line)
+	}
+
+	return output.Print(&listOut)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/workload_deployment"
@@ -17,14 +18,14 @@ import (
 )
 
 var (
-	workloadID   string
-	deploymentID string
+	workloadID   int64
+	deploymentID int64
 )
 
 type DescribeCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
-	GetDeployment func(ctx context.Context, id, deploymentid string) (api.DeploymentResponse, error)
+	GetDeployment func(ctx context.Context, id, deploymentid int64) (api.DeploymentResponse, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -33,7 +34,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		GetDeployment: func(ctx context.Context, id, deploymentid string) (api.DeploymentResponse, error) {
+		GetDeployment: func(ctx context.Context, id, deploymentid int64) (api.DeploymentResponse, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.GetDeployment(ctx, id, deploymentid)
 		},
@@ -60,7 +61,10 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				workloadID = answer
+				workloadID, err = strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					return msg.ErrorConvertWorkloadId
+				}
 			}
 
 			if !cmd.Flags().Changed("deployment-id") {
@@ -69,7 +73,10 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				deploymentID = answer
+				deploymentID, err = strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					return msg.ErrorConvertDeploymentId
+				}
 			}
 
 			ctx := context.Background()
@@ -96,8 +103,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&workloadID, "workload-id", "", msg.FlagWorkloadID)
-	cobraCmd.Flags().StringVar(&deploymentID, "deployment-id", "", msg.FlagDeploymentID)
+	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagWorkloadID)
+	cobraCmd.Flags().Int64Var(&deploymentID, "deployment-id", 0, msg.FlagDeploymentID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

@@ -72,37 +72,37 @@ func (b *Objects) PrintTable(client *api.Client) error {
 		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
 	}
 
-	settings.ContinuationToken = resp.GetContinuationToken()
-	err = token.WriteSettings(settings)
-	if err != nil {
-		return err
-	}
-
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"KEY", "LAST MODIFIED"}
 	listOut.Out = b.Factory.IOStreams.Out
 	listOut.Flags = b.Factory.Flags
 
 	if b.Options.Details {
-		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE", "ETAG"}
+		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE"}
 	}
 
-	for _, v := range resp.Results {
-		var ln []string
-		if b.Options.Details {
-			ln = []string{
-				v.GetKey(),
-				fmt.Sprintf("%v", v.GetLastModified()),
-				fmt.Sprintf("%v", v.GetSize()),
-				v.GetEtag(),
-			}
-		} else {
-			ln = []string{
-				v.GetKey(),
-				fmt.Sprintf("%v", v.GetLastModified()),
-			}
+	for _, v := range resp {
+		settings.ContinuationToken = v.GetContinuationToken()
+		err = token.WriteSettings(settings)
+		if err != nil {
+			return err
 		}
-		listOut.Lines = append(listOut.Lines, ln)
+		for _, res := range v.Results {
+			var ln []string
+			if b.Options.Details {
+				ln = []string{
+					res.GetKey(),
+					fmt.Sprintf("%v", res.GetLastModified()),
+					fmt.Sprintf("%v", res.GetSize()),
+				}
+			} else {
+				ln = []string{
+					res.GetKey(),
+					fmt.Sprintf("%v", res.GetLastModified()),
+				}
+			}
+			listOut.Lines = append(listOut.Lines, ln)
+		}
 	}
 	return output.Print(&listOut)
 }
