@@ -152,7 +152,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 	}
 
 	if cmd.Flags().Changed("initiator-type") {
-		request.SetInitiatorType(fields.InitiatorType)
+		request.SetExecutionEnvironment(fields.InitiatorType)
 	}
 
 	request.SetName(fields.Name)

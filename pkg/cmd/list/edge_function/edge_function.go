@@ -17,13 +17,13 @@ import (
 
 type ListCmd struct {
 	Io            *iostreams.IOStreams
-	ListFunctions func(context.Context, *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error)
+	ListFunctions func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error) {
+		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -65,13 +65,18 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		return fmt.Errorf(msg.ErrorGetFunctions.Error(), err)
 	}
 
+	// Check if functions is nil to prevent panic
+	if functions == nil {
+		return fmt.Errorf("received nil response from API")
+	}
+
 	listOut := output.ListOutput{}
-	listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
+	listOut.Columns = []string{"ID", "NAME", "RUNTIME", "ACTIVE"}
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "REFERENCE COUNT", "INITIATOR_TYPE"}
+		listOut.Columns = []string{"ID", "NAME", "RUNTIME", "ACTIVE", "LAST EDITOR", "REFERENCE COUNT", "EXECUTION_ENVIRONMENT"}
 	}
 
 	for _, v := range functions.Results {
@@ -80,17 +85,17 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				v.GetName(),
-				v.GetLanguage(),
+				v.GetRuntime(),
 				fmt.Sprintf("%v", v.GetActive()),
 				v.GetLastEditor(),
 				fmt.Sprintf("%d", v.GetReferenceCount()),
-				v.GetInitiatorType(),
+				v.GetExecutionEnvironment(),
 			}
 		} else {
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				v.GetName(),
-				v.GetLanguage(),
+				v.GetRuntime(),
 				fmt.Sprintf("%v", v.GetActive()),
 			}
 		}

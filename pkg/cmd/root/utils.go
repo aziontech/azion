@@ -20,7 +20,7 @@ func HasBlockAPIV4Flag(token string, f *factoryRoot) (bool, error) {
 		logger.FInfoFlags(f.factory.IOStreams.Out, msg.LoginMessage, f.factory.Format, f.factory.Out)
 		return false, nil
 	}
-	url := "https://sso.azion.com/api/account/info"
+	url := "https://stage-sso.azion.com/api/account/info"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
