@@ -142,14 +142,14 @@ func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOption
 	return resp, nil
 }
 
-func (c *Client) GetDeployment(ctx context.Context, id, deploymentid int64) (DeploymentResponse, error) {
-	logger.Debug("Get Workload Deployment")
-	request := c.apiClient.WorkloadDeploymentsAPI.RetrieveWorkloadDeployment(ctx, id, deploymentid)
-	res, httpResp, err := request.Execute()
+func (c *Client) CreateDeployment(ctx context.Context, workloadId int64, req *CreateDeploymentRequest) (DeploymentResponse, error) {
+	logger.Debug("Create Workload Deployment")
+	request := c.apiClient.WorkloadDeploymentsAPI.CreateWorkloadDeployment(ctx, workloadId).WorkloadDeploymentRequest(req.WorkloadDeploymentRequest)
+	workloadDeploymentResponse, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while describing a Workload Deployment", zap.Error(err))
+			logger.Debug("Error while creating a workload deployment", zap.Error(err), zap.Any("WorkloadId", workloadId))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -157,5 +157,23 @@ func (c *Client) GetDeployment(ctx context.Context, id, deploymentid int64) (Dep
 		}
 		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
-	return &res.Data, nil
+	return &workloadDeploymentResponse.Data, nil
+}
+
+func (c *Client) GetDeployment(ctx context.Context, id, deploymentid int64) (DeploymentResponse, error) {
+	logger.Debug("Get Workload Deployment")
+	request := c.apiClient.WorkloadDeploymentsAPI.RetrieveWorkloadDeployment(ctx, id, deploymentid)
+	workloadDeploymentResponse, httpResp, err := request.Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while getting a workload deployment", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return &workloadDeploymentResponse.Data, nil
 }

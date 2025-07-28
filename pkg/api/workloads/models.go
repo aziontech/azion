@@ -25,6 +25,10 @@ type WorkloadResponse interface {
 	GetActive() bool
 }
 
+type CreateDeploymentRequest struct {
+	sdk.WorkloadDeploymentRequest
+}
+
 type DeploymentResponse interface {
 	GetId() int64
 	GetCurrent() bool

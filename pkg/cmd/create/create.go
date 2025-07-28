@@ -12,6 +12,7 @@ import (
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/create/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/create/workloads"
+	workloadDeployment "github.com/aziontech/azion-cli/pkg/cmd/create/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -24,6 +25,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion create --help
 		$ azion create edge-application -h
 		$ azion create workload -h
+		$ azion create workload-deployment -h
 		$ azion create origin -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -40,6 +42,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(workloadDeployment.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
