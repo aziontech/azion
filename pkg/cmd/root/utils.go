@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 )
 
@@ -20,7 +21,7 @@ func HasBlockAPIV4Flag(token string, f *factoryRoot) (bool, error) {
 		logger.FInfoFlags(f.factory.IOStreams.Out, msg.LoginMessage, f.factory.Format, f.factory.Out)
 		return false, nil
 	}
-	url := "https://stage-sso.azion.com/api/account/info"
+	url := constants.AuthURL + "/account/info"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
