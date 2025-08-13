@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.24.2
+go 1.24.4
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.54
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.73.2
 	github.com/aziontech/azionapi-go-sdk v0.142.0
-	github.com/aziontech/azionapi-v4-go-sdk v0.26.0
+	github.com/aziontech/azionapi-v4-go-sdk v0.34.0
 	github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
 	github.com/briandowns/spinner v1.23.2
@@ -37,8 +37,6 @@ require (
 	go.uber.org/zap v1.27.0
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.37.0
 
 require (
 	dario.cat/mergo v1.0.0 // indirect

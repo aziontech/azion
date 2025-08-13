@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -110,6 +110,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
+			if request.Name == nil || *request.Name == "" {
+				resp, err := client.Get(context.Background(), fields.ApplicationID, fields.CacheSettingID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorGetCache.Error(), err)
+				}
+				name := resp.GetName()
+				request.Name = &name
+			}
+
 			if err := appAccelerationNoEnabled(clientEdgeApp, fields, request); err != nil {
 				return err
 			}
@@ -183,21 +192,41 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 	}
 
 	if cmd.Flags().Changed("query-string-fields") {
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
 		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
 		controls.SetFields(fields.queryStringFields)
 	}
 
 	if cmd.Flags().Changed("cookie-names") {
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
 		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
 		controls.SetCookieNames(fields.cookieNames)
 	}
 
 	if cmd.Flags().Changed("cache-by-cookies") {
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
 		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
 		controls.SetBehavior(fields.cacheByCookies)
 	}
 
 	if cmd.Flags().Changed("cache-by-query-string") {
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
 		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
 		controls.SetBehavior(fields.cacheByQueryString)
 	}
@@ -206,6 +235,12 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		cachingOptions, err := strconv.ParseBool(fields.enableCachingForOptions)
 		if err != nil {
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
+		}
+
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
 		}
 
 		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
@@ -220,6 +255,12 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
 		}
 
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
+		}
+
 		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
 		if cachingPost {
 			edgeCache = append(edgeCache, "post")
@@ -230,6 +271,12 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		stringSort, err := strconv.ParseBool(fields.enableQueryStringSort)
 		if err != nil {
 			return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
+		}
+
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
 		}
 
 		controls := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByQuerystring

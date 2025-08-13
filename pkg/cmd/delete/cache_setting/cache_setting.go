@@ -86,11 +86,9 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				cacheSettingsID = num
 			}
 
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-
 			ctx := context.Background()
 
-			_, err = client.Delete(ctx, applicationID, cacheSettingsID)
+			_, err = delete.DeleteCache(ctx, applicationID, cacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}

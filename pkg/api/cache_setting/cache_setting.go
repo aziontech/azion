@@ -7,7 +7,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -44,7 +44,7 @@ func (c *ClientV4) Update(ctx context.Context, req *RequestUpdate, applicationID
 		PatchedCacheSettingRequest(req.PatchedCacheSettingRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
+		logger.Debug("Error while updating a Cache Setting", zap.Any("ID", cacheSettingID), zap.Any("Name", req.PatchedCacheSettingRequest.Name), zap.Error(err))
 		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return nil, err
@@ -111,13 +111,20 @@ func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsI
 	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
 	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
 
-	_, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr).
-		Execute()
-	if err != nil {
-		logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
+	req := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr)
+	_, httpResp, err := req.Execute()
 
-		return httpResp.StatusCode, utils.ErrorPerStatusCode(httpResp, err)
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return httpResp.StatusCode, err
+			}
+		}
+		return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return 0, nil

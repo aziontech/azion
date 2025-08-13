@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -26,7 +25,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
+	storagesdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
 	"github.com/briandowns/spinner"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -195,12 +194,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		request.Bucket = &nameBucket
 		request.ExpirationDate = &oneYearLater
 
-		creds, err := storageClient.CreateCredentials(ctx, *request)
-		if err != nil {
-			return err
-		}
-		settings.S3AccessKey = creds.Data.GetAccessKey()
-		settings.S3SecreKey = creds.Data.GetSecretKey()
+		// creds, err := storageClient.CreateCredentials(ctx, *request)
+		// if err != nil {
+		// 	return err
+		// }
+		// settings.S3AccessKey = creds.Data.GetAccessKey()
+		// settings.S3SecreKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
 
 		err = token.WriteSettings(settings)
@@ -245,7 +244,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
 
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Workloads.Url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 
@@ -359,7 +358,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return fmt.Errorf(msg.ERRORCAPTURELOGS, Result.Result.Errors.Stack)
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)

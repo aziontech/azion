@@ -184,6 +184,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
+	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
+	if err != nil {
+		return err
+	}
+
 	err = cmd.doFunction(clients, ctx, conf, &msgs)
 	if err != nil {
 		return err
@@ -203,16 +208,19 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		// if err != nil {
 		// 	return nil
 		// }
-		err = cmd.callBundlerInit(conf)
-		if err != nil {
-			return nil
+		if !SkipBuild {
+			err = cmd.callBundlerInit(conf)
+			if err != nil {
+				return nil
+			}
+			buildCmd := cmd.BuildCmd(f)
+			err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+			if err != nil {
+				logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+				return err
+			}
 		}
-		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
+
 	}
 
 	// if !conf.NotFirstRun {
@@ -250,22 +258,17 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	// 	}
 	// }
 
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
-	if err != nil {
-		return err
-	}
-
-	if len(conf.RulesEngine.Rules) == 0 {
+	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
 		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
 		if err != nil {
 			return err
 		}
 	}
 
-	// err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
-	// if err != nil {
-	// 	return err
-	// }
+	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
+	if err != nil {
+		return err
+	}
 
 	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
 		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
@@ -277,7 +280,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
 
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Workloads.Url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 

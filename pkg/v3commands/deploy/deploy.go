@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -328,7 +327,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return fmt.Errorf(msg.ERRORCAPTURELOGS, Result.Result.Errors.Stack)
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)

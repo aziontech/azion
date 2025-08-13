@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"

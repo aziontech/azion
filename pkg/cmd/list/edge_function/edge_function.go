@@ -11,19 +11,19 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io            *iostreams.IOStreams
-	ListFunctions func(context.Context, *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error)
+	ListFunctions func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error) {
+		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -66,12 +66,12 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 	}
 
 	listOut := output.ListOutput{}
-	listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE"}
+	listOut.Columns = []string{"ID", "NAME", "ACTIVE"}
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "LANGUAGE", "ACTIVE", "LAST EDITOR", "REFERENCE COUNT", "INITIATOR_TYPE"}
+		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "REFERENCE COUNT", "EXECUTION ENVIRONMENT"}
 	}
 
 	for _, v := range functions.Results {
@@ -80,17 +80,15 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				v.GetName(),
-				v.GetLanguage(),
 				fmt.Sprintf("%v", v.GetActive()),
 				v.GetLastEditor(),
 				fmt.Sprintf("%d", v.GetReferenceCount()),
-				v.GetInitiatorType(),
+				v.GetExecutionEnvironment(),
 			}
 		} else {
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				v.GetName(),
-				v.GetLanguage(),
 				fmt.Sprintf("%v", v.GetActive()),
 			}
 		}

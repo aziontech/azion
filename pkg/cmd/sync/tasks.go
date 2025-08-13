@@ -16,7 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -150,7 +150,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		if err != nil {
 			return remoteCacheIds, err
 		}
-		manifest.EdgeApplications[0].Cache = append(manifest.EdgeApplications[0].Cache, cEntry)
+		// manifest.EdgeApplications[0].Cache = append(manifest.EdgeApplications[0].Cache, cEntry)
 
 		newCache := contracts.AzionJsonDataCacheSettings{
 			Id:   cache.GetId(),

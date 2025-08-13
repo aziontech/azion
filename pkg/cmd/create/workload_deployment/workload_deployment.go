@@ -6,15 +6,17 @@ import (
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/update/workload_deployment"
+	"go.uber.org/zap"
+
+	msg "github.com/aziontech/azion-cli/messages/create/workload_deployment"
 	api "github.com/aziontech/azion-cli/pkg/api/workloads"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 type Fields struct {
@@ -23,7 +25,7 @@ type Fields struct {
 	Current         string `json:"current"`
 	Path            string
 	WorkloadID      int64
-	DeploymentID    int64
+	ApplicationID   int64
 	StrategyType    string `json:"strategy_type"`
 	EdgeApplication string `json:"edge_application"`
 	EdgeFirewall    string `json:"edge_firewall"`
@@ -40,14 +42,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update workload-deployment --workload-id 1234 --deployment-id 5678 --name 'Hello'
-		$ azion update workload-deployment --workload-id 1234 --deployment-id 5678 --active true --current true
-		$ azion update workload-deployment --workload-id 1234 --deployment-id 5678 --strategy-type blue-green --edge-application 123
-		$ azion update workload-deployment --file "update.json"
+        $ azion create workload-deployment --name workloadName
+        $ azion create workload-deployment --name withargs --active true --current true
+        $ azion create workload-deployment --name withstrategy --strategy-type blue-green --edge-application 123
+        $ azion create workload-deployment --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := sdk.PatchedWorkloadDeploymentRequest{}
-
+			request := sdk.WorkloadDeploymentRequest{}
 			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {
@@ -55,39 +56,45 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				if !cmd.Flags().Changed("workload-id") {
-					answer, err := utils.AskInput(msg.AskInputWorkloadID)
+
+				if !cmd.Flags().Changed("name") {
+					answer, err := utils.AskInput(msg.AskInputName)
 					if err != nil {
 						return err
 					}
-					num, err := strconv.ParseInt(answer, 10, 64)
-					if err != nil {
-						logger.Debug("Error while converting answer to int64", zap.Error(err))
-						return msg.ErrorConvertWorkloadId
-					}
-					logger.Debug("Converted Workload ID", zap.Any("Workload ID", num))
-					fields.WorkloadID = num
+
+					fields.Name = answer
 				}
 
-				if !cmd.Flags().Changed("deployment-id") {
-					answer, err := utils.AskInput(msg.AskInputDeploymentID)
+				// Check if workload-id is provided, if not ask for it
+				if fields.WorkloadID == 0 {
+					workloadIDStr, err := utils.AskInput(msg.AskInputWorkloadID)
 					if err != nil {
 						return err
 					}
-					num, err := strconv.ParseInt(answer, 10, 64)
+
+					workloadID, err := strconv.ParseInt(workloadIDStr, 10, 64)
 					if err != nil {
-						logger.Debug("Error while converting answer to int64", zap.Error(err))
-						return msg.ErrorConvertDeploymentId
+						return fmt.Errorf("invalid workload ID: %q", workloadIDStr)
 					}
-					logger.Debug("Converted Deployment ID", zap.Any("Deployment ID", num))
-					fields.DeploymentID = num
+					fields.WorkloadID = workloadID
 				}
 
-				// Set name if provided
-				if cmd.Flags().Changed("name") {
-					name := fields.Name
-					request.Name = &name
+				// Check if application-id is provided, if not ask for it
+				if fields.ApplicationID == 0 {
+					appIDStr, err := utils.AskInput(msg.AskInputApplicationID)
+					if err != nil {
+						return err
+					}
+
+					appID, err := strconv.ParseInt(appIDStr, 10, 64)
+					if err != nil {
+						return fmt.Errorf("invalid application ID: %q", appIDStr)
+					}
+					fields.ApplicationID = appID
 				}
+
+				request.SetName(fields.Name)
 
 				// Handle Active flag as pointer
 				if cmd.Flags().Changed("active") {
@@ -95,16 +102,18 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					if err != nil {
 						return fmt.Errorf("%w: %q", msg.ErrorIsActiveFlag, fields.Active)
 					}
-					request.Active = &isActive
+					active := isActive
+					request.Active = &active
 				}
 
 				// Handle Current flag as pointer
 				if cmd.Flags().Changed("current") {
 					isCurrent, err := strconv.ParseBool(fields.Current)
 					if err != nil {
-						return fmt.Errorf("%w: %q", msg.ErrorConvertCurrent, fields.Current)
+						return fmt.Errorf("%w: %q", msg.ErrorIsActiveFlag, fields.Current)
 					}
-					request.Current = &isCurrent
+					current := isCurrent
+					request.Current = &current
 				}
 
 				// Handle Strategy
@@ -148,39 +157,36 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					}
 
 					strategy.Attributes = attributes
-					request.Strategy = &strategy
+					request.Strategy = strategy
 				}
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			ctx := context.Background()
-			response, err := client.UpdateDeployment(ctx, request, fields.WorkloadID, fields.DeploymentID)
-
+			response, err := client.CreateDeployment(context.Background(), request, fields.WorkloadID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorUpdateWorkloadDeployment.Error(), err)
+				return fmt.Errorf(msg.ErrorCreateWorkloadDeployment.Error(), err)
 			}
 
-			updateOut := output.GeneralOutput{
+			createOut := output.GeneralOutput{
 				Msg:   fmt.Sprintf(msg.OutputSuccess, response.GetId()),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
-			return output.Print(&updateOut)
+			return output.Print(&createOut)
 		},
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.WorkloadID, "workload-id", 0, msg.FlagWorkloadID)
-	flags.Int64Var(&fields.DeploymentID, "deployment-id", 0, msg.FlagDeploymentID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagIsActive)
 	flags.StringVar(&fields.Current, "current", "", msg.FlagIsCurrent)
 	flags.StringVar(&fields.StrategyType, "strategy-type", "", msg.FlagStrategyType)
-	flags.StringVar(&fields.EdgeApplication, "edge-application", "", msg.FlagEdgeApplicationId)
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagEdgeFirewallId)
-	flags.StringVar(&fields.CustomPage, "custom-page", "", msg.FlagCustomPageId)
+	flags.StringVar(&fields.EdgeApplication, "edge-application", "", "Edge Application ID for the deployment strategy")
+	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", "Edge Firewall ID for the deployment strategy")
+	flags.StringVar(&fields.CustomPage, "custom-page", "", "Custom Page ID for the deployment strategy")
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
+	flags.Int64Var(&fields.WorkloadID, "workload-id", 0, "Workload ID")
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, "Application ID")
 	flags.BoolP("help", "h", false, msg.HelpFlag)
-
 	return cmd
 }

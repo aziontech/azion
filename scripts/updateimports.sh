@@ -2,7 +2,7 @@
 
 # Default values
 FROM="github.com/aziontech/azionapi-v4-go-sdk"
-TO="github.com/aziontech/azionapi-v4-go-sdk-dev"
+TO="github.com/aziontech/azionapi-v4-go-sdk"
 DIRECTORIES=(".") # Default: full project
 
 # Show usage help
@@ -34,7 +34,7 @@ EOF
 while [[ "$#" -gt 0 ]]; do
     case "$1" in
         --undo)
-            FROM="github.com/aziontech/azionapi-v4-go-sdk-dev"
+            FROM="github.com/aziontech/azionapi-v4-go-sdk"
             TO="github.com/aziontech/azionapi-v4-go-sdk"
             shift
             ;;

@@ -7,7 +7,7 @@ var (
 	DeployLongDescription                = "Deploys an Edge Application"
 	DeploySuccessful                     = "Your Edge Application was deployed successfully\n"
 	SimpleDeploySuccessful               = "Your simple Edge Application was deployed successfully\n"
-	DeployOutputDomainSuccess            = "\nTo visualize your application access the Domain: %v\n"
+	DeployOutputDomainSuccess            = "\nTo visualize your application access the Domain: %s\n"
 	EdgeApplicationDeployDomainHint      = "You may now edit your Domain and add your own CNAMES. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	DeployOutputCachePurge               = "Domain cache was purged\n"
 	DeployOutputEdgeFunctionCreate       = "Created Edge Function %v with ID %v\n"

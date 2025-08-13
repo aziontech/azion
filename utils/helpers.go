@@ -557,7 +557,7 @@ func LogAndRewindBodyV4(httpResp *http.Response) (string, error) {
 
 	errorMessage := ""
 	for _, errorObject := range errResp.Errors {
-		errorMessage = errorMessage + errorObject.Detail + "\n"
+		errorMessage = errorMessage + "Error: " + errorObject.Title + " - Source: " + errorObject.Source.Pointer + " - Message: " + errorObject.Detail + "\n"
 	}
 	logger.Debug("", zap.Any("Detailed error message from API", errorMessage))
 

@@ -11,7 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"github.com/spf13/cobra"
 )
 
@@ -74,6 +74,9 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		listOut.Columns = []string{"ID", "NAME", "TYPE", "ACTIVE", "LAST EDITOR", "LAST MODIFIED"}
 	}
 
+	if functions == nil {
+		return output.Print(&listOut)
+	}
 	for _, v := range functions.Results {
 		var ln []string
 		if v.EdgeConnectorHTTP != nil {

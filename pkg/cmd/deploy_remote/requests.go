@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
@@ -183,7 +183,6 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 				newFunc.Name = projName
 				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, newFunc, msgs)
 				if err != nil {
-					fmt.Println(err)
 					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 						continue
 					}
@@ -477,7 +476,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqCre.SetDefaultArgs(edgesdk.EdgeFunctionsDefaultArgs{Arg: args})
+	reqCre.SetDefaultArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
 		logger.Debug("Error while creating Edge Function", zap.Error(err), zap.Any("Name", reqCre.Name))
@@ -522,7 +521,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
 
-	reqUpd.SetDefaultArgs(edgesdk.EdgeFunctionsDefaultArgs{Arg: args})
+	reqUpd.SetDefaultArgs(args)
 	funcId := strconv.FormatInt(funcToUpdate.ID, 10)
 	response, err := client.Update(ctx, &reqUpd, funcId)
 	if err != nil {

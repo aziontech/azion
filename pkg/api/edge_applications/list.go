@@ -3,7 +3,7 @@ package edge_applications
 import (
 	"context"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -14,8 +14,9 @@ import (
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error) {
 	logger.Debug("List Edge Applications")
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsAPI.
-		ListEdgeApplications(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
+	req := c.apiClient.EdgeApplicationsAPI.
+		ListEdgeApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
+	resp, httpResp, err := req.Execute()
 
 	if err != nil {
 		errBody := ""

@@ -2,182 +2,87 @@ package manifest
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
+	"encoding/json"
+
+	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
-	"github.com/aziontech/azionapi-v4-go-sdk/edge"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
 //TODO: FIX HERE
 
-// func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
-// 	request := &apiConnector.UpdateRequest{}
+func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
+	request := &apiConnector.UpdateRequest{}
 
-// 	if connectorRequest.EdgeConnectorHTTPRequest != nil {
-// 		bodyRequest := connectorRequest.EdgeConnectorHTTPRequest
-// 		body := edgesdk.PatchedEdgeConnectorHTTPRequest{}
-// 		if bodyRequest.Active != nil {
-// 			body.SetActive(*bodyRequest.Active)
-// 		}
-// 		if len(bodyRequest.Addresses) > 0 {
-// 			body.SetAddresses(bodyRequest.Addresses)
-// 		}
-// 		if len(bodyRequest.ConnectionPreference) > 0 {
-// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-// 		}
-// 		if bodyRequest.ConnectionTimeout != nil {
-// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-// 		}
-// 		if bodyRequest.LoadBalanceMethod != nil {
-// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-// 		}
-// 		if bodyRequest.MaxRetries != nil {
-// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
-// 		}
+	if connectorRequest.EdgeConnectorHTTPRequest != nil {
+		bodyRequest := connectorRequest.EdgeConnectorHTTPRequest
+		atts := bodyRequest.Attributes
+		body := edgesdk.PatchedEdgeConnectorHTTPRequest{}
+		if bodyRequest.Active != nil {
+			body.SetActive(*bodyRequest.Active)
+		}
 
-// 		body.SetModules(bodyRequest.Modules)
+		if bodyRequest.Name != "" {
+			body.SetName(bodyRequest.Name)
+		}
 
-// 		if bodyRequest.Name != "" {
-// 			body.SetName(bodyRequest.Name)
-// 		}
-// 		if bodyRequest.ReadWriteTimeout != nil {
-// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-// 		}
-// 		if bodyRequest.Tls != nil {
-// 			body.SetTls(*bodyRequest.Tls)
-// 		}
-// 		if bodyRequest.Type != "" {
-// 			body.SetType(bodyRequest.Type)
-// 		}
-// 		body.SetTypeProperties(bodyRequest.TypeProperties)
-// 		request.PatchedEdgeConnectorHTTPRequest = &body
-// 		return request
-// 	}
+		body.SetType(bodyRequest.Type)
 
-// 	if connectorRequest.EdgeConnectorLiveIngestRequest != nil {
-// 		body := edgesdk.PatchedEdgeConnectorLiveIngestRequest{}
-// 		bodyRequest := connectorRequest.EdgeConnectorLiveIngestRequest
-// 		if bodyRequest.Active != nil {
-// 			body.SetActive(*bodyRequest.Active)
-// 		}
-// 		if len(bodyRequest.ConnectionPreference) > 0 {
-// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-// 		}
-// 		if bodyRequest.ConnectionTimeout != nil {
-// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-// 		}
-// 		if bodyRequest.LoadBalanceMethod != nil {
-// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-// 		}
-// 		if bodyRequest.MaxRetries != nil {
-// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
-// 		}
+		body.SetAttributes(atts)
+		request.PatchedEdgeConnectorHTTPRequest = &body
+		return request
+	}
 
-// 		body.SetModules(bodyRequest.Modules)
+	if connectorRequest.EdgeConnectorLiveIngestRequest != nil {
+		body := edgesdk.PatchedEdgeConnectorLiveIngestRequest{}
+		bodyRequest := connectorRequest.EdgeConnectorLiveIngestRequest
+		if bodyRequest.Active != nil {
+			body.SetActive(*bodyRequest.Active)
+		}
+		body.SetType(bodyRequest.Type)
+		body.SetAttributes(bodyRequest.Attributes)
 
-// 		if bodyRequest.Name != "" {
-// 			body.SetName(bodyRequest.Name)
-// 		}
-// 		if bodyRequest.ReadWriteTimeout != nil {
-// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-// 		}
-// 		if bodyRequest.Tls != nil {
-// 			body.SetTls(*bodyRequest.Tls)
-// 		}
-// 		if bodyRequest.Type != "" {
-// 			body.SetType(bodyRequest.Type)
-// 		}
-// 		body.SetTypeProperties(bodyRequest.TypeProperties)
-// 		request.PatchedEdgeConnectorLiveIngestRequest = &body
-// 		return request
-// 	}
+		if bodyRequest.Name != "" {
+			body.SetName(bodyRequest.Name)
+		}
 
-// 	if connectorRequest.EdgeConnectorS3Request != nil {
-// 		body := edgesdk.PatchedEdgeConnectorS3Request{}
-// 		bodyRequest := connectorRequest.EdgeConnectorS3Request
-// 		if bodyRequest.Active != nil {
-// 			body.SetActive(*bodyRequest.Active)
-// 		}
-// 		if len(bodyRequest.Addresses) > 0 {
-// 			body.SetAddresses(bodyRequest.Addresses)
-// 		}
-// 		if len(bodyRequest.ConnectionPreference) > 0 {
-// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-// 		}
-// 		if bodyRequest.ConnectionTimeout != nil {
-// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-// 		}
-// 		if bodyRequest.LoadBalanceMethod != nil {
-// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-// 		}
-// 		if bodyRequest.MaxRetries != nil {
-// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
-// 		}
-// 		body.SetModules(bodyRequest.Modules)
+		if bodyRequest.Type != "" {
+			body.SetType(bodyRequest.Type)
+		}
+		request.PatchedEdgeConnectorLiveIngestRequest = &body
+		return request
+	}
 
-// 		if bodyRequest.Name != "" {
-// 			body.SetName(bodyRequest.Name)
-// 		}
-// 		if bodyRequest.ReadWriteTimeout != nil {
-// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-// 		}
-// 		if bodyRequest.Tls != nil {
-// 			body.SetTls(*bodyRequest.Tls)
-// 		}
-// 		if bodyRequest.Type != "" {
-// 			body.SetType(bodyRequest.Type)
-// 		}
-// 		body.SetTypeProperties(bodyRequest.TypeProperties)
+	if connectorRequest.EdgeConnectorStorageRequest != nil {
+		body := edgesdk.PatchedEdgeConnectorStorageRequest{}
+		bodyRequest := connectorRequest.EdgeConnectorStorageRequest
+		if bodyRequest.Active != nil {
+			body.SetActive(*bodyRequest.Active)
+		}
 
-// 		request.PatchedEdgeConnectorS3Request = &body
-// 		return request
-// 	}
+		if bodyRequest.Name != "" {
+			body.SetName(bodyRequest.Name)
+		}
 
-// 	if connectorRequest.EdgeConnectorStorageRequest != nil {
-// 		body := edgesdk.PatchedEdgeConnectorStorageRequest{}
-// 		bodyRequest := connectorRequest.EdgeConnectorStorageRequest
-// 		if bodyRequest.Active != nil {
-// 			body.SetActive(*bodyRequest.Active)
-// 		}
-// 		if len(bodyRequest.ConnectionPreference) > 0 {
-// 			body.SetConnectionPreference(bodyRequest.ConnectionPreference)
-// 		}
-// 		if bodyRequest.ConnectionTimeout != nil {
-// 			body.SetConnectionTimeout(*bodyRequest.ConnectionTimeout)
-// 		}
-// 		if bodyRequest.LoadBalanceMethod != nil {
-// 			body.SetLoadBalanceMethod(*bodyRequest.LoadBalanceMethod)
-// 		}
-// 		if bodyRequest.MaxRetries != nil {
-// 			body.SetMaxRetries(*bodyRequest.MaxRetries)
-// 		}
-// 		body.SetModules(bodyRequest.Modules)
-// 		if bodyRequest.Name != "" {
-// 			body.SetName(bodyRequest.Name)
-// 		}
-// 		if bodyRequest.ReadWriteTimeout != nil {
-// 			body.SetReadWriteTimeout(*bodyRequest.ReadWriteTimeout)
-// 		}
-// 		if bodyRequest.Tls != nil {
-// 			body.SetTls(*bodyRequest.Tls)
-// 		}
-// 		if bodyRequest.Type != "" {
-// 			body.SetType(bodyRequest.Type)
-// 		}
-// 		body.SetTypeProperties(bodyRequest.TypeProperties)
+		body.SetType(bodyRequest.Type)
 
-// 		request.PatchedEdgeConnectorStorageRequest = &body
-// 		return request
-// 	}
+		body.SetAttributes(bodyRequest.Attributes)
 
-// 	return request
-// }
+		request.PatchedEdgeConnectorStorageRequest = &body
+		return request
+	}
+
+	return request
+}
 
 func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *apiWorkloads.UpdateRequest {
 	request := &apiWorkloads.UpdateRequest{}
@@ -245,26 +150,9 @@ func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.EdgeApplicat
 		ImageProcessorEnabled         bool `json:"image_processor_enabled"`
 		TieredCacheEnabled            bool `json:"tiered_cache_enabled"`
 	}
-	// if edgeapprequest.Modules != nil {
-	// 	modules := edgesdk.EdgeApplicationModulesRequest{}
-	// 	if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
-	// 		modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.EdgeCacheEnabled != nil {
-	// 		modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
-	// 		modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.ImageProcessorEnabled != nil {
-	// 		modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.TieredCacheEnabled != nil {
-	// 		modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
-	// 	}
-
-	// 	request.SetModules(modules)
-	// }
+	if edgeapprequest.Modules != nil {
+		request.SetModules(*edgeapprequest.Modules)
+	}
 
 	//TODO: Fix Here
 	if edgeapprequest.Name != "" {
@@ -319,42 +207,68 @@ func transformEdgeApplicationRequestCreate(edgeapprequest contracts.EdgeApplicat
 	return request
 }
 
-func transformCacheRequest(cache edgesdk.CacheSettingRequest) *apiCache.RequestUpdate {
+func transformCacheRequest(cache contracts.ManifestCacheSetting) *apiCache.RequestUpdate {
 	request := apiCache.RequestUpdate{}
 
 	if cache.Name != "" {
 		request.SetName(cache.Name)
 	}
-	// request.SetApplicationControls(cache.ApplicationControls)
-	// request.SetBrowserCache(cache.BrowserCache)
-	// request.SetEdgeCache(cache.EdgeCache)
-	// request.SetSliceControls(cache.SliceControls)
 
-	//TODO: Fix Here
+	if cache.BrowserCache != nil {
+		request.SetBrowserCache(*cache.BrowserCache)
+	}
+	if cache.Modules != nil {
+		request.SetModules(*cache.Modules)
+	}
 
 	return &request
 }
 
-func transformRuleRequest(rule edgesdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest) *apiEdgeApplications.UpdateRulesEngineRequest {
-	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
+func transformCacheRequestCreate(cache contracts.ManifestCacheSetting) *apiCache.Request {
+	request := apiCache.Request{}
 
-	if rule.Active != nil {
-		request.SetActive(*rule.Active)
+	if cache.Name != "" {
+		request.SetName(cache.Name)
 	}
+
+	if cache.BrowserCache != nil {
+		request.SetBrowserCache(*cache.BrowserCache)
+	}
+	if cache.Modules != nil {
+		request.SetModules(*cache.Modules)
+	}
+
+	return &request
+}
+
+func transformRuleResponse(rule contracts.ManifestRule) *apiEdgeApplications.UpdateRulesEngineResponse {
+	request := &apiEdgeApplications.UpdateRulesEngineResponse{}
+
+	request.SetActive(rule.Active)
 	// if rule.Behaviors != nil {
 	// 	request.SetBehaviors(rule.Behaviors)
 	// }
-	// if rule.Criteria != nil {
-	// 	request.SetCriteria(rule.Criteria)
-	// }
+	if rule.Criteria != nil {
+		request.SetCriteria(rule.Criteria)
+	}
 
 	//TODO: Fix Here
-	if rule.Description != nil {
-		request.SetDescription(*rule.Description)
+	request.SetDescription(rule.Description)
+	request.SetName(rule.Name)
+
+	return request
+}
+
+func transformRuleRequest(rule contracts.ManifestRule) *apiEdgeApplications.UpdateRulesEngineRequest {
+	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
+
+	request.SetActive(rule.Active)
+	if rule.Criteria != nil {
+		request.SetCriteria(rule.Criteria)
 	}
-	if rule.Name != nil {
-		request.SetName(*rule.Name)
-	}
+
+	request.SetDescription(rule.Description)
+	request.SetName(rule.Name)
 
 	return request
 }
@@ -392,21 +306,219 @@ func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, con
 	return cache.GetId(), nil
 }
 
-func getConnectorName(connector edge.EdgeConnectorPolymorphicRequest, defaultName string) string {
-	if connector.EdgeConnectorHTTPTypedRequest != nil {
-		return connector.EdgeConnectorHTTPTypedRequest.Name
+func getConnectorName(connector edgesdk.EdgeConnectorPolymorphicRequest, defaultName string) (string, string) {
+	if connector.EdgeConnectorHTTPRequest != nil {
+		return connector.EdgeConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.EdgeConnectorLiveIngestTypedRequest != nil {
-		return connector.EdgeConnectorLiveIngestTypedRequest.Name
+	if connector.EdgeConnectorLiveIngestRequest != nil {
+		return connector.EdgeConnectorLiveIngestRequest.Name, "ingest"
 	}
 
-	if connector.EdgeConnectorS3TypedRequest != nil {
-		return connector.EdgeConnectorS3TypedRequest.Name
+	if connector.EdgeConnectorStorageRequest != nil {
+		return connector.EdgeConnectorStorageRequest.Name, "storage"
 	}
 
-	if connector.EdgeConnectorStorageTypedRequest != nil {
-		return connector.EdgeConnectorStorageTypedRequest.Name
+	return defaultName, ""
+}
+
+func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.EdgeApplicationRuleEngineRequestPhaseBehaviorsRequest, error) {
+	behaviorsRequest := []edgesdk.EdgeApplicationRuleEngineRequestPhaseBehaviorsRequest{}
+	for _, behavior := range behaviors {
+		var withArgs edgesdk.EdgeApplicationRequestPhaseBehaviorWithArgsRequest
+		var withoutArgs edgesdk.EdgeApplicationRequestPhaseBehaviorWithoutArgsRequest
+		var captureMatchGroups edgesdk.EdgeApplicationRequestPhaseBehaviorCaptureMatchGroupsRequest
+		var beh edgesdk.EdgeApplicationRuleEngineRequestPhaseBehaviorsRequest
+		switch behavior.Type {
+		case "run_function":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineStringAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			withArgs.SetType("run_function")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				funcName := *attributes.Value.String
+				if _, ok := FunctionIds[funcName]; !ok {
+					return nil, msg.ErrorFuncNotFound
+				}
+				funcToWorkWith := FunctionIds[funcName]
+				v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
+					Int64: &funcToWorkWith.InstanceID,
+				}
+				attributes.SetValue(v)
+				withArgs.SetAttributes(attributes)
+			}
+			beh.EdgeApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			behaviorsRequest = append(behaviorsRequest, beh)
+		case "set_cache_policy":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineStringAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			withArgs.SetType("set_cache_policy")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				cacheName := *attributes.Value.String
+				if id := CacheIdsBackup[cacheName]; id > 0 {
+					fmt.Println("ID", id)
+					v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
+					withArgs.SetAttributes(attributes)
+					fmt.Println(cacheName)
+					delete(CacheIds, cacheName)
+				} else {
+					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
+					return nil, msg.ErrorCacheNotFound
+				}
+			}
+			beh.EdgeApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			behaviorsRequest = append(behaviorsRequest, beh)
+		case "set_edge_connector":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineStringAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			withArgs.SetType("set_edge_connector")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				connectorName := *attributes.Value.String
+				if id := ConnectorIds[connectorName]; id > 0 {
+					v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
+					withArgs.SetAttributes(attributes)
+					delete(ConnectorIds, connectorName)
+				} else {
+					logger.Debug("Edge Connector not found", zap.Any("Target", connectorName))
+					return nil, msg.ErrorConnectorNotFound
+				}
+			}
+			beh.EdgeApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			behaviorsRequest = append(behaviorsRequest, beh)
+		case "capture_match_groups":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineCaptureMatchGroupsAttributesRequest
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			captureMatchGroups.SetType("capture_match_groups")
+			captureMatchGroups.SetAttributes(attributes)
+			beh.EdgeApplicationRequestPhaseBehaviorCaptureMatchGroupsRequest = &captureMatchGroups
+			behaviorsRequest = append(behaviorsRequest, beh)
+		case "redirect_to_301", "redirect_to_302", "filter_request_cookie", "rewrite_request", "add_request_header", "filter_request_header", "add_request_cookie":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineStringAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			withArgs.SetType(behavior.Type)
+			withArgs.SetAttributes(attributes)
+			beh.EdgeApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			behaviorsRequest = append(behaviorsRequest, beh)
+		default:
+			withoutArgs.SetType(behavior.Type)
+			beh.EdgeApplicationRequestPhaseBehaviorWithoutArgsRequest = &withoutArgs
+			behaviorsRequest = append(behaviorsRequest, beh)
+		}
 	}
-	return defaultName
+
+	return behaviorsRequest, nil
+}
+
+func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest, error) {
+	behaviorsResponse := []edgesdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest{}
+
+	for _, behavior := range behaviors {
+		var withArgs edgesdk.EdgeApplicationResponsePhaseBehaviorWithArgsRequest
+		var withoutArgs edgesdk.EdgeApplicationResponsePhaseBehaviorWithoutArgsRequest
+		var captureMatchGroups edgesdk.EdgeApplicationResponsePhaseBehaviorCaptureMatchGroupsRequest
+		var beh edgesdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest
+
+		switch behavior.Type {
+		case "capture_match_groups":
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineCaptureMatchGroupsAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			captureMatchGroups.SetType("capture_match_groups")
+			captureMatchGroups.SetAttributes(attributes)
+			beh.EdgeApplicationResponsePhaseBehaviorCaptureMatchGroupsRequest = &captureMatchGroups
+			behaviorsResponse = append(behaviorsResponse, beh)
+		case "enable_gzip", "deliver":
+			withoutArgs.SetType(behavior.Type)
+			beh.EdgeApplicationResponsePhaseBehaviorWithoutArgsRequest = &withoutArgs
+			behaviorsResponse = append(behaviorsResponse, beh)
+		default:
+			// Everything else is WithArgs string
+			attributesJSON, err := json.Marshal(behavior.Attributes)
+			if err != nil {
+				return nil, err
+			}
+			var attributes edgesdk.EdgeApplicationRuleEngineStringAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
+			}
+			withArgs.SetType(behavior.Type)
+			withArgs.SetAttributes(attributes)
+			beh.EdgeApplicationResponsePhaseBehaviorWithArgsRequest = &withArgs
+			behaviorsResponse = append(behaviorsResponse, beh)
+		}
+	}
+
+	return behaviorsResponse, nil
+}
+
+func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.EdgeApplicationRequestPhaseRuleEngineRequest {
+	request := edgesdk.EdgeApplicationRequestPhaseRuleEngineRequest{}
+
+	request.SetActive(rule.Active)
+	if rule.Criteria != nil {
+		request.SetCriteria(rule.Criteria)
+	}
+	request.SetDescription(rule.Description)
+	request.SetName(rule.Name)
+
+	return request
+}
+
+func transformRuleResponseCreate(rule contracts.ManifestRule) edgesdk.EdgeApplicationResponsePhaseRuleEngineRequest {
+	request := edgesdk.EdgeApplicationResponsePhaseRuleEngineRequest{}
+
+	request.SetActive(rule.Active)
+	if rule.Criteria != nil {
+		request.SetCriteria(rule.Criteria)
+	}
+	request.SetDescription(rule.Description)
+	request.SetName(rule.Name)
+
+	return request
 }

@@ -1,7 +1,7 @@
 package workloads
 
 import (
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 )
 
 type Client struct {
@@ -23,6 +23,7 @@ type WorkloadResponse interface {
 	GetDomains() []string
 	GetLastEditor() string
 	GetActive() bool
+	GetWorkloadDomain() string
 }
 
 type DeploymentResponse interface {

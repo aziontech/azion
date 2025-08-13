@@ -4,8 +4,7 @@ import (
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdkstorage "github.com/aziontech/azionapi-go-sdk/storage"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 )
 
 type FileOps struct {
@@ -224,12 +223,20 @@ type Manifest struct {
 	Purge         []Purges       `json:"purge"`
 }
 
+// BuildManifest represents the build configuration in the manifest.json file
+type BuildManifest struct {
+	Preset    string `json:"preset,omitempty"`    // JavaScript, etc.
+	Entry     string `json:"entry,omitempty"`     // Entry file like handler.js
+	Bundler   string `json:"bundler,omitempty"`   // webpack, etc.
+	Polyfills bool   `json:"polyfills,omitempty"` // Whether to include polyfills
+}
+
 type ManifestV4 struct {
-	Build            BuildConf                                 `json:"build"`
-	EdgeStorage      []sdkstorage.BucketCreate                 `json:"edgeStorage"`
-	EdgeFunctions    []EdgeFunction                            `json:"edgeFunctions"`
-	EdgeApplications []EdgeApplications                        `json:"edgeApplications"`
-	EdgeConnectors   []edgesdk.EdgeConnectorPolymorphicRequest `json:"edgeConnectors"`
+	Build            BuildManifest                             `json:"build"`
+	EdgeStorage      []EdgeStorageManifest                     `json:"edge_storage"`
+	EdgeFunctions    []EdgeFunction                            `json:"edge_functions"`
+	EdgeApplications []EdgeApplications                        `json:"edge_applications"`
+	EdgeConnectors   []edgesdk.EdgeConnectorPolymorphicRequest `json:"edge_connectors"`
 	Workloads        []WorkloadManifest                        `json:"workloads"`
 	Purge            []PurgeManifest                           `json:"purge"`
 }
@@ -240,56 +247,17 @@ type PurgeManifest struct {
 	Type  string   `json:"type"`
 }
 
+// WorkloadManifest represents a workload in the manifest.json file
 type WorkloadManifest struct {
-	Name            string                      `json:"name" validate:"regexp=.*"`
-	EdgeApplication int64                       `json:"edge_application"`
-	Active          *bool                       `json:"active,omitempty"`
-	NetworkMap      *string                     `json:"network_map,omitempty"`
-	EdgeFirewall    *int64                      `json:"edge_firewall,omitempty"`
-	Tls             *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
-	Protocols       *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
-	Mtls            *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
-	Domains         []string                    `json:"domains,omitempty"`
-}
-
-type Modules struct {
-	EdgeCacheEnabled              *bool `json:"edge_cache_enabled,omitempty"`
-	EdgeFunctionsEnabled          *bool `json:"edge_functions_enabled,omitempty"`
-	ApplicationAcceleratorEnabled *bool `json:"application_accelerator_enabled,omitempty"`
-	ImageProcessorEnabled         *bool `json:"image_processor_enabled,omitempty"`
-	TieredCacheEnabled            *bool `json:"tiered_cache_enabled,omitempty"`
-}
-
-type EdgeApplications struct {
-	Name    string                                                         `json:"name"`
-	Modules *Modules                                                       `json:"modules,omitempty"`
-	Active  *bool                                                          `json:"active,omitempty"`
-	Debug   *bool                                                          `json:"debug,omitempty"`
-	Rules   []edgesdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest `json:"rules"`
-	Cache   []edgesdk.CacheSettingRequest                                  `json:"cache"`
-}
-
-type EdgeFunction struct {
-	Name     string                 `json:"name"`
-	Argument string                 `json:"argument"`
-	Args     map[string]interface{} `json:"args"`
-	Bindings Bindings               `json:"bindings"`
-}
-
-type Bindings struct {
-	EdgeStorage EdgeStorage `json:"edge_storage"`
-}
-
-type EdgeStorage struct {
-	Bucket string `json:"bucket"`
-	Prefix string `json:"prefix"`
-}
-
-type BuildConfig struct {
-	Preset    string   `json:"preset"`
-	Entry     []string `json:"entry"`
-	Polyfills bool     `json:"polyfills"`
-	Worker    bool     `json:"worker"`
+	Name                      string                      `json:"name"`
+	Active                    *bool                       `json:"active,omitempty"`
+	Infrastructure            int64                       `json:"infrastructure,omitempty"`
+	WorkloadDomainAllowAccess *bool                       `json:"workload_domain_allow_access,omitempty"`
+	Domains                   []string                    `json:"domains,omitempty"`
+	Tls                       *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
+	Protocols                 *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
+	Mtls                      *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
+	NetworkMap                *string                     `json:"network_map,omitempty"`
 }
 
 type Purges struct {
@@ -377,4 +345,236 @@ type SyncOpts struct {
 type RuleIdsStruct struct {
 	Id    int64
 	Phase string
+}
+
+type ManifestCacheSetting struct {
+	Name         string                               `json:"name"`
+	BrowserCache *edgesdk.BrowserCacheModuleRequest   `json:"browser_cache,omitempty"`
+	Modules      *edgesdk.CacheSettingsModulesRequest `json:"modules,omitempty"`
+}
+
+type ManifestBrowserCache struct {
+	Behavior string `json:"behavior,omitempty"`
+	MaxAge   int64  `json:"max_age,omitempty"`
+}
+
+type ManifestCacheModules struct {
+	EdgeCache              *ManifestEdgeCache      `json:"edge_cache,omitempty"`
+	TieredCache            *ManifestTieredCache    `json:"tiered_cache,omitempty"`
+	ApplicationAccelerator *ManifestAppAccelerator `json:"application_accelerator,omitempty"`
+}
+
+type ManifestEdgeCache struct {
+	Behavior       string                  `json:"behavior,omitempty"`
+	MaxAge         int64                   `json:"max_age,omitempty"`
+	StaleCache     *ManifestStaleCache     `json:"stale_cache,omitempty"`
+	LargeFileCache *ManifestLargeFileCache `json:"large_file_cache,omitempty"`
+}
+
+type ManifestStaleCache struct {
+	Enabled bool `json:"enabled"`
+}
+
+type ManifestLargeFileCache struct {
+	Enabled bool  `json:"enabled"`
+	Offset  int64 `json:"offset,omitempty"`
+}
+
+type ManifestTieredCache struct {
+	Topology string `json:"topology,omitempty"`
+}
+
+type ManifestAppAccelerator struct {
+	CacheVaryByMethod      []string                  `json:"cache_vary_by_method,omitempty"`
+	CacheVaryByQuerystring *ManifestQuerystringCache `json:"cache_vary_by_querystring,omitempty"`
+	CacheVaryByCookies     *ManifestCookiesCache     `json:"cache_vary_by_cookies,omitempty"`
+	CacheVaryByDevices     *ManifestDevicesCache     `json:"cache_vary_by_devices,omitempty"`
+}
+
+type ManifestQuerystringCache struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	Fields      []string `json:"fields,omitempty"`
+	SortEnabled bool     `json:"sort_enabled"`
+}
+
+type ManifestCookiesCache struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	CookieNames []string `json:"cookie_names,omitempty"`
+}
+
+type ManifestDevicesCache struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	DeviceGroup []string `json:"device_group,omitempty"`
+}
+
+type CacheSettingManifest struct {
+	Name         string                `json:"name"`
+	BrowserCache *BrowserCacheSettings `json:"browser_cache,omitempty"`
+	Modules      *CacheSettingModules  `json:"modules,omitempty"`
+}
+
+type BrowserCacheSettings struct {
+	Behavior string `json:"behavior,omitempty"`
+	MaxAge   int64  `json:"max_age,omitempty"`
+}
+
+type CacheSettingModules struct {
+	EdgeCache              *EdgeCacheSettings              `json:"edge_cache,omitempty"`
+	TieredCache            *TieredCacheSettings            `json:"tiered_cache,omitempty"`
+	ApplicationAccelerator *ApplicationAcceleratorSettings `json:"application_accelerator,omitempty"`
+}
+
+type EdgeCacheSettings struct {
+	Behavior       string                  `json:"behavior,omitempty"`
+	MaxAge         int64                   `json:"max_age,omitempty"`
+	StaleCache     *StaleCacheSettings     `json:"stale_cache,omitempty"`
+	LargeFileCache *LargeFileCacheSettings `json:"large_file_cache,omitempty"`
+}
+
+type StaleCacheSettings struct {
+	Enabled bool `json:"enabled"`
+}
+
+type LargeFileCacheSettings struct {
+	Enabled bool  `json:"enabled"`
+	Offset  int64 `json:"offset,omitempty"`
+}
+
+type TieredCacheSettings struct {
+	Topology string `json:"topology,omitempty"`
+}
+
+type ApplicationAcceleratorSettings struct {
+	CacheVaryByMethod      []string                  `json:"cache_vary_by_method,omitempty"`
+	CacheVaryByQuerystring *QuerystringCacheSettings `json:"cache_vary_by_querystring,omitempty"`
+	CacheVaryByCookies     *CookiesCacheSettings     `json:"cache_vary_by_cookies,omitempty"`
+	CacheVaryByDevices     *DevicesCacheSettings     `json:"cache_vary_by_devices,omitempty"`
+}
+
+type QuerystringCacheSettings struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	Fields      []string `json:"fields,omitempty"`
+	SortEnabled bool     `json:"sort_enabled"`
+}
+
+type CookiesCacheSettings struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	CookieNames []string `json:"cookie_names,omitempty"`
+}
+
+type DevicesCacheSettings struct {
+	Behavior    string   `json:"behavior,omitempty"`
+	DeviceGroup []string `json:"device_group,omitempty"`
+}
+
+// FunctionInstance represents an edge function instance in the manifest.json file
+type FunctionInstance struct {
+	Name         string                 `json:"name"`
+	EdgeFunction string                 `json:"edge_function"`
+	Active       bool                   `json:"active"`
+	Args         map[string]interface{} `json:"args,omitempty"`
+}
+
+// EdgeStorageManifest represents an edge storage entry in the manifest.json file
+type EdgeStorageManifest struct {
+	Name       string `json:"name"`
+	EdgeAccess string `json:"edge_access"` // read_write, read_only, etc.
+	Dir        string `json:"dir"`         // Directory path
+}
+
+// WorkloadHttp represents HTTP configuration for a workload
+type WorkloadHttp struct {
+	Versions   []string `json:"versions,omitempty"`
+	HttpPorts  []int64  `json:"http_ports,omitempty"`
+	HttpsPorts []int64  `json:"https_ports,omitempty"`
+	QuicPorts  []int64  `json:"quic_ports,omitempty"`
+}
+
+type EdgeApplications struct {
+	Name               string                                 `json:"name"`
+	Modules            *edgesdk.EdgeApplicationModulesRequest `json:"modules,omitempty"`
+	Active             *bool                                  `json:"active,omitempty"`
+	Debug              *bool                                  `json:"debug,omitempty"`
+	Rules              []ManifestRulesEngine                  `json:"rules"`
+	CacheSettings      []ManifestCacheSetting                 `json:"cache_settings"`
+	FunctionsInstances []FunctionInstance                     `json:"functions_instances,omitempty"`
+}
+
+type StorageBinding struct {
+	Bucket string `json:"bucket,omitempty"`
+	Prefix string `json:"prefix,omitempty"`
+}
+
+type FunctionBindings struct {
+	Storage StorageBinding `json:"storage,omitempty"`
+}
+
+type EdgeFunction struct {
+	Name                 string                 `json:"name"`
+	Runtime              string                 `json:"runtime,omitempty"`               // azion_js, etc.
+	DefaultArgs          map[string]interface{} `json:"default_args,omitempty"`          // Default arguments
+	ExecutionEnvironment string                 `json:"execution_environment,omitempty"` // application, etc.
+	Active               bool                   `json:"active,omitempty"`                // Whether the function is active
+	Bindings             FunctionBindings       `json:"bindings,omitempty"`              // Function bindings
+	// Keep the old fields for backward compatibility
+	Argument string                 `json:"argument,omitempty"`
+	Args     map[string]interface{} `json:"args,omitempty"`
+}
+
+type Bindings struct {
+	EdgeStorage EdgeStorage `json:"edge_storage"`
+}
+
+type EdgeStorage struct {
+	Bucket string `json:"bucket"`
+	Prefix string `json:"prefix"`
+}
+
+type BuildConfig struct {
+	Preset    string   `json:"preset"`
+	Entry     []string `json:"entry"`
+	Polyfills bool     `json:"polyfills"`
+	Worker    bool     `json:"worker"`
+}
+
+type Modules struct {
+	EdgeCacheEnabled              *bool `json:"edge_cache_enabled,omitempty"`
+	EdgeFunctionsEnabled          *bool `json:"edge_functions_enabled,omitempty"`
+	ApplicationAcceleratorEnabled *bool `json:"application_accelerator_enabled,omitempty"`
+	ImageProcessorEnabled         *bool `json:"image_processor_enabled,omitempty"`
+	TieredCacheEnabled            *bool `json:"tiered_cache_enabled,omitempty"`
+}
+
+// ManifestRulesEngine represents a rule engine entry in the manifest.json file
+type ManifestRulesEngine struct {
+	Phase string       `json:"phase"`
+	Rule  ManifestRule `json:"rule"`
+}
+
+// ManifestRule represents a rule in the manifest.json file
+type ManifestRule struct {
+	Name        string                                           `json:"name"`
+	Description string                                           `json:"description,omitempty"`
+	Active      bool                                             `json:"active,omitempty"`
+	Criteria    [][]edgesdk.EdgeApplicationCriterionFieldRequest `json:"criteria"`
+	Behaviors   []ManifestRuleBehavior                           `json:"behaviors"`
+}
+
+// ManifestCriteria represents a criteria in a rule
+type ManifestCriteria struct {
+	Variable    string `json:"variable"`
+	Conditional string `json:"conditional,omitempty"`
+	Operator    string `json:"operator"`
+	Argument    string `json:"argument"`
+}
+
+// ManifestRuleBehavior represents a behavior in a rule
+type ManifestRuleBehavior struct {
+	Type       string                 `json:"type"`
+	Attributes map[string]interface{} `json:"attributes,omitempty"`
+}
+
+type EdgeConnectorManifest struct {
+	Name    string   `json:"name"`
+	Address []string `json:"address"`
 }

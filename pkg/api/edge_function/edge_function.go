@@ -6,13 +6,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
-const javascript = "javascript"
-
-func (c *Client) Get(ctx context.Context, id string) (sdk.GetEdgeFunctions, error) {
+func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) {
 	logger.Debug("Get Edge Function")
 	request := c.apiClient.EdgeFunctionsAPI.RetrieveEdgeFunction(ctx, id)
 
@@ -23,10 +21,10 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.GetEdgeFunctions, erro
 			logger.Debug("Error while getting an Edge Function", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.GetEdgeFunctions{}, err
+				return sdk.EdgeFunctions{}, err
 			}
 		}
-		return sdk.GetEdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.EdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
@@ -57,7 +55,6 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
 	logger.Debug("Create Edge Function")
-	req.EdgeFunctionsRequest.SetLanguage(javascript)
 
 	request := c.apiClient.EdgeFunctionsAPI.CreateEdgeFunction(ctx).EdgeFunctionsRequest(req.EdgeFunctionsRequest)
 
@@ -97,7 +94,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedGetEdgeFunctionsList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error) {
 	logger.Debug("List Edge Functions")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

@@ -10,7 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
-	sdkstorage "github.com/aziontech/azionapi-go-sdk/storage"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -36,45 +36,46 @@ func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationO
 	truePointer := true
 	appManifest := contracts.EdgeApplications{
 		Name: conf.Name,
-		Modules: &contracts.Modules{
-			EdgeFunctionsEnabled: &truePointer,
+		Modules: &edgesdk.EdgeApplicationModulesRequest{
+			EdgeFunctions: &edgesdk.EdgeFunctionModuleRequest{
+				Enabled: &truePointer,
+			},
 		},
 		Active: &truePointer,
 	}
 
-	//TODO: FIX HRE
-
-	// storageType := edge.EdgeConnectorStorageTypePropertiesRequest{
-	// 	Bucket: &conf.Bucket,
-	// 	Prefix: &conf.Prefix,
-	// }
-	// storageConnector := edge.EdgeConnectorStorageTypedRequest{
-	// 	Name:           conf.Name,
-	// 	Active:         &truePointer,
-	// 	TypeProperties: storageType,
-	// }
-	// connectorManifest := edge.EdgeConnectorPolymorphicRequest{
-	// 	EdgeConnectorStorageTypedRequest: &storageConnector,
-	// }
+	storageType := edgesdk.EdgeConnectorStorageAttributesRequest{
+		Bucket: conf.Bucket,
+		Prefix: &conf.Prefix,
+	}
+	storageConnector := edgesdk.EdgeConnectorStorageRequest{
+		Name:       conf.Name,
+		Active:     &truePointer,
+		Attributes: storageType,
+	}
+	connectorManifest := edgesdk.EdgeConnectorPolymorphicRequest{
+		EdgeConnectorStorageRequest: &storageConnector,
+	}
 
 	functionMan := contracts.EdgeFunction{
 		Name:     conf.Name,
 		Argument: ".edge/worker.js",
-		Bindings: contracts.Bindings{
-			EdgeStorage: contracts.EdgeStorage{
+		Bindings: contracts.FunctionBindings{
+			Storage: contracts.StorageBinding{
 				Bucket: conf.Bucket,
 				Prefix: conf.Prefix,
 			},
 		},
 	}
 
-	storageMan := sdkstorage.BucketCreate{
+	storageMan := contracts.EdgeStorageManifest{
 		Name:       conf.Bucket,
-		EdgeAccess: sdkstorage.READ_ONLY,
+		EdgeAccess: "read_only",
+		Dir:        conf.Prefix,
 	}
 
 	manifestToConfig := &contracts.ManifestV4{}
-	// manifestToConfig.EdgeConnectors = append(manifestToConfig.EdgeConnectors, connectorManifest) //TODO: FIX HERE
+	manifestToConfig.EdgeConnectors = append(manifestToConfig.EdgeConnectors, connectorManifest)
 	manifestToConfig.EdgeApplications = append(manifestToConfig.EdgeApplications, appManifest)
 	manifestToConfig.EdgeFunctions = append(manifestToConfig.EdgeFunctions, functionMan)
 	manifestToConfig.EdgeStorage = append(manifestToConfig.EdgeStorage, storageMan)

@@ -4,7 +4,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	cache "github.com/aziontech/azion-cli/pkg/v3commands/delete/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
 	function "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_function"
@@ -34,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))
-	cmd.AddCommand(cache.NewCmd(f))
+	// cmd.AddCommand(cache.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
 

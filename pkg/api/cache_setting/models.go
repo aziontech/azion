@@ -2,7 +2,7 @@ package cachesetting
 
 import (
 	sdkOld "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 )
 
 type Request struct {

@@ -13,7 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"github.com/spf13/cobra"
 )
 
@@ -80,7 +80,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if err := PrintTable(cmd, f, opts, list); err != nil {
-				return msg.ErrorGetRulesEngines
+				return fmt.Errorf(msg.ErrorGetRulesEngines.Error(), err)
 			}
 			return nil
 		},

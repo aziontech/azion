@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -312,14 +312,14 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phas
 }
 
 func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
-	logger.Debug("Update Rules Engine")
+	logger.Debug("Update Rules Engine", zap.Any("ID", req.Id), zap.Any("Application ID", req.IdApplication), zap.Any("Name", req.Name))
 	requestUpdate := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesPartialUpdate(ctx, req.IdApplication, req.Id).PatchedEdgeApplicationRequestPhaseRuleEngineRequest(req.PatchedEdgeApplicationRequestPhaseRuleEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a rules engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating a rules engine", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Application ID", req.IdApplication), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -511,9 +511,9 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	behaviors := make([]sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest, 0)
 
 	var behString sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsRequest
-	var behSet sdk.EdgeApplicationRuleEngineResponsePhaseBehaviorsEdgeApplicationRuleEngineResponseNoArgsRequest
+	var behSet sdk.EdgeApplicationResponsePhaseBehaviorWithoutArgsRequest
 	behSet.SetType("enable_gzip")
-	behString.EdgeApplicationRuleEngineResponsePhaseBehaviorsEdgeApplicationRuleEngineResponseNoArgsRequest = &behSet
+	behString.EdgeApplicationResponsePhaseBehaviorWithoutArgsRequest = &behSet
 
 	behaviors = append(behaviors, behString)
 
