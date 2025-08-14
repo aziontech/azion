@@ -2,8 +2,11 @@ package edge_applications
 
 import (
 	"context"
+	"fmt"
+	"io"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -55,6 +58,21 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest,
 			}
 		}
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
+	}
+
+	if edgeApplicationsResponse == nil {
+		fmt.Println("Deu ruim 2")
+		bodyBytes, err := io.ReadAll(httpResp.Body)
+		if err != nil {
+			logger.Debug("Error while reading body of the http response", zap.Error(err))
+			return nil, err
+		}
+
+		// Convert the body bytes to string
+		bodyString := string(bodyBytes)
+		spew.Dump(edgeApplicationsResponse)
+		fmt.Println("BBBBBB", bodyString)
+		fmt.Println("BBBBBB Stauts", httpResp.StatusCode)
 	}
 
 	return &edgeApplicationsResponse.Results, nil

@@ -23,6 +23,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/pkg/v3api/storage"
+	deploy "github.com/aziontech/azion-cli/pkg/v3commands/deploy_remote"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/storage"
 	"github.com/briandowns/spinner"
@@ -62,6 +63,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	DryRun      bool
+	Local       bool
 	Env         string
 	Logs        = contracts.Logs{}
 	Result      = contracts.Results{}
@@ -118,6 +120,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().BoolVar(&DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
+	deployCmd.Flags().BoolVar(&Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
@@ -126,7 +129,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, local bool) error {
+	Local = local
+	Sync = sync
 	ProjectConf = configPath
 	return cmd.Run(f)
 }
@@ -140,6 +145,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		return dryStructure.SimulateDeploy(pathWorkingDir, ProjectConf)
+	}
+
+	if Local {
+		deployLocal := deploy.NewDeployCmd(f)
+		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild)
 	}
 
 	msgs := []string{}

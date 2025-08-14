@@ -100,8 +100,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
 	ProjectConf = configPath
+	Sync = shouldSync
+	Env = env
+	Auto = auto
+	SkipBuild = skipBuild
 	return cmd.Run(f)
 }
 
