@@ -36,6 +36,7 @@ var (
 	NoHasPackageManager                   = "No package manager was identified.\n"
 	AskDeploy                             = "Do you want to deploy your project? (y/N)"
 	AskInstallDepsDev                     = "Do you want to install project dependencies? This may be required to start local development server (Y/n)"
+	AskInstallDepsBuild                   = "Do you want to install project dependencies? This may be required to generate initial configuration file (Y/n)"
 	AskInstallDepsDeploy                  = "Do you want to install project dependencies? This may be required to deploy your project (Y/n)"
 	AskLocalDev                           = "Do you want to start a local development server? (y/N)"
 	AskGitignore                          = "Azion CLI creates some files during the build process for internal use. Would you like to add these to your .gitignore file? (Y/n)"

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -22,7 +23,6 @@ import (
 	functionsApi "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
-	edgeapi "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -31,6 +31,7 @@ var (
 	CacheIdsBackup   map[string]int64
 	RuleIds          map[string]contracts.RuleIdsStruct
 	ConnectorIds     map[string]int64
+	DeploymentIds    map[string]int64
 	FunctionIds      map[string]contracts.AzionJsonDataFunction
 	manifestFilePath = "/.edge/manifest.json"
 )
@@ -91,7 +92,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	CacheIdsBackup = make(map[string]int64)
 	RuleIds = make(map[string]contracts.RuleIdsStruct)
 	ConnectorIds = make(map[string]int64)
-	FunctionIds = functions
+	DeploymentIds = make(map[string]int64)
+	FunctionIds = make(map[string]contracts.AzionJsonDataFunction)
 
 	for _, cacheConf := range conf.CacheSettings {
 		CacheIds[cacheConf.Name] = cacheConf.Id
@@ -99,6 +101,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	for _, funcCong := range conf.Function {
 		FunctionIds[funcCong.Name] = funcCong
+	}
+
+	for _, deploymentConf := range conf.Workloads.Deployments {
+		DeploymentIds[deploymentConf.Name] = deploymentConf.Id
 	}
 
 	for _, ruleConf := range conf.RulesEngine.Rules {
@@ -113,7 +119,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 
 	for _, funcMan := range manifest.EdgeFunctions {
-		code, err := os.ReadFile(funcMan.Argument)
+		code, err := os.ReadFile(path.Join(".edge", funcMan.Path))
 		if err != nil {
 			return fmt.Errorf(msg.ErrorReadCodeFile.Error(), err)
 		}
@@ -161,10 +167,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			request := apiEdgeApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
 			request.SetEdgeFunction(funcConf.ID)
-			// request.SetArgs(funcMan.Args) //TODO: add args after patch
-			request.SetArgs(edgeapi.EdgeApplicationFunctionInstanceArgs{
-				Arg: funcMan.Args,
-			})
+			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
 			idString := strconv.FormatInt(funcConf.InstanceID, 10)
 			appID := strconv.FormatInt(conf.Application.ID, 10)
@@ -175,10 +178,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		} else {
 			request := apiEdgeApplications.CreateInstanceRequest{}
 			request.SetActive(true)
-			// request.SetArgs(funcMan.Args) //TODO: add args after patch
-			request.SetArgs(edgeapi.EdgeApplicationFunctionInstanceArgs{
-				Arg: funcMan.Args,
-			})
+			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
 			request.SetEdgeFunction(funcConf.ID)
 			appId := strconv.FormatInt(conf.Application.ID, 10)
@@ -318,20 +318,20 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					http := connectorResp.EdgeConnectorHTTP
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
-					ConnectorIds[conn.Name] = conn.Id
 				case "ingest":
 					liveIngest := connectorResp.EdgeConnectorLiveIngest
 					conn.Id = liveIngest.GetId()
 					conn.Name = liveIngest.GetName()
-					ConnectorIds[conn.Name] = conn.Id
 				case "storage":
 					storage := connectorResp.EdgeConnectorStorage
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
-					ConnectorIds[conn.Name] = conn.Id
 				default:
 					return errors.New("Failed to get Edge Connector type")
 				}
+				ConnectorIds[conn.Name] = conn.Id
+				fmt.Println("connector inside the map ----------->", ConnectorIds[conn.Name])
+				fmt.Println("the whole freaking map ------->", ConnectorIds)
 				connectorConf = append(connectorConf, conn)
 			}
 		}
@@ -368,6 +368,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 							Phase: rule.Phase,
 						}
 						ruleConf = append(ruleConf, newRule)
+						delete(RuleIds, updated.GetName())
 					case "response":
 						req := transformRuleResponse(rule.Rule)
 						strid := strconv.FormatInt(r.Id, 10)
@@ -388,6 +389,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 							Phase: rule.Phase,
 						}
 						ruleConf = append(ruleConf, newRule)
+						delete(RuleIds, updated.GetName())
 					default:
 						return msg.ErrorInvalidPhase
 					}
@@ -476,6 +478,34 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			conf.Workloads.Name = resp.GetName()
 			conf.Workloads.Domains = resp.GetDomains()
 			conf.Workloads.Url = utils.Concat("https://", resp.GetWorkloadDomain())
+		}
+	}
+
+	err = man.WriteAzionJsonContent(conf, projectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	if len(manifest.WorkloadDeployments) > 0 {
+		for _, deployment := range manifest.WorkloadDeployments {
+			if id := DeploymentIds[deployment.Name]; id > 0 {
+				request := transformWorkloadDeploymentRequestUpdate(deployment, conf)
+				_, err := clientWorkload.UpdateDeployment(ctx, request, conf.Workloads.Id, id)
+				if err != nil {
+					return err
+				}
+			} else {
+				request := transformWorkloadDeploymentRequestCreate(deployment, conf)
+				resp, err := clientWorkload.CreateDeployment(ctx, request, conf.Workloads.Id)
+				if err != nil {
+					return err
+				}
+				conf.Workloads.Deployments = append(conf.Workloads.Deployments, contracts.Deployments{
+					Id:   resp.GetId(),
+					Name: resp.GetName(),
+				})
+			}
 		}
 	}
 

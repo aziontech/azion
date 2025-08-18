@@ -17,6 +17,7 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 		fileInfo, err := job.FileContent.Stat()
 		if err != nil {
 			logger.Debug("Error while worker tried to read file stats", zap.Error(err))
+			logger.Debug("File that caused the error: " + job.Path)
 			results <- err
 			return
 		}

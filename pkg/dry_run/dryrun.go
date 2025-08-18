@@ -92,12 +92,12 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
 	}
 
-	// interpreter := dry.Interpreter()
+	interpreter := dry.Interpreter()
 
-	// pathManifest, err := interpreter.ManifestPath()
-	// if err != nil {
-	// 	return err
-	// }
+	pathManifest, err := interpreter.ManifestPath()
+	if err != nil {
+		return err
+	}
 
 	//FUNCTION AND INSTANCE
 
@@ -114,60 +114,75 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 	}
 
 	var skipManifest bool
-	// manifestStructure, err := interpreter.ReadManifest(pathManifest, dry.F, &msgs)
-	// if err != nil {
-	// 	skipManifest = true
-	// }
+	manifestStructure, err := interpreter.ReadManifest(pathManifest, dry.F, &msgs)
+	if err != nil {
+		skipManifest = true
+	}
 
-	// if _, err := dry.Stat(pathManifest); os.IsNotExist(err) {
-	// 	logger.FInfoFlags(dry.Io.Out, msg.SkipManifest, dry.F.Format, dry.F.Out)
-	// 	msgs = append(msgs, msg.SkipManifest)
-	// } else
-	if !skipManifest {
-		CacheIds := make(map[string]int64)
-		CacheIdsBackup := make(map[string]int64)
-		RuleIds := make(map[string]contracts.RuleIdsStruct)
+	if _, err := dry.Stat(pathManifest); os.IsNotExist(err) {
+		logger.FInfoFlags(dry.Io.Out, msg.SkipManifest, dry.F.Format, dry.F.Out)
+		msgs = append(msgs, msg.SkipManifest)
+	} else if !skipManifest {
+		// Initialize maps to track resources
+		manifestInt.CacheIds = make(map[string]int64)
+		manifestInt.CacheIdsBackup = make(map[string]int64)
+		manifestInt.RuleIds = make(map[string]contracts.RuleIdsStruct)
+		manifestInt.ConnectorIds = make(map[string]int64)
+		manifestInt.DeploymentIds = make(map[string]int64)
+		manifestInt.FunctionIds = make(map[string]contracts.AzionJsonDataFunction)
+
+		// Local maps for origin tracking (not in manifest package)
 		OriginKeys := make(map[string]string)
 		OriginIds := make(map[string]int64)
 
 		for _, cacheConf := range conf.CacheSettings {
-			CacheIds[cacheConf.Name] = cacheConf.Id
+			manifestInt.CacheIds[cacheConf.Name] = cacheConf.Id
 		}
 
 		for _, ruleConf := range conf.RulesEngine.Rules {
-			RuleIds[ruleConf.Name] = contracts.RuleIdsStruct{
+			manifestInt.RuleIds[ruleConf.Name] = contracts.RuleIdsStruct{
 				Id:    ruleConf.Id,
 				Phase: ruleConf.Phase,
 			}
 		}
 
+		for _, funcConf := range conf.Function {
+			manifestInt.FunctionIds[funcConf.Name] = funcConf
+		}
+
+		for _, deploymentConf := range conf.Workloads.Deployments {
+			manifestInt.DeploymentIds[deploymentConf.Name] = deploymentConf.Id
+		}
+
 		for _, originConf := range conf.Origin {
 			OriginKeys[originConf.Name] = originConf.OriginKey
 			OriginIds[originConf.Name] = originConf.OriginId
+			// Also initialize ConnectorIds with the same data
+			manifestInt.ConnectorIds[originConf.Name] = originConf.OriginId
 		}
 
-		// if len(manifestStructure.Workloads) > 0 && manifestStructure.Workloads[0].Name != "" {
-		// 	skip = true
-		// 	logger.Debug("", zap.Any("Workload Payload", manifestStructure.Workloads))
-		// 	if conf.Domain.Id > 0 {
-		// 		msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, manifestStructure.Workloads[0].Name)
-		// 		msgs = append(msgs, msgf)
-		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-		// 	} else {
-		// 		msgf := fmt.Sprintf(msg.CreateDomain, manifestStructure.Workloads[0].Name)
-		// 		msgs = append(msgs, msgf)
-		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-		// 	}
-		// }
+		if len(manifestStructure.Workloads) > 0 && manifestStructure.Workloads[0].Name != "" {
+			skip = true
+			logger.Debug("", zap.Any("Workload Payload", manifestStructure.Workloads))
+			if conf.Domain.Id > 0 {
+				msgf := fmt.Sprintf(msg.UpdateDomain, conf.Domain.Id, manifestStructure.Workloads[0].Name)
+				msgs = append(msgs, msgf)
+				logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+			} else {
+				msgf := fmt.Sprintf(msg.CreateDomain, manifestStructure.Workloads[0].Name)
+				msgs = append(msgs, msgf)
+				logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+			}
+		}
 
 		// for _, connector := range manifestStructure.EdgeConnectors {
 		// 	logger.Debug("", zap.Any("Edge Connector Payload", connector))
-		// 	if id := OriginIds[connector.Name]; id > 0 {
-		// 		msgf := fmt.Sprintf(msg.UpdateOrigin, id, OriginKeys[origin.Name], origin.Name)
+		// 	if id, ok := manifestInt.ConnectorIds[connector.Name]; ok && id > 0 {
+		// 		msgf := fmt.Sprintf(msg.UpdateOrigin, id, OriginKeys[connector.Name], connector.Name)
 		// 		msgs = append(msgs, msgf)
 		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
 		// 	} else {
-		// 		msgf := fmt.Sprintf(msg.CreateOrigin, origin.Name)
+		// 		msgf := fmt.Sprintf(msg.CreateOrigin, connector.Name)
 		// 		msgs = append(msgs, msgf)
 		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
 		// 	}
@@ -176,7 +191,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		// for _, app := range manifestStructure.EdgeApplications {
 		// 	for _, cache := range app.Cache {
 		// 		logger.Debug("", zap.Any("Cache Setting Payload", cache))
-		// 		if id := CacheIds[cache.Name]; id > 0 {
+		// 		if id, ok := manifestInt.CacheIds[cache.Name]; ok && id > 0 {
 		// 			msgf := fmt.Sprintf(msg.UpdateCacheSetting, id, cache.Name)
 		// 			msgs = append(msgs, msgf)
 		// 			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
@@ -189,31 +204,31 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		// }
 
 		//backup cache ids
-		for k, v := range CacheIds {
-			CacheIdsBackup[k] = v
+		for k, v := range manifestInt.CacheIds {
+			manifestInt.CacheIdsBackup[k] = v
 		}
 
+		// Process rules from manifest
 		// for _, rule := range manifestStructure.Rules {
 		// 	logger.Debug("", zap.Any("Rule Engine Payload", rule))
-		// 	if r := RuleIds[rule.Name]; r.Id > 0 {
+		// 	if r, ok := manifestInt.RuleIds[rule.Name]; ok && r.Id > 0 {
 		// 		msgf := fmt.Sprintf(msg.UpdateRule, r.Id, rule.Name)
 		// 		msgs = append(msgs, msgf)
 		// 		logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
-		// 		delete(RuleIds, rule.Name)
+		// 		delete(manifestInt.RuleIds, rule.Name)
 		// 		for _, v := range rule.Behaviors {
 		// 			if v.RulesEngineBehaviorString != nil {
 		// 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-		// 					if id := CacheIdsBackup[v.RulesEngineBehaviorString.Target]; id > 0 {
-		// 						delete(CacheIds, v.RulesEngineBehaviorString.Target)
-		// 					} else if v.RulesEngineBehaviorString.Name == "set_origin" {
-		// 						if id := OriginIds[v.RulesEngineBehaviorString.Target]; id > 0 {
-		// 							delete(OriginKeys, v.RulesEngineBehaviorString.Target)
-		// 						}
+		// 					if id, ok := manifestInt.CacheIdsBackup[v.RulesEngineBehaviorString.Target]; ok && id > 0 {
+		// 						delete(manifestInt.CacheIds, v.RulesEngineBehaviorString.Target)
+		// 					}
+		// 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
+		// 					if id, ok := OriginIds[v.RulesEngineBehaviorString.Target]; ok && id > 0 {
+		// 						delete(OriginKeys, v.RulesEngineBehaviorString.Target)
 		// 					}
 		// 				}
 		// 			}
 		// 		}
-
 		// 	} else {
 		// 		msgf := fmt.Sprintf(msg.CreateRule, rule.Name)
 		// 		msgs = append(msgs, msgf)
@@ -221,21 +236,20 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		// 		for _, v := range rule.Behaviors {
 		// 			if v.RulesEngineBehaviorString != nil {
 		// 				if v.RulesEngineBehaviorString.Name == "set_cache_policy" {
-		// 					if id := CacheIdsBackup[v.RulesEngineBehaviorString.Target]; id > 0 {
-		// 						delete(CacheIds, v.RulesEngineBehaviorString.Target)
-		// 					} else if v.RulesEngineBehaviorString.Name == "set_origin" {
-		// 						if id := OriginIds[v.RulesEngineBehaviorString.Target]; id > 0 {
-		// 							delete(OriginKeys, v.RulesEngineBehaviorString.Target)
-		// 						}
+		// 					if id, ok := manifestInt.CacheIdsBackup[v.RulesEngineBehaviorString.Target]; ok && id > 0 {
+		// 						delete(manifestInt.CacheIds, v.RulesEngineBehaviorString.Target)
+		// 					}
+		// 				} else if v.RulesEngineBehaviorString.Name == "set_origin" {
+		// 					if id, ok := OriginIds[v.RulesEngineBehaviorString.Target]; ok && id > 0 {
+		// 						delete(OriginKeys, v.RulesEngineBehaviorString.Target)
 		// 					}
 		// 				}
-
 		// 			}
 		// 		}
 		// 	}
 		// }
 
-		for key, value := range RuleIds {
+		for key, value := range manifestInt.RuleIds {
 			msgf := fmt.Sprintf(msg.DeletingRuleEngine, value.Id, key)
 			msgs = append(msgs, msgf)
 			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
@@ -245,12 +259,14 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 			if strings.Contains(key, "_single") {
 				continue
 			}
-			msgf := fmt.Sprintf(msg.DeletingOrigin, OriginIds[key], value, key)
-			msgs = append(msgs, msgf)
-			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+			if id, ok := OriginIds[key]; ok {
+				msgf := fmt.Sprintf(msg.DeletingOrigin, id, value, key)
+				msgs = append(msgs, msgf)
+				logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)
+			}
 		}
 
-		for key, value := range CacheIds {
+		for key, value := range manifestInt.CacheIds {
 			msgf := fmt.Sprintf(msg.DeletingCacheSetting, value, key)
 			msgs = append(msgs, msgf)
 			logger.FInfoFlags(dry.Io.Out, msgf, dry.F.Format, dry.F.Out)

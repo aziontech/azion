@@ -1,9 +1,7 @@
 package manifest
 
 import (
-	"context"
 	"fmt"
-	"strconv"
 
 	"encoding/json"
 
@@ -17,8 +15,6 @@ import (
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
 	"go.uber.org/zap"
 )
-
-//TODO: FIX HERE
 
 func transformEdgeConnectorRequest(connectorRequest edgesdk.EdgeConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
 	request := &apiConnector.UpdateRequest{}
@@ -109,6 +105,55 @@ func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *a
 	return request
 }
 
+func transformWorkloadDeploymentRequestUpdate(updateRequest contracts.WorkloadDeployment, conf *contracts.AzionApplicationOptions) edgesdk.PatchedWorkloadDeploymentRequest {
+	request := edgesdk.PatchedWorkloadDeploymentRequest{}
+
+	if updateRequest.Name != "" {
+		request.SetName(updateRequest.Name)
+	}
+
+	request.SetActive(updateRequest.Active)
+
+	request.SetCurrent(updateRequest.Current)
+
+	strategy := edgesdk.DeploymentStrategyDefaultDeploymentStrategyRequest{}
+	attributes := edgesdk.DefaultDeploymentStrategyAttrsRequest{}
+
+	if updateRequest.Strategy.Type != "" {
+		strategy.SetType(updateRequest.Strategy.Type)
+	}
+
+	attributes.SetEdgeApplication(conf.Application.ID)
+	strategy.SetAttributes(attributes)
+	request.SetStrategy(strategy)
+
+	return request
+}
+
+func transformWorkloadDeploymentRequestCreate(createRequest contracts.WorkloadDeployment, conf *contracts.AzionApplicationOptions) edgesdk.WorkloadDeploymentRequest {
+	request := edgesdk.WorkloadDeploymentRequest{}
+
+	if createRequest.Name != "" {
+		request.SetName(createRequest.Name)
+	}
+	request.SetActive(createRequest.Active)
+
+	request.SetCurrent(createRequest.Current)
+
+	strategy := edgesdk.DeploymentStrategyDefaultDeploymentStrategyRequest{}
+	attributes := edgesdk.DefaultDeploymentStrategyAttrsRequest{}
+
+	if createRequest.Strategy.Type != "" {
+		strategy.SetType(createRequest.Strategy.Type)
+	}
+
+	attributes.SetEdgeApplication(conf.Application.ID)
+	strategy.SetAttributes(attributes)
+	request.SetStrategy(strategy)
+
+	return request
+}
+
 func transformWorkloadRequestCreate(createRequest contracts.WorkloadManifest, appid int64) *apiWorkloads.CreateRequest {
 	request := &apiWorkloads.CreateRequest{}
 
@@ -154,7 +199,6 @@ func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.EdgeApplicat
 		request.SetModules(*edgeapprequest.Modules)
 	}
 
-	//TODO: Fix Here
 	if edgeapprequest.Name != "" {
 		request.SetName(edgeapprequest.Name)
 	}
@@ -199,7 +243,6 @@ func transformEdgeApplicationRequestCreate(edgeapprequest contracts.EdgeApplicat
 	// 	request.SetModules(modules)
 	// }
 
-	//TODO: Fix Here
 	if edgeapprequest.Name != "" {
 		request.SetName(edgeapprequest.Name)
 	}
@@ -252,7 +295,6 @@ func transformRuleResponse(rule contracts.ManifestRule) *apiEdgeApplications.Upd
 		request.SetCriteria(rule.Criteria)
 	}
 
-	//TODO: Fix Here
 	request.SetDescription(rule.Description)
 	request.SetName(rule.Name)
 
@@ -271,39 +313,6 @@ func transformRuleRequest(rule contracts.ManifestRule) *apiEdgeApplications.Upda
 	request.SetName(rule.Name)
 
 	return request
-}
-
-func doCacheForRule(ctx context.Context, client *apiEdgeApplications.Client, conf *contracts.AzionApplicationOptions, function contracts.AzionJsonDataFunction) (int64, error) {
-	if function.CacheId > 0 {
-		return function.CacheId, nil
-	}
-	var reqCache apiEdgeApplications.CreateCacheSettingsRequest
-	reqCache.SetName("function-policy")
-	// reqCache.BrowserCache = edgesdk.BrowserCacheModuleRequest{
-	// 	Behavior: "honor",
-	// }
-	// reqCache.EdgeCache = edgesdk.EdgeCacheModuleRequest{
-	// 	Behavior: "honor",
-	// 	MaxAge:   0,
-	// }
-	// reqCache.ApplicationControls = edgesdk.ApplicationControlsModuleRequest{
-	// 	CacheByQueryString: "all",
-	// 	CacheByCookies:     "all",
-	// }
-
-	//TODO: Fix Here
-
-	// create cache to function next
-	str := strconv.FormatInt(conf.Application.ID, 10)
-	cache, err := client.CreateCacheEdgeApplication(ctx, &reqCache, str)
-	if err != nil {
-		logger.Debug("Error while creating Cache Settings", zap.Error(err))
-		return 0, err
-	}
-
-	// conf.Function.CacheId = cache.GetId()
-
-	return cache.GetId(), nil
 }
 
 func getConnectorName(connector edgesdk.EdgeConnectorPolymorphicRequest, defaultName string) (string, string) {
@@ -400,14 +409,17 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				withArgs.SetAttributes(attributes)
 			} else if attributes.Value.String != nil {
 				connectorName := *attributes.Value.String
+				fmt.Println("Connector name ---------->", connectorName)
+				fmt.Println("the id --------->", ConnectorIds[connectorName])
 				if id := ConnectorIds[connectorName]; id > 0 {
 					v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
 						Int64: &id,
 					}
 					attributes.SetValue(v)
 					withArgs.SetAttributes(attributes)
-					delete(ConnectorIds, connectorName)
+					// delete(ConnectorIds, connectorName)
 				} else {
+					fmt.Println("ID In error", id)
 					logger.Debug("Edge Connector not found", zap.Any("Target", connectorName))
 					return nil, msg.ErrorConnectorNotFound
 				}

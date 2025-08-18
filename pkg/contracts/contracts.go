@@ -189,10 +189,16 @@ type AzionJsonDataDomain struct {
 }
 
 type AzionJsonDataWorkload struct {
-	Id      int64    `json:"id"`
-	Name    string   `json:"name"`
-	Domains []string `json:"domains"`
-	Url     string   `json:"url"`
+	Id          int64         `json:"id"`
+	Name        string        `json:"name"`
+	Domains     []string      `json:"domains"`
+	Url         string        `json:"url"`
+	Deployments []Deployments `json:"deployment_id"`
+}
+
+type Deployments struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
 }
 
 type AzionJsonDataPurge struct {
@@ -225,20 +231,24 @@ type Manifest struct {
 
 // BuildManifest represents the build configuration in the manifest.json file
 type BuildManifest struct {
-	Preset    string `json:"preset,omitempty"`    // JavaScript, etc.
-	Entry     string `json:"entry,omitempty"`     // Entry file like handler.js
-	Bundler   string `json:"bundler,omitempty"`   // webpack, etc.
-	Polyfills bool   `json:"polyfills,omitempty"` // Whether to include polyfills
+	Build Build `json:"build,omitempty"`
+}
+
+type Build struct {
+	Preset    string   `json:"preset,omitempty"`    // JavaScript, etc.
+	Entry     []string `json:"entry,omitempty"`     // Entry files like main.js
+	Polyfills bool     `json:"polyfills,omitempty"` // Whether to include polyfills
 }
 
 type ManifestV4 struct {
-	Build            BuildManifest                             `json:"build"`
-	EdgeStorage      []EdgeStorageManifest                     `json:"edge_storage"`
-	EdgeFunctions    []EdgeFunction                            `json:"edge_functions"`
-	EdgeApplications []EdgeApplications                        `json:"edge_applications"`
-	EdgeConnectors   []edgesdk.EdgeConnectorPolymorphicRequest `json:"edge_connectors"`
-	Workloads        []WorkloadManifest                        `json:"workloads"`
-	Purge            []PurgeManifest                           `json:"purge"`
+	Build               BuildManifest                             `json:"build"`
+	EdgeStorage         []EdgeStorageManifest                     `json:"edge_storage"`
+	EdgeFunctions       []EdgeFunction                            `json:"edge_functions"`
+	EdgeApplications    []EdgeApplications                        `json:"edge_applications"`
+	EdgeConnectors      []edgesdk.EdgeConnectorPolymorphicRequest `json:"edge_connectors"`
+	Workloads           []WorkloadManifest                        `json:"workloads"`
+	WorkloadDeployments []WorkloadDeployment                      `json:"workload_deployments,omitempty"`
+	Purge               []PurgeManifest                           `json:"purge"`
 }
 
 type PurgeManifest struct {
@@ -258,6 +268,24 @@ type WorkloadManifest struct {
 	Protocols                 *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
 	Mtls                      *edgesdk.MTLSRequest        `json:"mtls,omitempty"`
 	NetworkMap                *string                     `json:"network_map,omitempty"`
+}
+
+type WorkloadDeployment struct {
+	Name     string           `json:"name"`
+	Current  bool             `json:"current"`
+	Active   bool             `json:"active"`
+	Strategy WorkloadStrategy `json:"strategy"`
+}
+
+type WorkloadStrategy struct {
+	Type       string                `json:"type"`
+	Attributes WorkloadStrategyAttrs `json:"attributes"`
+}
+
+type WorkloadStrategyAttrs struct {
+	EdgeApplication *string `json:"edge_application"`
+	EdgeFirewall    *string `json:"edge_firewall"`
+	CustomPage      *string `json:"custom_page"`
 }
 
 type Purges struct {
@@ -480,6 +508,7 @@ type EdgeStorageManifest struct {
 	Name       string `json:"name"`
 	EdgeAccess string `json:"edge_access"` // read_write, read_only, etc.
 	Dir        string `json:"dir"`         // Directory path
+	Prefix     string `json:"prefix"`
 }
 
 // WorkloadHttp represents HTTP configuration for a workload
@@ -511,14 +540,14 @@ type FunctionBindings struct {
 
 type EdgeFunction struct {
 	Name                 string                 `json:"name"`
+	Path                 string                 `json:"path"`
 	Runtime              string                 `json:"runtime,omitempty"`               // azion_js, etc.
 	DefaultArgs          map[string]interface{} `json:"default_args,omitempty"`          // Default arguments
 	ExecutionEnvironment string                 `json:"execution_environment,omitempty"` // application, etc.
 	Active               bool                   `json:"active,omitempty"`                // Whether the function is active
 	Bindings             FunctionBindings       `json:"bindings,omitempty"`              // Function bindings
 	// Keep the old fields for backward compatibility
-	Argument string                 `json:"argument,omitempty"`
-	Args     map[string]interface{} `json:"args,omitempty"`
+	Argument string `json:"argument,omitempty"`
 }
 
 type Bindings struct {

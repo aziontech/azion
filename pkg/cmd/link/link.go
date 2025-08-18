@@ -223,12 +223,12 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
-		//run init before calling build
-		cmdVulcanInit := "store init"
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
-
+		cmdVulcanBuild := "build"
+		if len(info.Preset) > 0 {
+			cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, info.Preset)
+		}
 		vul := vulcanPkg.NewVulcan()
-		command := vul.Command("", cmdVulcanInit, cmd.F)
+		command := vul.Command("", cmdVulcanBuild, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 
 		_, err = cmd.CommandRunner(cmd.F, command, []string{})

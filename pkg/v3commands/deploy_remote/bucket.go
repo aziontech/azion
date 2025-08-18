@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/aziontech/azionapi-go-sdk/storage"
+	storage "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -21,7 +21,7 @@ func (cmd *DeployCmd) doBucket(
 	ctx context.Context,
 	conf *contracts.AzionApplicationOptionsV3,
 	msgs *[]string) error {
-	if conf.Bucket != "" || (conf.Preset == "javascript" || conf.Preset == "typescript") {
+	if conf.Bucket != "" {
 		return nil
 	}
 
@@ -30,7 +30,7 @@ func (cmd *DeployCmd) doBucket(
 	nameBucket := replaceInvalidChars(conf.Name)
 
 	err := client.CreateBucket(ctx, api.RequestBucket{
-		BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: storage.READ_WRITE}})
+		BucketCreateRequest: storage.BucketCreateRequest{Name: nameBucket, EdgeAccess: "read_write"}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
@@ -39,7 +39,7 @@ func (cmd *DeployCmd) doBucket(
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
 			err := client.CreateBucket(ctx, api.RequestBucket{
-				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: storage.READ_WRITE}})
+				BucketCreateRequest: storage.BucketCreateRequest{Name: nameB, EdgeAccess: "read_write"}})
 			if err != nil {
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 					continue

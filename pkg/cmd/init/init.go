@@ -243,7 +243,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	// options := &git.CloneOptions{}
 	options := &git.CloneOptions{
 		SingleBranch:  true,
-		ReferenceName: plumbing.ReferenceName("v3"),
+		ReferenceName: plumbing.ReferenceName("dev"),
 	}
 	err = cmd.git.Clone(options, SAMPLESURL, tempDir)
 	if err != nil {
@@ -279,6 +279,9 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	vul := vulcanPkg.NewVulcan()
+	if err := cmd.deps(c, msg.AskInstallDepsBuild, &msgs); err != nil {
+		return err
+	}
 	err = cmd.selectVulcanTemplates(vul)
 	if err != nil {
 		return msg.ErrorGetProjectInfo

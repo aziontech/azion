@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -133,18 +134,16 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	if !SkipBuild {
-		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
+	defer func() {
+		if err := cmd.WriteAzionJsonContent(conf, ProjectConf); err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
 		}
-	}
+	}()
 
 	versionID := cmd.VersionID()
+	var oldprefix string
 
-	conf.Prefix = versionID
+	oldprefix, conf.Prefix = conf.Prefix, versionID
 
 	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {
@@ -153,6 +152,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
+
+	if !SkipBuild && conf.NotFirstRun {
+		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+		vul := vulcanPkg.NewVulcan()
+		command := vul.Command("", cmdStr, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+
+		err := cmd.commandRunInteractive(cmd.F, command)
+		if err != nil {
+			return err
+		}
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs)
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
+	}
 
 	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
@@ -164,99 +181,50 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	// singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// Check if directory exists; if not, we skip creating bucket and uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-		if err != nil {
-			return err
-		}
-
-		err = cmd.uploadFiles(f, conf, &msgs)
-		if err != nil {
-			return err
-		}
-	}
-
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
 
-	err = cmd.doFunction(clients, ctx, conf, &msgs)
+	// Check if directory exists; if not, we skip creating bucket
+	if len(manifestStructure.EdgeStorage) == 0 {
+		logger.Debug(msg.SkipBucket)
+	} else {
+		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !conf.NotFirstRun {
+		err = cmd.callBundlerInit(conf)
+		if err != nil {
+			return err
+		}
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
+	}
+
+	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
 
-	if !conf.NotFirstRun {
-		// format, err := findAzionConfig()
-		// if err != nil {
-		// 	format = ".mjs"
-		// }
-		// fileName := fmt.Sprintf("azion.config%s", format)
-		// err = os.Remove(fileName)
-		// if err != nil {
-		// 	return err
-		// }
-		// err = cmd.firstRunManifestToConfig(conf)
-		// if err != nil {
-		// 	return nil
-		// }
-		if !SkipBuild {
-			err = cmd.callBundlerInit(conf)
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
+		for _, storage := range manifestStructure.EdgeStorage {
+			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
 			if err != nil {
-				return nil
-			}
-			buildCmd := cmd.BuildCmd(f)
-			err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
-			if err != nil {
-				logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 				return err
 			}
 		}
-
 	}
-
-	// if !conf.NotFirstRun {
-	// 	strApp := strconv.FormatInt(conf.Application.ID, 10)
-	// 	ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, strApp, "request")
-	// 	if err != nil {
-	// 		logger.Debug("Error while getting default rules engine", zap.Error(err))
-	// 		return err
-	// 	}
-
-	// 	behaviors := make([]sdk.EdgeApplicationBehaviorFieldRequest, 0)
-
-	// 	var behString sdk.EdgeApplicationBehaviorFieldRequest
-	// 	var behSet sdk.EdgeApplicationBehaviorPolymorphicArgumentRequest
-	// 	originId := strconv.Itoa(int(singleOriginId))
-	// 	behSet.String = &originId
-	// 	behString.SetName("set_edge_connector")
-	// 	behString.SetArgument(behSet)
-
-	// 	behaviors = append(behaviors, behString)
-
-	// 	strRule := strconv.FormatInt(ruleDefaultID, 10)
-	// 	reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-	// 		IdApplication: strApp,
-	// 		Phase:         "request",
-	// 		Id:            strRule,
-	// 	}
-
-	// 	reqUpdateRulesEngine.SetBehaviors(behaviors)
-
-	// 	_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-	// 	if err != nil {
-	// 		logger.Debug("Error while updating default rules engine", zap.Error(err))
-	// 		return err
-	// 	}
-	// }
 
 	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
 		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
@@ -264,6 +232,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 	}
+
+	conf.NotFirstRun = true
 
 	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {

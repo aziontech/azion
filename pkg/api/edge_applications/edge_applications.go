@@ -97,7 +97,7 @@ type FunctionsInstancesResponse interface {
 	GetId() int64
 	GetEdgeFunction() int64
 	GetName() string
-	GetArgs() sdk.EdgeApplicationFunctionInstanceArgs
+	GetArgs() interface{}
 }
 
 type CreateDeviceGroupsRequest struct {

@@ -3,7 +3,7 @@ package storage
 import (
 	"net/http"
 
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 )

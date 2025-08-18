@@ -47,13 +47,19 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	cmdVulcanInit := "store init"
+	// cmdVulcanInit := "store init"
+	// if len(cmd.preset) > 0 {
+	// 	formatted := fmt.Sprintf(jsonTemplate, cmd.preset)
+	// 	cmdVulcanInit = fmt.Sprintf("%s --config '%s'", cmdVulcanInit, formatted)
+	// }
+
+	// TODO: use later
+	cmdVulcanBuild := "build"
 	if len(cmd.preset) > 0 {
-		formatted := fmt.Sprintf(jsonTemplate, cmd.preset)
-		cmdVulcanInit = fmt.Sprintf("%s --config '%s'", cmdVulcanInit, formatted)
+		cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, cmd.preset)
 	}
 
-	command := vul.Command("", cmdVulcanInit, cmd.f)
+	command := vul.Command("", cmdVulcanBuild, cmd.f)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 
 	err = cmd.commandRunInteractive(cmd.f, command)

@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"path"
 	"strconv"
@@ -17,7 +16,6 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
-	apiori "github.com/aziontech/azion-cli/pkg/api/origin"
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -36,97 +34,6 @@ var injectIntoFunction = `
 
 `
 
-var applicationUpdate = `
-{
-	"name": "%s",
-	"active": true,
-	"modules": {
-		"edgeFunctionsEnabled": true
-	}
-}`
-
-var connectorUpdate = `
-{
-	"name": "%s",
-	"active": true,
-	"type": "edge_storage",
-	"typeProperties": {
-		"bucket": "%s",
-		"prefix": "%s"
-	},
-	"modules": {
-		"loadBalancerEnabled": false,
-		"originShieldEnabled": false
-	}
-}`
-
-var functionUpdate = `
-{
-	"name": "%s",
-	"path": ".edge/worker.js",
-	"bindings": {
-		"storage": {
-		"bucket": "%s",
-		"prefix": "%s"
-		}
-	}
-}`
-
-var storageUpdate = `
-{
-	"name": "%s",
-	"edgeAccess": "read_only",
-	"dir": ".edge/storage"
-}`
-
-var jsonTemplate = `{
-	"scope": "global",
-  	"preset": "%s",
-	"edgeApplications": [
-	{
-		"name": "%s",
-		"active": true,
-		"modules": {
-    		"edgeFunctionsEnabled": true
-  		}
-	}
-	],
-	"edgeConnectors": [
-	{
-		"name": "%s",
-		"active": true,
-		"type": "edge_storage",
-		"typeProperties": {
-			"bucket": "%s",
-			"prefix": "%s"
-		},
-		"modules": {
-			"loadBalancerEnabled": true,
-			"originShieldEnabled": true
-		}
-	}
-	],
-	"edgeFunctions": [
-	  {
-		"name": "%s",
-		"path": ".edge/worker.js",
-		"bindings": {
-		  "storage": {
-			"bucket": "%s",
-			"prefix": "%s"
-		  }
-		}
-	  }
-	],
-	"edgeStorage": [
-	  {
-		"name": "%s",
-		"edgeAccess": "read_only",
-		"dir": ".edge/storage"
-	  }
-	]
-  }`
-
 func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) error {
 	logger.Debug("Running bundler config update to update azion.config")
 	// checking if vulcan major is correct
@@ -143,15 +50,15 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 	}
 
 	// cmdVulcanInit := "config update"
-	applicationUpdate = fmt.Sprintf(applicationUpdate, conf.Name)
-	connectorUpdate = fmt.Sprintf(connectorUpdate, conf.Name, conf.Bucket, conf.Prefix)
-	functionUpdate = fmt.Sprintf(functionUpdate, conf.Name, conf.Bucket, conf.Prefix)
-	storageUpdate = fmt.Sprintf(storageUpdate, conf.Bucket)
 	commands := []string{
-		fmt.Sprintf("config update -k 'edgeApplications[0]' -v '%s'", applicationUpdate),
-		fmt.Sprintf("config update -k 'edgeFunctions[0]' -v '%s'", functionUpdate),
-		fmt.Sprintf("config update -k 'edgeConnectors[0]' -v '%s'", connectorUpdate),
-		fmt.Sprintf("config update -k 'edgeStorage[0]' -v '%s'", storageUpdate),
+		fmt.Sprintf("config replace -k '$EDGE_FUNCTION_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$EDGE_APPLICATION_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$BUCKET_NAME' -v '%s'", conf.Bucket),
+		fmt.Sprintf("config replace -k '$BUCKET_PREFIX' -v '%s'", conf.Prefix),
+		fmt.Sprintf("config replace -k '$EDGE_CONNECTOR_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$WORKLOAD_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$DEPLOYMENT_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$EDGE_FUNCTION_INSTANCE_NAME' -v '%s'", conf.Name),
 	}
 
 	for _, cmdStr := range commands {
@@ -163,96 +70,6 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 			return err
 		}
 	}
-
-	return nil
-}
-
-func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	FunctionIds = make(map[string]contracts.AzionJsonDataFunction)
-	if len(conf.Function) == 0 {
-		newFunc := contracts.AzionJsonDataFunction{
-			Name: conf.Name,
-			Args: "./azion/args.json",
-			File: ".edge/worker.js",
-		}
-		var projName string
-		functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, newFunc, msgs)
-		if err != nil {
-			for i := 0; i < 10; i++ {
-				projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
-				newFunc.Name = projName
-				functionId, err := cmd.createFunction(clients.EdgeFunction, ctx, conf, newFunc, msgs)
-				if err != nil {
-					if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
-						continue
-					}
-					return fmt.Errorf(msg.ErrorCreateFunction.Error(), err)
-				}
-				newFunc.ID = functionId
-				break
-			}
-		} else {
-			newFunc.ID = functionId
-		}
-
-		conf.Function = append(conf.Function, newFunc)
-
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return err
-		}
-
-		for {
-			instance, err := cmd.createInstance(ctx, clients.EdgeApplication, conf, newFunc)
-			if err != nil {
-				// if the name is already in use, we ask for another one
-				if errors.Is(err, utils.ErrorNameInUse) {
-					logger.FInfoFlags(cmd.Io.Out, msg.FuncInstInUse, cmd.F.Format, cmd.F.Out)
-					*msgs = append(*msgs, msg.FuncInstInUse)
-					if Auto {
-						projName = thoth.GenerateName()
-					} else {
-						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
-						if err != nil {
-							return err
-						}
-					}
-					newFunc.InstanceName = projName
-					continue
-				}
-				return err
-			}
-			newFunc.InstanceID = instance.GetId()
-			break
-		}
-
-		conf.Function[0] = newFunc
-		FunctionIds[newFunc.Name] = newFunc
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
-		if err != nil {
-			logger.Debug("Error while writing azion.json file", zap.Error(err))
-			return err
-		}
-
-		return nil
-	}
-
-	for _, funcCong := range conf.Function {
-		FunctionIds[funcCong.Name] = funcCong
-
-		_, err := cmd.updateFunction(clients.EdgeFunction, ctx, conf, funcCong, msgs)
-		if err != nil {
-			return err
-		}
-
-		_, err = cmd.updateInstance(ctx, clients.EdgeApplication, conf, funcCong)
-		if err != nil {
-			return err
-		}
-
-	}
-
 	return nil
 }
 
@@ -408,39 +225,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return err
 	}
 
-	conf.NotFirstRun = true
 	return nil
-}
-
-func (cmd *DeployCmd) doOriginSingle(clientOrigin *apiori.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
-	var DefaultOrigin = [1]string{"api.azion.net"}
-
-	if conf.NotFirstRun {
-		return 0, nil
-	}
-
-	reqSingleOrigin := apiori.CreateRequest{}
-	addresses := prepareAddresses(DefaultOrigin[:])
-	reqSingleOrigin.SetAddresses(addresses)
-
-	reqSingleOrigin.SetName(utils.Concat(conf.Name, "_single"))
-	reqSingleOrigin.SetHostHeader("${host}")
-
-	origin, err := clientOrigin.Create(ctx, conf.Application.ID, &reqSingleOrigin)
-	if err != nil {
-		logger.Debug("Error while creating default origin ", zap.Any("Error", err))
-		return 0, err
-	}
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.OriginsSuccessful, cmd.F.Format, cmd.F.Out)
-	*msgs = append(*msgs, msg.OriginsSuccessful)
-	newOrigin := contracts.AzionJsonDataOrigin{
-		OriginId:  origin.GetOriginId(),
-		OriginKey: origin.GetOriginKey(),
-		Name:      origin.GetName(),
-	}
-	conf.Origin = append(conf.Origin, newOrigin)
-
-	return newOrigin.OriginId, nil
 }
 
 func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, funcToCreate contracts.AzionJsonDataFunction, msgs *[]string) (int64, error) {

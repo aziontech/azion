@@ -207,9 +207,8 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 	hasFlag, err := HasBlockAPIV4Flag(fact.factory.Config.GetString("token"), fact)
 	if err != nil {
 		logger.Debug("Failed to get client flags for this user", zap.Error(err))
-		panic("Failed to read client flags for this user. Check your settings and/or token and try again. If the error persists, contact Azion support.")
-	}
-	if hasFlag {
+		fact.setV3Cmds(cobraCmd)
+	} else if hasFlag {
 		fact.setV3Cmds(cobraCmd)
 	} else {
 		fact.setCmds(cobraCmd)

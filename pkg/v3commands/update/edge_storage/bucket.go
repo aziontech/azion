@@ -87,7 +87,7 @@ func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.Request
 		b.edgeAccess = answers
 	}
 	request.SetName(b.name)
-	request.SetEdgeAccess(sdk.EdgeAccessEnum(b.edgeAccess))
+	request.SetEdgeAccess(b.edgeAccess)
 	return nil
 }
 

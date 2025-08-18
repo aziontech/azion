@@ -181,7 +181,7 @@ func (c *Client) CreateDeployment(ctx context.Context, req sdk.WorkloadDeploymen
 
 func (c *Client) UpdateDeployment(ctx context.Context, req sdk.PatchedWorkloadDeploymentRequest, id int64, deploymentid int64) (DeploymentResponse, error) {
 	logger.Debug("Update Workload Deployment")
-	request := c.apiClient.WorkloadDeploymentsAPI.PartialUpdateWorkloadDeployment(ctx, id, deploymentid).PatchedWorkloadDeploymentRequest(req)
+	request := c.apiClient.WorkloadDeploymentsAPI.PartialUpdateWorkloadDeployment(ctx, deploymentid, id).PatchedWorkloadDeploymentRequest(req)
 	// request := c.apiClient.DomainsAPI.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	workloadDeploymentsResponse, httpResp, err := request.Execute()
 	if err != nil {

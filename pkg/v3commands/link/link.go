@@ -220,7 +220,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 
 		//run init before calling build
-		cmdVulcanInit := "init"
+		cmdVulcanInit := "store init"
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
 
 		vul := vulcanPkg.NewVulcan()

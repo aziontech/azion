@@ -11,11 +11,11 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	"github.com/aziontech/azion-cli/messages/general"
+	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
-	api "github.com/aziontech/azion-cli/pkg/v3api/storage"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -51,10 +51,7 @@ func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 		}
 		b.BucketName = answer
 	}
-	client := api.NewClient(
-		b.Factory.HttpClient,
-		b.Factory.Config.GetString("storage_url"),
-		b.Factory.Config.GetString("token"))
+	client := api.NewClient(b.Factory.HttpClient, b.Factory.Config.GetString("storage_url"), b.Factory.Config.GetString("token"))
 	return b.PrintTable(client)
 }
 
@@ -75,37 +72,37 @@ func (b *Objects) PrintTable(client *api.Client) error {
 		return fmt.Errorf(msg.ERROR_LIST_BUCKET, err)
 	}
 
-	settings.ContinuationToken = resp.GetContinuationToken()
-	err = token.WriteSettings(settings)
-	if err != nil {
-		return err
-	}
-
 	listOut := output.ListOutput{}
 	listOut.Columns = []string{"KEY", "LAST MODIFIED"}
 	listOut.Out = b.Factory.IOStreams.Out
 	listOut.Flags = b.Factory.Flags
 
 	if b.Options.Details {
-		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE", "ETAG"}
+		listOut.Columns = []string{"KEY", "LAST MODIFIED", "SIZE"}
 	}
 
-	for _, v := range resp.Results {
-		var ln []string
-		if b.Options.Details {
-			ln = []string{
-				v.GetKey(),
-				fmt.Sprintf("%v", v.GetLastModified()),
-				fmt.Sprintf("%v", v.GetSize()),
-				v.GetEtag(),
-			}
-		} else {
-			ln = []string{
-				v.GetKey(),
-				fmt.Sprintf("%v", v.GetLastModified()),
-			}
+	for _, v := range resp {
+		settings.ContinuationToken = v.GetContinuationToken()
+		err = token.WriteSettings(settings)
+		if err != nil {
+			return err
 		}
-		listOut.Lines = append(listOut.Lines, ln)
+		for _, res := range v.Results {
+			var ln []string
+			if b.Options.Details {
+				ln = []string{
+					res.GetKey(),
+					fmt.Sprintf("%v", res.GetLastModified()),
+					fmt.Sprintf("%v", res.GetSize()),
+				}
+			} else {
+				ln = []string{
+					res.GetKey(),
+					fmt.Sprintf("%v", res.GetLastModified()),
+				}
+			}
+			listOut.Lines = append(listOut.Lines, ln)
+		}
 	}
 	return output.Print(&listOut)
 }
