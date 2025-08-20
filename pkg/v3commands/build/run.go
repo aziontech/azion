@@ -53,6 +53,6 @@ func (b *BuildCmd) run(fields *contracts.BuildInfoV3, msgs *[]string) error {
 		vulcanParams += " --firewall "
 	}
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.NewVulcanV3()
 	return b.vulcan(vul, conf, vulcanParams, fields, msgs)
 }

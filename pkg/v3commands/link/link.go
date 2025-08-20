@@ -223,7 +223,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		cmdVulcanInit := "store init"
 		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
 
-		vul := vulcanPkg.NewVulcan()
+		vul := vulcanPkg.NewVulcanV3()
 		command := vul.Command("", cmdVulcanInit, cmd.F)
 
 		_, err = cmd.CommandRunner(cmd.F, command, []string{})

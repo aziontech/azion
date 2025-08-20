@@ -263,7 +263,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.NewVulcanV3()
 	err = cmd.selectVulcanTemplates(vul)
 	if err != nil {
 		return msg.ErrorGetProjectInfo
