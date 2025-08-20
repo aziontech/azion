@@ -330,8 +330,6 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					return errors.New("Failed to get Edge Connector type")
 				}
 				ConnectorIds[conn.Name] = conn.Id
-				fmt.Println("connector inside the map ----------->", ConnectorIds[conn.Name])
-				fmt.Println("the whole freaking map ------->", ConnectorIds)
 				connectorConf = append(connectorConf, conn)
 			}
 		}

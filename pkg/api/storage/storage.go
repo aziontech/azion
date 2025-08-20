@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"

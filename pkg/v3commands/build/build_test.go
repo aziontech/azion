@@ -35,8 +35,8 @@ func TestBuildCmd_ExternalRun(t *testing.T) {
 		CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 		CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 		FileReader            func(path string) ([]byte, error)
-		GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptions, error)
-		WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+		GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptionsV3, error)
+		WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confPath string) error
 		EnvLoader             func(path string) ([]string, error)
 		Stat                  func(path string) (fs.FileInfo, error)
 		GetWorkDir            func() (string, error)
@@ -56,8 +56,8 @@ func TestBuildCmd_ExternalRun(t *testing.T) {
 		{
 			name: "flow completed with success",
 			fields: fields{
-				GetAzionJsonContent: func(pathConf string) (*contracts.AzionApplicationOptions, error) {
-					return &contracts.AzionApplicationOptions{}, nil
+				GetAzionJsonContent: func(pathConf string) (*contracts.AzionApplicationOptionsV3, error) {
+					return &contracts.AzionApplicationOptionsV3{}, nil
 				},
 				Io: iostreams.System(),
 				CommandRunner: func(
@@ -71,7 +71,7 @@ func TestBuildCmd_ExternalRun(t *testing.T) {
 					return nil
 				},
 				WriteAzionJsonContent: func(
-					conf *contracts.AzionApplicationOptions,
+					conf *contracts.AzionApplicationOptionsV3,
 					confPath string,
 				) error {
 					return nil

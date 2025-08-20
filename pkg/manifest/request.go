@@ -1,8 +1,6 @@
 package manifest
 
 import (
-	"fmt"
-
 	"encoding/json"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -12,7 +10,7 @@ import (
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -380,13 +378,11 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			} else if attributes.Value.String != nil {
 				cacheName := *attributes.Value.String
 				if id := CacheIdsBackup[cacheName]; id > 0 {
-					fmt.Println("ID", id)
 					v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
 						Int64: &id,
 					}
 					attributes.SetValue(v)
 					withArgs.SetAttributes(attributes)
-					fmt.Println(cacheName)
 					delete(CacheIds, cacheName)
 				} else {
 					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
@@ -409,8 +405,6 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				withArgs.SetAttributes(attributes)
 			} else if attributes.Value.String != nil {
 				connectorName := *attributes.Value.String
-				fmt.Println("Connector name ---------->", connectorName)
-				fmt.Println("the id --------->", ConnectorIds[connectorName])
 				if id := ConnectorIds[connectorName]; id > 0 {
 					v := edgesdk.EdgeApplicationRuleEngineStringAttributesValue{
 						Int64: &id,
@@ -419,7 +413,6 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 					withArgs.SetAttributes(attributes)
 					// delete(ConnectorIds, connectorName)
 				} else {
-					fmt.Println("ID In error", id)
 					logger.Debug("Edge Connector not found", zap.Any("Target", connectorName))
 					return nil, msg.ErrorConnectorNotFound
 				}

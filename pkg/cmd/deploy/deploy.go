@@ -25,7 +25,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	storagesdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
+	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -66,7 +66,7 @@ var (
 	Local       bool
 	Env         string
 	Logs        = contracts.Logs{}
-	Result      = contracts.Results{}
+	Result      = contracts.ResultsV4{}
 	DeployURL   = "https://console.azion.com"
 	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 )
@@ -194,12 +194,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		request.Bucket = &nameBucket
 		request.ExpirationDate = &oneYearLater
 
-		// creds, err := storageClient.CreateCredentials(ctx, *request)
-		// if err != nil {
-		// 	return err
-		// }
-		// settings.S3AccessKey = creds.Data.GetAccessKey()
-		// settings.S3SecreKey = creds.Data.GetSecretKey()
+		creds, err := storageClient.CreateCredentials(ctx, *request)
+		if err != nil {
+			return err
+		}
+		settings.S3AccessKey = creds.Data.GetAccessKey()
+		settings.S3SecreKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
 
 		err = token.WriteSettings(settings)

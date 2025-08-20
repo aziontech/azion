@@ -10,7 +10,6 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
-	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -18,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/v3commands/build"
 	manifestInt "github.com/aziontech/azion-cli/pkg/v3manifest"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -127,7 +127,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{}, ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -237,7 +237,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	if manifestStructure.Domain.Name == "" {
+	if manifestStructure.Domain == nil || manifestStructure.Domain.Name != "" {
 		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
 		if err != nil {
 			return err

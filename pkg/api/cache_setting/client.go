@@ -6,7 +6,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	sdkV3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 )
 
 type ClientV4 struct {

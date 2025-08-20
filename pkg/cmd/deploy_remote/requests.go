@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"

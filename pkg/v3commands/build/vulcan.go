@@ -13,7 +13,7 @@ import (
 
 func (b *BuildCmd) vulcan(
 	vul *vulcanPkg.VulcanPkg,
-	conf *contracts.AzionApplicationOptions,
+	conf *contracts.AzionApplicationOptionsV3,
 	vulcanParams string,
 	fields *contracts.BuildInfoV3,
 	msgs *[]string,

@@ -82,7 +82,7 @@ func MockGetAzionJsonContent(pathConfig string) (*contracts.AzionApplicationOpti
 }
 
 // MockWriteAzionJsonContent mocks WriteAzionJsonContent
-func MockWriteAzionJsonContent(conf *contracts.AzionApplicationOptions, confConf string) error {
+func MockWriteAzionJsonContent(conf *contracts.AzionApplicationOptionsV3, confConf string) error {
 	return nil
 }
 
@@ -266,7 +266,7 @@ func TestCaptureLogs(t *testing.T) {
 			Logs = tt.logStruct
 			Result = tt.resultStruct
 
-			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confConf string) error {
+			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confConf string) error {
 				return nil
 			}
 			err := cmd.CaptureLogs(execID, token, cmd)

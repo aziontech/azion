@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -75,7 +75,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, bucketName, objectKey string) error {
 	logger.Debug("Creating object")
 	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
-		Body(fileOps.FileContent) //.ContentType(fileOps.MimeType)
+		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while creating object in the edge storage", zap.Error(err))
@@ -102,7 +102,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent) //.ContentType(fileOps.MimeType)
+	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -159,7 +159,7 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 
 func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
 	logger.Debug("Updating objects")
-	req := c.apiClient.EdgeStorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body) //.ContentType(contentType)
+	req := c.apiClient.EdgeStorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body).ContentType(contentType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while updating the object of the bucket", zap.Error(err))

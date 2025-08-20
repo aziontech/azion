@@ -25,7 +25,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/v3api/storage"
 	deployRemote "github.com/aziontech/azion-cli/pkg/v3commands/deploy_remote"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -38,7 +38,7 @@ type DeployCmd struct {
 	FileReader            func(path string) ([]byte, error)
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptionsV3, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confConf string) error
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
@@ -79,7 +79,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		WriteFile:             os.WriteFile,
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,

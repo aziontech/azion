@@ -4,7 +4,7 @@ import (
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 )
 
 type FileOps struct {
@@ -97,7 +97,17 @@ type Results struct {
 	Result Result `json:"result"`
 }
 
+type ResultsV4 struct {
+	Result ResultV4 `json:"result"`
+}
+
 type Result struct {
+	Azion  *AzionApplicationOptionsV3 `json:"azion,omitempty"`  // Pointer and omitempty tag
+	Extras []interface{}              `json:"extras"`           // Assuming Extras can contain any data
+	Errors *ErrorDetails              `json:"errors,omitempty"` // Pointer and omitempty for optional errors
+}
+
+type ResultV4 struct {
 	Azion  *AzionApplicationOptions `json:"azion,omitempty"`  // Pointer and omitempty tag
 	Extras []interface{}            `json:"extras"`           // Assuming Extras can contain any data
 	Errors *ErrorDetails            `json:"errors,omitempty"` // Pointer and omitempty for optional errors

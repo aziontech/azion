@@ -23,8 +23,8 @@ type BuildCmd struct {
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	CommandRunner         func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	FileReader            func(path string) ([]byte, error)
-	GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptionsV3, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confPath string) error
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	GetWorkDir            func() (string, error)
@@ -75,8 +75,8 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 		EnvLoader:             utils.LoadEnvVarsFromFile,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
 		WriteFile:             os.WriteFile,
 		Stat:                  os.Stat,
 		GetWorkDir:            utils.GetWorkingDir,

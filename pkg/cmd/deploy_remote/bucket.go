@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/storage-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
