@@ -16,7 +16,7 @@ expected_folder="azion"
 # Set the path to the expected folder after the build command
 expected_edge_folder=".edge"
 # token from secrets
-token=$TOKEN
+token="azionfa8de37c8c330fa236591fe8630d55ff4cc"
 
 # Function to list and delete edge storage buckets
 delete_edge_storage_buckets() {
@@ -73,7 +73,7 @@ if [ -f "$full_main_go_path" ]; then
     rm -rf vulcan
     rm -rf reactjs-boilerplate
 
-    git clone --single-branch --branch v3 https://github.com/aziontech/azion-samples.git
+    git clone --single-branch --branch dev https://github.com/aziontech/azion-samples.git
     cp -r azion-samples/templates/react/reactjs-boilerplate ./
     cd reactjs-boilerplate
     echo "Finished cloning and copying to destination directory"

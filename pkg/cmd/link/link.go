@@ -238,7 +238,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return err
 		}
 
-		if cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
+		if !info.Auto && cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
 			if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
 				return err
 			}
