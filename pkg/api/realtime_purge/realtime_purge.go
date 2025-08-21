@@ -9,7 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -41,13 +41,14 @@ func (c *Client) PurgeCache(ctx context.Context, urlToPurge []string, purgeType,
 
 	_, httpResp, err := request.PurgeInputRequest(purgeRequest).Execute()
 	if err != nil {
+		errBody := ""
 		logger.Debug("Error while purging cache", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err = utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return err
 		}
 
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	if httpResp.StatusCode != 201 {

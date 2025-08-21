@@ -12,7 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -101,7 +101,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorConvertingStringToBool
 					}
 
-					modules.SetEdgeCacheEnabled(edgeCache)
+					eCache := sdk.CacheModuleRequest{
+						Enabled: &edgeCache,
+					}
+
+					modules.SetEdgeCache(eCache)
 				}
 
 				if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
@@ -111,7 +115,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorConvertingStringToBool
 					}
 
-					modules.SetEdgeFunctionsEnabled(edgeFunctions)
+					eFunction := sdk.EdgeFunctionModuleRequest{
+						Enabled: &edgeFunctions,
+					}
+
+					modules.SetEdgeFunctions(eFunction)
 				}
 
 				if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
@@ -121,7 +129,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorConvertingStringToBool
 					}
 
-					modules.SetApplicationAcceleratorEnabled(applicationAcc)
+					aAcceleration := sdk.ApplicationAcceleratorModuleRequest{
+						Enabled: &applicationAcc,
+					}
+
+					modules.SetApplicationAccelerator(aAcceleration)
 				}
 
 				if !utils.IsEmpty(fields.ImageProcessorEnabled) {
@@ -131,7 +143,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorConvertingStringToBool
 					}
 
-					modules.SetImageProcessorEnabled(imageProcessor)
+					iProcessor := sdk.ImageProcessorModuleRequest{
+						Enabled: &imageProcessor,
+					}
+
+					modules.SetImageProcessor(iProcessor)
 				}
 
 				if !utils.IsEmpty(fields.TieredCacheEnabled) {
@@ -141,7 +157,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						return utils.ErrorConvertingStringToBool
 					}
 
-					modules.SetTieredCacheEnabled(tieredCache)
+					tCache := sdk.TieredCacheModuleRequest{
+						Enabled: &tieredCache,
+					}
+
+					modules.SetTieredCache(tCache)
 				}
 
 				request.SetModules(modules)

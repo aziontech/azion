@@ -20,13 +20,13 @@ import (
 )
 
 type Fields struct {
-	Name          string
-	Language      string
-	Code          string
-	Active        string
-	InitiatorType string
-	Args          string
-	InPath        string
+	Name                 string
+	Language             string
+	Code                 string
+	Active               string
+	Args                 string
+	ExecutionEnvironment string
+	InPath               string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -86,6 +86,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.FlagCode)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.Args, "args", "", msg.FlagArgs)
+	flags.StringVar(&fields.ExecutionEnvironment, "execution-environment", "", msg.FlagExecutionEnvironment)
 	flags.StringVar(&fields.InPath, "file", "", msg.FlagIn)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
@@ -146,7 +147,11 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 		if err := json.Unmarshal(marshalledArgs, &args); err != nil {
 			return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 		}
-		request.SetJsonArgs(args)
+		request.SetDefaultArgs(args)
+	}
+
+	if cmd.Flags().Changed("execution-environment") {
+		request.SetExecutionEnvironment(fields.ExecutionEnvironment)
 	}
 
 	request.SetName(fields.Name)

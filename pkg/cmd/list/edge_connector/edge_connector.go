@@ -11,19 +11,19 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io             *iostreams.IOStreams
-	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedResponseListBaseEdgeConnectorList, error)
+	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponseListBaseEdgeConnectorList, error) {
+		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -74,26 +74,73 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		listOut.Columns = []string{"ID", "NAME", "TYPE", "ACTIVE", "LAST EDITOR", "LAST MODIFIED"}
 	}
 
+	if functions == nil {
+		return output.Print(&listOut)
+	}
 	for _, v := range functions.Results {
 		var ln []string
-		if opts.Details {
-			ln = []string{
-				fmt.Sprintf("%d", v.GetId()),
-				v.GetName(),
-				v.GetType(),
-				fmt.Sprintf("%v", v.GetActive()),
-				v.GetLastEditor(),
-				v.GetLastModified().String(),
+		if v.EdgeConnectorHTTP != nil {
+			vObj := v.EdgeConnectorHTTP
+			if opts.Details {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+					vObj.GetLastEditor(),
+					vObj.GetLastModified().String(),
+				}
+			} else {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+				}
 			}
-		} else {
-			ln = []string{
-				fmt.Sprintf("%d", v.GetId()),
-				v.GetName(),
-				v.GetType(),
-				fmt.Sprintf("%v", v.GetActive()),
+			listOut.Lines = append(listOut.Lines, ln)
+		} else if v.EdgeConnectorLiveIngest != nil {
+			vObj := v.EdgeConnectorLiveIngest
+			if opts.Details {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+					vObj.GetLastEditor(),
+					vObj.GetLastModified().String(),
+				}
+			} else {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+				}
 			}
+			listOut.Lines = append(listOut.Lines, ln)
+		} else if v.EdgeConnectorStorage != nil {
+			vObj := v.EdgeConnectorStorage
+			if opts.Details {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+					vObj.GetLastEditor(),
+					vObj.GetLastModified().String(),
+				}
+			} else {
+				ln = []string{
+					fmt.Sprintf("%d", vObj.Id),
+					vObj.GetName(),
+					vObj.GetType(),
+					fmt.Sprintf("%v", vObj.GetActive()),
+				}
+			}
+			listOut.Lines = append(listOut.Lines, ln)
+
 		}
-		listOut.Lines = append(listOut.Lines, ln)
 	}
 
 	return output.Print(&listOut)

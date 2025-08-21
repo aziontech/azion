@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"os"
+	"path"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -21,13 +22,14 @@ var (
 )
 
 func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, dir string) error {
 	// Get total amount of files to display progress
 	totalFiles := 0
-	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
+	logger.Debug("Path to be uploaded: " + dir)
+	if err := cmd.FilepathWalk(dir, func(pathDir string, info os.FileInfo, err error) error {
 		if err != nil {
 			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
-			logger.Debug("File that caused the error: " + PathStatic)
+			logger.Debug("File that caused the error: " + pathDir)
 			return err
 		}
 		if !info.IsDir() {
@@ -66,20 +68,25 @@ func (cmd *DeployCmd) uploadFiles(
 		bar = nil
 	}
 
-	if err := cmd.FilepathWalk(PathStatic, func(path string, info os.FileInfo, err error) error {
+	if err := cmd.FilepathWalk(dir, func(pathDir string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
+		if info.Mode()&os.ModeSymlink != 0 {
+		}
+		logger.Debug("Reading the following file", zap.Any("File name", pathDir))
 		if !info.IsDir() {
-			fileContent, err := cmd.Open(path)
+			fileContent, err := cmd.Open(pathDir)
 			if err != nil {
-				logger.Debug("Error while trying to read file <"+path+"> about to be uploaded", zap.Error(err))
+				logger.Debug("Error while trying to read file <"+pathDir+"> about to be uploaded", zap.Error(err))
 				return err
 			}
 
-			fileString := strings.TrimPrefix(path, PathStatic)
-			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			fileString := strings.TrimPrefix(pathDir, path.Clean(dir))
+			logger.Debug("File name after trim", zap.Any("File name", fileString))
+			logger.Debug("Dir content", zap.Any("Dir content", dir))
+			mimeType, err := mimemagic.MatchFilePath(pathDir, -1)
 			if err != nil {
 				logger.Debug("Error while matching file path", zap.Error(err))
 				return err

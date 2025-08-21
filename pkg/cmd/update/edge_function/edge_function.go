@@ -20,14 +20,14 @@ import (
 )
 
 type Fields struct {
-	ID            string
-	Name          string
-	Language      string
-	Code          string
-	Active        string
-	InitiatorType string
-	Args          string
-	InPath        string
+	ID                   string
+	Name                 string
+	Language             string
+	Code                 string
+	Active               string
+	Args                 string
+	ExecutionEnvironment string
+	InPath               string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -41,9 +41,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 		$ azion update edge-function --function-id 1234 --name 'Hello'
-		$ azion update edge-function -f 4185 --code ./mycode/function.js --args ./mycode/myargs.json
-		$ azion update edge-function -f 9123 --active true
-		$ azion update edge-function -f 9123 --active false
+		$ azion update edge-function --function-id 4185 --code ./mycode/function.js --args ./mycode/myargs.json
+		$ azion update edge-function --function-id 9123 --active true
+		$ azion update edge-function --function-id 9123 --active false
 		$ azion update edge-function --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -124,7 +124,11 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		if err := json.Unmarshal(marshalledArgs, &args); err != nil {
 			return fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 		}
-		request.SetJsonArgs(args)
+		request.SetDefaultArgs(args)
+	}
+
+	if cmd.Flags().Changed("execution-environment") {
+		request.SetExecutionEnvironment(fields.ExecutionEnvironment)
 	}
 
 	if cmd.Flags().Changed("name") {
@@ -140,6 +144,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
 	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)
 	flags.StringVar(&fields.Active, "active", "", msg.UpdateFlagActive)
+	flags.StringVar(&fields.ExecutionEnvironment, "execution-environment", "", msg.FlagExecutionEnvironment)
 	flags.StringVar(&fields.InPath, "file", "", msg.UpdateFlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
 }

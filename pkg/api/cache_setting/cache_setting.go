@@ -7,27 +7,27 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
-func (c *ClientV4) Create(ctx context.Context, req *Request, applicationID int64) (sdk.CacheSetting, error) {
+func (c *ClientV4) Create(ctx context.Context, req sdk.CacheSettingRequest, applicationID int64) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Settings")
 
 	applicationIDStr := strconv.Itoa(int(applicationID))
 
 	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
 		CreateCacheSetting(ctx, applicationIDStr).
-		CacheSettingRequest(req.CacheSettingRequest)
+		CacheSettingRequest(req)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return sdk.CacheSetting{}, err
 		}
 
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return cacheResponse.Data, nil
@@ -44,13 +44,13 @@ func (c *ClientV4) Update(ctx context.Context, req *RequestUpdate, applicationID
 		PatchedCacheSettingRequest(req.PatchedCacheSettingRequest)
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
-		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		logger.Debug("Error while updating a Cache Setting", zap.Any("ID", cacheSettingID), zap.Any("Name", req.PatchedCacheSettingRequest.Name), zap.Error(err))
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return nil, err
 		}
 
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return cacheResponse, nil
@@ -75,11 +75,11 @@ func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeAp
 		Execute()
 	if err != nil {
 		logger.Debug("Error while listing Cache Settings", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return nil, err
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -95,30 +95,37 @@ func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 		Execute()
 	if err != nil {
 		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
+		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
 			return sdk.CacheSetting{}, err
 		}
 
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Data, nil
 }
 
-func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) error {
+func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (int, error) {
 	logger.Debug("Delete Cache Settings")
 
 	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
 	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
 
-	_, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr).
-		Execute()
-	if err != nil {
-		logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
+	req := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr)
+	_, httpResp, err := req.Execute()
 
-		return utils.ErrorPerStatusCode(httpResp, err)
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while deleting a Cache Setting", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return httpResp.StatusCode, err
+			}
+		}
+		return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
-	return nil
+	return 0, nil
 }

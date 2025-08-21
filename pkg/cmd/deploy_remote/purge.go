@@ -58,10 +58,7 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse,
 	}
 	listURLsDomains := []string{}
 	for _, domain := range workload.GetDomains() {
-		listURLsDomains = append(listURLsDomains, domain.GetDomain())
-	}
-	for _, alternate := range workload.GetAlternateDomains() {
-		listURLsDomains = append(listURLsDomains, alternate)
+		listURLsDomains = append(listURLsDomains, domain)
 	}
 
 	currentDataMap, err := ReadFilesJSONL()

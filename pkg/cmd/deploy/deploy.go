@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -26,7 +25,7 @@ import (
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/spf13/cobra"
@@ -67,7 +66,7 @@ var (
 	Local       bool
 	Env         string
 	Logs        = contracts.Logs{}
-	Result      = contracts.Results{}
+	Result      = contracts.ResultsV4{}
 	DeployURL   = "https://console.azion.com"
 	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 )
@@ -178,7 +177,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if settings.S3AccessKey == "" || settings.S3SecreKey == "" {
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreate: sdk.BucketCreate{Name: nameBucket, EdgeAccess: sdk.READ_ONLY}})
+		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: "read_only"}})
 		if err != nil {
 			return err
 		}
@@ -190,7 +189,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		oneYearLater := now.AddDate(1, 0, 0)
 
 		request := new(storage.RequestCredentials)
-		request.Name = &nameBucket
+		request.Name = nameBucket
 		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
 		request.Bucket = &nameBucket
 		request.ExpirationDate = &oneYearLater
@@ -245,7 +244,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
 
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Workloads.Url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 
@@ -359,7 +358,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			}
 
 			if Result.Result.Errors != nil {
-				return errors.New(Result.Result.Errors.Stack) //TODO: add mensagem que deu ruim e é para verificar se criou algo na conta
+				return fmt.Errorf(msg.ERRORCAPTURELOGS, Result.Result.Errors.Stack)
 			}
 
 			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)

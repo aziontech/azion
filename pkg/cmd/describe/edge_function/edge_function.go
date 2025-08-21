@@ -13,7 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 )
 
@@ -94,7 +94,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			if cmd.Flags().Changed("with-code") {
-				describeOut.Field = resp.GetCode()
+				// describeOut.Field = resp.
 			}
 
 			return output.Print(&describeOut)

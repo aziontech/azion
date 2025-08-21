@@ -1,0 +1,27 @@
+{
+    "results": {
+        "id": 210543,
+        "name": "New Rule 534322",
+        "phase": "request",
+        "description": "Are you approaching me?",
+        "behaviors": [
+            {
+                "target": "run_function",
+                "name": "delivera"
+            }
+        ],
+        "criteria": [
+            [
+                {
+                    "variable": "${uri}",
+                    "operator": "starts_with",
+                    "conditional": "if",
+                    "input_value": "/"
+                }
+            ]
+        ],
+        "is_active": true,
+        "order": 5
+    },
+    "schema_version": 3
+}

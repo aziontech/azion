@@ -18,13 +18,15 @@ import (
 var (
 	applicationID string
 	ruleID        string
+	phase         string
 )
 
 type DescribeCmd struct {
-	Io             *iostreams.IOStreams
-	ReadInput      func(string) (string, error)
-	GetRulesEngine func(context.Context, string, string) (api.RulesEngineResponse, error)
-	AskInput       func(string) (string, error)
+	Io                     *iostreams.IOStreams
+	ReadInput              func(string) (string, error)
+	GetRulesEngineRequest  func(context.Context, string, string) (api.RulesEngineResponse, error)
+	GetRulesEngineResponse func(context.Context, string, string) (api.RulesEngineResponse, error)
+	AskInput               func(string) (string, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -33,9 +35,13 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		GetRulesEngine: func(ctx context.Context, appID, ruleID string) (api.RulesEngineResponse, error) {
+		GetRulesEngineRequest: func(ctx context.Context, appID, ruleID string) (api.RulesEngineResponse, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			return client.GetRulesEngine(ctx, appID, ruleID)
+			return client.GetRulesEngineRequest(ctx, appID, ruleID)
+		},
+		GetRulesEngineResponse: func(ctx context.Context, appID, ruleID string) (api.RulesEngineResponse, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			return client.GetRulesEngineResponse(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,
 	}
@@ -54,8 +60,6 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
       $ azion describe rules-engine --application-id 1673635839 --rule-id 31223 --out "./tmp/test.json"
     `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			var err error
-
 			if !cmd.Flags().Changed("rule-id") {
 				answer, err := describe.AskInput(msg.AskInputRulesId)
 				if err != nil {
@@ -75,11 +79,6 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			ctx := context.Background()
-			rules, err := describe.GetRulesEngine(ctx, applicationID, ruleID)
-			if err != nil {
-				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
-			}
-
 			fields := make(map[string]string)
 			fields["Id"] = "Rules Engine ID"
 			fields["Name"] = "Name"
@@ -89,20 +88,46 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			fields["Behaviors"] = "Behaviours"
 			fields["Criteria"] = "Criteria"
 
-			describeOut := output.DescribeOutput{
-				GeneralOutput: output.GeneralOutput{
-					Flags: f.Flags,
-					Out:   f.IOStreams.Out,
-				},
-				Fields: fields,
-				Values: rules,
+			switch phase {
+			case "request":
+				rules, err := describe.GetRulesEngineRequest(ctx, applicationID, ruleID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
+				}
+
+				describeOut := output.DescribeOutput{
+					GeneralOutput: output.GeneralOutput{
+						Flags: f.Flags,
+						Out:   f.IOStreams.Out,
+					},
+					Fields: fields,
+					Values: rules,
+				}
+				return output.Print(&describeOut)
+			case "response":
+				rules, err := describe.GetRulesEngineResponse(ctx, applicationID, ruleID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
+				}
+
+				describeOut := output.DescribeOutput{
+					GeneralOutput: output.GeneralOutput{
+						Flags: f.Flags,
+						Out:   f.IOStreams.Out,
+					},
+					Fields: fields,
+					Values: rules,
+				}
+				return output.Print(&describeOut)
+			default:
+				return msg.ErrorInvalidPhase
 			}
-			return output.Print(&describeOut)
 		},
 	}
 
 	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagAppID)
 	cobraCmd.Flags().StringVar(&ruleID, "rule-id", "", msg.FlagRuleID)
+	cobraCmd.Flags().StringVar(&phase, "phase", "", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

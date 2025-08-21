@@ -25,6 +25,7 @@ import (
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
+	gitlib "github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -161,7 +162,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 		nameRepo := git.GetNameRepo(info.remote)
 		info.PathWorkingDir = filepath.Join(info.PathWorkingDir, nameRepo)
-		err = git.Clone(info.remote, filepath.Join(path, nameRepo))
+		options := &gitlib.CloneOptions{}
+		err = git.Clone(options, info.remote, filepath.Join(path, nameRepo))
 		if err != nil {
 			logger.Debug("Error while cloning the repository", zap.Error(err))
 			return err
@@ -221,12 +223,12 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
-		//run init before calling build
-		cmdVulcanInit := "store init"
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
-
+		cmdVulcanBuild := "build"
+		if len(info.Preset) > 0 {
+			cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, info.Preset)
+		}
 		vul := vulcanPkg.NewVulcan()
-		command := vul.Command("", cmdVulcanInit, cmd.F)
+		command := vul.Command("", cmdVulcanBuild, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 
 		_, err = cmd.CommandRunner(cmd.F, command, []string{})

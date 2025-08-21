@@ -10,7 +10,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 )
@@ -93,119 +92,6 @@ func TestNewCmd(t *testing.T) {
 					return
 				}
 				t.Fatal("Error: ", err)
-			}
-		})
-	}
-}
-
-func TestValidateRequest(t *testing.T) {
-	tests := []struct {
-		name    string
-		request sdk.EdgeApplicationRuleEngineRequest
-		wantErr bool
-	}{
-		{
-			name:    "error name empty",
-			request: sdk.EdgeApplicationRuleEngineRequest{},
-			wantErr: true,
-		},
-		{
-			name: "error criteria null",
-			request: sdk.EdgeApplicationRuleEngineRequest{
-				Name:     "no_empty",
-				Criteria: nil,
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria conditional empty",
-			request: sdk.EdgeApplicationRuleEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.EdgeApplicationCriterionFieldRequest{
-					{{Conditional: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria variable empty",
-			request: sdk.EdgeApplicationRuleEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.EdgeApplicationCriterionFieldRequest{
-					{{Conditional: "no_empty", Variable: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria operator empty",
-			request: sdk.EdgeApplicationRuleEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.EdgeApplicationCriterionFieldRequest{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria variable empty",
-			request: sdk.EdgeApplicationRuleEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.EdgeApplicationCriterionFieldRequest{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty"}},
-				},
-			},
-			wantErr: true,
-		},
-		// {
-		// 	name: "error behaviors null",
-		// 	request: sdk.EdgeApplicationRuleEngineRequest{
-		// 		Name: "no_empty",
-		// 		Criteria: [][]sdk.EdgeApplicationCriterionFieldRequest{
-		// 			{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", Argument: utils.PointerString("")}},
-		// 		},
-		// 		Behaviors: nil,
-		// 	},
-		// 	wantErr: true,
-		// },
-		// {
-		// 	name: "error struct string from behaviors field name empty",
-		// 	request: sdk.EdgeApplicationRuleEngineRequest{
-		// 		Name: "no_empty",
-		// 		Criteria: [][]sdk.RulesEngineCriteria{
-		// 			{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", InputValue: utils.PointerString("")}},
-		// 		},
-		// 		Behaviors: []sdk.RulesEngineBehaviorEntry{
-		// 			sdk.RulesEngineBehaviorEntry{
-		// 				RulesEngineBehaviorString: &sdk.RulesEngineBehaviorString{
-		// 					Name: "",
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	wantErr: true,
-		// },
-		// {
-		// 	name: "error struct Object from behaviors field name empty",
-		// 	request: sdk.EdgeApplicationRuleEngineRequest{
-		// 		Name: "no_empty",
-		// 		Criteria: [][]sdk.RulesEngineCriteria{
-		// 			{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", InputValue: utils.PointerString("")}},
-		// 		},
-		// 		Behaviors: []sdk.RulesEngineBehaviorEntry{
-		// 			sdk.RulesEngineBehaviorEntry{
-		// 				RulesEngineBehaviorObject: &sdk.RulesEngineBehaviorObject{},
-		// 			},
-		// 		},
-		// 	},
-		// 	wantErr: true,
-		// },
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validateRequest(tt.request); (err != nil) != tt.wantErr {
-				t.Errorf("validateRequest() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

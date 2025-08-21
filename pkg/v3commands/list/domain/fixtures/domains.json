@@ -1,0 +1,31 @@
+{
+    "count": 2,
+    "total_pages": 1,
+    "schema_version": 3,
+    "links": {
+        "previous": null,
+        "next": null
+    },
+    "results": [
+        {
+            "id": 1674040168,
+            "name": "asdf",
+            "cnames": [],
+            "cname_access_only": false,
+            "digital_certificate_id": null,
+            "edge_application_id": 1674046568,
+            "is_active": true,
+            "domain_name": "r1oslr15v9.map.azionedge.net"
+        },
+        {
+            "id": 1674060237,
+            "name": "oite",
+            "cnames": [],
+            "cname_access_only": false,
+            "digital_certificate_id": null,
+            "edge_application_id": 1674066603,
+            "is_active": true,
+            "domain_name": "e5skak9ib6.map.azionedge.net"
+        }
+    ]
+}

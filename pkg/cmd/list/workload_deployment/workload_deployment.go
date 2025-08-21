@@ -14,7 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk/edge"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -24,7 +24,7 @@ var workloadId int64
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
-	ListWorkloadDeployments func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedResponseListWorkloadDeploymentList, error)
+	ListWorkloadDeployments func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedWorkloadDeploymentList, error)
 	AskInput                func(string) (string, error)
 }
 
@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListWorkloadDeployments: func(ctx context.Context, opts *contracts.ListOptions, id int64) (*sdk.PaginatedResponseListWorkloadDeploymentList, error) {
+		ListWorkloadDeployments: func(ctx context.Context, opts *contracts.ListOptions, id int64) (*sdk.PaginatedWorkloadDeploymentList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListDeployments(ctx, opts, id)
 		},
@@ -95,29 +95,27 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 	}
 
 	listOut := output.ListOutput{}
-	listOut.Columns = []string{"ID", "TAG", "CURRENT"}
+	listOut.Columns = []string{"ID", "CURRENT"}
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "TAG", "EDGE APPLICATION", "EDGE FIREWALL", "CURRENT"}
+		listOut.Columns = []string{"ID", "CURRENT", "EDGE APPLICATION", "EDGE FIREWALL"}
 	}
 
 	for _, v := range response.Results {
 		var ln []string
+		stratety := v.GetStrategy()
 		if opts.Details {
-			binds := v.GetBinds()
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
-				utils.TruncateString(v.GetTag()),
-				fmt.Sprintf("%d", binds.GetEdgeApplication()),
-				fmt.Sprintf("%d", binds.GetEdgeFirewall()),
 				fmt.Sprintf("%v", v.GetCurrent()),
+				fmt.Sprintf("%d", stratety.Attributes.GetEdgeApplication()),
+				fmt.Sprintf("%d", stratety.Attributes.GetEdgeFirewall()),
 			}
 		} else {
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
-				utils.TruncateString(v.GetTag()),
 				fmt.Sprintf("%v", v.GetCurrent()),
 			}
 		}

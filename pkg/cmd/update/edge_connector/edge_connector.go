@@ -65,8 +65,17 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorUpdateConnector.Error(), err)
 			}
 
+			var id int64
+			if response.EdgeConnectorHTTP != nil {
+				id = response.EdgeConnectorHTTP.GetId()
+			} else if response.EdgeConnectorLiveIngest != nil {
+				id = response.EdgeConnectorLiveIngest.GetId()
+			} else if response.EdgeConnectorStorage != nil {
+				id = response.EdgeConnectorStorage.GetId()
+			}
+
 			updateOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.UpdateOutputSuccess, response.GetId()),
+				Msg:   fmt.Sprintf(msg.UpdateOutputSuccess, id),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}

@@ -7,7 +7,8 @@ var (
 	DeployLongDescription                = "Deploys an Edge Application"
 	DeploySuccessful                     = "Your Edge Application was deployed successfully\n"
 	SimpleDeploySuccessful               = "Your simple Edge Application was deployed successfully\n"
-	DeployOutputDomainSuccess            = "\nTo visualize your application access the Domain: %v\n"
+	DeployOutputDomainSuccess            = "\nTo visualize your application access the Domain: %s\n"
+	DeployOutputWorkloadSuccess          = "\nTo visualize your application access the Domain: %s\n"
 	EdgeApplicationDeployDomainHint      = "You may now edit your Domain and add your own CNAMES. To do this you may run 'azion domain update' command and also configure your DNS\n"
 	DeployOutputCachePurge               = "Domain cache was purged\n"
 	DeployOutputEdgeFunctionCreate       = "Created Edge Function %v with ID %v\n"
@@ -46,7 +47,8 @@ var (
   - Edge Application Cache Settings: Override Cache Settings - Maximum TTL in seconds: 7200
 
 Create a Cache Settings configuration with the above specifications? (y/N)`
-	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket and upload of static files"
+	SkipBucket           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
+	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
 	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
 	NameInUseApplication = "Edge Application name is already in use. Trying to create Edge Application with the following name: %s\n"
 	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"

@@ -97,20 +97,20 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE", "CACHE BY COOKIES", "ENABLE CACHING FOR POST"}
+		listOut.Columns = []string{"ID", "NAME", "BROWSER CACHE", "EDGE CACHE"}
 	}
 
 	for _, v := range response.GetResults() {
 		var ln []string
 		if opts.Details {
-			cache := v.GetEdgeCache()
-			applicationControls := v.GetApplicationControls()
+			cache := v.GetBrowserCache()
+			modules := v.GetModules()
+			applicationControls := modules.GetEdgeCache()
 			ln = []string{
 				fmt.Sprintf("%d", v.Id),
 				v.Name,
-				v.BrowserCache.GetBehavior(),
-				applicationControls.GetCacheByCookies(),
-				fmt.Sprintf("%v", cache.GetCachingForPostEnabled()),
+				cache.GetBehavior(),
+				applicationControls.GetBehavior(),
 			}
 		} else {
 			ln = []string{

@@ -8,15 +8,22 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id string) (EdgeApplicationResponse, error) {
+func (c *Client) Get(ctx context.Context, id int64) (EdgeApplicationResponse, error) {
 	logger.Debug("Get Edge Application")
 
 	res, httpResp, err := c.apiClient.EdgeApplicationsAPI.
 		RetrieveEdgeApplication(ctx, id).Execute()
 
 	if err != nil {
-		logger.Debug("Error while getting an Edge Application", zap.Error(err))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while getting an Edge Application", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &res.Data, nil

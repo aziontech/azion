@@ -24,6 +24,7 @@ var (
 	RootYesFlag     = "Answers all yes/no interactions automatically with yes"
 	TokenSavedIn    = "Token saved in %s\n"
 	TokenUsedIn     = "This token will be used by default with all commands"
+	LoginMessage    = "Please remember to login before running any commands. You can do this by running the following command: 'azion login'\n"
 
 	// update messages
 	// NotSupported      = "OS currently not supported"
