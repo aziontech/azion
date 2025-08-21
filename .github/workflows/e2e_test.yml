@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
     branches-ignore:
       - main 
-      - edgeconnectors-v4
+      - dev
       - pre-release-v4
 
 jobs:
