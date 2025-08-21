@@ -96,9 +96,6 @@ func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error
 	fact.startTime = time.Now()
 	logger.LogLevel(fact.factory.Logger)
 
-	// Display update reminder message
-	fmt.Fprintln(fact.factory.IOStreams.Out, color.New(color.FgYellow).Sprint("⚠️  ", msg.UpdateReminder))
-
 	if strings.HasPrefix(fact.configFlag, PREFIX_FLAG) {
 		return msg.ErrorPrefix
 	}

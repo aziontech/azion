@@ -25,7 +25,6 @@ var (
 	TokenSavedIn    = "Token saved in %s\n"
 	TokenUsedIn     = "This token will be used by default with all commands"
 	LoginMessage    = "Please remember to login before running any commands. You can do this by running the following command: 'azion login'\n"
-	UpdateReminder  = "Some features in the current version may no longer be compatible with future versions of the CLI. Please update your CLI version to be up to date with the new features."
 
 	// update messages
 	// NotSupported      = "OS currently not supported"
