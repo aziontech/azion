@@ -1,26 +1,19 @@
 {
-  "results": {
-    "id": 1665081615,
-    "name": "Update Edge Application",
-    "delivery_protocol": "http,https",
-    "http_port": 8008,
-    "https_port": 9443,
-    "minimum_tls_version": "tls_1_3",
+  "state": "pending",
+  "data": {
+    "id": 1337,
+    "name": "ATUALIZANDO",
+    "last_editor": "string",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "modules": {
+      "edge_cache_enabled": true,
+      "edge_functions_enabled": false,
+      "application_accelerator_enabled": false,
+      "image_processor_enabled": false,
+      "tiered_cache_enabled": false
+    },
     "active": true,
-    "debug_rules": false,
-    "http3": false,
-    "websocket": null,
-    "supported_ciphers": "TLSv1.3_2022",
-    "application_acceleration": true,
-    "caching": true,
-    "device_detection": false,
-    "edge_firewall": false,
-    "edge_functions": true,
-    "image_optimization": true,
-    "load_balancer": false,
-    "raw_logs": false,
-    "l2_caching": false,
-    "web_application_firewall": false
-  },
-  "schema_version": 3
+    "debug": false,
+    "product_version": "string"
+  }
 }

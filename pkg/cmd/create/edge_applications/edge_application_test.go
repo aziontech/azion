@@ -29,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("POST", "edge_applications"),
+					httpmock.REST("POST", "edge_application/applications"),
 					httpmock.JSONFromFile("./fixtures/response.json"),
 				)
 				return &mock
@@ -37,52 +37,12 @@ func TestNewCmd(t *testing.T) {
 			output: fmt.Sprintf(msg.OutputSuccess, 1694434702),
 		},
 		{
-			name: "Create edge application with success all fields completed",
-			args: []string{
-				"--name", "lulu",
-				"--http3", "true",
-				"--debug-rules", "false",
-				"--supported-ciphers", "AES256-GCM-SHA384",
-				"--websocket", "true",
-				"--http-port", "80",
-				"--https-port", "443",
-				"--delivery-protocol", "http",
-				"--address", "https://example.com",
-				"--origin-protocol-policy", "https-only",
-				"--host-header", "example.com",
-				"--browser-cache-settings", "max-age=3600",
-				"--cdn-cache-settings", "max-age=3600",
-			},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				mock.Register(
-					httpmock.REST("POST", "edge_applications"),
-					httpmock.JSONFromFile("./fixtures/response.json"),
-				)
-				return &mock
-			},
-			output: fmt.Sprintf(msg.OutputSuccess, 1694434702),
-		},
-		{
-			name: "Creating the edge application with the --file flag",
-			args: []string{"--file", "./fixtures/body_request.json"},
-			mock: func() *httpmock.Registry {
-				mock := httpmock.Registry{}
-				mock.Register(
-					httpmock.REST("POST", "edge_applications"),
-					httpmock.JSONFromFile("./fixtures/response.json"),
-				)
-				return &mock
-			},
-			output: fmt.Sprintf(msg.OutputSuccess, 1694434702),
-		},
-		{
-			name: "Error file json no exist",
+			name: "Error file json does not exist",
 			args: []string{"--file", "./fixtures/no_exist.json"},
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("POST", "edge_applications"),
+					httpmock.REST("POST", "edge_application/applications"),
 					httpmock.JSONFromString("{}"),
 				)
 				return &mock

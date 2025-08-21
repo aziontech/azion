@@ -1,0 +1,12 @@
+{
+    "name": "borus",
+    "delivery_protocol": "http",
+    "origin_type": "single_origin",
+    "address": "www.new.api",
+    "origin_protocol_policy": "preserve",
+    "host_header": "www.new.api",
+    "browser_cache_settings": "override",
+    "browser_cache_settings_maximum_ttl": 20,
+    "cdn_cache_settings": "honor",
+    "cdn_cache_settings_maximum_ttl": 60
+}

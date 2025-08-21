@@ -1,34 +1,31 @@
 {
-    "count": 1,
-    "total_pages": 1,
-    "schema_version": 3,
-    "links": {
-      "previous": null,
-      "next": null
-    },
-    "results": [
-      {
-        "id": 173617,
-        "name": "Default Rule",
-        "phase": "default",
-        "behaviors": [
+  "count": 123,
+  "results": [
+    {
+      "id": 173617,
+      "name": "string",
+      "phase": "default",
+      "active": true,
+      "behaviors": [
+        {
+          "name": "deny",
+          "argument": 0
+        }
+      ],
+      "criteria": [
+        [
           {
-            "name": "run_function",
-            "target": "9525"
+            "argument": 0,
+            "variable": "${arg_<name>}",
+            "conditional": "if",
+            "operator": "does_not_exist"
           }
-        ],
-        "criteria": [
-          [
-            {
-              "variable": "${uri}",
-              "operator": "starts_with",
-              "conditional": "if",
-              "input_value": "/"
-            }
-          ]
-        ],
-        "is_active": true,
-        "order": 1
-      }
-    ]
-  }
+        ]
+      ],
+      "description": "string",
+      "order": 0,
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z"
+    }
+  ]
+}

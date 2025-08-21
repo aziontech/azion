@@ -5,12 +5,14 @@ on:
     types: [opened, synchronize]
     branches-ignore:
       - main 
+      - dev
+      - pre-release-v4
 
 jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: golang:1.24.4
+      image: golang:1.25.0
 
     steps:
       - name: Setting GIT

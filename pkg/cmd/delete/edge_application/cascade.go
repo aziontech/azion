@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
 	app "github.com/aziontech/azion-cli/pkg/api/edge_applications"
@@ -27,8 +28,8 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	if azionJson.Application.ID == 0 {
 		return msg.ErrorMissingApplicationIdJson
 	}
-	clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
-	clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
+	clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
+	clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	storagecmd := store.NewBucket(del.f)
 
 	err = clientapp.Delete(ctx, azionJson.Application.ID)
@@ -36,15 +37,18 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 		return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
 	}
 
-	if azionJson.Function.ID == 0 {
-		_, err := fmt.Fprint(del.f.IOStreams.Out, msg.MissingFunction)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = clientfunc.Delete(ctx, azionJson.Function.ID)
-		if err != nil {
-			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+	for _, funcJson := range azionJson.Function {
+		if funcJson.ID == 0 {
+			_, err := fmt.Fprint(del.f.IOStreams.Out, msg.MissingFunction)
+			if err != nil {
+				return err
+			}
+		} else {
+			str := strconv.FormatInt(funcJson.ID, 10)
+			err = clientfunc.Delete(ctx, str)
+			if err != nil {
+				return fmt.Errorf(msg.ErrorFailToDeleteFunction.Error(), err)
+			}
 		}
 	}
 

@@ -206,7 +206,7 @@ func TestCaptureLogs(t *testing.T) {
 		logsResponse    string
 		resultsResponse string
 		logStruct       contracts.Logs
-		resultStruct    contracts.Results
+		resultStruct    contracts.ResultsV4
 		expectError     bool
 	}{
 		{
@@ -221,7 +221,7 @@ func TestCaptureLogs(t *testing.T) {
 			logsResponse:    `{"status": "succeeded"}`,
 			resultsResponse: `{"result": {"errors": {"stack": "Something went wrong"}}}`,
 			logStruct:       contracts.Logs{Status: "succeeded"},
-			resultStruct: contracts.Results{Result: contracts.Result{
+			resultStruct: contracts.ResultsV4{Result: contracts.ResultV4{
 				Errors: &contracts.ErrorDetails{
 					Stack:   "Something went wrong",
 					Message: "Something went wrong",

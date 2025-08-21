@@ -61,12 +61,14 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 	listOut.Out = b.Factory.IOStreams.Out
 	listOut.Flags = b.Factory.Flags
 
-	for _, v := range resp.Results {
-		ln := []string{
-			v.GetName(),
-			string(v.GetEdgeAccess()),
+	if resp != nil && len(resp.Results) > 0 {
+		for _, v := range resp.Results {
+			ln := []string{
+				v.GetName(),
+				string(v.GetEdgeAccess()),
+			}
+			listOut.Lines = append(listOut.Lines, ln)
 		}
-		listOut.Lines = append(listOut.Lines, ln)
 	}
 	return output.Print(&listOut)
 }

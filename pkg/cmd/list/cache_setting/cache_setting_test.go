@@ -20,7 +20,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 
@@ -36,7 +36,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -50,45 +50,11 @@ func TestList(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("list page 1 with item 1", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
-			httpmock.JSONFromFile("./fixtures/list_3_itens.json"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "1"})
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
-	})
-
-	t.Run("list page 3 with item 1", func(t *testing.T) {
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
-			httpmock.JSONFromFile("./fixtures/list_3_itens.json"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--application-id", "1673635839", "--page", "3"})
-
-		_, err := cmd.ExecuteC()
-		require.NoError(t, err)
-	})
-
 	t.Run("no items", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/nocaches.json"),
 		)
 
@@ -111,7 +77,7 @@ func TestList(t *testing.T) {
 		}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 

@@ -16,10 +16,12 @@ var (
 	ErrorCachingStringSortFlag  = errors.New("Invalid --enable-caching-string-sort flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorSliceConfigurationFlag = errors.New("Invalid --slice-configuration-enable flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorSliceL2CachingFlag     = errors.New("Invalid --slice-l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorTieredCachingFlag      = errors.New("Invalid --tiered-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorL2CachingEnabledFlag   = errors.New("Invalid --l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 
 	ErrorCreateCacheSettings               = errors.New("Failed to create the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorBrowserMaximumTtlNotSent          = errors.New("When browser Cache Settings is 'override' you must inform the --browser-cache-settings-maximum-ttl flag.")
+	ErrorUpdateCacheSettings               = errors.New("Failed to update the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorBrowserMaximumTtlNotSent          = errors.New("When browser Cache Settings is 'override' you must inform the --browser-cache-max-age flag.")
 	ErrorApplicationAccelerationNotEnabled = errors.New("When --enable-caching-string-sort, --enable-caching-for-post or --enable-caching-for-options is sent, application acceleration must be enabled.")
 
 	ErrorMissingArguments = errors.New("Required flags are missing. You must supply application-id and cache-settings-id as arguments. Run 'azion <command> <subcommand> --help' command to display more information and try again.")

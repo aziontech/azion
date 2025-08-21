@@ -1,0 +1,20 @@
+{
+  "name": "varejo",
+  "env": "production",
+  "Function": {
+    "name": "__DEFAULT__",
+    "file": "./dist/main.js",
+    "args": "./args.json",
+    "language": "javascript",
+    "id": 0
+  },
+  "application": {
+    "name": "__DEFAULT__"
+  },
+  "domain": {
+    "name": "__DEFAULT__"
+  },
+  "rt-purge": {
+    "purge_on_publish": true
+  }
+}

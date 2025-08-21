@@ -29,7 +29,7 @@ type SyncCmd struct {
 	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
 	EnvPath               string
 	ReadEnv               func(filenames ...string) (envMap map[string]string, err error)
-	WriteManifest         func(manifest *contracts.Manifest, pathMan string) error
+	WriteManifest         func(manifest *contracts.ManifestV4, pathMan string) error
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 }
 

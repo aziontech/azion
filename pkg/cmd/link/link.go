@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
@@ -224,7 +225,20 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
-		if cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
+		cmdVulcanBuild := "build"
+		if len(info.Preset) > 0 {
+			cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, info.Preset)
+		}
+		vul := vulcanPkg.NewVulcan()
+		command := vul.Command("", cmdVulcanBuild, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+
+		_, err = cmd.CommandRunner(cmd.F, command, []string{})
+		if err != nil {
+			return err
+		}
+
+		if !info.Auto && cmd.ShouldDevDeploy(info, msg.ASKPREBUILD, true) {
 			if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
 				return err
 			}

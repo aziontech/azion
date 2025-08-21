@@ -61,8 +61,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					if err != nil {
 						logger.Debug("Error while converting answer to int64", zap.Error(err))
 						return msg.ErrorConvertApplicationID
-
 					}
+
 					fields.EdgeApplicationID = int(num)
 				}
 

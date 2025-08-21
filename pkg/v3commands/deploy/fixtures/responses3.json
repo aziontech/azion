@@ -1,0 +1,19 @@
+{
+    "state": "executed",
+    "data": {
+        "name": "my-s3-credential-all-permissions",
+        "access_key": "s3_credential_access_key",
+        "secret_key": "s3_credential_secret_key", 
+        "capabilities": [
+            "listAllBucketNames",
+            "listBuckets",
+            "listFiles",
+            "readFiles",
+            "writeFiles",
+            "deleteFiles"
+        ],
+        "bucket": "s3-credentials-bucket",
+        "expiration_date": "2025-01-31T10:57:00Z",
+        "created_at": "2024-03-07T18:37:30.763295Z"
+    }
+}

@@ -10,7 +10,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 )
@@ -30,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:     "success phase request",
 			args:     []string{"--application-id", "1679423488", "--phase", "request", "--file", "./fixtures/create.json"},
-			request:  httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/request/rules"),
+			request:  httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response: httpmock.JSONFromFile("./fixtures/resp_phase_request.json"),
 			wantOut:  fmt.Sprintf(msg.OutputSuccess, 210543),
 			err:      false,
@@ -38,15 +37,15 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:     "success phase response",
 			args:     []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create.json"},
-			request:  httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/response/rules"),
+			request:  httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response: httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
-			wantOut:  fmt.Sprintf(msg.OutputSuccess, 210544),
+			wantOut:  fmt.Sprintf(msg.OutputSuccess, 210543),
 			err:      false,
 		},
 		{
 			name:      "error name empty",
 			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_name_empty.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/response/rules"),
+			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
 			wantError: msg.ErrorNameEmpty.Error(),
 			err:       true,
@@ -54,7 +53,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:      "error conditional empty",
 			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_conditional_empty.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/response/rules"),
+			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
 			wantError: msg.ErrorConditionalEmpty.Error(),
 			err:       true,
@@ -62,7 +61,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:      "error unmarshal file not exist",
 			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/no_exist.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/response/rules"),
+			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
 			wantError: utils.ErrorUnmarshalReader.Error(),
 			err:       true,
@@ -70,7 +69,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:      "error api request create rules",
 			args:      []string{"--application-id", "1679423488", "--phase", "request", "--file", "./fixtures/create.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_applications/1679423488/rules_engine/request/rules"),
+			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
 			response:  httpmock.StatusStringResponse(http.StatusInternalServerError, "invalid"),
 			wantError: "Failed to create the rule in Rules Engine: The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support. Check your settings and try again. If the error persists, contact Azion support.",
 			err:       true,
@@ -93,119 +92,6 @@ func TestNewCmd(t *testing.T) {
 					return
 				}
 				t.Fatal("Error: ", err)
-			}
-		})
-	}
-}
-
-func TestValidateRequest(t *testing.T) {
-	tests := []struct {
-		name    string
-		request sdk.CreateRulesEngineRequest
-		wantErr bool
-	}{
-		{
-			name:    "error name empty",
-			request: sdk.CreateRulesEngineRequest{},
-			wantErr: true,
-		},
-		{
-			name: "error criteria null",
-			request: sdk.CreateRulesEngineRequest{
-				Name:     "no_empty",
-				Criteria: nil,
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria conditional empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria variable empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria operator empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: ""}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct criteria variable empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty"}},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error behaviors null",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", InputValue: utils.PointerString("")}},
-				},
-				Behaviors: nil,
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct string from behaviors field name empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", InputValue: utils.PointerString("")}},
-				},
-				Behaviors: []sdk.RulesEngineBehaviorEntry{
-					sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorString: &sdk.RulesEngineBehaviorString{
-							Name: "",
-						},
-					},
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "error struct Object from behaviors field name empty",
-			request: sdk.CreateRulesEngineRequest{
-				Name: "no_empty",
-				Criteria: [][]sdk.RulesEngineCriteria{
-					{{Conditional: "no_empty", Variable: "no_empty", Operator: "no_empty", InputValue: utils.PointerString("")}},
-				},
-				Behaviors: []sdk.RulesEngineBehaviorEntry{
-					sdk.RulesEngineBehaviorEntry{
-						RulesEngineBehaviorObject: &sdk.RulesEngineBehaviorObject{},
-					},
-				},
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := validateRequest(tt.request); (err != nil) != tt.wantErr {
-				t.Errorf("validateRequest() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

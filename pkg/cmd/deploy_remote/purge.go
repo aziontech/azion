@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apidom "github.com/aziontech/azion-cli/pkg/api/domain"
 	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -28,8 +28,8 @@ func (cmd *DeployCmd) PurgeWildcard(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
-	err := clipurge.PurgeWildcard(ctx, purgeDomains)
+	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	err := clipurge.PurgeCache(ctx, purgeDomains, "wildcard", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging wildcard domain", zap.Error(err))
 		return err
@@ -43,8 +43,8 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_url"), cmd.F.Config.GetString("token"))
-	err := clipurge.PurgeUrls(ctx, purgeDomains)
+	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	err := clipurge.PurgeCache(ctx, purgeDomains, "url", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging urls domain", zap.Error(err))
 		return err
@@ -52,13 +52,13 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, domain apidom.DomainResponse, confPath string, msgs *[]string) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse, confPath string, msgs *[]string) error {
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		return nil
 	}
-	listURLsDomains := domain.GetCnames()
-	if !domain.GetCnameAccessOnly() {
-		listURLsDomains = append(listURLsDomains, domain.GetDomainName())
+	listURLsDomains := []string{}
+	for _, domain := range workload.GetDomains() {
+		listURLsDomains = append(listURLsDomains, domain)
 	}
 
 	currentDataMap, err := ReadFilesJSONL()
