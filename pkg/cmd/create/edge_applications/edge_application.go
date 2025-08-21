@@ -12,6 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -22,41 +23,20 @@ import (
 const example = `
         $ azion create edge-application --name "naruno"
         $ azion create edge-application --file create.json
-        $ json example to be used with '--file flag' "create.json": 
-        {
-            "name": "New Edge Application",
-            "delivery_protocol": "http",
-            "origin_type": "single_origin",
-            "address": "www.new.api",
-            "origin_protocol_policy": "preserve",
-            "host_header": "${host}",
-            "browser_cache_settings": "override",
-            "browser_cache_settings_maximum_ttl": 20,
-            "cdn_cache_settings": "honor",
-            "cdn_cache_settings_maximum_ttl": 60
-        }
         `
 
 type Fields struct {
-	Name                           string `json:"name,omitempty"`
-	DeliveryProtocol               string `json:"delivery_protocol,omitempty"`
-	Http3                          string `json:"http_3,omitempty"`
-	HttpPort                       string `json:"http_port,omitempty"`
-	HttpsPort                      string `json:"https_port,omitempty"`
-	OriginType                     string `json:"origin_type,omitempty"`
-	Address                        string `json:"address,omitempty"`
-	OriginProtocolPolicy           string `json:"origin_protocol_policy,omitempty"`
-	HostHeader                     string `json:"host_header,omitempty"`
-	BrowserCacheSettings           string `json:"browser_cache_settings,omitempty"`
-	CdnCacheSettings               string `json:"cdn_cache_settings,omitempty"`
-	BrowserCacheSettingsMaximumTtl int64  `json:"browser_cache_settings_maximum_ttl,omitempty"`
-	CdnCacheSettingsMaximumTtl     int64  `json:"cdn_cache_settings_maximum_ttl,omitempty"`
-	DebugRules                     string `json:"debug_rules,omitempty"`
-	SupportedCiphers               string `json:"supported_ciphers,omitempty"`
-	Websocket                      string `json:"websocket,omitempty"`
-	Path                           string
-	OutPath                        string
-	Format                         string
+	Name                          string `json:"name,omitempty"`
+	EdgeCacheEnabled              string `json:"edge_cache_enabled,omitempty"`
+	EdgeFunctionsEnabled          string `json:"edge_functions_enabled,omitempty"`
+	ApplicationAcceleratorEnabled string `json:"application_accelerator_enabled,omitempty"`
+	ImageProcessorEnabled         string `json:"image_processor_enabled,omitempty"`
+	TieredCacheEnabled            string `json:"tiered_cache_enabled,omitempty"`
+	Active                        string `json:"active,omitempty"`
+	DebugRules                    string `json:"debug,omitempty"`
+	Path                          string
+	OutPath                       string
+	Format                        string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -86,7 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			response, err := api.NewClient(
-				f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"),
+				f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"),
 			).Create(context.Background(), &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
@@ -125,20 +105,6 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	request.SetName(fields.Name)
 
-	if !utils.IsEmpty(fields.DeliveryProtocol) {
-		request.SetDeliveryProtocol(fields.DeliveryProtocol)
-	}
-
-	if !utils.IsEmpty(fields.Http3) {
-		http3, err := strconv.ParseBool(fields.Http3)
-		if err != nil {
-			logger.Debug("Error while parsing <"+fields.Http3+"> ", zap.Error(err))
-			return utils.ErrorConvertingStringToBool
-		}
-
-		request.SetHttp3(http3)
-	}
-
 	if !utils.IsEmpty(fields.DebugRules) {
 		debugRules, err := strconv.ParseBool(fields.DebugRules)
 		if err != nil {
@@ -146,61 +112,90 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		request.SetDebugRules(debugRules)
+		request.SetDebug(debugRules)
 	}
 
-	if !utils.IsEmpty(fields.SupportedCiphers) {
-		request.SetSupportedCiphers(fields.SupportedCiphers)
-	}
+	modules := sdk.EdgeApplicationModulesRequest{}
 
-	if !utils.IsEmpty(fields.Websocket) {
-		websocket, err := strconv.ParseBool(fields.Websocket)
+	if !utils.IsEmpty(fields.EdgeCacheEnabled) {
+		edgeCache, err := strconv.ParseBool(fields.EdgeCacheEnabled)
 		if err != nil {
-			logger.Debug("Error while parsing <"+fields.Websocket+"> ", zap.Error(err))
+			logger.Debug("Error while parsing <"+fields.EdgeCacheEnabled+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+		eCache := sdk.CacheModuleRequest{
+			Enabled: &edgeCache,
+		}
+
+		modules.SetEdgeCache(eCache)
+	}
+
+	if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
+		edgeFunctions, err := strconv.ParseBool(fields.EdgeFunctionsEnabled)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.EdgeFunctionsEnabled+"> ", zap.Error(err))
 			return utils.ErrorConvertingStringToBool
 		}
 
-		request.SetWebsocket(websocket)
+		eFunction := sdk.EdgeFunctionModuleRequest{
+			Enabled: &edgeFunctions,
+		}
+
+		modules.SetEdgeFunctions(eFunction)
 	}
 
-	if !utils.IsEmpty(fields.HttpPort) {
-		request.SetHttpPort(fields.HttpPort)
+	if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
+		applicationAcc, err := strconv.ParseBool(fields.ApplicationAcceleratorEnabled)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.ApplicationAcceleratorEnabled+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		aAcceleration := sdk.ApplicationAcceleratorModuleRequest{
+			Enabled: &applicationAcc,
+		}
+
+		modules.SetApplicationAccelerator(aAcceleration)
 	}
 
-	if !utils.IsEmpty(fields.HttpsPort) {
-		request.SetHttpsPort(fields.HttpsPort)
+	if !utils.IsEmpty(fields.ImageProcessorEnabled) {
+		imageProcessor, err := strconv.ParseBool(fields.ImageProcessorEnabled)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.ImageProcessorEnabled+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		iProcessor := sdk.ImageProcessorModuleRequest{
+			Enabled: &imageProcessor,
+		}
+
+		modules.SetImageProcessor(iProcessor)
 	}
 
-	if !utils.IsEmpty(fields.OriginType) {
-		request.SetOriginType(fields.OriginType)
+	if !utils.IsEmpty(fields.TieredCacheEnabled) {
+		tieredCache, err := strconv.ParseBool(fields.TieredCacheEnabled)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.TieredCacheEnabled+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		tCache := sdk.TieredCacheModuleRequest{
+			Enabled: &tieredCache,
+		}
+
+		modules.SetTieredCache(tCache)
 	}
 
-	if !utils.IsEmpty(fields.Address) {
-		request.SetAddress(fields.Address)
-	}
+	request.SetModules(modules)
 
-	if !utils.IsEmpty(fields.OriginProtocolPolicy) {
-		request.SetOriginProtocolPolicy(fields.OriginProtocolPolicy)
-	}
+	if !utils.IsEmpty(fields.Active) {
+		active, err := strconv.ParseBool(fields.Active)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.Active+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
 
-	if !utils.IsEmpty(fields.HostHeader) {
-		request.SetHostHeader(fields.HostHeader)
-	}
-
-	if !utils.IsEmpty(fields.BrowserCacheSettings) {
-		request.SetBrowserCacheSettings(fields.BrowserCacheSettings)
-	}
-
-	if !utils.IsEmpty(fields.CdnCacheSettings) {
-		request.SetCdnCacheSettings(fields.CdnCacheSettings)
-	}
-
-	if fields.BrowserCacheSettingsMaximumTtl <= 0 {
-		request.SetBrowserCacheSettingsMaximumTtl(fields.BrowserCacheSettingsMaximumTtl)
-	}
-
-	if fields.CdnCacheSettingsMaximumTtl <= 0 {
-		request.SetCdnCacheSettingsMaximumTtl(fields.CdnCacheSettingsMaximumTtl)
+		request.SetActive(active)
 	}
 
 	return nil
@@ -208,21 +203,13 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.DeliveryProtocol, "delivery-protocol", "", msg.FlagDeliveryProtocol)
-	flags.StringVar(&fields.Http3, "http3", "", msg.FlagHttp3)
-	flags.StringVar(&fields.HttpPort, "http-port", "", msg.FlagHttpPort)
-	flags.StringVar(&fields.HttpsPort, "https-port", "", msg.FlagHttpsPort)
-	flags.StringVar(&fields.OriginType, "origin-type", "", msg.FlagOriginType)
-	flags.StringVar(&fields.Address, "address", "", msg.FlagAddress)
-	flags.StringVar(&fields.OriginProtocolPolicy, "origin-protocol-policy", "", msg.FlagOriginProtocolPolicy)
-	flags.StringVar(&fields.HostHeader, "host-header", "", msg.FlagHostHeader)
-	flags.StringVar(&fields.BrowserCacheSettings, "browser-cache-settings", "", msg.FlagBrowserCacheSettings)
-	flags.Int64Var(&fields.BrowserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaximumTtl)
-	flags.StringVar(&fields.CdnCacheSettings, "cdn-cache-settings", "", msg.FlagCdnCacheSettings)
-	flags.StringVar(&fields.DebugRules, "debug-rules", "", msg.FlagDebugRules)
-	flags.StringVar(&fields.SupportedCiphers, "supported-ciphers", "", msg.FlagSupportedCiphers)
-	flags.StringVar(&fields.Websocket, "websocket", "", msg.FlagWebsocket)
-	flags.Int64Var(&fields.CdnCacheSettingsMaximumTtl, "cdn-cache-settings-maximum-ttl", 0, msg.FlagCdnCacheSettingsMaximumTtl)
+	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
+	flags.StringVar(&fields.EdgeFunctionsEnabled, "edge-function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
+	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
+	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)
+	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
+	flags.StringVar(&fields.DebugRules, "debug-enabled", "", msg.FlagDebugRules)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 }

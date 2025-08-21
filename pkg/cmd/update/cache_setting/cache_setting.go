@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
@@ -26,7 +28,8 @@ type Fields struct {
 	CacheSettingID                 int64
 	Name                           string
 	browserCacheSettings           string
-	adaptiveDeliveryAction         string
+	browserCacheBehavior           string
+	browserCacheMaxAge             int64
 	browserCacheSettingsMaximumTtl int64
 	cdnCacheSettings               string
 	cdnCacheSettingsMaximumTtl     int64
@@ -38,9 +41,6 @@ type Fields struct {
 	enableCachingForPost           string
 	enableCachingForOptions        string
 	l2CachingEnabled               string
-	isSliceConfigurationEnabled    string
-	isSliceL2CachingEnabled        string
-	sliceConfigurationRange        int64
 	Path                           string
 }
 
@@ -58,10 +58,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion update cache-setting --application-id 1673635839 --cache-setting-id 123123421 --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
-			request := api.UpdateRequest{}
+			request := api.RequestUpdate{}
 
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.CreateAskInputApplicationID)
@@ -110,17 +110,27 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
+			if request.Name == nil || *request.Name == "" {
+				resp, err := client.Get(context.Background(), fields.ApplicationID, fields.CacheSettingID)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorGetCache.Error(), err)
+				}
+				name := resp.GetName()
+				request.Name = &name
+			}
+
 			if err := appAccelerationNoEnabled(clientEdgeApp, fields, request); err != nil {
 				return err
 			}
 
 			response, err := client.Update(context.Background(), &request, fields.ApplicationID, fields.CacheSettingID)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
+				return fmt.Errorf(msg.ErrorUpdateCacheSettings.Error(), err)
 			}
 
+			data := response.GetData()
 			updateOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.UpdateOutputSuccess, response.GetId()),
+				Msg:   fmt.Sprintf(msg.UpdateOutputSuccess, data.GetId()),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -137,90 +147,88 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	flags.Int64Var(&fields.CacheSettingID, "cache-setting-id", 0, msg.FlagCacheSettingID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.browserCacheSettings, "browser-cache-settings", "honor", msg.FlagBrowserCacheSettings)
+	flags.StringVar(&fields.browserCacheSettings, "browser-cache-settings", "honor", msg.FlagBrowserCacheBehavior)
 	flags.StringSliceVar(&fields.queryStringFields, "query-string-fields", []string{}, msg.FlagQueryStringFields)
 	flags.StringSliceVar(&fields.cookieNames, "cookie-names", []string{}, msg.FlagCookieNames)
 	flags.StringVar(&fields.cacheByCookies, "cache-by-cookies", "ignore", msg.FlagCacheByCookiesEnabled)
 	flags.StringVar(&fields.cacheByQueryString, "cache-by-query-string", "ignore", msg.FlagCacheByQueryString)
-	flags.StringVar(&fields.cdnCacheSettings, "cdn-cache-settings", "honor", msg.FlagCdnCacheSettingsEnabled)
 	flags.StringVar(&fields.enableCachingForOptions, "enable-caching-for-options", "false", msg.FlagCachingForOptionsEnabled)
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
-	flags.StringVar(&fields.isSliceConfigurationEnabled, "slice-configuration-enabled", "", msg.FlagSliceConfigurationEnabled)
-	flags.StringVar(&fields.isSliceL2CachingEnabled, "slice-l2-caching-enabled", "", msg.FlagSliceL2CachingEnabled)
-	flags.StringVar(&fields.l2CachingEnabled, "l2-caching-enabled", "", msg.FlagL2CachingEnabled)
-	flags.Int64Var(&fields.sliceConfigurationRange, "slice-configuration-range", 0, msg.FlagSliceConfigurationRange)
-	flags.Int64Var(&fields.cdnCacheSettingsMaximumTtl, "cnd-cache-settings-maximum-ttl", 60, msg.FlagCdnCacheSettingsMaxTtl)
-	flags.Int64Var(&fields.browserCacheSettingsMaximumTtl, "browser-cache-settings-maximum-ttl", 0, msg.FlagBrowserCacheSettingsMaxTtl)
-	flags.StringVar(&fields.adaptiveDeliveryAction, "adaptive-delivery-action", "ignore", msg.FlagAdaptiveDeliveryAction)
+	flags.Int64Var(&fields.browserCacheMaxAge, "browser-cache-max-age", 0, msg.FlagBrowserCacheMaxAge)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.UpdateRequest) error {
+func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.RequestUpdate) error {
 	ctx := context.Background()
-	str := strconv.FormatInt(fields.ApplicationID, 10)
-	application, err := client.Get(ctx, str)
+	application, err := client.Get(ctx, fields.ApplicationID)
 	if err != nil {
 		return err
 	}
 
-	if (request.GetEnableCachingForOptions() ||
-		request.GetEnableCachingForPost() ||
-		request.GetEnableQueryStringSort()) &&
-		!application.GetApplicationAcceleration() {
+	acc := application.GetModules()
+	appAcc := acc.GetApplicationAccelerator()
+
+	edgeCache := request.GetModules().ApplicationAccelerator
+
+	if len(edgeCache.CacheVaryByMethod) > 0 && !appAcc.GetEnabled() {
 		return msg.ErrorApplicationAccelerationNotEnabled
 	}
 	return nil
 }
 
-func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.UpdateRequest) error {
+func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.RequestUpdate) error {
 	request.SetName(fields.Name)
 	if cmd.Flags().Changed("browser-cache-settings") {
-		if fields.browserCacheSettings == "override" && !cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
+		if fields.browserCacheSettings == "override" && !cmd.Flags().Changed("browser-cache-max-age") {
 			return msg.ErrorBrowserMaximumTtlNotSent
 		}
-		request.SetBrowserCacheSettings(fields.browserCacheSettings)
+
+		req := sdk.BrowserCacheModuleRequest{}
+		req.SetBehavior(fields.browserCacheBehavior)
+		req.SetMaxAge(fields.browserCacheMaxAge)
+		request.SetBrowserCache(req)
 	}
 
 	if cmd.Flags().Changed("query-string-fields") {
-		request.SetQueryStringFields(fields.queryStringFields)
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetFields(fields.queryStringFields)
 	}
 
 	if cmd.Flags().Changed("cookie-names") {
-		request.SetCookieNames(fields.cookieNames)
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
+		controls.SetCookieNames(fields.cookieNames)
 	}
 
 	if cmd.Flags().Changed("cache-by-cookies") {
-		request.SetCacheByCookies(fields.cacheByCookies)
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
+		controls.SetBehavior(fields.cacheByCookies)
 	}
 
 	if cmd.Flags().Changed("cache-by-query-string") {
-		request.SetCacheByQueryString(fields.cacheByQueryString)
-	}
-
-	if cmd.Flags().Changed("cdn-cache-settings") {
-		request.SetCdnCacheSettings(fields.cdnCacheSettings)
-	}
-
-	if cmd.Flags().Changed("slice-configuration-range") {
-		request.SetSliceConfigurationRange(fields.sliceConfigurationRange)
-	}
-
-	if cmd.Flags().Changed("cnd-cache-settings-maximum-ttl") {
-		request.SetCdnCacheSettingsMaximumTtl(fields.cdnCacheSettingsMaximumTtl)
-	}
-
-	if cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
-		request.SetBrowserCacheSettingsMaximumTtl(fields.browserCacheSettingsMaximumTtl)
-	}
-
-	if cmd.Flags().Changed("adaptive-delivery-action") {
-		request.SetAdaptiveDeliveryAction(fields.adaptiveDeliveryAction)
-	}
-
-	if cmd.Flags().Changed("browser-cache-settings-maximum-ttl") {
-		request.SetBrowserCacheSettingsMaximumTtl(fields.browserCacheSettingsMaximumTtl)
+		if request.GetModules().ApplicationAccelerator == nil {
+			mods := request.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.SetModules(mods)
+		}
+		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetBehavior(fields.cacheByQueryString)
 	}
 
 	if cmd.Flags().Changed("enable-caching-for-options") {
@@ -228,7 +236,17 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		if err != nil {
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
 		}
-		request.SetEnableCachingForPost(cachingOptions)
+
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
+		}
+
+		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
+		if cachingOptions {
+			edgeCache = append(edgeCache, "options")
+		}
 	}
 
 	if cmd.Flags().Changed("enable-caching-for-post") {
@@ -236,7 +254,17 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		if err != nil {
 			return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
 		}
-		request.SetEnableCachingForPost(cachingPost)
+
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
+		}
+
+		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
+		if cachingPost {
+			edgeCache = append(edgeCache, "post")
+		}
 	}
 
 	if cmd.Flags().Changed("enable-caching-string-sort") {
@@ -244,32 +272,15 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 		if err != nil {
 			return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
 		}
-		request.SetEnableQueryStringSort(stringSort)
-	}
 
-	if cmd.Flags().Changed("slice-configuration-enabled") {
-		sliceEnable, err := strconv.ParseBool(fields.isSliceConfigurationEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorSliceConfigurationFlag, fields.isSliceConfigurationEnabled)
+		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
+			mods := request.PatchedCacheSettingRequest.GetModules()
+			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+			request.PatchedCacheSettingRequest.SetModules(mods)
 		}
-		request.SetIsSliceConfigurationEnabled(sliceEnable)
-		request.SetIsSliceEdgeCachingEnabled(true) //Edge Cache is mandatory in this case
-	}
 
-	if cmd.Flags().Changed("slice-l2-caching-enabled") {
-		sliceEnable, err := strconv.ParseBool(fields.isSliceL2CachingEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorSliceL2CachingFlag, fields.isSliceL2CachingEnabled)
-		}
-		request.SetIsSliceL2CachingEnabled(sliceEnable)
-	}
-
-	if cmd.Flags().Changed("l2-caching-enabled") {
-		lsEnable, err := strconv.ParseBool(fields.l2CachingEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorL2CachingEnabledFlag, fields.l2CachingEnabled)
-		}
-		request.SetIsSliceConfigurationEnabled(lsEnable)
+		controls := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
+		controls.SetSortEnabled(stringSort)
 	}
 
 	return nil

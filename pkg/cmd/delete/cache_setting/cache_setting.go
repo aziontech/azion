@@ -25,7 +25,7 @@ var (
 type DeleteCmd struct {
 	Io          *iostreams.IOStreams
 	ReadInput   func(string) (string, error)
-	DeleteCache func(context.Context, int64, int64) error
+	DeleteCache func(context.Context, int64, int64) (int, error)
 	AskInput    func(msg string) (string, error)
 }
 
@@ -35,8 +35,8 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		DeleteCache: func(ctx context.Context, appID int64, cacheID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		DeleteCache: func(ctx context.Context, appID int64, cacheID int64) (int, error) {
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Delete(ctx, appID, cacheID)
 		},
 		AskInput: utils.AskInput,
@@ -86,11 +86,9 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				cacheSettingsID = num
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-
 			ctx := context.Background()
 
-			err = client.Delete(ctx, applicationID, cacheSettingsID)
+			_, err = delete.DeleteCache(ctx, applicationID, cacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}

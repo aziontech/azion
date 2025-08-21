@@ -1,0 +1,29 @@
+{
+    "results": {
+        "origin_id": 1111,
+        "origin_key": "0000000-00000000-00a0a00s0as0-000000",
+        "name": "Origin 1",
+        "origin_type": "single_origin",
+        "addresses": [
+            {
+                "address": "httpbin.org",
+                "weight": null,
+                "server_role": "primary",
+                "is_active": true
+            }
+        ],
+        "origin_protocol_policy": "http",
+        "is_origin_redirection_enabled": false,
+        "host_header": "${host}",
+        "method": "",
+        "origin_path": "/requests",
+        "connection_timeout": 60,
+        "timeout_between_bytes": 120,
+        "hmac_authentication": false,
+        "hmac_secret_key": "",
+        "hmac_region_name": "",
+        "hmac_access_key": "",
+        "hmac_secret_key": ""
+    },
+    "schema_version": 3
+}

@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +30,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, int64) (api.GetResponse, error)
+	Get      func(context.Context, int64, int64) (sdk.CacheSetting, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -38,8 +39,8 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, appID, cacheID int64) (api.GetResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		Get: func(ctx context.Context, appID, cacheID int64) (sdk.CacheSetting, error) {
+			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, appID, cacheID)
 		},
 	}
@@ -99,19 +100,10 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			fields := make(map[string]string, 0)
 			fields["Id"] = "ID"
 			fields["Name"] = "Name"
-			fields["BrowserCacheSettings"] = "Browser Cache Settings"
-			fields["BrowserCacheSettingsMaximumTtl"] = "Browser Cache Settings maximum TTL"
-			fields["CdnCacheSettings"] = "Cdn Cache Settings"
-			fields["CdnCacheSettingsMaximumTtl"] = "Cdn Cache Settings maximum TTL"
-			fields["CacheByQueryString"] = "Cache by query string"
-			fields["QueryStringFields"] = "Query string fiedlds"
-			fields["EnableQueryStringSort"] = "Enable query string sort"
-			fields["CacheByCookies"] = "Cache by cookies"
-			fields["CookieNames"] = "Cookie Names"
-			fields["AdaptiveDeliveryAction"] = "Adaptive delivery action"
-			fields["DeviceGroup"] = "Device group"
-			fields["EnableCachingForPost"] = "EnableCachingForPost"
-			fields["L2CachingEnabled"] = "L2 caching enabled"
+			fields["BrowserCache"] = "Browser Cache Settings"
+			fields["EdgeCache"] = "Edge Cache Settings"
+			fields["ApplicationControls"] = "Application Controls"
+			fields["SliceControls"] = "Slice Controls"
 
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
@@ -120,7 +112,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					Flags: f.Flags,
 				},
 				Fields: fields,
-				Values: resp,
+				Values: &resp,
 			}
 			return output.Print(&describeOut)
 		},

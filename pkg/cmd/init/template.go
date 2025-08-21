@@ -21,10 +21,7 @@ func (cmd *initCmd) createTemplateAzion() error {
 		Prefix: "",
 	}
 
-	azionJson.Function.Name = "__DEFAULT__"
-	azionJson.Function.InstanceName = "__DEFAULT__"
-	azionJson.Function.File = "./out/worker.js"
-	azionJson.Function.Args = "./azion/args.json"
+	azionJson.Function = []contracts.AzionJsonDataFunction{}
 	azionJson.Domain.Name = "__DEFAULT__"
 	azionJson.Application.Name = "__DEFAULT__"
 	azionJson.RtPurge.PurgeOnPublish = true

@@ -20,7 +20,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1337"),
+			httpmock.REST("PATCH", "edge_application/applications/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -38,7 +38,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("bad request", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1337"),
+			httpmock.REST("PATCH", "edge_application/applications/1337"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, `{"details": "invalid field active"}`),
 		)
 
@@ -57,7 +57,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1337"),
+			httpmock.REST("PATCH", "edge_application/applications/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -76,7 +76,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1337"),
+			httpmock.REST("PATCH", "edge_application/applications/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 

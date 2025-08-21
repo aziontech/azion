@@ -1,27 +1,29 @@
 {
-    "results": {
-        "id": 210544,
-        "name": "New Rule 534322",
-        "phase": "response",
-        "description": "This is a very basic rule engine description",
-        "behaviors": [
-            {
-                "name": "deliver",
-                "target": ""
-            }
-        ],
-        "criteria": [
-            [
-                {
-                    "variable": "${uri}",
-                    "operator": "starts_with",
-                    "conditional": "if",
-                    "input_value": "/"
-                }
-            ]
-        ],
-        "is_active": true,
-        "order": 2
-    },
-    "schema_version": 3
-}
+    "state": "pending",
+    "data": {
+      "id": 210543,
+      "name": "anothernamefortesting",
+      "phase": "response",
+      "active": true,
+      "behaviors": [
+        {
+          "name": "deny",
+          "argument": 0
+        }
+      ],
+      "criteria": [
+        [
+          {
+            "argument": 0,
+            "variable": "${arg_<name>}",
+            "conditional": "if",
+            "operator": "does_not_exist"
+          }
+        ]
+      ],
+      "description": "string",
+      "order": 0,
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z"
+    }
+  }

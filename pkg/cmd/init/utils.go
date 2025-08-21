@@ -13,6 +13,11 @@ import (
 	"go.uber.org/zap"
 )
 
+var jsonTemplate = `{
+  "scope": "global",
+  "preset": "%s"
+}`
+
 func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{
@@ -38,6 +43,26 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 	}
 
 	err = vul.CheckVulcanMajor(vulcanVer, cmd.f, vul)
+	if err != nil {
+		return err
+	}
+
+	// cmdVulcanInit := "store init"
+	// if len(cmd.preset) > 0 {
+	// 	formatted := fmt.Sprintf(jsonTemplate, cmd.preset)
+	// 	cmdVulcanInit = fmt.Sprintf("%s --config '%s'", cmdVulcanInit, formatted)
+	// }
+
+	// TODO: use later
+	cmdVulcanBuild := "build"
+	if len(cmd.preset) > 0 {
+		cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, cmd.preset)
+	}
+
+	command := vul.Command("", cmdVulcanBuild, cmd.f)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+
+	err = cmd.commandRunInteractive(cmd.f, command)
 	if err != nil {
 		return err
 	}

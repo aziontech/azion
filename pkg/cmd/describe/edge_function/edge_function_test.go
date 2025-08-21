@@ -13,19 +13,23 @@ import (
 
 var successResponse string = `
 {
-    "results":{
-        "id":1337,
-        "name":"SUUPA_FUNCTION",
-        "language":"javascript",
-        "code":"async function handleRequest(request) {return new Response(\"Hello World!\",{status:200})}",
-        "json_args":{"a":1,"b":2},"function_to_run":"",
-        "initiator_type":"edge_application",
-        "active":true,
-        "last_editor":"testando@azion.com",
-        "modified":"2022-01-26T12:31:09.865515Z",
-        "reference_count":0
+  "data": {
+    "id": 1337,
+    "name": "string",
+    "language": "javascript",
+    "code": "string",
+    "json_args": {
+      "arg_01": "value_01"
     },
-    "schema_version":3
+    "initiator_type": "edge_application",
+    "active": true,
+    "reference_count": 0,
+    "version": "string",
+    "vendor": "string",
+    "last_editor": "string",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "product_version": "string"
+  }
 }
 `
 
@@ -42,14 +46,14 @@ func TestDescribe(t *testing.T) {
 	}{
 		{
 			name:      "describe a function",
-			request:   httpmock.REST("GET", "edge_functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/123"),
 			response:  httpmock.JSONFromString(successResponse),
 			args:      []string{"--function-id", "123"},
 			expectErr: false,
 		},
 		{
 			name:      "describe a function - no function id",
-			request:   httpmock.REST("GET", "edge_functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/123"),
 			response:  httpmock.JSONFromString(successResponse),
 			expectErr: false,
 			mockInput: func(s string) (string, error) {
@@ -58,14 +62,14 @@ func TestDescribe(t *testing.T) {
 		},
 		{
 			name:      "with code",
-			request:   httpmock.REST("GET", "edge_functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/123"),
 			response:  httpmock.JSONFromString(successResponse),
 			args:      []string{"--function-id", "123", "--with-code"},
 			expectErr: false,
 		},
 		{
 			name:      "not found",
-			request:   httpmock.REST("GET", "edge_functions/1234"),
+			request:   httpmock.REST("GET", "edge_functions/functions/1234"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{"--function-id", "1234", "--with-code"},
 			expectErr: true,

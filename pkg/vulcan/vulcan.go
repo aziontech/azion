@@ -12,13 +12,12 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	currentMajor         = 5
+var (
+	currentMajor         = 6
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@5.2.0"
+	firstTimeExecuting   = "@6.0.0"
+	versionVulcan        = "@6.0.0"
 )
-
-var versionVulcan = "@5.2.0"
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
@@ -27,6 +26,17 @@ type VulcanPkg struct {
 }
 
 func NewVulcan() *VulcanPkg {
+	return &VulcanPkg{
+		Command:          command,
+		CheckVulcanMajor: checkVulcanMajor,
+		ReadSettings:     token.ReadSettings,
+	}
+}
+
+func NewVulcanV3() *VulcanPkg {
+	versionVulcan = "@5.2.0"
+	currentMajor = 5
+	firstTimeExecuting = "@5.2.0"
 	return &VulcanPkg{
 		Command:          command,
 		CheckVulcanMajor: checkVulcanMajor,

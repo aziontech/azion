@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aziontech/azionapi-go-sdk/storage"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -29,11 +29,14 @@ func (cmd *DeployCmd) doBucket(
 	*msgs = append(*msgs, msg.ProjectNameMessage)
 	nameBucket := utils.ReplaceInvalidCharsBucket(conf.Name)
 
-	bucketAccess := storage.READ_ONLY
+	bucketAccess := "read_only"
 	if WriteBucket {
-		bucketAccess = storage.READ_WRITE
+		bucketAccess = "read_write"
 	}
-	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: bucketAccess}})
+	err := client.CreateBucket(ctx, api.RequestBucket{
+		BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
+
+	err = client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
@@ -42,7 +45,7 @@ func (cmd *DeployCmd) doBucket(
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
 			err := client.CreateBucket(ctx, api.RequestBucket{
-				BucketCreate: storage.BucketCreate{Name: nameB, EdgeAccess: bucketAccess}})
+				BucketCreateRequest: sdk.BucketCreateRequest{Name: nameB, EdgeAccess: bucketAccess}})
 			if err != nil {
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 					continue

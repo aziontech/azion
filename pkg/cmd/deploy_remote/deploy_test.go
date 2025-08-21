@@ -17,33 +17,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var successResponseApp string = `
+const successResponseApp = `
 {
-	"results":{
-		"id":1697666970,
-		"name":"New Edge Applicahvjgjhgjhhgtion",
-		"delivery_protocol":"http",
-		"http_port":80,
-		"https_port":443,
-		"minimum_tls_version":"",
-		"active":true,
-		"application_acceleration":false,
-		"caching":true,
-   		"debug_rules": true,
-   		"http3": false,
-		"supported_ciphers": "asdf",
-		"device_detection":false,
-		"edge_firewall":false,
-		"edge_functions":false,
-		"image_optimization":false,
-		"load_balancer":false,
-		"raw_logs":false,
-		"web_application_firewall":false,
-		"l2_caching": false
-	},
-	"schema_version":3
-}
-`
+  "state": "pending",
+  "data": {
+    "id": 1697666970,
+    "name": "LovelyName",
+    "last_editor": "tester",
+    "last_modified": "2025-06-20T16:55:19Z",
+    "modules": {
+      "edge_cache_enabled": true,
+      "edge_functions_enabled": false,
+      "application_accelerator_enabled": false,
+      "image_processor_enabled": false,
+      "tiered_cache_enabled": false
+    },
+    "active": true,
+    "debug": true,
+    "product_version": "1.0.0"
+  }
+}`
 
 func TestDeployCmd(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
@@ -79,7 +72,7 @@ func TestDeployCmd(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications"),
+			httpmock.REST("POST", "edge_application/applications"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, "Invalid"),
 		)
 
@@ -105,24 +98,24 @@ func TestDeployCmd(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications"),
+			httpmock.REST("POST", "edge_application/applications"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_applications/1697666970"),
+			httpmock.REST("PATCH", "edge_application/applications/1697666970"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_applications/1697666970/functions_instances"),
+			httpmock.REST("POST", "edge_application/applications/1697666970/functions"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 		ctx := context.Background()
 
-		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		cliapp := apiapp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 		cmd := NewDeployCmd(f)
 

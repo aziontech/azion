@@ -7,20 +7,19 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -32,6 +31,9 @@ type DeployCmd struct {
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
+	commandRunInteractive func(f *cmdutil.Factory, comm string) error
+	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
+	WriteManifest         func(manifest *contracts.ManifestV4, pathMan string) error
 	EnvLoader             func(path string) ([]string, error)
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
@@ -51,6 +53,7 @@ var (
 	ProjectConf   string
 	Sync          bool
 	Env           string
+	FunctionIds   map[string]contracts.AzionJsonDataFunction
 	WriteBucket   bool
 )
 
@@ -64,6 +67,9 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		commandRunInteractive: command.CommandRunInteractive,
+		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
+		WriteManifest:         WriteManifest,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,
@@ -141,9 +147,16 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	versionID := cmd.VersionID()
+	defer func() {
+		if err := cmd.WriteAzionJsonContent(conf, ProjectConf); err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+		}
+	}()
 
-	conf.Prefix = versionID
+	versionID := cmd.VersionID()
+	var oldprefix string
+
+	oldprefix, conf.Prefix = conf.Prefix, versionID
 
 	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {
@@ -152,6 +165,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
+
+	if !SkipBuild && conf.NotFirstRun {
+		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+		vul := vulcanPkg.NewVulcan()
+		command := vul.Command("", cmdStr, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+
+		err := cmd.commandRunInteractive(cmd.F, command)
+		if err != nil {
+			return err
+		}
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
+	}
 
 	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
@@ -163,83 +194,67 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Check if directory exists; if not, we skip creating bucket and uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-		if err != nil {
-			return err
-		}
-
-		err = cmd.uploadFiles(f, conf, &msgs)
-		if err != nil {
-			return err
-		}
-	}
-
-	conf.Function.File = ".edge/worker.js"
-	err = cmd.doFunction(clients, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	if !conf.NotFirstRun {
-		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
-		if err != nil {
-			logger.Debug("Error while getting default rules engine", zap.Error(err))
-			return err
-		}
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-		var behString sdk.RulesEngineBehaviorString
-		behString.SetName("set_origin")
-
-		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
-
-		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-			IdApplication: conf.Application.ID,
-			Phase:         "request",
-			Id:            ruleDefaultID,
-		}
-
-		reqUpdateRulesEngine.SetBehaviors(behaviors)
-
-		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-		if err != nil {
-			logger.Debug("Error while updating default rules engine", zap.Error(err))
-			return err
-		}
-	}
-
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
 
-	if len(conf.RulesEngine.Rules) == 0 {
+	// Check if directory exists; if not, we skip creating bucket
+	if len(manifestStructure.EdgeStorage) == 0 {
+		logger.Debug(msg.SkipBucket)
+	} else {
+		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
+		if err != nil {
+			return err
+		}
+	}
+
+	if !conf.NotFirstRun {
+		err = cmd.callBundlerInit(conf)
+		if err != nil {
+			return err
+		}
+		buildCmd := cmd.BuildCmd(f)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
+		if err != nil {
+			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
+			return err
+		}
+	}
+
+	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
+	if err != nil {
+		return err
+	}
+
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
+		for _, storage := range manifestStructure.EdgeStorage {
+			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
 		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	conf.NotFirstRun = true
+
+	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
 
-	if manifestStructure.Domain == nil || manifestStructure.Domain.Name == "" {
-		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
+	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
+		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
 		if err != nil {
 			return err
 		}
@@ -248,7 +263,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
 
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Domain.Url)
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputWorkloadSuccess, conf.Workloads.Url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 

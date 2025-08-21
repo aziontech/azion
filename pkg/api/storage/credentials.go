@@ -5,21 +5,29 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/storage"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"go.uber.org/zap"
 )
 
 type RequestCredentials struct {
-	sdk.S3CredentialCreate
+	sdk.CredentialCreateRequest
 }
 
-func (c *Client) CreateCredentials(ctx context.Context, request RequestCredentials) (*sdk.ResponseS3Credential, error) {
+func (c *Client) CreateCredentials(ctx context.Context, request RequestCredentials) (*sdk.ResponseCredential, error) {
 	logger.Debug("Creating s3 credentials ", zap.Any("name", request.Name))
-	req := c.apiClient.StorageAPI.StorageApiS3CredentialsCreate(ctx).S3CredentialCreate(request.S3CredentialCreate)
+	req := c.apiClient.EdgeStorageCredentialsAPI.CreateCredential(ctx).CredentialCreateRequest(request.CredentialCreateRequest)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
-		logger.Debug("Error while creating the user's s3 credentials", zap.Error(err))
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while creating the user's s3 credentials", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp, nil
 }

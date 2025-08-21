@@ -58,14 +58,15 @@ func (c *Client) Get(ctx context.Context, id string) (DomainResponse, error) {
 	request := c.apiClient.DomainsAPI.GetDomain(ctx, id)
 	res, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while describing a domain", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &res.Results, nil
 }
@@ -75,14 +76,15 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (DomainResponse
 	request := c.apiClient.DomainsAPI.CreateDomain(ctx).CreateDomainRequest(req.CreateDomainRequest)
 	domainsResponse, httpResp, err := request.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a domain", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &domainsResponse.Results, nil
 }
@@ -95,14 +97,15 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (DomainResponse
 	domainsResponse, httpResp, err := request.Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while updating a domain", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return &domainsResponse.Results, nil
@@ -122,14 +125,15 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Do
 		Execute()
 
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing domains", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return resp, nil
@@ -142,14 +146,15 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 
 	httpResp, err := req.Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while deleting a domain", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
 			}
 		}
-		return utils.ErrorPerStatusCode(httpResp, err)
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return nil

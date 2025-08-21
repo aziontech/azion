@@ -17,14 +17,14 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules"),
+			httpmock.REST("GET", "edge_application/applications/1678743802/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--application-id", "1678743802", "--phase", "request"})
+		cmd.SetArgs([]string{"--application-id", "1678743802"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -34,7 +34,7 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules"),
+			httpmock.REST("GET", "edge_application/applications/1678743802/rules"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -52,7 +52,7 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules"),
+			httpmock.REST("GET", "edge_application/applications/1678743802/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
@@ -63,7 +63,7 @@ func TestNewCmd(t *testing.T) {
 		}
 		cmd := NewCobraCmd(listCmd, f)
 
-		cmd.SetArgs([]string{"--phase", "request"})
+		cmd.SetArgs([]string{})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
@@ -73,14 +73,14 @@ func TestNewCmd(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1678743802/rules_engine/request/rules"),
+			httpmock.REST("GET", "edge_application/applications/1678743802/rules"),
 			httpmock.JSONFromFile("./fixtures/norules.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
 		cmd := NewCmd(f)
 
-		cmd.SetArgs([]string{"--application-id", "1678743802", "--phase", "request"})
+		cmd.SetArgs([]string{"--application-id", "1678743802"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)

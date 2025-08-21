@@ -2,7 +2,7 @@ package domain
 
 var (
 	Usage            = "domain"
-	ShortDescription = "Deletes a Domain"
+	ShortDescription = "Removes a Domain"
 	LongDescription  = "Removes a Domain from the Domains library based on a given ID"
 	OutputSuccess    = "Domain %d was successfully deleted"
 	HelpFlag         = "Displays more information about the delete domain subcommand"

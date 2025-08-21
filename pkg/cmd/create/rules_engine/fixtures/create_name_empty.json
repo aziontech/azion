@@ -1,20 +1,22 @@
 {
     "name": "",
-    "description": "This is a very basic rule engine description",
-    "criteria": [
-        [
-            {
-                "conditional": "if",
-                "variable": "${uri}",
-                "operator": "starts_with",
-                "input_value": "/"
-            }
-        ]
-    ],
+    "phase": "default",
+    "active": true,
     "behaviors": [
+      {
+        "name": "deny",
+        "argument": 0
+      }
+    ],
+    "criteria": [
+      [
         {
-            "name": "deliver",
-            "target": ""
+          "argument": 0,
+          "variable": "${arg_<name>}",
+          "conditional": "if",
+          "operator": "does_not_exist"
         }
-    ]
-}
+      ]
+    ],
+    "description": "string"
+  }

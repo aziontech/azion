@@ -1,20 +1,22 @@
 {
-    "name": "New Rule 534322",
-    "description": "muda muda muda muda muda",
-    "criteria": [
-        [
-            {
-                "conditional": "",
-                "variable": "${uri}",
-                "operator": "starts_with",
-                "input_value": "/"
-            }
-        ]
-    ],
+    "name": "string",
+    "phase": "default",
+    "active": true,
     "behaviors": [
+      {
+        "name": "deny",
+        "argument": 0
+      }
+    ],
+    "criteria": [
+      [
         {
-            "name": "deliver",
-            "target": ""
+          "argument": 0,
+          "variable": "${arg_<name>}",
+          "conditional": "",
+          "operator": "does_not_exist"
         }
-    ]
-}
+      ]
+    ],
+    "description": "string"
+  }

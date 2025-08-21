@@ -5,67 +5,75 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"go.uber.org/zap"
 )
 
 // CreateCacheSettingsNextApplication this function creates the necessary Cache Settings for next applications
 // to work correctly on the edge
-func (c *Client) CreateCacheSettingsNextApplication(
-	ctx context.Context, req *CreateCacheSettingsRequest,
-	applicationID int64,
-) (CacheSettingsResponse, error) {
+func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationID string) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Settings Next Application")
 
-	req.SetBrowserCacheSettings("override")
-	req.SetBrowserCacheSettingsMaximumTtl(7200)
-	req.SetCdnCacheSettings("override")
-	req.SetCdnCacheSettingsMaximumTtl(7200)
+	BCache := sdk.BrowserCacheModuleRequest{}
+	BCache.SetBehavior("override")
+	BCache.SetMaxAge(7200)
+	ECache := sdk.CacheSettingsEdgeCacheModuleRequest{}
+	ECache.SetBehavior("override")
+	ECache.SetMaxAge(7200)
+
+	cacheModules := sdk.CacheSettingsModulesRequest{
+		EdgeCache: &ECache,
+	}
+
+	req.SetModules(cacheModules)
+	req.SetBrowserCache(BCache)
 
 	resp, err := c.CreateCacheEdgeApplication(ctx, req, applicationID)
 	if err != nil {
-		return nil, err
+		return sdk.CacheSetting{}, err
 	}
 
 	return resp, nil
 }
 
 func (c *Client) CreateCacheEdgeApplication(
-	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID int64,
-) (CacheSettingsResponse, error) {
+	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID string,
+) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Edge Application")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		EdgeApplicationsEdgeApplicationIdCacheSettingsPost(ctx, edgeApplicationID).
-		ApplicationCacheCreateRequest(req.ApplicationCacheCreateRequest).Execute()
+		CreateCacheSetting(ctx, edgeApplicationID).
+		CacheSettingRequest(req.CacheSettingRequest).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a cache setting", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return nil, err
+				return sdk.CacheSetting{}, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
-	return resp.Results, nil
+	return resp.Data, nil
 }
 
 func (c *Client) ListCacheEdgeApp(
-	ctx context.Context, edgeApplicationID int64,
-) ([]sdk.ApplicationCacheResults, error) {
+	ctx context.Context, edgeApplicationID string,
+) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache Edge Application")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).Execute()
+		ListCacheSettings(ctx, edgeApplicationID).Execute()
 	if err != nil {
+		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while listing a cache setting", zap.Error(err))
-			err := utils.LogAndRewindBody(httpResp)
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
 			}
 		}
-		return nil, utils.ErrorPerStatusCode(httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Results, nil
 }

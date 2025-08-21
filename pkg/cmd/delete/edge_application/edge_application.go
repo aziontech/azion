@@ -101,7 +101,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		application_id = num
 	}
 
-	client := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_url"), del.f.Config.GetString("token"))
+	client := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 
 	err := client.Delete(ctx, application_id)
 	if err != nil {
@@ -127,9 +127,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		Env:    "production",
 		Prefix: "",
 	}
-	azionJsonFile.Function.Name = "__DEFAULT__"
-	azionJsonFile.Function.InstanceName = "__DEFAULT__"
-	azionJsonFile.Function.File = "./out/worker.js"
+	azionJsonFile.Function = []contracts.AzionJsonDataFunction{}
 	azionJsonFile.Domain.Name = "__DEFAULT__"
 	azionJsonFile.Application.Name = "__DEFAULT__"
 	azionJsonFile.RtPurge.PurgeOnPublish = true

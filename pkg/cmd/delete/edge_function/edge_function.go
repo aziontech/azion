@@ -3,26 +3,23 @@ package edgefunction
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
 	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
-	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
-var functionID int64
+var functionID string
 
 type DeleteCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
-	DeleteFunction func(context.Context, int64) error
+	DeleteFunction func(context.Context, string) error
 	AskInput       func(string) (string, error)
 }
 
@@ -32,8 +29,8 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		DeleteFunction: func(ctx context.Context, functionID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		DeleteFunction: func(ctx context.Context, functionID string) error {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Delete(ctx, functionID)
 		},
 		AskInput: utils.AskInput,
@@ -59,20 +56,12 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				num, err := strconv.ParseInt(answer, 10, 64)
-				if err != nil {
-					logger.Debug("Error while converting answer to int64", zap.Error(err))
-					return msg.ErrorConvertIdFunction
-				}
-
-				functionID = num
+				functionID = answer
 			}
-
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, functionID)
+			err = delete.DeleteFunction(ctx, functionID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteFunction.Error(), err)
 			}
@@ -86,7 +75,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&functionID, "function-id", 0, msg.FlagID)
+	cobraCmd.Flags().StringVar(&functionID, "function-id", "", msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

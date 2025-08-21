@@ -6,7 +6,7 @@ import (
 
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/edge_applications"
@@ -19,14 +19,14 @@ import (
 
 type ListCmd struct {
 	Io           *iostreams.IOStreams
-	ListEdgeApps func(context.Context, *contracts.ListOptions) (*edgeapplications.GetApplicationsResponse, error)
+	ListEdgeApps func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListEdgeApps: func(ctx context.Context, opts *contracts.ListOptions) (*edgeapplications.GetApplicationsResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+		ListEdgeApps: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error) {
+			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
 	}
@@ -76,7 +76,7 @@ func PrintTable(cmd *cobra.Command, list *ListCmd, f *cmdutil.Factory, opts *con
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG RULES"}
+		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "LAST MODIFIED", "DEBUG"}
 	}
 
 	for _, v := range resp.Results {
@@ -85,16 +85,16 @@ func PrintTable(cmd *cobra.Command, list *ListCmd, f *cmdutil.Factory, opts *con
 			ln = []string{
 				fmt.Sprintf("%d", v.Id),
 				utils.TruncateString(v.Name),
-				fmt.Sprintf("%v", v.Active),
+				fmt.Sprintf("%v", *v.Active),
 				v.LastEditor,
-				v.LastModified,
-				fmt.Sprintf("%v", v.DebugRules),
+				v.LastModified.String(),
+				fmt.Sprintf("%v", *v.Debug),
 			}
 		} else {
 			ln = []string{
 				fmt.Sprintf("%d", v.Id),
 				utils.TruncateString(v.Name),
-				fmt.Sprintf("%v", v.Active),
+				fmt.Sprintf("%v", *v.Active),
 			}
 		}
 

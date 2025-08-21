@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgefunctions"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 )
 
 type Client struct {
