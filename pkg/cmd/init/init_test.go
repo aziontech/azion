@@ -34,6 +34,8 @@ func TestNewCmd(t *testing.T) {
 	NewCmd(f)
 }
 
+var cloneOptions git.CloneOptions
+
 func Test_initCmd_Run(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 

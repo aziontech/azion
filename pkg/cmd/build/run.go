@@ -27,6 +27,8 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 	if fields.Preset != "" {
 		vulcanParams = " --preset " + fields.Preset
 		conf.Preset = fields.Preset
+	} else {
+		vulcanParams = " --preset " + conf.Preset
 	}
 
 	if fields.Entry != "" {
@@ -47,6 +49,10 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 			return fmt.Errorf("%w: %s", msg.ErrorWorker, fields.OwnWorker)
 		}
 		vulcanParams += " --worker " + fields.OwnWorker
+	}
+
+	if fields.SkipFramework {
+		vulcanParams += " --skip-framework-build"
 	}
 
 	vul := vulcanPkg.NewVulcan()

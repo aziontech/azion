@@ -24,6 +24,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
+	"github.com/aziontech/azion-cli/pkg/cmd/warmup"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/metric"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -94,6 +95,9 @@ type globals struct {
 func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	fact.startTime = time.Now()
 	logger.LogLevel(fact.factory.Logger)
+
+	// Display update reminder message
+	fmt.Fprintln(fact.factory.IOStreams.Out, color.New(color.FgYellow).Sprint("⚠️  ", msg.UpdateReminder))
 
 	if strings.HasPrefix(fact.configFlag, PREFIX_FLAG) {
 		return msg.ErrorPrefix
@@ -175,6 +179,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
 	cobraCmd.AddCommand(clone.NewCmd(fact.factory))
+	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {

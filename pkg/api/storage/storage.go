@@ -90,6 +90,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 		}
 		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
+
 	return nil
 }
 
@@ -210,5 +211,6 @@ func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, conten
 
 		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
+
 	return nil
 }

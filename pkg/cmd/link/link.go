@@ -22,7 +22,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
@@ -40,6 +39,7 @@ type LinkInfo struct {
 	Auto           bool
 	projectPath    string
 	Sync           bool
+	SkipFramework  bool
 	Local          bool
 }
 
@@ -127,6 +127,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
 	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
 	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
+	cobraCmd.Flags().BoolVar(&info.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 
 	return cobraCmd
 }
@@ -243,7 +244,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 			logger.Debug("Running build command from link command")
 			buildCmd := cmd.BuildCmd(cmd.F)
-			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: strings.ToLower(info.Preset)}, info.projectPath, &msgs)
+			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: strings.ToLower(info.Preset)}, info.projectPath, &msgs, info.SkipFramework)
 			if err != nil {
 				logger.Debug("Error while running build command called by link command", zap.Error(err))
 				return err
@@ -261,7 +262,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running dev command from link command")
 				dev := cmd.DevCmd(cmd.F)
-				err = dev.Run(cmd.F)
+				err = dev.ExternalRun(cmd.F, info.SkipFramework)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err
@@ -278,7 +279,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local)
+				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local, info.SkipFramework)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err

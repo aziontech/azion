@@ -32,6 +32,9 @@ var injectIntoFunction = `
 //     prefix: %s
 //---
 
+globalThis.AZION_BUCKET_NAME = "%s";
+globalThis.AZION_BUCKET_PREFIX = "%s";
+
 `
 
 func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) error {
@@ -237,13 +240,13 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
 	newCode := append([]byte(prependText), code...)
 
 	reqCre.SetCode(string(newCode))
 
 	reqCre.SetActive(true)
-	if funcToCreate.Name == "__DEFAULT__" {
+	if funcToCreate.Name == "__DEFAULT__" || funcToCreate.Name == "" {
 		reqCre.SetName(conf.Name)
 	} else {
 		reqCre.SetName(funcToCreate.Name)
@@ -282,13 +285,13 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
 	newCode := append([]byte(prependText), code...)
 
 	reqUpd.SetCode(string(newCode))
 
 	reqUpd.SetActive(true)
-	if funcToUpdate.Name == "__DEFAULT__" {
+	if conf.Function.Name == "__DEFAULT__" || conf.Function.Name == "" {
 		reqUpd.SetName(conf.Name)
 	} else {
 		reqUpd.SetName(funcToUpdate.Name)
@@ -322,7 +325,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 
 func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
 	reqApp := apiapp.CreateRequest{}
-	if conf.Application.Name == "__DEFAULT__" {
+	if conf.Application.Name == "__DEFAULT__" || conf.Application.Name == "" {
 		reqApp.SetName(conf.Name)
 	} else {
 		reqApp.SetName(conf.Application.Name)
@@ -358,7 +361,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 
 func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
 	reqApp := apiapp.UpdateRequest{}
-	if conf.Application.Name == "__DEFAULT__" {
+	if conf.Application.Name == "__DEFAULT__" || conf.Application.Name == "" {
 		reqApp.SetName(conf.Name)
 	} else {
 		reqApp.SetName(conf.Application.Name)
@@ -395,7 +398,7 @@ func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Con
 
 func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (apiworkload.WorkloadResponse, error) {
 	reqWork := apiworkload.UpdateRequest{}
-	if conf.Workloads.Name == "__DEFAULT__" {
+	if conf.Workloads.Name == "__DEFAULT__" || conf.Workloads.Name == "" {
 		reqWork.SetName(conf.Name)
 	} else {
 		reqWork.SetName(conf.Workloads.Name)
@@ -463,7 +466,7 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 	reqIns := apiapp.UpdateInstanceRequest{}
 	reqIns.SetEdgeFunction(funcToUpdate.ID)
 
-	if funcToUpdate.InstanceName == "__DEFAULT__" {
+	if funcToUpdate.InstanceName == "__DEFAULT__" || funcToUpdate.InstanceName == "" {
 		reqIns.SetName(conf.Name)
 	} else {
 		reqIns.SetName(funcToUpdate.Name)
