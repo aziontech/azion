@@ -26,7 +26,6 @@ import (
 )
 
 var infoJsonData = `{"preset":"astro"}`
-var cloneOptions git.CloneOptions
 
 func TestNewCmd(t *testing.T) {
 	mock := &httpmock.Registry{}

@@ -29,14 +29,14 @@ func (cmd *DeployCmd) doBucket(
 	*msgs = append(*msgs, msg.ProjectNameMessage)
 	nameBucket := utils.ReplaceInvalidCharsBucket(conf.Name)
 
-  bucketAccess := "read_only"
+	bucketAccess := "read_only"
 	if WriteBucket {
 		bucketAccess = "read_write"
 	}
 	err := client.CreateBucket(ctx, api.RequestBucket{
 		BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
 
-	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreate: storage.BucketCreate{Name: nameBucket, EdgeAccess: bucketAccess}})
+	err = client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {

@@ -45,16 +45,16 @@ type DeployCmd struct {
 }
 
 var (
-	Path        string
-	Auto        bool
-	NoPrompt    bool
-	SkipBuild   bool
-  SkipFramework bool
-	ProjectConf string
-	Sync        bool
-	Env         string
-	FunctionIds map[string]contracts.AzionJsonDataFunction
-  WriteBucket   bool
+	Path          string
+	Auto          bool
+	NoPrompt      bool
+	SkipBuild     bool
+	SkipFramework bool
+	ProjectConf   string
+	Sync          bool
+	Env           string
+	FunctionIds   map[string]contracts.AzionJsonDataFunction
+	WriteBucket   bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -177,7 +177,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -215,7 +215,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

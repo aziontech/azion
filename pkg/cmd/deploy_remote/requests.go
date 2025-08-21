@@ -291,7 +291,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 	reqUpd.SetCode(string(newCode))
 
 	reqUpd.SetActive(true)
-	if conf.Function.Name == "__DEFAULT__" || conf.Function.Name == "" {
+	if funcToUpdate.Name == "__DEFAULT__" || funcToUpdate.Name == "" {
 		reqUpd.SetName(conf.Name)
 	} else {
 		reqUpd.SetName(funcToUpdate.Name)
