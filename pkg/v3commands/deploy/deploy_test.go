@@ -87,7 +87,7 @@ func MockWriteAzionJsonContent(conf *contracts.AzionApplicationOptionsV3, confCo
 }
 
 // MockCallScript mocks the callScript behavior
-func MockCallScript(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error) {
+func MockCallScript(token string, id string, secret string, prefix string, name string, confDir string, cmd *DeployCmd) (string, error) {
 	return "mockExecId", nil
 }
 
@@ -123,7 +123,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.ReadSettings = func() (token.Settings, error) {
 					return token.Settings{}, nil
 				}
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
 				}
 			},
@@ -142,7 +142,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
 				}
 			},
@@ -158,10 +158,10 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.WriteAzionJsonContent = MockWriteAzionJsonContent
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
-				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error {
+				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
 				}
-				cmd.CallScript = func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error) {
+				cmd.CallScript = func(token string, id string, secret string, prefix string, name string, confDir string, cmd *DeployCmd) (string, error) {
 					return "", errors.New("call script failed")
 				}
 				cmd.OpenBrowser = MockOpenBrowser
@@ -313,6 +313,7 @@ func TestCallScript(t *testing.T) {
 		secret          string
 		prefix          string
 		projectName     string
+		confDir         string
 		resultsResponse string
 		expectedUUID    string
 		expectedErr     bool
@@ -324,6 +325,7 @@ func TestCallScript(t *testing.T) {
 			secret:          "validSecret",
 			prefix:          "validPrefix",
 			projectName:     "myProject",
+			confDir:         "myConfDir",
 			resultsResponse: `{"uuid": "12345"}`,
 			expectedUUID:    "12345",
 			expectedErr:     false,
@@ -335,6 +337,7 @@ func TestCallScript(t *testing.T) {
 			secret:          "validSecret",
 			prefix:          "validPrefix",
 			projectName:     "myProject",
+			confDir:         "myConfDir",
 			resultsResponse: "",
 			expectedUUID:    "",
 			expectedErr:     true,
@@ -362,7 +365,7 @@ func TestCallScript(t *testing.T) {
 			}
 
 			// Call the function under test
-			_, err := cmd.CallScript(tt.token, tt.id, tt.secret, tt.prefix, tt.projectName, cmd)
+			_, err := cmd.CallScript(tt.token, tt.id, tt.secret, tt.prefix, tt.projectName, tt.confDir, cmd)
 
 			// Assert the results
 			if tt.expectedErr {

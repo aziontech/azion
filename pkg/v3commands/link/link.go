@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
@@ -20,7 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/v3commands/deploy"
 	"github.com/aziontech/azion-cli/pkg/v3commands/dev"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
@@ -217,18 +215,6 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			}
 			logger.FInfoFlags(cmd.Io.Out, msg.WrittenGitignore, cmd.F.Format, cmd.F.Out)
 			msgs = append(msgs, msg.WrittenGitignore)
-		}
-
-		//run init before calling build
-		cmdVulcanInit := "store init"
-		cmdVulcanInit = fmt.Sprintf("%s --preset '%s' --scope global", cmdVulcanInit, strings.ToLower(info.Preset))
-
-		vul := vulcanPkg.NewVulcanV3()
-		command := vul.Command("", cmdVulcanInit, cmd.F)
-
-		_, err = cmd.CommandRunner(cmd.F, command, []string{})
-		if err != nil {
-			return err
 		}
 
 		if !info.Auto {

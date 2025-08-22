@@ -46,12 +46,12 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
-	CallScript            func(token string, id string, secret string, prefix string, name string, cmd *DeployCmd) (string, error)
+	CallScript            func(token string, id string, secret string, prefix string, name string, confDir string, cmd *DeployCmd) (string, error)
 	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
 	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
 	CheckToken            func(f *cmdutil.Factory) error
 	ReadSettings          func() (token.Settings, error)
-	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd) error
+	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error
 	OpenBrowserFunc       func(input string) error
 }
 
@@ -194,12 +194,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		request.Bucket = &nameBucket
 		request.ExpirationDate = &oneYearLater
 
-		// creds, err := storageClient.CreateCredentials(ctx, *request)
-		// if err != nil {
-		// 	return err
-		// }
-		// settings.S3AccessKey = creds.Data.GetAccessKey()
-		// settings.S3SecreKey = creds.Data.GetSecretKey()
+		creds, err := storageClient.CreateCredentials(ctx, *request)
+		if err != nil {
+			return err
+		}
+		settings.S3AccessKey = creds.Data.GetAccessKey()
+		settings.S3SecreKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
 
 		err = token.WriteSettings(settings)
@@ -215,12 +215,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.Prefix = cmd.VersionID()
 
-	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd)
+	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd, settings)
 	if err != nil {
 		return err
 	}
 
-	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, cmd)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
 	if err != nil {
 		return err
 	}
