@@ -21,7 +21,7 @@ type Response struct {
 	Start time.Time `json:"start"`
 }
 
-func callScript(token, id, secret, prefix, name string, cmd *DeployCmd) (string, error) {
+func callScript(token, id, secret, prefix, name, confDir string, cmd *DeployCmd) (string, error) {
 	logger.Debug("Calling script runner api")
 	instantiateURL := fmt.Sprintf("%s/api/template-engine/templates/%s/instantiate", DeployURL, ScriptID)
 
@@ -51,6 +51,11 @@ func callScript(token, id, secret, prefix, name string, cmd *DeployCmd) (string,
 			"field":                   "AZCLI_TOKEN",
 			"instantiation_data_path": "envs.[4].value",
 			"value":                   token,
+		},
+		{
+			"field":                   "AZCLI_CONFDIR",
+			"instantiation_data_path": "envs.[5].value",
+			"value":                   confDir,
 		},
 	}
 
