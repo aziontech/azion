@@ -381,6 +381,13 @@ type SyncOpts struct {
 	Conf      *AzionApplicationOptions
 }
 
+type SyncOptsV3 struct {
+	RuleIds   map[string]RuleIdsStruct
+	CacheIds  map[string]AzionJsonDataCacheSettings
+	OriginIds map[string]AzionJsonDataOrigin
+	Conf      *AzionApplicationOptionsV3
+}
+
 type RuleIdsStruct struct {
 	Id    int64
 	Phase string
