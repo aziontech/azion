@@ -90,9 +90,12 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID int64, originKey str
 
 func (c *Client) ListOrigins(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.OriginsResponse, error) {
 	logger.Debug("List Origins")
+	if opts.OrderBy == "" {
+		opts.OrderBy = "name"
+	}
 	resp, httpResp, err := c.apiClient.EdgeApplicationsOriginsAPI.
 		EdgeApplicationsEdgeApplicationIdOriginsGet(ctx, edgeApplicationID).PageSize(opts.PageSize).
-		Page(opts.Page).Sort(opts.Sort).OrderBy(opts.OrderBy).Execute()
+		Page(opts.Page).OrderBy(opts.OrderBy).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while listing your origins", zap.Error(err))
