@@ -4,9 +4,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -15,26 +17,32 @@ import (
 
 var (
 	ProjectConf string
+	IaC         bool
+	IaCFormat   string
 )
 
 type SyncCmd struct {
 	Io                    *iostreams.IOStreams
-	GetAzionJsonContent   func(confPath string) (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	GetAzionJsonContent   func(confPath string) (*contracts.AzionApplicationOptionsV3, error)
+	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptionsV3, confPath string) error
 	F                     *cmdutil.Factory
-	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
+	SyncResources         func(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error
 	EnvPath               string
 	ReadEnv               func(filenames ...string) (envMap map[string]string, err error)
+	WriteManifest         func(manifest *contracts.Manifest, pathMan string) error
+	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 }
 
 func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
 	return &SyncCmd{
 		F:                     f,
 		Io:                    f.IOStreams,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
 		SyncResources:         SyncLocalResources,
 		ReadEnv:               godotenv.Read,
+		WriteManifest:         WriteManifest,
+		CommandRunInteractive: command.CommandRunInteractive,
 	}
 }
 
@@ -57,6 +65,8 @@ func NewCobraCmd(sync *SyncCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
 	cobraCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	cobraCmd.Flags().StringVar(&sync.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
+	cobraCmd.Flags().BoolVar(&IaC, "iac", false, msg.IACFLAG)
+	cobraCmd.Flags().StringVar(&IaCFormat, "extension", "mjs", msg.IACFORMATFLAG)
 
 	return cobraCmd
 }
@@ -99,7 +109,7 @@ func Run(cmdFac *SyncCmd) error {
 		}
 	}
 
-	info := contracts.SyncOpts{
+	info := contracts.SyncOptsV3{
 		RuleIds:   ruleIds,
 		OriginIds: originIds,
 		CacheIds:  cacheIds,
@@ -111,5 +121,11 @@ func Run(cmdFac *SyncCmd) error {
 		return err
 	}
 
-	return nil
+	syncOut := output.GeneralOutput{
+		Msg:   msg.SYNCSUCCESS,
+		Out:   cmdFac.F.IOStreams.Out,
+		Flags: cmdFac.F.Flags,
+	}
+	return output.Print(&syncOut)
+
 }

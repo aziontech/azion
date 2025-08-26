@@ -20,50 +20,70 @@ import (
 func TestSync(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	tests := []struct {
-		name               string
-		mockGetContentFunc func(confPath string) (*contracts.AzionApplicationOptions, error)
-		mockWriteFunc      func(conf *contracts.AzionApplicationOptions, confPath string) error
-		mockSyncResources  func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error
-		expectedError      error
+		name                      string
+		mockGetContentFunc        func(confPath string) (*contracts.AzionApplicationOptionsV3, error)
+		mockWriteFunc             func(conf *contracts.AzionApplicationOptionsV3, confPath string) error
+		mockSyncResources         func(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error
+		mockWriteManifest         func(manifest *contracts.Manifest, pathMan string) error
+		mockCommandRunInteractive func(f *cmdutil.Factory, comm string) error
+		expectedError             error
 	}{
 		{
 			name: "sync - successful synchronization",
-			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptions, error) {
-				return &contracts.AzionApplicationOptions{}, nil
+			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+				return &contracts.AzionApplicationOptionsV3{}, nil
 			},
-			mockWriteFunc: func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			mockWriteFunc: func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 				return nil
 			},
-			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
+			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error {
+				return nil
+			},
+			mockWriteManifest: func(manifest *contracts.Manifest, pathMan string) error {
+				return nil
+			},
+			mockCommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 				return nil
 			},
 			expectedError: nil,
 		},
 		{
 			name: "sync - failed to get content",
-			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptions, error) {
+			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
 				return nil, errors.New("Failed to synchronize local resources with remote resources: failed to get azion.json content")
 			},
-			mockWriteFunc: func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			mockWriteFunc: func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 				return nil
 			},
-			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
+			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error {
+				return nil
+			},
+			mockWriteManifest: func(manifest *contracts.Manifest, pathMan string) error {
+				return nil
+			},
+			mockCommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 				return nil
 			},
 			expectedError: fmt.Errorf(msg.ERRORSYNC, "failed to get azion.json content"),
 		},
 		{
 			name: "sync - failed to write content",
-			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptions, error) {
-				return &contracts.AzionApplicationOptions{
+			mockGetContentFunc: func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+				return &contracts.AzionApplicationOptionsV3{
 					// Mock relevant fields
 				}, nil
 			},
-			mockWriteFunc: func(conf *contracts.AzionApplicationOptions, confPath string) error {
+			mockWriteFunc: func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 				return errors.New("failed to write azion.json content")
 			},
-			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
+			mockSyncResources: func(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error {
 				return errors.New("failed to write azion.json content")
+			},
+			mockWriteManifest: func(manifest *contracts.Manifest, pathMan string) error {
+				return nil
+			},
+			mockCommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+				return nil
 			},
 			expectedError: errors.New("failed to write azion.json content"),
 		},
@@ -104,6 +124,11 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/response/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
+
+		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
@@ -121,13 +146,22 @@ func TestSyncFull(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		syncCmd := NewSyncCmd(f)
-		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
-			return &contracts.AzionApplicationOptions{
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+			return &contracts.AzionApplicationOptionsV3{
 				Application: contracts.AzionJsonDataApplication{
 					ID:   1000000,
 					Name: "testename",
 				},
 			}, nil
+		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
 		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
@@ -149,6 +183,10 @@ func TestSyncFull(t *testing.T) {
 			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
 			httpmock.JSONFromFile("./fixtures/rules_results.json"),
 		)
+		mock.Register(
+			httpmock.REST("GET", "edge_applications/1000000/rules_engine/response/rules"),
+			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+		)
 
 		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
@@ -168,19 +206,25 @@ func TestSyncFull(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		syncCmd := NewSyncCmd(f)
-		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
-			return &contracts.AzionApplicationOptions{
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+			return &contracts.AzionApplicationOptionsV3{
 				Application: contracts.AzionJsonDataApplication{
 					ID:   1000000,
 					Name: "testename",
 				},
 			}, nil
 		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
+		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
 		}
 
-		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 			return nil
 		}
 
@@ -219,19 +263,25 @@ func TestSyncFull(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 
 		syncCmd := NewSyncCmd(f)
-		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptions, error) {
-			return &contracts.AzionApplicationOptions{
+		syncCmd.GetAzionJsonContent = func(confPath string) (*contracts.AzionApplicationOptionsV3, error) {
+			return &contracts.AzionApplicationOptionsV3{
 				Application: contracts.AzionJsonDataApplication{
 					ID:   1000000,
 					Name: "testename",
 				},
 			}, nil
 		}
+		syncCmd.WriteManifest = func(manifest *contracts.Manifest, pathMan string) error {
+			return nil
+		}
+		syncCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+			return nil
+		}
 		syncCmd.ReadEnv = func(filenames ...string) (envMap map[string]string, err error) {
 			return nil, nil
 		}
 
-		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confPath string) error {
+		syncCmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
 			return utils.ErrorWritingAzionJsonFile
 		}
 
