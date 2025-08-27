@@ -131,6 +131,7 @@ func dtoStructRequest(request api.UpdateRulesEngineRequest) api.UpdateRulesEngin
 
 	req.Name = request.Name
 	req.Description = request.Description
+	req.IsActive = request.IsActive
 
 	var rulesEngineCriteria [][]sdk.RulesEngineCriteria
 	for _, itemCriterias := range request.Criteria {
