@@ -98,8 +98,7 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 	logger.Debug("Creating object")
 	c.apiClient.GetConfig().DefaultHeader["Content-Type"] = fileOps.MimeType
 	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
-		Body(fileOps.FileContent)
-	//TODO: add back when storage is deployed .ContentType(fileOps.MimeType)
+		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
@@ -141,8 +140,8 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent)
-	//TODO: add back when storage is deployed .ContentType(fileOps.MimeType)
+	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
