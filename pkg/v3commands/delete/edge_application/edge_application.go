@@ -143,7 +143,17 @@ func updateAzionJson(cmd *DeleteCmd) error {
 		return msg.ErrorFailedUpdateAzionJson
 	}
 
-	err = cmd.WriteFile(azionJson, []byte(jsonReplaceDomain), 0644)
+	jsonReplaceFuncInstanceID, err := sjson.Set(jsonReplaceDomain, "function.instance-id", 0)
+	if err != nil {
+		return msg.ErrorFailedUpdateAzionJson
+	}
+
+	jsonReplaceFirstRun, err := sjson.Set(jsonReplaceFuncInstanceID, "not-first-run", false)
+	if err != nil {
+		return msg.ErrorFailedUpdateAzionJson
+	}
+
+	err = cmd.WriteFile(azionJson, []byte(jsonReplaceFirstRun), 0644)
 	if err != nil {
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
 	}

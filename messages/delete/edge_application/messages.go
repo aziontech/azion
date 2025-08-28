@@ -8,7 +8,7 @@ var (
 	HelpFlag         = "Displays more information about the delete edge-application command"
 	CascadeFlag      = "Deletes all resources created through the 'azion deploy' command"
 	MissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion\n"
-	CascadeSuccess   = "Remote resources deleted successfully"
+	CascadeSuccess   = "Remote resources deleted successfully\n"
 	FlagId           = "Unique identifier of the Edge Application"
 	AskInput         = "Enter the ID of the Edge Application you wish to delete:"
 	CONFDIRFLAG      = "Relative path to where your custom azion.json and args.json files are stored"
