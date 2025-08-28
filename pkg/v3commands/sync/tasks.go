@@ -71,7 +71,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *Sy
 		defer os.Remove("manifesttoconvert.json")
 		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
 
-		vul := vulcanPkg.NewVulcan()
+		vul := vulcanPkg.NewVulcanV3()
 		command := vul.Command("", "manifest -o %s transform %s", f)
 		err = synch.CommandRunInteractive(f, fmt.Sprintf(command, fileName, "manifesttoconvert.json"))
 		if err != nil {
