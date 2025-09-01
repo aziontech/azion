@@ -40,11 +40,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update edge-function --function-id 1234 --name 'Hello'
-		$ azion update edge-function --function-id 4185 --code ./mycode/function.js --args ./mycode/myargs.json
-		$ azion update edge-function --function-id 9123 --active true
-		$ azion update edge-function --function-id 9123 --active false
-		$ azion update edge-function --in "update.json"
+		$ azion update function --function-id 1234 --name 'Hello'
+		$ azion update function --function-id 4185 --code ./mycode/function.js --args ./mycode/myargs.json
+		$ azion update function --function-id 9123 --active true
+		$ azion update function --function-id 9123 --active false
+		$ azion update function --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 

@@ -23,9 +23,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription, Example: heredoc.Doc(`
 		$ azion update --help
-		$ azion update edge-application -h
+		$ azion update application -h
+		$ azion update connector -h
 		$ azion update workload -h
-		$ azion update origin -h
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

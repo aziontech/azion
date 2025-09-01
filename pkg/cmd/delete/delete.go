@@ -23,7 +23,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription, Example: heredoc.Doc(`
 		$ azion delete --help
-		$ azion delete edge-application -h
+		$ azion delete application -h
 		$ azion delete workload -h
 		$ azion delete origin -h
         `),

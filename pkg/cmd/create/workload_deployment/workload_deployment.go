@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create workload-deployment --name workloadName
         $ azion create workload-deployment --name withargs --active true --current true
-        $ azion create workload-deployment --name withstrategy --strategy-type blue-green --edge-application 123
+        $ azion create workload-deployment --name withstrategy --strategy-type blue-green --application 123
         $ azion create workload-deployment --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
