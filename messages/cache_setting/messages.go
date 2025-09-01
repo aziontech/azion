@@ -44,7 +44,7 @@ var (
 
 	// [ delete ]
 	DeleteShortDescription    = "Deletes a Cache Settings configuration"
-	DeleteLongDescription     = "Deletes a Caches Settings configuration from the Application library based on its given ID"
+	DeleteLongDescription     = "Deletes a Cache Settings configuration from the Applications library based on its given ID"
 	DeleteOutputSuccess       = "Caches settings configuration %d was successfully deleted"
 	DeleteFlagApplicationID   = "Unique identifier for an Application"
 	DeleteFlagCacheSettingsID = "The Cache Settings configuration key unique identifier"

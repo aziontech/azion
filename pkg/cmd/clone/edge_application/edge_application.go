@@ -17,8 +17,7 @@ import (
 )
 
 const example = `
-        $ azion create edge-application --name "naruno"
-        $ azion create edge-application --file create.json
+        $ azion clone application --application-id 1 --name "naruno"
         `
 
 type Fields struct {

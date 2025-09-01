@@ -21,8 +21,8 @@ import (
 )
 
 const example = `
-        $ azion create edge-application --name "naruno"
-        $ azion create edge-application --file create.json
+        $ azion create application --name "naruno"
+        $ azion create application --file create.json
         `
 
 type Fields struct {
@@ -204,7 +204,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
-	flags.StringVar(&fields.EdgeFunctionsEnabled, "edge-function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.EdgeFunctionsEnabled, "function", "", msg.FlagEdgeFunctions)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
 	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)

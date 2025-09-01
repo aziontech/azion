@@ -42,10 +42,10 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion list edge-application
-			$ azion list edge-application --details
-			$ azion list edge-application --page 1
-			$ azion list edge-application --page-size 5
+			$ azion list application
+			$ azion list application --details
+			$ azion list application --page 1
+			$ azion list application --page-size 5
 		`),
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if err := PrintTable(cmd, list, f, opts); err != nil {
