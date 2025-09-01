@@ -124,7 +124,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagApplicationID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.browserCacheBehavior, "browser-cache-behavior", "honor", msg.FlagBrowserCacheBehavior)
 	flags.Int64Var(&fields.browserCacheMaxAge, "browser-cache-max-age", 0, msg.FlagBrowserCacheMaxAge)

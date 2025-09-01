@@ -77,7 +77,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.FlagApplicationID)
 	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 
 	return cmd
