@@ -90,7 +90,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	if utils.IsEmpty(fields.Name) {
-		answers, err := utils.AskInput("Enter the new Edge Application's name")
+		answers, err := utils.AskInput("Enter the new Application's name")
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
