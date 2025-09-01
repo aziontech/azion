@@ -5,7 +5,7 @@ var (
 
 	// [ variables ]
 	ShortDescription = "Manages your environment variables and secrets"
-	LongDescription  = "Manages your environment variables and secrets to be used inside Edge Functions"
+	LongDescription  = "Manages your environment variables and secrets to be used inside Functions"
 	FlagHelp         = "Displays more information about the variables command"
 	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
@@ -43,7 +43,7 @@ var (
 
 	// [ create ]
 	CreateShortDescription = "Creates a new environment variable or secret"
-	CreateLongDescription  = "Creates a new environment variable or secret to be used inside Edge Functions"
+	CreateLongDescription  = "Creates a new environment variable or secret to be used inside Functions"
 	CreateFlagKey          = "Informs the variable's key"
 	CreateFlagValue        = "Informs the variable's value"
 	CreateFlagSecret       = "Indicates whether the value is meant to be confidential."

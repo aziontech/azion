@@ -45,13 +45,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion delete edge-function --function-id 1234
+		$ azion delete function --function-id 1234
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := delete.AskInput(msg.AskEdgeFunctionID)
+				answer, err := delete.AskInput(msg.AskFunctionID)
 				if err != nil {
 					return err
 				}

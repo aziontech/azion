@@ -39,9 +39,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create edge-function --name misfunction --code ./code/function.js --active false
-        $ azion create edge-function --name with args --code ./code/function.js --args ./args.json --active true
-        $ azion create edge-function --file "create.json"
+        $ azion create function --name misfunction --code ./code/function.js --active false
+        $ azion create function --name with args --code ./code/function.js --args ./args.json --active true
+        $ azion create function --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()

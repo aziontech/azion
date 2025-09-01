@@ -24,7 +24,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Long:  msg.LongDescription,
 		Example: heredoc.Doc(`
 		$ azion describe --help
-		$ azion describe edge-application -h
+		$ azion describe application -h
 		$ azion describe workload -h
 		$ azion describe origin -h
         `),

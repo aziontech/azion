@@ -28,7 +28,7 @@ func NewObject(f *cmdutil.Factory) *cobra.Command {
 		Long:          "",
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_DESCRIBE_OBJECT),
+		Example:       heredoc.Doc("$ azion describe edge-storage object --bucket-id 1234 --object-key 'object-key'"),
 		RunE:          fields.RunE,
 	}
 	fields.AddFlags(cmd.Flags())

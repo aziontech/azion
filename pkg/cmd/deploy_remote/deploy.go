@@ -200,7 +200,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	// Check if directory exists; if not, we skip creating bucket
-	if len(manifestStructure.EdgeStorage) == 0 {
+	if len(manifestStructure.Storage) == 0 {
 		logger.Debug(msg.SkipBucket)
 	} else {
 		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
@@ -231,7 +231,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		logger.Debug(msg.SkipUpload)
 	} else {
-		for _, storage := range manifestStructure.EdgeStorage {
+		for _, storage := range manifestStructure.Storage {
 			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
 			if err != nil {
 				return err

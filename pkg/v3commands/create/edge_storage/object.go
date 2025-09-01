@@ -28,7 +28,7 @@ func commandObjects(fact *factoryObjects) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_CREATE_OBJECTS,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_CREATE_OBJECTS),
+		Example:       heredoc.Doc("azion create edge-storage object --bucket-name 'bucket-name' --object-key 'object-key' --source 'source'"),
 		RunE:          fact.RunE,
 	}
 	fact.AddFlags(cmd.Flags())

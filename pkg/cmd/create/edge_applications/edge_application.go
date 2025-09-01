@@ -21,8 +21,8 @@ import (
 )
 
 const example = `
-        $ azion create edge-application --name "naruno"
-        $ azion create edge-application --file create.json
+        $ azion create application --name "naruno"
+        $ azion create application --file create.json
         `
 
 type Fields struct {
@@ -90,7 +90,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	if utils.IsEmpty(fields.Name) {
-		answers, err := utils.AskInput("Enter the new Edge Application's name")
+		answers, err := utils.AskInput("Enter the new Application's name")
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
@@ -115,7 +115,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 		request.SetDebug(debugRules)
 	}
 
-	modules := sdk.EdgeApplicationModulesRequest{}
+	modules := sdk.ApplicationModulesRequest{}
 
 	if !utils.IsEmpty(fields.EdgeCacheEnabled) {
 		edgeCache, err := strconv.ParseBool(fields.EdgeCacheEnabled)
@@ -141,7 +141,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			Enabled: &edgeFunctions,
 		}
 
-		modules.SetEdgeFunctions(eFunction)
+		modules.SetFunctions(eFunction)
 	}
 
 	if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
@@ -204,7 +204,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
-	flags.StringVar(&fields.EdgeFunctionsEnabled, "edge-function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.EdgeFunctionsEnabled, "function", "", msg.FlagEdgeFunctions)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
 	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)

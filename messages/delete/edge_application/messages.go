@@ -1,15 +1,15 @@
 package edgeapplication
 
 var (
-	Usage            = "edge-application"
-	ShortDescription = "Deletes an Edge Application"
-	LongDescription  = "Removes an Edge Application from the Edge Applications library based on a given ID"
-	OutputSuccess    = "Edge Application %d was successfully deleted"
-	HelpFlag         = "Displays more information about the delete edge-application command"
+	Usage            = "application"
+	ShortDescription = "Deletes an Application"
+	LongDescription  = "Removes an Application from the Applications library based on a given ID"
+	OutputSuccess    = "Application %d was successfully deleted"
+	HelpFlag         = "Displays more information about the delete application command"
 	CascadeFlag      = "Deletes all resources created through the 'azion deploy' command"
-	MissingFunction  = "Missing Edge Function ID in azion.json file. Skipping deletion\n"
+	MissingFunction  = "Missing Function ID in azion.json file. Skipping deletion\n"
 	CascadeSuccess   = "Remote resources deleted successfully\n"
-	FlagId           = "Unique identifier of the Edge Application"
-	AskInput         = "Enter the ID of the Edge Application you wish to delete:"
+	FlagId           = "Unique identifier of the Application"
+	AskInput         = "Enter the ID of the Application you wish to delete:"
 	CONFDIRFLAG      = "Relative path to where your custom azion.json and args.json files are stored"
 )

@@ -11,25 +11,25 @@ import (
 )
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedEdgeApplicationRequestPhaseRuleEngineRequest
+	sdk.PatchedApplicationRequestPhaseRuleEngineRequest
 	ApplicationID string
 	RulesID       string
 	Phase         string
 }
 
 type UpdateRulesEngineResponse struct {
-	sdk.PatchedEdgeApplicationResponsePhaseRuleEngineRequest
+	sdk.PatchedApplicationResponsePhaseRuleEngineRequest
 	ApplicationID string
 	RulesID       string
 	Phase         string
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.EdgeApplicationRequestPhaseRuleEngineRequest
+	sdk.ApplicationRequestPhaseRuleEngineRequest
 }
 
 type CreateRulesEngineResponse struct {
-	sdk.EdgeApplicationResponsePhaseRuleEngineRequest
+	sdk.ApplicationResponsePhaseRuleEngineRequest
 }
 
 type CreateRulesEngineRequestV3 struct {
@@ -46,9 +46,9 @@ type RulesEngineResponse interface {
 	GetName() string
 }
 
-func (c *Client) DeleteRequest(ctx context.Context, edgeApplicationID string, ruleID string) error {
+func (c *Client) DeleteRequest(ctx context.Context, applicationID string, ruleID string) error {
 	logger.Debug("Delete Rules Engine")
-	_, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
+	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesDestroy(ctx, applicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -65,7 +65,7 @@ func (c *Client) DeleteRequest(ctx context.Context, edgeApplicationID string, ru
 
 func (c *Client) DeleteResponse(ctx context.Context, edgeApplicationID string, ruleID string) error {
 	logger.Debug("Delete Rules Engine")
-	_, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
+	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -82,7 +82,7 @@ func (c *Client) DeleteResponse(ctx context.Context, edgeApplicationID string, r
 
 func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.EdgeApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesPartialUpdate(ctx, req.ApplicationID, req.RulesID).PatchedEdgeApplicationRequestPhaseRuleEngineRequest(req.PatchedEdgeApplicationRequestPhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesPartialUpdate(ctx, req.ApplicationID, req.RulesID).PatchedApplicationRequestPhaseRuleEngineRequest(req.PatchedApplicationRequestPhaseRuleEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -102,7 +102,7 @@ func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineReques
 
 func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineResponse) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.EdgeApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesPartialUpdate(ctx, req.ApplicationID, req.RulesID).PatchedEdgeApplicationResponsePhaseRuleEngineRequest(req.PatchedEdgeApplicationResponsePhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesPartialUpdate(ctx, req.ApplicationID, req.RulesID).PatchedApplicationResponsePhaseRuleEngineRequest(req.PatchedApplicationResponsePhaseRuleEngineRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -120,11 +120,11 @@ func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineRespo
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID string, req sdk.EdgeApplicationRequestPhaseRuleEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID string, req sdk.ApplicationRequestPhaseRuleEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsRequestRulesAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		EdgeApplicationApiApplicationsRequestRulesCreate(ctx, edgeApplicationID).
-		EdgeApplicationRequestPhaseRuleEngineRequest(req).Execute()
+		ApplicationRequestPhaseRuleEngineRequest(req).Execute()
 
 	if err != nil {
 		errBody := ""
@@ -140,11 +140,11 @@ func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID string, re
 	return &resp.Data, nil
 }
 
-func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID string, req sdk.EdgeApplicationResponsePhaseRuleEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID string, req sdk.ApplicationResponsePhaseRuleEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsResponseRulesAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		EdgeApplicationApiApplicationsResponseRulesCreate(ctx, edgeApplicationID).
-		EdgeApplicationResponsePhaseRuleEngineRequest(req).Execute()
+		ApplicationResponsePhaseRuleEngineRequest(req).Execute()
 
 	if err != nil {
 		errBody := ""

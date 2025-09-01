@@ -115,9 +115,9 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 	return nil
 }
 
-func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contracts.ListOptions) ([]sdk.ResponseBucketObject, error) {
+func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contracts.ListOptions) (*sdk.ResponseBucketObject, error) {
 	logger.Debug("Listing bucket")
-	req := c.apiClient.EdgeStorageObjectsAPI.ListObjectKeys(ctx, bucketName).
+	req := c.apiClient.EdgeStorageObjectsAPI.ListObjects(ctx, bucketName).
 		MaxObjectCount(opts.PageSize).ContinuationToken(opts.ContinuationToken)
 	resp, httpResp, err := req.Execute()
 	if err != nil {

@@ -40,7 +40,7 @@ var successResponse string = `
 
 func TestUpdate(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
-	t.Run("update Edge Function", func(t *testing.T) {
+	t.Run("update Function", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(

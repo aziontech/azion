@@ -23,7 +23,7 @@ type Fields struct {
 	ID                            int64  `json:"id,omitempty"`
 	Name                          string `json:"name,omitempty"`
 	EdgeCacheEnabled              string `json:"edge_cache_enabled,omitempty"`
-	EdgeFunctionsEnabled          string `json:"edge_functions_enabled,omitempty"`
+	FunctionsEnabled              string `json:"functions_enabled,omitempty"`
 	ApplicationAcceleratorEnabled string `json:"application_accelerator_enabled,omitempty"`
 	ImageProcessorEnabled         string `json:"image_processor_enabled,omitempty"`
 	TieredCacheEnabled            string `json:"tiered_cache_enabled,omitempty"`
@@ -44,8 +44,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update edge-application --application-id 1234 --name 'Hello'
-		$ azion update edge-application --file "update.json"
+		$ azion update application --application-id 1234 --name 'Hello'
+		$ azion update application --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") && !cmd.Flags().Changed("file") {
@@ -92,7 +92,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					request.SetDebug(debugRules)
 				}
 
-				modules := sdk.EdgeApplicationModulesRequest{}
+				modules := sdk.ApplicationModulesRequest{}
 
 				if !utils.IsEmpty(fields.EdgeCacheEnabled) {
 					edgeCache, err := strconv.ParseBool(fields.EdgeCacheEnabled)
@@ -108,10 +108,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					modules.SetEdgeCache(eCache)
 				}
 
-				if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
-					edgeFunctions, err := strconv.ParseBool(fields.EdgeFunctionsEnabled)
+				if !utils.IsEmpty(fields.FunctionsEnabled) {
+					edgeFunctions, err := strconv.ParseBool(fields.FunctionsEnabled)
 					if err != nil {
-						logger.Debug("Error while parsing <"+fields.EdgeFunctionsEnabled+"> ", zap.Error(err))
+						logger.Debug("Error while parsing <"+fields.FunctionsEnabled+"> ", zap.Error(err))
 						return utils.ErrorConvertingStringToBool
 					}
 
@@ -119,7 +119,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						Enabled: &edgeFunctions,
 					}
 
-					modules.SetEdgeFunctions(eFunction)
+					modules.SetFunctions(eFunction)
 				}
 
 				if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {
@@ -200,7 +200,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
-	flags.StringVar(&fields.EdgeFunctionsEnabled, "edge-function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.FunctionsEnabled, "functions", "", msg.FlagFunctions)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
 	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)

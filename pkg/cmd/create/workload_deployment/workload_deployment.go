@@ -44,7 +44,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion create workload-deployment --name workloadName
         $ azion create workload-deployment --name withargs --active true --current true
-        $ azion create workload-deployment --name withstrategy --strategy-type blue-green --edge-application 123
+        $ azion create workload-deployment --name withstrategy --strategy-type blue-green --application 123
         $ azion create workload-deployment --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -131,7 +131,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						if err != nil {
 							return fmt.Errorf("%w: %q", msg.ErrorConvertEdgeApplication, fields.EdgeApplication)
 						}
-						attributes.EdgeApplication = edgeApp
+						attributes.Application = edgeApp
 					}
 
 					// Set EdgeFirewall if provided
@@ -142,7 +142,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						}
 						var nullableEdgeFirewall sdk.NullableInt64
 						nullableEdgeFirewall.Set(&edgeFirewall)
-						attributes.EdgeFirewall = nullableEdgeFirewall
+						attributes.Firewall = nullableEdgeFirewall
 					}
 
 					// Set CustomPage if provided
@@ -181,8 +181,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Active, "active", "", msg.FlagIsActive)
 	flags.StringVar(&fields.Current, "current", "", msg.FlagIsCurrent)
 	flags.StringVar(&fields.StrategyType, "strategy-type", "", msg.FlagStrategyType)
-	flags.StringVar(&fields.EdgeApplication, "edge-application", "", "Edge Application ID for the deployment strategy")
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", "Edge Firewall ID for the deployment strategy")
+	flags.StringVar(&fields.EdgeApplication, "application", "", "Application ID for the deployment strategy")
+	flags.StringVar(&fields.EdgeFirewall, "firewall", "", "Firewall ID for the deployment strategy")
 	flags.StringVar(&fields.CustomPage, "custom-page", "", "Custom Page ID for the deployment strategy")
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.Int64Var(&fields.WorkloadID, "workload-id", 0, "Workload ID")

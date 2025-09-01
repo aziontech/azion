@@ -29,7 +29,7 @@ func NewObject(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_CREATE_BUCKET,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_UPDATE_OBJECT),
+		Example:       heredoc.Doc(`$ azion update edge-storage object --object-id 1234 --name 'Hello'`),
 		RunE:          object.runE,
 	}
 	object.addFlags(cmd.Flags())

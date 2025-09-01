@@ -122,7 +122,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						if err != nil {
 							return fmt.Errorf("%w: %q", msg.ErrorConvertEdgeApplication, fields.EdgeApplication)
 						}
-						attributes.EdgeApplication = edgeApp
+						attributes.Application = edgeApp
 					}
 
 					// Set EdgeFirewall if provided
@@ -133,7 +133,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						}
 						var nullableEdgeFirewall sdk.NullableInt64
 						nullableEdgeFirewall.Set(&edgeFirewall)
-						attributes.EdgeFirewall = nullableEdgeFirewall
+						attributes.Firewall = nullableEdgeFirewall
 					}
 
 					// Set CustomPage if provided

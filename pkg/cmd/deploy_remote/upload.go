@@ -84,8 +84,6 @@ func (cmd *DeployCmd) uploadFiles(
 			}
 
 			fileString := strings.TrimPrefix(pathDir, path.Clean(dir))
-			logger.Debug("File name after trim", zap.Any("File name", fileString))
-			logger.Debug("Dir content", zap.Any("Dir content", dir))
 			mimeType, err := mimemagic.MatchFilePath(pathDir, -1)
 			if err != nil {
 				logger.Debug("Error while matching file path", zap.Error(err))
