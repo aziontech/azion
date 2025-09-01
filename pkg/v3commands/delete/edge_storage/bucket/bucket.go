@@ -58,7 +58,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_DELETE_BUCKET,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_DELETE_BUCKET),
+		Example:       heredoc.Doc("$ azion delete edge-storage bucket --bucket-id 1234"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 

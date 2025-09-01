@@ -45,7 +45,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-function",
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,

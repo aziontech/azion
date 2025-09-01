@@ -51,7 +51,7 @@ func NewObjectCmd(delete *DeleteObjectCmd, f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_DELETE_OBJECTS,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_DELETE_OBJECTS),
+		Example:       heredoc.Doc("$ azion delete edge-storage object --bucket-id 1234 --object-key 'object-key'"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var err error
 

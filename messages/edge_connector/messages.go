@@ -43,11 +43,13 @@ var (
 	UpdateOutputSuccess              = "Updated Connector with ID %d"
 	UpdateHelpFlag                   = "Displays more information about the update connector command"
 	UpdateAskEdgeConnectorFunctionID = "Enter the ID of the Connector you wish to update:"
+	UpdateAskEdgeConnectorType       = "Enter the type of the Connector you wish to update:"
+	UpdateAskEdgeConnectorFile       = "Enter the path of the json to update the Connector:"
 
 	// flags
 	FlagID         = "Unique identifier of the Connector"
 	FlagName       = "The Connector's name"
-	FlagType       = "The Connector's type ('http', 'edge_storage', 'live_ingest')"
+	FlagType       = "The Connector's type ('http', 'storage', 'live_ingest')"
 	FlagAddresses  = "List of origin addresses"
 	FlagActive     = "Whether the Connector is active or not"
 	FlagIn         = "Given file path to create an Connector; you can use - for reading from stdin"

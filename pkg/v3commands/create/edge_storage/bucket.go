@@ -28,7 +28,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_CREATE_BUCKET,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_CREATE_BUCKET),
+		Example:       heredoc.Doc("azion create edge-storage bucket --name 'bucket-name' --edge-access 'read_only'"),
 		RunE:          fields.RunE,
 	}
 

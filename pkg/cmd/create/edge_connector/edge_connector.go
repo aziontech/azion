@@ -11,33 +11,17 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 )
 
 type Fields struct {
-	Name                 string
-	Type                 string
-	LoadBalancer         string
-	OriginShield         string
-	Active               string
-	Addresses            []string
-	TlsPolicy            string
-	LoadBalanceMethod    string
-	ConnectionPreference []string
-	ConnectionTimeout    int64
-	ReadWriteTimeout     int64
-	MaxRetries           int64
-	Versions             []string
-	Host                 string
-	Path                 string
-	FollowingRedirect    string
-	RealIpHeader         string
-	RealPortHeader       string
-	Bucket               string
-	Prefix               string
-	InPath               string
+	Name   string
+	Type   string
+	Path   string
+	InPath string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -50,17 +34,54 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create edge-connector --file "create.json"
+        $ azion create connector --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			request := api.NewCreateRequest()
 
+			if !cmd.Flags().Changed("type") {
+				answer, err := utils.AskInput("Enter the type of your Connector")
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+				fields.Type = answer
+			}
+
 			if !cmd.Flags().Changed("file") {
-				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
+				answer, err := utils.AskInput("Enter the path of the json to create the Connector:")
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+				fields.InPath = answer
+			}
+
+			switch fields.Type {
+			case "http":
+				httpStruct := sdk.ConnectorHTTPRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &httpStruct)
 				if err != nil {
 					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
+				request.ConnectorHTTPRequest = &httpStruct
+			case "storage":
+				storageStruct := sdk.ConnectorStorageRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
+				if err != nil {
+					logger.Debug("Failed to unmarshal file", zap.Error(err))
+					return utils.ErrorUnmarshalReader
+				}
+				request.ConnectorStorageRequest = &storageStruct
+			case "live_ingest":
+				liveIngestStruct := sdk.ConnectorLiveIngestRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
+				if err != nil {
+					logger.Debug("Failed to unmarshal file", zap.Error(err))
+					return utils.ErrorUnmarshalReader
+				}
+				request.ConnectorLiveIngestRequest = &liveIngestStruct
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -75,9 +96,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			switch fields.Type {
 			case "http":
 				id = response.ConnectorHTTP.GetId()
-			// case "s3":
-			// id = response.EdgeConnectorS3.GetId()
-			case "edge_storage":
+			case "storage":
 				id = response.ConnectorStorage.GetId()
 			case "live_ingest":
 				id = response.ConnectorLiveIngest.GetId()
@@ -99,5 +118,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.InPath, "file", "", msg.FlagIn)
+	flags.StringVar(&fields.Type, "type", "", msg.FlagType)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }

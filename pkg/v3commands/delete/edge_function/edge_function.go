@@ -42,7 +42,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 
 func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-function",
 		Short:         msg.DeleteShortDescription,
 		Long:          msg.DeleteLongDescription,
 		SilenceUsage:  true,

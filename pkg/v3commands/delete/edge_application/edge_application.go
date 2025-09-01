@@ -54,7 +54,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	var application_id int64
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-application",
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
