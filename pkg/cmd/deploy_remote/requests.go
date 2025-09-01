@@ -54,14 +54,14 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 
 	// cmdVulcanInit := "config update"
 	commands := []string{
-		fmt.Sprintf("config replace -k '$EDGE_FUNCTION_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$EDGE_APPLICATION_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$FUNCTION_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$APPLICATION_NAME' -v '%s'", conf.Name),
 		fmt.Sprintf("config replace -k '$BUCKET_NAME' -v '%s'", conf.Bucket),
 		fmt.Sprintf("config replace -k '$BUCKET_PREFIX' -v '%s'", conf.Prefix),
-		fmt.Sprintf("config replace -k '$EDGE_CONNECTOR_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$CONNECTOR_NAME' -v '%s'", conf.Name),
 		fmt.Sprintf("config replace -k '$WORKLOAD_NAME' -v '%s'", conf.Name),
 		fmt.Sprintf("config replace -k '$DEPLOYMENT_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$EDGE_FUNCTION_INSTANCE_NAME' -v '%s'", conf.Name),
+		fmt.Sprintf("config replace -k '$FUNCTION_INSTANCE_NAME' -v '%s'", conf.Name),
 	}
 
 	for _, cmdStr := range commands {
@@ -342,11 +342,11 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	*msgs = append(*msgs, msgf)
 
 	reqUpApp := apiapp.UpdateRequest{}
-	mods := edgesdk.EdgeApplicationModulesRequest{
-		EdgeFunctions:          &edgesdk.EdgeFunctionModuleRequest{},
+	mods := edgesdk.ApplicationModulesRequest{
+		Functions:              &edgesdk.EdgeFunctionModuleRequest{},
 		ApplicationAccelerator: &edgesdk.ApplicationAcceleratorModuleRequest{},
 	}
-	mods.EdgeFunctions.SetEnabled(true)
+	mods.Functions.SetEnabled(true)
 	mods.ApplicationAccelerator.SetEnabled(true)
 	reqUpApp.SetModules(mods)
 	reqUpApp.Id = application.GetId()
@@ -423,12 +423,12 @@ func prepareAddresses(addrs []string) (addresses []sdkv3.CreateOriginsRequestAdd
 	return
 }
 
-func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToCreate contracts.AzionJsonDataFunction) (edgesdk.EdgeApplicationFunctionInstance, error) {
+func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToCreate contracts.AzionJsonDataFunction) (edgesdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Create Instance")
 
 	// create instance function
 	reqIns := apiapp.CreateInstanceRequest{}
-	reqIns.SetEdgeFunction(funcToCreate.ID)
+	reqIns.SetFunction(funcToCreate.ID)
 
 	if funcToCreate.InstanceName == "__DEFAULT__" || funcToCreate.InstanceName == "" {
 		reqIns.SetName(conf.Name)
@@ -441,30 +441,30 @@ func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client,
 	marshalledArgs, err := cmd.FileReader(funcToCreate.Args)
 	if err != nil {
 		logger.Debug("Error while reding args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return edgesdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return edgesdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
-	reqIns.SetArgs(edgesdk.EdgeApplicationFunctionInstanceArgs{Arg: args})
+	reqIns.SetArgs(args)
 
 	appId := fmt.Sprintf("%d", conf.Application.ID)
 	resp, err := client.CreateFuncInstances(ctx, &reqIns, appId)
 	if err != nil {
-		return edgesdk.EdgeApplicationFunctionInstance{}, err
+		return edgesdk.ApplicationFunctionInstance{}, err
 	}
 
 	return resp, nil
 }
 
-func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToUpdate contracts.AzionJsonDataFunction) (edgesdk.EdgeApplicationFunctionInstance, error) {
+func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToUpdate contracts.AzionJsonDataFunction) (edgesdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Update Instance")
 
 	// create instance function
 	reqIns := apiapp.UpdateInstanceRequest{}
-	reqIns.SetEdgeFunction(funcToUpdate.ID)
+	reqIns.SetFunction(funcToUpdate.ID)
 
 	if funcToUpdate.InstanceName == "__DEFAULT__" || funcToUpdate.InstanceName == "" {
 		reqIns.SetName(conf.Name)
@@ -476,20 +476,20 @@ func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client,
 	marshalledArgs, err := cmd.FileReader(funcToUpdate.Args)
 	if err != nil {
 		logger.Debug("Error while reding args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return edgesdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
+		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
 	}
 	args := make(map[string]interface{})
 	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
 		logger.Debug("Error while unmarshling args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return edgesdk.EdgeApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
+		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
 	}
-	reqIns.SetArgs(edgesdk.EdgeApplicationFunctionInstanceArgs{Arg: args})
+	reqIns.SetArgs(args)
 
 	instID := strconv.FormatInt(funcToUpdate.InstanceID, 10)
 	appID := strconv.FormatInt(conf.Application.ID, 10)
 	resp, err := client.UpdateInstance(ctx, &reqIns, appID, instID)
 	if err != nil {
-		return edgesdk.EdgeApplicationFunctionInstance{}, err
+		return edgesdk.ApplicationFunctionInstance{}, err
 	}
 
 	return resp, nil

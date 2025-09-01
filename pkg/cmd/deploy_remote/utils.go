@@ -34,30 +34,30 @@ func WriteManifest(manifest *contracts.ManifestV4, pathMan string) error {
 func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationOptions) error {
 
 	truePointer := true
-	appManifest := contracts.EdgeApplications{
+	appManifest := contracts.Applications{
 		Name: conf.Name,
-		Modules: &edgesdk.EdgeApplicationModulesRequest{
-			EdgeFunctions: &edgesdk.EdgeFunctionModuleRequest{
+		Modules: &edgesdk.ApplicationModulesRequest{
+			Functions: &edgesdk.EdgeFunctionModuleRequest{
 				Enabled: &truePointer,
 			},
 		},
 		Active: &truePointer,
 	}
 
-	storageType := edgesdk.EdgeConnectorStorageAttributesRequest{
+	storageType := edgesdk.ConnectorStorageAttributesRequest{
 		Bucket: conf.Bucket,
 		Prefix: &conf.Prefix,
 	}
-	storageConnector := edgesdk.EdgeConnectorStorageRequest{
+	storageConnector := edgesdk.ConnectorStorageRequest{
 		Name:       conf.Name,
 		Active:     &truePointer,
 		Attributes: storageType,
 	}
-	connectorManifest := edgesdk.EdgeConnectorPolymorphicRequest{
-		EdgeConnectorStorageRequest: &storageConnector,
+	connectorManifest := edgesdk.ConnectorPolymorphicRequest{
+		ConnectorStorageRequest: &storageConnector,
 	}
 
-	functionMan := contracts.EdgeFunction{
+	functionMan := contracts.Function{
 		Name:     conf.Name,
 		Argument: ".edge/worker.js",
 		Bindings: contracts.FunctionBindings{
@@ -68,17 +68,17 @@ func (cmd *DeployCmd) firstRunManifestToConfig(conf *contracts.AzionApplicationO
 		},
 	}
 
-	storageMan := contracts.EdgeStorageManifest{
+	storageMan := contracts.StorageManifest{
 		Name:       conf.Bucket,
 		EdgeAccess: "read_only",
 		Dir:        conf.Prefix,
 	}
 
 	manifestToConfig := &contracts.ManifestV4{}
-	manifestToConfig.EdgeConnectors = append(manifestToConfig.EdgeConnectors, connectorManifest)
-	manifestToConfig.EdgeApplications = append(manifestToConfig.EdgeApplications, appManifest)
-	manifestToConfig.EdgeFunctions = append(manifestToConfig.EdgeFunctions, functionMan)
-	manifestToConfig.EdgeStorage = append(manifestToConfig.EdgeStorage, storageMan)
+	manifestToConfig.Connectors = append(manifestToConfig.Connectors, connectorManifest)
+	manifestToConfig.Applications = append(manifestToConfig.Applications, appManifest)
+	manifestToConfig.Functions = append(manifestToConfig.Functions, functionMan)
+	manifestToConfig.Storage = append(manifestToConfig.Storage, storageMan)
 
 	err := cmd.WriteManifest(manifestToConfig, "")
 	if err != nil {

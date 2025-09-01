@@ -118,7 +118,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		ConnectorIds[connectorConf.Name] = connectorConf.Id
 	}
 
-	for _, funcMan := range manifest.EdgeFunctions {
+	for _, funcMan := range manifest.Functions {
 		code, err := os.ReadFile(path.Join(".edge", funcMan.Path))
 		if err != nil {
 			return fmt.Errorf(msg.ErrorReadCodeFile.Error(), err)
@@ -162,11 +162,11 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
-	for _, funcMan := range manifest.EdgeApplications[0].FunctionsInstances {
-		if funcConf := FunctionIds[funcMan.EdgeFunction]; funcConf.InstanceID > 0 {
+	for _, funcMan := range manifest.Applications[0].FunctionsInstances {
+		if funcConf := FunctionIds[funcMan.Function]; funcConf.InstanceID > 0 {
 			request := apiEdgeApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
-			request.SetEdgeFunction(funcConf.ID)
+			request.SetFunction(funcConf.ID)
 			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
 			idString := strconv.FormatInt(funcConf.InstanceID, 10)
@@ -180,7 +180,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			request.SetActive(true)
 			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
-			request.SetEdgeFunction(funcConf.ID)
+			request.SetFunction(funcConf.ID)
 			appId := strconv.FormatInt(conf.Application.ID, 10)
 			resp, err := client.CreateFuncInstances(ctx, &request, appId)
 			if err != nil {
@@ -211,8 +211,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
-	if len(manifest.EdgeApplications) > 0 {
-		edgeappman := manifest.EdgeApplications[0]
+	if len(manifest.Applications) > 0 {
+		edgeappman := manifest.Applications[0]
 		if conf.Application.ID > 0 {
 			req := transformEdgeApplicationRequestUpdate(edgeappman)
 			req.Id = conf.Application.ID
@@ -273,8 +273,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		}
 
 		connectorConf := []contracts.AzionJsonDataConnectors{}
-		if len(manifest.EdgeConnectors) > 0 {
-			connector := manifest.EdgeConnectors[0]
+		if len(manifest.Connectors) > 0 {
+			connector := manifest.Connectors[0]
 			connName, connType := getConnectorName(connector, conf.Name)
 			if id := ConnectorIds[connName]; id > 0 {
 				request := transformEdgeConnectorRequest(connector)
@@ -286,17 +286,17 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				conn := contracts.AzionJsonDataConnectors{}
 				switch connType {
 				case "http":
-					http := connectorResp.EdgeConnectorHTTP
+					http := connectorResp.ConnectorHTTP
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
 					conn.Address = http.Attributes.Addresses
 				case "ingest":
-					liveIngest := connectorResp.EdgeConnectorLiveIngest
+					liveIngest := connectorResp.ConnectorLiveIngest
 					conn.Id = liveIngest.GetId()
 					conn.Name = liveIngest.GetName()
 					// live ingest does not contain addresses
 				case "storage":
-					storage := connectorResp.EdgeConnectorStorage
+					storage := connectorResp.ConnectorStorage
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 					// storage does not contain addresses
@@ -306,7 +306,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				connectorConf = append(connectorConf, conn)
 			} else {
 				request := apiConnector.CreateRequest{
-					EdgeConnectorPolymorphicRequest: connector,
+					ConnectorPolymorphicRequest: connector,
 				}
 				connectorResp, err := connectorClient.Create(ctx, &request)
 				if err != nil {
@@ -315,15 +315,15 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				conn := contracts.AzionJsonDataConnectors{}
 				switch connType {
 				case "http":
-					http := connectorResp.EdgeConnectorHTTP
+					http := connectorResp.ConnectorHTTP
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
 				case "ingest":
-					liveIngest := connectorResp.EdgeConnectorLiveIngest
+					liveIngest := connectorResp.ConnectorLiveIngest
 					conn.Id = liveIngest.GetId()
 					conn.Name = liveIngest.GetName()
 				case "storage":
-					storage := connectorResp.EdgeConnectorStorage
+					storage := connectorResp.ConnectorStorage
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -401,7 +401,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.EdgeApplicationRequestPhaseRuleEngineRequest = createRequest
+						req.ApplicationRequestPhaseRuleEngineRequest = createRequest
 						req.Behaviors = bh
 						appstring := strconv.FormatInt(conf.Application.ID, 10)
 						created, err := client.CreateRulesEngineRequest(ctx, appstring, rule.Phase, req)
@@ -421,7 +421,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.EdgeApplicationResponsePhaseRuleEngineRequest = createRequest
+						req.ApplicationResponsePhaseRuleEngineRequest = createRequest
 						req.Behaviors = bh
 						appstring := strconv.FormatInt(conf.Application.ID, 10)
 						created, err := client.CreateRulesEngineResponse(ctx, appstring, rule.Phase, req)

@@ -24,7 +24,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (sdk.EdgeConnectorPolymorphic, error)
+	Get      func(context.Context, string) (sdk.ConnectorPolymorphic, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -33,7 +33,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, connectorID string) (sdk.EdgeConnectorPolymorphic, error) {
+		Get: func(ctx context.Context, connectorID string) (sdk.ConnectorPolymorphic, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, connectorID)
 		},

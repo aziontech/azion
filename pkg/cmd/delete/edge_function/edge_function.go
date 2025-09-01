@@ -51,7 +51,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 			var err error
 
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := delete.AskInput(msg.AskEdgeFunctionID)
+				answer, err := delete.AskInput(msg.AskFunctionID)
 				if err != nil {
 					return err
 				}

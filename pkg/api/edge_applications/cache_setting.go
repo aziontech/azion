@@ -41,7 +41,7 @@ func (c *Client) CreateCacheEdgeApplication(
 	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID string,
 ) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Edge Application")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		CreateCacheSetting(ctx, edgeApplicationID).
 		CacheSettingRequest(req.CacheSettingRequest).Execute()
 	if err != nil {
@@ -62,7 +62,7 @@ func (c *Client) ListCacheEdgeApp(
 	ctx context.Context, edgeApplicationID string,
 ) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache Edge Application")
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		ListCacheSettings(ctx, edgeApplicationID).Execute()
 	if err != nil {
 		errBody := ""

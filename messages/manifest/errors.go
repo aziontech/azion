@@ -5,9 +5,9 @@ import "errors"
 var (
 	ErrorUnmarshalAzionJsonFile = errors.New("Failed to parse the given 'azion.json' file. Verify if the file format is JSON or fix its content according to the JSON format specification at https://www.json.org/json-en.html")
 	ErrorCacheNotFound          = errors.New("Could not find this cache setting")
-	ErrorFunctionNotFound       = errors.New("Could not find this edge function")
+	ErrorFunctionNotFound       = errors.New("Could not find this function")
 	ErrorOriginNotFound         = errors.New("Could not find this origin")
-	ErrorConnectorNotFound      = errors.New("Could not find this edge connector")
+	ErrorConnectorNotFound      = errors.New("Could not find this connector")
 	ErrorCreateOrigin           = errors.New("Failed to create the origin")
 	ErrorCreateCache            = errors.New("Failed to create the cache setting")
 	ErrorCreateRule             = errors.New("Failed to create the rule in Rules Engine")

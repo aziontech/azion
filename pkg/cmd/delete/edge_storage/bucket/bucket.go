@@ -126,16 +126,11 @@ func deleteAllObjects(client *api.Client, ctx context.Context, name, continuatio
 	if err != nil {
 		return err
 	}
-	if len(objects) > 0 {
-		for _, o := range objects {
-			for _, obj := range o.Results {
-				err := client.DeleteObject(ctx, name, obj.GetKey())
-				if err != nil {
-					return err
-				}
-			}
+	for _, obj := range objects.Results {
+		err := client.DeleteObject(ctx, name, obj.GetKey())
+		if err != nil {
+			return err
 		}
-		return deleteAllObjects(client, ctx, name, continuationToken)
 	}
 	return nil
 }

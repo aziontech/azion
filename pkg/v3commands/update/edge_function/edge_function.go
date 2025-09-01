@@ -50,7 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			// either function-id or in path should be passed
 			if !cmd.Flags().Changed("function-id") {
-				answers, err := utils.AskInput(msg.UpdateAskEdgeFunctionID)
+				answers, err := utils.AskInput(msg.UpdateAskFunctionID)
 
 				if err != nil {
 					logger.Debug("Error while parsing answer", zap.Error(err))

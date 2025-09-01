@@ -66,12 +66,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var id int64
-			if response.EdgeConnectorHTTP != nil {
-				id = response.EdgeConnectorHTTP.GetId()
-			} else if response.EdgeConnectorLiveIngest != nil {
-				id = response.EdgeConnectorLiveIngest.GetId()
-			} else if response.EdgeConnectorStorage != nil {
-				id = response.EdgeConnectorStorage.GetId()
+			if response.ConnectorHTTP != nil {
+				id = response.ConnectorHTTP.GetId()
+			} else if response.ConnectorLiveIngest != nil {
+				id = response.ConnectorLiveIngest.GetId()
+			} else if response.ConnectorStorage != nil {
+				id = response.ConnectorStorage.GetId()
 			}
 
 			updateOut := output.GeneralOutput{

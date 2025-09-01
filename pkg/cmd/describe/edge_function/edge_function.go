@@ -56,7 +56,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := describe.AskInput(msg.AskEdgeFunctionID)
+				answer, err := describe.AskInput(msg.AskFunctionID)
 				if err != nil {
 					return err
 				}

@@ -11,11 +11,11 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedApplicationList, error) {
 	logger.Debug("List Edge Applications")
 
-	req := c.apiClient.EdgeApplicationsAPI.
-		ListEdgeApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
+	req := c.apiClient.ApplicationsAPI.
+		ListApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {

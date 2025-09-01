@@ -11,8 +11,8 @@ import (
 func (c *Client) Get(ctx context.Context, id int64) (EdgeApplicationResponse, error) {
 	logger.Debug("Get Edge Application")
 
-	res, httpResp, err := c.apiClient.EdgeApplicationsAPI.
-		RetrieveEdgeApplication(ctx, id).Execute()
+	res, httpResp, err := c.apiClient.ApplicationsAPI.
+		RetrieveApplication(ctx, id).Execute()
 
 	if err != nil {
 		errBody := ""

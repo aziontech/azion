@@ -36,14 +36,14 @@ type EdgeApplicationsResponse interface {
 }
 
 type CreateRequest struct {
-	sdk.EdgeApplicationRequest
+	sdk.ApplicationRequest
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest,
 ) (EdgeApplicationsResponse, error) {
 	logger.Debug("Create Edge Application")
-	request := c.apiClient.EdgeApplicationsAPI.
-		CreateEdgeApplication(ctx).EdgeApplicationRequest(req.EdgeApplicationRequest)
+	request := c.apiClient.ApplicationsAPI.
+		CreateApplication(ctx).ApplicationRequest(req.ApplicationRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {

@@ -252,14 +252,14 @@ type Build struct {
 }
 
 type ManifestV4 struct {
-	Build               BuildManifest                             `json:"build"`
-	EdgeStorage         []EdgeStorageManifest                     `json:"edge_storage"`
-	EdgeFunctions       []EdgeFunction                            `json:"edge_functions"`
-	EdgeApplications    []EdgeApplications                        `json:"edge_applications"`
-	EdgeConnectors      []edgesdk.EdgeConnectorPolymorphicRequest `json:"edge_connectors"`
-	Workloads           []WorkloadManifest                        `json:"workloads"`
-	WorkloadDeployments []WorkloadDeployment                      `json:"workload_deployments,omitempty"`
-	Purge               []PurgeManifest                           `json:"purge"`
+	Build               BuildManifest                         `json:"build"`
+	Storage             []StorageManifest                     `json:"storage"`
+	Functions           []Function                            `json:"functions"`
+	Applications        []Applications                        `json:"applications"`
+	Connectors          []edgesdk.ConnectorPolymorphicRequest `json:"connectors"`
+	Workloads           []WorkloadManifest                    `json:"workloads"`
+	WorkloadDeployments []WorkloadDeployment                  `json:"workload_deployments,omitempty"`
+	Purge               []PurgeManifest                       `json:"purge"`
 }
 
 type PurgeManifest struct {
@@ -294,9 +294,9 @@ type WorkloadStrategy struct {
 }
 
 type WorkloadStrategyAttrs struct {
-	EdgeApplication *string `json:"edge_application"`
-	EdgeFirewall    *string `json:"edge_firewall"`
-	CustomPage      *string `json:"custom_page"`
+	Application *string `json:"application"`
+	Firewall    *string `json:"firewall"`
+	CustomPage  *string `json:"custom_page"`
 }
 
 type Purges struct {
@@ -515,14 +515,14 @@ type DevicesCacheSettings struct {
 
 // FunctionInstance represents an edge function instance in the manifest.json file
 type FunctionInstance struct {
-	Name         string                 `json:"name"`
-	EdgeFunction string                 `json:"edge_function"`
-	Active       bool                   `json:"active"`
-	Args         map[string]interface{} `json:"args,omitempty"`
+	Name     string                 `json:"name"`
+	Function string                 `json:"function"`
+	Active   bool                   `json:"active"`
+	Args     map[string]interface{} `json:"args,omitempty"`
 }
 
-// EdgeStorageManifest represents an edge storage entry in the manifest.json file
-type EdgeStorageManifest struct {
+// StorageManifest represents an edge storage entry in the manifest.json file
+type StorageManifest struct {
 	Name       string `json:"name"`
 	EdgeAccess string `json:"edge_access"` // read_write, read_only, etc.
 	Dir        string `json:"dir"`         // Directory path
@@ -537,14 +537,14 @@ type WorkloadHttp struct {
 	QuicPorts  []int64  `json:"quic_ports,omitempty"`
 }
 
-type EdgeApplications struct {
-	Name               string                                 `json:"name"`
-	Modules            *edgesdk.EdgeApplicationModulesRequest `json:"modules,omitempty"`
-	Active             *bool                                  `json:"active,omitempty"`
-	Debug              *bool                                  `json:"debug,omitempty"`
-	Rules              []ManifestRulesEngine                  `json:"rules"`
-	CacheSettings      []ManifestCacheSetting                 `json:"cache_settings"`
-	FunctionsInstances []FunctionInstance                     `json:"functions_instances,omitempty"`
+type Applications struct {
+	Name               string                             `json:"name"`
+	Modules            *edgesdk.ApplicationModulesRequest `json:"modules,omitempty"`
+	Active             *bool                              `json:"active,omitempty"`
+	Debug              *bool                              `json:"debug,omitempty"`
+	Rules              []ManifestRulesEngine              `json:"rules"`
+	CacheSettings      []ManifestCacheSetting             `json:"cache_settings"`
+	FunctionsInstances []FunctionInstance                 `json:"functions_instances,omitempty"`
 }
 
 type StorageBinding struct {
@@ -556,7 +556,7 @@ type FunctionBindings struct {
 	Storage StorageBinding `json:"storage,omitempty"`
 }
 
-type EdgeFunction struct {
+type Function struct {
 	Name                 string                 `json:"name"`
 	Path                 string                 `json:"path"`
 	Runtime              string                 `json:"runtime,omitempty"`               // azion_js, etc.
@@ -569,10 +569,10 @@ type EdgeFunction struct {
 }
 
 type Bindings struct {
-	EdgeStorage EdgeStorage `json:"edge_storage"`
+	Storage Storage `json:"storage"`
 }
 
-type EdgeStorage struct {
+type Storage struct {
 	Bucket string `json:"bucket"`
 	Prefix string `json:"prefix"`
 }

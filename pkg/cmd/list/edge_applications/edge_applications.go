@@ -19,13 +19,13 @@ import (
 
 type ListCmd struct {
 	Io           *iostreams.IOStreams
-	ListEdgeApps func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error)
+	ListEdgeApps func(context.Context, *contracts.ListOptions) (*sdk.PaginatedApplicationList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListEdgeApps: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeApplicationList, error) {
+		ListEdgeApps: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedApplicationList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},

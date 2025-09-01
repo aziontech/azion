@@ -12,7 +12,7 @@ import (
 
 func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) {
 	logger.Debug("Get Edge Function")
-	request := c.apiClient.EdgeFunctionsAPI.RetrieveEdgeFunction(ctx, id)
+	request := c.apiClient.FunctionsAPI.RetrieveFunction(ctx, id)
 
 	res, httpResp, err := request.Execute()
 	if err != nil {
@@ -32,7 +32,7 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) 
 
 func (c *Client) Delete(ctx context.Context, id string) error {
 	logger.Debug("Delete Edge Function")
-	request := c.apiClient.EdgeFunctionsAPI.DestroyEdgeFunction(ctx, id)
+	request := c.apiClient.FunctionsAPI.DestroyFunction(ctx, id)
 
 	_, httpResp, err := request.Execute()
 
@@ -56,7 +56,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 	// Hard-coding javascript for now
 	logger.Debug("Create Edge Function")
 
-	request := c.apiClient.EdgeFunctionsAPI.CreateEdgeFunction(ctx).EdgeFunctionsRequest(req.EdgeFunctionsRequest)
+	request := c.apiClient.FunctionsAPI.CreateFunction(ctx).EdgeFunctionsRequest(req.EdgeFunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeFunctions, error) {
 	logger.Debug("Update Edge Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
-	request := c.apiClient.EdgeFunctionsAPI.PartialUpdateEdgeFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
+	request := c.apiClient.FunctionsAPI.PartialUpdateFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	resp, httpResp, err := c.apiClient.EdgeFunctionsAPI.ListEdgeFunctions(ctx).
+	resp, httpResp, err := c.apiClient.FunctionsAPI.ListFunctions(ctx).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).

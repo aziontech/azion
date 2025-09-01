@@ -115,7 +115,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 		request.SetDebug(debugRules)
 	}
 
-	modules := sdk.EdgeApplicationModulesRequest{}
+	modules := sdk.ApplicationModulesRequest{}
 
 	if !utils.IsEmpty(fields.EdgeCacheEnabled) {
 		edgeCache, err := strconv.ParseBool(fields.EdgeCacheEnabled)
@@ -141,7 +141,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			Enabled: &edgeFunctions,
 		}
 
-		modules.SetEdgeFunctions(eFunction)
+		modules.SetFunctions(eFunction)
 	}
 
 	if !utils.IsEmpty(fields.ApplicationAcceleratorEnabled) {

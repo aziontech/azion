@@ -122,17 +122,15 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 	}
 
 	var prevTimestamp string
-	for _, objects := range resp {
-		for _, object := range objects.Results {
-			parts := strings.Split(object.Key, "/")
-			if len(parts) > 1 {
-				timestamp := parts[0]
-				if timestamp == referenceTimestamp {
-					return prevTimestamp, nil
-				} else {
-					prevTimestamp = timestamp
-					continue
-				}
+	for _, object := range resp.Results {
+		parts := strings.Split(object.Key, "/")
+		if len(parts) > 1 {
+			timestamp := parts[0]
+			if timestamp == referenceTimestamp {
+				return prevTimestamp, nil
+			} else {
+				prevTimestamp = timestamp
+				continue
 			}
 		}
 	}
