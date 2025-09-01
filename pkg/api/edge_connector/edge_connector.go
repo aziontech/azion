@@ -93,7 +93,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error) {
-	logger.Debug("List Edge Connectors")
+	logger.Debug("List Connectors")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -107,7 +107,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while listing the Edge Connectors", zap.Error(err))
+			logger.Debug("Error while listing the Connectors", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

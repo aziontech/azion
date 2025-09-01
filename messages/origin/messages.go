@@ -6,16 +6,16 @@ var (
 
 	// [create]
 	CreateShortDescription = "Creates a new Origin"
-	CreateLongDescription  = "Creates an Origin based on given attributes to be used in Edge Applications"
+	CreateLongDescription  = "Creates an Origin based on given attributes to be used in Applications"
 	CreateOutputSuccess    = "Created Origin with key %s"
 	CreateFlagHelp         = "Displays more information about the create Origin command"
 
 	// [delete]
 	DeleteShortDescription = "Deletes an Origin"
-	DeleteLongDescription  = "Deletes an Origin from the Edge Applications library based on its given ID"
+	DeleteLongDescription  = "Deletes an Origin from the Applications library based on its given ID"
 	DeleteOutputSuccess    = "Origin %s was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete Origin command"
-	DeleteAskInputApp      = "Enter the ID of the Edge Application linked to this Origin:"
+	DeleteAskInputApp      = "Enter the ID of the Application linked to this Origin:"
 	DeleteAskInputOri      = "Enter the key of the Origin you wish to delete:"
 
 	// [describe]
@@ -29,17 +29,17 @@ var (
 	ListShortDescription      = "Displays your origins"
 	ListLongDescription       = "Displays all origins related to your applications"
 	ListHelpFlag              = "Displays more information about the list Origin command"
-	ListAskInputApplicationId = "Enter the ID of the Edge Application the Origins are linked to:"
+	ListAskInputApplicationId = "Enter the ID of the Application the Origins are linked to:"
 
 	// [update]
 	UpdateShortDescription      = "Updates an Origin"
 	UpdateLongDescription       = "Updates an Origin based on its key and given attributes"
-	UpdateFlagEdgeApplicationId = "Unique identifier for an Edge Application"
+	UpdateFlagEdgeApplicationId = "Unique identifier for an Application"
 	UpdateFlagHelp              = "Displays more information about the update Origin command"
 	UpdateOutputSuccess         = "Updated Origin with key %s"
 
 	// [ ask ]
-	AskAppID      = "Enter the ID of the Edge Application this Origin is linked to:"
+	AskAppID      = "Enter the ID of the Application this Origin is linked to:"
 	AskName       = "Enter the new Origin's Name:"
 	AskBucket     = "Enter the new Origin's Bucket:"
 	AskPrefix     = "Enter the new Origin's Prefix, or leave it blank if you are not using any prefix:"
@@ -49,7 +49,7 @@ var (
 	AskOriginType = "Enter the Origin's type:"
 
 	// [ flags ]
-	FlagEdgeApplicationID    = "Unique identifier for an Edge Application"
+	FlagEdgeApplicationID    = "Unique identifier for an Application"
 	FlagOriginKey            = "The Origin's key unique identifier"
 	FlagName                 = "The Origin's name"
 	FlagOriginType           = `Identifies the source of a record. I.e. "single_origin"`

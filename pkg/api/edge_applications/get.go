@@ -9,7 +9,7 @@ import (
 )
 
 func (c *Client) Get(ctx context.Context, id int64) (EdgeApplicationResponse, error) {
-	logger.Debug("Get Edge Application")
+	logger.Debug("Get Application")
 
 	res, httpResp, err := c.apiClient.ApplicationsAPI.
 		RetrieveApplication(ctx, id).Execute()
@@ -17,7 +17,7 @@ func (c *Client) Get(ctx context.Context, id int64) (EdgeApplicationResponse, er
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while getting an Edge Application", zap.Error(err))
+			logger.Debug("Error while getting an Application", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

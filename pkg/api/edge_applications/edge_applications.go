@@ -107,14 +107,14 @@ type DeviceGroupsResponse interface {
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicationsResponse, error) {
-	logger.Debug("Update Edge Application")
+	logger.Debug("Update Application")
 	request := c.apiClient.ApplicationsAPI.PartialUpdateApplication(ctx, req.Id).PatchedApplicationRequest(req.PatchedApplicationRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Application", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating an Application", zap.Error(err), zap.Any("ID", req.Id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -134,7 +134,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Function instance", zap.Error(err), zap.Any("ID", instanceID), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating an Function instance", zap.Error(err), zap.Any("ID", instanceID), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.ApplicationFunctionInstance{}, err
@@ -147,14 +147,14 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 }
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
-	logger.Debug("Delete Edge Application")
+	logger.Debug("Delete Application")
 	req := c.apiClient.ApplicationsAPI.DestroyApplication(ctx, id)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Application", zap.Error(err), zap.Any("ID", id))
+			logger.Debug("Error while deleting an Application", zap.Error(err), zap.Any("ID", id))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -350,7 +350,7 @@ func (c *Client) UpdateRulesEngineResponse(ctx context.Context, req *UpdateRules
 }
 
 func (c *Client) Clone(ctx context.Context, name, id string) error {
-	logger.Debug("Cloning Edge Application")
+	logger.Debug("Cloning Application")
 	req := sdk.CloneApplicationRequest{
 		Name: name,
 	}
@@ -359,7 +359,7 @@ func (c *Client) Clone(ctx context.Context, name, id string) error {
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while cloning an Edge Application", zap.Error(err), zap.Any("Name", req.Name))
+			logger.Debug("Error while cloning an Application", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -411,7 +411,7 @@ func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationI
 }
 
 func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
-	logger.Debug("List Edge Function Instances")
+	logger.Debug("List Function Instances")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -426,7 +426,7 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while listing Edge Function instances", zap.Error(err))
+			logger.Debug("Error while listing Function instances", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
@@ -438,14 +438,14 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 }
 
 func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
-	logger.Debug("Delete Edge Function Instance")
+	logger.Debug("Delete Function Instance")
 	req := c.apiClient.ApplicationsFunctionAPI.DestroyApplicationFunctionInstance(ctx, appID, funcID)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Function instance", zap.Error(err))
+			logger.Debug("Error while deleting a Function instance", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -458,13 +458,13 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 }
 
 func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID string) (sdk.ApplicationFunctionInstance, error) {
-	logger.Debug("Create Edge Function Instance")
+	logger.Debug("Create Function Instance")
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.CreateApplicationFunctionInstance(ctx, applicationID).
 		ApplicationFunctionInstanceRequest(req.ApplicationFunctionInstanceRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function instance", zap.Error(err), zap.Any("Name", req.Name))
+			logger.Debug("Error while creating a Function instance", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.ApplicationFunctionInstance{}, err
@@ -476,12 +476,12 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceReq
 }
 
 func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID string) (FunctionsInstancesResponse, error) {
-	logger.Debug("Get Edge Function Instance")
+	logger.Debug("Get Function Instance")
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.RetrieveApplicationFunctionInstance(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while getting an Edge Function instance", zap.Error(err))
+			logger.Debug("Error while getting a Function instance", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

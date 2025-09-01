@@ -18,5 +18,5 @@ var (
 	ErrorReadCodeFile           = errors.New("Failed to read target code file: %w")
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine")
 	ErrorInvalidPhase           = errors.New("Invalid phase. Please use 'request' or 'response'")
-	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Edge Function to your azion.config file")
+	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Function to your azion.config file")
 )

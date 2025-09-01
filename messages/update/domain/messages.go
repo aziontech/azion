@@ -6,7 +6,7 @@ var (
 	LongDescription          = "Updates a Domain's name and other attributes based on a given ID"
 	FlagDomainID             = "The '--domain-id'"
 	FlagDigitalCertificateID = "Unique identifier of the Digital Certificate; this value is either an integer or null"
-	FlagApplicationID        = "Unique identifier for an Edge Application used by this Domain."
+	FlagApplicationID        = "Unique identifier for an Application used by this Domain."
 	FlagName                 = "The Domain's name"
 	FlagCnames               = "CNAMEs of your Domain"
 	FlagCnameAccessOnly      = "Whether the Domain should be Accessed only through CNAMEs or not"

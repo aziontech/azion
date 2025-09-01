@@ -12,7 +12,7 @@ import (
 )
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedApplicationList, error) {
-	logger.Debug("List Edge Applications")
+	logger.Debug("List Applications")
 
 	req := c.apiClient.ApplicationsAPI.
 		ListApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
@@ -21,7 +21,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while listing Edge Applications", zap.Error(err))
+			logger.Debug("Error while listing Applications", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

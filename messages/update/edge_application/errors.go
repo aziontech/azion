@@ -3,7 +3,7 @@ package edgeapplication
 import "errors"
 
 var (
-	ErrorUpdateApplication           = errors.New("Failed to update the Edge Application: %s. Check your settings and try again. If the error persists, contact Azion support")
+	ErrorUpdateApplication           = errors.New("Failed to update the Application: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorApplicationAccelerationFlag = errors.New("Invalid --application-acceleration flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update edge-application  --help' to display more information and try again")
 	ErrorCachingFlag                 = errors.New("Invalid --caching flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update edge-application --help' to display more information and try again")
 	ErrorDeviceDetectionFlag         = errors.New("Invalid --device-detection flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update edge-application --help' to display more information and try again")

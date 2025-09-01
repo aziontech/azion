@@ -36,7 +36,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-application",
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,

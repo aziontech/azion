@@ -3,8 +3,8 @@ package device_groups
 var (
 	// [ device groups ]
 	DeviceGroupsUsage            = "device_groups"
-	DeviceGroupsShortDescription = "Device groups is an Edge Application capability that allows you to identify the devices sending requests to your application."
-	DeviceGroupsLongDescription  = "Device groups is an Edge Application capability that allows you to identify the devices sending requests to your application and categorize them into groups."
+	DeviceGroupsShortDescription = "Device groups is an Application capability that allows you to identify the devices sending requests to your application."
+	DeviceGroupsLongDescription  = "Device groups is an Application capability that allows you to identify the devices sending requests to your application and categorize them into groups."
 	DeviceGroupsFlagHelp         = "Displays more information about the Device Groups command"
 
 	// [ list ]

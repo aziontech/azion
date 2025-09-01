@@ -41,7 +41,7 @@ type CreateRequest struct {
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest,
 ) (EdgeApplicationsResponse, error) {
-	logger.Debug("Create Edge Application")
+	logger.Debug("Create Application")
 	request := c.apiClient.ApplicationsAPI.
 		CreateApplication(ctx).ApplicationRequest(req.ApplicationRequest)
 
@@ -49,7 +49,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest,
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Application", zap.Error(err), zap.Any("Name", req.Name))
+			logger.Debug("Error while creating an Application", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

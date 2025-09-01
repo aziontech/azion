@@ -34,7 +34,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-function",
 		Short:         msg.UpdateShortDescription,
 		Long:          msg.UpdateLongDescription,
 		SilenceUsage:  true,

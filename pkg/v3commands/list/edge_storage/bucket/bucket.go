@@ -34,7 +34,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE:          bucket.RunE,
-		Example:       heredoc.Doc(msg.EXAMPLE_LIST_BUCKET),
+		Example:       heredoc.Doc("$ azion list edge-storage bucket"),
 	}
 
 	bucket.AddFlags(cmd.Flags())

@@ -2,8 +2,8 @@ package dryrun
 
 var (
 	SkipManifest           = "This project has not been built yet. Skipping the simulation for resources found in your azion.config file\n"
-	CreateEdgeApp          = "Creating Edge Application named '%s'\n"
-	UpdateEdgeApp          = "Updating Edge Application with ID '%d', named '%s'\n"
+	CreateEdgeApp          = "Creating Application named '%s'\n"
+	UpdateEdgeApp          = "Updating Application with ID '%d', named '%s'\n"
 	CreateOrigin           = "Creating Origin named '%s'\n"
 	UpdateOrigin           = "Updating Origin with ID '%d' and Key '%s', named '%s'\n"
 	CreateCacheSetting     = "Creating Cache Setting named '%s'\n"
@@ -22,6 +22,6 @@ var (
 	AskCreateCacheSettings = `Cache Settings specifications:
   - Browser Cache Settings: Override Cache Settings
   - Maximum TTL for Browser Cache Settings (in seconds): 7200
-  - Edge Application Cache Settings: Override Cache Settings
-  - Maximum TTL for Edge Application Cache Settings (in seconds): 7200`
+  - Application Cache Settings: Override Cache Settings
+  - Maximum TTL for Application Cache Settings (in seconds): 7200`
 )

@@ -14,7 +14,7 @@ var (
 	FlagDebugRules              = "Allows you to check whether rules created using Rules Engine for Application have been successfully executed in your application"
 	FlagApplicationAcceleration = "Whether the Application has Application Acceleration active or not"
 	FlagCaching                 = "Whether the Application has Caching active or not"
-	FlagEdgeFunctions           = "Whether the Application has Edge Functions active or not"
+	FlagEdgeFunctions           = "Whether the Application has Functions active or not"
 	FlagImageOptimization       = "Whether the Application has Image Optimization active or not"
 	FlagTieredCaching           = "Whether the Application has Tiered Caching active or not"
 

@@ -9,7 +9,7 @@ var (
 
 	//create cmd
 	CreateShortDescription = "Creates a new serverless Connector"
-	CreateLongDescription  = "Creates a Connector based on given attributes to create a serverless code for Edge Applications"
+	CreateLongDescription  = "Creates a Connector based on given attributes to create a serverless code for Applications"
 	CreateOutputSuccess    = "Created Connector with ID %d"
 
 	//delete cmd

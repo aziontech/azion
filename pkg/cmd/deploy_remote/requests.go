@@ -117,7 +117,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 	} else {
 		err := cmd.updateApplication(client, ctx, conf, msgs)
 		if err != nil {
-			logger.Debug("Error while updating Edge Application", zap.Error(err))
+			logger.Debug("Error while updating Application", zap.Error(err))
 			return err
 		}
 	}
@@ -236,7 +236,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(funcToCreate.File)
 	if err != nil {
-		logger.Debug("Error while reading Edge Function file <"+funcToCreate.File+">", zap.Error(err))
+		logger.Debug("Error while reading Function file <"+funcToCreate.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -267,7 +267,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 	reqCre.SetDefaultArgs(args)
 	response, err := client.Create(ctx, &reqCre)
 	if err != nil {
-		logger.Debug("Error while creating Edge Function", zap.Error(err), zap.Any("Name", reqCre.Name))
+		logger.Debug("Error while creating Function", zap.Error(err), zap.Any("Name", reqCre.Name))
 		return 0, err
 	}
 	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId())
@@ -281,7 +281,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 
 	code, err := cmd.FileReader(funcToUpdate.File)
 	if err != nil {
-		logger.Debug("Error while reading Edge Function file <"+funcToUpdate.File+">", zap.Error(err))
+		logger.Debug("Error while reading Function file <"+funcToUpdate.File+">", zap.Error(err))
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
@@ -313,7 +313,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 	funcId := strconv.FormatInt(funcToUpdate.ID, 10)
 	response, err := client.Update(ctx, &reqUpd, funcId)
 	if err != nil {
-		logger.Debug("Error while updating Edge Function", zap.Error(err), zap.Any("Name", reqUpd.Name))
+		logger.Debug("Error while updating Function", zap.Error(err), zap.Any("Name", reqUpd.Name))
 		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
 	}
 

@@ -4,12 +4,12 @@ var (
 	// general
 	Usage            = "function"
 	FileWritten      = "File successfully written to: %s\n"
-	ShortDescription = "Manages your Azion account's Edge Functions"
-	LongDescription  = "Manages serverless functions on the Edge Functions library"
+	ShortDescription = "Manages your Azion account's Functions"
+	LongDescription  = "Manages serverless functions on the Functions library"
 
 	//create cmd
 	CreateShortDescription = "Creates a new serverless function"
-	CreateLongDescription  = "Creates a function based on given attributes to create a serverless code for Edge Applications"
+	CreateLongDescription  = "Creates a function based on given attributes to create a serverless code for Applications"
 	CreateOutputSuccess    = "Created function with ID %d"
 
 	//delete cmd

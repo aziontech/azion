@@ -8,7 +8,7 @@ var (
 	FlagFormat       = "Changes the output format passing the json value to the flag"
 	HelpFlag         = "Displays more information about the describe command"
 
-	FlagId                = "Unique identifier of the Edge Application"
+	FlagId                = "Unique identifier of the Application"
 	FileWritten           = "File successfully written to: %s\n"
-	AskInputApplicationID = "Enter the Edge Application's ID:"
+	AskInputApplicationID = "Enter the Application's ID:"
 )

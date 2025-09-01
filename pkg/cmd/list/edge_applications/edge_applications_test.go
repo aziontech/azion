@@ -55,7 +55,7 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			err: errors.New("Failed to list your Edge Applications: invalid character '\\'' looking for beginning of object key string. Check your settings and try again. If the error persists, contact Azion support."),
+			err: errors.New("Failed to list your Applications: invalid character '\\'' looking for beginning of object key string. Check your settings and try again. If the error persists, contact Azion support."),
 		},
 	}
 	for _, tt := range tests {

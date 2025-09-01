@@ -39,7 +39,7 @@ func TestListOutput_Format(t *testing.T) {
 				Lines: [][]string{
 					{
 						"1665081615",
-						"Update Edge Application",
+						"Update Application",
 						"true",
 					},
 					{
@@ -49,7 +49,7 @@ func TestListOutput_Format(t *testing.T) {
 					},
 					{
 						"1694024475",
-						"New Edge Application",
+						"New Application",
 						"true",
 					},
 				},
@@ -72,7 +72,7 @@ func TestListOutput_Format(t *testing.T) {
 				Lines: [][]string{
 					{
 						"1665081615",
-						"Update Edge Application",
+						"Update Application",
 						"true",
 					},
 					{
@@ -82,7 +82,7 @@ func TestListOutput_Format(t *testing.T) {
 					},
 					{
 						"1694024475",
-						"New Edge Application",
+						"New Application",
 						"true",
 					},
 				},
@@ -138,7 +138,7 @@ func TestListOutput_Output(t *testing.T) {
 				Lines: [][]string{
 					{
 						"1665081615",
-						"Update Edge Application",
+						"Update Application",
 						"true",
 					},
 					{
@@ -148,7 +148,7 @@ func TestListOutput_Output(t *testing.T) {
 					},
 					{
 						"1694024475",
-						"New Edge Application",
+						"New Application",
 						"true",
 					},
 				},

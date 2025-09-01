@@ -8,35 +8,35 @@ var (
 	CacheSettingsLongDescription  = "Cache Settings allows you to check, remove or update existing cache configurations and create new ones"
 	CreateFlagHelp                = "Displays more information about the create cache-setting command"
 	CacheSettingsId               = "Unique identifier for a Cache Settings configuration"
-	ListAskInputApplicationID     = "Enter the ID of the Edge Application the Cache Setting is linked to:"
-	CreateAskInputApplicationID   = "Enter the ID of the Edge Application the Cache Setting will be linked to:"
+	ListAskInputApplicationID     = "Enter the ID of the Application the Cache Setting is linked to:"
+	CreateAskInputApplicationID   = "Enter the ID of the Application the Cache Setting will be linked to:"
 	UpdateAskInputCacheSettingID  = "Enter the ID of the Cache Setting you wish to update:"
 	DeleteAskInputCacheID         = "Enter the ID of the Cache Setting you wish to delete:"
 	DescribeAskInputCacheID       = "Enter the ID of the Cache Setting you wish to describe:"
-	DescibeAskInputApplicationID  = "Enter the ID of the Edge Application the Cache Settings is linked to:"
+	DescibeAskInputApplicationID  = "Enter the ID of the Application the Cache Settings is linked to:"
 
 	// [ list ]
 	ListShortDescription = "Displays your Cache Settings configurations"
-	ListLongDescription  = "Displays your Cache Settings configurations to be used with an Edge Application"
+	ListLongDescription  = "Displays your Cache Settings configurations to be used with an Application"
 	ListHelpFlag         = "Displays more information about the list cache-setting command"
 
 	// [ create ]
 	CreateShortDescription = "Creates a new Cache Settings configuration"
-	CreateLongDescription  = "Creates a Cache Settings configuration based on given attributes to be used in Edge Applications"
+	CreateLongDescription  = "Creates a Cache Settings configuration based on given attributes to be used in Applications"
 	CreateOutputSuccess    = "Created Cache Settings configuration with ID %d"
 	CreateAskInputName     = "Enter the new Cache Setting's name:"
 
 	// [ update ]
 	UpdateUsage            = "update [flags]"
 	UpdateShortDescription = "Updates a Cache Settings configuration"
-	UpdateLongDescription  = "Updates a Cache Settings configuration based on given attributes to be used in Edge Applications"
+	UpdateLongDescription  = "Updates a Cache Settings configuration based on given attributes to be used in Applications"
 	UpdateOutputSuccess    = "Updated a Cache Settings configuration with ID %d"
 	UpdateFlagHelp         = "Displays more information about the update cache-setting command"
 
 	// [ describe ]
 	DescribeShortDescription    = "Returns information about a specific Cache Settings configuration"
 	DescribeLongDescription     = "Returns information about a specific Cache Settings configuration, based on a given ID, in details"
-	DescribeFlagApplicationID   = "Unique identifier for an Edge Application. The '--application-id' flag is required"
+	DescribeFlagApplicationID   = "Unique identifier for an Application. The '--application-id' flag is required"
 	DescribeFlagCacheSettingsID = "Unique identifier for a Cache Settings configuration. The '--cache-settings-id' flag is required"
 	DescribeFlagOut             = "Exports the output to the given <file_path/file_name.ext>"
 	DescribeFlagFormat          = "Changes the output format passing the json value to the flag"
@@ -44,14 +44,14 @@ var (
 
 	// [ delete ]
 	DeleteShortDescription    = "Deletes a Cache Settings configuration"
-	DeleteLongDescription     = "Deletes a Caches Settings configuration from the Edge Applications library based on its given ID"
+	DeleteLongDescription     = "Deletes a Caches Settings configuration from the Application library based on its given ID"
 	DeleteOutputSuccess       = "Caches settings configuration %d was successfully deleted"
-	DeleteFlagApplicationID   = "Unique identifier for an Edge Application"
+	DeleteFlagApplicationID   = "Unique identifier for an Application"
 	DeleteFlagCacheSettingsID = "The Cache Settings configuration key unique identifier"
 	DeleteHelpFlag            = "Displays more information about the delete cache-setting command"
 
 	// [ flags ]
-	FlagEdgeApplicationID          = "Unique identifier for an Edge Application"
+	FlagApplicationID              = "Unique identifier for an Application"
 	FlagCacheSettingID             = "Unique identifier for an Cache Setting"
 	FlagName                       = "The Cache Settings configuration name"
 	FlagFile                       = "Path to a JSON file containing the attributes of the Cache Settings configuration that will be created; you can use - for reading from stdin"
@@ -69,9 +69,9 @@ var (
 	FlagSliceConfigurationRange    = "Informs slice configuration range"
 	FlagAdaptiveDeliveryAction     = "Informs the Cache Settings configuration adaptive delivery action."
 	FlagBrowserCacheSettings       = "Configures the amount of time that the content is cached in the web browser"
-	FlagCdnCacheSettingsEnabled    = "Configures the amount of time Azion's Edge Applications take to cache the content. It can either 'honor' Origin Cache Headers or 'override' Cache Settings"
+	FlagCdnCacheSettingsEnabled    = "Configures the amount of time Azion's Applications take to cache the content. It can either 'honor' Origin Cache Headers or 'override' Cache Settings"
 	FlagSliceL2CachingEnabled      = "Whether slice L2 caching is active or not"
 	FlagL2CachingEnabled           = "Whether L2 caching is active or not"
-	FlagCdnCacheSettingsMaxTtl     = "Informs Edge Application Cache Settings configuration maximum TTL"
+	FlagCdnCacheSettingsMaxTtl     = "Informs Application Cache Settings configuration maximum TTL"
 	FlagBrowserCacheSettingsMaxTtl = "Informs Browser Cache Settings configuration maximum TTL"
 )

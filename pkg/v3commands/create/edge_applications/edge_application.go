@@ -24,7 +24,7 @@ const example = `
         $ azion create edge-application --file create.json
         $ json example to be used with '--file flag' "create.json": 
         {
-            "name": "New Edge Application",
+            "name": "New Application",
             "delivery_protocol": "http",
             "origin_type": "single_origin",
             "address": "www.new.api",

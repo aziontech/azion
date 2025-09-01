@@ -301,7 +301,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Name = storage.GetName()
 					// storage does not contain addresses
 				default:
-					return errors.New("Failed to get Edge Connector type")
+					return errors.New("Failed to get Connector type")
 				}
 				connectorConf = append(connectorConf, conn)
 			} else {
@@ -327,7 +327,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
-					return errors.New("Failed to get Edge Connector type")
+					return errors.New("Failed to get Connector type")
 				}
 				ConnectorIds[conn.Name] = conn.Id
 				connectorConf = append(connectorConf, conn)

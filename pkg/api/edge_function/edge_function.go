@@ -11,14 +11,14 @@ import (
 )
 
 func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) {
-	logger.Debug("Get Edge Function")
+	logger.Debug("Get Function")
 	request := c.apiClient.FunctionsAPI.RetrieveFunction(ctx, id)
 
 	res, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while getting an Edge Function", zap.Error(err))
+			logger.Debug("Error while getting a Function", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeFunctions{}, err
@@ -31,7 +31,7 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) 
 }
 
 func (c *Client) Delete(ctx context.Context, id string) error {
-	logger.Debug("Delete Edge Function")
+	logger.Debug("Delete Function")
 	request := c.apiClient.FunctionsAPI.DestroyFunction(ctx, id)
 
 	_, httpResp, err := request.Execute()
@@ -39,7 +39,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Function", zap.Error(err))
+			logger.Debug("Error while deleting a Function", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -54,7 +54,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFunctions, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
-	logger.Debug("Create Edge Function")
+	logger.Debug("Create Function")
 
 	request := c.apiClient.FunctionsAPI.CreateFunction(ctx).EdgeFunctionsRequest(req.EdgeFunctionsRequest)
 
@@ -62,7 +62,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Function", zap.Error(err), zap.Any("Name", req.Name))
+			logger.Debug("Error while creating a Function", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeFunctions{}, err
@@ -75,14 +75,14 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeFunctions, error) {
-	logger.Debug("Update Edge Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
+	logger.Debug("Update Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
 	request := c.apiClient.FunctionsAPI.PartialUpdateFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Function", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating a Function", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.EdgeFunctions{}, err
@@ -95,7 +95,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk
 }
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error) {
-	logger.Debug("List Edge Functions")
+	logger.Debug("List Functions")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
@@ -109,7 +109,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while listing the Edge Functions", zap.Error(err))
+			logger.Debug("Error while listing the Functions", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err
