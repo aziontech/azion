@@ -2,10 +2,10 @@ package init
 
 const (
 	USAGE               = "init"
-	SHORT_DESCRIPTION   = "Initializes an Edge Application from a starter template"
-	LONG_DESCRIPTION    = "Defines primary parameters based on a given name and application preset to start an Edge Application"
+	SHORT_DESCRIPTION   = "Initializes an Application from a starter template"
+	LONG_DESCRIPTION    = "Defines primary parameters based on a given name and application preset to start an Application"
 	EXAMPLE             = "$ azion init\n$ azion init --help\n$ azion init --name testproject"
-	FLAG_NAME           = "The Edge Application's name"
+	FLAG_NAME           = "The Application's name"
 	FLAG_PRESET         = "The Preset's name"
 	FLAG_TEMPLATE       = "The Template's name"
 	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"

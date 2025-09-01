@@ -1,6 +1,7 @@
 package edge_storage
 
 import (
+	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_storage"
@@ -11,12 +12,15 @@ import (
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:           msg.USAGE,
+		Use:           "edge-storage",
 		Short:         msg.SHORT_DESCRIPTION_LIST,
 		Long:          msg.LONG_DESCRIPTION_LIST,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       msg.EXAMPLE_LIST,
+		Example: heredoc.Doc(`
+			$ azion list edge-storage bucket
+			$ azion list edge-storage object
+		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},

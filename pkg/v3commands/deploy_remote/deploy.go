@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/v3commands/build"
+	delete "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
 	manifestInt "github.com/aziontech/azion-cli/pkg/v3manifest"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -162,36 +163,19 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.uploadFiles(f, conf, &msgs)
+	if !conf.NotFirstRun {
+		singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
 		if err != nil {
 			return err
 		}
-	}
 
-	conf.Function.File = ".edge/worker.js"
-	err = cmd.doFunction(clients, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	if !conf.NotFirstRun {
 		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
 		if err != nil {
 			logger.Debug("Error while getting default rules engine", zap.Error(err))
+			errCascade := callDeleteCascade(f)
+			if errCascade != nil {
+				return errCascade
+			}
 			return err
 		}
 		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
@@ -216,20 +200,49 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
 		if err != nil {
 			logger.Debug("Error while updating default rules engine", zap.Error(err))
+			errCascade := callDeleteCascade(f)
+			if errCascade != nil {
+				return errCascade
+			}
 			return err
 		}
+
+		if len(conf.RulesEngine.Rules) == 0 {
+			err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
+			if err != nil {
+				errCascade := callDeleteCascade(f)
+				if errCascade != nil {
+					return errCascade
+				}
+				return err
+			}
+		}
+	}
+
+	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
+	if err != nil {
+		return err
+	}
+
+	// Check if directory exists; if not, we skip uploading static files
+	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
+		logger.Debug(msg.SkipUpload)
+	} else {
+		err = cmd.uploadFiles(f, conf, &msgs)
+		if err != nil {
+			return err
+		}
+	}
+
+	conf.Function.File = ".edge/worker.js"
+	err = cmd.doFunction(clients, ctx, conf, &msgs)
+	if err != nil {
+		return err
 	}
 
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
-	}
-
-	if len(conf.RulesEngine.Rules) == 0 {
-		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
-		if err != nil {
-			return err
-		}
 	}
 
 	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
@@ -263,4 +276,21 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	return output.Print(&outSlice)
+}
+
+func callDeleteCascade(f *cmdutil.Factory) error {
+	del := delete.NewDeleteCmd(f)
+	del.Io.In = f.IOStreams.In
+	del.Io.Out = f.IOStreams.Out
+	del.Io.Err = f.IOStreams.Err
+	del.Io = f.IOStreams
+
+	cmd := delete.NewCobraCmd(del)
+
+	cmd.SetArgs([]string{"--cascade"})
+	_, err := cmd.ExecuteC()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -28,7 +28,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 		Long:          msg.LONG_DESCRIPTION_CREATE_BUCKET,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Example:       heredoc.Doc(msg.EXAMPLE_UPDATE_BUCKET),
+		Example:       heredoc.Doc(`$ azion update edge-storage bucket --bucket-id 1234 --name 'Hello'`),
 		RunE:          bucket.runE,
 	}
 	bucket.addFlags(cmd.Flags())

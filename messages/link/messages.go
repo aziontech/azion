@@ -10,10 +10,10 @@ var (
 	//link cmd
 	EdgeApplicationsLinkUsage             = "link [flags]"
 	EdgeApplicationsLinkShortDescription  = "Creates configuration used to build and deploy applications on Azion"
-	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project to an Azion Edge Application"
+	EdgeApplicationsLinkLongDescription   = "Defines primary parameters based on a given name and application preset to link a Project to an Azion Application"
 	EdgeApplicationsLinkRunningCmd        = "Running link step command:\n\n"
-	EdgeApplicationsLinkFlagName          = "The Edge Application's name"
-	EdgeApplicationsLinkFlagTemplate      = "The Edge Application's template"
+	EdgeApplicationsLinkFlagName          = "The Application's name"
+	EdgeApplicationsLinkFlagTemplate      = "The Application's template"
 	WebAppLinkCmdSuccess                  = "Project successfully configured\n"
 	LinkGettingTemplates                  = "Getting templates available\n"
 	LinkProjectQuestion                   = "(Hit enter to accept the suggested name in parenthesis) Your application's name: "
@@ -36,7 +36,7 @@ var (
 )
 
 const (
-	FLAG_REMOTE  = "Clones a remote repository to be linked to an Azion Edge Application"
+	FLAG_REMOTE  = "Clones a remote repository to be linked to an Azion Application"
 	FLAGPATHCONF = "Relative path to where your custom azion.json and args.json files are stored"
 	ASKPREBUILD  = "Do you allow Azion to build your project in order to generate configuration files? (Y/n)"
 	BUILDLATER   = "Please, remember to run azion build --preset [preset-name], in order to generate the necessary configuration files\n"

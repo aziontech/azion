@@ -17,13 +17,13 @@ import (
 
 type ListCmd struct {
 	Io             *iostreams.IOStreams
-	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error)
+	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error) {
+		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -39,11 +39,11 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion list edge-connector --details
-			$ azion list edge-connector --order_by "id"
-			$ azion list edge-connector --page 1
-			$ azion list edge-connector --page_size 5
-			$ azion list edge-connector --sort "asc"
+			$ azion list connector --details
+			$ azion list connector --order_by "id"
+			$ azion list connector --page 1
+			$ azion list connector --page_size 5
+			$ azion list connector --sort "asc"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {
@@ -79,8 +79,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 	}
 	for _, v := range functions.Results {
 		var ln []string
-		if v.EdgeConnectorHTTP != nil {
-			vObj := v.EdgeConnectorHTTP
+		if v.ConnectorHTTP != nil {
+			vObj := v.ConnectorHTTP
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),
@@ -99,8 +99,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			}
 			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.EdgeConnectorLiveIngest != nil {
-			vObj := v.EdgeConnectorLiveIngest
+		} else if v.ConnectorLiveIngest != nil {
+			vObj := v.ConnectorLiveIngest
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),
@@ -119,8 +119,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			}
 			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.EdgeConnectorStorage != nil {
-			vObj := v.EdgeConnectorStorage
+		} else if v.ConnectorStorage != nil {
+			vObj := v.ConnectorStorage
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),

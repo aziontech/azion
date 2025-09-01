@@ -3,16 +3,16 @@ package device_groups
 var (
 	// [ device groups ]
 	DeviceGroupsUsage            = "device_groups"
-	DeviceGroupsShortDescription = "Device groups is an Edge Application capability that allows you to identify the devices sending requests to your application."
-	DeviceGroupsLongDescription  = "Device groups is an Edge Application capability that allows you to identify the devices sending requests to your application and categorize them into groups."
+	DeviceGroupsShortDescription = "Device groups is an Application capability that allows you to identify the devices sending requests to your application."
+	DeviceGroupsLongDescription  = "Device groups is an Application capability that allows you to identify the devices sending requests to your application and categorize them into groups."
 	DeviceGroupsFlagHelp         = "Displays more information about the Device Groups command"
 
 	// [ list ]
 	DeviceGroupsListUsage                 = "list [flags]"
 	DeviceGroupsListShortDescription      = "Displays your device groups"
-	DeviceGroupsListLongDescription       = "Displays all device groups related to a specific Edge Application"
+	DeviceGroupsListLongDescription       = "Displays all device groups related to a specific Application"
 	DeviceGroupsListHelpFlag              = "Displays more information about the list subcommand"
-	DeviceGroupsListFlagEdgeApplicationID = "Unique identifier for an Edge Application."
+	DeviceGroupsListFlagEdgeApplicationID = "Unique identifier for an Application."
 
 	// [ delete ]
 	DeviceGroupsDeleteUsage            = "delete [flags]"
@@ -33,7 +33,7 @@ var (
 	//update command
 	DeviceGroupsUpdateUsage            = "update [flags]"
 	DeviceGroupsUpdateShortDescription = "Updates a device group"
-	DeviceGroupsUpdateLongDescription  = "Updates a device group based on given attributes to be used in Edge Applications"
+	DeviceGroupsUpdateLongDescription  = "Updates a device group based on given attributes to be used in Applications"
 	DeviceGroupsUpdateFlagName         = "The device group name"
 	DeviceGroupsUpdateFlagUserAgent    = "The device group flag user agent"
 	DeviceGroupsUpdateFlagIn           = "Path to a JSON file containing the attributes of the  device group that will be created; you can use - for reading from stdin"
@@ -42,14 +42,14 @@ var (
 	// [ create ]
 	DeviceGroupsCreateUsage                 = "create [flags]"
 	DeviceGroupsCreateShortDescription      = "Creates a new device group"
-	DeviceGroupsCreateLongDescription       = "Creates a device group based on given attributes to be used in an Edge Application"
-	DeviceGroupsCreateFlagEdgeApplicationId = "Unique identifier for an Edge Application"
+	DeviceGroupsCreateLongDescription       = "Creates a device group based on given attributes to be used in an Application"
+	DeviceGroupsCreateFlagEdgeApplicationId = "Unique identifier for an Application"
 	DeviceGroupsCreateFlagName              = "The name of your device group"
 	DeviceGroupsCreateFlagUserAgent         = "The regex to match against the User-Agent header"
 	DeviceGroupsCreateFlagIn                = "Path to a JSON file containing the attributes of the device group that will be created; you can use - for reading from stdin"
 	DeviceGroupsCreateOutputSuccess         = "Created device group with ID %d\n"
 	DeviceGroupsCreateHelpFlag              = "Displays more information about the create subcommand"
 
-	ApplicationFlagId = "Unique identifier for the Edge Application that implements this device group. The '--application-id' flag is required"
+	ApplicationFlagId = "Unique identifier for the Application that implements this device group. The '--application-id' flag is required"
 	DeviceGroupFlagId = "Unique identifier for a device group. The '--group-id' flag is required"
 )

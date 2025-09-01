@@ -36,7 +36,7 @@ func NewDevCmd(f *cmdutil.Factory) *DevCmd {
 		CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 			return command.CommandRunInteractive(f, comm)
 		},
-		Vulcan: vulcanPkg.NewVulcan,
+		Vulcan: vulcanPkg.NewVulcanV3,
 	}
 }
 

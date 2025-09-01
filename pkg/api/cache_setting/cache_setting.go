@@ -16,7 +16,7 @@ func (c *ClientV4) Create(ctx context.Context, req sdk.CacheSettingRequest, appl
 
 	applicationIDStr := strconv.Itoa(int(applicationID))
 
-	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	request := c.apiClient.ApplicationsCacheSettingsAPI.
 		CreateCacheSetting(ctx, applicationIDStr).
 		CacheSettingRequest(req)
 	cacheResponse, httpResp, err := request.Execute()
@@ -39,7 +39,7 @@ func (c *ClientV4) Update(ctx context.Context, req *RequestUpdate, applicationID
 	applicationIDStr := strconv.Itoa(int(applicationID))
 	cacheSettingIDStr := strconv.Itoa(int(cacheSettingID))
 
-	request := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	request := c.apiClient.ApplicationsCacheSettingsAPI.
 		PartialUpdateCacheSetting(ctx, applicationIDStr, cacheSettingIDStr).
 		PatchedCacheSettingRequest(req.PatchedCacheSettingRequest)
 	cacheResponse, httpResp, err := request.Execute()
@@ -66,7 +66,7 @@ func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeAp
 
 	applicationIDStr := strconv.Itoa(int(edgeApplicationID))
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		ListCacheSettings(ctx, applicationIDStr).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
@@ -90,7 +90,7 @@ func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
 	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
 
-	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		RetrieveCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr).
 		Execute()
 	if err != nil {
@@ -111,7 +111,7 @@ func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsI
 	edgeApplicationIDStr := strconv.Itoa(int(edgeApplicationID))
 	cacheSettingIDStr := strconv.Itoa(int(cacheSettingsID))
 
-	req := c.apiClient.EdgeApplicationsCacheSettingsAPI.
+	req := c.apiClient.ApplicationsCacheSettingsAPI.
 		DestroyCacheSetting(ctx, edgeApplicationIDStr, cacheSettingIDStr)
 	_, httpResp, err := req.Execute()
 

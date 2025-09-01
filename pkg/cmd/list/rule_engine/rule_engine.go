@@ -22,8 +22,8 @@ var phase string
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
-	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedEdgeApplicationRequestPhaseRuleEngineList, error)
-	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedEdgeApplicationResponsePhaseRuleEngineList, error)
+	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error)
+	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error)
 	AskInput                func(string) (string, error)
 	EdgeApplicationID       string
 }
@@ -34,11 +34,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedEdgeApplicationRequestPhaseRuleEngineList, error) {
+		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineRequest(ctx, opts, appID)
 		},
-		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedEdgeApplicationResponsePhaseRuleEngineList, error) {
+		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineResponse(ctx, opts, appID)
 		},
@@ -104,7 +104,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		extractor := func(rule sdk.EdgeApplicationRequestPhaseRuleEngine, details bool) []string {
+		extractor := func(rule sdk.ApplicationRequestPhaseRuleEngine, details bool) []string {
 			if details {
 				return []string{
 					fmt.Sprintf("%d", rule),
@@ -128,7 +128,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		extractor := func(rule sdk.EdgeApplicationResponsePhaseRuleEngine, details bool) []string {
+		extractor := func(rule sdk.ApplicationResponsePhaseRuleEngine, details bool) []string {
 			if details {
 				return []string{
 					fmt.Sprintf("%d", rule),

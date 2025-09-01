@@ -41,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	fields := &Fields{}
 
 	cmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-application",
 		Short:         msg.ShortDescription,
 		Long:          msg.LongDescription,
 		SilenceUsage:  true,
@@ -203,8 +203,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.MinimumTLSVersion, "min-tsl-ver", "", msg.FlagMinimumTlsVersion)
 	flags.StringVar(&fields.ApplicationAcceleration, "application-acceleration", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.DeviceDetection, "device-detection", "", msg.FlagDeviceDetection)
-	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagEdgeFirewall)
-	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.EdgeFirewall, "edge-firewall", "", msg.FlagFirewall)
+	flags.StringVar(&fields.EdgeFunctions, "edge-functions", "", msg.FlagFunctions)
 	flags.StringVar(&fields.ImageOptimization, "image-optimization", "", msg.FlagImageOptimization)
 	flags.StringVar(&fields.L2Caching, "l2-caching", "", msg.FlagL2Caching)
 	flags.StringVar(&fields.LoadBalancer, "load-balancer", "", msg.FlagLoadBalancer)

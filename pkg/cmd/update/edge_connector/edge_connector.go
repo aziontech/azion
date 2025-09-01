@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -19,6 +20,7 @@ import (
 type Fields struct {
 	ID     string
 	InPath string
+	Type   string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -31,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion update edge-connector --in "update.json"
+		$ azion update connector --in "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
@@ -49,11 +51,50 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRequest{}
 
-			if cmd.Flags().Changed("file") {
-				err := utils.FlagFileUnmarshalJSON(fields.InPath, &request)
+			if !cmd.Flags().Changed("type") {
+				answer, err := utils.AskInput(msg.UpdateAskEdgeConnectorType)
+
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				fields.Type = answer
+			}
+
+			if !cmd.Flags().Changed("file") {
+				answer, err := utils.AskInput(msg.UpdateAskEdgeConnectorFile)
+
+				if err != nil {
+					logger.Debug("Error while parsing answer", zap.Error(err))
+					return utils.ErrorParseResponse
+				}
+
+				fields.InPath = answer
+			}
+
+			switch fields.Type {
+			case "http":
+				httpStruct := sdk.PatchedConnectorHTTPRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &httpStruct)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
+				request.PatchedConnectorHTTPRequest = &httpStruct
+			case "storage":
+				storageStruct := sdk.PatchedConnectorStorageRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
+				request.PatchedConnectorStorageRequest = &storageStruct
+			case "live_ingest":
+				liveIngestStruct := sdk.PatchedConnectorLiveIngestRequest{}
+				err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
+				if err != nil {
+					return utils.ErrorUnmarshalReader
+				}
+				request.PatchedConnectorLiveIngestRequest = &liveIngestStruct
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -66,12 +107,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var id int64
-			if response.EdgeConnectorHTTP != nil {
-				id = response.EdgeConnectorHTTP.GetId()
-			} else if response.EdgeConnectorLiveIngest != nil {
-				id = response.EdgeConnectorLiveIngest.GetId()
-			} else if response.EdgeConnectorStorage != nil {
-				id = response.EdgeConnectorStorage.GetId()
+			if response.ConnectorHTTP != nil {
+				id = response.ConnectorHTTP.GetId()
+			} else if response.ConnectorLiveIngest != nil {
+				id = response.ConnectorLiveIngest.GetId()
+			} else if response.ConnectorStorage != nil {
+				id = response.ConnectorStorage.GetId()
 			}
 
 			updateOut := output.GeneralOutput{
@@ -92,5 +133,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.ID, "connector-id", "", msg.FlagID)
 	flags.StringVar(&fields.InPath, "file", "", msg.UpdateFlagFile)
+	flags.StringVar(&fields.Type, "type", "", msg.FlagType)
 	flags.BoolP("help", "h", false, msg.UpdateHelpFlag)
 }

@@ -45,7 +45,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.DescribeOptions{}
 	cobraCmd := &cobra.Command{
-		Use:           msg.Usage,
+		Use:           "edge-function",
 		Short:         msg.DescribeShortDescription,
 		Long:          msg.DescribeLongDescription,
 		SilenceUsage:  true,
@@ -58,7 +58,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("function-id") {
-				answer, err := describe.AskInput(msg.AskEdgeFunctionID)
+				answer, err := describe.AskInput(msg.AskFunctionID)
 				if err != nil {
 					return err
 				}

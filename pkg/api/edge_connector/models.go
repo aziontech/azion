@@ -5,7 +5,7 @@ import (
 )
 
 type CreateRequest struct {
-	sdk.EdgeConnectorPolymorphicRequest
+	sdk.ConnectorPolymorphicRequest
 }
 
 func NewCreateRequest() *CreateRequest {
@@ -13,7 +13,7 @@ func NewCreateRequest() *CreateRequest {
 }
 
 type UpdateRequest struct {
-	sdk.PatchedEdgeConnectorPolymorphicRequest
+	sdk.PatchedConnectorPolymorphicRequest
 }
 
 func NewUpdateRequest() *UpdateRequest {

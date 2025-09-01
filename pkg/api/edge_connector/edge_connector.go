@@ -10,36 +10,36 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeConnectorPolymorphic, error) {
-	logger.Debug("Get Edge Connector")
-	request := c.apiClient.EdgeConnectorsAPI.RetrieveEdgeConnector(ctx, id)
+func (c *Client) Get(ctx context.Context, id string) (sdk.ConnectorPolymorphic, error) {
+	logger.Debug("Get Connector")
+	request := c.apiClient.ConnectorsAPI.RetrieveConnector(ctx, id)
 
 	res, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while getting an Edge Connector", zap.Error(err))
+			logger.Debug("Error while getting a Connector", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeConnectorPolymorphic{}, err
+				return sdk.ConnectorPolymorphic{}, err
 			}
 		}
-		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.ConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
 }
 
 func (c *Client) Delete(ctx context.Context, id string) error {
-	logger.Debug("Delete Edge Connector")
-	request := c.apiClient.EdgeConnectorsAPI.DestroyEdgeConnector(ctx, id)
+	logger.Debug("Delete Connector")
+	request := c.apiClient.ConnectorsAPI.DestroyConnector(ctx, id)
 
 	_, httpResp, err := request.Execute()
 
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while deleting an Edge Connector", zap.Error(err))
+			logger.Debug("Error while deleting a Connector", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return err
@@ -51,53 +51,53 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeConnectorPolymorphic, error) {
-	logger.Debug("Create Edge Connector")
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.ConnectorPolymorphic, error) {
+	logger.Debug("Create Connector")
 
-	request := c.apiClient.EdgeConnectorsAPI.CreateEdgeConnector(ctx).EdgeConnectorPolymorphicRequest(req.EdgeConnectorPolymorphicRequest)
-
-	response, httpResp, err := request.Execute()
-	if err != nil {
-		errBody := ""
-		if httpResp != nil {
-			logger.Debug("Error while creating an Edge Connector", zap.Error(err))
-			errBody, err = utils.LogAndRewindBodyV4(httpResp)
-			if err != nil {
-				return sdk.EdgeConnectorPolymorphic{}, err
-			}
-		}
-		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
-	}
-
-	return response.Data, nil
-}
-
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeConnectorPolymorphic, error) {
-	logger.Debug("Update Edge Connector")
-	request := c.apiClient.EdgeConnectorsAPI.PartialUpdateEdgeConnector(ctx, id).PatchedEdgeConnectorPolymorphicRequest(req.PatchedEdgeConnectorPolymorphicRequest)
+	request := c.apiClient.ConnectorsAPI.CreateConnector(ctx).ConnectorPolymorphicRequest(req.ConnectorPolymorphicRequest)
 
 	response, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating an Edge Connector", zap.Error(err), zap.Any("ID", id))
+			logger.Debug("Error while creating a Connector", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeConnectorPolymorphic{}, err
+				return sdk.ConnectorPolymorphic{}, err
 			}
 		}
-		return sdk.EdgeConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.ConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return response.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeConnectorPolymorphicList, error) {
-	logger.Debug("List Edge Connectors")
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.ConnectorPolymorphic, error) {
+	logger.Debug("Update Connector")
+	request := c.apiClient.ConnectorsAPI.PartialUpdateConnector(ctx, id).PatchedConnectorPolymorphicRequest(req.PatchedConnectorPolymorphicRequest)
+
+	response, httpResp, err := request.Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while updating a Connector", zap.Error(err), zap.Any("ID", id))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return sdk.ConnectorPolymorphic{}, err
+			}
+		}
+		return sdk.ConnectorPolymorphic{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+
+	return response.Data, nil
+}
+
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error) {
+	logger.Debug("List Connectors")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
 	}
-	resp, httpResp, err := c.apiClient.EdgeConnectorsAPI.ListEdgeConnectors(ctx).
+	resp, httpResp, err := c.apiClient.ConnectorsAPI.ListConnectors(ctx).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
 		PageSize(opts.PageSize).
@@ -107,7 +107,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while listing the Edge Connectors", zap.Error(err))
+			logger.Debug("Error while listing the Connectors", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return nil, err

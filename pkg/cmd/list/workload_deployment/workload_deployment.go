@@ -110,8 +110,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			ln = []string{
 				fmt.Sprintf("%d", v.GetId()),
 				fmt.Sprintf("%v", v.GetCurrent()),
-				fmt.Sprintf("%d", stratety.Attributes.GetEdgeApplication()),
-				fmt.Sprintf("%d", stratety.Attributes.GetEdgeFirewall()),
+				fmt.Sprintf("%d", stratety.Attributes.GetApplication()),
+				fmt.Sprintf("%d", stratety.Attributes.GetFirewall()),
 			}
 		} else {
 			ln = []string{
