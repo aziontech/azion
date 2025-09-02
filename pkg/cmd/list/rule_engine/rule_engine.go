@@ -170,6 +170,10 @@ func RenderList[T Rule](items []T, details bool, outWriter io.Writer, flags cmdu
 		listOut.Columns = []string{"ID", "NAME"}
 	}
 
+	if len(items) == 0 {
+		return output.Print(&listOut)
+	}
+
 	for _, item := range items {
 		line := extract(item, details)
 		listOut.Lines = append(listOut.Lines, line)

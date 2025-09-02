@@ -60,7 +60,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
-	functions, err := list.ListConnectors(ctx, opts)
+	connectors, err := list.ListConnectors(ctx, opts)
 	if err != nil {
 		return err
 	}
@@ -74,10 +74,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		listOut.Columns = []string{"ID", "NAME", "TYPE", "ACTIVE", "LAST EDITOR", "LAST MODIFIED"}
 	}
 
-	if functions == nil {
+	if connectors == nil || len(connectors.Results) == 0 {
 		return output.Print(&listOut)
 	}
-	for _, v := range functions.Results {
+	for _, v := range connectors.Results {
 		var ln []string
 		if v.ConnectorHTTP != nil {
 			vObj := v.ConnectorHTTP

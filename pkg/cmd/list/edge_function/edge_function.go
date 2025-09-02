@@ -74,6 +74,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "LAST EDITOR", "REFERENCE COUNT", "EXECUTION ENVIRONMENT"}
 	}
 
+	if functions == nil || len(functions.Results) == 0 {
+		return output.Print(&listOut)
+	}
+
 	for _, v := range functions.Results {
 		var ln []string
 		if opts.Details {
