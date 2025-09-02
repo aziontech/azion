@@ -77,7 +77,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 
 			err = client.DeleteBucket(ctx, bucketName)
 			if err != nil {
-				if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET.Error()) {
+				if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET) {
 					if !forceDelete {
 						if !delete.ConfirmDelete(f.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) {
 							return nil
@@ -90,7 +90,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 					}
 					err := client.DeleteBucket(ctx, bucketName)
 					if err != nil {
-						if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET.Error()) {
+						if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET) {
 							logger.FInfo(f.IOStreams.Out, "Bucket deletion was scheduled successfully\n")
 							return schedule.NewSchedule(nil, bucketName, schedule.DELETE_BUCKET)
 						} else {
