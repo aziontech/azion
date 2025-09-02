@@ -78,6 +78,15 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 				"LastEditor":   "Last Editor",
 			}
 
+			var values interface{}
+			if resp.ConnectorHTTP != nil {
+				values = resp.ConnectorHTTP
+			} else if resp.ConnectorStorage != nil {
+				values = resp.ConnectorStorage
+			} else if resp.ConnectorLiveIngest != nil {
+				values = resp.ConnectorLiveIngest
+			}
+
 			describeOut := output.DescribeOutput{
 				GeneralOutput: output.GeneralOutput{
 					Out:   f.IOStreams.Out,
@@ -85,7 +94,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					Flags: f.Flags,
 				},
 				Fields: fields,
-				Values: &resp,
+				Values: values,
 			}
 
 			return output.Print(&describeOut)
