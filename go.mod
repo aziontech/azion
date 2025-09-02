@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.63.0
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.64.0
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
