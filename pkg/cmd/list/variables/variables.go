@@ -95,6 +95,10 @@ func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factor
 		listOut.Columns = []string{"ID", "KEY", "VALUE", "SECRET", "LAST EDITOR"}
 	}
 
+	if len(resp) == 0 {
+		return output.Print(&listOut)
+	}
+
 	for _, v := range resp {
 		var ln []string
 		if opts.Details {
