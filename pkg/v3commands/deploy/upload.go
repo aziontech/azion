@@ -27,7 +27,7 @@ var (
 )
 
 func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
-	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecreKey)
+	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecretKey)
 	if err != nil {
 		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
 	}

@@ -47,7 +47,7 @@ func MockFileReader(path string) ([]byte, error) {
 }
 
 func MockReadSettings() (token.Settings, error) {
-	return token.Settings{Token: "123321", S3AccessKey: "122221", S3SecreKey: "3333322222", S3Bucket: "bucketname"}, nil
+	return token.Settings{Token: "123321", S3AccessKey: "122221", S3SecretKey: "3333322222", S3Bucket: "bucketname"}, nil
 }
 
 // MockWriteFile mocks os.WriteFile behavior
