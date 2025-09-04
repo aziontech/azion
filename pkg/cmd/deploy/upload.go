@@ -81,7 +81,7 @@ func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error
 }
 
 func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
-	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecreKey)
+	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecretKey)
 	if err != nil {
 		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
 	}

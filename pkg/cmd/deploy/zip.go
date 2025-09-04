@@ -64,6 +64,7 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
+	logger.Debug("Creating ZIP file", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
 
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
@@ -99,7 +100,7 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error
 		}
 	}
 
-	logger.Debug("Create ZIP file", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
+	logger.Debug("Create ZIP file successfully", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
 	return nil
 }
 
