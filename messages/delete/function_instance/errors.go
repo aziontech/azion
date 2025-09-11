@@ -3,5 +3,5 @@ package functioninstance
 import "errors"
 
 var (
-	ErrorFailToDeletInstance = errors.New("failed to delete function instance: %s")
+	ErrorFailToDeletInstance = errors.New("Failed to delete Function Instance: %s")
 )
