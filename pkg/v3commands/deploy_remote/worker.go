@@ -31,7 +31,7 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 
 		if err := clientUpload.Upload(context.Background(), &job, conf, bucket); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
-			for Retries < 5 {
+			for Retries < 20 {
 				atomic.AddInt64(&Retries, 1)
 				_, err := job.FileContent.Seek(0, 0)
 				if err != nil {
@@ -47,8 +47,8 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 				break
 			}
 
-			if Retries >= 5 {
-				logger.Debug("There have been 5 retries already, quitting upload")
+			if Retries >= 20 {
+				logger.Debug("There have been 20 retries already, quitting upload")
 				results <- err
 				return
 			}

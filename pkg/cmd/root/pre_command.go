@@ -97,6 +97,9 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		ClientId:                   user.Results.ClientID,
 		Email:                      user.Results.Email,
 		AuthorizeMetricsCollection: settings.AuthorizeMetricsCollection,
+		S3AccessKey:                "",
+		S3SecretKey:                "",
+		S3Bucket:                   "",
 	}
 
 	bStrToken, err := toml.Marshal(strToken)

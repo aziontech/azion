@@ -125,10 +125,13 @@ func (l *login) selectLoginMode() (answer string, err error) {
 
 func (l *login) saveSettings() error {
 	settings := token.Settings{
-		UUID:     uuid,
-		Token:    tokenValue,
-		ClientId: userInfo.Results.ClientID,
-		Email:    userInfo.Results.Email,
+		UUID:        uuid,
+		Token:       tokenValue,
+		ClientId:    userInfo.Results.ClientID,
+		Email:       userInfo.Results.Email,
+		S3AccessKey: "",
+		S3SecretKey: "",
+		S3Bucket:    "",
 	}
 
 	byteSettings, err := l.marshalToml(settings)
