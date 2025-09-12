@@ -47,7 +47,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-
 				if !cmd.Flags().Changed("name") {
 					answer, err := utils.AskInput(msg.AskInputName)
 					if err != nil {
