@@ -2,7 +2,6 @@ package login
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -46,7 +45,7 @@ func factory(f *cmdutil.Factory) *login {
 		factory:     f,
 		askOne:      survey.AskOne,
 		run:         open.Run,
-		server:      &http.Server{Addr: ":8080"},
+		server:      nil, // Will be initialized dynamically in browserLogin
 		token:       tk,
 		marshalToml: toml.Marshal,
 		askInput:    utils.AskInput,
@@ -71,7 +70,7 @@ func cmd(l *login) *cobra.Command {
 
 			switch {
 			case strings.Contains(answer, "browser"):
-				err := l.browserLogin(l.server)
+				err := l.browserLogin(nil) // Server will be initialized in browserLogin
 				if err != nil {
 					return err
 				}
