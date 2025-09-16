@@ -20,7 +20,7 @@ import (
 )
 
 type Github struct {
-	GetVersionGitHub func(name string) (string, error)
+	GetVersionGitHub func(name string) (string, string, error)
 	Clone            func(cloneOptions *git.CloneOptions, url, path string) error
 	GetNameRepo      func(url string) string
 	CheckGitignore   func(path string) (bool, error)
@@ -28,7 +28,8 @@ type Github struct {
 }
 
 type Release struct {
-	TagName string `json:"tag_name"`
+	TagName     string `json:"tag_name"`
+	PublishedAt string `json:"published_at"`
 }
 
 var (
@@ -45,34 +46,34 @@ func NewGithub() *Github {
 	}
 }
 
-func getVersionGitHub(name string) (string, error) {
+func getVersionGitHub(name string) (string, string, error) {
 	ApiURL = fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
 
 	response, err := http.Get(ApiURL)
 	if err != nil {
 		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
-		return "", err
+		return "", "", err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
 		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
-		return "", nil
+		return "", "", nil
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Debug("Failed to read response body", zap.Error(err))
-		return "", err
+		return "", "", err
 	}
 
 	var release Release
 	if err := json.Unmarshal(body, &release); err != nil {
 		logger.Debug("Failed to unmarshal response body", zap.Error(err))
-		return "", err
+		return "", "", err
 	}
 
-	return release.TagName, nil
+	return release.TagName, release.PublishedAt, nil
 }
 
 func clone(cloneOptions *git.CloneOptions, url, path string) error {

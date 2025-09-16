@@ -62,7 +62,7 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 
 	git := github.NewGithub()
 
-	tagName, err := git.GetVersionGitHub("bundler")
+	tagName, _, err := git.GetVersionGitHub("bundler")
 	if err != nil {
 		return err
 	}
