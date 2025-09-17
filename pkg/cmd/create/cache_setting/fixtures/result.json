@@ -1,44 +1,46 @@
 {
-	"state": "pending",
-	"data": {
 	  "id": 138729,
-	  "product_version": "1.0",
-	  "last_editor": "eita+test@test.com",
-      "last_modified": "2025-05-16T14:10:00.921706Z",
 	  "name": "string",
 	  "browser_cache": {
-		"behavior": "honor",
+		"behavior": "override",
 		"max_age": 0
 	  },
-	  "edge_cache": {
-		"behavior": "honor",
-		"max_age": 0,
-		"caching_for_post_enabled": true,
-		"caching_for_options_enabled": true,
-		"stale_cache_enabled": true,
-		"tiered_cache_enabled": true,
-		"tiered_cache_region": "string"
-	  },
-	  "application_controls": {
-		"cache_by_query_string": "ignore",
-		"query_string_fields": [
-		  "string"
-		],
-		"query_string_sort_enabled": true,
-		"cache_by_cookies": "ignore",
-		"cookie_names": [
-		  "string"
-		],
-		"adaptive_delivery_action": "ignore",
-		"device_group": [
-		  0
-		]
-	  },
-	  "slice_controls": {
-		"slice_configuration_enabled": true,
-		"slice_edge_caching_enabled": true,
-		"slice_tiered_caching_enabled": true,
-		"slice_configuration_range": 1024
+	  "modules": {
+		"edge_cache": {
+		  "behavior": "honor",
+		  "max_age": 60,
+		  "stale_cache": {
+			"enabled": false
+		  },
+		  "large_file_cache": {
+			"enabled": false,
+			"offset": 1024
+		  }
+		},
+		"tiered_cache": {
+		  "behavior": "override",
+		  "max_age": 31536000,
+		  "topology": "near-edge"
+		},
+		"application_accelerator": {
+		  "cache_vary_by_method": [
+			"options"
+		  ],
+		  "cache_vary_by_querystring": {
+			"behavior": "ignore",
+			"fields": [],
+			"sort_enabled": true
+		  },
+		  "cache_vary_by_cookies": {
+			"behavior": "ignore",
+			"cookie_names": []
+		  },
+		  "cache_vary_by_devices": {
+			"behavior": "ignore",
+			"device_group": [
+			  0
+			]
+		  }
+		}
 	  }
-	}
   }
