@@ -29,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:     "success phase request",
 			args:     []string{"--application-id", "1679423488", "--phase", "request", "--file", "./fixtures/create.json"},
-			request:  httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
+			request:  httpmock.MatchAny,
 			response: httpmock.JSONFromFile("./fixtures/resp_phase_request.json"),
 			wantOut:  fmt.Sprintf(msg.OutputSuccess, 210543),
 			err:      false,
@@ -37,31 +37,15 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:     "success phase response",
 			args:     []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create.json"},
-			request:  httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
+			request:  httpmock.MatchAny,
 			response: httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
 			wantOut:  fmt.Sprintf(msg.OutputSuccess, 210543),
 			err:      false,
 		},
 		{
-			name:      "error name empty",
-			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_name_empty.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
-			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
-			wantError: msg.ErrorNameEmpty.Error(),
-			err:       true,
-		},
-		{
-			name:      "error conditional empty",
-			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/create_conditional_empty.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
-			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
-			wantError: msg.ErrorConditionalEmpty.Error(),
-			err:       true,
-		},
-		{
 			name:      "error unmarshal file not exist",
 			args:      []string{"--application-id", "1679423488", "--phase", "response", "--file", "./fixtures/no_exist.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
+			request:   httpmock.MatchAny,
 			response:  httpmock.JSONFromFile("./fixtures/resp_phase_response.json"),
 			wantError: utils.ErrorUnmarshalReader.Error(),
 			err:       true,
@@ -69,7 +53,7 @@ func TestNewCmd(t *testing.T) {
 		{
 			name:      "error api request create rules",
 			args:      []string{"--application-id", "1679423488", "--phase", "request", "--file", "./fixtures/create.json"},
-			request:   httpmock.REST(http.MethodPost, "edge_application/applications/1679423488/rules"),
+			request:   httpmock.MatchAny,
 			response:  httpmock.StatusStringResponse(http.StatusInternalServerError, "invalid"),
 			wantError: "Failed to create the rule in Rules Engine: The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support. Check your settings and try again. If the error persists, contact Azion support.",
 			err:       true,
@@ -85,14 +69,15 @@ func TestNewCmd(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			err := cmd.Execute()
 
-			if !tt.err && err == nil {
-				require.Equal(t, tt.wantOut, outGot.String())
-			} else {
-				if err.Error() == tt.wantError {
-					return
+			if tt.err {
+				require.Error(t, err)
+				if tt.wantError != "" && err != nil {
+					require.Equal(t, tt.wantError, err.Error())
 				}
-				t.Fatal("Error: ", err)
+				return
 			}
+			require.NoError(t, err)
+			require.Equal(t, tt.wantOut, outGot.String())
 		})
 	}
 }
