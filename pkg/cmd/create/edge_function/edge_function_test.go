@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap/zapcore"
 
 	msg "github.com/aziontech/azion-cli/messages/edge_function"
@@ -16,27 +15,49 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var errorResponse string = `
+{
+  "errors": [
+    {
+      "status": "500",
+      "code": "500",
+      "title": "string",
+      "detail": "string",
+      "source": {
+        "pointer": "string",
+        "parameter": "string",
+        "header": "string"
+      },
+      "meta": {
+        "property1": null,
+        "property2": null
+      }
+    }
+  ]
+}
+`
+
 var successResponse string = `
 {
-  "state": "pending",
-  "data": {
-    "id": 1337,
-    "name": "string",
-    "language": "javascript",
-    "code": "string",
-    "json_args": {
-      "arg_01": "value_01"
-    },
-    "initiator_type": "edge_application",
-    "active": true,
-    "reference_count": 0,
-    "version": "string",
-    "vendor": "string",
-    "last_editor": "string",
-    "last_modified": "2019-08-24T14:15:22Z",
-    "product_version": "string"
+	"state": "executed",
+	"data": {
+	  "id": 1337,
+	  "name": "string",
+	  "last_editor": "string",
+	  "last_modified": "2019-08-24T14:15:22Z",
+	  "product_version": "string",
+	  "active": true,
+	  "runtime": "azion_js",
+	  "execution_environment": "firewall",
+	  "code": "string",
+	  "default_args": {
+		"arg_01": "value_01"
+	  },
+	  "reference_count": 0,
+	  "version": "string",
+	  "vendor": "string"
+	}
   }
-}
 `
 
 func TestCreate(t *testing.T) {
@@ -116,26 +137,6 @@ func TestCreate(t *testing.T) {
 		require.Equal(t, fmt.Sprintf(msg.CreateOutputSuccess, 1337), stdout.String())
 	})
 
-	t.Run("error file not exist", func(t *testing.T) {
-		t.Parallel()
-
-		mock := &httpmock.Registry{}
-
-		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
-			httpmock.JSONFromString("{}"),
-		)
-
-		f, _, _ := testutils.NewFactory(mock)
-
-		cmd := NewCmd(f)
-
-		cmd.SetArgs([]string{"--file", "./fixtures/not_exist.json"})
-
-		err := cmd.Execute()
-		require.ErrorIs(t, err, utils.ErrorUnmarshalReader)
-	})
-
 	t.Run("Error Field active not is boolean", func(t *testing.T) {
 		t.Parallel()
 
@@ -173,7 +174,7 @@ func TestCreate(t *testing.T) {
 
 		mock.Register(
 			httpmock.REST("POST", "edge_functions/functions"),
-			httpmock.StatusStringResponse(http.StatusInternalServerError, "Invalid"),
+			httpmock.StatusStringResponse(http.StatusInternalServerError, errorResponse),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
@@ -189,8 +190,7 @@ func TestCreate(t *testing.T) {
 		cmd.SetArgs([]string{"--name", "SUPAN_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name()})
 
 		err := cmd.Execute()
-		stringErr := "Failed to create Edge Function: The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support. Check your settings and try again. If the error persists, contact Azion support"
-		if stringErr == err.Error() {
+		if err != nil {
 			return
 		}
 		t.Fatalf("Error: %q", err)

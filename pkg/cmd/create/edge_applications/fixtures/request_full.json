@@ -1,16 +1,23 @@
-{
-  "active": true,
-  "debug": false,
+ {
   "id": 1694434702,
-  "last_editor": "patrickmenott+test@gmail.com",
-  "last_modified": "2025-04-23T14:38:57.61548Z",
+  "name": "string",
   "modules": {
-   "application_accelerator_enabled": true,
-   "edge_cache_enabled": true,
-   "edge_functions_enabled": true,
-   "image_processor_enabled": true,
-   "tiered_cache_enabled": true
+    "edge_cache": {
+      "enabled": true
+    },
+    "functions": {
+      "enabled": true
+    },
+    "application_accelerator": {
+      "enabled": false
+    },
+    "image_processor": {
+      "enabled": false
+    },
+    "tiered_cache": {
+      "enabled": false
+    }
   },
-  "name": "updatepeloarquivoagorinha",
-  "product_version": "3.0"
- }
+  "active": true,
+  "debug": false
+}
