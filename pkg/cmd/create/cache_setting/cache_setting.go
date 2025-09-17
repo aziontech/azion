@@ -24,20 +24,18 @@ import (
 )
 
 type Fields struct {
-	ApplicationID               int64
-	Name                        string
-	browserCacheBehavior        string
-	browserCacheMaxAge          int64
-	adaptiveDeliveryAction      string
-	cacheByQueryString          string
-	queryStringFields           []string
-	enableQueryStringSort       string
-	cacheByCookies              string
-	cookieNames                 []string
-	enableCachingForPost        string
-	enableCachingForOptions     string
-	isSliceConfigurationEnabled string
-	Path                        string
+	ApplicationID           int64
+	Name                    string
+	browserCacheBehavior    string
+	browserCacheMaxAge      int64
+	adaptiveDeliveryAction  string
+	cacheByQueryString      string
+	queryStringFields       []string
+	cacheByCookies          string
+	cookieNames             []string
+	enableCachingForPost    string
+	enableCachingForOptions string
+	Path                    string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -100,7 +98,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			if err := appAccelerationNoEnabled(clientEdgeApp, fields, &request); err != nil {
+			if err := appAccelerationNotEnabled(clientEdgeApp, fields, &request); err != nil {
 				return err
 			}
 
@@ -134,12 +132,11 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.cacheByQueryString, "cache-by-query-string", "ignore", msg.FlagCacheByQueryString)
 	flags.StringVar(&fields.enableCachingForOptions, "enable-caching-for-options", "false", msg.FlagCachingForOptionsEnabled)
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
-	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request *sdk.CacheSettingRequest) error {
+func appAccelerationNotEnabled(client *apiEdgeApp.Client, fields *Fields, request *sdk.CacheSettingRequest) error {
 	ctx := context.Background()
 	application, err := client.Get(ctx, fields.ApplicationID)
 	if err != nil {
@@ -172,58 +169,44 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *sdk.Cac
 		request.SetBrowserCache(req)
 	}
 
-	if cmd.Flags().Changed("query-string-fields") {
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetFields(fields.queryStringFields)
+	modules := &sdk.CacheSettingsModulesRequest{}
+	appAcc := &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
+	setAcc := false
+
+	if cmd.Flags().Changed("query-string-fields") && cmd.Flags().Changed("cache-by-query-string") {
+		cacheVary := &sdk.CacheVaryByQuerystringModuleRequest{}
+		cacheVary.SetFields(fields.queryStringFields)
+		cacheVary.SetBehavior(fields.cacheByQueryString)
+		appAcc.SetCacheVaryByQuerystring(*cacheVary)
+		setAcc = true
 	}
 
-	if cmd.Flags().Changed("cookie-names") {
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
+	if cmd.Flags().Changed("cookie-names") && cmd.Flags().Changed("cache-by-cookies") {
+		controls := &sdk.CacheVaryByCookiesModuleRequest{}
 		controls.SetCookieNames(fields.cookieNames)
-	}
-
-	if cmd.Flags().Changed("cache-by-cookies") {
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
 		controls.SetBehavior(fields.cacheByCookies)
+		appAcc.SetCacheVaryByCookies(*controls)
+		setAcc = true
 	}
 
-	if cmd.Flags().Changed("cache-by-query-string") {
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetBehavior(fields.cacheByQueryString)
+	if cmd.Flags().Changed("enable-caching-for-options") || cmd.Flags().Changed("enable-caching-for-post") {
+		cacheByMethod := []string{}
+		if fields.enableCachingForOptions != "" {
+			cacheByMethod = append(cacheByMethod, "options")
+		}
+
+		if fields.enableCachingForPost != "" {
+			cacheByMethod = append(cacheByMethod, "post")
+		}
+
+		appAcc.SetCacheVaryByMethod(cacheByMethod)
+		setAcc = true
+
 	}
 
-	if cmd.Flags().Changed("enable-caching-for-options") {
-		cachingOptions, err := strconv.ParseBool(fields.enableCachingForOptions)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
-		}
-
-		edgeCache := request.GetModules().ApplicationAccelerator.CacheVaryByMethod
-		if cachingOptions {
-			edgeCache = append(edgeCache, "options")
-		}
-	}
-
-	if cmd.Flags().Changed("enable-caching-for-post") {
-		cachingPost, err := strconv.ParseBool(fields.enableCachingForPost)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
-		}
-
-		appAcc := request.GetModules().ApplicationAccelerator.CacheVaryByMethod
-		if cachingPost {
-			appAcc = append(appAcc, "post")
-		}
-	}
-
-	if cmd.Flags().Changed("enable-caching-string-sort") {
-		stringSort, err := strconv.ParseBool(fields.enableQueryStringSort)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
-		}
-
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetSortEnabled(stringSort)
+	if setAcc {
+		modules.SetApplicationAccelerator(*appAcc)
+		request.SetModules(*modules)
 	}
 
 	return nil

@@ -31,6 +31,17 @@ type CreateRequest struct {
 	sdkOld.ApplicationCacheCreateRequest
 }
 
+func NewCreateRequest() *sdk.CacheSettingRequest {
+	return &sdk.CacheSettingRequest{
+		Modules: &sdk.CacheSettingsModulesRequest{
+			EdgeCache:              &sdk.CacheSettingsEdgeCacheModuleRequest{},
+			ApplicationAccelerator: &sdk.CacheSettingsApplicationAcceleratorModuleRequest{},
+		},
+		Name:         "",
+		BrowserCache: &sdk.BrowserCacheModuleRequest{},
+	}
+}
+
 type Response interface {
 	GetId() int64
 	GetName() string
