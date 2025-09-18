@@ -37,8 +37,7 @@ import (
 
 const (
 	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
-	// APIURL     = "https://api.azion.com/v4/utils/project_samples"
-	APIURL = "https://b0rfluh05b.map.azionedge.net/api/templates"
+	APIURL     = "https://api.azion.com/v4/utils/project_samples"
 )
 
 type initCmd struct {
@@ -271,31 +270,11 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	// Handle optional extras from the Templates API
 	selectedItem := templateOptionsMap[answerTemplate]
 	if selectedItem.Extras != nil && strings.ToLower(selectedItem.Extras.Type) == "env" && len(selectedItem.Extras.Inputs) > 0 {
-		// Collect user inputs and write/append them to a .env file in the working directory
-		envLines := make([]string, 0, len(selectedItem.Extras.Inputs))
-		for _, input := range selectedItem.Extras.Inputs {
-			var userVal string
-			promptEnv := &survey.Input{Message: input.Text}
-			if err := cmd.askOne(promptEnv, &userVal); err != nil {
-				return err
-			}
-			line := fmt.Sprintf("%s=%s", input.Key, userVal)
-			envLines = append(envLines, line)
+		inputs := make([]utils.EnvInput, 0, len(selectedItem.Extras.Inputs))
+		for _, in := range selectedItem.Extras.Inputs {
+			inputs = append(inputs, utils.EnvInput{Key: in.Key, Text: in.Text})
 		}
-
-		envPath := path.Join(newPath, ".env")
-		var existing string
-		if _, err := cmd.stat(envPath); err == nil {
-			if b, rerr := cmd.fileReader(envPath); rerr == nil {
-				existing = string(b)
-				if len(existing) > 0 && !strings.HasSuffix(existing, "\n") {
-					existing += "\n"
-				}
-			}
-		}
-
-		content := existing + strings.Join(envLines, "\n") + "\n"
-		if err := cmd.writeFile(envPath, []byte(content), 0644); err != nil {
+		if err := utils.CollectEnvInputsAndWriteFile(inputs, newPath); err != nil {
 			return err
 		}
 	}
