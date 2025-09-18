@@ -17,23 +17,23 @@ import (
 
 var successResponse string = `
 {
-  "state": "pending",
+  "state": "executed",
   "data": {
     "id": 1337,
-    "name": "string",
-    "language": "javascript",
-    "code": "string",
-    "json_args": {
-      "arg_01": "value_01"
-    },
-    "initiator_type": "edge_application",
-    "active": true,
-    "reference_count": 0,
-    "version": "string",
-    "vendor": "string",
+    "name": "ATUALIZANDO",
     "last_editor": "string",
     "last_modified": "2019-08-24T14:15:22Z",
-    "product_version": "string"
+    "product_version": "string",
+    "active": true,
+    "runtime": "azion_js",
+    "execution_environment": "application",
+    "code": "string",
+    "default_args": {
+      "arg_01": "value_01"
+    },
+    "reference_count": 0,
+    "version": "string",
+    "vendor": "string"
   }
 }
 `
