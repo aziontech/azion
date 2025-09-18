@@ -1,3 +1,16 @@
 {
-	name: "error";
+	"errors": [
+	  {
+		"status": "str",
+		"code": "strin",
+		"title": "string",
+		"detail": "string",
+		"source": {
+		  "pointer": "string",
+		  "parameter": "string",
+		  "header": "string"
+		},
+		"meta": null
+	  }
+	]
 }

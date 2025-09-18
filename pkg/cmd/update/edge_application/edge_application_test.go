@@ -57,7 +57,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_application/applications/1337"),
+			httpmock.REST("PATCH", "edge_application/applications/0"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
