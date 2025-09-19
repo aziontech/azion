@@ -38,6 +38,7 @@ globalThis.AZION_BUCKET_PREFIX = "%s";
 `
 
 func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) error {
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UpdateAzionConfig, cmd.F.Format, cmd.F.Out)
 	logger.Debug("Running bundler config update to update azion.config")
 	// checking if vulcan major is correct
 	vulcanVer, err := cmd.commandRunnerOutput(cmd.F, "npm show edge-functions version", []string{})

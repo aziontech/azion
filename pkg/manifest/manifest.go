@@ -8,12 +8,14 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/briandowns/spinner"
 
 	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
 	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
@@ -77,6 +79,13 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 }
 
 func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, functions map[string]contracts.AzionJsonDataFunction, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
+	s.Suffix = " " + msg.CreatingManifest
+	s.FinalMSG = "\n"
+	if !f.Debug {
+		s.Start() // Start the spinner
+	}
+	defer s.Stop()
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.CreatingManifest)
