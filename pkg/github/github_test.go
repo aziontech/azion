@@ -37,7 +37,7 @@ func TestGetVersionGitHub(t *testing.T) {
 			repoName:   "azion-cli",
 			wantTag:    "1.30.0",
 			statusCode: http.StatusOK,
-			response:   `{"tag_name": "1.30.0"}`,
+			response:   `{"tag_name": "1.30.0", "published_at": "2025-09-12T19:15:10Z"}`,
 			wantErr:    false,
 		},
 	}
@@ -58,11 +58,11 @@ func TestGetVersionGitHub(t *testing.T) {
 			defer func() { ApiURL = oldURL }()
 
 			gh := NewGithub()
-			gh.GetVersionGitHub = func(name string) (string, error) {
-				return tt.wantTag, nil
+			gh.GetVersionGitHub = func(name string) (string, string, error) {
+				return tt.wantTag, "2025-09-12T19:15:10Z", nil
 			}
 
-			gotTag, err := gh.GetVersionGitHub(tt.repoName)
+			gotTag, _, err := gh.GetVersionGitHub(tt.repoName)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVersionGitHub() error = %v, wantErr %v", err, tt.wantErr)
 				return

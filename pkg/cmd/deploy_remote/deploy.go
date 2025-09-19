@@ -132,15 +132,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	if !SkipBuild {
-		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
-	}
-
 	conf, err := cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))

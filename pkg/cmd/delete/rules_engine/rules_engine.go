@@ -105,8 +105,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 
 			}
 
+			rid, err := utils.Format(ruleID)
+			if err != nil {
+				return err
+			}
+
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, ruleID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, rid),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}

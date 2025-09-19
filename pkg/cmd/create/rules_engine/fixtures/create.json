@@ -1,11 +1,9 @@
 {
     "name": "namefortesting",
-    "phase": "default",
     "active": true,
     "behaviors": [
       {
-        "name": "deny",
-        "argument": 0
+        "type": "deny"
       }
     ],
     "criteria": [

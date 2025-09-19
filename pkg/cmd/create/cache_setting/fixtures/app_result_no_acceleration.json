@@ -1,43 +1,29 @@
-{
+
+  {
 	"data": {
 	  "id": 1673635841,
 	  "name": "string",
-	  "last_editor": "eita+test@test.com",
-      "last_modified": "2025-05-16T14:10:00.921706Z",
-	  "product_version": "1.0",
-	  "browser_cache": {
-		"behavior": "honor",
-		"max_age": 0
+	  "last_editor": "string",
+	  "last_modified": "2019-08-24T14:15:22Z",
+	  "modules": {
+		"edge_cache": {
+		  "enabled": true
+		},
+		"functions": {
+		  "enabled": true
+		},
+		"application_accelerator": {
+		  "enabled": false
+		},
+		"image_processor": {
+		  "enabled": false
+		},
+		"tiered_cache": {
+		  "enabled": false
+		}
 	  },
-	  "edge_cache": {
-		"behavior": "honor",
-		"max_age": 0,
-		"caching_for_post_enabled": true,
-		"caching_for_options_enabled": true,
-		"stale_cache_enabled": true,
-		"tiered_cache_enabled": true,
-		"tiered_cache_region": "string"
-	  },
-	  "application_controls": {
-		"cache_by_query_string": "ignore",
-		"query_string_fields": [
-		  "string"
-		],
-		"query_string_sort_enabled": true,
-		"cache_by_cookies": "ignore",
-		"cookie_names": [
-		  "string"
-		],
-		"adaptive_delivery_action": "ignore",
-		"device_group": [
-		  0
-		]
-	  },
-	  "slice_controls": {
-		"slice_configuration_enabled": true,
-		"slice_edge_caching_enabled": true,
-		"slice_tiered_caching_enabled": true,
-		"slice_configuration_range": 1024
-	  }
+	  "active": true,
+	  "debug": false,
+	  "product_version": "1.0"
 	}
   }

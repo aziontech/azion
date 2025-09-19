@@ -16,19 +16,19 @@ var successResponse string = `
   "data": {
     "id": 1337,
     "name": "string",
-    "language": "javascript",
-    "code": "string",
-    "json_args": {
+    "active": true,
+    "runtime": "azion_js",
+    "reference_count": 0,
+    "last_modified": "2019-08-24T14:15:22Z",
+    "product_version": "v1",
+    "version": "1.0.0",
+    "vendor": "azion",
+    "execution_environment": "firewall",
+    "last_editor": "string",
+    "default_args": {
       "arg_01": "value_01"
     },
-    "initiator_type": "edge_application",
-    "active": true,
-    "reference_count": 0,
-    "version": "string",
-    "vendor": "string",
-    "last_editor": "string",
-    "last_modified": "2019-08-24T14:15:22Z",
-    "product_version": "string"
+    "code": "console.log('hello');"
   }
 }
 `
@@ -46,25 +46,25 @@ func TestDescribe(t *testing.T) {
 	}{
 		{
 			name:      "describe a function",
-			request:   httpmock.REST("GET", "edge_functions/functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
-			args:      []string{"--function-id", "123"},
+			args:      []string{"--function-id", "1337"},
 			expectErr: false,
 		},
 		{
 			name:      "describe a function - no function id",
-			request:   httpmock.REST("GET", "edge_functions/functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
 			expectErr: false,
 			mockInput: func(s string) (string, error) {
-				return "123", nil
+				return "1337", nil
 			},
 		},
 		{
 			name:      "with code",
-			request:   httpmock.REST("GET", "edge_functions/functions/123"),
+			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
-			args:      []string{"--function-id", "123", "--with-code"},
+			args:      []string{"--function-id", "1337", "--with-code"},
 			expectErr: false,
 		},
 		{
