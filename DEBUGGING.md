@@ -93,6 +93,7 @@ Use this guide to collect the right information and quickly diagnose issues when
     azion unlink
     ```
   - This is helpful when your local project has drifted from the remote state and you want to re-link or re-init cleanly.
+  - If the unlink option is the one chose, remember to run `azion link` again to re-link your project.
 
 ## Common Issues and How to Resolve
 
