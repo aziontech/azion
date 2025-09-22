@@ -220,6 +220,8 @@ func TestGetWorkingDir(t *testing.T) {
 				require.NoError(t, err)
 				var azJsonData contracts.AzionApplicationOptions
 				azJsonData.Name = "Test01"
+				// initialize Function slice to avoid index out of range
+				azJsonData.Function = []contracts.AzionJsonDataFunction{{}}
 				azJsonData.Function[0].Name = "MyFunc"
 				azJsonData.Function[0].File = "myfile.js"
 				azJsonData.Function[0].ID = 476

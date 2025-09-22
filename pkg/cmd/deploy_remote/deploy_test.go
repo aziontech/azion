@@ -19,21 +19,13 @@ import (
 
 const successResponseApp = `
 {
-  "state": "pending",
   "data": {
     "id": 1697666970,
     "name": "LovelyName",
-    "last_editor": "tester",
-    "last_modified": "2025-06-20T16:55:19Z",
-    "modules": {
-      "edge_cache_enabled": true,
-      "edge_functions_enabled": false,
-      "application_accelerator_enabled": false,
-      "image_processor_enabled": false,
-      "tiered_cache_enabled": false
-    },
     "active": true,
     "debug": true,
+    "last_editor": "tester",
+    "last_modified": "2025-06-20T16:55:19Z",
     "product_version": "1.0.0"
   }
 }`

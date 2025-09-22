@@ -1,8 +1,6 @@
 package whoami
 
 import (
-	"fmt"
-
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/whoami"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -60,7 +58,7 @@ func (cmd *WhoamiCmd) run() error {
 	}
 
 	whoamiOut := output.GeneralOutput{
-		Msg:   fmt.Sprintf(settings.Email + "\n"),
+		Msg:   settings.Email + "\n",
 		Out:   cmd.Io.Out,
 		Flags: cmd.F.Flags,
 	}
