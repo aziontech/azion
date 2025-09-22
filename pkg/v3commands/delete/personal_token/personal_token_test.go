@@ -1,6 +1,7 @@
 package personaltoken
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -58,7 +59,7 @@ func TestDeleteCmd(t *testing.T) {
 			responseBody: "Not Found",
 			expectError:  true,
 			mockInputs:   mockTokenID,
-			mockError:    fmt.Errorf(msg.ErrorFailToDelete, utils.ErrorNotFound404),
+			mockError:    errors.New(fmt.Sprintf(msg.ErrorFailToDelete, utils.ErrorNotFound404)),
 		},
 		{
 			name:           "error - parse answer",
@@ -69,7 +70,7 @@ func TestDeleteCmd(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalid,
-			mockError:      fmt.Errorf(utils.ErrorParseResponse.Error()),
+			mockError:      errors.New(utils.ErrorParseResponse.Error()),
 		},
 	}
 

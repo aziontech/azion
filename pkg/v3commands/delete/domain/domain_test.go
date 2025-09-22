@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -100,7 +101,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalid,
-			mockError:      fmt.Errorf(msg.ErrorConvertId.Error()),
+			mockError:      errors.New(msg.ErrorConvertId.Error()),
 		},
 		{
 			name:           "error - parse answer",
@@ -112,7 +113,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockParseError,
-			mockError:      fmt.Errorf(utils.ErrorParseResponse.Error()),
+			mockError:      errors.New(utils.ErrorParseResponse.Error()),
 		},
 	}
 
