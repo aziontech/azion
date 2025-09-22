@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	tblWithFunc string = "ID    NAME    LANGUAGE    ACTIVE  \n1337  string  javascript  true    \n"
-	tblNoFunc   string = "ID    NAME    LANGUAGE    ACTIVE  \n"
+	tblWithFunc string = "ID    NAME    ACTIVE  \n1337  string  true    \n"
+	tblNoFunc   string = "ID    NAME    ACTIVE  \n"
 )
 
 func TestList(t *testing.T) {

@@ -1,12 +1,11 @@
-{
-    "count": 2,
-    "next": "next-page-token",
+[
+  {
+    "continuation_token": "next-page-token",
     "results": [
       {
         "key": "object1",
         "last_modified": "2024-08-05T12:00:00Z",
-        "size": 1234,
-        "etag": "etag1"
+        "size": 1234
       },
       {
         "key": "object2",
@@ -15,4 +14,4 @@
       }
     ]
   }
-  
+]
