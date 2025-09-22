@@ -4,23 +4,21 @@
     {
       "id": 173617,
       "name": "string",
-      "phase": "default",
       "active": true,
-      "behaviors": [
-        {
-          "name": "deny",
-          "argument": 0
-        }
-      ],
       "criteria": [
         [
           {
-            "argument": 0,
-            "variable": "${arg_<name>}",
             "conditional": "if",
-            "operator": "does_not_exist"
+            "variable": "${arg_<name>}",
+            "operator": "does_not_exist",
+            "argument": 0
           }
         ]
+      ],
+      "behaviors": [
+        {
+          "type": "deny"
+        }
       ],
       "description": "string",
       "order": 0,
