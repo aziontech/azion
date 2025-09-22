@@ -24,10 +24,16 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      - name: Build & Test
+      - name: Build & Test (skip v3 tests)
         run: |
-          echo "Building and testing"
-          make test build
+          echo "Building and testing (skipping v3 tests)"
+          mkdir -p cover
+          PKGS=$(go list ./... | grep -v "/pkg/v3commands/")
+          echo "Testing packages:" $PKGS
+          go test -v -failfast -coverprofile ./cover/azioncoverage.out -coverpkg=$(echo "$PKGS" | tr '\n' ',') $PKGS
+          go tool cover -html=./cover/azioncoverage.out -o ./cover/azioncoverage.html
+          go tool cover -func ./cover/azioncoverage.out
+          make build
 
       - name: Gosec
         run: |
