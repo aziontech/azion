@@ -57,11 +57,42 @@ Use this guide to collect the right information and quickly diagnose issues when
     - Command used, full output with `--debug`, your OS/arch, CLI version, and a sanitized `azion.json` snippet.
 
 - **Prefer local mode for debugging**
-  - The `--local` flag for `deploy` runs a local simulation and is easier to debug issues in `manifest.json`/rules/origin mapping.
+  - The `--local` flag for `deploy` runs a local deploy and is easier to debug issues in `manifest.json`/rules/application mapping.
   - Example:
     ```bash
     azion deploy --local --debug
     ```
+
+### Handling "name already in use" errors
+
+- Check existing resources via CLI
+  - Use list commands to confirm whether the resource already exists. If it does, future deploys should update the existing resource instead of creating a new one:
+    ```bash
+    azion list application
+    azion list workload
+    azion list function
+    azion list cache-setting
+    ```
+  - If you find existing resources, you can manually edit your `azion.json` to include the corresponding IDs.
+
+- You may also verify in the [Azion Console](https://console.azion.com)
+  - Visit [Azion Console](https://console.azion.com) and check whether the resource you are trying to create already exists (Application, Workload, Function, Cache Setting, etc.).
+  - This is helpful for a visual confirmation and for reviewing additional details (owners, timestamps, references) that might explain conflicts.
+
+- If resources were created but IDs were not recorded in `azion.json`
+  - If you don't mind redoing the deploy from scratch, you can remove the resources referenced by your `azion.json` in one go:
+    ```bash
+    # Be at your project's root (where azion/azion.json lives)
+    azion delete application --cascade
+    ```
+  - The cascade delete will attempt to delete the application and related resources declared in your `azion.json`, allowing a clean redeploy.
+
+- Use unlink for a guided cleanup
+  - The `unlink` command also offers to cascade delete and clean local state:
+    ```bash
+    azion unlink
+    ```
+  - This is helpful when your local project has drifted from the remote state and you want to re-link or re-init cleanly.
 
 ## Common Issues and How to Resolve
 
