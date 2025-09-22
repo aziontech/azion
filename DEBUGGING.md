@@ -28,7 +28,7 @@ Use this guide to collect the right information and quickly diagnose issues when
     azion login
     ```
 
-    or 
+    or
 
     ```bash
     azion -t <PERSONAL_TOKEN>
@@ -46,7 +46,11 @@ Use this guide to collect the right information and quickly diagnose issues when
   - Some link/init paths automate multiple steps and may hide the root cause. If it fails, run `deploy` directly to isolate the issue:
     ```bash
     azion deploy --debug
-    or 
+    ```
+
+    or
+
+    ```bash
     azion deploy --local --debug
     ```
   - If direct deploy succeeds but link/init fails, open an [issue](https://github.com/aziontech/azion/issues) with logs:
