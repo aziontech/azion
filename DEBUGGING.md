@@ -40,7 +40,7 @@ Use this guide to collect the right information and quickly diagnose issues when
   - V3 accounts should use the legacy `azion.json` (v3) format.
   - V4 accounts should use the new `azion.json` (v4) format.
   - Mixing formats will cause parsing or ID conversion errors (e.g. messages like `ErrorConvertId`, `ErrorConvertIdFunction`).
-  - The same goes for your azion.config file. You should respect the V3/V4 format.
+  - The same goes for your azion.config file. You should respect the (V3)[https://github.com/aziontech/lib/blob/v1.20.6/packages/config/src/configProcessor/helpers/azion.config.example.ts]/(V4)[https://github.com/aziontech/lib/blob/v2.1.2/packages/config/src/configProcessor/helpers/azion.config.example.ts] format.
 
 - **If link/init + deploy fails, try deploy directly**
   - Some link/init paths automate multiple steps and may hide the root cause. If it fails, run `deploy` directly to isolate the issue:
