@@ -6,8 +6,8 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/aws/aws-sdk-go-v2 v1.39.0
-	github.com/aws/aws-sdk-go-v2/config v1.31.6
-	github.com/aws/aws-sdk-go-v2/credentials v1.18.10
+	github.com/aws/aws-sdk-go-v2/config v1.31.8
+	github.com/aws/aws-sdk-go-v2/credentials v1.18.12
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.1
 	github.com/aziontech/azionapi-go-sdk v0.143.0
 	github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f
@@ -49,7 +49,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.1 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.6 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.7 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
@@ -58,9 +58,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.8.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.29.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.34.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.38.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.29.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.34.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.38.4 // indirect
 	github.com/aws/smithy-go v1.23.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
@@ -74,24 +74,20 @@ require (
 	github.com/go-git/go-billy/v5 v5.6.2 // indirect
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
-	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/segmentio/backo-go v1.0.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
@@ -105,12 +101,10 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/term v0.31.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
