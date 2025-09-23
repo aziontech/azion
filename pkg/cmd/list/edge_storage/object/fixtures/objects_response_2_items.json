@@ -5,12 +5,14 @@
       {
         "key": "object1",
         "last_modified": "2024-08-05T12:00:00Z",
-        "size": 1234
+        "size": 1234,
+        "is_folder": false
       },
       {
         "key": "object2",
         "last_modified": "2024-08-05T13:00:00Z",
-        "size": 5678
+        "size": 5678,
+        "is_folder": false
       }
     ]
   }
