@@ -61,7 +61,7 @@ before:
 nfpms:
   - id: packages
     license: MIT
-    maintainer: Azion Technologies <https://github.com/aziontech>
+    maintainer: 'Azion Technologies <https://github.com/aziontech>'
     package_name: azion
     homepage: https://github.com/aziontech/azion
     bindir: /usr/local/bin
