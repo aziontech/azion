@@ -2,13 +2,13 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"net/http"
 	"net/url"
-	"encoding/json"
+	"os"
 
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"go.uber.org/zap"
@@ -24,7 +24,7 @@ type RequestBucket struct {
 
 func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error {
 	logger.Debug("Creating bucket ", zap.Any("name", request.Name))
-	req := c.apiClient.EdgeStorageBucketsAPI.CreateBucket(ctx).BucketCreateRequest(request.BucketCreateRequest)
+	req := c.apiClient.StorageBucketsAPI.CreateBucket(ctx).BucketCreateRequest(request.BucketCreateRequest)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""
@@ -43,7 +43,7 @@ func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error 
 
 func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedBucketList, error) {
 	logger.Debug("Listing bucket")
-	resp, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.ListBuckets(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
+	resp, httpResp, err := c.apiClient.StorageBucketsAPI.ListBuckets(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -62,7 +62,7 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 
 func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	logger.Debug("Delete bucket", zap.Any("bucket-name", name))
-	_, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.DeleteBucket(ctx, name).Execute()
+	_, httpResp, err := c.apiClient.StorageBucketsAPI.DeleteBucket(ctx, name).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -81,7 +81,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 	bucket := sdk.PatchedBucketRequest{
 		EdgeAccess: &edgeAccess,
 	}
-	_, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.UpdateBucket(ctx, name).PatchedBucketRequest(bucket).Execute()
+	_, httpResp, err := c.apiClient.StorageBucketsAPI.UpdateBucket(ctx, name).PatchedBucketRequest(bucket).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -100,7 +100,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, bucketName, objectKey string) error {
 	logger.Debug("Creating object")
 	c.apiClient.GetConfig().DefaultHeader["Content-Type"] = fileOps.MimeType
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
 		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -151,10 +151,10 @@ func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contra
 	if err != nil {
 		return nil, err
 	}
-    // Headers
-    for k, v := range c.apiClient.GetConfig().DefaultHeader {
-        req.Header.Add(k, v)
-    }
+	// Headers
+	for k, v := range c.apiClient.GetConfig().DefaultHeader {
+		req.Header.Add(k, v)
+	}
 	req.Header.Set("Accept", "application/json")
 
 	httpResp, err := httpClient.Do(req)
@@ -178,34 +178,34 @@ func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contra
 		return nil, err
 	}
 
-    // Try to decode as an array of generic pages to accommodate the new format
-    var pages []map[string]any
-    if err := json.Unmarshal(body, &pages); err != nil {
-        // Fallback: try to unmarshal as single object (backward compatibility)
-        var single sdk.ResponseBucketObject
-        if err2 := json.Unmarshal(body, &single); err2 == nil {
-            return &single, nil
-        }
-        logger.Debug("Error while listing Objects from Bucket", zap.Error(err))
-        return nil, err
-    }
-    if len(pages) == 0 {
-        // Return empty object
-        empty := &sdk.ResponseBucketObject{}
-        return empty, nil
-    }
+	// Try to decode as an array of generic pages to accommodate the new format
+	var pages []map[string]any
+	if err := json.Unmarshal(body, &pages); err != nil {
+		// Fallback: try to unmarshal as single object (backward compatibility)
+		var single sdk.ResponseBucketObject
+		if err2 := json.Unmarshal(body, &single); err2 == nil {
+			return &single, nil
+		}
+		logger.Debug("Error while listing Objects from Bucket", zap.Error(err))
+		return nil, err
+	}
+	if len(pages) == 0 {
+		// Return empty object
+		empty := &sdk.ResponseBucketObject{}
+		return empty, nil
+	}
 
-    // Map the first element into the SDK struct
-    mapped := sdk.ResponseBucketObject{}
-    // Marshal the first page back to JSON and unmarshal into the SDK struct to ensure compatibility
-    firstPageBytes, err := json.Marshal(pages[0])
-    if err != nil {
-        return nil, err
-    }
-    if err := json.Unmarshal(firstPageBytes, &mapped); err != nil {
-        return nil, err
-    }
-    return &mapped, nil
+	// Map the first element into the SDK struct
+	mapped := sdk.ResponseBucketObject{}
+	// Marshal the first page back to JSON and unmarshal into the SDK struct to ensure compatibility
+	firstPageBytes, err := json.Marshal(pages[0])
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(firstPageBytes, &mapped); err != nil {
+		return nil, err
+	}
+	return &mapped, nil
 }
 
 func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *contracts.AzionApplicationOptions, bucket string) error {
@@ -214,7 +214,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -234,7 +234,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 
 func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
 	logger.Debug("Getting object")
-	_, httpResp, err := c.apiClient.EdgeStorageObjectsAPI.DownloadObject(ctx, bucketName, objectKey).Execute()
+	_, httpResp, err := c.apiClient.StorageObjectsAPI.DownloadObject(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -255,7 +255,7 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 
 func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
 	logger.Debug("Delete object", zap.Any("object-key", objectKey))
-	_, httpResp, err := c.apiClient.EdgeStorageObjectsAPI.DeleteObjectKey(ctx, bucketName, objectKey).Execute()
+	_, httpResp, err := c.apiClient.StorageObjectsAPI.DeleteObjectKey(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -271,7 +271,7 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 
 func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
 	logger.Debug("Updating objects")
-	_, httpResp, err := c.apiClient.EdgeStorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body).Execute()
+	_, httpResp, err := c.apiClient.StorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
