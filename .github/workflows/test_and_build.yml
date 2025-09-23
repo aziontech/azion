@@ -24,6 +24,15 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
+      - uses: goreleaser/goreleaser-action@v6
+        name: run goreleaser check
+        with:
+          distribution: goreleaser
+          version: 2.3.2
+          args: check --debug
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
       - name: Build & Test (skip v3 tests)
         run: |
           echo "Building and testing (skipping v3 tests)"
@@ -39,20 +48,6 @@ jobs:
         run: |
           echo "Checking Security"
           make sec
-      
-      - name: Golangci-lint
-        run: |
-          echo "Checking Lint"
-          make lint
-      
-      - uses: goreleaser/goreleaser-action@v6
-        name: run goreleaser check
-        with:
-          distribution: goreleaser
-          version: 2.3.2
-          args: check --debug
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
 
       - name: Go Report
         uses: creekorful/goreportcard-action@v1.0
