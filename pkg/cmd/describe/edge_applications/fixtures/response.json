@@ -5,7 +5,7 @@
     "last_editor": "string",
     "last_modified": "2019-08-24T14:15:22Z",
     "modules": {
-      "edge_cache": {
+      "cache": {
         "enabled": true
       },
       "functions": {
@@ -15,9 +15,6 @@
         "enabled": false
       },
       "image_processor": {
-        "enabled": false
-      },
-      "tiered_cache": {
         "enabled": false
       }
     },

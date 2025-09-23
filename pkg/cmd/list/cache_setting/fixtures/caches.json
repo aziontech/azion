@@ -9,21 +9,9 @@
         "max_age": 0
       },
       "modules": {
-        "edge_cache": {
+        "cache": {
           "behavior": "honor",
-          "max_age": 60,
-          "stale_cache": {
-            "enabled": false
-          },
-          "large_file_cache": {
-            "enabled": false,
-            "offset": 1024
-          }
-        },
-        "tiered_cache": {
-          "behavior": "override",
-          "max_age": 31536000,
-          "topology": "near-edge"
+          "max_age": 60
         },
         "application_accelerator": {
           "cache_vary_by_method": [
