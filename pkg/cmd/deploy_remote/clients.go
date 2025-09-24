@@ -1,8 +1,8 @@
 package deploy
 
 import (
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	apiEdgeFunction "github.com/aziontech/azion-cli/pkg/api/edge_function"
+	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
+	apiFunction "github.com/aziontech/azion-cli/pkg/api/function"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
 	apiWorkload "github.com/aziontech/azion-cli/pkg/api/workloads"
@@ -10,12 +10,12 @@ import (
 )
 
 type Clients struct {
-	EdgeFunction    *apiEdgeFunction.Client
-	EdgeApplication *apiEdgeApplications.Client
-	Workload        *apiWorkload.Client
-	Origin          *apiOrigin.Client
-	Bucket          *apiStorage.Client
-	Storage         *apiStorage.Client
+	Function    *apiFunction.Client
+	Application *apiApplications.Client
+	Workload    *apiWorkload.Client
+	Origin      *apiOrigin.Client
+	Bucket      *apiStorage.Client
+	Storage     *apiStorage.Client
 }
 
 func NewClients(f *cmdutil.Factory) *Clients {
@@ -25,11 +25,11 @@ func NewClients(f *cmdutil.Factory) *Clients {
 	token := f.Config.GetString("token")
 
 	return &Clients{
-		EdgeFunction:    apiEdgeFunction.NewClient(httpClient, apiURL, token),
-		EdgeApplication: apiEdgeApplications.NewClient(httpClient, apiURL, token),
-		Workload:        apiWorkload.NewClient(httpClient, apiURL, token),
-		Origin:          apiOrigin.NewClient(httpClient, apiURL, token),
-		Bucket:          apiStorage.NewClient(httpClient, storageURL, token),
-		Storage:         apiStorage.NewClient(httpClient, storageURL, token),
+		Function:    apiFunction.NewClient(httpClient, apiURL, token),
+		Application: apiApplications.NewClient(httpClient, apiURL, token),
+		Workload:    apiWorkload.NewClient(httpClient, apiURL, token),
+		Origin:      apiOrigin.NewClient(httpClient, apiURL, token),
+		Bucket:      apiStorage.NewClient(httpClient, storageURL, token),
+		Storage:     apiStorage.NewClient(httpClient, storageURL, token),
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id int64) (EdgeApplicationResponse, error) {
+func (c *Client) Get(ctx context.Context, id int64) (ApplicationResponse, error) {
 	logger.Debug("Get Application")
 
 	res, httpResp, err := c.apiClient.ApplicationsAPI.

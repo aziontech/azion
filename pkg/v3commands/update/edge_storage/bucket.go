@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"

@@ -14,28 +14,14 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apiapp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_function"
+	apiapp "github.com/aziontech/azion-cli/pkg/api/applications"
+	api "github.com/aziontech/azion-cli/pkg/api/function"
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 )
-
-// inject this code into worker.js
-var injectIntoFunction = `
-//---
-//storages:
-//   - name: assets
-//     bucket: %s
-//     prefix: %s
-//---
-
-globalThis.AZION_BUCKET_NAME = "%s";
-globalThis.AZION_BUCKET_PREFIX = "%s";
-
-`
 
 func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UpdateAzionConfig, cmd.F.Format, cmd.F.Out)
@@ -241,10 +227,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
-	newCode := append([]byte(prependText), code...)
-
-	reqCre.SetCode(string(newCode))
+	reqCre.SetCode(string(code))
 
 	reqCre.SetActive(true)
 	if funcToCreate.Name == "__DEFAULT__" || funcToCreate.Name == "" {
@@ -286,10 +269,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
-	newCode := append([]byte(prependText), code...)
-
-	reqUpd.SetCode(string(newCode))
+	reqUpd.SetCode(string(code))
 
 	reqUpd.SetActive(true)
 	if funcToUpdate.Name == "__DEFAULT__" || funcToUpdate.Name == "" {

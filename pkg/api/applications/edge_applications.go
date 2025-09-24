@@ -28,7 +28,7 @@ type GetCacheSettingsResponse interface {
 	GetDeviceGroup() []int32
 }
 
-type EdgeApplicationResponse interface {
+type ApplicationResponse interface {
 	GetId() int64
 	GetName() string
 	GetActive() bool
