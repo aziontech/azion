@@ -184,7 +184,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
+	flags.StringVar(&fields.EdgeCacheEnabled, "cache", "", msg.FlagCaching)
 	flags.StringVar(&fields.FunctionsEnabled, "functions", "", msg.FlagFunctions)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
