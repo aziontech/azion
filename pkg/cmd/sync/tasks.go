@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
-	edgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	edgeApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"

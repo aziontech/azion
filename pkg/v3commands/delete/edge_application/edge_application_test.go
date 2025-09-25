@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/delete/application"
 )
 
 func mockApplicationID(msg string) (string, error) {
