@@ -78,7 +78,7 @@ func Test_login_browserLogin(t *testing.T) {
 				askInput:    tt.fields.askInput,
 			}
 			enableHandlerRouter = false
-			if err := l.browserLogin(tt.args.srv); (err != nil) != tt.wantErr {
+			if err := l.browserLogin(); (err != nil) != tt.wantErr {
 				t.Errorf("login.browserLogin() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

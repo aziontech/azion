@@ -42,7 +42,7 @@ func shutdownContext() {
 	}
 }
 
-func (l *login) browserLogin(srv Server) error {
+func (l *login) browserLogin() error {
 	initializeContext()
 	defer shutdownContext()
 

@@ -70,7 +70,7 @@ func cmd(l *login) *cobra.Command {
 
 			switch {
 			case strings.Contains(answer, "browser"):
-				err := l.browserLogin(nil) // Server will be initialized in browserLogin
+				err := l.browserLogin() // Server will be initialized in browserLogin
 				if err != nil {
 					return err
 				}
