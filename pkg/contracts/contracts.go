@@ -59,7 +59,7 @@ type AzionApplicationOptions struct {
 	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
-	SkipDeletion  bool                         `json:"skip-deletion,omitempty"`
+	SkipDeletion  *bool                        `json:"skip-deletion,omitempty"`
 	NotFirstRun   bool                         `json:"not-first-run"`
 	Function      []AzionJsonDataFunction      `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
@@ -79,7 +79,7 @@ type AzionApplicationOptionsV3 struct {
 	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
 	Env           string                       `json:"env"`
 	Prefix        string                       `json:"prefix"`
-	SkipDeletion  bool                         `json:"skip-deletion,omitempty"`
+	SkipDeletion  *bool                        `json:"skip-deletion,omitempty"`
 	NotFirstRun   bool                         `json:"not-first-run"`
 	Function      AzionJsonDataFunction        `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`

@@ -349,7 +349,7 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	clientCache := apiCache.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
-	if conf.SkipDeletion {
+	if conf.SkipDeletion != nil && *conf.SkipDeletion {
 		logger.FInfoFlags(f.IOStreams.Out, msg.SkipDeletion, f.Format, f.Out)
 		*msgs = append(*msgs, msg.SkipDeletion)
 		return nil
