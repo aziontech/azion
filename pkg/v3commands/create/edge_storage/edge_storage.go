@@ -4,7 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 )
 

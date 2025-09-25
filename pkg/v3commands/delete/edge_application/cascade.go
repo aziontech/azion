@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/delete/application"
 	"github.com/aziontech/azion-cli/pkg/output"
 	app "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/v3api/edge_function"

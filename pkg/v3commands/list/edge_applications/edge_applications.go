@@ -9,7 +9,7 @@ import (
 	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/list/edge_applications"
+	msg "github.com/aziontech/azion-cli/messages/list/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	api "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"

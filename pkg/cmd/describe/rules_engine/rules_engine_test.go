@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	"github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -21,7 +21,7 @@ type fakeRule struct {
 	active      bool
 }
 
-func (f *fakeRule) GetId() int64          { return f.id }
+func (f *fakeRule) GetId() int64           { return f.id }
 func (f *fakeRule) GetDescription() string { return f.description }
 func (f *fakeRule) GetActive() bool        { return f.active }
 func (f *fakeRule) GetOrder() int64        { return f.order }
@@ -217,10 +217,10 @@ func TestDescribe(t *testing.T) {
 					order:       1,
 					active:      true,
 				}
-				descCmd.GetRulesEngineRequest = func(_ context.Context, _ string, _ string) (edge_applications.RulesEngineResponse, error) {
+				descCmd.GetRulesEngineRequest = func(_ context.Context, _ string, _ string) (applications.RulesEngineResponse, error) {
 					return success, nil
 				}
-				descCmd.GetRulesEngineResponse = func(_ context.Context, _ string, _ string) (edge_applications.RulesEngineResponse, error) {
+				descCmd.GetRulesEngineResponse = func(_ context.Context, _ string, _ string) (applications.RulesEngineResponse, error) {
 					return success, nil
 				}
 			}

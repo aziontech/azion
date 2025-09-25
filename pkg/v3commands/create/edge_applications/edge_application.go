@@ -8,7 +8,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/create/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/create/application"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	api "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"

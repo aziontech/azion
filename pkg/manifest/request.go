@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
+	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
+	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -177,8 +177,8 @@ func transformWorkloadRequestCreate(createRequest contracts.WorkloadManifest, ap
 	return request
 }
 
-func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.Applications) *apiEdgeApplications.UpdateRequest {
-	request := &apiEdgeApplications.UpdateRequest{}
+func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.Applications) *apiApplications.UpdateRequest {
+	request := &apiApplications.UpdateRequest{}
 
 	if edgeapprequest.Active != nil {
 		request.SetActive(*edgeapprequest.Active)
@@ -204,8 +204,8 @@ func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.Applications
 	return request
 }
 
-func transformEdgeApplicationRequestCreate(edgeapprequest contracts.Applications) *apiEdgeApplications.CreateRequest {
-	request := &apiEdgeApplications.CreateRequest{}
+func transformEdgeApplicationRequestCreate(edgeapprequest contracts.Applications) *apiApplications.CreateRequest {
+	request := &apiApplications.CreateRequest{}
 
 	if edgeapprequest.Active != nil {
 		request.SetActive(*edgeapprequest.Active)
@@ -282,8 +282,8 @@ func transformCacheRequestCreate(cache contracts.ManifestCacheSetting) *apiCache
 	return &request
 }
 
-func transformRuleResponse(rule contracts.ManifestRule) *apiEdgeApplications.UpdateRulesEngineResponse {
-	request := &apiEdgeApplications.UpdateRulesEngineResponse{}
+func transformRuleResponse(rule contracts.ManifestRule) *apiApplications.UpdateRulesEngineResponse {
+	request := &apiApplications.UpdateRulesEngineResponse{}
 
 	request.SetActive(rule.Active)
 	// if rule.Behaviors != nil {
@@ -299,8 +299,8 @@ func transformRuleResponse(rule contracts.ManifestRule) *apiEdgeApplications.Upd
 	return request
 }
 
-func transformRuleRequest(rule contracts.ManifestRule) *apiEdgeApplications.UpdateRulesEngineRequest {
-	request := &apiEdgeApplications.UpdateRulesEngineRequest{}
+func transformRuleRequest(rule contracts.ManifestRule) *apiApplications.UpdateRulesEngineRequest {
+	request := &apiApplications.UpdateRulesEngineRequest{}
 
 	request.SetActive(rule.Active)
 	if rule.Criteria != nil {

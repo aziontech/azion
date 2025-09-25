@@ -180,7 +180,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf, &msgs)
+	err = cmd.doApplication(clients.Application, context.Background(), conf, &msgs)
 	if err != nil {
 		return err
 	}
@@ -231,7 +231,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
-		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
+		err = cmd.doRulesDeploy(ctx, conf, clients.Application, &msgs)
 		if err != nil {
 			return err
 		}
