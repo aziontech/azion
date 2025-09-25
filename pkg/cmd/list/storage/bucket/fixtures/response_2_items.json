@@ -1,0 +1,19 @@
+{
+  "count": 2,
+  "results": [
+    {
+      "name": "arthur-morgan02",
+      "edge_access": "read_only",
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "product_version": "1.0"
+    },
+    {
+      "name": "arthur-morgan03",
+      "edge_access": "read_only",
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "product_version": "1.0"
+    }
+  ]
+}

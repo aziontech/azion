@@ -27,10 +27,11 @@ func TestWhoami(t *testing.T) {
 		{
 			name: "whoami - logged in",
 			tokenSettings: token.Settings{
-				Email: "test@example.com",
+				Email:    "test@example.com",
+				ClientId: "abcd-1234",
 			},
 			mockReadError:  nil,
-			expectedOutput: "test@example.com\n",
+			expectedOutput: " Client ID: abcd-1234\n Email: test@example.com\n",
 			expectedError:  nil,
 		},
 		{
@@ -60,6 +61,7 @@ func TestWhoami(t *testing.T) {
 			mock := &httpmock.Registry{}
 
 			f, out, _ := testutils.NewFactory(mock)
+			f.Flags.NoColor = true
 
 			whoamiCmd := &WhoamiCmd{
 				Io:           f.IOStreams,

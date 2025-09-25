@@ -99,28 +99,43 @@ func TestSyncFull(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/request/rules/"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
 		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/response/rules"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/response/rules/"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/rules_engine/response/rules"),
-			httpmock.JSONFromFile("./fixtures/rules_results.json"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
+			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings"),
+			httpmock.JSONFromFile("./fixtures/cache.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings/"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1000000/origins"),
+			httpmock.REST("GET", "edge_application/applications/1000000/origins"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
-		)
-
-		mock.Register(
-			httpmock.REST("GET", "variables"),
-			httpmock.JSONFromFile("./fixtures/variables.json"),
 		)
 
 		f, _, _ := testutils.NewFactory(mock)
@@ -133,6 +148,10 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		// Avoid HTTP by stubbing SyncResources for success case
+		syncCmd.SyncResources = func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
+			return nil
 		}
 		syncCmd.WriteManifest = func(manifest *contracts.ManifestV4, pathMan string) error {
 			return nil
@@ -160,7 +179,20 @@ func TestSyncFull(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/request/rules/"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+		mock.Register(
 			httpmock.REST("GET", "edge_applications/1000000/rules_engine/request/rules"),
+			httpmock.JSONFromFile("./fixtures/rules.json"),
+		)
+
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/response/rules"),
 			httpmock.JSONFromFile("./fixtures/rules_results.json"),
 		)
 		mock.Register(
@@ -169,13 +201,21 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1000000/cache_settings"),
-			httpmock.JSONFromFile("./fixtures/cache_results.json"),
+			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings"),
+			httpmock.JSONFromFile("./fixtures/cache.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings/"),
+			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_applications/1000000/origins"),
-			httpmock.JSONFromFile("./fixtures/origins_results.json"),
+			httpmock.REST("GET", "edge_application/applications/1000000/origins"),
+			httpmock.JSONFromFile("./fixtures/origins.json"),
+		)
+		mock.Register(
+			httpmock.REST("GET", "edge_application/applications/1000000/origins/"),
+			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 
 		mock.Register(
@@ -193,6 +233,10 @@ func TestSyncFull(t *testing.T) {
 					Name: "testename",
 				},
 			}, nil
+		}
+		// Avoid HTTP by stubbing SyncResources for success case
+		syncCmd.SyncResources = func(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
+			return nil
 		}
 		syncCmd.WriteManifest = func(manifest *contracts.ManifestV4, pathMan string) error {
 			return nil

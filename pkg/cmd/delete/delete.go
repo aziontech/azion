@@ -3,14 +3,15 @@ package delete
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
+	application "github.com/aziontech/azion-cli/pkg/cmd/delete/application"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/delete/cache_setting"
-	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_application"
-	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_connector"
-	function "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_function"
-	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/delete/edge_storage"
+	connector "github.com/aziontech/azion-cli/pkg/cmd/delete/connector"
+	function "github.com/aziontech/azion-cli/pkg/cmd/delete/function"
+	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/delete/function_instance"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/delete/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/delete/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/delete/rules_engine"
+	storage "github.com/aziontech/azion-cli/pkg/cmd/delete/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -32,7 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(edgeApplication.NewCmd(f))
+	cmd.AddCommand(application.NewCmd(f))
 	cmd.AddCommand(rulesEngine.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
 	cmd.AddCommand(token.NewCmd(f))
@@ -40,8 +41,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(function.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
-	cmd.AddCommand(edgeStorage.NewCmd(f))
-	cmd.AddCommand(edgeConnector.NewCmd(f))
+	cmd.AddCommand(storage.NewCmd(f))
+	cmd.AddCommand(connector.NewCmd(f))
+	cmd.AddCommand(functionInstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

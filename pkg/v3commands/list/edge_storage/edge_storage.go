@@ -4,10 +4,10 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
-	"github.com/aziontech/azion-cli/pkg/cmd/list/edge_storage/bucket"
-	"github.com/aziontech/azion-cli/pkg/cmd/list/edge_storage/object"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/v3commands/list/edge_storage/bucket"
+	"github.com/aziontech/azion-cli/pkg/v3commands/list/edge_storage/object"
 )
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {

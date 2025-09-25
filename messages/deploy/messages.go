@@ -56,5 +56,6 @@ Create a Cache Settings configuration with the above specifications? (y/N)`
 	NameInUseApplication = "Application name is already in use. Trying to create Application with the following name: %s\n"
 	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
 
-	VisitMsg = "Please visit %s in case it did not open automatically, to follow up the full deploy process\n"
+	VisitMsg          = "Please visit %s in case it did not open automatically, to follow up the full deploy process\n"
+	UpdateAzionConfig = "Updating azion.config file with variable names\n"
 )

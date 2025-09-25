@@ -1,6 +1,7 @@
 package edgefunction
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -8,7 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap/zapcore"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_function"
+	msg "github.com/aziontech/azion-cli/messages/function"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/stretchr/testify/assert"
@@ -64,7 +65,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockFunctionID,
-			mockError:      fmt.Errorf("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support"),
+			mockError:      errors.New("Failed to parse your response. Check your response and try again. If the error persists, contact Azion support"),
 		},
 		{
 			name:           "error in input",
@@ -76,7 +77,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalidFunctionID,
-			mockError:      fmt.Errorf("invalid argument \"\" for \"--function-id\" flag: strconv.ParseInt: parsing \"\": invalid syntax"),
+			mockError:      errors.New("invalid argument \"\" for \"--function-id\" flag: strconv.ParseInt: parsing \"\": invalid syntax"),
 		},
 		{
 			name:           "ask for function id success",
@@ -100,7 +101,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalidFunctionID,
-			mockError:      fmt.Errorf(msg.ErrorConvertIdFunction.Error()),
+			mockError:      errors.New(msg.ErrorConvertIdFunction.Error()),
 		},
 		{
 			name:           "error - parse answer",
@@ -112,7 +113,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockParseErrorFunctionID,
-			mockError:      fmt.Errorf(utils.ErrorParseResponse.Error()),
+			mockError:      errors.New(utils.ErrorParseResponse.Error()),
 		},
 	}
 

@@ -1,0 +1,23 @@
+ {
+  "id": 1694434702,
+  "name": "string",
+  "modules": {
+    "edge_cache": {
+      "enabled": true
+    },
+    "functions": {
+      "enabled": true
+    },
+    "application_accelerator": {
+      "enabled": false
+    },
+    "image_processor": {
+      "enabled": false
+    },
+    "tiered_cache": {
+      "enabled": false
+    }
+  },
+  "active": true,
+  "debug": false
+}

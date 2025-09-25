@@ -1,0 +1,10 @@
+{
+	"state": "executed",
+	"data": {
+	  "name": "John-Marston",
+	  "edge_access": "read_only",
+	  "last_editor": "guess@who.com",
+	  "last_modified": "2019-08-24T14:15:22Z",
+	  "product_version": "1.0"
+	}
+  }

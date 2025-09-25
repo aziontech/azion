@@ -3,14 +3,15 @@ package create
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/create"
+	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/applications"
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/create/cache_setting"
-	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/edge_applications"
-	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/create/edge_connector"
-	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/create/edge_function"
-	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/edge_storage"
+	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/create/connector"
+	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/create/function"
+	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/create/function_instance"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/create/rules_engine"
+	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/create/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmd/create/workloads"
@@ -44,6 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(workloads.NewCmd(f))
 	cmd.AddCommand(workloaddeployment.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
+	cmd.AddCommand(functionInstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

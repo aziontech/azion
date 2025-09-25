@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
-	edgeApp "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	edgeApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -39,20 +39,20 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	var err error
 	manifest := &contracts.ManifestV4{}
 
-	// remoteCaches, err := synch.syncCache(info, f, manifest)
-	// if err != nil {
-	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	// }
+	remoteCaches, err := synch.syncCache(info, f, manifest)
+	if err != nil {
+		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
 
 	// remoteConnectors, err := synch.syncConnector(info, f, manifest)
 	// if err != nil {
 	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	// }
 
-	// err = synch.syncRules(info, f, manifest, remoteCaches)
-	// if err != nil {
-	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	// }
+	err = synch.syncRules(info, f, manifest, remoteCaches)
+	if err != nil {
+		return fmt.Errorf(msg.ERRORSYNC, err.Error())
+	}
 
 	err = synch.syncEnv(f)
 	if err != nil {
@@ -167,54 +167,105 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	return remoteCacheIds, nil
 }
 
-// func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4,
-// 	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings) error {
-// 	// Get request rules first
-// 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-// 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-// 	resp, err := client.ListRulesEngine(context.Background(), opts, str)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	rulesAzion := []contracts.AzionJsonDataRules{}
-// 	info.Conf.RulesEngine.Rules = rulesAzion
-// 	for _, rule := range resp.Results {
-// 		if rule.Name == "Default Rule" || rule.Name == "enable gzip" {
-// 			//default rule or enable gzip rule are not added to azion.json or azion.config
-// 			continue
-// 		}
-// 		jsonBytes, err := json.Marshal(rule)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		rEntry := edgesdk.EdgeApplicationRuleEngineRequest{}
-// 		err = json.Unmarshal(jsonBytes, &rEntry)
-// 		if err != nil {
-// 			return err
-// 		}
+func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4,
+	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings) error {
+	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	str := strconv.FormatInt(info.Conf.Application.ID, 10)
+	rulesAzion := []contracts.AzionJsonDataRules{}
+	info.Conf.RulesEngine.Rules = rulesAzion
 
-// 		manifest.EdgeApplications[0].Rules = append(manifest.EdgeApplications[0].Rules, rEntry)
+	// Initialize Applications slice if it's empty
+	if len(manifest.Applications) == 0 {
+		manifest.Applications = append(manifest.Applications, contracts.Applications{
+			Name:  info.Conf.Application.Name,
+			Rules: []contracts.ManifestRulesEngine{},
+		})
+	}
 
-// 		newRule := contracts.AzionJsonDataRules{
-// 			Id:    rule.GetId(),
-// 			Name:  rule.GetName(),
-// 			Phase: rule.GetPhase(),
-// 		}
-// 		rulesAzion = append(rulesAzion, newRule)
-// 		info.Conf.RulesEngine.Rules = rulesAzion
-// 	}
-// 	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-// 	if err != nil {
-// 		logger.Debug("Error while writing azion.json file", zap.Error(err))
-// 		return err
-// 	}
+	// Get request phase rules
+	reqResp, err := client.ListRulesEngineRequest(context.Background(), opts, str)
+	if err != nil {
+		logger.Debug("Error while listing request phase rules", zap.Error(err))
+		return fmt.Errorf("failed to list request phase rules: %w", err)
+	}
 
-// 	return nil
-// }
+	for _, rule := range reqResp.Results {
+		if rule.Name == "Default Rule" || rule.Name == "enable gzip" {
+			//default rule or enable gzip rule are not added to azion.json or azion.config
+			continue
+		}
+
+		// Create a ManifestRulesEngine for the request phase rule
+		manifestRule := contracts.ManifestRulesEngine{
+			Phase: "request",
+			Rule: contracts.ManifestRule{
+				Name:        rule.GetName(),
+				Description: rule.GetDescription(),
+				Active:      rule.GetActive(),
+				// Convert criteria and behaviors to appropriate types
+			},
+		}
+
+		// Add rule to manifest
+		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
+
+		newRule := contracts.AzionJsonDataRules{
+			Id:    rule.GetId(),
+			Name:  rule.GetName(),
+			Phase: "request",
+		}
+		rulesAzion = append(rulesAzion, newRule)
+	}
+
+	// Get response phase rules
+	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, str)
+	if err != nil {
+		logger.Debug("Error while listing response phase rules", zap.Error(err))
+		return fmt.Errorf("failed to list response phase rules: %w", err)
+	}
+
+	for _, rule := range respResp.Results {
+		if rule.Name == "Default Rule" || rule.Name == "enable gzip" {
+			//default rule or enable gzip rule are not added to azion.json or azion.config
+			continue
+		}
+
+		// Create a ManifestRulesEngine for the response phase rule
+		manifestRule := contracts.ManifestRulesEngine{
+			Phase: "response",
+			Rule: contracts.ManifestRule{
+				Name:        rule.GetName(),
+				Description: rule.GetDescription(),
+				Active:      rule.GetActive(),
+				// Convert criteria and behaviors to appropriate types
+			},
+		}
+
+		// Add rule to manifest
+		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
+
+		newRule := contracts.AzionJsonDataRules{
+			Id:    rule.GetId(),
+			Name:  rule.GetName(),
+			Phase: "response",
+		}
+		rulesAzion = append(rulesAzion, newRule)
+	}
+
+	// Update the configuration with all rules
+	info.Conf.RulesEngine.Rules = rulesAzion
+	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	if err != nil {
+		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
 
 func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 
-	client := varApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	client := varApi.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 	resp, err := client.List(context.Background())
 	if err != nil {
 		return err

@@ -132,15 +132,6 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	if !SkipBuild {
-		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
-	}
-
 	conf, err := cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
@@ -189,7 +180,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf, &msgs)
+	err = cmd.doApplication(clients.Application, context.Background(), conf, &msgs)
 	if err != nil {
 		return err
 	}
@@ -240,7 +231,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
-		err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
+		err = cmd.doRulesDeploy(ctx, conf, clients.Application, &msgs)
 		if err != nil {
 			return err
 		}

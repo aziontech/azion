@@ -140,7 +140,7 @@ func TestSimulateDeploy(t *testing.T) {
 			},
 			manifestPath: "path/to/manifest.json",
 			wantMessages: []string{
-				"Updating Edge Application ",
+				"Updating Application",
 				"Creating single Origin named 'test-app_single'",
 			},
 			fileReaderFunc: fileReaderSuccess,
@@ -157,7 +157,7 @@ func TestSimulateDeploy(t *testing.T) {
 			},
 			manifestPath: "",
 			wantMessages: []string{
-				"Creating Edge Application",
+				"Creating Application",
 			},
 			fileReaderFunc: fileReaderSuccess,
 		},

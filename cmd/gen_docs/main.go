@@ -16,6 +16,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
+// emptyConfig is a minimal implementation of the config.Config interface used by the root factory
+// to avoid nil dereferences during documentation generation and tests.
+type emptyConfig struct{}
+
+func (emptyConfig) GetString(key string) string { return "" }
+
 func main() {
 	if err := run(os.Args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -44,6 +50,7 @@ func run(args []string) error {
 
 	fact := cmd.NewFactoryRoot(&cmdutil.Factory{
 		IOStreams: iostreams.System(),
+		Config:    emptyConfig{},
 	})
 
 	rootCmd := fact.CmdRoot()

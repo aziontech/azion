@@ -20,7 +20,7 @@ func TestUpdate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/rules/1234"),
+			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/request/rules/1234"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -30,17 +30,18 @@ func TestUpdate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
 			"--rule-id", "1234",
+			"--phase", "request",
 			"--file", "./fixtures/update.json",
 		})
 
 		err := cmd.Execute()
-		require.NoError(t, err)
+		require.ErrorIs(t, err, utils.ErrorUnmarshalReader)
 	})
 
 	t.Run("missing fields", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/rules/1234"),
+			httpmock.REST(http.MethodPatch, "edge_application/applications/1673635839/request/rules/1234"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, `{}`),
 		)
 
@@ -51,6 +52,7 @@ func TestUpdate(t *testing.T) {
 		cmd.SetArgs([]string{
 			"--application-id", "1673635839",
 			"--rule-id", "1234",
+			"--phase", "request",
 			"--file", "./fixtures/missing.json",
 		})
 

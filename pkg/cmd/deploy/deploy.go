@@ -179,7 +179,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}
 
 	//create credentials if they are not found on settings file
-	if settings.S3AccessKey == "" || settings.S3SecreKey == "" {
+	if settings.S3AccessKey == "" || settings.S3SecretKey == "" {
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: "read_only"}})
@@ -204,7 +204,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		settings.S3AccessKey = creds.Data.GetAccessKey()
-		settings.S3SecreKey = creds.Data.GetSecretKey()
+		settings.S3SecretKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
 
 		err = token.WriteSettings(settings)
@@ -225,7 +225,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecreKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecretKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
 	if err != nil {
 		return err
 	}

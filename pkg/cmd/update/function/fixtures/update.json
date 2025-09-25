@@ -1,0 +1,10 @@
+{
+    "name": "string",
+    "active": true,
+    "id": 1337,
+    "runtime": "azion_js",
+    "execution_environment": "application",
+    "code": "string",
+    "default_args": {},
+    "azion_form": {}
+  }

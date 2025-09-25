@@ -1,30 +1,45 @@
 {
-    "application_controls": {
-     "adaptive_delivery_action": "ignore",
-     "cache_by_cookies": "ignore",
-     "cache_by_query_string": "ignore",
-     "cookie_names": [],
-     "device_group": [],
-     "query_string_fields": [],
-     "query_string_sort_enabled": false
-    },
-    "browser_cache": {
-     "behavior": "honor",
-     "max_age": 0
-    },
-    "edge_cache": {
-     "behavior": "honor",
-     "caching_for_options_enabled": false,
-     "caching_for_post_enabled": false,
-     "max_age": 60,
-     "stale_cache_enabled": true,
-     "tiered_cache_enabled": false
-    },
-    "name": "updatedonomene",
-    "slice_controls": {
-     "slice_configuration_enabled": false,
-     "slice_configuration_range": 1024,
-     "slice_edge_caching_enabled": false,
-     "slice_tiered_caching_enabled": false
-    }
+    "name": "string",
+	  "browser_cache": {
+		"behavior": "override",
+		"max_age": 0
+	  },
+	  "modules": {
+		"edge_cache": {
+		  "behavior": "honor",
+		  "max_age": 60,
+		  "stale_cache": {
+			"enabled": false
+		  },
+		  "large_file_cache": {
+			"enabled": false,
+			"offset": 1024
+		  }
+		},
+		"tiered_cache": {
+		  "behavior": "override",
+		  "max_age": 31536000,
+		  "topology": "near-edge"
+		},
+		"application_accelerator": {
+		  "cache_vary_by_method": [
+			"options"
+		  ],
+		  "cache_vary_by_querystring": {
+			"behavior": "ignore",
+			"fields": [],
+			"sort_enabled": true
+		  },
+		  "cache_vary_by_cookies": {
+			"behavior": "ignore",
+			"cookie_names": []
+		  },
+		  "cache_vary_by_devices": {
+			"behavior": "ignore",
+			"device_group": [
+			  0
+			]
+		  }
+		}
+	  }
    }

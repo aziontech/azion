@@ -27,7 +27,7 @@ var (
 )
 
 func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
-	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecreKey)
+	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecretKey)
 	if err != nil {
 		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
 	}
@@ -179,7 +179,7 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 
 		if err := s3.UploadFile(context.Background(), clientUpload, &job, bucket, prefix); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
-			for Retries < 5 {
+			for Retries < 20 {
 				atomic.AddInt64(&Retries, 1)
 
 				time.Sleep(time.Second * time.Duration(Retries))
@@ -198,8 +198,8 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 				break
 			}
 
-			if Retries >= 5 {
-				logger.Debug("There have been 5 retries already, quitting upload")
+			if Retries >= 20 {
+				logger.Debug("There have been 20 retries already, quitting upload")
 				results <- err
 				return
 			}

@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/aziontech/azion-cli/pkg/github"
+	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
@@ -97,6 +98,9 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		ClientId:                   user.Results.ClientID,
 		Email:                      user.Results.Email,
 		AuthorizeMetricsCollection: settings.AuthorizeMetricsCollection,
+		S3AccessKey:                "",
+		S3SecretKey:                "",
+		S3Bucket:                   "",
 	}
 
 	bStrToken, err := toml.Marshal(strToken)
@@ -130,13 +134,14 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 
 	git := github.NewGithub()
 
-	tagName, err := git.GetVersionGitHub("azion")
+	tagName, publishedAt, err := git.GetVersionGitHub("azion")
 	if err != nil {
 		return err
 	}
 
 	logger.Debug("Current version: " + cVersion)
 	logger.Debug("Latest version: " + tagName)
+	logger.Debug("Published at: " + publishedAt)
 
 	latestVersion, err := format(tagName)
 	if err != nil {
@@ -147,13 +152,24 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 		return err
 	}
 
-	logger.Debug("Formatted current version: " + fmt.Sprint(currentVersion))
-	logger.Debug("Formatted latest version: " + fmt.Sprint(latestVersion))
-
 	if latestVersion > currentVersion {
-		err := showUpdateMessage(f, tagName)
+		// Parse the published_at date
+		publishedTime, err := time.Parse(time.RFC3339, publishedAt)
 		if err != nil {
-			return err
+			logger.Debug("Failed to parse published_at date", zap.Error(err))
+			// If we can't parse the date, fall back to showing the update message
+			err := showUpdateMessage(f, tagName)
+			if err != nil {
+				return err
+			}
+		} else {
+			// Only show update message if at least 24 hours have passed since publishing
+			if time.Since(publishedTime) >= 24*time.Hour {
+				err := showUpdateMessage(f, tagName)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 

@@ -12,7 +12,7 @@ import (
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"

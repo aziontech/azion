@@ -7,7 +7,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
-	api "github.com/aziontech/azion-cli/pkg/api/edge_applications"
+	api "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -107,7 +107,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		extractor := func(rule sdk.ApplicationRequestPhaseRuleEngine, details bool) []string {
 			if details {
 				return []string{
-					fmt.Sprintf("%d", rule),
+					fmt.Sprintf("%d", rule.Id),
 					rule.Name,
 					fmt.Sprintf("%d", rule.Order),
 					phase,
@@ -120,6 +120,13 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			}
 		}
 
+		// Ensure rules.Results is not nil before passing to RenderList
+		if rules == nil {
+			rules = &sdk.PaginatedApplicationRequestPhaseRuleEngineList{}
+		}
+		if rules.Results == nil {
+			rules.Results = []sdk.ApplicationRequestPhaseRuleEngine{}
+		}
 		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
 
 	case "response":
@@ -131,7 +138,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		extractor := func(rule sdk.ApplicationResponsePhaseRuleEngine, details bool) []string {
 			if details {
 				return []string{
-					fmt.Sprintf("%d", rule),
+					fmt.Sprintf("%d", rule.Id),
 					rule.Name,
 					fmt.Sprintf("%d", rule.Order),
 					phase,
@@ -144,6 +151,13 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			}
 		}
 
+		// Ensure rules.Results is not nil before passing to RenderList
+		if rules == nil {
+			rules = &sdk.PaginatedApplicationResponsePhaseRuleEngineList{}
+		}
+		if rules.Results == nil {
+			rules.Results = []sdk.ApplicationResponsePhaseRuleEngine{}
+		}
 		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
 	default:
 		return msg.ErrorInvalidPhase
