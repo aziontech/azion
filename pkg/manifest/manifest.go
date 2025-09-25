@@ -545,6 +545,12 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	// clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
+	if conf.SkipDeletion {
+		logger.FInfoFlags(f.IOStreams.Out, msg.SkipDeletion, f.Format, f.Out)
+		*msgs = append(*msgs, msg.SkipDeletion)
+		return nil
+	}
+
 	for _, value := range RuleIds {
 		//since until [UXE-3599] was carried out we'd only cared about "request" phase, this check guarantees that if Phase is empty
 		// we are probably dealing with a rule engine from a previous version

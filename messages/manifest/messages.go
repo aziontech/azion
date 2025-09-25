@@ -12,4 +12,5 @@ const (
 	ManifestCreateDomain = "Domain %s with id %d successfully created\n"
 	ReadingManifest      = "Reading manifest.json file\n"
 	CreatingManifest     = "Creating resources found in manifest.json file\n"
+	SkipDeletion         = "Skipping deletion of resources based on configuration found on azion.json file\n"
 )
