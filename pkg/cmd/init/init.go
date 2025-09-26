@@ -267,6 +267,18 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
 
+	// Handle optional extras from the Templates API
+	selectedItem := templateOptionsMap[answerTemplate]
+	if selectedItem.Extras != nil && strings.ToLower(selectedItem.Extras.Type) == "env" && len(selectedItem.Extras.Inputs) > 0 {
+		inputs := make([]utils.EnvInput, 0, len(selectedItem.Extras.Inputs))
+		for _, in := range selectedItem.Extras.Inputs {
+			inputs = append(inputs, utils.EnvInput{Key: in.Key, Text: in.Text})
+		}
+		if err := utils.CollectEnvInputsAndWriteFile(inputs, newPath); err != nil {
+			return err
+		}
+	}
+
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
