@@ -261,65 +261,66 @@ func TestResponseToBool(t *testing.T) {
 }
 
 func TestGetAzionJsonContent(t *testing.T) {
-    tests := []struct {
-        name string
-        test func(t *testing.T)
-    }{
-        {
-            name: "read json content",
-            test: func(t *testing.T) {
-                path, _ := GetWorkingDir()
-                jsonConf := filepath.Join(path, "azion", "azion.json")
-                _ = os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
-                azJsonData, err := GetAzionJsonContent("azion")
-                require.NoError(t, err)
-                require.Contains(t, azJsonData.Name, "Test01")
-                require.Contains(t, azJsonData.Function[0].Name, "MyFunc")
-                require.Contains(t, azJsonData.Function[0].File, "myfile.js")
-                require.EqualValues(t, azJsonData.Function[0].ID, 476)
-            },
-        },
-    }
-    for _, test := range tests {
-        t.Run(test.name, test.test)
-    }
+	tests := []struct {
+		name string
+		test func(t *testing.T)
+	}{
+		{
+			name: "read json content",
+			test: func(t *testing.T) {
+				path, _ := GetWorkingDir()
+				jsonConf := filepath.Join(path, "azion", "azion.json")
+				_ = os.MkdirAll(filepath.Dir(jsonConf), os.ModePerm)
+				azJsonData, err := GetAzionJsonContent("azion")
+				require.NoError(t, err)
+				require.Contains(t, azJsonData.Name, "Test01")
+				require.Contains(t, azJsonData.Function[0].Name, "MyFunc")
+				require.Contains(t, azJsonData.Function[0].File, "myfile.js")
+				require.EqualValues(t, azJsonData.Function[0].ID, 476)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, test.test)
+	}
 }
 
+// test "skip-deletion" field absence
 func TestGetAzionJsonContent_SkipDeletionAbsent(t *testing.T) {
-    // Create a temporary config directory under current working dir
-    cwd, err := GetWorkingDir()
-    require.NoError(t, err)
+	// Create a temporary config directory under current working dir
+	cwd, err := GetWorkingDir()
+	require.NoError(t, err)
 
-    dir := filepath.Join(cwd, "azion-skip")
-    err = os.MkdirAll(dir, os.ModePerm)
-    require.NoError(t, err)
-    defer os.RemoveAll(dir)
+	dir := filepath.Join(cwd, "azion-skip")
+	err = os.MkdirAll(dir, os.ModePerm)
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
 
-    // Write a minimal azion.json WITHOUT the "skip-deletion" field
-    content := `{
+	// Write a minimal azion.json WITHOUT the "skip-deletion" field
+	content := `{
         "name": "SkipDeletionAbsent",
         "bucket": "bkt",
         "preset": "react",
         "env": "prod",
         "prefix": "pre"
     }`
-    err = os.WriteFile(filepath.Join(dir, "azion.json"), []byte(content), 0644)
-    require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(dir, "azion.json"), []byte(content), 0644)
+	require.NoError(t, err)
 
-    conf, err := GetAzionJsonContent("azion-skip")
-    require.NoError(t, err)
+	conf, err := GetAzionJsonContent("azion-skip")
+	require.NoError(t, err)
 
-    // When the field is absent, the pointer must remain nil
-    require.Nil(t, conf.SkipDeletion)
+	// When the field is absent, the pointer must remain nil
+	require.Nil(t, conf.SkipDeletion)
 }
 
 func TestErrorPerStatusCode(t *testing.T) {
-    tests := []struct {
-        name          string
-        httpResp      *http.Response
-        err           error
-        expectedError error
-    }{
+	tests := []struct {
+		name          string
+		httpResp      *http.Response
+		err           error
+		expectedError error
+	}{
 		{
 			name: "status code 401 - unauthorized",
 			httpResp: &http.Response{
