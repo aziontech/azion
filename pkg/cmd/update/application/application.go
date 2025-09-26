@@ -26,7 +26,6 @@ type Fields struct {
 	FunctionsEnabled              string `json:"functions_enabled,omitempty"`
 	ApplicationAcceleratorEnabled string `json:"application_accelerator_enabled,omitempty"`
 	ImageProcessorEnabled         string `json:"image_processor_enabled,omitempty"`
-	TieredCacheEnabled            string `json:"tiered_cache_enabled,omitempty"`
 	Active                        string `json:"active,omitempty"`
 	DebugRules                    string `json:"debug,omitempty"`
 	Path                          string
@@ -105,7 +104,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 						Enabled: &edgeCache,
 					}
 
-					modules.SetEdgeCache(eCache)
+					modules.SetCache(eCache)
 				}
 
 				if !utils.IsEmpty(fields.FunctionsEnabled) {
@@ -150,20 +149,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					modules.SetImageProcessor(iProcessor)
 				}
 
-				if !utils.IsEmpty(fields.TieredCacheEnabled) {
-					tieredCache, err := strconv.ParseBool(fields.TieredCacheEnabled)
-					if err != nil {
-						logger.Debug("Error while parsing <"+fields.TieredCacheEnabled+"> ", zap.Error(err))
-						return utils.ErrorConvertingStringToBool
-					}
-
-					tCache := sdk.TieredCacheModuleRequest{
-						Enabled: &tieredCache,
-					}
-
-					modules.SetTieredCache(tCache)
-				}
-
 				request.SetModules(modules)
 
 				if !utils.IsEmpty(fields.Active) {
@@ -199,11 +184,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.Int64Var(&fields.ID, "application-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
+	flags.StringVar(&fields.EdgeCacheEnabled, "cache", "", msg.FlagCaching)
 	flags.StringVar(&fields.FunctionsEnabled, "functions", "", msg.FlagFunctions)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
-	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagName)
 	flags.StringVar(&fields.DebugRules, "debug-enabled", "", msg.FlagDebugRules)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)

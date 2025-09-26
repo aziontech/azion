@@ -30,21 +30,21 @@ func TestNewObject(t *testing.T) {
 	}{
 		{
 			name:     "list success",
-			request:  httpmock.REST(http.MethodGet, "v4/storage/buckets/my-bucket/objects"),
+			request:  httpmock.REST(http.MethodGet, "v4/edge_storage/buckets/my-bucket/objects"),
 			response: httpmock.JSONFromFile("fixtures/objects_response.json"),
 			args:     []string{"--bucket-name", "my-bucket"},
 			output:   "KEY      LAST MODIFIED                  \nobject1  2024-08-05 12:00:00 +0000 UTC  \nobject2  2024-08-05 13:00:00 +0000 UTC  \n",
 		},
 		{
 			name:     "list 2 items successfully",
-			request:  httpmock.REST(http.MethodGet, "v4/storage/buckets/my-bucket/objects"),
+			request:  httpmock.REST(http.MethodGet, "v4/edge_storage/buckets/my-bucket/objects"),
 			response: httpmock.JSONFromFile("fixtures/objects_response_2_items.json"),
 			args:     []string{"--bucket-name", "my-bucket", "--page-size", "2"},
 			output:   "KEY      LAST MODIFIED                  \nobject1  2024-08-05 12:00:00 +0000 UTC  \nobject2  2024-08-05 13:00:00 +0000 UTC  \n",
 		},
 		{
 			name:    "failed internal error status 500",
-			request: httpmock.REST(http.MethodGet, "v4/storage/buckets/my-bucket/objects"),
+			request: httpmock.REST(http.MethodGet, "v4/edge_storage/buckets/my-bucket/objects"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,

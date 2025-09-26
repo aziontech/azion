@@ -21,7 +21,7 @@ type RequestBucket struct {
 
 func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error {
 	logger.Debug("Creating bucket ", zap.Any("name", request.Name))
-	req := c.apiClient.EdgeStorageBucketsAPI.CreateBucket(ctx).BucketCreateRequest(request.BucketCreateRequest)
+	req := c.apiClient.StorageBucketsAPI.CreateBucket(ctx).BucketCreateRequest(request.BucketCreateRequest)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while creating the project Bucket", zap.Error(err))
@@ -32,7 +32,7 @@ func (c *Client) CreateBucket(ctx context.Context, request RequestBucket) error 
 
 func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedBucketList, error) {
 	logger.Debug("Listing bucket")
-	resp, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.ListBuckets(ctx).
+	resp, httpResp, err := c.apiClient.StorageBucketsAPI.ListBuckets(ctx).
 		Page(opts.Page).PageSize(opts.PageSize).Execute()
 	if err != nil {
 		logger.Error("Error while listing buckets", zap.Error(err))
@@ -43,7 +43,7 @@ func (c *Client) ListBucket(ctx context.Context, opts *contracts.ListOptions) (*
 
 func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	logger.Debug("Delete bucket", zap.Any("bucket-name", name))
-	_, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.
+	_, httpResp, err := c.apiClient.StorageBucketsAPI.
 		DeleteBucket(ctx, name).Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -63,7 +63,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 	bucket := sdk.PatchedBucketRequest{
 		EdgeAccess: &edgeAccess,
 	}
-	_, httpResp, err := c.apiClient.EdgeStorageBucketsAPI.
+	_, httpResp, err := c.apiClient.StorageBucketsAPI.
 		UpdateBucket(ctx, name).PatchedBucketRequest(bucket).Execute()
 	if err != nil {
 		logger.Debug("Error while updating the project Bucket", zap.Error(err))
@@ -74,7 +74,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 
 func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, bucketName, objectKey string) error {
 	logger.Debug("Creating object")
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).
 		Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -86,7 +86,7 @@ func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, b
 
 func (c *Client) ListObject(ctx context.Context, bucketName string, opts *contracts.ListOptions) (*sdk.ResponseBucketObject, error) {
 	logger.Debug("Listing bucket")
-	req := c.apiClient.EdgeStorageObjectsAPI.ListObjects(ctx, bucketName).
+	req := c.apiClient.StorageObjectsAPI.ListObjects(ctx, bucketName).
 		MaxObjectCount(opts.PageSize).ContinuationToken(opts.ContinuationToken)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
@@ -102,7 +102,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.EdgeStorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -121,7 +121,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 
 func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
 	logger.Debug("Getting bucket")
-	_, httpResp, err := c.apiClient.EdgeStorageObjectsAPI.DownloadObject(ctx, bucketName, objectKey).Execute()
+	_, httpResp, err := c.apiClient.StorageObjectsAPI.DownloadObject(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while updating the project Bucket", zap.Error(err))
@@ -142,7 +142,7 @@ func (c *Client) GetObject(ctx context.Context, bucketName, objectKey string) ([
 
 func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string) error {
 	logger.Debug("Delete object", zap.Any("object-key", objectKey))
-	_, httpResp, err := c.apiClient.EdgeStorageObjectsAPI.
+	_, httpResp, err := c.apiClient.StorageObjectsAPI.
 		DeleteObjectKey(ctx, bucketName, objectKey).Execute()
 	if err != nil {
 		if httpResp != nil {
@@ -159,7 +159,7 @@ func (c *Client) DeleteObject(ctx context.Context, bucketName, objectKey string)
 
 func (c *Client) UpdateObject(ctx context.Context, bucketName, objectKey, contentType string, body *os.File) error {
 	logger.Debug("Updating objects")
-	req := c.apiClient.EdgeStorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body).ContentType(contentType)
+	req := c.apiClient.StorageObjectsAPI.UpdateObjectKey(ctx, bucketName, objectKey).Body(body).ContentType(contentType)
 	_, httpResp, err := req.Execute()
 	if err != nil {
 		logger.Debug("Error while updating the object of the bucket", zap.Error(err))

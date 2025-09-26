@@ -41,6 +41,7 @@ type Fields struct {
 	enableCachingForPost           string
 	enableCachingForOptions        string
 	l2CachingEnabled               string
+	tieredCachingEnabled           string
 	Path                           string
 }
 
@@ -156,6 +157,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
 	flags.Int64Var(&fields.browserCacheMaxAge, "browser-cache-max-age", 0, msg.FlagBrowserCacheMaxAge)
+	flags.StringVar(&fields.tieredCachingEnabled, "tiered-caching-enabled", "", msg.FlagTieredCachingEnabled)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
@@ -281,6 +283,22 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 
 		controls := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
 		controls.SetSortEnabled(stringSort)
+	}
+
+	if cmd.Flags().Changed("tiered-caching-enabled") {
+		tiered, err := strconv.ParseBool(fields.tieredCachingEnabled)
+		if err != nil {
+			return fmt.Errorf("%w: %q", msg.ErrorTieredCachingFlag, fields.tieredCachingEnabled)
+		}
+
+		mods := request.PatchedCacheSettingRequest.GetModules()
+		if mods.Cache == nil {
+			mods.Cache = &sdk.CacheSettingsEdgeCacheModuleRequest{}
+		}
+		tieredCfg := sdk.CacheSettingsTieredCacheModuleRequest{}
+		tieredCfg.SetEnabled(tiered)
+		mods.Cache.SetTieredCache(tieredCfg)
+		request.PatchedCacheSettingRequest.SetModules(mods)
 	}
 
 	return nil

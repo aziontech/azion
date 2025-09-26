@@ -1,45 +1,28 @@
 {
-    "name": "string",
-	  "browser_cache": {
-		"behavior": "override",
-		"max_age": 0
-	  },
-	  "modules": {
-		"edge_cache": {
-		  "behavior": "honor",
-		  "max_age": 60,
-		  "stale_cache": {
-			"enabled": false
-		  },
-		  "large_file_cache": {
-			"enabled": false,
-			"offset": 1024
-		  }
-		},
-		"tiered_cache": {
-		  "behavior": "override",
-		  "max_age": 31536000,
-		  "topology": "near-edge"
-		},
-		"application_accelerator": {
-		  "cache_vary_by_method": [
-			"options"
-		  ],
-		  "cache_vary_by_querystring": {
-			"behavior": "ignore",
-			"fields": [],
-			"sort_enabled": true
-		  },
-		  "cache_vary_by_cookies": {
-			"behavior": "ignore",
-			"cookie_names": []
-		  },
-		  "cache_vary_by_devices": {
-			"behavior": "ignore",
-			"device_group": [
-			  0
-			]
-		  }
-		}
-	  }
-   }
+  "name": "BetterLesson",
+  "browser_cache": {
+    "behavior": "honor",
+    "max_age": 0
+  },
+  "modules": {
+    "application_accelerator": {
+      "cache_vary_by_method": [
+        "options",
+        "post"
+      ],
+      "cache_vary_by_querystring": {
+        "behavior": "ignore",
+        "fields": []
+      },
+      "cache_vary_by_cookies": {
+        "behavior": "ignore",
+        "cookie_names": []
+      }
+    },
+    "cache": {
+      "tiered_cache": {
+        "enabled": false
+      }
+    }
+  }
+}

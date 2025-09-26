@@ -91,7 +91,7 @@ func TestDeployCmd(t *testing.T) {
 		cmd := NewDeployCmd(f)
 
 		_, err := cmd.createApplication(cliapp, ctx, options, &msgs)
-		require.ErrorContains(t, err, "Failed to create the Edge Application")
+		require.ErrorContains(t, err, "Failed to create the Application")
 	})
 
 	t.Run("create application success", func(t *testing.T) {
