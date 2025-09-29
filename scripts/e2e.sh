@@ -16,13 +16,13 @@ expected_folder="azion"
 # Set the path to the expected folder after the build command
 expected_edge_folder=".edge"
 # token from secrets
-token="azionfa8de37c8c330fa236591fe8630d55ff4cc"
+token=$TOKEN
 
 # Function to list and delete edge storage buckets
 delete_edge_storage_buckets() {
   # List the buckets with page size 1000, skip the header line, and delete each bucket
-  "$full_bin_path" list edge-storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
-    "$full_bin_path" delete edge-storage bucket --name "$name" --force
+  "$full_bin_path" list storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
+    "$full_bin_path" delete storage bucket --name "$name" --force
   done
 }
 
