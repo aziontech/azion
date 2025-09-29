@@ -87,6 +87,10 @@ func (b *Objects) PrintTable(client *api.Client) error {
 		return err
 	}
 
+	if resp == nil || len(resp.Results) == 0 {
+		return output.Print(&listOut)
+	}
+
 	for _, res := range resp.Results {
 		var ln []string
 		if b.Options.Details {
