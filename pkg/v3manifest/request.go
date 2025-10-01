@@ -218,9 +218,17 @@ func makeRuleRequestUpdate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 					RulesEngineBehaviorString: &behaviorString,
 				})
+			} else if v.RulesEngineBehaviorInteger != nil {
+				var behaviorInteger sdk.RulesEngineBehaviorInteger
+				behaviorInteger.SetName(v.RulesEngineBehaviorInteger.Name)
+				if v.RulesEngineBehaviorInteger.Target > 0 {
+					behaviorInteger.SetTarget(v.RulesEngineBehaviorInteger.Target)
+				}
+				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+					RulesEngineBehaviorInteger: &behaviorInteger,
+				})
 			}
 		}
-
 	}
 
 	request.Behaviors = behaviors
@@ -310,6 +318,15 @@ func makeRuleRequestCreate(rule contracts.RuleEngine, conf *contracts.AzionAppli
 				behaviorString.SetName(v.RulesEngineBehaviorString.Name)
 				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
 					RulesEngineBehaviorString: &behaviorString,
+				})
+			} else if v.RulesEngineBehaviorInteger != nil {
+				var behaviorInteger sdk.RulesEngineBehaviorInteger
+				behaviorInteger.SetName(v.RulesEngineBehaviorInteger.Name)
+				if v.RulesEngineBehaviorInteger.Target > 0 {
+					behaviorInteger.SetTarget(v.RulesEngineBehaviorInteger.Target)
+				}
+				behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
+					RulesEngineBehaviorInteger: &behaviorInteger,
 				})
 			}
 		}
