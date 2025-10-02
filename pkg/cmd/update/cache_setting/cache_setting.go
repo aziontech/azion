@@ -12,7 +12,6 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
-	apiApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -60,7 +59,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			clientApp := apiApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			request := api.RequestUpdate{}
 
@@ -120,10 +118,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.Name = &name
 			}
 
-			if err := appAccelerationNoEnabled(clientApp, fields, request); err != nil {
-				return err
-			}
-
 			response, err := client.Update(context.Background(), &request, fields.ApplicationID, fields.CacheSettingID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorUpdateCacheSettings.Error(), err)
@@ -160,24 +154,6 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.tieredCachingEnabled, "tiered-caching-enabled", "", msg.FlagTieredCachingEnabled)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
-}
-
-func appAccelerationNoEnabled(client *apiApp.Client, fields *Fields, request api.RequestUpdate) error {
-	ctx := context.Background()
-	application, err := client.Get(ctx, fields.ApplicationID)
-	if err != nil {
-		return err
-	}
-
-	acc := application.GetModules()
-	appAcc := acc.GetApplicationAccelerator()
-
-	edgeCache := request.GetModules().ApplicationAccelerator
-
-	if len(edgeCache.CacheVaryByMethod) > 0 && !appAcc.GetEnabled() {
-		return msg.ErrorApplicationAccelerationNotEnabled
-	}
-	return nil
 }
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.RequestUpdate) error {
