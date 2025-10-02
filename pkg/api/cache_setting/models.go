@@ -34,7 +34,7 @@ type CreateRequest struct {
 func NewCreateRequest() *sdk.CacheSettingRequest {
 	return &sdk.CacheSettingRequest{
 		Modules: &sdk.CacheSettingsModulesRequest{
-			Cache:                  &sdk.CacheSettingsEdgeCacheModuleRequest{},
+			EdgeCache:              &sdk.CacheSettingsEdgeCacheModuleRequest{},
 			ApplicationAccelerator: &sdk.CacheSettingsApplicationAcceleratorModuleRequest{},
 		},
 		Name:         "",
