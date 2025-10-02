@@ -1,8 +1,9 @@
+version: 2
 project_name: azion
 
 builds:
-  - env:
-    id: azion-unix
+  - id: azion-unix
+    env:
       - CGO_ENABLED=0
     main: ./cmd/azion
     ldflags:
@@ -30,8 +31,8 @@ builds:
       - goos: windows
         goarch: arm
 
-  - env:
-    id: azion-windows
+  - id: azion-windows
+    env:
       - CGO_ENABLED=0
     main: ./cmd/azion
     ldflags:
@@ -61,7 +62,7 @@ before:
 nfpms:
   - id: packages
     license: MIT
-    maintainer: Azion Technologies <https://github.com/aziontech>
+    maintainer: 'Azion Technologies <https://github.com/aziontech>'
     package_name: azion
     homepage: https://github.com/aziontech/azion
     bindir: /usr/local/bin
@@ -69,7 +70,7 @@ nfpms:
       - apk
       - deb
       - rpm
-  - contents:
+    contents:
       - src: completions/azion.bash
         dst: /usr/share/bash-completion/completions/azion
         file_info:
@@ -86,7 +87,7 @@ nfpms:
 checksum:
   name_template: "{{ .ProjectName }}_v{{ .Env.BIN_VERSION }}_checksum"
 snapshot:
-  name_template: "{{ incpatch .Env.BIN_VERSION }}-next"
+  version_template: "{{ incpatch .Env.BIN_VERSION }}-next"
 changelog:
   sort: asc
   filters:

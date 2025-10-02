@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
 	"github.com/aziontech/azion-cli/messages/general"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"

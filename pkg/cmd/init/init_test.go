@@ -735,6 +735,10 @@ func Test_initCmd_Run(t *testing.T) {
 				unmarshal:             tt.fields.unmarshal,
 				git:                   tt.fields.git,
 			}
+			// Ensure we always pass a non-nil cobra.Command to avoid nil deref in deps()
+			if tt.args.c == nil {
+				tt.args.c = NewCmd(tt.fields.f)
+			}
 			if err := cmd.Run(tt.args.c, tt.args.in1); (err != nil) != tt.wantErr {
 				t.Errorf("initCmd.Run() error = %v, wantErr %v", err, tt.wantErr)
 			}

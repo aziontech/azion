@@ -220,6 +220,8 @@ func TestGetWorkingDir(t *testing.T) {
 				require.NoError(t, err)
 				var azJsonData contracts.AzionApplicationOptions
 				azJsonData.Name = "Test01"
+				// initialize Function slice to avoid index out of range
+				azJsonData.Function = []contracts.AzionJsonDataFunction{{}}
 				azJsonData.Function[0].Name = "MyFunc"
 				azJsonData.Function[0].File = "myfile.js"
 				azJsonData.Function[0].ID = 476
@@ -281,6 +283,35 @@ func TestGetAzionJsonContent(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, test.test)
 	}
+}
+
+// test "skip-deletion" field absence
+func TestGetAzionJsonContent_SkipDeletionAbsent(t *testing.T) {
+	// Create a temporary config directory under current working dir
+	cwd, err := GetWorkingDir()
+	require.NoError(t, err)
+
+	dir := filepath.Join(cwd, "azion-skip")
+	err = os.MkdirAll(dir, os.ModePerm)
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	// Write a minimal azion.json WITHOUT the "skip-deletion" field
+	content := `{
+        "name": "SkipDeletionAbsent",
+        "bucket": "bkt",
+        "preset": "react",
+        "env": "prod",
+        "prefix": "pre"
+    }`
+	err = os.WriteFile(filepath.Join(dir, "azion.json"), []byte(content), 0644)
+	require.NoError(t, err)
+
+	conf, err := GetAzionJsonContent("azion-skip")
+	require.NoError(t, err)
+
+	// When the field is absent, the pointer must remain nil
+	require.Nil(t, conf.SkipDeletion)
 }
 
 func TestErrorPerStatusCode(t *testing.T) {

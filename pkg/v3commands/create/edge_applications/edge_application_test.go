@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/create/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/create/application"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"

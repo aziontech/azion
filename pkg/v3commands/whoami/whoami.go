@@ -59,8 +59,9 @@ func (cmd *WhoamiCmd) run() error {
 		return msg.ErrorNotLoggedIn
 	}
 
+	msg := fmt.Sprintf(" Client ID: %s\n Email: %s\n", settings.ClientId, settings.Email)
 	whoamiOut := output.GeneralOutput{
-		Msg:   fmt.Sprintf(settings.Email + "\n"),
+		Msg:   msg,
 		Out:   cmd.Io.Out,
 		Flags: cmd.F.Flags,
 	}

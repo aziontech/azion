@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	msg "github.com/aziontech/azion-cli/messages/edge_storage"
+	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"

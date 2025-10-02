@@ -56,7 +56,7 @@ func NewCobraCmd(purge *PurgeCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&urls, "urls", "", msg.FlagUrls)
 	cobraCmd.Flags().StringVar(&wildcard, "wildcard", "", msg.FlagWildcard)
 	cobraCmd.Flags().StringVar(&cachekeys, "cachekey", "", msg.FlagCacheKeys)
-	cobraCmd.Flags().StringVar(&Layer, "layer", "edge_cache", msg.FlagLayer)
+	cobraCmd.Flags().StringVar(&Layer, "layer", "cache", msg.FlagLayer)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cobraCmd
