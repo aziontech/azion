@@ -12,7 +12,7 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
-	apiApp "github.com/aziontech/azion-cli/pkg/api/applications"
+	apiEdgeApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -41,7 +41,6 @@ type Fields struct {
 	enableCachingForPost           string
 	enableCachingForOptions        string
 	l2CachingEnabled               string
-	tieredCachingEnabled           string
 	Path                           string
 }
 
@@ -60,7 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-			clientApp := apiApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			request := api.RequestUpdate{}
 
@@ -120,7 +119,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.Name = &name
 			}
 
-			if err := appAccelerationNoEnabled(clientApp, fields, request); err != nil {
+			if err := appAccelerationNoEnabled(clientEdgeApp, fields, request); err != nil {
 				return err
 			}
 
@@ -157,12 +156,11 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
 	flags.StringVar(&fields.enableQueryStringSort, "enable-caching-string-sort", "", msg.FlagCachingStringSortEnabled)
 	flags.Int64Var(&fields.browserCacheMaxAge, "browser-cache-max-age", 0, msg.FlagBrowserCacheMaxAge)
-	flags.StringVar(&fields.tieredCachingEnabled, "tiered-caching-enabled", "", msg.FlagTieredCachingEnabled)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.UpdateFlagHelp)
 }
 
-func appAccelerationNoEnabled(client *apiApp.Client, fields *Fields, request api.RequestUpdate) error {
+func appAccelerationNoEnabled(client *apiEdgeApp.Client, fields *Fields, request api.RequestUpdate) error {
 	ctx := context.Background()
 	application, err := client.Get(ctx, fields.ApplicationID)
 	if err != nil {
@@ -283,22 +281,6 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 
 		controls := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
 		controls.SetSortEnabled(stringSort)
-	}
-
-	if cmd.Flags().Changed("tiered-caching-enabled") {
-		tiered, err := strconv.ParseBool(fields.tieredCachingEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorTieredCachingFlag, fields.tieredCachingEnabled)
-		}
-
-		mods := request.PatchedCacheSettingRequest.GetModules()
-		if mods.Cache == nil {
-			mods.Cache = &sdk.CacheSettingsEdgeCacheModuleRequest{}
-		}
-		tieredCfg := sdk.CacheSettingsTieredCacheModuleRequest{}
-		tieredCfg.SetEnabled(tiered)
-		mods.Cache.SetTieredCache(tieredCfg)
-		request.PatchedCacheSettingRequest.SetModules(mods)
 	}
 
 	return nil
