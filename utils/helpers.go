@@ -702,3 +702,77 @@ func ReplaceInvalidCharsBucket(str string) string {
 	re := regexp.MustCompile(`(?i)(?:azion-|b2-)|[^a-z0-9\-]`)
 	return re.ReplaceAllString(str, "")
 }
+
+// EnvInput represents a key and a user-facing prompt text for collecting
+// environment variable values and writing them to a .env file.
+type EnvInput struct {
+	Key  string
+	Text string
+}
+
+// CollectEnvInputsAndWriteFile prompts the user for each provided EnvInput and
+// writes/appends the resulting KEY=VALUE pairs to a .env file under destDir.
+// If the .env file already exists, the new pairs are concatenated, preserving
+// existing content. Ensures the file ends with a trailing newline.
+func CollectEnvInputsAndWriteFile(inputs []EnvInput, destDir string) error {
+	if len(inputs) == 0 {
+		return nil
+	}
+
+	// Collect inputs from user
+	envLines := make([]string, 0, len(inputs))
+	for _, in := range inputs {
+		val, err := AskInputEmpty(in.Text)
+		if err != nil {
+			return err
+		}
+		line := fmt.Sprintf("%s=%s", in.Key, val)
+		envLines = append(envLines, line)
+	}
+
+	// Prepare .env path and existing content
+	envPath := path.Join(destDir, ".env")
+	var existing string
+	if FileExists(envPath) {
+		if b, err := os.ReadFile(envPath); err == nil {
+			existing = string(b)
+			if len(existing) > 0 && !strings.HasSuffix(existing, "\n") {
+				existing += "\n"
+			}
+		}
+	}
+
+	content := existing + strings.Join(envLines, "\n") + "\n"
+	if err := os.WriteFile(envPath, []byte(content), 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func CollectArgsInputsAndWriteFile(inputs []EnvInput, destDir string) error {
+	if len(inputs) == 0 {
+		return nil
+	}
+
+	// Prepare args.json path and collect fresh inputs into a new JSON object
+	argsPath := path.Join(destDir, "args.json")
+	data := make(map[string]string)
+
+	for _, in := range inputs {
+		val, err := AskInputEmpty(in.Text)
+		if err != nil {
+			return err
+		}
+		data[in.Key] = val
+	}
+
+	// Marshal as pretty JSON and write file
+	content, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(argsPath, content, 0644); err != nil {
+		return err
+	}
+	return nil
+}
