@@ -15,7 +15,7 @@ type RequestCredentials struct {
 
 func (c *Client) CreateCredentials(ctx context.Context, request RequestCredentials) (*sdk.ResponseCredential, error) {
 	logger.Debug("Creating s3 credentials ", zap.Any("name", request.Name))
-	req := c.apiClient.EdgeStorageCredentialsAPI.CreateCredential(ctx).CredentialCreateRequest(request.CredentialCreateRequest)
+	req := c.apiClient.StorageCredentialsAPI.CreateCredential(ctx).CredentialCreateRequest(request.CredentialCreateRequest)
 	resp, httpResp, err := req.Execute()
 	if err != nil {
 		errBody := ""

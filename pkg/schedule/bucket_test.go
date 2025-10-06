@@ -30,7 +30,7 @@ func TestTriggerDeleteBucket(t *testing.T) {
 			name: "success",
 			args: args{"arthur-morgan"},
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -45,7 +45,7 @@ func TestTriggerDeleteBucket(t *testing.T) {
 			name: "error",
 			args: args{"arthur-morgan"},
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodPost, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan"),
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {

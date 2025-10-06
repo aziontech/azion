@@ -1,0 +1,33 @@
+{
+  "count": 2,
+  "continuation_token": "next-page-token",
+  "continuationToken": "next-page-token",
+  "results": [
+    {
+      "key": "object1",
+      "last_modified": "2024-08-05T12:00:00Z",
+      "lastModified": "2024-08-05T12:00:00Z",
+      "size": 1234
+    },
+    {
+      "key": "object2",
+      "last_modified": "2024-08-05T13:00:00Z",
+      "lastModified": "2024-08-05T13:00:00Z",
+      "size": 5678
+    }
+  ],
+  "objects": [
+    {
+      "key": "object1",
+      "last_modified": "2024-08-05T12:00:00Z",
+      "lastModified": "2024-08-05T12:00:00Z",
+      "size": 1234
+    },
+    {
+      "key": "object2",
+      "last_modified": "2024-08-05T13:00:00Z",
+      "lastModified": "2024-08-05T13:00:00Z",
+      "size": 5678
+    }
+  ]
+}

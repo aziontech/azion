@@ -3,7 +3,7 @@ package clone
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/clone"
-	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/clone/edge_application"
+	application "github.com/aziontech/azion-cli/pkg/cmd/clone/application"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(edgeApplication.NewCmd(f))
+	cmd.AddCommand(application.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

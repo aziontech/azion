@@ -8,19 +8,21 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
+	"github.com/briandowns/spinner"
 
 	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
 	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
+	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/edge_applications"
-	apiConnector "github.com/aziontech/azion-cli/pkg/api/edge_connector"
-	functionsApi "github.com/aziontech/azion-cli/pkg/api/edge_function"
+	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
+	functionsApi "github.com/aziontech/azion-cli/pkg/api/function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"go.uber.org/zap"
@@ -77,11 +79,18 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 }
 
 func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, functions map[string]contracts.AzionJsonDataFunction, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
+	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
+	s.Suffix = " " + msg.CreatingManifest
+	s.FinalMSG = "\n"
+	if !f.Debug {
+		s.Start() // Start the spinner
+	}
+	defer s.Stop()
 
 	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
 	*msgs = append(*msgs, msg.CreatingManifest)
 
-	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	client := apiApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientWorkload := apiWorkloads.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	connectorClient := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -164,7 +173,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 	for _, funcMan := range manifest.Applications[0].FunctionsInstances {
 		if funcConf := FunctionIds[funcMan.Function]; funcConf.InstanceID > 0 {
-			request := apiEdgeApplications.UpdateInstanceRequest{}
+			request := apiApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
 			request.SetFunction(funcConf.ID)
 			request.SetArgs(funcMan.Args)
@@ -176,7 +185,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				return err
 			}
 		} else {
-			request := apiEdgeApplications.CreateInstanceRequest{}
+			request := apiApplications.CreateInstanceRequest{}
 			request.SetActive(true)
 			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
@@ -395,7 +404,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				} else {
 					switch rule.Phase {
 					case "request":
-						req := &apiEdgeApplications.CreateRulesEngineRequest{}
+						req := &apiApplications.CreateRulesEngineRequest{}
 						createRequest := transformRuleRequestCreate(rule.Rule)
 						bh, err := transformBehaviorsRequest(rule.Rule.Behaviors)
 						if err != nil {
@@ -415,7 +424,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						}
 						ruleConf = append(ruleConf, newRule)
 					case "response":
-						req := &apiEdgeApplications.CreateRulesEngineResponse{}
+						req := &apiApplications.CreateRulesEngineResponse{}
 						createRequest := transformRuleResponseCreate(rule.Rule)
 						bh, err := transformBehaviorsResponse(rule.Rule.Behaviors)
 						if err != nil {
@@ -532,9 +541,15 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 // this is called to delete resources no longer present in manifest.json
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	client := apiEdgeApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	client := apiApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	// clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+
+	if conf.SkipDeletion != nil && *conf.SkipDeletion {
+		logger.FInfoFlags(f.IOStreams.Out, msg.SkipDeletion, f.Format, f.Out)
+		*msgs = append(*msgs, msg.SkipDeletion)
+		return nil
+	}
 
 	for _, value := range RuleIds {
 		//since until [UXE-3599] was carried out we'd only cared about "request" phase, this check guarantees that if Phase is empty

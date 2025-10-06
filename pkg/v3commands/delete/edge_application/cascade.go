@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/delete/application"
 	"github.com/aziontech/azion-cli/pkg/output"
 	app "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	fun "github.com/aziontech/azion-cli/pkg/v3api/edge_function"
@@ -29,15 +29,15 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 
 	err = clientapp.Delete(ctx, azionJson.Application.ID)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+		return fmt.Errorf("%v: %w", msg.ErrorFailToDeleteApplication, err)
 	}
 
 	if azionJson.Function.ID == 0 {
-		fmt.Fprintf(del.f.IOStreams.Out, msg.MissingFunction)
+		fmt.Fprint(del.f.IOStreams.Out, msg.MissingFunction)
 	} else {
 		err = clientfunc.Delete(ctx, azionJson.Function.ID)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorFailToDeleteApplication.Error(), err)
+			return fmt.Errorf("%v: %w", msg.ErrorFailToDeleteApplication, err)
 		}
 	}
 

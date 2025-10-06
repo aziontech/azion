@@ -3,14 +3,14 @@ package update
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/update"
+	application "github.com/aziontech/azion-cli/pkg/cmd/update/application"
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/update/cache_setting"
-	edgeApplication "github.com/aziontech/azion-cli/pkg/cmd/update/edge_application"
-	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/update/edge_connector"
-	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/update/edge_function"
-	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/update/edge_storage"
+	connector "github.com/aziontech/azion-cli/pkg/cmd/update/connector"
+	function "github.com/aziontech/azion-cli/pkg/cmd/update/function"
 	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/update/function_instance"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/update/origin"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
+	storage "github.com/aziontech/azion-cli/pkg/cmd/update/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/update/variables"
 	"github.com/aziontech/azion-cli/pkg/cmd/update/workloads"
 
@@ -33,15 +33,15 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(edgeApplication.NewCmd(f))
+	cmd.AddCommand(application.NewCmd(f))
 	cmd.AddCommand(rulesEngine.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
-	cmd.AddCommand(edgeFunction.NewCmd(f))
+	cmd.AddCommand(function.NewCmd(f))
 	cmd.AddCommand(cacheSetting.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
-	cmd.AddCommand(edgeStorage.NewCmd(f))
+	cmd.AddCommand(storage.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
-	cmd.AddCommand(edgeConnector.NewCmd(f))
+	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(functionInstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)

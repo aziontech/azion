@@ -2,6 +2,7 @@ package edgeapplication
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -16,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	msg "github.com/aziontech/azion-cli/messages/delete/edge_application"
+	msg "github.com/aziontech/azion-cli/messages/delete/application"
 )
 
 func mockApplicationID(msg string) (string, error) {
@@ -104,7 +105,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			expectedOutput: "",
 			expectError:    true,
 			mockInputs:     mockInvalid,
-			mockError:      fmt.Errorf(msg.ErrorConvertId.Error()),
+			mockError:      errors.New(msg.ErrorConvertId.Error()),
 		},
 		{
 			name:           "error - parse answer",
