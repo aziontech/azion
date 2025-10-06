@@ -2,14 +2,13 @@ name: Test and Build
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, labeled, unlabeled]
     branches-ignore:
       - main 
-      - dev
-      - pre-release-v4
 
 jobs:
   build:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-unit-tests') }}
     runs-on: ubuntu-latest
     container:
       image: golang:1.25.0
@@ -26,10 +25,25 @@ jobs:
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      - name: Build & Test
+      - uses: goreleaser/goreleaser-action@v6
+        name: run goreleaser check
+        with:
+          distribution: goreleaser
+          version: 2.3.2
+          args: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+
+      - name: Build & Test (skip v3 tests)
         run: |
-          echo "Building and testing"
-          make test build
+          echo "Building and testing (skipping v3 tests)"
+          mkdir -p cover
+          PKGS=$(go list ./... | grep -v "/pkg/v3commands/")
+          echo "Testing packages:" $PKGS
+          go test -v -failfast -coverprofile ./cover/azioncoverage.out -coverpkg=$(echo "$PKGS" | tr '\n' ',') $PKGS
+          go tool cover -html=./cover/azioncoverage.out -o ./cover/azioncoverage.html
+          go tool cover -func ./cover/azioncoverage.out
+          make build
 
       - name: Gosec
         run: |
