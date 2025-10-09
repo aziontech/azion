@@ -2,6 +2,9 @@
 
 Use this guide to collect the right information and quickly diagnose issues when using the Azion CLI (`azion`). It focuses on actionable steps and the most common pitfalls observed in this repository.
 
+> [!NOTE]  
+> Remember that when a new version is released, it may take a couple of hours to be available in homebrew.
+
 ## Quick Checklist
 
 - **Enable debug logs**
