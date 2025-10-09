@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
-
+	apiEdgeApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
@@ -34,7 +34,6 @@ type Fields struct {
 	cookieNames             []string
 	enableCachingForPost    string
 	enableCachingForOptions string
-	tieredCachingEnabled    string
 	Path                    string
 }
 
@@ -53,6 +52,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientEdgeApp := apiEdgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			request := sdk.CacheSettingRequest{}
 
@@ -97,6 +97,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
+			if err := appAccelerationNotEnabled(clientEdgeApp, fields, &request); err != nil {
+				return err
+			}
+
 			response, err := client.Create(context.Background(), request, fields.ApplicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateCacheSettings.Error(), err)
@@ -127,9 +131,28 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.cacheByQueryString, "cache-by-query-string", "ignore", msg.FlagCacheByQueryString)
 	flags.StringVar(&fields.enableCachingForOptions, "enable-caching-for-options", "false", msg.FlagCachingForOptionsEnabled)
 	flags.StringVar(&fields.enableCachingForPost, "enable-caching-for-post", "", msg.FlagCachingForPostEnabled)
-	flags.StringVar(&fields.tieredCachingEnabled, "tiered-caching-enabled", "", msg.FlagTieredCachingEnabled)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.CreateFlagHelp)
+}
+
+func appAccelerationNotEnabled(client *apiEdgeApp.Client, fields *Fields, request *sdk.CacheSettingRequest) error {
+	ctx := context.Background()
+	application, err := client.Get(ctx, fields.ApplicationID)
+	if err != nil {
+		return err
+	}
+
+	acc := application.GetModules()
+	appAcc := acc.GetApplicationAccelerator()
+
+	if request.GetModules().EdgeCache != nil {
+		edgeCache := request.GetModules().ApplicationAccelerator
+		if len(edgeCache.CacheVaryByMethod) > 0 && !appAcc.GetEnabled() {
+			return msg.ErrorApplicationAccelerationNotEnabled
+		}
+	}
+
+	return nil
 }
 
 func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *sdk.CacheSettingRequest) error {
@@ -178,21 +201,6 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *sdk.Cac
 		appAcc.SetCacheVaryByMethod(cacheByMethod)
 		setAcc = true
 
-	}
-
-	// Handle Tiered Cache inside Edge Cache module
-	if cmd.Flags().Changed("tiered-caching-enabled") {
-		tiered, err := strconv.ParseBool(fields.tieredCachingEnabled)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorTieredCachingFlag, fields.tieredCachingEnabled)
-		}
-
-		eCache := sdk.CacheSettingsEdgeCacheModuleRequest{}
-		tCache := sdk.CacheSettingsTieredCacheModuleRequest{}
-		tCache.SetEnabled(tiered)
-		eCache.SetTieredCache(tCache)
-		modules.SetCache(eCache)
-		request.SetModules(*modules)
 	}
 
 	if setAcc {
