@@ -20,11 +20,13 @@ import (
 )
 
 type Github struct {
-	GetVersionGitHub func(name string) (string, string, error)
-	Clone            func(cloneOptions *git.CloneOptions, url, path string) error
-	GetNameRepo      func(url string) string
-	CheckGitignore   func(path string) (bool, error)
-	WriteGitignore   func(path string) error
+	GetVersionGitHub  func(name string) (string, string, error)
+	Clone             func(cloneOptions *git.CloneOptions, url, path string) error
+	GetNameRepo       func(url string) string
+	CheckGitignore    func(path string) (bool, error)
+	WriteGitignore    func(path string) error
+	CheckWorkflowFile func(path string) (bool, error)
+	WriteWorkflowFile func(path string) error
 }
 
 type Release struct {
@@ -38,11 +40,13 @@ var (
 
 func NewGithub() *Github {
 	return &Github{
-		GetVersionGitHub: getVersionGitHub,
-		Clone:            clone,
-		GetNameRepo:      getNameRepo,
-		CheckGitignore:   checkGitignore,
-		WriteGitignore:   writeGitignore,
+		GetVersionGitHub:  getVersionGitHub,
+		Clone:             clone,
+		GetNameRepo:       getNameRepo,
+		CheckGitignore:    checkGitignore,
+		WriteGitignore:    writeGitignore,
+		CheckWorkflowFile: checkWorkflowFile,
+		WriteWorkflowFile: writeWorkflowFile,
 	}
 }
 
@@ -141,6 +145,41 @@ func writeGitignore(path string) error {
 
 	if err := writer.Flush(); err != nil {
 		logger.Error("Error flushing writer", zap.Error(err))
+		return err
+	}
+
+	return nil
+}
+
+func checkWorkflowFile(path string) (bool, error) {
+	logger.Debug("Checking for GitHub Actions workflow file")
+	workflowPath := filepath.Join(path, ".github", "workflows", "azion-deploy.yml")
+
+	_, err := os.Stat(workflowPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
+}
+
+func writeWorkflowFile(path string) error {
+	logger.Debug("Writing GitHub Actions workflow file")
+	workflowDir := filepath.Join(path, ".github", "workflows")
+	workflowPath := filepath.Join(workflowDir, "azion-deploy.yml")
+
+	// Create .github/workflows directory if it doesn't exist
+	if err := os.MkdirAll(workflowDir, 0755); err != nil {
+		logger.Error("Error creating workflow directory", zap.Error(err))
+		return err
+	}
+
+	// Write the workflow file
+	if err := os.WriteFile(workflowPath, []byte(workflowContent), 0644); err != nil {
+		logger.Error("Error writing workflow file", zap.Error(err))
 		return err
 	}
 

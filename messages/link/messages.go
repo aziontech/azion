@@ -32,6 +32,8 @@ var (
 	AskLocalDev                           = "Do you want to start a local development server? (y/N)"
 	AskGitignore                          = "Azion CLI creates some files during the build process for internal use. Would you like to add these to your .gitignore file? (Y/n)"
 	WrittenGitignore                      = "Sucessfully written to your .gitignore file\n"
+	AskWorkflow                           = "Would you like to add a GitHub Actions workflow for automated deployment? (Y/n)"
+	WrittenWorkflow                       = "Successfully created GitHub Actions workflow file at .github/workflows/azion-deploy.yml\n"
 	SkipFrameworkBuild                    = "Indicates whether to bypass the framework build phase before executing 'azion build'"
 )
 
