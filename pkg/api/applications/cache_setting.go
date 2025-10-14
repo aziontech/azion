@@ -23,7 +23,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 	ECache.SetMaxAge(7200)
 
 	cacheModules := sdk.CacheSettingsModulesRequest{
-		EdgeCache: &ECache,
+		Cache: &ECache,
 	}
 
 	req.SetModules(cacheModules)

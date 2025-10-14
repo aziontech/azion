@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.71.0
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.74.0
 
 require (
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
