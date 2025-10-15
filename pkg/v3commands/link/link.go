@@ -217,6 +217,20 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			msgs = append(msgs, msg.WrittenGitignore)
 		}
 
+		//asks if user wants to add GitHub Actions workflow
+		workflowExists, err := git.CheckWorkflowFile(info.PathWorkingDir)
+		if err != nil {
+			return msg.ErrorReadingWorkflow
+		}
+
+		if !workflowExists && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskWorkflow, true)) {
+			if err := git.WriteWorkflowFile(info.PathWorkingDir); err != nil {
+				return msg.ErrorWritingWorkflow
+			}
+			logger.FInfoFlags(cmd.Io.Out, msg.WrittenWorkflow, cmd.F.Format, cmd.F.Out)
+			msgs = append(msgs, msg.WrittenWorkflow)
+		}
+
 		if !info.Auto {
 			if cmd.ShouldDevDeploy(info, msg.AskLocalDev, false) {
 				if err := deps(c, cmd, info, msg.AskInstallDepsDev, &msgs); err != nil {
