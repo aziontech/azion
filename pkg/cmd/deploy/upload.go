@@ -41,8 +41,8 @@ func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error
 			return statErr
 		}
 
-		// Skip directories like node_modules or .edge
-		if resolvedInfo.IsDir() && (strings.Contains(path, "node_modules") || strings.Contains(path, ".edge")) {
+		// Skip directories like node_modules
+		if resolvedInfo.IsDir() && (strings.Contains(path, "node_modules")) {
 			logger.Debug("Skipping directory: " + path)
 			return filepath.SkipDir
 		}
