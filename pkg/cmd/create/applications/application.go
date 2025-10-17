@@ -30,6 +30,7 @@ type Fields struct {
 	EdgeCacheEnabled              string `json:"edge_cache_enabled,omitempty"`
 	EdgeFunctionsEnabled          string `json:"edge_functions_enabled,omitempty"`
 	ApplicationAcceleratorEnabled string `json:"application_accelerator_enabled,omitempty"`
+	TieredCacheEnabled            string `json:"tiered_cache_enabled,omitempty"`
 	ImageProcessorEnabled         string `json:"image_processor_enabled,omitempty"`
 	Active                        string `json:"active,omitempty"`
 	DebugRules                    string `json:"debug,omitempty"`
@@ -124,7 +125,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			Enabled: &edgeCache,
 		}
 
-		modules.SetCache(eCache)
+		modules.SetEdgeCache(eCache)
 	}
 
 	if !utils.IsEmpty(fields.EdgeFunctionsEnabled) {
@@ -171,6 +172,20 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 	request.SetModules(modules)
 
+	if !utils.IsEmpty(fields.TieredCacheEnabled) {
+		tieredCache, err := strconv.ParseBool(fields.TieredCacheEnabled)
+		if err != nil {
+			logger.Debug("Error while parsing <"+fields.TieredCacheEnabled+"> ", zap.Error(err))
+			return utils.ErrorConvertingStringToBool
+		}
+
+		tCache := sdk.TieredCacheModuleRequest{
+			Enabled: &tieredCache,
+		}
+
+		modules.SetTieredCache(tCache)
+	}
+
 	if !utils.IsEmpty(fields.Active) {
 		active, err := strconv.ParseBool(fields.Active)
 		if err != nil {
@@ -186,8 +201,9 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
-	flags.StringVar(&fields.EdgeCacheEnabled, "cache", "", msg.FlagCaching)
 	flags.StringVar(&fields.EdgeFunctionsEnabled, "function", "", msg.FlagEdgeFunctions)
+	flags.StringVar(&fields.EdgeCacheEnabled, "edge-cache", "", msg.FlagCaching)
+	flags.StringVar(&fields.TieredCacheEnabled, "tiered-cache", "", msg.FlagTieredCaching)
 	flags.StringVar(&fields.ApplicationAcceleratorEnabled, "application-accelerator", "", msg.FlagApplicationAcceleration)
 	flags.StringVar(&fields.ImageProcessorEnabled, "image-processor", "", msg.FlagImageOptimization)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
