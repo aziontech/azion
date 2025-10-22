@@ -133,7 +133,6 @@ func ReadZip() ([]contracts.FileOps, error) {
 				Path:        fileString,
 				FileContent: f,
 			}
-			//
 			listZIP = append(listZIP, fileOptions)
 
 		}

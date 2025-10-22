@@ -15,8 +15,8 @@ import (
 var (
 	currentMajor         = 6
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@6.1.0"
-	versionVulcan        = "@6.1.0"
+	firstTimeExecuting   = "@6.1.2"
+	versionVulcan        = "@6.1.2"
 )
 
 type VulcanPkg struct {
