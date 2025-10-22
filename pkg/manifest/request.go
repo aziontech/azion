@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
@@ -538,7 +537,7 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
 	if errors.Is(err, utils.ErrorNotFound404) {
 		logger.Debug("Cache Setting not found. Trying to create", zap.Any("Error", err))
-		logger.FInfoFlags(f.IOStreams.Out, fmt.Sprintf(msg.MessageDeleteResource, "\n"), f.Format, f.Out)
+		logger.FInfoFlags(f.IOStreams.Out, msg.MessageDeleteResource+"\n", f.Format, f.Out)
 		return createCache(cache, clientCache, conf, ctx, edgeappman)
 	}
 	if err != nil {
