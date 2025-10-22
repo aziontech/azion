@@ -1,15 +1,20 @@
 package manifest
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
@@ -526,4 +531,36 @@ func transformRuleResponseCreate(rule contracts.ManifestRule) edgesdk.Applicatio
 	request.SetName(rule.Name)
 
 	return request
+}
+
+func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, r int64, ctx context.Context, edgeappman contracts.Applications) (contracts.AzionJsonDataCacheSettings, error) {
+	request := transformCacheRequest(cache)
+	updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
+	if errors.Is(err, utils.ErrorNotFound404) {
+		logger.Debug("Cache Setting not found. Trying to create", zap.Any("Error", err))
+		logger.FInfoFlags(f.IOStreams.Out, fmt.Sprintf(msg.MessageDeleteResource, "\n"), f.Format, f.Out)
+		return createCache(cache, clientCache, conf, ctx, edgeappman)
+	}
+	if err != nil {
+		return contracts.AzionJsonDataCacheSettings{}, err
+	}
+	newCache := contracts.AzionJsonDataCacheSettings{
+		Id:   updated.GetData().Id,
+		Name: updated.GetData().Name,
+	}
+	return newCache, nil
+}
+
+func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context, edgeappman contracts.Applications) (contracts.AzionJsonDataCacheSettings, error) {
+	request := transformCacheRequestCreate(cache)
+	responseCache, err := clientCache.Create(ctx, request.CacheSettingRequest, conf.Application.ID)
+	if err != nil {
+		return contracts.AzionJsonDataCacheSettings{}, err
+	}
+	newCache := contracts.AzionJsonDataCacheSettings{
+		Id:   responseCache.GetId(),
+		Name: responseCache.GetName(),
+	}
+	CacheIds[newCache.Name] = newCache.Id
+	return newCache, nil
 }

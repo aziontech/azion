@@ -238,37 +238,22 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			conf.Application.ID = resp.GetId()
 		}
 
-		cacheConf := []contracts.AzionJsonDataCacheSettings{}
+		CacheConf := []contracts.AzionJsonDataCacheSettings{}
 		if len(edgeappman.CacheSettings) > 0 {
 			for _, cache := range edgeappman.CacheSettings {
 				if r := CacheIds[cache.Name]; r > 0 {
-					request := transformCacheRequest(cache)
-					updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
-					if errors.Is(err, utils.ErrorNotFound404) {
-						logger.Debug("Cache Setting not found. Skipping update", zap.Any("Error", err))
-						continue
-					}
+					updated, err := updateCache(f, cache, clientCache, conf, r, ctx, edgeappman)
 					if err != nil {
 						return err
 					}
-					newCache := contracts.AzionJsonDataCacheSettings{
-						Id:   updated.GetData().Id,
-						Name: updated.GetData().Name,
-					}
-					cacheConf = append(cacheConf, newCache)
+					CacheConf = append(CacheConf, updated)
 				} else {
-					request := transformCacheRequestCreate(cache)
-					responseCache, err := clientCache.Create(ctx, request.CacheSettingRequest, conf.Application.ID)
+					newCache, err := createCache(cache, clientCache, conf, ctx, edgeappman)
 					if err != nil {
 						return err
 					}
-					newCache := contracts.AzionJsonDataCacheSettings{
-						Id:   responseCache.GetId(),
-						Name: responseCache.GetName(),
-					}
-					cacheConf = append(cacheConf, newCache)
+					CacheConf = append(CacheConf, newCache)
 					CacheIds[newCache.Name] = newCache.Id
-
 				}
 			}
 		}
@@ -278,7 +263,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			CacheIdsBackup[k] = v
 		}
 
-		conf.CacheSettings = cacheConf
+		conf.CacheSettings = CacheConf
 		err = man.WriteAzionJsonContent(conf, projectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
@@ -367,6 +352,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						behs, err := transformBehaviorsRequest(rule.Rule.Behaviors)
 						if errors.Is(err, utils.ErrorNotFound404) {
 							logger.Debug("Rule not found. Skipping update", zap.Any("Error", err))
+							edgeappman.Rules = append(edgeappman.Rules, rule)
+							delete(RuleIds, rule.Rule.Name)
 							continue
 						}
 						if err != nil {
@@ -392,6 +379,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						behs, err := transformBehaviorsResponse(rule.Rule.Behaviors)
 						if errors.Is(err, utils.ErrorNotFound404) {
 							logger.Debug("Rule not found. Skipping update", zap.Any("Error", err))
+							edgeappman.Rules = append(edgeappman.Rules, rule)
+							delete(RuleIds, rule.Rule.Name)
 							continue
 						}
 						if err != nil {
