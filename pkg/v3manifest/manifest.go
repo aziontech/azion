@@ -3,6 +3,7 @@ package manifest
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -147,6 +148,10 @@ func (man *ManifestInterpreter) CreateResources(
 				requestUpdate.Name = &conf.Name
 			}
 			updated, err := clientOrigin.Update(ctx, conf.Application.ID, OriginKeys[origin.Name], requestUpdate)
+			if errors.Is(err, utils.ErrorNotFound404) {
+				logger.Debug("Origin not found. Skipping update", zap.Any("Error", err))
+				continue
+			}
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateOrigin, origin.Name, err.Error())
 			}
@@ -204,6 +209,10 @@ func (man *ManifestInterpreter) CreateResources(
 				requestUpdate.Name = &conf.Name
 			}
 			updated, err := clientCache.Update(ctx, requestUpdate, conf.Application.ID, id)
+			if errors.Is(err, utils.ErrorNotFound404) {
+				logger.Debug("Cache Setting not found. Skipping update", zap.Any("Error", err))
+				continue
+			}
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateCache, *cache.Name, err.Error())
 			}
@@ -263,6 +272,10 @@ func (man *ManifestInterpreter) CreateResources(
 			requestUpdate.Order = &rule.Order
 			requestUpdate.IdApplication = conf.Application.ID
 			updated, err := client.UpdateRulesEngine(ctx, requestUpdate)
+			if errors.Is(err, utils.ErrorNotFound404) {
+				logger.Debug("Rule not found. Skipping update", zap.Any("Error", err))
+				continue
+			}
 			if err != nil {
 				return fmt.Errorf("%w - '%s': %s", msg.ErrorUpdateRule, rule.Name, err.Error())
 			}
