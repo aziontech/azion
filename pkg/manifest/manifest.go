@@ -244,6 +244,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				if r := CacheIds[cache.Name]; r > 0 {
 					request := transformCacheRequest(cache)
 					updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
+					if errors.Is(err, utils.ErrorNotFound404) {
+						logger.Debug("Cache Setting not found. Skipping update", zap.Any("Error", err))
+						continue
+					}
 					if err != nil {
 						return err
 					}
@@ -361,6 +365,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						req.IdApplication = strconv.FormatInt(conf.Application.ID, 10)
 						req.Id = strid
 						behs, err := transformBehaviorsRequest(rule.Rule.Behaviors)
+						if errors.Is(err, utils.ErrorNotFound404) {
+							logger.Debug("Rule not found. Skipping update", zap.Any("Error", err))
+							continue
+						}
 						if err != nil {
 							return err
 						}
@@ -382,6 +390,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						req.IdApplication = strconv.FormatInt(conf.Application.ID, 10)
 						req.Id = strid
 						behs, err := transformBehaviorsResponse(rule.Rule.Behaviors)
+						if errors.Is(err, utils.ErrorNotFound404) {
+							logger.Debug("Rule not found. Skipping update", zap.Any("Error", err))
+							continue
+						}
 						if err != nil {
 							return err
 						}
