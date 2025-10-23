@@ -391,8 +391,8 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 				pathWorkingDir: "/path/to/working/dir",
 				unmarshal: func(data []byte, v interface{}) error {
 					// Mocking unmarshalling process
-					*(v.(*map[string]string)) = map[string]string{
-						"preset": "astro",
+					*(v.(*Item)) = Item{
+						Preset: "astro",
 					}
 					return nil
 				},
@@ -400,7 +400,47 @@ func Test_initCmd_getVulcanInfo(t *testing.T) {
 			wantPreset: "astro",
 			wantErr:    false,
 			readFile: func(filename string) ([]byte, error) {
-				return []byte(`{"preset": "astro"}`), nil
+				return []byte(`{"name": "Test Template", "message": "A test template", "preset": "astro", "path": "/test"}`), nil
+			},
+		},
+		{
+			name: "flow completed with complex extras structure",
+			fields: fields{
+				pathWorkingDir: "/path/to/working/dir",
+				unmarshal: func(data []byte, v interface{}) error {
+					// Mocking unmarshalling process with complex structure
+					*(v.(*Item)) = Item{
+						Name:    "Cosmic - Simple Astro Blog",
+						Message: "An Astro blog template powered by Cosmic",
+						Preset:  "astro",
+						Path:    "/cosmic-simple-astro-blog",
+						Extras: &Extras{
+							Type: "env",
+							Inputs: []ExtraInput{
+								{Key: "PUBLIC_COSMIC_BUCKET_SLUG", Text: "Type the Bucket Slug of your Cosmic project"},
+								{Key: "PUBLIC_COSMIC_READ_KEY", Text: "Type the Read Key of your Cosmic project"},
+							},
+						},
+					}
+					return nil
+				},
+			},
+			wantPreset: "astro",
+			wantErr:    false,
+			readFile: func(filename string) ([]byte, error) {
+				return []byte(`{
+					"name": "Cosmic - Simple Astro Blog",
+					"message": "An Astro blog template powered by Cosmic",
+					"preset": "astro",
+					"path": "/cosmic-simple-astro-blog",
+					"extras": {
+						"type": "env",
+						"inputs": [
+							{"key": "PUBLIC_COSMIC_BUCKET_SLUG", "text": "Type the Bucket Slug of your Cosmic project"},
+							{"key": "PUBLIC_COSMIC_READ_KEY", "text": "Type the Read Key of your Cosmic project"}
+						]
+					}
+				}`), nil
 			},
 		},
 		{

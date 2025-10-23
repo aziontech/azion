@@ -10,8 +10,8 @@ type Item struct {
 	Message                 string  `json:"message"`
 	Preset                  string  `json:"preset"`
 	Path                    string  `json:"path"`
-	Link                    string  `json:"link"`
-	RequiresAdditionalBuild *bool   `json:"requires_additional_build"`
+	Link                    string  `json:"link,omitempty"`
+	RequiresAdditionalBuild *bool   `json:"requires_additional_build,omitempty"`
 	Extras                  *Extras `json:"extras,omitempty"`
 }
 
