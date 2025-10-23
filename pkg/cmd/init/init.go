@@ -200,10 +200,13 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	templateOptions := make([]string, len(templateMap[answer]))
+	templateOptions := []string{}
 	templateOptionsMap := make(map[string]Item)
-	for number, value := range templateMap[answer] {
-		templateOptions[number] = value.Name
+	for _, value := range templateMap[answer] {
+		if value.RequiresAdditionalBuild != nil && *value.RequiresAdditionalBuild {
+			continue
+		}
+		templateOptions = append(templateOptions, value.Name)
 		templateOptionsMap[value.Name] = value
 	}
 
@@ -266,9 +269,29 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	}
 
 	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
-
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
+	}
+
+	// Handle optional extras from the Templates API
+	selectedItem := templateOptionsMap[answerTemplate]
+	if selectedItem.Extras != nil && len(selectedItem.Extras.Inputs) > 0 {
+		inputs := make([]utils.EnvInput, 0, len(selectedItem.Extras.Inputs))
+		for _, in := range selectedItem.Extras.Inputs {
+			inputs = append(inputs, utils.EnvInput{Key: in.Key, Text: in.Text})
+		}
+		switch strings.ToLower(selectedItem.Extras.Type) {
+		case "env":
+			if err := utils.CollectEnvInputsAndWriteFile(inputs, newPath); err != nil {
+				return err
+			}
+		case "args":
+			if err := utils.CollectArgsInputsAndWriteFile(inputs, path.Join(newPath, "azion")); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("invalid extra type: %s", selectedItem.Extras.Type)
+		}
 	}
 
 	logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
