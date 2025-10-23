@@ -20,4 +20,6 @@ var (
 	ErrorDeps                          = errors.New("Failed to install project dependencies")
 	ErrorReadingGitignore              = errors.New("Failed to read your .gitignore file")
 	ErrorWritingGitignore              = errors.New("Failed to write to your .gitignore file")
+	ErrorReadingWorkflow               = errors.New("Failed to check for GitHub Actions workflow file")
+	ErrorWritingWorkflow               = errors.New("Failed to write GitHub Actions workflow file")
 )
