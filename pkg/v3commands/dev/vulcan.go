@@ -8,12 +8,17 @@ import (
 	"go.uber.org/zap"
 )
 
-func vulcan(cmd *DevCmd, isFirewall bool) error {
+func vulcan(cmd *DevCmd, isFirewall bool, port int) error {
 
 	vul := cmd.Vulcan()
 	command := vul.Command("", "dev", cmd.F)
+
+	if port > 0 {
+		command = fmt.Sprintf("%s --port %d", command, port)
+	}
+
 	if isFirewall {
-		command = vul.Command("", "dev --firewall", cmd.F)
+		command = fmt.Sprintf("%s --firewall", command)
 	}
 
 	err := runCommand(cmd, command)
