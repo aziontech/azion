@@ -14,8 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// CreateZipsInBatches Function to split files into batches of up to 1MB and
-// create ZIPs keeping the directory structure
 func CreateZipsInBatches(files []contracts.FileOps) error {
 	const maxBatchSize = 1 * 1024 * 1024 // 1MB em bytes
 	var currentBatch []contracts.FileOps
@@ -60,7 +58,6 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 	return nil
 }
 
-// createZip Helper function to create a ZIP file from a batch of FileOps while maintaining the directory structure
 func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
@@ -104,8 +101,6 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error
 	return nil
 }
 
-// ReadZip reads the ZIP files in the pathStatic directory that start with
-// prefix and end with .zip.  Returns a list of contracts.FileOps or an error.
 func ReadZip() ([]contracts.FileOps, error) {
 	var listZIP []contracts.FileOps
 
@@ -140,4 +135,36 @@ func ReadZip() ([]contracts.FileOps, error) {
 	}
 
 	return listZIP, nil
+}
+
+func CleanupZipFiles() error {
+	logger.Debug("Running cleanup for batch zip files")
+	tempDir := os.TempDir()
+
+	files, err := os.ReadDir(tempDir)
+	if err != nil {
+		logger.Debug("Error reading temp directory for cleanup", zap.Error(err))
+		return err
+	}
+
+	var cleanupErrors []error
+	for _, f := range files {
+		if strings.ToLower(filepath.Ext(f.Name())) == ".zip" &&
+			strings.HasPrefix(f.Name(), "batch") {
+			zipPath := filepath.Join(tempDir, f.Name())
+			logger.Debug("Removing temporary ZIP file", zap.String("path", zipPath))
+
+			if err := os.Remove(zipPath); err != nil {
+				logger.Debug("Error removing ZIP file", zap.String("path", zipPath), zap.Error(err))
+				cleanupErrors = append(cleanupErrors, err)
+			}
+		}
+	}
+
+	if len(cleanupErrors) > 0 {
+		logger.Debug("Some ZIP files could not be removed during cleanup", zap.Int("count", len(cleanupErrors)))
+		return cleanupErrors[0]
+	}
+
+	return nil
 }
