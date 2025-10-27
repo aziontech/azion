@@ -105,15 +105,21 @@ type ResultsV4 struct {
 }
 
 type Result struct {
-	Azion  *AzionApplicationOptionsV3 `json:"azion,omitempty"`  // Pointer and omitempty tag
-	Extras []interface{}              `json:"extras"`           // Assuming Extras can contain any data
-	Errors *ErrorDetails              `json:"errors,omitempty"` // Pointer and omitempty for optional errors
+	Azion  *AzionApplicationOptionsV3 `json:"azion,omitempty"`
+	Extras []interface{}              `json:"extras"`
+	Errors *ErrorDetails              `json:"errors,omitempty"`
 }
 
 type ResultV4 struct {
-	Azion  *AzionApplicationOptions `json:"azion,omitempty"`  // Pointer and omitempty tag
-	Extras []interface{}            `json:"extras"`           // Assuming Extras can contain any data
-	Errors *ErrorDetails            `json:"errors,omitempty"` // Pointer and omitempty for optional errors
+	Azion       *AzionApplicationOptions `json:"azion,omitempty"`
+	Extras      []interface{}            `json:"extras"`
+	Errors      *ErrorDetails            `json:"errors,omitempty"`
+	AzionConfig *AzionConfig             `json:"azion_config,omitempty"`
+}
+
+type AzionConfig struct {
+	FileName    string `json:"file_name"`
+	FileContent string `json:"file_content"`
 }
 
 type ErrorDetails struct {

@@ -230,6 +230,37 @@ func WriteAzionJsonContentV3(conf *contracts.AzionApplicationOptionsV3, confPath
 	return nil
 }
 
+func WriteAzionConfig(conf *contracts.AzionConfig) error {
+	logger.Debug("Writing your azion.config file", zap.Any("File name", conf.FileName))
+	// Get the current working directory
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return err
+	}
+
+	// Process the FileContent to handle escape sequences
+	processedContent := strings.ReplaceAll(conf.FileContent, "\\n", "\n")
+	processedContent = strings.ReplaceAll(processedContent, "\\t", "\t")
+	processedContent = strings.ReplaceAll(processedContent, "\\r", "\r")
+	processedContent = strings.ReplaceAll(processedContent, "\\\"", "\"")
+	processedContent = strings.ReplaceAll(processedContent, "\\'", "'")
+	processedContent = strings.ReplaceAll(processedContent, "\\\\", "\\")
+
+	// Create the full file path
+	filePath := path.Join(wd, conf.FileName)
+
+	// Write the processed content to the file (overwrite if exists)
+	err = os.WriteFile(filePath, []byte(processedContent), 0644)
+	if err != nil {
+		logger.Debug("Error writing config file", zap.Error(err))
+		return fmt.Errorf("failed to write config file %s: %w", filePath, err)
+	}
+
+	logger.Debug("Config file written successfully", zap.Any("File name", conf.FileName))
+
+	return nil
+}
+
 func ErrorPerStatusCode(httpResp *http.Response, err error) error {
 
 	// when the CLI times out, probably due to SSO communication, httpResp is null and/or http status is 500;
