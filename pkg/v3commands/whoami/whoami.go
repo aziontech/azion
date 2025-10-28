@@ -14,7 +14,7 @@ import (
 
 type WhoamiCmd struct {
 	Io           *iostreams.IOStreams
-	ReadSettings func() (token.Settings, error)
+	ReadSettings func(string) (token.Settings, error)
 	F            *cmdutil.Factory
 }
 
@@ -50,7 +50,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *WhoamiCmd) run() error {
-	settings, err := cmd.ReadSettings()
+	activeProfile := cmd.F.GetActiveProfile()
+	settings, err := cmd.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (cmd *WhoamiCmd) run() error {
 		return msg.ErrorNotLoggedIn
 	}
 
-	msg := fmt.Sprintf(" Client ID: %s\n Email: %s\n", settings.ClientId, settings.Email)
+	msg := fmt.Sprintf(" Client ID: %s\n Email: %s\n Active Profile: %s\n", settings.ClientId, settings.Email, activeProfile)
 	whoamiOut := output.GeneralOutput{
 		Msg:   msg,
 		Out:   cmd.Io.Out,

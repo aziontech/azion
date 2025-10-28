@@ -18,6 +18,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
+	"github.com/aziontech/azion-cli/pkg/cmd/profiles"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
 	"github.com/aziontech/azion-cli/pkg/cmd/reset"
 	"github.com/aziontech/azion-cli/pkg/cmd/rollback"
@@ -151,6 +152,7 @@ func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(v3reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3rollback.NewCmd(fact.factory))
+	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
@@ -177,6 +179,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
 	cobraCmd.AddCommand(clone.NewCmd(fact.factory))
 	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
+	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {
@@ -239,7 +242,8 @@ func Execute(f *factoryRoot) {
 	// 1 = authorize; anything different than 1 means that the user did not authorize metrics collection, or did not answer the question yet
 	if f.globalSettings != nil {
 		if f.globalSettings.AuthorizeMetricsCollection == 1 {
-			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err)
+			activeProfile := f.factory.GetActiveProfile()
+			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err, activeProfile)
 			if errMetrics != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}

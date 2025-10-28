@@ -152,7 +152,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			f, _, _ := testutils.NewFactory(nil)
 			vul := NewVulcan()
-			vul.ReadSettings = func() (token.Settings, error) {
+			vul.ReadSettings = func(string) (token.Settings, error) {
 				return token.Settings{}, nil
 			}
 			err := vul.CheckVulcanMajor(tt.args.currentVersion, f, vul)

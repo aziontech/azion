@@ -48,7 +48,12 @@ var (
 	ErrorMinTlsVersion              = errors.New("This is not a valid TLS Version. Run azion edge_applications <subcommand> --help for more information")
 	ErrorNameInUse                  = errors.New("The name you've selected is already in use by another resource. Please choose a different name. Run 'azion list [resource]' to see all your resources")
 	ErrorCancelledContextInput      = errors.New("Execution interrupted by the user. All interactions of this flow were lost.")
+	ErrorWriteProfiles              = errors.New("Failed to write profiles.toml file: %w")
+	ErrorReadProfiles               = errors.New("Failed to read profiles.toml file: %w")
 	ErrorWriteSettings              = errors.New("Failed to write settings.toml file: %w")
+	ErrorCheckingProfilesFile       = errors.New("error checking profiles file: %w")
+	ErrorCreatingConfigDirectory    = errors.New("error creating config directory: %w")
+	ErrorCreatingDefaultProfiles    = errors.New("error creating default profiles.json: %w")
 )
 
 const (

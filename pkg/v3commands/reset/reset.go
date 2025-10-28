@@ -16,9 +16,10 @@ import (
 
 type ResetCmd struct {
 	Io            *iostreams.IOStreams
-	ReadSettings  func() (token.Settings, error)
-	WriteSettings func(token.Settings) error
+	ReadSettings  func(string) (token.Settings, error)
+	WriteSettings func(token.Settings, string) error
 	DeleteToken   func(context.Context, string) error
+	Factory       *cmdutil.Factory
 }
 
 func NewResetCmd(f *cmdutil.Factory) *ResetCmd {
@@ -30,6 +31,7 @@ func NewResetCmd(f *cmdutil.Factory) *ResetCmd {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 			return client.Delete(ctx, uuid)
 		},
+		Factory: f,
 	}
 }
 
@@ -54,7 +56,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *ResetCmd) run() error {
-	settings, err := cmd.ReadSettings()
+	activeProfile := cmd.Factory.GetActiveProfile()
+	settings, err := cmd.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -67,7 +70,7 @@ func (cmd *ResetCmd) run() error {
 	}
 
 	settings = token.Settings{}
-	err = cmd.WriteSettings(settings)
+	err = cmd.WriteSettings(settings, activeProfile)
 	if err != nil {
 		return err
 	}

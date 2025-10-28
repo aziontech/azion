@@ -37,6 +37,7 @@ func TestSetPath(t *testing.T) {
 			// Reset to defaults before each test
 			pathDir = DEFAULT_DIR
 			pathSettings = DEFAULT_SETTINGS
+			pathProfiles = DEFAULT_PROFILES
 
 			err := SetPath(tt.path)
 			if err != tt.wantErr {
@@ -75,6 +76,7 @@ func TestGetPath(t *testing.T) {
 			// Reset to defaults before each test
 			pathDir = DEFAULT_DIR
 			pathSettings = DEFAULT_SETTINGS
+			pathProfiles = DEFAULT_PROFILES
 
 			if tt.setPath != "" {
 				err := SetPath(tt.setPath)
@@ -105,6 +107,7 @@ func TestDir(t *testing.T) {
 			wantDir: DirPath{
 				Dir:      filepath.Join(home, DEFAULT_DIR),
 				Settings: DEFAULT_SETTINGS,
+				Profiles: DEFAULT_PROFILES,
 				Metrics:  DEFAULT_METRICS,
 				Schedule: DEFAULT_SCHEDULE,
 			},
@@ -117,6 +120,7 @@ func TestDir(t *testing.T) {
 			wantDir: DirPath{
 				Dir:      "/home/user/.azion",
 				Settings: "settings.toml",
+				Profiles: DEFAULT_PROFILES,
 				Metrics:  DEFAULT_METRICS,
 				Schedule: DEFAULT_SCHEDULE,
 			},
@@ -129,6 +133,7 @@ func TestDir(t *testing.T) {
 			// Reset to defaults before each test
 			pathDir = DEFAULT_DIR
 			pathSettings = DEFAULT_SETTINGS
+			pathProfiles = DEFAULT_PROFILES
 
 			// Set environment variable for HOME
 			if tt.envHome != "" {

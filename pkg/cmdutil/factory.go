@@ -2,6 +2,8 @@ package cmdutil
 
 import (
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -21,4 +23,20 @@ type Flags struct {
 	Out           string `json:"-" yaml:"-" toml:"-"`
 	Format        string `json:"-" yaml:"-" toml:"-"`
 	NoColor       bool   `json:"-" yaml:"-" toml:"-"`
+}
+
+// GetActiveProfile returns the active profile name from config, defaulting to "default" if empty
+func (f *Factory) GetActiveProfile() string {
+	activeProfile := f.Config.GetString("active_profile")
+	
+	if activeProfile == "" {
+		return "default"
+	}
+	
+	// If the value looks like a path, extract just the profile name (last component)
+	if strings.Contains(activeProfile, "/") {
+		return filepath.Base(activeProfile)
+	}
+	
+	return activeProfile
 }

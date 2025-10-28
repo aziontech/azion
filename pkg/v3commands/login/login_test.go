@@ -84,6 +84,15 @@ func Test_cmd(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Mock confirmFn to return false (don't create new profile)
+			originalConfirmFn := confirmFn
+			confirmFn = func(globalFlagAll bool, msg string, defaultYes bool) bool {
+				return false
+			}
+			defer func() {
+				confirmFn = originalConfirmFn
+			}()
+
 			cmd := tt.cmd(tt.args.l)
 			if err := cmd.Execute(); (err != nil) != tt.wantErr {
 				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
