@@ -51,9 +51,9 @@ var (
 	ErrorWriteProfiles              = errors.New("Failed to write profiles.toml file: %w")
 	ErrorReadProfiles               = errors.New("Failed to read profiles.toml file: %w")
 	ErrorWriteSettings              = errors.New("Failed to write settings.toml file: %w")
-	ErrorCheckingProfilesFile       = errors.New("error checking profiles file: %w")
-	ErrorCreatingConfigDirectory    = errors.New("error creating config directory: %w")
-	ErrorCreatingDefaultProfiles    = errors.New("error creating default profiles.json: %w")
+	ErrorCheckingProfilesFile       = errors.New("Failed to check profiles file: %w")
+	ErrorCreatingConfigDirectory    = errors.New("Failed to create config directory: %w")
+	ErrorCreatingDefaultProfiles    = errors.New("Failed to create default profiles.json: %w")
 )
 
 const (

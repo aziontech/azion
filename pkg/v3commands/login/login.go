@@ -159,7 +159,7 @@ func (l *login) saveSettings() error {
 		profile := token.Profile{Name: profileName}
 		err = token.WriteProfiles(profile)
 		if err != nil {
-			return fmt.Errorf("failed to set new profile as active: %w", err)
+			return fmt.Errorf(msg.ErrorSetActiveProfile.Error(), err)
 		}
 
 		fmt.Fprintf(l.factory.IOStreams.Out, msg.ProfileCreated+"\n", profileName)

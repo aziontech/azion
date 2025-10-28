@@ -75,49 +75,41 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				profileToDelete = fields.Name
 			}
 
-			// Prevent deletion of default profile
 			if profileToDelete == "default" {
 				return msg.ErrorCannotDeleteDefault
 			}
 
-			// Confirm deletion
 			confirmDelete := confirmFn(false, fmt.Sprintf(msg.ConfirmDeleteProfile, profileToDelete), true)
 			if !confirmDelete {
-				return fmt.Errorf("Profile deletion cancelled")
+				return msg.ErrorDeleteCancelled
 			}
 
-			// Check if profile exists
 			dir := config.Dir()
 			profilePath := filepath.Join(dir.Dir, profileToDelete)
 			if _, err := os.Stat(profilePath); os.IsNotExist(err) {
-				return fmt.Errorf("Profile '%s' not found", profileToDelete)
+				return fmt.Errorf(msg.ErrorProfileNotFound.Error(), profileToDelete)
 			}
 
-			// Try to delete token if UUID exists
 			settings, err := token.ReadSettings(profileToDelete)
 			if err == nil && settings.UUID != "" {
 				client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), settings.Token)
 				err = client.Delete(context.Background(), settings.UUID)
 				if err != nil {
-					// Log warning but don't fail the profile deletion
-					fmt.Fprintf(f.IOStreams.Out, "Warning: Failed to delete token from server: %v\n", err)
+					fmt.Fprintf(f.IOStreams.Out, msg.WarningDeleteToken+"\n", err)
 				}
 			}
 
-			// Delete the profile directory and all its contents
 			err = os.RemoveAll(profilePath)
 			if err != nil {
-				return fmt.Errorf("Failed to delete the profile: %w", err)
+				return fmt.Errorf(msg.ErrorDeleteProfile.Error(), err)
 			}
 
-			// Check if deleted profile was the active one
 			currentProfile, _, err := token.ReadProfiles()
 			if err == nil && currentProfile.Name == profileToDelete {
-				// Set active profile to "default"
 				defaultProfile := token.Profile{Name: "default"}
 				err = token.WriteProfiles(defaultProfile)
 				if err != nil {
-					fmt.Fprintf(f.IOStreams.Out, "Warning: Failed to set active profile to default: %v\n", err)
+					fmt.Fprintf(f.IOStreams.Out, msg.WarningSetActiveProfile+"\n", err)
 				}
 			}
 

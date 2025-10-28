@@ -12,4 +12,5 @@ var (
 	ErrorProfileNotFound = errors.New("Profile '%s' not found")
 	ErrorCannotDeleteDefault = errors.New("Cannot delete the 'default' profile")
 	ErrorDeleteToken   = errors.New("Failed to delete token: %w")
+	ErrorDeleteCancelled = errors.New("Profile deletion cancelled")
 )

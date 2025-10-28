@@ -61,14 +61,12 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 	})
 
 	if cmd.Flags().Changed("token") {
-		// When token is provided, use empty settings initially to avoid creating base settings.toml
 		emptySettings := token.Settings{}
 		if err := checkTokenSent(fact, &emptySettings, t); err != nil {
 			return err
 		}
 		// fact.globalSettings is set inside checkTokenSent, so we can proceed
 	} else {
-		// Only read existing settings if no token is being provided
 		activeProfile := fact.factory.GetActiveProfile()
 		settings, err := token.ReadSettings(activeProfile)
 		if err != nil {
@@ -82,8 +80,6 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 		}
 	}
 
-	//both verifications occurs if 24 hours have passed since the last execution
-	// Skip update check when token is being provided to avoid creating base settings
 	if !cmd.Flags().Changed("token") && fact.globalSettings != nil {
 		if err := checkForUpdateAndMetrics(version.BinVersion, fact.factory, fact.globalSettings); err != nil {
 			return err
@@ -107,8 +103,11 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		return utils.ErrorInvalidToken
 	}
 
-	// When setting a token, always use "default" profile to avoid config system initialization
-	activeProfile := "default"
+	// When setting a token, use "default" profile if another one was not configured yet
+	activeProfile := fact.factory.GetActiveProfile()
+	if activeProfile == "" {
+		activeProfile = "default"
+	}
 
 	strToken := token.Settings{
 		Token:                      fact.tokenFlag,
@@ -128,7 +127,6 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 
 	fact.globalSettings = &strToken
 
-	// Create a profile-aware file path for the message
 	dir := config.Dir()
 	if activeProfile != "" {
 		dir.Dir = filepath.Join(dir.Dir, activeProfile)

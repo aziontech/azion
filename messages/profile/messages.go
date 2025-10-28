@@ -29,4 +29,6 @@ var (
 	DeleteOutputSuccess    = "Profile '%s' deleted successfully"
 	QuestionDeleteProfile  = "Choose a profile to delete:"
 	ConfirmDeleteProfile   = "Are you sure you want to delete profile '%s'? This action cannot be undone (Y/n)"
+	WarningDeleteToken     = "Warning: Failed to delete token from server: %v"
+	WarningSetActiveProfile = "Warning: Failed to set active profile to default: %v"
 )
