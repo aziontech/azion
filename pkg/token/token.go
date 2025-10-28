@@ -179,10 +179,12 @@ func WriteProfiles(profile Profile) error {
 }
 
 func ReadSettings(path string) (Settings, error) {
-	dir := config.Dir()
-	if path != "" {
-		dir.Dir = filepath.Join(dir.Dir, path)
+	if path == "" {
+		path = "default"
 	}
+
+	dir := config.Dir()
+	dir.Dir = filepath.Join(dir.Dir, path)
 	filePath := filepath.Join(dir.Dir, dir.Settings)
 
 	// Check if the file exists

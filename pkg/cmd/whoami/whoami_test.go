@@ -31,7 +31,7 @@ func TestWhoami(t *testing.T) {
 				ClientId: "abcd-1234",
 			},
 			mockReadError:  nil,
-			expectedOutput: " Client ID: abcd-1234\n Email: test@example.com\n Active Profile: \n",
+			expectedOutput: " Client ID: abcd-1234\n Email: test@example.com\n Active Profile: default\n",
 			expectedError:  nil,
 		},
 		{

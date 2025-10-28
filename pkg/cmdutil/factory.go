@@ -27,16 +27,20 @@ type Flags struct {
 
 // GetActiveProfile returns the active profile name from config, defaulting to "default" if empty
 func (f *Factory) GetActiveProfile() string {
+	if f.Config == nil {
+		return "default"
+	}
+
 	activeProfile := f.Config.GetString("active_profile")
-	
+
 	if activeProfile == "" {
 		return "default"
 	}
-	
+
 	// If the value looks like a path, extract just the profile name (last component)
 	if strings.Contains(activeProfile, "/") {
 		return filepath.Base(activeProfile)
 	}
-	
+
 	return activeProfile
 }
