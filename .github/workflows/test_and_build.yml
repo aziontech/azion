@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-unit-tests') }}
     runs-on: ubuntu-latest
