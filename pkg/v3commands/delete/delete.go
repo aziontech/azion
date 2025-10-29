@@ -3,6 +3,7 @@ package delete
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
+	profile "github.com/aziontech/azion-cli/pkg/cmd/delete/profile"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
@@ -21,6 +22,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		Short: msg.ShortDescription,
 		Long:  msg.LongDescription, Example: heredoc.Doc(`
 		$ azion delete --help
+		$ azion delete profile -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -36,6 +38,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// cmd.AddCommand(cache.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
+	cmd.AddCommand(profile.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
