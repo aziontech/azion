@@ -39,6 +39,7 @@ type DeployCmd struct {
 	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
 	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
+	WriteAzionConfig      func(conf *contracts.AzionConfig) error
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	Open                  func(name string) (*os.File, error)
 	FilepathWalk          func(root string, fn filepath.WalkFunc) error
@@ -82,6 +83,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		BuildCmd:              build.NewBuildCmd,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
 		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		WriteAzionConfig:      utils.WriteAzionConfig,
 		Open:                  os.Open,
 		FilepathWalk:          filepath.Walk,
 		Unmarshal:             json.Unmarshal,
@@ -370,6 +372,12 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			if err != nil {
 				return err
 			}
+
+			err = cmd.WriteAzionConfig(Result.Result.AzionConfig)
+			if err != nil {
+				return err
+			}
+
 		default:
 			s.Stop()
 			return msg.ErrorDeployRemote

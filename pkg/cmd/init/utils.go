@@ -98,13 +98,13 @@ func (cmd *initCmd) getVulcanInfo() (string, error) {
 		return "", err
 	}
 
-	var infoJson map[string]string
+	var infoJson Item
 	err = cmd.unmarshal(fileContent, &infoJson)
 	if err != nil {
 		logger.Debug("Error unmarshalling template info", zap.Error(err))
 		return "", err
 	}
 
-	logger.Debug("Information about the template:", zap.Any("preset", infoJson["preset"]))
-	return infoJson["preset"], nil
+	logger.Debug("Information about the template:", zap.Any("preset", infoJson.Preset))
+	return infoJson.Preset, nil
 }

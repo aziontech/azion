@@ -6,6 +6,9 @@ on:
 
 jobs:
   PackageAuditing:
+    permissions:
+      contents: write
+      pull-requests: write
     name: Package Auditor (GoVulnCheck)
     runs-on: ubuntu-latest
     container:

@@ -100,6 +100,12 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 		return err
 	}
 
+	defer func() {
+		if cleanupErr := CleanupZipFiles(); cleanupErr != nil {
+			logger.Debug("Failed to cleanup temporary zip files", zap.Error(cleanupErr))
+		}
+	}()
+
 	listZip, err := ReadZip()
 	if err != nil {
 		return err

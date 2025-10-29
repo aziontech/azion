@@ -101,6 +101,11 @@ func MockCaptureLogs(execId string, token string, cmd *DeployCmd) error {
 	return nil
 }
 
+// MockWriteAzionConfig mocks WriteAzionConfig behavior
+func MockWriteAzionConfig(conf *contracts.AzionConfig) error {
+	return nil
+}
+
 func TestDeploy_Run(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	tests := []struct {
@@ -120,6 +125,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.OpenBrowser = MockOpenBrowser
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
+				cmd.WriteAzionConfig = MockWriteAzionConfig
 				// Return populated settings so that the deploy flow skips bucket/credentials creation
 				cmd.ReadSettings = MockReadSettings
 				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
@@ -141,6 +147,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
+				cmd.WriteAzionConfig = MockWriteAzionConfig
 				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
 				}
@@ -157,6 +164,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.WriteAzionJsonContent = MockWriteAzionJsonContent
 				cmd.CheckToken = MockCheckToken
 				cmd.ReadSettings = MockReadSettings
+				cmd.WriteAzionConfig = MockWriteAzionConfig
 				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
 				}
@@ -266,6 +274,9 @@ func TestCaptureLogs(t *testing.T) {
 			Result = tt.resultStruct
 
 			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confConf string) error {
+				return nil
+			}
+			cmd.WriteAzionConfig = func(conf *contracts.AzionConfig) error {
 				return nil
 			}
 			err := cmd.CaptureLogs(execID, token, cmd)
