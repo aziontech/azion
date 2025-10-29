@@ -116,8 +116,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return err
 			}
 
+			// Ask if user wants to make this profile the default
+			var successMessage string
+			makeDefault := confirmFn(f.GlobalFlagAll, fmt.Sprintf(msg.QuestionMakeDefault, fields.Name), true)
+			if makeDefault {
+				profile := token.Profile{Name: fields.Name}
+				err := token.WriteProfiles(profile)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorSetDefault.Error(), err)
+				}
+				successMessage = fmt.Sprintf(msg.CreateOutputSuccessDefault, fields.Name)
+			} else {
+				successMessage = fmt.Sprintf(msg.CreateOutputSuccess, fields.Name)
+			}
+
 			profileOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.CreateOutputSuccess, fields.Name),
+				Msg: successMessage,
 				Out: f.IOStreams.Out,
 			}
 			return output.Print(&profileOut)

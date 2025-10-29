@@ -84,6 +84,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorDeleteCancelled
 			}
 
+			// Check if the profile to delete is the currently active one
+			currentProfile, _, err := token.ReadProfiles()
+			isActiveProfile := err == nil && currentProfile.Name == profileToDelete
+
 			dir := config.Dir()
 			profilePath := filepath.Join(dir.Dir, profileToDelete)
 			if _, err := os.Stat(profilePath); os.IsNotExist(err) {
@@ -104,17 +108,22 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return fmt.Errorf(msg.ErrorDeleteProfile.Error(), err)
 			}
 
-			currentProfile, _, err := token.ReadProfiles()
-			if err == nil && currentProfile.Name == profileToDelete {
+			var successMessage string
+			if isActiveProfile {
 				defaultProfile := token.Profile{Name: "default"}
 				err = token.WriteProfiles(defaultProfile)
 				if err != nil {
 					fmt.Fprintf(f.IOStreams.Out, msg.WarningSetActiveProfile+"\n", err)
+					successMessage = fmt.Sprintf(msg.DeleteOutputSuccess, profileToDelete)
+				} else {
+					successMessage = fmt.Sprintf(msg.DeleteOutputSuccessWithSwitch, profileToDelete)
 				}
+			} else {
+				successMessage = fmt.Sprintf(msg.DeleteOutputSuccess, profileToDelete)
 			}
 
 			profileOut := output.GeneralOutput{
-				Msg: fmt.Sprintf(msg.DeleteOutputSuccess, profileToDelete),
+				Msg: successMessage,
 				Out: f.IOStreams.Out,
 			}
 			return output.Print(&profileOut)

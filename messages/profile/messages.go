@@ -14,7 +14,9 @@ var (
 	FieldToken             = "Please inform a token for the new profile"
 	FieldProfileName       = "Please inform a name for the new profile"
 	QuestionCollectMetrics = "To better understand user needs and enhance our application, we gather anonymous data. Do you agree to participate? (Y/n)"
+	QuestionMakeDefault    = "Would you like to make '%s' your default profile? (Y/n)"
 	CreateOutputSuccess    = "Profile '%s' created successfully"
+	CreateOutputSuccessDefault = "Profile '%s' created successfully and set as default"
 
 	UsageProfiles            = "profiles"
 	ProfilesShortDescription = "Manage profiles"
@@ -27,6 +29,7 @@ var (
 	DeleteLongDescription  = "Delete a profile and all its associated data"
 	DeleteFlagHelp         = "Displays more information about the delete profile subcommand"
 	DeleteOutputSuccess    = "Profile '%s' deleted successfully"
+	DeleteOutputSuccessWithSwitch = "Profile '%s' deleted successfully. Active profile switched to 'default'"
 	QuestionDeleteProfile  = "Choose a profile to delete:"
 	ConfirmDeleteProfile   = "Are you sure you want to delete profile '%s'? This action cannot be undone (Y/n)"
 	WarningDeleteToken     = "Warning: Failed to delete token from server: %v"
