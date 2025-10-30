@@ -85,11 +85,11 @@ func TestReset(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockReadSettings := func() (token.Settings, error) {
+			mockReadSettings := func(string) (token.Settings, error) {
 				return tt.tokenSettings, tt.mockReadError
 			}
 
-			mockWriteSettings := func(settings token.Settings) error {
+			mockWriteSettings := func(settings token.Settings, path string) error {
 				return tt.mockWriteError
 			}
 
@@ -105,6 +105,7 @@ func TestReset(t *testing.T) {
 				ReadSettings:  mockReadSettings,
 				WriteSettings: mockWriteSettings,
 				DeleteToken:   mockDeleteToken,
+				Factory:       f,
 			}
 
 			cmd := NewCobraCmd(resetCmd, f)

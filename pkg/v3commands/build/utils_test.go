@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -68,6 +69,7 @@ func TestBuildCmd_runCommand(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -103,6 +105,7 @@ func TestBuildCmd_runCommand(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -138,6 +141,7 @@ func TestBuildCmd_runCommand(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{

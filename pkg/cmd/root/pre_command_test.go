@@ -68,7 +68,7 @@ func TestCheckAuthorizeMetricsCollection(t *testing.T) {
 			confirmFn = func(globalFlagAll bool, msg string, defaultValue bool) bool {
 				return tt.mockConfirm
 			}
-			err := checkAuthorizeMetricsCollection(cmd, tt.globalFlagAll, &settings)
+			err := checkAuthorizeMetricsCollection(cmd, tt.globalFlagAll, &settings, "default")
 			assert.Equal(t, tt.expectedErr, err)
 			assert.Equal(t, tt.expectedSettings.AuthorizeMetricsCollection, settings.AuthorizeMetricsCollection)
 		})

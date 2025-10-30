@@ -31,7 +31,7 @@ func TestWhoami(t *testing.T) {
 				ClientId: "abcd-1234",
 			},
 			mockReadError:  nil,
-			expectedOutput: " Client ID: abcd-1234\n Email: test@example.com\n",
+			expectedOutput: " Client ID: abcd-1234\n Email: test@example.com\n Active Profile: \n",
 			expectedError:  nil,
 		},
 		{
@@ -54,7 +54,7 @@ func TestWhoami(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockReadSettings := func() (token.Settings, error) {
+			mockReadSettings := func(string) (token.Settings, error) {
 				return tt.tokenSettings, tt.mockReadError
 			}
 

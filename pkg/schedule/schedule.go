@@ -90,6 +90,19 @@ func (s *Factory) createFileSchedule(shedules []Schedule) error {
 	return s.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
+func (s *Factory) createFileScheduleForProfile(schedules []Schedule, profile string) error {
+	b, err := s.MarshalIndent(schedules, "  ", " ")
+	if err != nil {
+		return err
+	}
+	configPath := s.Dir()
+	if profile != "" {
+		configPath.Dir = filepath.Join(configPath.Dir, profile)
+	}
+	path := s.Join(configPath.Dir, configPath.Schedule)
+	return s.WriteFile(path, b, 0666)
+}
+
 func (s *Factory) readFileSchedule() ([]Schedule, error) {
 	configPath := config.Dir()
 	schedules := []Schedule{}
@@ -122,9 +135,44 @@ func (s *Factory) readFileSchedule() ([]Schedule, error) {
 	return schedules, nil
 }
 
+func (s *Factory) readFileScheduleForProfile(profile string) ([]Schedule, error) {
+	configPath := config.Dir()
+	if profile != "" {
+		configPath.Dir = filepath.Join(configPath.Dir, profile)
+	}
+	schedules := []Schedule{}
+
+	path := s.Join(configPath.Dir, configPath.Schedule)
+
+	// Checks if the file exists in the given path
+	if _, err := s.Stat(path); s.IsNotExist(err) {
+		data, err := s.Marshal(&schedules)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := s.WriteFile(path, data, 0666); err != nil {
+			return nil, err
+		}
+		return schedules, nil
+	}
+
+	file, err := s.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.Unmarshal(file, &schedules)
+	if err != nil {
+		return nil, err
+	}
+	return schedules, nil
+}
+
 func ExecSchedules(factory *cmdutil.Factory) {
 	logger.Debug("Exec Schedules")
-	schedules, err := factoryShedule.readFileSchedule()
+	activeProfile := factory.GetActiveProfile()
+	schedules, err := factoryShedule.readFileScheduleForProfile(activeProfile)
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return
@@ -142,7 +190,7 @@ func ExecSchedules(factory *cmdutil.Factory) {
 		}
 	}
 
-	if err := factoryShedule.createFileSchedule(scheds); err != nil {
+	if err := factoryShedule.createFileScheduleForProfile(scheds, activeProfile); err != nil {
 		logger.Debug("Scheduling error", zap.Error(err))
 	}
 }

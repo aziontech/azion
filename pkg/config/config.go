@@ -13,11 +13,13 @@ const (
 	DEFAULT_SETTINGS = "settings.toml"
 	DEFAULT_METRICS  = "metrics.json"
 	DEFAULT_SCHEDULE = "schedule.json"
+	DEFAULT_PROFILES = "profiles.json"
 )
 
 var (
 	pathDir      string = DEFAULT_DIR
 	pathSettings string = DEFAULT_SETTINGS
+	pathProfiles string = DEFAULT_PROFILES
 )
 
 type Config interface {
@@ -31,6 +33,7 @@ func SetPath(path string) error {
 
 	pathDir = filepath.Dir(path)
 	pathSettings = filepath.Base(path)
+	pathProfiles = DEFAULT_PROFILES
 
 	return nil
 }
@@ -44,6 +47,7 @@ type DirPath struct {
 	Settings string
 	Metrics  string
 	Schedule string
+	Profiles string
 }
 
 func Dir() DirPath {
@@ -56,6 +60,7 @@ func Dir() DirPath {
 	dirPath := DirPath{
 		Dir:      filepath.Join(home, pathDir),
 		Settings: pathSettings,
+		Profiles: pathProfiles,
 		Metrics:  DEFAULT_METRICS,
 		Schedule: DEFAULT_SCHEDULE,
 	}

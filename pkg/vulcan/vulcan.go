@@ -8,7 +8,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
-	"github.com/pelletier/go-toml"
 	"go.uber.org/zap"
 )
 
@@ -22,7 +21,7 @@ var (
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
 	CheckVulcanMajor func(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error
-	ReadSettings     func() (token.Settings, error)
+	ReadSettings     func(string) (token.Settings, error)
 }
 
 func NewVulcan() *VulcanPkg {
@@ -53,6 +52,7 @@ func command(flags, params string, f *cmdutil.Factory) string {
 }
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {
+	activeProfile := f.GetActiveProfile()
 	parts := strings.Split(currentVersion, ".")
 	// strings.Split will always return at least one element, so parts will always be len>0
 	// to avoid this, I am checking if version is empty. If so, I just use an empty slice
@@ -67,7 +67,7 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 			return err
 		}
 
-		config, err := vulcan.ReadSettings()
+		config, err := vulcan.ReadSettings(activeProfile)
 		if err != nil {
 			return err
 		}
@@ -77,14 +77,7 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		}
 
 		config.LastVulcanVersion = currentVersion
-		client := token.New(&token.Config{Client: f.HttpClient})
-		byteSettings, err := toml.Marshal(config)
-		if err != nil {
-			logger.Debug("Error while marshalling settings.toml", zap.Error(err))
-			return err
-		}
-
-		_, err = client.Save(byteSettings)
+		err = token.WriteSettings(config, activeProfile)
 		if err != nil {
 			logger.Debug("Error while saving settings", zap.Error(err))
 			return err

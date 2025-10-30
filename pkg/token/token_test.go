@@ -129,13 +129,13 @@ func Test_WriteSettings(t *testing.T) {
 			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
 		}
 
-		err := WriteSettings(settings)
+		err := WriteSettings(settings, "test")
 		if err != nil {
 			t.Fatalf("WriteSettings() = %v; want nil", err)
 		}
 
 		dir := config.Dir()
-		data, err := os.ReadFile(filepath.Join(dir.Dir, dir.Settings))
+		data, err := os.ReadFile(filepath.Join(dir.Dir, "test", dir.Settings))
 		require.NoError(t, err)
 
 		var readSettings Settings
@@ -162,12 +162,12 @@ func Test_ReadSettings(t *testing.T) {
 			UUID:  "uuidValue",
 		}
 
-		err := WriteSettings(expectedSettings)
+		err := WriteSettings(expectedSettings, "test")
 		if err != nil {
 			t.Fatalf("WriteSettings() error: %s", err)
 		}
 
-		settings, err := ReadSettings()
+		settings, err := ReadSettings("test")
 		if err != nil {
 			t.Fatalf("ReadSettings() = %v; want nil", err)
 		}
@@ -177,19 +177,21 @@ func Test_ReadSettings(t *testing.T) {
 		}
 	})
 
-	t.Run("read settings from non-existing file", func(t *testing.T) {
+	t.Run("read settings from non-existing file creates default", func(t *testing.T) {
 		errSetPath := config.SetPath("/tmp/testazion/nonexistent.toml")
 		if errSetPath != nil {
 			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
 		}
 
-		settings, err := ReadSettings()
-		if err == nil {
-			t.Fatalf("ReadSettings() error = nil; want non-nil error")
+		settings, err := ReadSettings("nonexistent")
+		if err != nil {
+			t.Fatalf("ReadSettings() error = %v; want nil", err)
 		}
 
-		if settings != (Settings{}) {
-			t.Errorf("ReadSettings() = %v; want empty settings", settings)
+		// Should return default empty settings
+		expectedSettings := Settings{}
+		if settings != expectedSettings {
+			t.Errorf("ReadSettings() = %v; want %v", settings, expectedSettings)
 		}
 	})
 }

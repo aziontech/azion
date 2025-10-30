@@ -2,6 +2,8 @@ package root
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +20,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/metric"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
 )
 
@@ -30,6 +31,10 @@ type OSInfo struct {
 
 // doPreCommandCheck carry out all pre-cmd checks needed
 func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
+	// Check if profiles.json exists, create it with default profile if not
+	if err := ensureProfilesExist(); err != nil {
+		return err
+	}
 
 	// Apply timeout based on the parsed flags
 	timeout, err := cmd.Flags().GetInt("timeout")
@@ -50,30 +55,35 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 		}
 	}
 
-	settings, err := token.ReadSettings()
-	if err != nil {
-		return err
-	}
-	fact.globalSettings = &settings
-
 	t := token.New(&token.Config{
 		Client: fact.factory.HttpClient,
 		Out:    fact.factory.IOStreams.Out,
 	})
 
 	if cmd.Flags().Changed("token") {
-		if err := checkTokenSent(fact, fact.globalSettings, t); err != nil {
+		emptySettings := token.Settings{}
+		if err := checkTokenSent(fact, &emptySettings, t); err != nil {
+			return err
+		}
+		// fact.globalSettings is set inside checkTokenSent, so we can proceed
+	} else {
+		activeProfile := fact.factory.GetActiveProfile()
+		settings, err := token.ReadSettings(activeProfile)
+		if err != nil {
+			return err
+		}
+		fact.globalSettings = &settings
+
+		// Only check metrics authorization if no token was provided
+		if err := checkAuthorizeMetricsCollection(cmd, fact.factory.GlobalFlagAll, fact.globalSettings, activeProfile); err != nil {
 			return err
 		}
 	}
 
-	if err := checkAuthorizeMetricsCollection(cmd, fact.factory.GlobalFlagAll, fact.globalSettings); err != nil {
-		return err
-	}
-
-	//both verifications occurs if 24 hours have passed since the last execution
-	if err := checkForUpdateAndMetrics(version.BinVersion, fact.factory, fact.globalSettings); err != nil {
-		return err
+	if !cmd.Flags().Changed("token") && fact.globalSettings != nil {
+		if err := checkForUpdateAndMetrics(version.BinVersion, fact.factory, fact.globalSettings); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -93,6 +103,12 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		return utils.ErrorInvalidToken
 	}
 
+	// When setting a token, use "default" profile if another one was not configured yet
+	activeProfile := fact.factory.GetActiveProfile()
+	if activeProfile == "" {
+		activeProfile = "default"
+	}
+
 	strToken := token.Settings{
 		Token:                      fact.tokenFlag,
 		ClientId:                   user.Results.ClientID,
@@ -103,17 +119,19 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		S3Bucket:                   "",
 	}
 
-	bStrToken, err := toml.Marshal(strToken)
-	if err != nil {
-		return err
-	}
-
-	filePath, err := tokenStr.Save(bStrToken)
+	// Save token to the active profile's settings
+	err = token.WriteSettings(strToken, activeProfile)
 	if err != nil {
 		return err
 	}
 
 	fact.globalSettings = &strToken
+
+	dir := config.Dir()
+	if activeProfile != "" {
+		dir.Dir = filepath.Join(dir.Dir, activeProfile)
+	}
+	filePath := filepath.Join(dir.Dir, dir.Settings)
 
 	logger.FInfo(fact.factory.IOStreams.Out, fmt.Sprintf(msg.TokenSavedIn, filePath))
 	logger.FInfo(fact.factory.IOStreams.Out, msg.TokenUsedIn+"\n")
@@ -122,6 +140,7 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 
 func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *token.Settings) error {
 	logger.Debug("Verifying if an update is required")
+	activeProfile := f.GetActiveProfile()
 	// checks if 24 hours have passed since the last check
 	if time.Since(settings.LastCheck) < 24*time.Hour && !settings.LastCheck.IsZero() {
 		return nil
@@ -129,7 +148,7 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 
 	// checks if user is Logged in before sending metrics
 	if verifyUserInfo(settings) {
-		metric.Send(settings)
+		metric.Send(settings, activeProfile)
 	}
 
 	git := github.NewGithub()
@@ -153,7 +172,6 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 	}
 
 	if latestVersion > currentVersion {
-		// Parse the published_at date
 		publishedTime, err := time.Parse(time.RFC3339, publishedAt)
 		if err != nil {
 			logger.Debug("Failed to parse published_at date", zap.Error(err))
@@ -175,7 +193,7 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 
 	// Update the last update check time
 	settings.LastCheck = time.Now()
-	if err := token.WriteSettings(*settings); err != nil {
+	if err := token.WriteSettings(*settings, activeProfile); err != nil {
 		return err
 	}
 
@@ -218,7 +236,7 @@ func format(input string) (int, error) {
 var confirmFn = utils.Confirm
 
 // 0 = authorization was not asked yet, 1 = accepted, 2 = denied
-func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings) error {
+func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, settings *token.Settings, activeProfile string) error {
 	if settings.AuthorizeMetricsCollection > 0 || cmd.Name() == "completion" {
 		return nil
 	}
@@ -230,7 +248,7 @@ func checkAuthorizeMetricsCollection(cmd *cobra.Command, globalFlagAll bool, set
 		settings.AuthorizeMetricsCollection = 2
 	}
 
-	if err := token.WriteSettings(*settings); err != nil {
+	if err := token.WriteSettings(*settings, activeProfile); err != nil {
 		return err
 	}
 
@@ -243,4 +261,30 @@ func verifyUserInfo(settings *token.Settings) bool {
 	}
 
 	return false
+}
+
+// function that ensures the profiles.json file exists
+func ensureProfilesExist() error {
+	dir := config.Dir()
+	profilesPath := filepath.Join(dir.Dir, dir.Profiles)
+
+	if _, err := os.Stat(profilesPath); err == nil {
+		return nil
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf(utils.ErrorCheckingProfilesFile.Error(), err)
+	}
+
+	defaultProfile := token.Profile{
+		Name: "default",
+	}
+	if err := os.MkdirAll(dir.Dir, 0755); err != nil {
+		return fmt.Errorf(utils.ErrorCreatingConfigDirectory.Error(), err)
+	}
+
+	if err := token.WriteProfiles(defaultProfile); err != nil {
+		return fmt.Errorf(utils.ErrorCreatingDefaultProfiles.Error(), err)
+	}
+
+	logger.Debug("Created default profiles.json with default profile")
+	return nil
 }

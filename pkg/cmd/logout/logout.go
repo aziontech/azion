@@ -16,8 +16,8 @@ import (
 
 type LogoutCmd struct {
 	Io            *iostreams.IOStreams
-	ReadSettings  func() (token.Settings, error)
-	WriteSettings func(token.Settings) error
+	ReadSettings  func(string) (token.Settings, error)
+	WriteSettings func(token.Settings, string) error
 	DeleteToken   func(context.Context, string) error
 }
 
@@ -42,7 +42,7 @@ func NewCobraCmd(logout *LogoutCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion logout --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return logout.run()
+			return logout.run(f)
 		},
 	}
 
@@ -55,8 +55,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewLogoutCmd(f), f)
 }
 
-func (cmd *LogoutCmd) run() error {
-	settings, err := cmd.ReadSettings()
+func (cmd *LogoutCmd) run(f *cmdutil.Factory) error {
+	activeProfile := f.GetActiveProfile()
+	settings, err := cmd.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -70,7 +71,7 @@ func (cmd *LogoutCmd) run() error {
 
 	settings.UUID = ""
 	settings.Token = ""
-	err = cmd.WriteSettings(settings)
+	err = cmd.WriteSettings(settings, activeProfile)
 	if err != nil {
 		return err
 	}

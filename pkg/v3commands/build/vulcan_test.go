@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
+	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -75,6 +76,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -134,6 +136,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -194,6 +197,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -254,6 +258,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
@@ -314,6 +319,7 @@ func TestBuildCmd_vulcan(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 			},
 			args: args{
