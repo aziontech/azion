@@ -633,3 +633,13 @@ type EdgeConnectorManifest struct {
 	Name    string   `json:"name"`
 	Address []string `json:"address"`
 }
+
+type DeployTimes struct {
+	DeployTime                     float64 `json:"deploy_time"`
+	BuildOperationTime             float64 `json:"build_operation_time"`
+	ApplicationOperationTime       float64 `json:"application_operation_time"`
+	BucketOperationTime            float64 `json:"bucket_operation_time"`
+	FileUploadOperationTime        float64 `json:"file_upload_operation_time"`
+	AzionConfigUpdateOperationTime float64 `json:"azion_config_update_operation_time"`
+	ManifestOperstionTime          float64 `json:"manifest_operation_time"`
+}
