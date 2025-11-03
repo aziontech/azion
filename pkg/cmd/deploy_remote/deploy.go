@@ -272,22 +272,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	deployTimes.DeployTime = float64(time.Since(deployTime)) / float64(time.Second)
 
-	logger.Debug(fmt.Sprintf(`
-Total Deploy Time:                     %.2f s
- ├─ Build Operation:                   %.2f s
- ├─ Application Creation/Update:       %.2f s
- ├─ Bucket Creation/Update:            %.2f s
- ├─ File Upload Operation:             %.2f s
- ├─ Update azion.config Operation:     %.2f s
- └─ Manifest Operation:                %.2f s
- `,
-		deployTimes.DeployTime,
-		deployTimes.BuildOperationTime,
-		deployTimes.ApplicationOperationTime,
-		deployTimes.BucketOperationTime,
-		deployTimes.FileUploadOperationTime,
-		deployTimes.AzionConfigUpdateOperationTime,
-		deployTimes.ManifestOperstionTime))
+	PrintDeployTimes(deployTimes)
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
