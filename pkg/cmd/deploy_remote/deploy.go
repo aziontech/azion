@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
@@ -121,6 +122,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
+	deployTimes := contracts.DeployTimes{}
+	deployTime := time.Now()
 
 	if Sync {
 		sync.ProjectConf = ProjectConf
@@ -158,6 +161,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	interpreter := cmd.Interpreter()
 
 	if !SkipBuild && conf.NotFirstRun {
+		congifUpdateTime := time.Now()
 		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", cmdStr, cmd.F)
@@ -167,12 +171,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		if err != nil {
 			return err
 		}
+		deployTimes.AzionConfigUpdateOperationTime = float64(time.Since(congifUpdateTime)) / float64(time.Second)
+		buildTime := time.Now()
 		buildCmd := cmd.BuildCmd(f)
 		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
 		}
+		deployTimes.BuildOperationTime = float64(time.Since(buildTime)) / float64(time.Second)
 	}
 
 	pathManifest, err := interpreter.ManifestPath()
@@ -180,10 +187,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	applicationTime := time.Now()
 	err = cmd.doApplication(clients.Application, context.Background(), conf, &msgs)
 	if err != nil {
 		return err
 	}
+	deployTimes.ApplicationOperationTime = float64(time.Since(applicationTime)) / float64(time.Second)
 
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
@@ -194,23 +203,29 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if len(manifestStructure.Storage) == 0 {
 		logger.Debug(msg.SkipBucket)
 	} else {
+		bucketTime := time.Now()
 		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
 		if err != nil {
 			return err
 		}
+		deployTimes.BucketOperationTime = float64(time.Since(bucketTime)) / float64(time.Second)
 	}
 
 	if !conf.NotFirstRun {
+		updateConfigTime := time.Now()
 		err = cmd.callBundlerInit(conf)
 		if err != nil {
 			return err
 		}
+		deployTimes.AzionConfigUpdateOperationTime = float64(time.Since(updateConfigTime)) / float64(time.Second)
 		buildCmd := cmd.BuildCmd(f)
+		buildTime := time.Now()
 		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
 		}
+		deployTimes.BuildOperationTime = float64(time.Since(buildTime)) / float64(time.Second)
 	}
 
 	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
@@ -223,10 +238,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		logger.Debug(msg.SkipUpload)
 	} else {
 		for _, storage := range manifestStructure.Storage {
+			uploadTime := time.Now()
 			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
 			if err != nil {
 				return err
 			}
+			deployTimes.FileUploadOperationTime = float64(time.Since(uploadTime)) / float64(time.Second)
 		}
 	}
 
@@ -239,10 +256,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.NotFirstRun = true
 
+	manifestTime := time.Now()
 	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
+	deployTimes.ManifestOperstionTime = float64(time.Since(manifestTime)) / float64(time.Second)
 
 	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
 		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
@@ -250,6 +269,10 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 	}
+
+	deployTimes.DeployTime = float64(time.Since(deployTime)) / float64(time.Second)
+
+	PrintDeployTimes(deployTimes)
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)

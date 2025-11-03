@@ -119,3 +119,22 @@ func findAzionConfig() (string, error) {
 	}
 	return "", fmt.Errorf("no azion.config file found")
 }
+
+func PrintDeployTimes(deployTimes contracts.DeployTimes) {
+	logger.Debug(fmt.Sprintf(`
+Total Deploy Time:                     %.2f s
+ ├─ Build Operation:                   %.2f s
+ ├─ Application Creation/Update:       %.2f s
+ ├─ Bucket Creation/Update:            %.2f s
+ ├─ File Upload Operation:             %.2f s
+ ├─ Update azion.config Operation:     %.2f s
+ └─ Manifest Operation:                %.2f s
+ `,
+		deployTimes.DeployTime,
+		deployTimes.BuildOperationTime,
+		deployTimes.ApplicationOperationTime,
+		deployTimes.BucketOperationTime,
+		deployTimes.FileUploadOperationTime,
+		deployTimes.AzionConfigUpdateOperationTime,
+		deployTimes.ManifestOperstionTime))
+}
