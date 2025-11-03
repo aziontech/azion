@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e') }}
     container:
-      image: golang:1.25.0
+      image: golang:1.25.3
     env:
       CGO_ENABLED: 0 # Statically linked
 
