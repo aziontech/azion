@@ -25,6 +25,7 @@ type Extras struct {
 // ExtraInput represents a single input for the extras block
 // For type "env", each input contains a key and a user-facing prompt text
 type ExtraInput struct {
-	Key  string `json:"key"`
-	Text string `json:"text"`
+	Key      string `json:"key"`
+	Text     string `json:"text"`
+	IsSecret bool   `json:"is_secret"`
 }

@@ -37,7 +37,8 @@ import (
 
 const (
 	SAMPLESURL = "https://github.com/aziontech/azion-samples.git"
-	APIURL     = "https://api.azion.com/v4/utils/project_samples"
+	// APIURL     = "https://api.azion.com/v4/utils/project_samples"
+	APIURL = "https://nf6r0s48g4.map.azionedge.net/api/templates"
 )
 
 type initCmd struct {
@@ -278,7 +279,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 	if selectedItem.Extras != nil && len(selectedItem.Extras.Inputs) > 0 {
 		inputs := make([]utils.EnvInput, 0, len(selectedItem.Extras.Inputs))
 		for _, in := range selectedItem.Extras.Inputs {
-			inputs = append(inputs, utils.EnvInput{Key: in.Key, Text: in.Text})
+			inputs = append(inputs, utils.EnvInput{Key: in.Key, Text: in.Text, IsSecret: in.IsSecret})
 		}
 		switch strings.ToLower(selectedItem.Extras.Type) {
 		case "env":
