@@ -737,8 +737,9 @@ func ReplaceInvalidCharsBucket(str string) string {
 // EnvInput represents a key and a user-facing prompt text for collecting
 // environment variable values and writing them to a .env file.
 type EnvInput struct {
-	Key  string
-	Text string
+	Key      string
+	Text     string
+	IsSecret bool
 }
 
 // CollectEnvInputsAndWriteFile prompts the user for each provided EnvInput and
@@ -753,7 +754,13 @@ func CollectEnvInputsAndWriteFile(inputs []EnvInput, destDir string) error {
 	// Collect inputs from user
 	envLines := make([]string, 0, len(inputs))
 	for _, in := range inputs {
-		val, err := AskInputEmpty(in.Text)
+		var val string
+		var err error
+		if in.IsSecret {
+			val, err = AskPassword(in.Text)
+		} else {
+			val, err = AskInputEmpty(in.Text)
+		}
 		if err != nil {
 			return err
 		}
@@ -790,7 +797,13 @@ func CollectArgsInputsAndWriteFile(inputs []EnvInput, destDir string) error {
 	data := make(map[string]string)
 
 	for _, in := range inputs {
-		val, err := AskInputEmpty(in.Text)
+		var val string
+		var err error
+		if in.IsSecret {
+			val, err = AskPassword(in.Text)
+		} else {
+			val, err = AskInputEmpty(in.Text)
+		}
 		if err != nil {
 			return err
 		}
