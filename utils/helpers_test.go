@@ -1587,10 +1587,10 @@ func TestOrderPreservation(t *testing.T) {
 			},
 			RulesEngine: contracts.AzionJsonDataRulesEngine{
 				Rules: []contracts.AzionJsonDataRules{
-					{Id: 100, Name: "rule-alpha-updated", Phase: "request"},  // Updated existing
-					{Id: 200, Name: "rule-beta-updated", Phase: "response"},  // Updated existing
-					{Id: 300, Name: "rule-gamma-updated", Phase: "request"},  // Updated existing
-					{Id: 400, Name: "rule-delta", Phase: "request"},          // New resource
+					{Id: 100, Name: "rule-alpha-updated", Phase: "request"}, // Updated existing
+					{Id: 200, Name: "rule-beta-updated", Phase: "response"}, // Updated existing
+					{Id: 300, Name: "rule-gamma-updated", Phase: "request"}, // Updated existing
+					{Id: 400, Name: "rule-delta", Phase: "request"},         // New resource
 				},
 			},
 		}
@@ -1663,10 +1663,10 @@ func TestOrderPreservation(t *testing.T) {
 			},
 			RulesEngine: contracts.AzionJsonDataRulesEngine{
 				Rules: []contracts.AzionJsonDataRules{
-					{Id: 100, Name: "rule-alpha-updated", Phase: "request"},  // Updated existing
-					{Id: 200, Name: "rule-beta-updated", Phase: "response"},  // Updated existing
-					{Id: 300, Name: "rule-gamma-updated", Phase: "request"},  // Updated existing
-					{Id: 400, Name: "rule-delta", Phase: "request"},          // New resource
+					{Id: 100, Name: "rule-alpha-updated", Phase: "request"}, // Updated existing
+					{Id: 200, Name: "rule-beta-updated", Phase: "response"}, // Updated existing
+					{Id: 300, Name: "rule-gamma-updated", Phase: "request"}, // Updated existing
+					{Id: 400, Name: "rule-delta", Phase: "request"},         // New resource
 				},
 			},
 		}
