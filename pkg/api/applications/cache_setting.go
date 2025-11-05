@@ -63,7 +63,7 @@ func (c *Client) ListCacheEdgeApp(
 ) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
-		ListCacheSettings(ctx, edgeApplicationID).Execute()
+		ListCacheSettings(ctx, edgeApplicationID).Ordering("id").Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {

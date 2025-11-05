@@ -39,17 +39,12 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	var err error
 	manifest := &contracts.ManifestV4{}
 
-	remoteCaches, err := synch.syncCache(info, f, manifest)
+	_, err = synch.syncCache(info, f)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
 
-	// remoteConnectors, err := synch.syncConnector(info, f, manifest)
-	// if err != nil {
-	// 	return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	// }
-
-	err = synch.syncRules(info, f, manifest, remoteCaches)
+	err = synch.syncRules(info, f, manifest)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
@@ -82,50 +77,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	return nil
 }
 
-// func (synch *SyncCmd) syncConnector(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataConnectors, error) {
-// 	remoteConnectorIds := make(map[string]contracts.AzionJsonDataConnectors)
-// 	client := connectorApi.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-// 	resp, err := client.List(ctx, opts)
-// 	if err != nil {
-// 		return remoteConnectorIds, err
-// 	}
-
-// 	ConnectorsAzion := []contracts.AzionJsonDataConnectors{}
-// 	info.Conf.Connectors = ConnectorsAzion
-
-// 	for _, connector := range resp.Results {
-// 		remoteConnectorIds[strconv.FormatInt(*&connector.Id, 10)] = contracts.AzionJsonDataConnectors{
-// 			Id:      connector.Id,
-// 			Name:    connector.Name,
-// 			Address: connector.Addresses,
-// 		}
-// 		jsonBytes, err := json.Marshal(connector)
-// 		if err != nil {
-// 			return remoteConnectorIds, err
-// 		}
-// 		oEntry := edgesdk.EdgeConnectorPolymorphicRequest{}
-// 		err = json.Unmarshal(jsonBytes, &oEntry)
-// 		if err != nil {
-// 			return remoteConnectorIds, err
-// 		}
-// 		manifest.EdgeConnectors = append(manifest.EdgeConnectors, oEntry)
-// 		newConnector := contracts.AzionJsonDataConnectors{
-// 			Id:      connector.Id,
-// 			Name:    connector.Name,
-// 			Address: connector.Addresses,
-// 		}
-// 		ConnectorsAzion = append(ConnectorsAzion, newConnector)
-// 		info.Conf.Connectors = ConnectorsAzion
-// 	}
-// 	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
-// 	if err != nil {
-// 		logger.Debug("Error while writing azion.json file", zap.Error(err))
-// 		return remoteConnectorIds, err
-// 	}
-// 	return remoteConnectorIds, nil
-// }
-
-func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
+func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
@@ -150,7 +102,6 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		if err != nil {
 			return remoteCacheIds, err
 		}
-		// manifest.EdgeApplications[0].Cache = append(manifest.EdgeApplications[0].Cache, cEntry)
 
 		newCache := contracts.AzionJsonDataCacheSettings{
 			Id:   cache.GetId(),
@@ -159,7 +110,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		cacheAzion = append(cacheAzion, newCache)
 		info.Conf.CacheSettings = cacheAzion
 	}
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return remoteCacheIds, err
@@ -167,8 +118,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	return remoteCacheIds, nil
 }
 
-func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4,
-	remoteCacheIds map[string]contracts.AzionJsonDataCacheSettings) error {
+func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) error {
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
 	rulesAzion := []contracts.AzionJsonDataRules{}
@@ -195,7 +145,6 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
-		// Create a ManifestRulesEngine for the request phase rule
 		manifestRule := contracts.ManifestRulesEngine{
 			Phase: "request",
 			Rule: contracts.ManifestRule{
@@ -206,7 +155,6 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			},
 		}
 
-		// Add rule to manifest
 		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
 
 		newRule := contracts.AzionJsonDataRules{
@@ -217,7 +165,6 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		rulesAzion = append(rulesAzion, newRule)
 	}
 
-	// Get response phase rules
 	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, str)
 	if err != nil {
 		logger.Debug("Error while listing response phase rules", zap.Error(err))
@@ -230,7 +177,6 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
-		// Create a ManifestRulesEngine for the response phase rule
 		manifestRule := contracts.ManifestRulesEngine{
 			Phase: "response",
 			Rule: contracts.ManifestRule{
@@ -241,7 +187,6 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			},
 		}
 
-		// Add rule to manifest
 		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
 
 		newRule := contracts.AzionJsonDataRules{
@@ -254,7 +199,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 	// Update the configuration with all rules
 	info.Conf.RulesEngine.Rules = rulesAzion
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
