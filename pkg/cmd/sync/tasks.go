@@ -159,7 +159,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		cacheAzion = append(cacheAzion, newCache)
 		info.Conf.CacheSettings = cacheAzion
 	}
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return remoteCacheIds, err
@@ -254,7 +254,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 	// Update the configuration with all rules
 	info.Conf.RulesEngine.Rules = rulesAzion
-	err = synch.WriteAzionJsonContent(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err

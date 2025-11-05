@@ -1544,3 +1544,192 @@ func TestFileExists(t *testing.T) {
 		})
 	}
 }
+
+func TestOrderPreservation(t *testing.T) {
+	// Test the merge function directly without file I/O
+	t.Run("Merge Resources Preserving Order V4", func(t *testing.T) {
+		// Create existing configuration with specific order
+		existing := &contracts.AzionApplicationOptions{
+			Name: "test-app",
+			CacheSettings: []contracts.AzionJsonDataCacheSettings{
+				{Id: 3, Name: "cache-c"},
+				{Id: 1, Name: "cache-a"},
+				{Id: 2, Name: "cache-b"},
+			},
+			Origin: []contracts.AzionJsonDataOrigin{
+				{OriginId: 30, Name: "origin-z"},
+				{OriginId: 10, Name: "origin-x"},
+				{OriginId: 20, Name: "origin-y"},
+			},
+			RulesEngine: contracts.AzionJsonDataRulesEngine{
+				Rules: []contracts.AzionJsonDataRules{
+					{Id: 300, Name: "rule-gamma", Phase: "request"},
+					{Id: 100, Name: "rule-alpha", Phase: "request"},
+					{Id: 200, Name: "rule-beta", Phase: "response"},
+				},
+			},
+		}
+
+		// Create new configuration with updates and new resources
+		new := &contracts.AzionApplicationOptions{
+			Name: "test-app",
+			CacheSettings: []contracts.AzionJsonDataCacheSettings{
+				{Id: 1, Name: "cache-a-updated"}, // Updated existing
+				{Id: 2, Name: "cache-b-updated"}, // Updated existing
+				{Id: 3, Name: "cache-c-updated"}, // Updated existing
+				{Id: 4, Name: "cache-d"},         // New resource
+			},
+			Origin: []contracts.AzionJsonDataOrigin{
+				{OriginId: 10, Name: "origin-x-updated"}, // Updated existing
+				{OriginId: 20, Name: "origin-y-updated"}, // Updated existing
+				{OriginId: 30, Name: "origin-z-updated"}, // Updated existing
+				{OriginId: 40, Name: "origin-w"},         // New resource
+			},
+			RulesEngine: contracts.AzionJsonDataRulesEngine{
+				Rules: []contracts.AzionJsonDataRules{
+					{Id: 100, Name: "rule-alpha-updated", Phase: "request"},  // Updated existing
+					{Id: 200, Name: "rule-beta-updated", Phase: "response"},  // Updated existing
+					{Id: 300, Name: "rule-gamma-updated", Phase: "request"},  // Updated existing
+					{Id: 400, Name: "rule-delta", Phase: "request"},          // New resource
+				},
+			},
+		}
+
+		// Test the merge function
+		result := mergeResourcesPreservingOrder(existing, new)
+
+		// Verify cache settings order: original order preserved, new ones at end
+		expectedCacheOrder := []string{"cache-c-updated", "cache-a-updated", "cache-b-updated", "cache-d"}
+		actualCacheOrder := make([]string, len(result.CacheSettings))
+		for i, cache := range result.CacheSettings {
+			actualCacheOrder[i] = cache.Name
+		}
+		assert.Equal(t, expectedCacheOrder, actualCacheOrder, "Cache settings order should be preserved")
+
+		// Verify origins order: original order preserved, new ones at end
+		expectedOriginOrder := []string{"origin-z-updated", "origin-x-updated", "origin-y-updated", "origin-w"}
+		actualOriginOrder := make([]string, len(result.Origin))
+		for i, origin := range result.Origin {
+			actualOriginOrder[i] = origin.Name
+		}
+		assert.Equal(t, expectedOriginOrder, actualOriginOrder, "Origins order should be preserved")
+
+		// Verify rules order: original order preserved, new ones at end
+		expectedRulesOrder := []string{"rule-gamma-updated", "rule-alpha-updated", "rule-beta-updated", "rule-delta"}
+		actualRulesOrder := make([]string, len(result.RulesEngine.Rules))
+		for i, rule := range result.RulesEngine.Rules {
+			actualRulesOrder[i] = rule.Name
+		}
+		assert.Equal(t, expectedRulesOrder, actualRulesOrder, "Rules order should be preserved")
+	})
+
+	t.Run("Merge Resources Preserving Order V3", func(t *testing.T) {
+		// Create existing configuration with specific order
+		existing := &contracts.AzionApplicationOptionsV3{
+			Name: "test-app-v3",
+			CacheSettings: []contracts.AzionJsonDataCacheSettings{
+				{Id: 3, Name: "cache-c"},
+				{Id: 1, Name: "cache-a"},
+				{Id: 2, Name: "cache-b"},
+			},
+			Origin: []contracts.AzionJsonDataOrigin{
+				{OriginId: 30, Name: "origin-z"},
+				{OriginId: 10, Name: "origin-x"},
+				{OriginId: 20, Name: "origin-y"},
+			},
+			RulesEngine: contracts.AzionJsonDataRulesEngine{
+				Rules: []contracts.AzionJsonDataRules{
+					{Id: 300, Name: "rule-gamma", Phase: "request"},
+					{Id: 100, Name: "rule-alpha", Phase: "request"},
+					{Id: 200, Name: "rule-beta", Phase: "response"},
+				},
+			},
+		}
+
+		// Create new configuration with updates and new resources
+		new := &contracts.AzionApplicationOptionsV3{
+			Name: "test-app-v3",
+			CacheSettings: []contracts.AzionJsonDataCacheSettings{
+				{Id: 1, Name: "cache-a-updated"}, // Updated existing
+				{Id: 2, Name: "cache-b-updated"}, // Updated existing
+				{Id: 3, Name: "cache-c-updated"}, // Updated existing
+				{Id: 4, Name: "cache-d"},         // New resource
+			},
+			Origin: []contracts.AzionJsonDataOrigin{
+				{OriginId: 10, Name: "origin-x-updated"}, // Updated existing
+				{OriginId: 20, Name: "origin-y-updated"}, // Updated existing
+				{OriginId: 30, Name: "origin-z-updated"}, // Updated existing
+				{OriginId: 40, Name: "origin-w"},         // New resource
+			},
+			RulesEngine: contracts.AzionJsonDataRulesEngine{
+				Rules: []contracts.AzionJsonDataRules{
+					{Id: 100, Name: "rule-alpha-updated", Phase: "request"},  // Updated existing
+					{Id: 200, Name: "rule-beta-updated", Phase: "response"},  // Updated existing
+					{Id: 300, Name: "rule-gamma-updated", Phase: "request"},  // Updated existing
+					{Id: 400, Name: "rule-delta", Phase: "request"},          // New resource
+				},
+			},
+		}
+
+		// Test the merge function
+		result := mergeResourcesPreservingOrderV3(existing, new)
+
+		// Verify cache settings order: original order preserved, new ones at end
+		expectedCacheOrder := []string{"cache-c-updated", "cache-a-updated", "cache-b-updated", "cache-d"}
+		actualCacheOrder := make([]string, len(result.CacheSettings))
+		for i, cache := range result.CacheSettings {
+			actualCacheOrder[i] = cache.Name
+		}
+		assert.Equal(t, expectedCacheOrder, actualCacheOrder, "Cache settings order should be preserved")
+
+		// Verify origins order: original order preserved, new ones at end
+		expectedOriginOrder := []string{"origin-z-updated", "origin-x-updated", "origin-y-updated", "origin-w"}
+		actualOriginOrder := make([]string, len(result.Origin))
+		for i, origin := range result.Origin {
+			actualOriginOrder[i] = origin.Name
+		}
+		assert.Equal(t, expectedOriginOrder, actualOriginOrder, "Origins order should be preserved")
+
+		// Verify rules order: original order preserved, new ones at end
+		expectedRulesOrder := []string{"rule-gamma-updated", "rule-alpha-updated", "rule-beta-updated", "rule-delta"}
+		actualRulesOrder := make([]string, len(result.RulesEngine.Rules))
+		for i, rule := range result.RulesEngine.Rules {
+			actualRulesOrder[i] = rule.Name
+		}
+		assert.Equal(t, expectedRulesOrder, actualRulesOrder, "Rules order should be preserved")
+	})
+
+	t.Run("JSON Structure Consistency", func(t *testing.T) {
+		// Test that the JSON structure is consistent
+		conf := &contracts.AzionApplicationOptions{
+			Name: "consistency-test",
+			CacheSettings: []contracts.AzionJsonDataCacheSettings{
+				{Id: 1, Name: "cache-1"},
+				{Id: 2, Name: "cache-2"},
+			},
+			Origin: []contracts.AzionJsonDataOrigin{
+				{OriginId: 10, Name: "origin-1"},
+				{OriginId: 20, Name: "origin-2"},
+			},
+		}
+
+		// Test merge with same data (no changes)
+		merged := mergeResourcesPreservingOrder(conf, conf)
+
+		// Verify all fields are preserved
+		assert.Equal(t, conf.Name, merged.Name)
+		assert.Equal(t, len(conf.CacheSettings), len(merged.CacheSettings))
+		assert.Equal(t, len(conf.Origin), len(merged.Origin))
+
+		// Verify order is maintained
+		for i, cache := range conf.CacheSettings {
+			assert.Equal(t, cache.Id, merged.CacheSettings[i].Id)
+			assert.Equal(t, cache.Name, merged.CacheSettings[i].Name)
+		}
+
+		for i, origin := range conf.Origin {
+			assert.Equal(t, origin.OriginId, merged.Origin[i].OriginId)
+			assert.Equal(t, origin.Name, merged.Origin[i].Name)
+		}
+	})
+}
