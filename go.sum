@@ -90,6 +90,8 @@ github.com/aziontech/azionapi-go-sdk v0.143.0 h1:4eEBlYT10prgeCVTNR9FIc7f59Crbl2
 github.com/aziontech/azionapi-go-sdk v0.143.0/go.mod h1:cA5DY/VP4X5Eu11LpQNzNn83ziKjja7QVMIl4J45feA=
 github.com/aziontech/azionapi-v4-go-sdk-dev v0.80.0 h1:q4Ma0fp/zcN8zzHtiOjOx+EaB/xK/vmlIMMXSAP4V8Y=
 github.com/aziontech/azionapi-v4-go-sdk-dev v0.80.0/go.mod h1:kJOyMICpeA+2xeo7/trGKGzMLdBMRKXM9A270vknSbI=
+github.com/aziontech/azionapi-v4-go-sdk-dev v0.84.0 h1:WMBXtpqR+4LFzn1B05V4RmMIC/eF9OVbVp3OU/c45Wc=
+github.com/aziontech/azionapi-v4-go-sdk-dev v0.84.0/go.mod h1:kJOyMICpeA+2xeo7/trGKGzMLdBMRKXM9A270vknSbI=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f h1:b0IX6tpiiG+QzCVOBqwYEHP5gPeeESq57A5ZXiYyDS4=
 github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
 github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e h1:4jnF5abLeCo+SqWNvegJjFuK1FUpIuuy09Fsfj2Ys+0=
