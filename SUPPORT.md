@@ -26,7 +26,7 @@ This document provides a comprehensive overview of feature availability, breakin
 
 ### Upgrading to v4.x
 1. **API Migration**: Update integrations from v3 to v4 API endpoints
-2. **Azion.json Updates**: Convert azion.json to new v4 structure (a script is available at 'scripts/v3_to_v4_converter.sh')
+2. **Azion.json Updates**: Convert azion.json to new v4 structure (a script is available at `scripts/v3_to_v4_converter.sh`)
 3. **Azion.config Updates**: Convert azion.config to new v4 structure 
 3. **Command Updates**: Review and update any automated scripts
 4. **Error Handling**: Update error parsing for new error standards
@@ -37,16 +37,16 @@ This document provides a comprehensive overview of feature availability, breakin
 |------------------|------|------|------|------|-------|
 | **Core CLI Commands** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | Stable across versions |
 | **V3 API Support** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :arrows_counterclockwise: | :arrows_counterclockwise:: Legacy support via backwards compatibility |
-| **V4 API Support** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Application** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Functions** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Rule Engine** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Cache Settings** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Workload** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Workload Deployment** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Edge Connector** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
-| **V4 Function Instance** | :x: | :x: | :x: | :white_check_mark: | New in v4.4.0 |
-| **V4 Cache Warming** | :x: | :x: | :x: | :white_check_mark: | New in v4.0.0 |
+| **V4 API Support** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Application** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Functions** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Rule Engine** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Cache Settings** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Workload** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Workload Deployment** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Edge Connector** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
+| **V4 Function Instance** | :x: | :x: | :x: | :white_check_mark: | v4.4.0+ |
+| **V4 Cache Warming** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
 | **Profile Management** | :x: | :x: | :x: | :white_check_mark: | v4.12.0+ |
 | **Bundler 5.0.0** | :x: | :x: | :white_check_mark: | :white_check_mark: | Required from v3.0.0 |
 | **Concurrent Uploads** | :x: | :x: | :x: | :white_check_mark: | Optimized in v4.x |
