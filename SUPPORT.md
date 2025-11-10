@@ -55,8 +55,8 @@ This document provides a comprehensive overview of feature availability, breakin
 
 - **Production Use**: v4.11.0+ (Latest stable with all features)
 - **Legacy Projects**: v3.6.0 (If v4 migration not feasible) | there's also the possibility of using the latest version with a v3 account, thus making use of the backwards compatibility
-- **Minimum Supported**: v2.x.x (Consider upgrading for security and features - we cannot guarantee support for v2.x)
-- **1.x and below**: Not supported
+- **Support not guaranteed**: v2.x.x (Consider upgrading for security and features - we cannot guarantee support for v2.x)
+- **Not supported**: v1.x and below
 
 ## :memo: Notes
 
