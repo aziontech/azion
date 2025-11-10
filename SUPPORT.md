@@ -49,7 +49,7 @@ This document provides a comprehensive overview of feature availability, breakin
 | **V4 Cache Warming** | :x: | :x: | :x: | :white_check_mark: | v4.0.0+ |
 | **Profile Management** | :x: | :x: | :x: | :white_check_mark: | v4.12.0+ |
 | **Bundler 5.0.0** | :x: | :x: | :white_check_mark: | :white_check_mark: | Required from v3.0.0 |
-| **Concurrent Uploads** | :x: | :x: | :x: | :white_check_mark: | Optimized in v4.x |
+| **Concurrent Uploads** | :x: | :x: | :white_check_mark: | :white_check_mark: | Optimized in v4.x |
 
 ## :label: Version Recommendations
 
