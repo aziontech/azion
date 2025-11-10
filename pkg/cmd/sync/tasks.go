@@ -14,9 +14,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/manifest"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 )
 
@@ -37,14 +39,26 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	}
 
 	var err error
-	manifest := &contracts.ManifestV4{}
+	var manifestStruct *contracts.ManifestV4
+	var msgs []string
 
-	_, err = synch.syncCache(info, f)
+	interpreter := manifest.NewManifestInterpreter()
+	pathManifest, err := interpreter.ManifestPath()
+	if err != nil {
+		manifestStruct = &contracts.ManifestV4{}
+	} else {
+		manifestStruct, err = interpreter.ReadManifest(pathManifest, f, &msgs)
+		if err != nil {
+			manifestStruct = &contracts.ManifestV4{}
+		}
+	}
+
+	_, err = synch.syncCache(info, f, manifestStruct)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
 
-	err = synch.syncRules(info, f, manifest)
+	err = synch.syncRules(info, f, manifestStruct)
 	if err != nil {
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
@@ -59,12 +73,14 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 			return msg.INVALIDFORMAT
 		}
 
-		err = synch.WriteManifest(manifest, "")
+		err = synch.WriteManifest(manifestStruct, "")
 		if err != nil {
 			return err
 		}
 		defer os.Remove("manifesttoconvert.json")
 		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
+
+		spew.Dump(manifestStruct)
 
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", "manifest transform --output %s --entry %s", f)
@@ -77,7 +93,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	return nil
 }
 
-func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) (map[string]contracts.AzionJsonDataCacheSettings, error) {
+func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
@@ -109,6 +125,18 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) (ma
 		}
 		cacheAzion = append(cacheAzion, newCache)
 		info.Conf.CacheSettings = cacheAzion
+
+		cacheManifest := contracts.ManifestCacheSetting{}
+		cacheManifestBytes, err := json.Marshal(cache)
+		if err != nil {
+			return remoteCacheIds, err
+		}
+		err = json.Unmarshal(cacheManifestBytes, &cacheManifest)
+		if err != nil {
+			return remoteCacheIds, err
+		}
+
+		manifest.Applications[0].CacheSettings = append(manifest.Applications[0].CacheSettings, cacheManifest)
 	}
 	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
@@ -126,8 +154,12 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 	// Initialize Applications slice if it's empty
 	if len(manifest.Applications) == 0 {
+		appName := info.Conf.Application.Name
+		if appName == "" || appName == "__DEFAULT__" {
+			appName = info.Conf.Name
+		}
 		manifest.Applications = append(manifest.Applications, contracts.Applications{
-			Name:  info.Conf.Application.Name,
+			Name:  appName,
 			Rules: []contracts.ManifestRulesEngine{},
 		})
 	}
@@ -145,13 +177,34 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
+		var criteria [][]edgesdk.EdgeApplicationCriterionFieldRequest
+		criteriaBytes, err := json.Marshal(rule.Criteria)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORMARSHALCRITERIA, err)
+		}
+		err = json.Unmarshal(criteriaBytes, &criteria)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORUNMARSHALCRITERIA, err)
+		}
+
+		var behaviors []contracts.ManifestRuleBehavior
+		behaviorsBytes, err := json.Marshal(rule.Behaviors)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORMARSHALBEHAVIORS, err)
+		}
+		err = json.Unmarshal(behaviorsBytes, &behaviors)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORUNMARSHALBEHAVIORS, err)
+		}
+
 		manifestRule := contracts.ManifestRulesEngine{
 			Phase: "request",
 			Rule: contracts.ManifestRule{
 				Name:        rule.GetName(),
 				Description: rule.GetDescription(),
 				Active:      rule.GetActive(),
-				// Convert criteria and behaviors to appropriate types
+				Criteria:    criteria,
+				Behaviors:   behaviors,
 			},
 		}
 
@@ -168,7 +221,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, str)
 	if err != nil {
 		logger.Debug("Error while listing response phase rules", zap.Error(err))
-		return fmt.Errorf("failed to list response phase rules: %w", err)
+		return fmt.Errorf(msg.ERRORLISTRESPONSERULES, err)
 	}
 
 	for _, rule := range respResp.Results {
@@ -177,13 +230,34 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
+		var criteria [][]edgesdk.EdgeApplicationCriterionFieldRequest
+		criteriaBytes, err := json.Marshal(rule.Criteria)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORMARSHALCRITERIA, err)
+		}
+		err = json.Unmarshal(criteriaBytes, &criteria)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORUNMARSHALCRITERIA, err)
+		}
+
+		var behaviors []contracts.ManifestRuleBehavior
+		behaviorsBytes, err := json.Marshal(rule.Behaviors)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORMARSHALBEHAVIORS, err)
+		}
+		err = json.Unmarshal(behaviorsBytes, &behaviors)
+		if err != nil {
+			return fmt.Errorf(msg.ERRORUNMARSHALBEHAVIORS, err)
+		}
+
 		manifestRule := contracts.ManifestRulesEngine{
 			Phase: "response",
 			Rule: contracts.ManifestRule{
 				Name:        rule.GetName(),
 				Description: rule.GetDescription(),
 				Active:      rule.GetActive(),
-				// Convert criteria and behaviors to appropriate types
+				Criteria:    criteria,
+				Behaviors:   behaviors,
 			},
 		}
 
@@ -220,7 +294,7 @@ func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 	envs, err := synch.ReadEnv(synch.EnvPath)
 	if err != nil {
 		logger.Debug("Error while loading .env file", zap.Error(err))
-		return nil // not every project has a .env file... this should not stop the execution
+		return nil // not every project has a .env file; this should not stop the execution
 	}
 
 	for _, variable := range resp {
