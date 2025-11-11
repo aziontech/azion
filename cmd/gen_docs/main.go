@@ -11,6 +11,7 @@ import (
 	cmd "github.com/aziontech/azion-cli/pkg/cmd/root"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/pflag"
@@ -47,6 +48,9 @@ func run(args []string) error {
 	if *dir == "" {
 		return fmt.Errorf("error: --doc-path not set")
 	}
+
+	// Initialize logger to prevent nil pointer dereference
+	logger.LogLevel(logger.Logger{})
 
 	fact := cmd.NewFactoryRoot(&cmdutil.Factory{
 		IOStreams: iostreams.System(),

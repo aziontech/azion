@@ -23,7 +23,11 @@ import (
 var (
 	username, password, tokenValue, uuid string
 	userInfo                             token.UserInfo
+	createNewProfile                     bool
+	newProfileName                       string
 )
+
+var confirmFn = utils.Confirm
 
 type login struct {
 	factory     *cmdutil.Factory
@@ -64,6 +68,15 @@ func cmd(l *login) *cobra.Command {
 		$ azion login --username fulanodasilva@gmail.com --password "senhasecreta"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			createNewProfile = confirmFn(l.factory.GlobalFlagAll, msg.QuestionCreateProfile, true)
+			if createNewProfile {
+				profileNameInput, err := utils.AskInput(msg.AskProfileName)
+				if err != nil {
+					return fmt.Errorf(msg.ErrorGetProfileName.Error(), err)
+				}
+				newProfileName = profileNameInput
+			}
+
 			answer, err := l.selectLoginMode()
 			if err != nil {
 				return err
@@ -134,17 +147,31 @@ func (l *login) saveSettings() error {
 		S3Bucket:    "",
 	}
 
-	byteSettings, err := l.marshalToml(settings)
-	if err != nil {
-		logger.Debug("Error while marshalling toml file", zap.Error(err))
-		return err
+	var profileName string
+	if createNewProfile {
+		profileName = newProfileName
+
+		err := token.WriteSettings(settings, profileName)
+		if err != nil {
+			return err
+		}
+
+		profile := token.Profile{Name: profileName}
+		err = token.WriteProfiles(profile)
+		if err != nil {
+			return fmt.Errorf(msg.ErrorSetActiveProfile.Error(), err)
+		}
+
+		fmt.Fprintf(l.factory.IOStreams.Out, msg.ProfileCreated+"\n", profileName)
+	} else {
+		profileName = l.factory.GetActiveProfile()
+		err := token.WriteSettings(settings, profileName)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err = l.token.Save(byteSettings)
-	if err != nil {
-		logger.Debug("Error while saving settings", zap.Error(err))
-		return err
-	}
+	fmt.Fprintf(l.factory.IOStreams.Out, msg.TokenSavedToProfile+"\n", profileName)
 	return nil
 }
 

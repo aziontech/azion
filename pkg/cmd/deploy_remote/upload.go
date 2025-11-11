@@ -74,6 +74,8 @@ func (cmd *DeployCmd) uploadFiles(
 		}
 
 		if info.Mode()&os.ModeSymlink != 0 {
+			logger.Debug("Skipping symlink file", zap.Any("File name", pathDir))
+			return nil
 		}
 		logger.Debug("Reading the following file", zap.Any("File name", pathDir))
 		if !info.IsDir() {

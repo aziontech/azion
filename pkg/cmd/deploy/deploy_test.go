@@ -46,7 +46,7 @@ func MockFileReader(path string) ([]byte, error) {
 	return nil, errors.New("file not found")
 }
 
-func MockReadSettings() (token.Settings, error) {
+func MockReadSettings(path string) (token.Settings, error) {
 	return token.Settings{Token: "123321", S3AccessKey: "122221", S3SecretKey: "3333322222", S3Bucket: "bucketname"}, nil
 }
 

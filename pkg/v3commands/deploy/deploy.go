@@ -50,7 +50,7 @@ type DeployCmd struct {
 	OpenBrowser           func(f *cmdutil.Factory, urlConsoleDeploy string, cmd *DeployCmd) error
 	CaptureLogs           func(execId string, token string, cmd *DeployCmd) error
 	CheckToken            func(f *cmdutil.Factory) error
-	ReadSettings          func() (token.Settings, error)
+	ReadSettings          func(string) (token.Settings, error)
 	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error
 	OpenBrowserFunc       func(input string) error
 }
@@ -137,7 +137,7 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local b
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
-
+	activeProfile := f.GetActiveProfile()
 	if DryRun {
 		dryStructure := dryrun.NewDryrunCmd(f)
 		pathWorkingDir, err := cmd.GetWorkDir()
@@ -162,7 +162,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	settings, err := cmd.ReadSettings()
+	settings, err := cmd.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		settings.S3SecretKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
 
-		err = token.WriteSettings(settings)
+		err = token.WriteSettings(settings, activeProfile)
 		if err != nil {
 			return err
 		}

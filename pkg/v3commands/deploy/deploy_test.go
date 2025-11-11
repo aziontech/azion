@@ -46,7 +46,7 @@ func MockFileReader(path string) ([]byte, error) {
 	return nil, errors.New("file not found")
 }
 
-func MockReadSettings() (token.Settings, error) {
+func MockReadSettings(string) (token.Settings, error) {
 	return token.Settings{Token: "123321", S3AccessKey: "122221", S3SecretKey: "3333322222", S3Bucket: "bucketname"}, nil
 }
 
@@ -120,8 +120,12 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.OpenBrowser = MockOpenBrowser
 				cmd.CaptureLogs = MockCaptureLogs
 				cmd.CheckToken = MockCheckToken
-				cmd.ReadSettings = func() (token.Settings, error) {
-					return token.Settings{}, nil
+				cmd.ReadSettings = func(string) (token.Settings, error) {
+					return token.Settings{
+						S3AccessKey: "test-access-key",
+						S3SecretKey: "test-secret-key", 
+						S3Bucket:    "test-bucket",
+					}, nil
 				}
 				cmd.UploadFiles = func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error {
 					return nil
@@ -175,11 +179,11 @@ func TestDeploy_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/edge_storage/buckets"),
+				httpmock.REST(http.MethodPost, "edge_storage/buckets"),
 				httpmock.JSONFromFile("fixtures/response.json"),
 			)
 			mock.Register(
-				httpmock.REST(http.MethodPost, "v4/edge_storage/s3-credentials"),
+				httpmock.REST(http.MethodPost, "edge_storage/s3-credentials"),
 				httpmock.JSONFromFile("fixtures/responses3.json"),
 			)
 

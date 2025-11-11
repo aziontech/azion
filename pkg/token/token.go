@@ -8,7 +8,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
@@ -30,7 +29,7 @@ func New(c *Config) *Token {
 	return &Token{
 		client:   c.Client,
 		Endpoint: constants.AuthURL,
-		filePath: filepath.Join(dir.Dir, dir.Settings),
+		filePath: filepath.Join(dir.Dir, dir.Settings), //TODO: here
 		out:      c.Out,
 	}
 }
@@ -118,11 +117,15 @@ func (t *Token) Create(b64 string) (*Response, error) {
 	return &result, nil
 }
 
-func WriteSettings(settings Settings) error {
+func WriteSettings(settings Settings, subdir string) error {
 	dir := config.Dir()
 	b, err := toml.Marshal(settings)
 	if err != nil {
 		return err
+	}
+
+	if subdir != "" {
+		dir.Dir = filepath.Join(dir.Dir, subdir)
 	}
 
 	// Check if the directory exists, create it if not
@@ -137,23 +140,62 @@ func WriteSettings(settings Settings) error {
 	return nil
 }
 
-func ReadSettings() (Settings, error) {
+func ReadProfiles() (Profile, string, error) {
 	dir := config.Dir()
+	filePath := filepath.Join(dir.Dir, dir.Profiles)
+
+	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return Profile{}, "", err
+	}
+
+	var profile Profile
+	err = toml.Unmarshal(fileData, &profile)
+	if err != nil {
+		return Profile{}, "", fmt.Errorf("Failed parse byte to struct profile: %w", err)
+	}
+
+	settingsPath := filepath.Join(dir.Dir, dir.Profiles)
+
+	return profile, settingsPath, nil
+}
+
+func WriteProfiles(profile Profile) error {
+	dir := config.Dir()
+	b, err := toml.Marshal(profile)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(dir.Dir, 0777); err != nil {
+		return fmt.Errorf("Error creating directory: %w", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(dir.Dir, dir.Profiles), b, 0777); err != nil {
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
+	}
+
+	return nil
+}
+
+func ReadSettings(path string) (Settings, error) {
+	if path == "" {
+		path = "default"
+	}
+
+	dir := config.Dir()
+	dir.Dir = filepath.Join(dir.Dir, path)
 	filePath := filepath.Join(dir.Dir, dir.Settings)
 
 	// Check if the file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		// File does not exist, create it with default settings
-		if config.GetPath() == config.DEFAULT_DIR {
-			defaultSettings := Settings{}
-			err := WriteSettings(defaultSettings)
-			if err != nil {
-				return Settings{}, fmt.Errorf("failed to create settings file: %w", err)
-			}
-			return defaultSettings, nil
+		// File does not exist, create it with default settings for the profile
+		defaultSettings := Settings{}
+		err := WriteSettings(defaultSettings, path)
+		if err != nil {
+			return Settings{}, fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
 		}
-
-		return Settings{}, root.ErrorReadFileSettingsToml
+		return defaultSettings, nil
 	}
 
 	// Read the file

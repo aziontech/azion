@@ -25,6 +25,10 @@ type UserInfo struct {
 	} `json:"results"`
 }
 
+type Profile struct {
+	Name string
+}
+
 type Settings struct {
 	Token                      string
 	UUID                       string

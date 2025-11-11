@@ -56,7 +56,7 @@ func (c *Client) ListCacheEdgeApp(
 ) ([]sdk.ApplicationCacheResults, error) {
 	logger.Debug("List Cache Edge Application")
 	resp, httpResp, err := c.apiClient.EdgeApplicationsCacheSettingsAPI.
-		EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).Execute()
+		EdgeApplicationsEdgeApplicationIdCacheSettingsGet(ctx, edgeApplicationID).OrderBy("id").Execute()
 	if err != nil {
 		if httpResp != nil {
 			logger.Debug("Error while listing a cache setting", zap.Error(err))

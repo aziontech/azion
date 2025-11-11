@@ -19,4 +19,10 @@ const (
 	//browser
 	VisitMsg   = "Please visit https://console.azion.com/login?next=cli&callback_port=%d in case it did not open automatically\n"
 	BrowserMsg = "You may now close this page and return to your terminal"
+
+	// profile creation
+	QuestionCreateProfile = "Would you like to create a new profile for this login? (Y/n)"
+	AskProfileName        = "Enter a name for the new profile:"
+	ProfileCreated        = "Profile '%s' created successfully"
+	TokenSavedToProfile   = "Token saved to profile '%s'"
 )

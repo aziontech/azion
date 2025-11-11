@@ -230,6 +230,215 @@ func WriteAzionJsonContentV3(conf *contracts.AzionApplicationOptionsV3, confPath
 	return nil
 }
 
+// WriteAzionJsonContentPreserveOrder writes azion.json while preserving the order of existing resources
+func WriteAzionJsonContentPreserveOrder(conf *contracts.AzionApplicationOptions, confPath string) error {
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return err
+	}
+
+	dirPath := path.Join(wd, confPath)
+	err = os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		logger.Debug("Error creating directory", zap.Error(err))
+		return err
+	}
+
+	existingConf, err := GetAzionJsonContent(confPath)
+	if err != nil {
+		return WriteAzionJsonContent(conf, confPath)
+	}
+
+	mergedConf := mergeResourcesPreservingOrder(existingConf, conf)
+
+	data, err := json.MarshalIndent(mergedConf, "", "  ")
+	if err != nil {
+		logger.Debug("Error marshalling response", zap.Error(err))
+		return ErrorMarshalAzionJsonFile
+	}
+
+	err = os.WriteFile(path.Join(wd, confPath, "azion.json"), data, 0644)
+	if err != nil {
+		logger.Debug("Error writing file", zap.Error(err))
+		return ErrorWritingAzionJsonFile
+	}
+
+	return nil
+}
+
+// WriteAzionJsonContentV3PreserveOrder writes azion.json while preserving the order of existing resources for V3
+func WriteAzionJsonContentV3PreserveOrder(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return err
+	}
+
+	dirPath := path.Join(wd, confPath)
+	err = os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		logger.Debug("Error creating directory", zap.Error(err))
+		return err
+	}
+
+	existingConf, err := GetAzionJsonContentV3(confPath)
+	if err != nil {
+		return WriteAzionJsonContentV3(conf, confPath)
+	}
+
+	mergedConf := mergeResourcesPreservingOrderV3(existingConf, conf)
+
+	data, err := json.MarshalIndent(mergedConf, "", "  ")
+	if err != nil {
+		logger.Debug("Error marshalling response", zap.Error(err))
+		return ErrorMarshalAzionJsonFile
+	}
+
+	err = os.WriteFile(path.Join(wd, confPath, "azion.json"), data, 0644)
+	if err != nil {
+		logger.Debug("Error writing file", zap.Error(err))
+		return ErrorWritingAzionJsonFile
+	}
+
+	return nil
+}
+
+// mergeResourcesPreservingOrder merges new resources with existing ones while preserving order
+func mergeResourcesPreservingOrder(existing, new *contracts.AzionApplicationOptions) *contracts.AzionApplicationOptions {
+	result := *new
+
+	newCacheMap := make(map[int64]contracts.AzionJsonDataCacheSettings)
+	for _, cache := range new.CacheSettings {
+		newCacheMap[cache.Id] = cache
+	}
+
+	newOriginMap := make(map[int64]contracts.AzionJsonDataOrigin)
+	for _, origin := range new.Origin {
+		newOriginMap[origin.OriginId] = origin
+	}
+
+	newRulesMap := make(map[int64]contracts.AzionJsonDataRules)
+	for _, rule := range new.RulesEngine.Rules {
+		newRulesMap[rule.Id] = rule
+	}
+
+	var mergedCaches []contracts.AzionJsonDataCacheSettings
+	var mergedOrigins []contracts.AzionJsonDataOrigin
+	var mergedRules []contracts.AzionJsonDataRules
+
+	for _, existingCache := range existing.CacheSettings {
+		if newCache, exists := newCacheMap[existingCache.Id]; exists {
+			mergedCaches = append(mergedCaches, newCache)
+			delete(newCacheMap, existingCache.Id)
+		} else {
+			mergedCaches = append(mergedCaches, existingCache)
+		}
+	}
+	for _, newCache := range newCacheMap {
+		mergedCaches = append(mergedCaches, newCache)
+	}
+
+	for _, existingOrigin := range existing.Origin {
+		if newOrigin, exists := newOriginMap[existingOrigin.OriginId]; exists {
+			mergedOrigins = append(mergedOrigins, newOrigin)
+			delete(newOriginMap, existingOrigin.OriginId)
+		} else {
+			mergedOrigins = append(mergedOrigins, existingOrigin)
+		}
+	}
+
+	for _, newOrigin := range newOriginMap {
+		mergedOrigins = append(mergedOrigins, newOrigin)
+	}
+
+	for _, existingRule := range existing.RulesEngine.Rules {
+		if newRule, exists := newRulesMap[existingRule.Id]; exists {
+			mergedRules = append(mergedRules, newRule)
+			delete(newRulesMap, existingRule.Id)
+		} else {
+			mergedRules = append(mergedRules, existingRule)
+		}
+	}
+
+	for _, newRule := range newRulesMap {
+		mergedRules = append(mergedRules, newRule)
+	}
+
+	result.CacheSettings = mergedCaches
+	result.Origin = mergedOrigins
+	result.RulesEngine.Rules = mergedRules
+
+	return &result
+}
+
+// mergeResourcesPreservingOrderV3 merges new resources with existing ones while preserving order for V3
+func mergeResourcesPreservingOrderV3(existing, new *contracts.AzionApplicationOptionsV3) *contracts.AzionApplicationOptionsV3 {
+	result := *new
+
+	newCacheMap := make(map[int64]contracts.AzionJsonDataCacheSettings)
+	for _, cache := range new.CacheSettings {
+		newCacheMap[cache.Id] = cache
+	}
+
+	newOriginMap := make(map[int64]contracts.AzionJsonDataOrigin)
+	for _, origin := range new.Origin {
+		newOriginMap[origin.OriginId] = origin
+	}
+
+	newRulesMap := make(map[int64]contracts.AzionJsonDataRules)
+	for _, rule := range new.RulesEngine.Rules {
+		newRulesMap[rule.Id] = rule
+	}
+
+	var mergedCaches []contracts.AzionJsonDataCacheSettings
+	var mergedOrigins []contracts.AzionJsonDataOrigin
+	var mergedRules []contracts.AzionJsonDataRules
+
+	for _, existingCache := range existing.CacheSettings {
+		if newCache, exists := newCacheMap[existingCache.Id]; exists {
+			mergedCaches = append(mergedCaches, newCache)
+			delete(newCacheMap, existingCache.Id)
+		} else {
+			mergedCaches = append(mergedCaches, existingCache)
+		}
+	}
+
+	for _, newCache := range newCacheMap {
+		mergedCaches = append(mergedCaches, newCache)
+	}
+
+	for _, existingOrigin := range existing.Origin {
+		if newOrigin, exists := newOriginMap[existingOrigin.OriginId]; exists {
+			mergedOrigins = append(mergedOrigins, newOrigin)
+			delete(newOriginMap, existingOrigin.OriginId)
+		} else {
+			mergedOrigins = append(mergedOrigins, existingOrigin)
+		}
+	}
+
+	for _, newOrigin := range newOriginMap {
+		mergedOrigins = append(mergedOrigins, newOrigin)
+	}
+
+	for _, existingRule := range existing.RulesEngine.Rules {
+		if newRule, exists := newRulesMap[existingRule.Id]; exists {
+			mergedRules = append(mergedRules, newRule)
+			delete(newRulesMap, existingRule.Id)
+		} else {
+			mergedRules = append(mergedRules, existingRule)
+		}
+	}
+
+	for _, newRule := range newRulesMap {
+		mergedRules = append(mergedRules, newRule)
+	}
+
+	result.CacheSettings = mergedCaches
+	result.Origin = mergedOrigins
+	result.RulesEngine.Rules = mergedRules
+
+	return &result
+}
+
 func WriteAzionConfig(conf *contracts.AzionConfig) error {
 	logger.Debug("Writing your azion.config file", zap.Any("File name", conf.FileName))
 	// Get the current working directory
@@ -737,8 +946,9 @@ func ReplaceInvalidCharsBucket(str string) string {
 // EnvInput represents a key and a user-facing prompt text for collecting
 // environment variable values and writing them to a .env file.
 type EnvInput struct {
-	Key  string
-	Text string
+	Key      string
+	Text     string
+	IsSecret bool
 }
 
 // CollectEnvInputsAndWriteFile prompts the user for each provided EnvInput and
@@ -753,7 +963,13 @@ func CollectEnvInputsAndWriteFile(inputs []EnvInput, destDir string) error {
 	// Collect inputs from user
 	envLines := make([]string, 0, len(inputs))
 	for _, in := range inputs {
-		val, err := AskInputEmpty(in.Text)
+		var val string
+		var err error
+		if in.IsSecret {
+			val, err = AskPassword(in.Text)
+		} else {
+			val, err = AskInputEmpty(in.Text)
+		}
 		if err != nil {
 			return err
 		}
@@ -790,7 +1006,13 @@ func CollectArgsInputsAndWriteFile(inputs []EnvInput, destDir string) error {
 	data := make(map[string]string)
 
 	for _, in := range inputs {
-		val, err := AskInputEmpty(in.Text)
+		var val string
+		var err error
+		if in.IsSecret {
+			val, err = AskPassword(in.Text)
+		} else {
+			val, err = AskInputEmpty(in.Text)
+		}
 		if err != nil {
 			return err
 		}

@@ -16,8 +16,8 @@ import (
 
 type ResetCmd struct {
 	Io            *iostreams.IOStreams
-	ReadSettings  func() (token.Settings, error)
-	WriteSettings func(token.Settings) error
+	ReadSettings  func(string) (token.Settings, error)
+	WriteSettings func(token.Settings, string) error
 	DeleteToken   func(context.Context, string) error
 }
 
@@ -42,7 +42,7 @@ func NewCobraCmd(reset *ResetCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion reset --help
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return reset.run()
+			return reset.run(f)
 		},
 	}
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAGHELP)
@@ -53,8 +53,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewResetCmd(f), f)
 }
 
-func (cmd *ResetCmd) run() error {
-	settings, err := cmd.ReadSettings()
+func (cmd *ResetCmd) run(f *cmdutil.Factory) error {
+	activeProfile := f.GetActiveProfile()
+	settings, err := cmd.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func (cmd *ResetCmd) run() error {
 	}
 
 	settings = token.Settings{}
-	err = cmd.WriteSettings(settings)
+	err = cmd.WriteSettings(settings, activeProfile)
 	if err != nil {
 		return err
 	}

@@ -27,29 +27,34 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			logger.Debug("\nSkipping upload of empty file: " + job.Path)
 			results <- nil
 			atomic.AddInt64(currentFile, 1)
-			return
+			continue
 		}
 
 		if err := clientUpload.Upload(context.Background(), &job, conf, bucket); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
-			for Retries < 20 {
+
+			fileRetries := 0
+			maxRetries := 5
+
+			for fileRetries < maxRetries {
+				fileRetries++
 				atomic.AddInt64(&Retries, 1)
-				_, err := job.FileContent.Seek(0, 0)
-				if err != nil {
-					logger.Debug("An error occurred while seeking fileContent", zap.Error(err))
+
+				_, seekErr := job.FileContent.Seek(0, 0)
+				if seekErr != nil {
+					logger.Debug("An error occurred while seeking fileContent", zap.Error(seekErr))
 					break
 				}
 
-				logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
+				logger.Debug("Retrying to upload file", zap.Int("attempt", fileRetries), zap.Int("maxRetries", maxRetries), zap.String("path", job.Path))
 				err = clientUpload.Upload(context.Background(), &job, conf, bucket)
-				if err != nil {
-					continue
+				if err == nil {
+					break
 				}
-				break
 			}
 
-			if Retries >= 20 {
-				logger.Debug("There have been 20 retries already, quitting upload")
+			if fileRetries >= maxRetries {
+				logger.Debug("Failed to upload file after retries", zap.Int("maxRetries", maxRetries), zap.String("path", job.Path))
 				results <- err
 				return
 			}

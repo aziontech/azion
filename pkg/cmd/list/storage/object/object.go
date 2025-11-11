@@ -57,8 +57,9 @@ func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 
 func (b *Objects) PrintTable(client *api.Client) error {
 	c := context.Background()
+	activeProfile := b.Factory.GetActiveProfile()
 
-	settings, err := token.ReadSettings()
+	settings, err := token.ReadSettings(activeProfile)
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func (b *Objects) PrintTable(client *api.Client) error {
 	}
 
 	settings.ContinuationToken = resp.GetContinuationToken()
-	err = token.WriteSettings(settings)
+	err = token.WriteSettings(settings, activeProfile)
 	if err != nil {
 		return err
 	}

@@ -17,13 +17,16 @@ import (
 
 const SEGMENT_KEY = "Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt"
 
-func location() string {
+func location(profile string) string {
 	dir := config.Dir()
+	if profile != "" {
+		dir.Dir = filepath.Join(dir.Dir, profile)
+	}
 	return filepath.Join(dir.Dir, dir.Metrics)
 }
 
-func readLocalMetrics() map[string]command {
-	file, err := os.OpenFile(location(), os.O_RDWR|os.O_CREATE, 0666)
+func readLocalMetrics(profile string) map[string]command {
+	file, err := os.OpenFile(location(profile), os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return nil
 	}
@@ -43,11 +46,11 @@ func readLocalMetrics() map[string]command {
 	return data
 }
 
-func Send(settings *token.Settings) {
+func Send(settings *token.Settings, profile string) {
 	client := analytics.New(SEGMENT_KEY)
 	defer client.Close()
 
-	metrics := readLocalMetrics()
+	metrics := readLocalMetrics(profile)
 
 	os := runtime.GOOS
 	arch := runtime.GOARCH
@@ -75,12 +78,12 @@ func Send(settings *token.Settings) {
 		}
 	}
 
-	clean()
+	clean(profile)
 }
 
 // cleans metrics location and rewrites the file with empty content
-func clean() {
-	err := os.WriteFile(location(), []byte{}, 0666)
+func clean(profile string) {
+	err := os.WriteFile(location(profile), []byte{}, 0666)
 	if err != nil {
 		return
 	}

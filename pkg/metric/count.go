@@ -24,7 +24,7 @@ type command struct {
 	Shell         string
 }
 
-func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error) error {
+func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string) error {
 	if commandName == "" {
 		return nil
 	}
@@ -35,6 +35,9 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 	}
 
 	dir := config.Dir()
+	if profile != "" {
+		dir.Dir = filepath.Join(dir.Dir, profile)
+	}
 	ignoredWords := map[string]bool{
 		"__complete": true,
 		"completion": true,

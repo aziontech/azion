@@ -22,6 +22,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/testutils"
 	"github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -101,6 +102,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "project-piece",
@@ -176,6 +178,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "project-piece",
@@ -252,6 +255,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: true,
 				name:          "",
@@ -328,6 +332,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "",
@@ -404,6 +409,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "",
@@ -480,6 +486,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "",
@@ -558,6 +565,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "project-piece",
@@ -636,6 +644,7 @@ func Test_initCmd_Run(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				globalFlagAll: false,
 				name:          "",
@@ -815,6 +824,7 @@ func Test_initCmd_deps(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 					return nil
@@ -846,6 +856,7 @@ func Test_initCmd_deps(t *testing.T) {
 						NoColor:       false,
 					},
 					IOStreams: iostreams.System(),
+					Config:    viper.New(),
 				},
 				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
 					return errors.New("error depsInstall")

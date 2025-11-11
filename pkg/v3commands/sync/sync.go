@@ -38,7 +38,7 @@ func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
 		F:                     f,
 		Io:                    f.IOStreams,
 		GetAzionJsonContent:   utils.GetAzionJsonContentV3,
-		WriteAzionJsonContent: utils.WriteAzionJsonContentV3,
+		WriteAzionJsonContent: utils.WriteAzionJsonContentV3PreserveOrder,
 		SyncResources:         SyncLocalResources,
 		ReadEnv:               godotenv.Read,
 		WriteManifest:         WriteManifest,
