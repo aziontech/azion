@@ -92,7 +92,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		if err != nil {
 			return err
 		}
-		// defer os.Remove("manifesttoconvert.json")
+		defer os.Remove("manifesttoconvert.json")
 		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
 
 		vul := vulcanPkg.NewVulcan()
@@ -129,54 +129,60 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		manifest.Applications[0].CacheSettings = []contracts.ManifestCacheSetting{}
 	}
 
-	cacheAzion := []contracts.AzionJsonDataCacheSettings{}
-	info.Conf.CacheSettings = cacheAzion
+	cacheAzion := info.Conf.CacheSettings
+	existingCacheNames := make(map[string]bool)
+	for _, existingCache := range cacheAzion {
+		existingCacheNames[existingCache.Name] = true
+	}
+
 	for _, cache := range resp {
 		remoteCacheIds[strconv.FormatInt(cache.Id, 10)] = contracts.AzionJsonDataCacheSettings{
 			Id:   cache.Id,
 			Name: cache.Name,
 		}
 
-		newCache := contracts.AzionJsonDataCacheSettings{
-			Id:   cache.GetId(),
-			Name: cache.GetName(),
-		}
-		cacheAzion = append(cacheAzion, newCache)
-		info.Conf.CacheSettings = cacheAzion
+		if !existingCacheNames[cache.GetName()] {
+			newCache := contracts.AzionJsonDataCacheSettings{
+				Id:   cache.GetId(),
+				Name: cache.GetName(),
+			}
+			cacheAzion = append(cacheAzion, newCache)
+			existingCacheNames[cache.GetName()] = true
 
-		// Create ManifestCacheSetting by converting API response fields
-		cacheManifest := contracts.ManifestCacheSetting{
-			Name: cache.GetName(),
-		}
+			cacheManifest := contracts.ManifestCacheSetting{
+				Name: cache.GetName(),
+			}
 
-		// Convert BrowserCache from response type to request type via JSON
-		browserCache := cache.GetBrowserCache()
-		browserCacheBytes, err := json.Marshal(browserCache)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		var browserCacheRequest edgesdk.BrowserCacheModuleRequest
-		err = json.Unmarshal(browserCacheBytes, &browserCacheRequest)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		cacheManifest.BrowserCache = &browserCacheRequest
+			browserCache := cache.GetBrowserCache()
+			browserCacheBytes, err := json.Marshal(browserCache)
+			if err != nil {
+				return remoteCacheIds, err
+			}
+			var browserCacheRequest edgesdk.BrowserCacheModuleRequest
+			err = json.Unmarshal(browserCacheBytes, &browserCacheRequest)
+			if err != nil {
+				return remoteCacheIds, err
+			}
+			cacheManifest.BrowserCache = &browserCacheRequest
 
-		// Convert Modules from response type to request type via JSON
-		modules := cache.GetModules()
-		modulesBytes, err := json.Marshal(modules)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		var modulesRequest edgesdk.CacheSettingsModulesRequest
-		err = json.Unmarshal(modulesBytes, &modulesRequest)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		cacheManifest.Modules = &modulesRequest
+			// Convert Modules from response type to request type via JSON
+			modules := cache.GetModules()
+			modulesBytes, err := json.Marshal(modules)
+			if err != nil {
+				return remoteCacheIds, err
+			}
+			var modulesRequest edgesdk.CacheSettingsModulesRequest
+			err = json.Unmarshal(modulesBytes, &modulesRequest)
+			if err != nil {
+				return remoteCacheIds, err
+			}
+			cacheManifest.Modules = &modulesRequest
 
-		manifest.Applications[0].CacheSettings = append(manifest.Applications[0].CacheSettings, cacheManifest)
+			manifest.Applications[0].CacheSettings = append(manifest.Applications[0].CacheSettings, cacheManifest)
+		}
 	}
+
+	info.Conf.CacheSettings = cacheAzion
 	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
@@ -188,8 +194,11 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) error {
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-	rulesAzion := []contracts.AzionJsonDataRules{}
-	info.Conf.RulesEngine.Rules = rulesAzion
+	rulesAzion := info.Conf.RulesEngine.Rules
+	existingRuleNames := make(map[string]bool)
+	for _, existingRule := range rulesAzion {
+		existingRuleNames[existingRule.Name] = true
+	}
 
 	// Initialize Applications slice if it's empty
 	if len(manifest.Applications) == 0 {
@@ -237,25 +246,29 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			return fmt.Errorf(msg.ERRORUNMARSHALBEHAVIORS, err)
 		}
 
-		manifestRule := contracts.ManifestRulesEngine{
-			Phase: "request",
-			Rule: contracts.ManifestRule{
-				Name:        rule.GetName(),
-				Description: rule.GetDescription(),
-				Active:      rule.GetActive(),
-				Criteria:    criteria,
-				Behaviors:   behaviors,
-			},
-		}
+		// Only add rule if it doesn't already exist locally
+		if !existingRuleNames[rule.GetName()] {
+			manifestRule := contracts.ManifestRulesEngine{
+				Phase: "request",
+				Rule: contracts.ManifestRule{
+					Name:        rule.GetName(),
+					Description: rule.GetDescription(),
+					Active:      rule.GetActive(),
+					Criteria:    criteria,
+					Behaviors:   behaviors,
+				},
+			}
 
-		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
+			manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
 
-		newRule := contracts.AzionJsonDataRules{
-			Id:    rule.GetId(),
-			Name:  rule.GetName(),
-			Phase: "request",
+			newRule := contracts.AzionJsonDataRules{
+				Id:    rule.GetId(),
+				Name:  rule.GetName(),
+				Phase: "request",
+			}
+			rulesAzion = append(rulesAzion, newRule)
+			existingRuleNames[rule.GetName()] = true
 		}
-		rulesAzion = append(rulesAzion, newRule)
 	}
 
 	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, str)
@@ -290,25 +303,28 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			return fmt.Errorf(msg.ERRORUNMARSHALBEHAVIORS, err)
 		}
 
-		manifestRule := contracts.ManifestRulesEngine{
-			Phase: "response",
-			Rule: contracts.ManifestRule{
-				Name:        rule.GetName(),
-				Description: rule.GetDescription(),
-				Active:      rule.GetActive(),
-				Criteria:    criteria,
-				Behaviors:   behaviors,
-			},
-		}
+		if !existingRuleNames[rule.GetName()] {
+			manifestRule := contracts.ManifestRulesEngine{
+				Phase: "response",
+				Rule: contracts.ManifestRule{
+					Name:        rule.GetName(),
+					Description: rule.GetDescription(),
+					Active:      rule.GetActive(),
+					Criteria:    criteria,
+					Behaviors:   behaviors,
+				},
+			}
 
-		manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
+			manifest.Applications[0].Rules = append(manifest.Applications[0].Rules, manifestRule)
 
-		newRule := contracts.AzionJsonDataRules{
-			Id:    rule.GetId(),
-			Name:  rule.GetName(),
-			Phase: "response",
+			newRule := contracts.AzionJsonDataRules{
+				Id:    rule.GetId(),
+				Name:  rule.GetName(),
+				Phase: "response",
+			}
+			rulesAzion = append(rulesAzion, newRule)
+			existingRuleNames[rule.GetName()] = true
 		}
-		rulesAzion = append(rulesAzion, newRule)
 	}
 
 	// Update the configuration with all rules
