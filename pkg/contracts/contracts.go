@@ -213,19 +213,22 @@ type Manifest struct {
 	Purge         []Purges       `json:"purge"`
 }
 
-// BuildManifest represents the build configuration in the manifest.json file
-type BuildManifest struct {
-	Build Build `json:"build,omitempty"`
+type Build struct {
+	Preset    string   `json:"preset,omitempty"`
+	Entry     []string `json:"entry,omitempty"`
+	Polyfills bool     `json:"polyfills,omitempty"`
+	Bundler   string   `json:"bundler,omitempty"`
+	Worker    bool     `json:"worker,omitempty"`
+	MemoryFS  MemoryFS `json:"memoryFS"`
 }
 
-type Build struct {
-	Preset    string   `json:"preset,omitempty"`    // JavaScript, etc.
-	Entry     []string `json:"entry,omitempty"`     // Entry files like main.js
-	Polyfills bool     `json:"polyfills,omitempty"` // Whether to include polyfills
+type MemoryFS struct {
+	InjectionDirs    []string `json:"injectionDirs,omitempty"`
+	RemovePathPrefix string   `json:"removePathPrefix,omitempty"`
 }
 
 type ManifestV4 struct {
-	Build               BuildManifest                         `json:"build"`
+	Build               Build                                 `json:"build"`
 	Storage             []StorageManifest                     `json:"storage"`
 	Functions           []Function                            `json:"functions"`
 	Applications        []Applications                        `json:"applications"`
@@ -247,7 +250,7 @@ type WorkloadManifest struct {
 	Active                    *bool                       `json:"active,omitempty"`
 	Infrastructure            int64                       `json:"infrastructure,omitempty"`
 	WorkloadDomainAllowAccess *bool                       `json:"workload_domain_allow_access,omitempty"`
-	Domains                   []string                    `json:"domains,omitempty"`
+	Domains                   []string                    `json:"domains"`
 	Tls                       *edgesdk.TLSWorkloadRequest `json:"tls,omitempty"`
 	Protocols                 *edgesdk.ProtocolsRequest   `json:"protocols,omitempty"`
 	Mtls                      *edgesdk.MTLSRequest        `json:"mtls,omitempty"`

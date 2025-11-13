@@ -18,7 +18,6 @@ import (
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
-	"github.com/davecgh/go-spew/spew"
 	"go.uber.org/zap"
 )
 
@@ -30,7 +29,7 @@ var (
 
 func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
-		PageSize: 1000,
+		PageSize: 20,
 		Page:     1,
 	}
 
@@ -45,11 +44,27 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 	interpreter := manifest.NewManifestInterpreter()
 	pathManifest, err := interpreter.ManifestPath()
 	if err != nil {
-		manifestStruct = &contracts.ManifestV4{}
+		manifestStruct = &contracts.ManifestV4{
+			Applications:        []contracts.Applications{},
+			Workloads:           []contracts.WorkloadManifest{},
+			WorkloadDeployments: []contracts.WorkloadDeployment{},
+			Purge:               []contracts.PurgeManifest{},
+			Storage:             []contracts.StorageManifest{},
+			Functions:           []contracts.Function{},
+			Connectors:          []edgesdk.ConnectorPolymorphicRequest{},
+		}
 	} else {
 		manifestStruct, err = interpreter.ReadManifest(pathManifest, f, &msgs)
 		if err != nil {
-			manifestStruct = &contracts.ManifestV4{}
+			manifestStruct = &contracts.ManifestV4{
+				Applications:        []contracts.Applications{},
+				Workloads:           []contracts.WorkloadManifest{},
+				WorkloadDeployments: []contracts.WorkloadDeployment{},
+				Purge:               []contracts.PurgeManifest{},
+				Storage:             []contracts.StorageManifest{},
+				Functions:           []contracts.Function{},
+				Connectors:          []edgesdk.ConnectorPolymorphicRequest{},
+			}
 		}
 	}
 
@@ -77,10 +92,8 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		if err != nil {
 			return err
 		}
-		defer os.Remove("manifesttoconvert.json")
+		// defer os.Remove("manifesttoconvert.json")
 		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
-
-		spew.Dump(manifestStruct)
 
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", "manifest transform --output %s --entry %s", f)
@@ -102,21 +115,26 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		return remoteCacheIds, err
 	}
 
+	if len(manifest.Applications) == 0 {
+		appName := info.Conf.Application.Name
+		if appName == "" || appName == "__DEFAULT__" {
+			appName = info.Conf.Name
+		}
+		manifest.Applications = append(manifest.Applications, contracts.Applications{
+			Name:          appName,
+			Rules:         []contracts.ManifestRulesEngine{},
+			CacheSettings: []contracts.ManifestCacheSetting{},
+		})
+	} else if manifest.Applications[0].CacheSettings == nil {
+		manifest.Applications[0].CacheSettings = []contracts.ManifestCacheSetting{}
+	}
+
 	cacheAzion := []contracts.AzionJsonDataCacheSettings{}
 	info.Conf.CacheSettings = cacheAzion
 	for _, cache := range resp {
 		remoteCacheIds[strconv.FormatInt(cache.Id, 10)] = contracts.AzionJsonDataCacheSettings{
 			Id:   cache.Id,
 			Name: cache.Name,
-		}
-		cEntry := edgesdk.CacheSettingRequest{}
-		jsonBytes, err := json.Marshal(cache)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		err = json.Unmarshal(jsonBytes, &cEntry)
-		if err != nil {
-			return remoteCacheIds, err
 		}
 
 		newCache := contracts.AzionJsonDataCacheSettings{
@@ -126,15 +144,36 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 		cacheAzion = append(cacheAzion, newCache)
 		info.Conf.CacheSettings = cacheAzion
 
-		cacheManifest := contracts.ManifestCacheSetting{}
-		cacheManifestBytes, err := json.Marshal(cache)
+		// Create ManifestCacheSetting by converting API response fields
+		cacheManifest := contracts.ManifestCacheSetting{
+			Name: cache.GetName(),
+		}
+
+		// Convert BrowserCache from response type to request type via JSON
+		browserCache := cache.GetBrowserCache()
+		browserCacheBytes, err := json.Marshal(browserCache)
 		if err != nil {
 			return remoteCacheIds, err
 		}
-		err = json.Unmarshal(cacheManifestBytes, &cacheManifest)
+		var browserCacheRequest edgesdk.BrowserCacheModuleRequest
+		err = json.Unmarshal(browserCacheBytes, &browserCacheRequest)
 		if err != nil {
 			return remoteCacheIds, err
 		}
+		cacheManifest.BrowserCache = &browserCacheRequest
+
+		// Convert Modules from response type to request type via JSON
+		modules := cache.GetModules()
+		modulesBytes, err := json.Marshal(modules)
+		if err != nil {
+			return remoteCacheIds, err
+		}
+		var modulesRequest edgesdk.CacheSettingsModulesRequest
+		err = json.Unmarshal(modulesBytes, &modulesRequest)
+		if err != nil {
+			return remoteCacheIds, err
+		}
+		cacheManifest.Modules = &modulesRequest
 
 		manifest.Applications[0].CacheSettings = append(manifest.Applications[0].CacheSettings, cacheManifest)
 	}
@@ -159,8 +198,9 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			appName = info.Conf.Name
 		}
 		manifest.Applications = append(manifest.Applications, contracts.Applications{
-			Name:  appName,
-			Rules: []contracts.ManifestRulesEngine{},
+			Name:          appName,
+			Rules:         []contracts.ManifestRulesEngine{},
+			CacheSettings: []contracts.ManifestCacheSetting{},
 		})
 	}
 
