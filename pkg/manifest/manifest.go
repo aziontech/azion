@@ -87,9 +87,6 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	}
 	defer s.Stop()
 
-	logger.FInfoFlags(f.IOStreams.Out, msg.CreatingManifest, f.Format, f.Out)
-	*msgs = append(*msgs, msg.CreatingManifest)
-
 	client := apiApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	clientWorkload := apiWorkloads.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
