@@ -1,4 +1,4 @@
-name: Generate docs and upload to wiki
+name: Generate docs and upload to repository wiki
 
 on:
   workflow_dispatch:
@@ -18,30 +18,33 @@ jobs:
       CGO_ENABLED: 0 # Statically linked
 
     steps:
-      - name: Setting GIT
-        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Setting GIT
+        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - name: Generate docs
         run: go run ./cmd/gen_docs/main.go --file-type "md" --doc-path "/tmp/docs"
 
-      - name: Checkout code
+      - name: Checkout wiki repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: ${{github.repository}}.wiki
+          token: ${{ secrets.GLOBAL_TOKEN }}
+          path: wiki
 
-      - name: Copy files
-        run: cp /tmp/docs/* .
+      - name: Copy files to wiki
+        run: cp /tmp/docs/* wiki/
 
-      - name: Commit files
+      - name: Commit and push to wiki
         run: |
+          cd wiki
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
-          git commit -m "Add changes"
+          git commit -m "Add changes" || echo "No changes to commit"
           git push
