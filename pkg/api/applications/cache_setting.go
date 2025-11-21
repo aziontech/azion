@@ -3,6 +3,7 @@ package applications
 import (
 	"context"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
@@ -58,12 +59,10 @@ func (c *Client) CreateCacheEdgeApplication(
 	return resp.Data, nil
 }
 
-func (c *Client) ListCacheEdgeApp(
-	ctx context.Context, edgeApplicationID string,
-) ([]sdk.ResponseListCacheSetting, error) {
+func (c *Client) ListCacheEdgeApp(ctx context.Context, edgeApplicationID string, opts *contracts.ListOptions) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
-		ListCacheSettings(ctx, edgeApplicationID).Ordering("id").Execute()
+		ListCacheSettings(ctx, edgeApplicationID).Ordering("id").PageSize(opts.PageSize).Page(opts.Page).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
