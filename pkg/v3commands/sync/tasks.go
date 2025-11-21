@@ -28,7 +28,7 @@ var (
 
 func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
-		PageSize: 1000,
+		PageSize: 100,
 		Page:     1,
 	}
 
