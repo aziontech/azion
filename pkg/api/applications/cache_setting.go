@@ -59,9 +59,7 @@ func (c *Client) CreateCacheEdgeApplication(
 	return resp.Data, nil
 }
 
-func (c *Client) ListCacheEdgeApp(
-	ctx context.Context, edgeApplicationID string, opts *contracts.ListOptions,
-) ([]sdk.ResponseListCacheSetting, error) {
+func (c *Client) ListCacheEdgeApp(ctx context.Context, edgeApplicationID string, opts *contracts.ListOptions) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		ListCacheSettings(ctx, edgeApplicationID).Ordering("id").PageSize(opts.PageSize).Page(opts.Page).Execute()
