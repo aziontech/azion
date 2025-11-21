@@ -16,7 +16,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +27,7 @@ var (
 
 func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
-		PageSize: 1000,
+		PageSize: 100,
 		Page:     1,
 	}
 
@@ -81,7 +80,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) (ma
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-	resp, err := client.ListCacheEdgeApp(context.Background(), str)
+	resp, err := client.ListCacheEdgeApp(context.Background(), str, opts)
 	if err != nil {
 		return remoteCacheIds, err
 	}
@@ -92,15 +91,6 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory) (ma
 		remoteCacheIds[strconv.FormatInt(cache.Id, 10)] = contracts.AzionJsonDataCacheSettings{
 			Id:   cache.Id,
 			Name: cache.Name,
-		}
-		cEntry := edgesdk.CacheSettingRequest{}
-		jsonBytes, err := json.Marshal(cache)
-		if err != nil {
-			return remoteCacheIds, err
-		}
-		err = json.Unmarshal(jsonBytes, &cEntry)
-		if err != nil {
-			return remoteCacheIds, err
 		}
 
 		newCache := contracts.AzionJsonDataCacheSettings{

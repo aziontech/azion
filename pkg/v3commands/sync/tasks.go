@@ -139,7 +139,7 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOptsV3, f *cmdutil.Factory, 
 func (synch *SyncCmd) syncCache(info contracts.SyncOptsV3, f *cmdutil.Factory, manifest *contracts.Manifest) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID)
+	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID, opts)
 	if err != nil {
 		return remoteCacheIds, err
 	}
