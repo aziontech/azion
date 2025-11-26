@@ -79,7 +79,7 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.NetworkListDetail, err
 }
 
 func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkListDetail, error) {
-	logger.Debug("Create Function")
+	logger.Debug("Create network list")
 
 	request := c.apiClient.NetworkListsAPI.CreateNetworkList(ctx).NetworkListDetailRequest(req.NetworkListDetailRequest)
 
@@ -87,7 +87,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkLis
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while creating a Function", zap.Error(err), zap.Any("Name", req.Name))
+			logger.Debug("Error while creating a network list", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.NetworkListDetail{}, err
@@ -100,14 +100,14 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkLis
 }
 
 func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.NetworkListDetail, error) {
-	logger.Debug("Update Network List", zap.Any("Network List ID", id), zap.Any("Network List name", req.Name))
+	logger.Debug("Update network list", zap.Any("ID", id), zap.Any("Name", req.Name))
 	request := c.apiClient.NetworkListsAPI.PartialUpdateNetworkList(ctx, id).PatchedNetworkListDetailRequest(req.PatchedNetworkListDetailRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
-			logger.Debug("Error while updating a Function", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
+			logger.Debug("Error while updating a network list", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
 				return sdk.NetworkListDetail{}, err

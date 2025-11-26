@@ -7,6 +7,6 @@ var (
 	ErrorFailToDeleteNetworkList = errors.New("Failed to delete Network List: %w")
 	ErrorGetNetworkList          = errors.New("Failed to describe Network List: %w")
 	ErrorCreateNetworkList       = errors.New("Failed to create Network List: %w")
-	ErrorUpdateNetworkList       = errors.New("Failed to update Network List: %s")
+	ErrorUpdateNetworkList       = errors.New("Failed to update Network List: %w")
 	ErrorActiveFlag              = errors.New("Invalid value for --active flag")
 )

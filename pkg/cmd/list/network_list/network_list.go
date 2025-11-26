@@ -16,14 +16,14 @@ import (
 )
 
 type ListCmd struct {
-	Io            *iostreams.IOStreams
-	ListFunctions func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error)
+	Io              *iostreams.IOStreams
+	ListNetworkList func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListFunctions: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error) {
+		ListNetworkList: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -60,7 +60,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
-	functions, err := list.ListFunctions(ctx, opts)
+	netlist, err := list.ListNetworkList(ctx, opts)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorGetNetworkLists.Error(), err)
 	}
@@ -74,11 +74,11 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 		listOut.Columns = []string{"ID", "NAME", "ACTIVE", "TYPE"}
 	}
 
-	if functions == nil || len(functions.Results) == 0 {
+	if netlist == nil || len(netlist.Results) == 0 {
 		return output.Print(&listOut)
 	}
 
-	for _, v := range functions.Results {
+	for _, v := range netlist.Results {
 		var ln []string
 		if opts.Details {
 			ln = []string{
