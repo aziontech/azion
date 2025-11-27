@@ -8,6 +8,7 @@ import (
 	connector "github.com/aziontech/azion-cli/pkg/cmd/delete/connector"
 	function "github.com/aziontech/azion-cli/pkg/cmd/delete/function"
 	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/delete/function_instance"
+	networkList "github.com/aziontech/azion-cli/pkg/cmd/delete/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/delete/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/delete/personal_token"
 	profile "github.com/aziontech/azion-cli/pkg/cmd/delete/profile"
@@ -28,6 +29,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion delete application -h
 		$ azion delete workload -h
 		$ azion delete origin -h
+		$ azion delete network-list -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -46,6 +48,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(profile.NewCmd(f))
+	cmd.AddCommand(networkList.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

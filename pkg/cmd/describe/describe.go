@@ -8,6 +8,7 @@ import (
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
 	function "github.com/aziontech/azion-cli/pkg/cmd/describe/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/describe/function_instance"
+	networklist "github.com/aziontech/azion-cli/pkg/cmd/describe/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/describe/origin"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
@@ -28,6 +29,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion describe application -h
 		$ azion describe workload -h
 		$ azion describe origin -h
+		$ azion describe network-list -h
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -45,6 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(personal_token.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
+	cmd.AddCommand(networklist.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

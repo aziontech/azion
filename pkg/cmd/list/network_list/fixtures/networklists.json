@@ -1,0 +1,13 @@
+{
+  "count": 1,
+  "results": [
+    {
+      "id": 0,
+      "name": "string",
+      "type": "asn",
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "active": true
+    }
+  ]
+}

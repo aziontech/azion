@@ -8,6 +8,7 @@ import (
 	connector "github.com/aziontech/azion-cli/pkg/cmd/list/connector"
 	function "github.com/aziontech/azion-cli/pkg/cmd/list/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/list/function_instance"
+	networklist "github.com/aziontech/azion-cli/pkg/cmd/list/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
@@ -30,6 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion list workload -h
 		$ azion list origin -h
 		$ azion list function-instance -h
+		$ azion list network-list -h
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -48,6 +50,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(storage.NewCmd(f))
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
+	cmd.AddCommand(networklist.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
