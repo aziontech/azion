@@ -33,10 +33,12 @@ var (
 	AskItems         = "Enter the items (comma-separated):"
 	AskActive        = "Should the Network List be active?"
 
-	FlagID     = "Unique identifier of the Network List"
-	FlagName   = "Name of the Network List"
-	FlagType   = "Type of the Network List (asn, countries, ip_cidr)"
-	FlagItems  = "Items for the Network List (comma-separated)"
-	FlagActive = "Whether the Network List is active"
-	FlagIn     = "Path to a JSON file containing the Network List attributes"
+	FlagID         = "Unique identifier of the Network List"
+	FlagName       = "Name of the Network List"
+	FlagType       = "Type of the Network List (asn, countries, ip_cidr)"
+	FlagItems      = "Items for the Network List (comma-separated)"
+	FlagAddItem    = "Add items to the Network List (comma-separated)"
+	FlagRemoveItem = "Remove items from the Network List (comma-separated)"
+	FlagActive     = "Whether the Network List is active"
+	FlagIn         = "Path to a JSON file containing the Network List attributes"
 )

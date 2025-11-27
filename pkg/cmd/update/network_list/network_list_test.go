@@ -168,4 +168,253 @@ func TestUpdate(t *testing.T) {
 
 		require.Error(t, err)
 	})
+
+	t.Run("add single item", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		// Mock GET to retrieve current items
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24",
+      "10.0.0.0/8"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--add-item", "203.0.113.0/24"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
+
+	t.Run("add multiple items", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--add-item", "203.0.113.0/24,172.16.0.0/12"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
+
+	t.Run("remove single item", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24",
+      "10.0.0.0/8",
+      "203.0.113.0/24"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--remove-item", "10.0.0.0/8"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
+
+	t.Run("remove multiple items", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24",
+      "10.0.0.0/8",
+      "203.0.113.0/24",
+      "172.16.0.0/12"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--remove-item", "10.0.0.0/8,172.16.0.0/12"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
+
+	t.Run("add and remove items together", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24",
+      "10.0.0.0/8"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--add-item", "203.0.113.0/24", "--remove-item", "10.0.0.0/8"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
+
+	t.Run("add item that already exists", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+
+		getCurrentResponse := `
+{
+  "data": {
+    "id": 1337,
+    "name": "Test Network List",
+    "type": "ip_cidr",
+    "items": [
+      "192.168.1.0/24",
+      "10.0.0.0/8"
+    ],
+    "last_editor": "user@example.com",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true
+  }
+}
+`
+		mock.Register(
+			httpmock.REST("GET", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(getCurrentResponse),
+		)
+
+		mock.Register(
+			httpmock.REST("PATCH", "workspace/network_lists/1337"),
+			httpmock.JSONFromString(successResponse),
+		)
+
+		f, stdout, _ := testutils.NewFactory(mock)
+
+		cmd := NewCmd(f)
+
+		cmd.SetArgs([]string{"--network-list-id", "1337", "--add-item", "192.168.1.0/24"})
+
+		err := cmd.Execute()
+
+		require.NoError(t, err)
+		require.Equal(t, fmt.Sprintf(msg.UpdateOutputSuccess, 1337), stdout.String())
+	})
 }
