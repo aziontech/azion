@@ -16,6 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/schedule"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 type DeleteBucketCmd struct {
@@ -92,7 +93,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 					if err != nil {
 						if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET) {
 							logger.FInfo(f.IOStreams.Out, "Bucket deletion was scheduled successfully\n")
-							return schedule.NewSchedule(nil, bucketName, schedule.DELETE_BUCKET)
+							return schedule.NewSchedule(nil, f, bucketName, schedule.DELETE_BUCKET)
 						} else {
 							return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
 						}
@@ -123,15 +124,23 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 }
 
 func deleteAllObjects(client *api.Client, ctx context.Context, name, continuationToken string) error {
-	objects, err := client.ListObject(ctx, name, &contracts.ListOptions{ContinuationToken: continuationToken})
-	if err != nil {
-		return err
-	}
-	for _, obj := range objects.Results {
-		err := client.DeleteObject(ctx, name, obj.GetKey())
+	for {
+		objects, err := client.ListObject(ctx, name, &contracts.ListOptions{ContinuationToken: continuationToken})
 		if err != nil {
 			return err
 		}
+		for _, obj := range objects.Results {
+			logger.Debug("Deleting object", zap.Any("object-key", obj.GetKey()))
+			err := client.DeleteObject(ctx, name, obj.GetKey())
+			if err != nil {
+				return err
+			}
+		}
+		logger.Debug("continuing to next page", zap.Any("continuation-token", objects.GetContinuationToken()))
+		if contToken, ok := objects.GetContinuationTokenOk(); contToken == nil || !ok {
+			break
+		}
+		continuationToken = objects.GetContinuationToken()
 	}
 	return nil
 }

@@ -58,13 +58,18 @@ type Schedule struct {
 	Kind string    `json:"kind"`
 }
 
-func NewSchedule(fact *Factory, name string, kind string) error {
+func NewSchedule(fact *Factory, cmdFactory *cmdutil.Factory, name string, kind string) error {
 	factory := InjectFactory(fact)
 	factory.Schedule.Name = name
 	factory.Schedule.Time = time.Now()
 	factory.Schedule.Kind = kind
 
-	schedules, err := factory.readFileSchedule()
+	var activeProfile string
+	if cmdFactory != nil {
+		activeProfile = cmdFactory.GetActiveProfile()
+	}
+
+	schedules, err := factory.readFileScheduleForProfile(activeProfile)
 	if err != nil {
 		logger.Debug("Error while reading the schedule", zap.Error(err))
 		return err
@@ -72,22 +77,12 @@ func NewSchedule(fact *Factory, name string, kind string) error {
 
 	schedules = append(schedules, factory.Schedule)
 
-	err = factory.createFileSchedule(schedules)
+	err = factory.createFileScheduleForProfile(schedules, activeProfile)
 	if err != nil {
 		logger.Debug("Scheduling error", zap.Error(err))
 		return err
 	}
 	return nil
-}
-
-func (s *Factory) createFileSchedule(shedules []Schedule) error {
-	b, err := s.MarshalIndent(shedules, "  ", " ")
-	if err != nil {
-		return err
-	}
-	configPath := s.Dir()
-	path := s.Join(configPath.Dir, configPath.Schedule)
-	return s.WriteFile(path, b, os.FileMode(os.O_CREATE))
 }
 
 func (s *Factory) createFileScheduleForProfile(schedules []Schedule, profile string) error {
@@ -101,38 +96,6 @@ func (s *Factory) createFileScheduleForProfile(schedules []Schedule, profile str
 	}
 	path := s.Join(configPath.Dir, configPath.Schedule)
 	return s.WriteFile(path, b, 0666)
-}
-
-func (s *Factory) readFileSchedule() ([]Schedule, error) {
-	configPath := config.Dir()
-	schedules := []Schedule{}
-
-	path := s.Join(configPath.Dir, configPath.Schedule)
-
-	// Checks if the file exists in the given path
-	if _, err := s.Stat(path); s.IsNotExist(err) {
-		data, err := s.Marshal(&schedules)
-		if err != nil {
-			return nil, err
-		}
-		err = s.WriteFile(path, data, 0666)
-		if err != nil {
-			return nil, err
-		}
-
-		return schedules, nil
-	}
-
-	file, err := s.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.Unmarshal(file, &schedules)
-	if err != nil {
-		return nil, err
-	}
-	return schedules, nil
 }
 
 func (s *Factory) readFileScheduleForProfile(profile string) ([]Schedule, error) {
