@@ -94,7 +94,6 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
 	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
-	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
@@ -145,9 +144,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	}()
 
 	versionID := cmd.VersionID()
-	var oldprefix string
+	var oldprefix, newprefix string
 
-	oldprefix, conf.Prefix = conf.Prefix, versionID
+	oldprefix, newprefix = conf.Prefix, versionID
 
 	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {
@@ -158,6 +157,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	interpreter := cmd.Interpreter()
 
 	if !SkipBuild && conf.NotFirstRun {
+		conf.Prefix = newprefix
 		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", cmdStr, cmd.F)
@@ -200,7 +200,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
-	if !conf.NotFirstRun {
+	if !conf.NotFirstRun && (!SkipBuild || !SkipFramework) {
+		conf.Prefix = newprefix
 		err = cmd.callBundlerInit(conf)
 		if err != nil {
 			return err
@@ -221,6 +222,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	// Check if directory exists; if not, we skip uploading static files
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		logger.Debug(msg.SkipUpload)
+	} else if SkipBuild || SkipFramework {
+		logger.Debug(msg.SkipUploadBuild)
 	} else {
 		for _, storage := range manifestStructure.Storage {
 			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
