@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
 	thoth "github.com/aziontech/go-thoth"
@@ -15,7 +14,6 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/applications"
-	api "github.com/aziontech/azion-cli/pkg/api/function"
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -39,19 +37,22 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		return err
 	}
 
-	// cmdVulcanInit := "config update"
-	commands := []string{
-		fmt.Sprintf("config replace -k '$FUNCTION_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$APPLICATION_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$BUCKET_NAME' -v '%s'", conf.Bucket),
-		fmt.Sprintf("config replace -k '$BUCKET_PREFIX' -v '%s'", conf.Prefix),
-		fmt.Sprintf("config replace -k '$CONNECTOR_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$WORKLOAD_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$DEPLOYMENT_NAME' -v '%s'", conf.Name),
-		fmt.Sprintf("config replace -k '$FUNCTION_INSTANCE_NAME' -v '%s'", conf.Name),
+	configReplacements := []struct {
+		key   string
+		value string
+	}{
+		{"$FUNCTION_NAME", conf.Name},
+		{"$APPLICATION_NAME", conf.Name},
+		{"$BUCKET_NAME", conf.Bucket},
+		{"$BUCKET_PREFIX", conf.Prefix},
+		{"$CONNECTOR_NAME", conf.Name},
+		{"$WORKLOAD_NAME", conf.Name},
+		{"$DEPLOYMENT_NAME", conf.Name},
+		{"$FUNCTION_INSTANCE_NAME", conf.Name},
 	}
 
-	for _, cmdStr := range commands {
+	for _, replacement := range configReplacements {
+		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", replacement.key, replacement.value)
 		command := vul.Command("", cmdStr, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 
@@ -190,13 +191,14 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
 	}
 
+	appIDStr := strconv.FormatInt(conf.Application.ID, 10)
+
 	if authorize {
 		var reqCache apiapp.CreateCacheSettingsRequest
 		reqCache.SetName(conf.Name)
 
 		// create Cache Settings
-		strApp := strconv.FormatInt(conf.Application.ID, 10)
-		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, strApp)
+		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, appIDStr)
 		if err != nil {
 			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
@@ -206,102 +208,14 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		cacheId = cache.GetId()
 	}
 
-	appId := fmt.Sprintf("%d", conf.Application.ID)
-
 	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, appId, cacheId, conf.Preset, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, appIDStr, cacheId, conf.Preset, authorize)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
 	}
 
 	return nil
-}
-
-func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, funcToCreate contracts.AzionJsonDataFunction, msgs *[]string) (int64, error) {
-	reqCre := api.CreateRequest{}
-
-	code, err := cmd.FileReader(funcToCreate.File)
-	if err != nil {
-		logger.Debug("Error while reading Function file <"+funcToCreate.File+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
-	}
-
-	reqCre.SetCode(string(code))
-
-	reqCre.SetActive(true)
-	if funcToCreate.Name == "__DEFAULT__" || funcToCreate.Name == "" {
-		reqCre.SetName(conf.Name)
-	} else {
-		reqCre.SetName(funcToCreate.Name)
-	}
-
-	//Read args
-	marshalledArgs, err := cmd.FileReader(funcToCreate.Args)
-	if err != nil {
-		logger.Debug("Error while reding args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
-	}
-	args := make(map[string]interface{})
-	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Debug("Error while unmarshling args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
-	}
-
-	reqCre.SetDefaultArgs(args)
-	response, err := client.Create(ctx, &reqCre)
-	if err != nil {
-		logger.Debug("Error while creating Function", zap.Error(err), zap.Any("Name", reqCre.Name))
-		return 0, err
-	}
-	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionCreate, response.GetName(), response.GetId())
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
-	*msgs = append(*msgs, msgf)
-	return response.GetId(), nil
-}
-
-func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, funcToUpdate contracts.AzionJsonDataFunction, msgs *[]string) (int64, error) {
-	reqUpd := api.UpdateRequest{}
-
-	code, err := cmd.FileReader(funcToUpdate.File)
-	if err != nil {
-		logger.Debug("Error while reading Function file <"+funcToUpdate.File+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
-	}
-
-	reqUpd.SetCode(string(code))
-
-	reqUpd.SetActive(true)
-	if funcToUpdate.Name == "__DEFAULT__" || funcToUpdate.Name == "" {
-		reqUpd.SetName(conf.Name)
-	} else {
-		reqUpd.SetName(funcToUpdate.Name)
-	}
-
-	//Read args
-	marshalledArgs, err := cmd.FileReader(funcToUpdate.Args)
-	if err != nil {
-		logger.Debug("Error while reading args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
-	}
-	args := make(map[string]interface{})
-	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Debug("Error while unmarshling args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return 0, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
-	}
-
-	reqUpd.SetDefaultArgs(args)
-	funcId := strconv.FormatInt(funcToUpdate.ID, 10)
-	response, err := client.Update(ctx, &reqUpd, funcId)
-	if err != nil {
-		logger.Debug("Error while updating Function", zap.Error(err), zap.Any("Name", reqUpd.Name))
-		return 0, fmt.Errorf(msg.ErrorUpdateFunction.Error(), err)
-	}
-
-	msgf := fmt.Sprintf(msg.DeployOutputEdgeFunctionUpdate, response.GetName(), funcToUpdate.ID)
-	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
-	*msgs = append(*msgs, msgf)
-	return response.GetId(), nil
 }
 
 func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (int64, error) {
@@ -393,87 +307,6 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return workload, nil
-}
-
-func prepareAddresses(addrs []string) (addresses []sdkv3.CreateOriginsRequestAddresses) {
-	var addr sdkv3.CreateOriginsRequestAddresses
-	for _, v := range addrs {
-		addr.Address = v
-		addresses = append(addresses, addr)
-	}
-	return
-}
-
-func (cmd *DeployCmd) createInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToCreate contracts.AzionJsonDataFunction) (edgesdk.ApplicationFunctionInstance, error) {
-	logger.Debug("Create Instance")
-
-	// create instance function
-	reqIns := apiapp.CreateInstanceRequest{}
-	reqIns.SetFunction(funcToCreate.ID)
-
-	if funcToCreate.InstanceName == "__DEFAULT__" || funcToCreate.InstanceName == "" {
-		reqIns.SetName(conf.Name)
-	} else {
-		reqIns.SetName(funcToCreate.InstanceName)
-	}
-	reqIns.ApplicationId = conf.Application.ID
-
-	//Read args
-	marshalledArgs, err := cmd.FileReader(funcToCreate.Args)
-	if err != nil {
-		logger.Debug("Error while reding args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
-	}
-	args := make(map[string]interface{})
-	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Debug("Error while unmarshling args.json file <"+funcToCreate.Args+">", zap.Error(err))
-		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
-	}
-	reqIns.SetArgs(args)
-
-	appId := fmt.Sprintf("%d", conf.Application.ID)
-	resp, err := client.CreateFuncInstances(ctx, &reqIns, appId)
-	if err != nil {
-		return edgesdk.ApplicationFunctionInstance{}, err
-	}
-
-	return resp, nil
-}
-
-func (cmd *DeployCmd) updateInstance(ctx context.Context, client *apiapp.Client, conf *contracts.AzionApplicationOptions, funcToUpdate contracts.AzionJsonDataFunction) (edgesdk.ApplicationFunctionInstance, error) {
-	logger.Debug("Update Instance")
-
-	// create instance function
-	reqIns := apiapp.UpdateInstanceRequest{}
-	reqIns.SetFunction(funcToUpdate.ID)
-
-	if funcToUpdate.InstanceName == "__DEFAULT__" || funcToUpdate.InstanceName == "" {
-		reqIns.SetName(conf.Name)
-	} else {
-		reqIns.SetName(funcToUpdate.Name)
-	}
-
-	//Read args
-	marshalledArgs, err := cmd.FileReader(funcToUpdate.Args)
-	if err != nil {
-		logger.Debug("Error while reding args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorArgsFlag, err)
-	}
-	args := make(map[string]interface{})
-	if err := cmd.Unmarshal(marshalledArgs, &args); err != nil {
-		logger.Debug("Error while unmarshling args.json file <"+funcToUpdate.Args+">", zap.Error(err))
-		return edgesdk.ApplicationFunctionInstance{}, fmt.Errorf("%s: %w", msg.ErrorParseArgs, err)
-	}
-	reqIns.SetArgs(args)
-
-	instID := strconv.FormatInt(funcToUpdate.InstanceID, 10)
-	appID := strconv.FormatInt(conf.Application.ID, 10)
-	resp, err := client.UpdateInstance(ctx, &reqIns, appID, instID)
-	if err != nil {
-		return edgesdk.ApplicationFunctionInstance{}, err
-	}
-
-	return resp, nil
 }
 
 func checkArgsJson(cmd *DeployCmd, projectPath string) error {

@@ -17,29 +17,12 @@ import (
 
 var (
 	PathStatic = ".edge/storage"
-	Jobs       chan contracts.FileOps
 	Retries    int64
 )
 
 func (cmd *DeployCmd) uploadFiles(
 	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, dir string) error {
-	// Get total amount of files to display progress
-	totalFiles := 0
 	logger.Debug("Path to be uploaded: " + dir)
-	if err := cmd.FilepathWalk(dir, func(pathDir string, info os.FileInfo, err error) error {
-		if err != nil {
-			logger.Debug("Error while reading files to be uploaded", zap.Error(err))
-			logger.Debug("File that caused the error: " + pathDir)
-			return err
-		}
-		if !info.IsDir() {
-			totalFiles++
-		}
-		return nil
-	}); err != nil {
-		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
-		return err
-	}
 
 	clientUpload := storage.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("storage_url"), cmd.F.Config.GetString("token"))
 
@@ -48,26 +31,9 @@ func (cmd *DeployCmd) uploadFiles(
 
 	noOfWorkers := 5
 	var currentFile int64
-	Jobs := make(chan contracts.FileOps, totalFiles)
-	results := make(chan error, noOfWorkers)
 
-	// Create worker goroutines
-	for i := 1; i <= noOfWorkers; i++ {
-		go Worker(Jobs, results, &currentFile, clientUpload, conf, conf.Bucket)
-	}
-
-	bar := progressbar.NewOptions(
-		totalFiles,
-		progressbar.OptionSetDescription("Uploading files"),
-		progressbar.OptionShowCount(),
-		progressbar.OptionSetWriter(cmd.F.IOStreams.Out),
-		progressbar.OptionClearOnFinish(),
-	)
-
-	if f.Silent {
-		bar = nil
-	}
-
+	// Collect all files in a single walk to avoid double traversal
+	var fileOps []contracts.FileOps
 	if err := cmd.FilepathWalk(dir, func(pathDir string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -97,14 +63,47 @@ func (cmd *DeployCmd) uploadFiles(
 				FileContent: fileContent,
 			}
 
-			Jobs <- fileOptions
+			fileOps = append(fileOps, fileOptions)
 		}
 		return nil
 	}); err != nil {
 		logger.Debug("Error while reading files to be uploaded", zap.Error(err))
 		return err
 	}
-	close(Jobs)
+
+	totalFiles := len(fileOps)
+	if totalFiles == 0 {
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadSuccessful, f.Format, f.Out)
+		*msgs = append(*msgs, msg.UploadSuccessful)
+		return nil
+	}
+
+	// Create channels and workers after we know the file count
+	jobsChan := make(chan contracts.FileOps, totalFiles)
+	results := make(chan error, noOfWorkers)
+
+	// Create worker goroutines
+	for i := 1; i <= noOfWorkers; i++ {
+		go Worker(jobsChan, results, &currentFile, clientUpload, conf, conf.Bucket)
+	}
+
+	bar := progressbar.NewOptions(
+		totalFiles,
+		progressbar.OptionSetDescription("Uploading files"),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSetWriter(cmd.F.IOStreams.Out),
+		progressbar.OptionClearOnFinish(),
+	)
+
+	if f.Silent {
+		bar = nil
+	}
+
+	// Queue all files for upload
+	for _, fileOp := range fileOps {
+		jobsChan <- fileOp
+	}
+	close(jobsChan)
 
 	// Check for errors from workers
 	for a := 1; a <= totalFiles; a++ {

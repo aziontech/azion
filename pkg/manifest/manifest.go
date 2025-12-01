@@ -168,6 +168,9 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
+	// Cache string conversion of application ID (used multiple times in loop)
+	appIDStr := strconv.FormatInt(conf.Application.ID, 10)
+
 	for _, funcMan := range manifest.Applications[0].FunctionsInstances {
 		if funcConf := FunctionIds[funcMan.Function]; funcConf.InstanceID > 0 {
 			request := apiApplications.UpdateInstanceRequest{}
@@ -176,8 +179,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
 			idString := strconv.FormatInt(funcConf.InstanceID, 10)
-			appID := strconv.FormatInt(conf.Application.ID, 10)
-			_, err := client.UpdateInstance(ctx, &request, appID, idString)
+			_, err := client.UpdateInstance(ctx, &request, appIDStr, idString)
 			if err != nil {
 				return err
 			}
@@ -187,8 +189,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			request.SetArgs(funcMan.Args)
 			request.SetName(funcMan.Name)
 			request.SetFunction(funcConf.ID)
-			appId := strconv.FormatInt(conf.Application.ID, 10)
-			resp, err := client.CreateFuncInstances(ctx, &request, appId)
+			resp, err := client.CreateFuncInstances(ctx, &request, appIDStr)
 			if err != nil {
 				return err
 			}
@@ -296,7 +297,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Name = storage.GetName()
 					// storage does not contain addresses
 				default:
-					return errors.New("Failed to get Connector type")
+					return errors.New("failed to get Connector type")
 				}
 				connectorConf = append(connectorConf, conn)
 			} else {
@@ -322,7 +323,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
-					return errors.New("Failed to get Connector type")
+					return errors.New("failed to get Connector type")
 				}
 				ConnectorIds[conn.Name] = conn.Id
 				connectorConf = append(connectorConf, conn)
@@ -338,13 +339,16 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 
 		ruleConf := []contracts.AzionJsonDataRules{}
 		if len(edgeappman.Rules) > 0 {
+			// Cache string conversion of application ID (used multiple times in rules loop)
+			appIDStr := strconv.FormatInt(conf.Application.ID, 10)
+
 			for _, rule := range edgeappman.Rules {
 				if r := RuleIds[rule.Rule.Name]; r.Id > 0 {
 					switch rule.Phase {
 					case "request":
 						req := transformRuleRequest(rule.Rule)
 						strid := strconv.FormatInt(r.Id, 10)
-						req.IdApplication = strconv.FormatInt(conf.Application.ID, 10)
+						req.IdApplication = appIDStr
 						req.Id = strid
 						behs, err := transformBehaviorsRequest(rule.Rule.Behaviors)
 						if errors.Is(err, utils.ErrorNotFound404) {
@@ -371,7 +375,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					case "response":
 						req := transformRuleResponse(rule.Rule)
 						strid := strconv.FormatInt(r.Id, 10)
-						req.IdApplication = strconv.FormatInt(conf.Application.ID, 10)
+						req.IdApplication = appIDStr
 						req.Id = strid
 						behs, err := transformBehaviorsResponse(rule.Rule.Behaviors)
 						if errors.Is(err, utils.ErrorNotFound404) {
@@ -410,8 +414,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						}
 						req.ApplicationRequestPhaseRuleEngineRequest = createRequest
 						req.Behaviors = bh
-						appstring := strconv.FormatInt(conf.Application.ID, 10)
-						created, err := client.CreateRulesEngineRequest(ctx, appstring, rule.Phase, req)
+						created, err := client.CreateRulesEngineRequest(ctx, appIDStr, rule.Phase, req)
 						if err != nil {
 							return err
 						}
@@ -430,8 +433,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						}
 						req.ApplicationResponsePhaseRuleEngineRequest = createRequest
 						req.Behaviors = bh
-						appstring := strconv.FormatInt(conf.Application.ID, 10)
-						created, err := client.CreateRulesEngineResponse(ctx, appstring, rule.Phase, req)
+						created, err := client.CreateRulesEngineResponse(ctx, appIDStr, rule.Phase, req)
 						if err != nil {
 							return err
 						}
@@ -549,6 +551,9 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		return nil
 	}
 
+	// Cache string conversion of application ID (used in delete loop)
+	appIDStr := strconv.FormatInt(conf.Application.ID, 10)
+
 	for _, value := range RuleIds {
 		//since until [UXE-3599] was carried out we'd only cared about "request" phase, this check guarantees that if Phase is empty
 		// we are probably dealing with a rule engine from a previous version
@@ -556,15 +561,14 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 		if value.Phase != "" {
 			phase = value.Phase
 		}
-		str := strconv.FormatInt(conf.Application.ID, 10)
 		strRule := strconv.FormatInt(value.Id, 10)
 		var statusInt int
 		var err error
 		switch phase {
 		case "request":
-			statusInt, err = client.DeleteRulesEngineRequest(ctx, str, phase, strRule)
+			statusInt, err = client.DeleteRulesEngineRequest(ctx, appIDStr, phase, strRule)
 		case "response":
-			statusInt, err = client.DeleteRulesEngineResponse(ctx, str, phase, strRule)
+			statusInt, err = client.DeleteRulesEngineResponse(ctx, appIDStr, phase, strRule)
 		default:
 			return msgrule.ErrorInvalidPhase
 		}

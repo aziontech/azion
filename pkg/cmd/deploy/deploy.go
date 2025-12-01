@@ -286,7 +286,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	req.Header.Set("content-type", "application/json; version=3")
 	req.Header.Set("Authorization", "Token "+token)
 
-	// Send the request
+	// Reuse single HTTP client for all requests
 	client := &http.Client{}
 	logTime := time.Now()
 	lastLog := ""
@@ -299,10 +299,10 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			logger.Debug("Error sending request", zap.Error(err))
 			return err
 		}
-		defer resp.Body.Close()
 
 		// Read the response
 		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
 		if err != nil {
 			return err
 		}
@@ -332,7 +332,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			time.Sleep(7 * time.Second)
 			continue
 		case "succeeded":
-			// Create a new HTTP request
+			// Create a new HTTP request for results
 			requestResults, err := http.NewRequest("GET", resultsURL, bytes.NewBuffer([]byte{}))
 			if err != nil {
 				logger.Debug("Error creating request", zap.Error(err))
@@ -344,18 +344,16 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			requestResults.Header.Set("content-type", "application/json; version=3")
 			requestResults.Header.Set("Authorization", "Token "+token)
 
-			// Send the request
-			clientResults := &http.Client{}
-
-			respResults, err := clientResults.Do(requestResults)
+			// Reuse the same client
+			respResults, err := client.Do(requestResults)
 			if err != nil {
 				logger.Debug("Error sending request", zap.Error(err))
 				return err
 			}
-			defer respResults.Body.Close()
 
 			// Read the response
 			body, err := io.ReadAll(respResults.Body)
+			respResults.Body.Close()
 			if err != nil {
 				return err
 			}

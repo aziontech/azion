@@ -22,7 +22,6 @@ import (
 )
 
 var (
-	Jobs    chan contracts.FileOps
 	Retries int64
 )
 
@@ -95,7 +94,7 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 		return err
 	}
 
-	err = CreateZipsInBatches(allFiles)
+	createdZipPaths, err := CreateZipsInBatches(allFiles)
 	if err != nil {
 		return err
 	}
@@ -106,9 +105,22 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 		}
 	}()
 
-	listZip, err := ReadZip()
-	if err != nil {
-		return err
+	// Open the created zip files
+	listZip := make([]contracts.FileOps, 0, len(createdZipPaths))
+	tempDir := os.TempDir()
+	for _, zipPath := range createdZipPaths {
+		f, err := os.Open(zipPath)
+		if err != nil {
+			logger.Debug("Error opening ZIP "+zipPath, zap.Error(err))
+			continue
+		}
+
+		fileString := strings.TrimPrefix(zipPath, tempDir)
+		fileOptions := contracts.FileOps{
+			Path:        fileString,
+			FileContent: f,
+		}
+		listZip = append(listZip, fileOptions)
 	}
 
 	numFiles := len(listZip)
