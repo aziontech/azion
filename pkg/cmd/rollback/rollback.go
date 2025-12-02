@@ -6,19 +6,20 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/rollback"
-	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
+	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
 var (
-	originKey   string
+	connectorID string
 	projectPath string
 )
 
@@ -44,16 +45,16 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion rollback --origin-key aaaa-bbbb-cccc-dddd
+		$ azion rollback --connector-id aaaa-bbbb-cccc-dddd
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			if !cmd.Flags().Changed("origin-key") {
-				answer, err := rollback.AskInput(msg.ASKORIGIN)
+			if !cmd.Flags().Changed("connector-id") {
+				answer, err := rollback.AskInput(msg.ASKCONNECTOR)
 				if err != nil {
 					return err
 				}
-				originKey = answer
+				connectorID = answer
 			}
 
 			conf, err := rollback.GetAzionJsonContent(projectPath)
@@ -71,11 +72,25 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 				return msg.ERRORROLLBACK
 			}
 
-			clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-			request := apiOrigin.UpdateRequest{}
-			request.SetPrefix(timestamp)
+			if timestamp == "" {
+				logger.Debug("No previous timestamp found for rollback")
+				return msg.ERRORNOPREVIOUS
+			}
 
-			_, err = clientOrigin.Update(context.Background(), conf.Application.ID, originKey, &request)
+			logger.Debug("Rolling back to previous timestamp", zap.String("from", conf.Prefix), zap.String("to", timestamp))
+
+			clientConnector := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			request := apiConnector.UpdateRequest{}
+
+			attributes := sdk.ConnectorStorageAttributesRequest{}
+			attributes.SetBucket(conf.Bucket)
+			attributes.SetPrefix(timestamp)
+
+			storageRequest := sdk.PatchedConnectorStorageRequest{}
+			storageRequest.SetAttributes(attributes)
+			request.PatchedConnectorStorageRequest = &storageRequest
+
+			_, err = clientConnector.Update(context.Background(), &request, connectorID)
 			if err != nil {
 				return msg.ERRORROLLBACK
 			}
@@ -95,7 +110,7 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&originKey, "origin-key", "", msg.FLAGORIGINKEY)
+	cobraCmd.Flags().StringVar(&connectorID, "connector-id", "", msg.FLAGCONNECTORID)
 	cobraCmd.Flags().StringVar(&projectPath, "config-dir", "azion", msg.CONFFLAG)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAGHELP)
 
@@ -110,29 +125,38 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 	logger.Debug("Checking if there are previous static files for the following bucket", zap.Any("Bucket name", bucketName))
 	client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 	c := context.Background()
-	options := &contracts.ListOptions{
-		// Sort:     "desc",
-		// OrderBy:  "last_modified",
-		PageSize: 100000,
-	}
-
-	resp, err := client.ListObject(c, bucketName, options)
-	if err != nil {
-		return "", err
-	}
 
 	var prevTimestamp string
-	for _, object := range resp.Results {
-		parts := strings.Split(object.Key, "/")
-		if len(parts) > 1 {
-			timestamp := parts[0]
-			if timestamp == referenceTimestamp {
-				return prevTimestamp, nil
-			} else {
+	var continuationToken string
+
+	for {
+		options := &contracts.ListOptions{
+			ContinuationToken: continuationToken,
+		}
+
+		resp, err := client.ListObject(c, bucketName, options)
+		if err != nil {
+			return "", err
+		}
+
+		for _, object := range resp.Results {
+			parts := strings.Split(object.Key, "/")
+			if len(parts) > 1 {
+				timestamp := parts[0]
+				logger.Debug("Found timestamp in bucket", zap.String("timestamp", timestamp), zap.String("key", object.Key))
+				if timestamp == referenceTimestamp {
+					logger.Debug("Found current timestamp, returning previous", zap.String("current", referenceTimestamp), zap.String("previous", prevTimestamp))
+					return prevTimestamp, nil
+				}
 				prevTimestamp = timestamp
-				continue
 			}
 		}
+
+		logger.Debug("continuing to next page", zap.Any("continuation-token", resp.GetContinuationToken()))
+		if contToken, ok := resp.GetContinuationTokenOk(); contToken == nil || !ok {
+			break
+		}
+		continuationToken = resp.GetContinuationToken()
 	}
 
 	return referenceTimestamp, nil

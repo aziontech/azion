@@ -66,11 +66,12 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		return err
 	}
 
-	if preset == strings.ToLower("vite") {
-		preset = "vue"
+	cmd.preset = strings.ToLower(preset)
+
+	if cmd.preset == "vite" {
+		cmd.preset = "vue"
 	}
 
-	cmd.preset = strings.ToLower(preset)
 	return nil
 }
 

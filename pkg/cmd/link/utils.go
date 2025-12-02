@@ -86,11 +86,9 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return err
 	}
 
-	// The list that comes from Vulcan has a blank line that we should remove.
+	// The list that comes from bundler has a blank line that we should remove.
 	outputInline := strings.Split(output, "\n")
-	noLastItem := len(outputInline) - 1
-	listPresets := make([]string, noLastItem)
-	copy(listPresets, outputInline[:noLastItem])
+	listPresets := outputInline[:len(outputInline)-1]
 
 	prompt := &survey.Select{
 		Message:  "Choose a preset:",

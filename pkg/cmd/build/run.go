@@ -3,6 +3,7 @@ package build
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -22,17 +23,20 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		return msg.ErrorBuilding
 	}
 
-	var vulcanParams string
+	var paramsBuilder strings.Builder
 
 	if fields.Preset != "" {
-		vulcanParams = " --preset " + fields.Preset
+		paramsBuilder.WriteString(" --preset ")
+		paramsBuilder.WriteString(fields.Preset)
 		conf.Preset = fields.Preset
 	} else {
-		vulcanParams = " --preset " + conf.Preset
+		paramsBuilder.WriteString(" --preset ")
+		paramsBuilder.WriteString(conf.Preset)
 	}
 
 	if fields.Entry != "" {
-		vulcanParams += " --entry " + fields.Entry
+		paramsBuilder.WriteString(" --entry ")
+		paramsBuilder.WriteString(fields.Entry)
 	}
 
 	if fields.NodePolyfills != "" {
@@ -40,7 +44,8 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		if err != nil {
 			return fmt.Errorf("%w: %s", msg.ErrorPolyfills, fields.NodePolyfills)
 		}
-		vulcanParams += " --polyfills " + fields.NodePolyfills
+		paramsBuilder.WriteString(" --polyfills ")
+		paramsBuilder.WriteString(fields.NodePolyfills)
 	}
 
 	if fields.OwnWorker != "" {
@@ -48,13 +53,14 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		if err != nil {
 			return fmt.Errorf("%w: %s", msg.ErrorWorker, fields.OwnWorker)
 		}
-		vulcanParams += " --worker " + fields.OwnWorker
+		paramsBuilder.WriteString(" --worker ")
+		paramsBuilder.WriteString(fields.OwnWorker)
 	}
 
 	if fields.SkipFramework {
-		vulcanParams += " --skip-framework-build"
+		paramsBuilder.WriteString(" --skip-framework-build")
 	}
 
 	vul := vulcanPkg.NewVulcan()
-	return b.vulcan(vul, conf, vulcanParams, fields, msgs)
+	return b.vulcan(vul, conf, paramsBuilder.String(), fields, msgs)
 }

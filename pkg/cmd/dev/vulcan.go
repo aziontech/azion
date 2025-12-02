@@ -2,6 +2,7 @@ package dev
 
 import (
 	"fmt"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -11,17 +12,21 @@ import (
 func vulcan(cmd *DevCmd, port int) error {
 
 	vul := cmd.Vulcan()
-	command := vul.Command("", "dev", cmd.F)
+	baseCommand := vul.Command("", "dev", cmd.F)
+
+	var commandBuilder strings.Builder
+	commandBuilder.WriteString(baseCommand)
 
 	if port > 0 {
-		command = fmt.Sprintf("%s --port %d", command, port)
+		commandBuilder.WriteString(" --port ")
+		commandBuilder.WriteString(fmt.Sprintf("%d", port))
 	}
 
 	if SkipFramework {
-		command = fmt.Sprintf("%s --skip-framework-build", command)
+		commandBuilder.WriteString(" --skip-framework-build")
 	}
 
-	err := runCommand(cmd, command)
+	err := runCommand(cmd, commandBuilder.String())
 	if err != nil {
 		return fmt.Errorf(msg.ErrorVulcanExecute.Error(), err.Error())
 	}
