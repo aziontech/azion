@@ -19,9 +19,8 @@ import (
 )
 
 func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
-	request := &apiConnector.UpdateRequest{}
-
 	if connectorRequest.ConnectorHTTPRequest != nil {
+		request := &apiConnector.UpdateRequest{}
 		bodyRequest := connectorRequest.ConnectorHTTPRequest
 		atts := bodyRequest.Attributes
 		body := edgesdk.PatchedConnectorHTTPRequest{}
@@ -41,12 +40,12 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 	}
 
 	if connectorRequest.ConnectorLiveIngestRequest != nil {
+		request := &apiConnector.UpdateRequest{}
 		body := edgesdk.PatchedConnectorLiveIngestRequest{}
 		bodyRequest := connectorRequest.ConnectorLiveIngestRequest
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
-		body.SetType(bodyRequest.Type)
 		body.SetAttributes(bodyRequest.Attributes)
 
 		if bodyRequest.Name != "" {
@@ -61,8 +60,9 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 	}
 
 	if connectorRequest.ConnectorStorageRequest != nil {
-		body := edgesdk.PatchedConnectorStorageRequest{}
+		request := &apiConnector.UpdateRequest{}
 		bodyRequest := connectorRequest.ConnectorStorageRequest
+		body := edgesdk.PatchedConnectorStorageRequest{}
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
@@ -79,7 +79,7 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 		return request
 	}
 
-	return request
+	return &apiConnector.UpdateRequest{}
 }
 
 func transformWorkloadRequestUpdate(createRequest contracts.WorkloadManifest) *apiWorkloads.UpdateRequest {
@@ -190,13 +190,6 @@ func transformEdgeApplicationRequestUpdate(edgeapprequest contracts.Applications
 	if edgeapprequest.Debug != nil {
 		request.SetDebug(*edgeapprequest.Debug)
 	}
-	type Modules struct {
-		EdgeCacheEnabled              bool `json:"edge_cache_enabled"`
-		EdgeFunctionsEnabled          bool `json:"edge_functions_enabled"`
-		ApplicationAcceleratorEnabled bool `json:"application_accelerator_enabled"`
-		ImageProcessorEnabled         bool `json:"image_processor_enabled"`
-		TieredCacheEnabled            bool `json:"tiered_cache_enabled"`
-	}
 	if edgeapprequest.Modules != nil {
 		request.SetModules(*edgeapprequest.Modules)
 	}
@@ -217,33 +210,9 @@ func transformEdgeApplicationRequestCreate(edgeapprequest contracts.Applications
 	if edgeapprequest.Debug != nil {
 		request.SetDebug(*edgeapprequest.Debug)
 	}
-	type Modules struct {
-		EdgeCacheEnabled              bool `json:"edge_cache_enabled"`
-		EdgeFunctionsEnabled          bool `json:"edge_functions_enabled"`
-		ApplicationAcceleratorEnabled bool `json:"application_accelerator_enabled"`
-		ImageProcessorEnabled         bool `json:"image_processor_enabled"`
-		TieredCacheEnabled            bool `json:"tiered_cache_enabled"`
+	if edgeapprequest.Modules != nil {
+		request.SetModules(*edgeapprequest.Modules)
 	}
-	// if edgeapprequest.Modules != nil {
-	// 	modules := edgesdk.EdgeApplicationModulesRequest{}
-	// 	if edgeapprequest.Modules.ApplicationAcceleratorEnabled != nil {
-	// 		modules.SetApplicationAcceleratorEnabled(*edgeapprequest.Modules.ApplicationAcceleratorEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.EdgeCacheEnabled != nil {
-	// 		modules.SetEdgeCacheEnabled(*edgeapprequest.Modules.EdgeCacheEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.EdgeFunctionsEnabled != nil {
-	// 		modules.SetEdgeFunctionsEnabled(*edgeapprequest.Modules.EdgeFunctionsEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.ImageProcessorEnabled != nil {
-	// 		modules.SetImageProcessorEnabled(*edgeapprequest.Modules.ImageProcessorEnabled)
-	// 	}
-	// 	if edgeapprequest.Modules.TieredCacheEnabled != nil {
-	// 		modules.SetTieredCacheEnabled(*edgeapprequest.Modules.TieredCacheEnabled)
-	// 	}
-
-	// 	request.SetModules(modules)
-	// }
 
 	if edgeapprequest.Name != "" {
 		request.SetName(edgeapprequest.Name)
@@ -290,9 +259,6 @@ func transformRuleResponse(rule contracts.ManifestRule) *apiApplications.UpdateR
 	request := &apiApplications.UpdateRulesEngineResponse{}
 
 	request.SetActive(rule.Active)
-	// if rule.Behaviors != nil {
-	// 	request.SetBehaviors(rule.Behaviors)
-	// }
 	if rule.Criteria != nil {
 		request.SetCriteria(rule.Criteria)
 	}
@@ -334,7 +300,7 @@ func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName
 }
 
 func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest, error) {
-	behaviorsRequest := []edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest{}
+	behaviorsRequest := make([]edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest, 0, len(behaviors))
 	for _, behavior := range behaviors {
 		var withArgs edgesdk.ApplicationRequestPhaseBehaviorWithArgsRequest
 		var withoutArgs edgesdk.ApplicationRequestPhaseBehaviorWithoutArgsRequest
@@ -460,7 +426,7 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 }
 
 func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest, error) {
-	behaviorsResponse := []edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest{}
+	behaviorsResponse := make([]edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest, 0, len(behaviors))
 
 	for _, behavior := range behaviors {
 		var withArgs edgesdk.ApplicationResponsePhaseBehaviorWithArgsRequest

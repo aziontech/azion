@@ -14,10 +14,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func CreateZipsInBatches(files []contracts.FileOps) error {
+func CreateZipsInBatches(files []contracts.FileOps) ([]string, error) {
 	const maxBatchSize = 1 * 1024 * 1024 // 1MB em bytes
 	var currentBatch []contracts.FileOps
 	var currentSize int64 = 0
+	var createdZips []string
 	tempDir := os.TempDir()
 
 	batchNumber := 1
@@ -25,16 +26,18 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 	for _, fileOp := range files {
 		info, err := fileOp.FileContent.Stat()
 		if err != nil {
-			return fmt.Errorf("error getting info from file %s: %v", fileOp.Path, err)
+			return nil, fmt.Errorf("error getting info from file %s: %v", fileOp.Path, err)
 		}
 		fileSize := info.Size()
 
 		// Check if adding this file exceeds the maximum batch size
 		if currentSize+fileSize > maxBatchSize && len(currentBatch) > 0 {
 			// Create ZIP for the current batch
-			if err := createZip(currentBatch, tempDir, batchNumber); err != nil {
-				return err
+			zipPath, err := createZip(currentBatch, tempDir, batchNumber)
+			if err != nil {
+				return nil, err
 			}
+			createdZips = append(createdZips, zipPath)
 
 			batchNumber++
 
@@ -50,22 +53,24 @@ func CreateZipsInBatches(files []contracts.FileOps) error {
 
 	// Create ZIP for any remaining files
 	if len(currentBatch) > 0 {
-		if err := createZip(currentBatch, tempDir, batchNumber); err != nil {
-			return err
+		zipPath, err := createZip(currentBatch, tempDir, batchNumber)
+		if err != nil {
+			return nil, err
 		}
+		createdZips = append(createdZips, zipPath)
 	}
 
-	return nil
+	return createdZips, nil
 }
 
-func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error {
+func createZip(batch []contracts.FileOps, destDir string, batchNumber int) (string, error) {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
 	logger.Debug("Creating ZIP file", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
 
 	zipFile, err := os.Create(zipFilePath)
 	if err != nil {
-		return fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
+		return "", fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
 	}
 	defer zipFile.Close()
 
@@ -75,7 +80,7 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error
 	for _, fileOp := range batch {
 		relPath, err := filepath.Rel(destDir, fileOp.Path)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorRelPath, fileOp.Path, err)
+			return "", fmt.Errorf(msg.ErrorRelPath, fileOp.Path, err)
 		}
 
 		// Replace directory separators for ZIP compatibility
@@ -84,21 +89,25 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) error
 		// Add a file to the ZIP with the relative path
 		writer, err := zipWriter.Create(zipPath)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorCreateZip, zipPath, err)
+			return "", fmt.Errorf(msg.ErrorCreateZip, zipPath, err)
 		}
 
 		if _, err := fileOp.FileContent.Seek(0, io.SeekStart); err != nil {
-			return fmt.Errorf(msg.ErrorResetPointFile, fileOp.Path, err)
+			return "", fmt.Errorf(msg.ErrorResetPointFile, fileOp.Path, err)
 		}
 
 		_, err = io.Copy(writer, fileOp.FileContent)
 		if err != nil {
-			return fmt.Errorf(msg.ErrorCopyContentFile, fileOp.Path, err)
+			return "", fmt.Errorf(msg.ErrorCopyContentFile, fileOp.Path, err)
 		}
 	}
 
 	logger.Debug("Create ZIP file successfully", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
-	return nil
+	return zipFilePath, nil
+}
+
+func isBatchZipFile(name string) bool {
+	return strings.ToLower(filepath.Ext(name)) == ".zip" && strings.HasPrefix(name, "batch")
 }
 
 func ReadZip() ([]contracts.FileOps, error) {
@@ -112,8 +121,7 @@ func ReadZip() ([]contracts.FileOps, error) {
 	}
 
 	for _, f := range files {
-		if strings.ToLower(filepath.Ext(f.Name())) == ".zip" &&
-			strings.HasPrefix(f.Name(), "batch") {
+		if isBatchZipFile(f.Name()) {
 			pathZIP := filepath.Join(tempDir, f.Name())
 			logger.Debug("Processing ZIP file " + pathZIP)
 
@@ -149,8 +157,7 @@ func CleanupZipFiles() error {
 
 	var cleanupErrors []error
 	for _, f := range files {
-		if strings.ToLower(filepath.Ext(f.Name())) == ".zip" &&
-			strings.HasPrefix(f.Name(), "batch") {
+		if isBatchZipFile(f.Name()) {
 			zipPath := filepath.Join(tempDir, f.Name())
 			logger.Debug("Removing temporary ZIP file", zap.String("path", zipPath))
 
