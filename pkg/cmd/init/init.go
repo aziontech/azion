@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path"
@@ -232,9 +231,8 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	// Defer deletion of the temporary directory
 	defer func() {
-		err := cmd.removeAll(tempDir)
-		if err != nil {
-			log.Fatal(err)
+		if cleanupErr := cmd.removeAll(tempDir); cleanupErr != nil {
+			logger.Debug("Failed to cleanup temporary directory", zap.Error(cleanupErr))
 		}
 	}()
 
