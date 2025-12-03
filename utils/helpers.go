@@ -571,10 +571,8 @@ func checkStatusCode400Error(httpResp *http.Response) error {
 		return err
 	}
 
-	result := strings.ReplaceAll(string(responseBody), "{", "")
-	result = strings.ReplaceAll(result, "}", "")
-	result = strings.ReplaceAll(result, "[", "")
-	result = strings.ReplaceAll(result, "]", "")
+	replacer := strings.NewReplacer("{", "", "}", "", "[", "", "]", "")
+	result := replacer.Replace(string(responseBody))
 
 	return fmt.Errorf("%s", result)
 }
@@ -850,8 +848,8 @@ func Select(prompter Prompter) (string, error) {
 
 func Concat(strs ...string) string {
 	var sb strings.Builder
-	for i := 0; i < len(strs); i++ {
-		sb.WriteString(strs[i])
+	for _, str := range strs {
+		sb.WriteString(str)
 	}
 	return sb.String()
 }

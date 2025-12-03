@@ -34,10 +34,6 @@ type Release struct {
 	PublishedAt string `json:"published_at"`
 }
 
-var (
-	ApiURL string
-)
-
 func NewGithub() *Github {
 	return &Github{
 		GetVersionGitHub:  getVersionGitHub,
@@ -51,9 +47,9 @@ func NewGithub() *Github {
 }
 
 func getVersionGitHub(name string) (string, string, error) {
-	ApiURL = fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
+	apiURL := fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
 
-	response, err := http.Get(ApiURL)
+	response, err := http.Get(apiURL)
 	if err != nil {
 		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
 		return "", "", err
@@ -136,8 +132,7 @@ func writeGitignore(path string) error {
 	writer := bufio.NewWriter(file)
 
 	for _, line := range linesToAdd {
-		_, err := writer.WriteString(line + "\n")
-		if err != nil {
+		if _, err := fmt.Fprintln(writer, line); err != nil {
 			logger.Error("Error writing to .gitignore file", zap.Error(err))
 			return err
 		}

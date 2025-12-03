@@ -13,11 +13,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var jsonTemplate = `{
-  "scope": "global",
-  "preset": "%s"
-}`
-
 func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 	var userInput string
 	prompt := &survey.Input{

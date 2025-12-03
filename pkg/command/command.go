@@ -68,7 +68,7 @@ func CommandRunInteractive(f *cmdutil.Factory, comm string) error {
 	return cmd.Run()
 }
 
-// RunCommandStreamOutput executes the provived command while streaming its logs (stdout+stderr) directly to terminal
+// RunCommandStreamOutput executes the provided command while streaming its logs (stdout+stderr) directly to terminal
 func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error {
 	command := exec.Command(SHELL, "-c", comm)
 	if len(envVars) > 0 {
@@ -97,7 +97,7 @@ func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error 
 	in := bufio.NewScanner(multi)
 
 	for in.Scan() {
-		fmt.Fprintf(out, "%s\n", in.Text())
+		fmt.Fprintln(out, in.Text())
 	}
 	if err := in.Err(); err != nil {
 		return fmt.Errorf(utils.ErrorRunningCommandStream.Error(), err)

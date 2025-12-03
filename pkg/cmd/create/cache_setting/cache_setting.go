@@ -27,7 +27,6 @@ type Fields struct {
 	Name                    string
 	browserCacheBehavior    string
 	browserCacheMaxAge      int64
-	adaptiveDeliveryAction  string
 	cacheByQueryString      string
 	queryStringFields       []string
 	cacheByCookies          string
