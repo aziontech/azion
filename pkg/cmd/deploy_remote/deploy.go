@@ -157,16 +157,19 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	interpreter := cmd.Interpreter()
 
 	if !SkipBuild && conf.NotFirstRun {
-		conf.Prefix = newprefix
-		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
-		vul := vulcanPkg.NewVulcan()
-		command := vul.Command("", cmdStr, cmd.F)
-		logger.Debug("Running the following command", zap.Any("Command", command))
+		if !SkipFramework {
+			conf.Prefix = newprefix
+			cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+			vul := vulcanPkg.NewVulcan()
+			command := vul.Command("", cmdStr, cmd.F)
+			logger.Debug("Running the following command", zap.Any("Command", command))
 
-		err := cmd.commandRunInteractive(cmd.F, command)
-		if err != nil {
-			return err
+			err := cmd.commandRunInteractive(cmd.F, command)
+			if err != nil {
+				return err
+			}
 		}
+
 		buildCmd := cmd.BuildCmd(f)
 		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
