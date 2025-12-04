@@ -3,7 +3,6 @@ package metric
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -24,6 +23,11 @@ type command struct {
 	Shell         string
 }
 
+var ignoredCommands = map[string]bool{
+	"__complete": true,
+	"completion": true,
+}
+
 func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string) error {
 	if commandName == "" {
 		return nil
@@ -38,12 +42,8 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 	if profile != "" {
 		dir.Dir = filepath.Join(dir.Dir, profile)
 	}
-	ignoredWords := map[string]bool{
-		"__complete": true,
-		"completion": true,
-	}
 
-	if ignoredWords[commandName] {
+	if ignoredCommands[commandName] {
 		return nil
 	}
 
@@ -110,7 +110,7 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 
 	// Encode and write the updated map back to the file
 	if err := json.NewEncoder(file).Encode(data); err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

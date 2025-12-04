@@ -16,15 +16,15 @@ type GeneralOutput struct {
 }
 
 func (g *GeneralOutput) Format() (bool, error) {
-	formated := false
+	formatted := false
 	if len(g.Flags.Format) > 0 || len(g.Flags.Out) > 0 {
-		formated = true
+		formatted = true
 		err := format(g, *g)
 		if err != nil {
-			return formated, err
+			return formatted, err
 		}
 	}
-	return formated, nil
+	return formatted, nil
 }
 
 func (g *GeneralOutput) Output() {

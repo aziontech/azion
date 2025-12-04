@@ -53,10 +53,6 @@ func TestGetVersionGitHub(t *testing.T) {
 			}))
 			defer server.Close()
 
-			oldURL := ApiURL
-			ApiURL = server.URL + "/repos/aziontech/%s/releases/tag/1.30.0"
-			defer func() { ApiURL = oldURL }()
-
 			gh := NewGithub()
 			gh.GetVersionGitHub = func(name string) (string, string, error) {
 				return tt.wantTag, "2025-09-12T19:15:10Z", nil

@@ -46,7 +46,7 @@ func RunCommandStreamOutput(out io.Writer, envVars []string, comm string) error 
 	in := bufio.NewScanner(multi)
 
 	for in.Scan() {
-		fmt.Fprintf(out, "%s\n", in.Text())
+		fmt.Fprintln(out, in.Text())
 	}
 
 	// Check for scanning errors

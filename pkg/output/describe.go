@@ -18,15 +18,15 @@ type DescribeOutput struct {
 }
 
 func (d *DescribeOutput) Format() (bool, error) {
-	formated := false
+	formatted := false
 	if len(d.Flags.Format) > 0 || len(d.Flags.Out) > 0 {
-		formated = true
+		formatted = true
 		err := format(d.Values, d.GeneralOutput)
 		if err != nil {
-			return formated, err
+			return formatted, err
 		}
 	}
-	return formated, nil
+	return formatted, nil
 }
 
 func (c *DescribeOutput) Output() {
@@ -75,15 +75,19 @@ func (c *DescribeOutput) Output() {
 
 func checkPrimitiveType(value any) any {
 	valueType := reflect.TypeOf(value)
-	if valueType != nil && (valueType.Kind() == reflect.Int || valueType.Kind() == reflect.String ||
-		valueType.Kind() == reflect.Bool || valueType.Kind() == reflect.Float32 ||
-		valueType.Kind() == reflect.Float64 || valueType.Kind() == reflect.Uint ||
-		valueType.Kind() == reflect.Uint8 || valueType.Kind() == reflect.Uint16 ||
-		valueType.Kind() == reflect.Uint32 || valueType.Kind() == reflect.Uint64 ||
-		valueType.Kind() == reflect.Int8 || valueType.Kind() == reflect.Int16 ||
-		valueType.Kind() == reflect.Int32 || valueType.Kind() == reflect.Int64) {
-		return value
+	if valueType == nil {
+		jsonValue, _ := json.Marshal(value)
+		return string(jsonValue)
 	}
-	jsonValue, _ := json.Marshal(value)
-	return string(jsonValue)
+
+	switch valueType.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64,
+		reflect.Bool, reflect.String:
+		return value
+	default:
+		jsonValue, _ := json.Marshal(value)
+		return string(jsonValue)
+	}
 }

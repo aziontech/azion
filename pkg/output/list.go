@@ -15,15 +15,15 @@ type ListOutput struct {
 }
 
 func (l *ListOutput) Format() (bool, error) {
-	formated := false
+	formatted := false
 	if len(l.Flags.Format) > 0 || len(l.Flags.Out) > 0 {
-		formated = true
+		formatted = true
 		err := format(l, l.GeneralOutput)
 		if err != nil {
-			return formated, err
+			return formatted, err
 		}
 	}
-	return formated, nil
+	return formatted, nil
 }
 
 func (c *ListOutput) Output() {

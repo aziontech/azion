@@ -6,12 +6,12 @@ type SliceOutput struct {
 }
 
 func (i *SliceOutput) Format() (bool, error) {
-	formated := false
+	formatted := false
 	if len(i.Flags.Format) > 0 || len(i.Flags.Out) > 0 {
-		formated = true
+		formatted = true
 		err := format(i, i.GeneralOutput)
 		if err != nil {
-			return formated, err
+			return formatted, err
 		}
 	}
 	return true, nil

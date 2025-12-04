@@ -25,11 +25,6 @@ func format(v any, g GeneralOutput) error {
 	var err error
 
 	switch g.Flags.Format {
-	case JSON:
-		b, err = json.MarshalIndent(v, "", " ")
-		if err != nil {
-			return err
-		}
 	case YAML, YML:
 		b, err = yaml.Marshal(v)
 		if err != nil {
@@ -40,6 +35,8 @@ func format(v any, g GeneralOutput) error {
 		if err != nil {
 			return err
 		}
+	case JSON:
+		fallthrough
 	default:
 		b, err = json.MarshalIndent(v, "", " ")
 		if err != nil {
