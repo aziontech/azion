@@ -27,6 +27,7 @@ import (
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
 	"github.com/spf13/cobra"
+	"github.com/tidwall/gjson"
 	"go.uber.org/zap"
 )
 
@@ -198,9 +199,22 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		}
 
 		if info.Preset == "" {
-			err = cmd.selectVulcanMode(info)
-			if err != nil {
-				return err
+			infoJsonPath := filepath.Join(info.PathWorkingDir, "info.json")
+			if fileContent, err := cmd.FileReader(infoJsonPath); err == nil {
+				preset := gjson.Get(string(fileContent), "preset")
+				if preset.Exists() && preset.String() != "" {
+					info.Preset = preset.String()
+					logger.Debug("Preset loaded from info.json", zap.String("preset", info.Preset))
+					logger.FInfoFlags(cmd.Io.Out, fmt.Sprintf(msg.PresetAutoDetected, info.Preset), cmd.F.Format, cmd.F.Out)
+					msgs = append(msgs, fmt.Sprintf(msg.PresetAutoDetected, info.Preset))
+				}
+			}
+
+			if info.Preset == "" {
+				err = cmd.selectVulcanMode(info)
+				if err != nil {
+					return err
+				}
 			}
 		}
 

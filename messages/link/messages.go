@@ -35,6 +35,7 @@ var (
 	AskWorkflow                           = "Would you like to add a GitHub Actions workflow for automated deployment? (Y/n)"
 	WrittenWorkflow                       = "Successfully created GitHub Actions workflow file at .github/workflows/azion-deploy.yml\n"
 	SkipFrameworkBuild                    = "Indicates whether to bypass the framework build phase before executing 'azion build'"
+	PresetAutoDetected                    = "Preset '%s' automatically detected from info.json\n"
 )
 
 const (
