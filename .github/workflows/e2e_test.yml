@@ -19,6 +19,42 @@ jobs:
       CGO_ENABLED: 0 # Statically linked
 
     steps:
+      - name: Check for E2E_TOKEN secret
+        id: check_secret
+        run: |
+          if [ -z "${{ secrets.E2E_TOKEN }}" ]; then
+            echo "secret_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "secret_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add skip-e2e label if E2E_TOKEN is missing
+        if: steps.check_secret.outputs.secret_exists == 'false'
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: |
+            skip-e2e
+
+      - name: Comment on PR if E2E_TOKEN is missing
+        if: steps.check_secret.outputs.secret_exists == 'false'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ⚠️ **E2E Tests Skipped**
+
+            The E2E tests were skipped because the `E2E_TOKEN` secret is not configured in this repository. The `skip-e2e` label has been added to prevent future E2E test runs on this PR.
+
+            To enable E2E tests, please:
+            1. Go to your repository Settings → Secrets and variables → Actions
+            2. Add a new repository secret named `E2E_TOKEN`
+            3. Set the value to a valid Azion personal token
+            4. Remove the `skip-e2e` label from this PR
+
+            Once configured, the E2E tests will run automatically on future pull requests.
+
       - name: Setting GIT
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
