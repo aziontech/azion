@@ -26,7 +26,7 @@ type Fields struct {
 	Active        string `json:"active"`
 	Args          string `json:"args"`
 	Path          string
-	ApplicationID string
+	ApplicationID int64
 	FunctionID    int64
 }
 
@@ -52,7 +52,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				fields.ApplicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+
+				fields.ApplicationID = num
 			}
 			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
@@ -131,7 +137,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	flags.StringVar(&fields.Active, "active", "true", msg.FlagIsActive)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.StringVar(&fields.Args, "args", "", msg.FlagArgs)
-	flags.StringVar(&fields.ApplicationID, "application-id", "", msg.FlagApplicationID)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagApplicationID)
 	flags.Int64Var(&fields.FunctionID, "function-id", 0, msg.FlagFunctionID)
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	return cmd

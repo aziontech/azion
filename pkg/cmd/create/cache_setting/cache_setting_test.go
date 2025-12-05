@@ -21,12 +21,12 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635841"),
+			httpmock.REST("GET", "workspace/applications/1673635841"),
 			httpmock.JSONFromFile("./fixtures/app_result.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications/1673635841/cache_settings"),
+			httpmock.REST("POST", "workspace/applications/1673635841/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -52,12 +52,12 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635841"),
+			httpmock.REST("GET", "workspace/applications/1673635841"),
 			httpmock.JSONFromFile("./fixtures/app_result.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications/1673635841/cache_settings"),
+			httpmock.REST("POST", "workspace/applications/1673635841/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 
@@ -78,12 +78,12 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635841"),
+			httpmock.REST("GET", "workspace/applications/1673635841"),
 			httpmock.JSONFromFile("./fixtures/app_result.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications/1673635841/cache_settings"),
+			httpmock.REST("POST", "workspace/applications/1673635841/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/result.json"),
 		)
 

@@ -12,7 +12,7 @@ import (
 
 // CreateCacheSettingsNextApplication this function creates the necessary Cache Settings for next applications
 // to work correctly on the edge
-func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationID string) (sdk.CacheSetting, error) {
+func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *CreateCacheSettingsRequest, applicationID int64) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache Settings Next Application")
 
 	BCache := sdk.BrowserCacheModuleRequest{}
@@ -38,7 +38,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 }
 
 func (c *Client) CreateCacheEdgeApplication(
-	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID string,
+	ctx context.Context, req *CreateCacheSettingsRequest, edgeApplicationID int64,
 ) (sdk.CacheSetting, error) {
 	logger.Debug("Create Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
@@ -59,7 +59,7 @@ func (c *Client) CreateCacheEdgeApplication(
 }
 
 func (c *Client) ListCacheEdgeApp(
-	ctx context.Context, edgeApplicationID string,
+	ctx context.Context, edgeApplicationID int64,
 ) ([]sdk.ResponseListCacheSetting, error) {
 	logger.Debug("List Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.

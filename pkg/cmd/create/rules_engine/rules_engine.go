@@ -3,6 +3,7 @@ package rules_engine
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -18,7 +19,7 @@ import (
 )
 
 type Fields struct {
-	ApplicationID string
+	ApplicationID int64
 	Phase         string
 	Path          string
 }
@@ -42,7 +43,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				fields.ApplicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+
+				fields.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("file") {
@@ -107,7 +114,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&fields.ApplicationID, "application-id", "", msg.FlagEdgeApplicationID)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
 	flags.StringVar(&fields.Phase, "phase", "", msg.FlagPhase)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.HelpFlag)

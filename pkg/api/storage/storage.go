@@ -97,7 +97,7 @@ func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess strin
 func (c *Client) CreateObject(ctx context.Context, fileOps *contracts.FileOps, bucketName, objectKey string) error {
 	logger.Debug("Creating object")
 	c.apiClient.GetConfig().DefaultHeader["Content-Type"] = fileOps.MimeType
-	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucketName, objectKey).Body(fileOps.FileContent) //.ContentType(fileOps.MimeType)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -121,7 +121,7 @@ func (c *Client) Upload(ctx context.Context, fileOps *contracts.FileOps, conf *c
 		file = fmt.Sprintf("%s%s", conf.Prefix, fileOps.Path)
 	}
 	logger.Debug("Object_key: " + file)
-	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent).ContentType(fileOps.MimeType)
+	req := c.apiClient.StorageObjectsAPI.CreateObjectKey(ctx, bucket, file).Body(fileOps.FileContent) //.ContentType(fileOps.MimeType)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {

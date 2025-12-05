@@ -14,5 +14,5 @@ var (
 	ErrorStructCriteriaNil      = errors.New("You must inform a criteria")
 	ErrorStructBehaviorsNil     = errors.New("You must inform a behavior")
 	ErrorMandatoryCreateFlags   = errors.New("Required flags are missing. You must provide the --application-id and --phase flags when the --application-id and --in flags are not provided. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorConvertIdApplication   = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list application' command to check your application ID")
+	ErrorConvertApplicationId   = errors.New("Invalid --application-id flag provided. The value must be an integer. Run the command 'azion create rules-engine --help' to display more information and try again")
 )

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.ConnectorPolymorphic, error) {
+func (c *Client) Get(ctx context.Context, id int64) (sdk.ConnectorPolymorphic, error) {
 	logger.Debug("Get Connector")
 	request := c.apiClient.ConnectorsAPI.RetrieveConnector(ctx, id)
 
@@ -30,9 +30,9 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.ConnectorPolymorphic, 
 	return res.Data, nil
 }
 
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Connector")
-	request := c.apiClient.ConnectorsAPI.DestroyConnector(ctx, id)
+	request := c.apiClient.ConnectorsAPI.DeleteConnector(ctx, id)
 
 	_, httpResp, err := request.Execute()
 
@@ -72,7 +72,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.ConnectorP
 	return response.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.ConnectorPolymorphic, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.ConnectorPolymorphic, error) {
 	logger.Debug("Update Connector")
 	request := c.apiClient.ConnectorsAPI.PartialUpdateConnector(ctx, id).PatchedConnectorPolymorphicRequest(req.PatchedConnectorPolymorphicRequest)
 

@@ -99,11 +99,11 @@ func TestSyncFull(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/request/rules"),
+			httpmock.REST("GET", "workspace/applications/1000000/request/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/request/rules/"),
+			httpmock.REST("GET", "workspace/applications/1000000/request/rules/"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
@@ -112,11 +112,11 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/response/rules"),
+			httpmock.REST("GET", "workspace/applications/1000000/response/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/response/rules/"),
+			httpmock.REST("GET", "workspace/applications/1000000/response/rules/"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
@@ -125,16 +125,16 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1000000/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings/"),
+			httpmock.REST("GET", "workspace/applications/1000000/cache_settings/"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/origins"),
+			httpmock.REST("GET", "workspace/applications/1000000/origins"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 
@@ -179,11 +179,11 @@ func TestSyncFull(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/request/rules"),
+			httpmock.REST("GET", "workspace/applications/1000000/request/rules"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/request/rules/"),
+			httpmock.REST("GET", "workspace/applications/1000000/request/rules/"),
 			httpmock.JSONFromFile("./fixtures/rules.json"),
 		)
 		mock.Register(
@@ -192,7 +192,7 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/response/rules"),
+			httpmock.REST("GET", "workspace/applications/1000000/response/rules"),
 			httpmock.JSONFromFile("./fixtures/rules_results.json"),
 		)
 		mock.Register(
@@ -201,20 +201,20 @@ func TestSyncFull(t *testing.T) {
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1000000/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/cache_settings/"),
+			httpmock.REST("GET", "workspace/applications/1000000/cache_settings/"),
 			httpmock.JSONFromFile("./fixtures/cache.json"),
 		)
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/origins"),
+			httpmock.REST("GET", "workspace/applications/1000000/origins"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1000000/origins/"),
+			httpmock.REST("GET", "workspace/applications/1000000/origins/"),
 			httpmock.JSONFromFile("./fixtures/origins.json"),
 		)
 

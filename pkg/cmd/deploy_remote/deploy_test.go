@@ -64,7 +64,7 @@ func TestDeployCmd(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications"),
+			httpmock.REST("POST", "workspace/applications"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, "Invalid"),
 		)
 
@@ -90,17 +90,17 @@ func TestDeployCmd(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications"),
+			httpmock.REST("POST", "workspace/applications"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		mock.Register(
-			httpmock.REST("PATCH", "edge_application/applications/1697666970"),
+			httpmock.REST("PATCH", "workspace/applications/1697666970"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 
 		mock.Register(
-			httpmock.REST("POST", "edge_application/applications/1697666970/functions"),
+			httpmock.REST("POST", "workspace/applications/1697666970/functions"),
 			httpmock.JSONFromString(successResponseApp),
 		)
 

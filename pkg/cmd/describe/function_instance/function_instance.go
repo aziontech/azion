@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/function_instance"
@@ -11,21 +12,23 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
-	applicationID string
-	instanceID    string
+	applicationID int64
+	instanceID    int64
 )
 
 type DescribeCmd struct {
 	Io                  *iostreams.IOStreams
 	AskInput            func(string) (string, error)
-	GetFunctionInstance func(ctx context.Context, applicationId, instanceId string) (sdk.ApplicationFunctionInstance, error)
+	GetFunctionInstance func(ctx context.Context, applicationId, instanceId int64) (sdk.ApplicationFunctionInstance, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -34,7 +37,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		GetFunctionInstance: func(ctx context.Context, applicationId, instanceId string) (sdk.ApplicationFunctionInstance, error) {
+		GetFunctionInstance: func(ctx context.Context, applicationId, instanceId int64) (sdk.ApplicationFunctionInstance, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, applicationId, instanceId)
 		},
@@ -61,7 +64,13 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				applicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+
+				applicationID = num
 			}
 
 			if !cmd.Flags().Changed("instance-id") {
@@ -70,7 +79,13 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				instanceID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertFunctionInstanceId
+				}
+
+				instanceID = num
 			}
 
 			ctx := context.Background()
@@ -99,8 +114,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagApplicationID)
-	cobraCmd.Flags().StringVar(&instanceID, "instance-id", "", msg.FlagFunctionInstanceID)
+	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
+	cobraCmd.Flags().Int64Var(&instanceID, "instance-id", 0, msg.FlagFunctionInstanceID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

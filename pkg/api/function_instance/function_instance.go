@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
 
 	logger.Debug("List Function Instances")
 
@@ -35,7 +35,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 	return resp, nil
 }
 
-func (c *Client) Get(ctx context.Context, edgeApplicationID, functionInstanceID string) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) Get(ctx context.Context, edgeApplicationID, functionInstanceID int64) (sdk.ApplicationFunctionInstance, error) {
 
 	logger.Debug("Get Function Instance")
 	req := c.apiClient.ApplicationsFunctionAPI.RetrieveApplicationFunctionInstance(ctx, edgeApplicationID, functionInstanceID)
@@ -56,9 +56,9 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID, functionInstanceID 
 	return resp.Data, nil
 }
 
-func (c *Client) Delete(ctx context.Context, edgeApplicationID, functionInstanceID string) error {
+func (c *Client) Delete(ctx context.Context, edgeApplicationID, functionInstanceID int64) error {
 	logger.Debug("Delete Function Instance")
-	req := c.apiClient.ApplicationsFunctionAPI.DestroyApplicationFunctionInstance(ctx, edgeApplicationID, functionInstanceID)
+	req := c.apiClient.ApplicationsFunctionAPI.DeleteApplicationFunctionInstance(ctx, edgeApplicationID, functionInstanceID)
 	_, httpResp, err := req.Execute()
 
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *Client) Delete(ctx context.Context, edgeApplicationID, functionInstance
 	return nil
 }
 
-func (c *Client) Create(ctx context.Context, edgeApplicationID string, req sdk.ApplicationFunctionInstanceRequest) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) Create(ctx context.Context, edgeApplicationID int64, req sdk.ApplicationFunctionInstanceRequest) (sdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Create Function Instance")
 	request := c.apiClient.ApplicationsFunctionAPI.CreateApplicationFunctionInstance(ctx, edgeApplicationID).ApplicationFunctionInstanceRequest(req)
 	resp, httpResp, err := request.Execute()
@@ -96,7 +96,7 @@ func (c *Client) Create(ctx context.Context, edgeApplicationID string, req sdk.A
 	return resp.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, edgeApplicationID, instanceID string, req sdk.PatchedApplicationFunctionInstanceRequest) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) Update(ctx context.Context, edgeApplicationID, instanceID int64, req sdk.PatchedApplicationFunctionInstanceRequest) (sdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Update Function Instance")
 	request := c.apiClient.ApplicationsFunctionAPI.PartialUpdateApplicationFunctionInstance(ctx, edgeApplicationID, instanceID).PatchedApplicationFunctionInstanceRequest(req)
 	resp, httpResp, err := request.Execute()

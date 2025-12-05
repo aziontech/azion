@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) {
+func (c *Client) Get(ctx context.Context, id int64) (sdk.EdgeFunctions, error) {
 	logger.Debug("Get Function")
 	request := c.apiClient.FunctionsAPI.RetrieveFunction(ctx, id)
 
@@ -30,9 +30,9 @@ func (c *Client) Get(ctx context.Context, id string) (sdk.EdgeFunctions, error) 
 	return res.Data, nil
 }
 
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Function")
-	request := c.apiClient.FunctionsAPI.DestroyFunction(ctx, id)
+	request := c.apiClient.FunctionsAPI.DeleteFunction(ctx, id)
 
 	_, httpResp, err := request.Execute()
 
@@ -74,7 +74,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.EdgeFunctions, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.EdgeFunctions, error) {
 	logger.Debug("Update Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
 	request := c.apiClient.FunctionsAPI.PartialUpdateFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
 

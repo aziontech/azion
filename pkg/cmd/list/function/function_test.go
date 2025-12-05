@@ -23,7 +23,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions/functions"),
+			httpmock.REST("GET", "workspace/functions"),
 			httpmock.JSONFromFile("./fixtures/functions.json"),
 		)
 
@@ -42,7 +42,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions/functions"),
+			httpmock.REST("GET", "workspace/functions"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -60,7 +60,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_functions/functions"),
+			httpmock.REST("GET", "workspace/functions"),
 			httpmock.JSONFromFile("./fixtures/nofunction.json"),
 		)
 

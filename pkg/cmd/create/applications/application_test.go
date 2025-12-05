@@ -29,7 +29,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("POST", "edge_application/applications"),
+					httpmock.REST("POST", "workspace/applications"),
 					httpmock.JSONFromFile("./fixtures/response.json"),
 				)
 				return &mock
@@ -42,7 +42,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("POST", "edge_application/applications"),
+					httpmock.REST("POST", "workspace/applications"),
 					httpmock.JSONFromString("{}"),
 				)
 				return &mock
@@ -58,8 +58,14 @@ func TestNewCmd(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			_, err := cmd.ExecuteC()
 
-			if err != nil && !(err.Error() == tt.err.Error()) {
-				t.Errorf("Executec() err = %v, \nexpected %v", err, tt.args)
+			if tt.err != nil {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				} else if err.Error() != tt.err.Error() {
+					t.Errorf("Executec() err = %v, \nexpected %v", err, tt.err)
+				}
+			} else if err != nil {
+				t.Errorf("Unexpected error: %v", err)
 			}
 
 			assert.Equal(t, tt.output, out.String())

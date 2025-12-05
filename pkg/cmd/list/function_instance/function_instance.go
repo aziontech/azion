@@ -3,8 +3,10 @@ package functioninstance
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 
@@ -15,16 +17,17 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
-	ApplicationID string
+	ApplicationID int64
 )
 
 type ListCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
-	ListInstances func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationFunctionInstanceList, error)
+	ListInstances func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -33,7 +36,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListInstances: func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
+		ListInstances: func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts, edgeApplicationID)
 		},
@@ -62,7 +65,13 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				ApplicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+
+				ApplicationID = num
 			}
 
 			if err := PrintTable(cmd, list, f, opts); err != nil {
@@ -74,7 +83,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolP("help", "h", false, msg.HelpFlag)
-	flags.StringVar(&ApplicationID, "application-id", "", msg.ApplicationIdFlag)
+	flags.Int64Var(&ApplicationID, "application-id", 0, msg.ApplicationIdFlag)
 	cmdutil.AddAzionApiFlags(cmd, opts)
 
 	return cmd

@@ -20,7 +20,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 
@@ -36,7 +36,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1673635839/cache_settings"),
 			httpmock.StatusStringResponse(404, "Not Found"),
 		)
 
@@ -54,7 +54,7 @@ func TestList(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/nocaches.json"),
 		)
 
@@ -77,7 +77,7 @@ func TestList(t *testing.T) {
 		}
 
 		mock.Register(
-			httpmock.REST("GET", "edge_application/applications/1673635839/cache_settings"),
+			httpmock.REST("GET", "workspace/applications/1673635839/cache_settings"),
 			httpmock.JSONFromFile("./fixtures/caches.json"),
 		)
 

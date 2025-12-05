@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
@@ -11,10 +12,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var phase string
@@ -22,10 +25,10 @@ var phase string
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
-	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error)
-	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, string) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error)
+	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error)
+	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error)
 	AskInput                func(string) (string, error)
-	EdgeApplicationID       string
+	EdgeApplicationID       int64
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -34,11 +37,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineRequest(ctx, opts, appID)
 		},
-		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID string) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
+		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineResponse(ctx, opts, appID)
 		},
@@ -67,7 +70,13 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				list.EdgeApplicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdApplication
+				}
+
+				list.EdgeApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -87,7 +96,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().StringVar(&list.EdgeApplicationID, "application-id", "", msg.ApplicationFlagId)
+	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
 	cmd.Flags().StringVar(&phase, "phase", "request", msg.RulesEnginePhase)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
 

@@ -26,7 +26,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications"),
+					httpmock.REST("GET", "workspace/applications"),
 					httpmock.JSONFromFile("./fixtures/response.json"),
 				)
 				return &mock
@@ -38,7 +38,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications"),
+					httpmock.REST("GET", "workspace/applications"),
 					httpmock.JSONFromFile("./fixtures/no_items.json"),
 				)
 				return &mock
@@ -50,7 +50,7 @@ func TestNewCmd(t *testing.T) {
 			mock: func() *httpmock.Registry {
 				mock := httpmock.Registry{}
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications"),
+					httpmock.REST("GET", "workspace/applications"),
 					httpmock.JSONFromString("{'name': 'some name',}"),
 				)
 				return &mock
@@ -66,8 +66,14 @@ func TestNewCmd(t *testing.T) {
 			cmd.SetArgs(tt.args)
 			_, err := cmd.ExecuteC()
 
-			if err != nil && !(err.Error() == tt.err.Error()) {
-				t.Errorf("Executec() err = %v, \nexpected %v", err, tt.args)
+			if tt.err != nil {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				} else if err.Error() != tt.err.Error() {
+					t.Errorf("Executec() err = %v, \nexpected %v", err, tt.err)
+				}
+			} else if err != nil {
+				t.Errorf("Unexpected error: %v", err)
 			}
 		})
 	}

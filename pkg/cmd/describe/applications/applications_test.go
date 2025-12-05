@@ -23,21 +23,21 @@ func TestDescribe(t *testing.T) {
 	}{
 		{
 			name:      "describe an application",
-			request:   httpmock.REST("GET", "edge_application/applications/1232132135"),
+			request:   httpmock.REST("GET", "workspace/applications/1232132135"),
 			response:  httpmock.JSONFromFile("./fixtures/response.json"),
 			args:      []string{"--application-id", "1232132135"},
 			expectErr: false,
 		},
 		{
 			name:      "not found",
-			request:   httpmock.REST("GET", "edge_application/applications/1234"),
+			request:   httpmock.REST("GET", "workspace/applications/1234"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{"--application-id", "1234"},
 			expectErr: true,
 		},
 		{
 			name:      "no id sent",
-			request:   httpmock.REST("GET", "edge_application/applications/1234"),
+			request:   httpmock.REST("GET", "workspace/applications/1234"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{},
 			expectErr: true,

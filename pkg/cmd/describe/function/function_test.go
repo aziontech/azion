@@ -46,14 +46,14 @@ func TestDescribe(t *testing.T) {
 	}{
 		{
 			name:      "describe a function",
-			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
+			request:   httpmock.REST("GET", "workspace/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
 			args:      []string{"--function-id", "1337"},
 			expectErr: false,
 		},
 		{
 			name:      "describe a function - no function id",
-			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
+			request:   httpmock.REST("GET", "workspace/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
 			expectErr: false,
 			mockInput: func(s string) (string, error) {
@@ -62,14 +62,14 @@ func TestDescribe(t *testing.T) {
 		},
 		{
 			name:      "with code",
-			request:   httpmock.REST("GET", "edge_functions/functions/1337"),
+			request:   httpmock.REST("GET", "workspace/functions/1337"),
 			response:  httpmock.JSONFromString(successResponse),
 			args:      []string{"--function-id", "1337", "--with-code"},
 			expectErr: false,
 		},
 		{
 			name:      "not found",
-			request:   httpmock.REST("GET", "edge_functions/functions/1234"),
+			request:   httpmock.REST("GET", "workspace/functions/1234"),
 			response:  httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 			args:      []string{"--function-id", "1234", "--with-code"},
 			expectErr: true,

@@ -68,7 +68,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
+			httpmock.REST("POST", "workspace/functions"),
 			httpmock.JSONFromString(successResponse),
 		)
 
@@ -96,7 +96,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
+			httpmock.REST("POST", "workspace/functions"),
 			httpmock.StatusStringResponse(http.StatusBadRequest, "Invalid"),
 		)
 
@@ -119,7 +119,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
+			httpmock.REST("POST", "workspace/functions"),
 			httpmock.JSONFromString(successResponse),
 		)
 
@@ -143,7 +143,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
+			httpmock.REST("POST", "workspace/functions"),
 			httpmock.JSONFromString(successResponse),
 		)
 
@@ -173,7 +173,7 @@ func TestCreate(t *testing.T) {
 		mock := &httpmock.Registry{}
 
 		mock.Register(
-			httpmock.REST("POST", "edge_functions/functions"),
+			httpmock.REST("POST", "workspace/functions"),
 			httpmock.StatusStringResponse(http.StatusInternalServerError, errorResponse),
 		)
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path"
-	"strconv"
 	"strings"
 
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
@@ -191,14 +190,12 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
 	}
 
-	appIDStr := strconv.FormatInt(conf.Application.ID, 10)
-
 	if authorize {
 		var reqCache apiapp.CreateCacheSettingsRequest
 		reqCache.SetName(conf.Name)
 
 		// create Cache Settings
-		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, appIDStr)
+		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
 		if err != nil {
 			logger.Debug("Error while creating Cache Settings", zap.Error(err))
 			return err
@@ -209,7 +206,7 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	}
 
 	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, appIDStr, cacheId, conf.Preset, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, authorize)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err

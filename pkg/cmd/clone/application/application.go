@@ -3,11 +3,14 @@ package application
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
+	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/clone"
 	api "github.com/aziontech/azion-cli/pkg/api/applications"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 
@@ -21,7 +24,7 @@ const example = `
         `
 
 type Fields struct {
-	Id      string `json:"id,omitempty"`
+	Id      int64  `json:"id,omitempty"`
 	Name    string `json:"name,omitempty"`
 	Path    string
 	OutPath string
@@ -45,7 +48,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				fields.Id = answer
+
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+				fields.Id = num
 			}
 
 			if !cmd.Flags().Changed("name") {
@@ -80,6 +89,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagNameApplication)
-	flags.StringVar(&fields.Id, "application-id", "", msg.FlagIdApplication)
+	flags.Int64Var(&fields.Id, "application-id", 0, msg.FlagIdApplication)
 	flags.BoolP("help", "h", false, msg.FlagHelpApplication)
 }

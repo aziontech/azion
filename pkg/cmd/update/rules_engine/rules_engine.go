@@ -3,6 +3,7 @@ package rules_engine
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/update/rules_engine"
@@ -16,8 +17,8 @@ import (
 )
 
 type Fields struct {
-	ApplicationID string
-	RuleID        string
+	ApplicationID int64
+	RuleID        int64
 	Phase         string
 	Path          string
 }
@@ -89,8 +90,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&fields.ApplicationID, "application-id", "", msg.FlagApplicationID)
-	flags.StringVar(&fields.RuleID, "rule-id", "", msg.FlagRulesEngineID)
+	flags.Int64Var(&fields.ApplicationID, "application-id", 0, msg.FlagApplicationID)
+	flags.Int64Var(&fields.RuleID, "rule-id", 0, msg.FlagRulesEngineID)
 	flags.StringVar(&fields.Phase, "phase", "", msg.RulesEnginePhase)
 	flags.StringVar(&fields.Path, "file", "", msg.FlagFile)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
@@ -104,7 +105,13 @@ func validateUserInput(cmd *cobra.Command, fields *Fields) error {
 			return err
 		}
 
-		fields.ApplicationID = answer
+		num, err := strconv.ParseInt(answer, 10, 64)
+		if err != nil {
+			logger.Debug("Error while converting answer to int64", zap.Error(err))
+			return msg.ErrorConvertApplicationID
+		}
+
+		fields.ApplicationID = num
 	}
 
 	if !cmd.Flags().Changed("rule-id") {
@@ -113,7 +120,13 @@ func validateUserInput(cmd *cobra.Command, fields *Fields) error {
 			return err
 		}
 
-		fields.RuleID = answer
+		num, err := strconv.ParseInt(answer, 10, 64)
+		if err != nil {
+			logger.Debug("Error while converting answer to int64", zap.Error(err))
+			return msg.ErrorConvertRulesID
+		}
+
+		fields.RuleID = num
 	}
 
 	if !cmd.Flags().Changed("phase") {
