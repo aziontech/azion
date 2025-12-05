@@ -217,10 +217,10 @@ func TestDescribe(t *testing.T) {
 					order:       1,
 					active:      true,
 				}
-				descCmd.GetRulesEngineRequest = func(_ context.Context, _ string, _ string) (applications.RulesEngineResponse, error) {
+				descCmd.GetRulesEngineRequest = func(_ context.Context, _ int64, _ int64) (applications.RulesEngineResponse, error) {
 					return success, nil
 				}
-				descCmd.GetRulesEngineResponse = func(_ context.Context, _ string, _ string) (applications.RulesEngineResponse, error) {
+				descCmd.GetRulesEngineResponse = func(_ context.Context, _ int64, _ int64) (applications.RulesEngineResponse, error) {
 					return success, nil
 				}
 			}

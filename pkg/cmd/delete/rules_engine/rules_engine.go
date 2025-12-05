@@ -3,28 +3,31 @@ package rulesengine
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
-	ruleID        string
-	applicationID string
+	ruleID        int64
+	applicationID int64
 	phase         string
 )
 
 type DeleteCmd struct {
 	Io                 *iostreams.IOStreams
 	ReadInput          func(string) (string, error)
-	DeleteRuleRequest  func(context.Context, string, string) error
-	DeleteRuleResponse func(context.Context, string, string) error
+	DeleteRuleRequest  func(context.Context, int64, int64) error
+	DeleteRuleResponse func(context.Context, int64, int64) error
 	AskInput           func(string) (string, error)
 }
 
@@ -34,11 +37,11 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		DeleteRuleRequest: func(ctx context.Context, ruleID, appID string) error {
+		DeleteRuleRequest: func(ctx context.Context, ruleID, appID int64) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.DeleteRequest(ctx, appID, ruleID)
 		},
-		DeleteRuleResponse: func(ctx context.Context, ruleID, appID string) error {
+		DeleteRuleResponse: func(ctx context.Context, ruleID, appID int64) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.DeleteResponse(ctx, appID, ruleID)
 		},
@@ -66,7 +69,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				ruleID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdRule
+				}
+
+				ruleID = num
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -75,7 +84,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				applicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdApplication
+				}
+
+				applicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -105,13 +120,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 
 			}
 
-			rid, err := utils.Format(ruleID)
-			if err != nil {
-				return err
-			}
-
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, rid),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, ruleID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -119,8 +129,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&ruleID, "rule-id", "", msg.FlagRuleID)
-	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagAppID)
+	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
 	cobraCmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 

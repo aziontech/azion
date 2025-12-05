@@ -64,16 +64,16 @@ type CreateInstanceRequest struct {
 
 type UpdateRulesEngineRequest struct {
 	sdk.PatchedApplicationRequestPhaseRuleEngineRequest
-	IdApplication string
+	IdApplication int64
 	Phase         string
-	Id            string
+	Id            int64
 }
 
 type UpdateRulesEngineResponse struct {
 	sdk.PatchedApplicationResponsePhaseRuleEngineRequest
-	IdApplication string
+	IdApplication int64
 	Phase         string
-	Id            string
+	Id            int64
 }
 
 type CreateCacheSettingsRequest struct {
@@ -126,7 +126,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID string, instanceID string) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID int64, instanceID int64) (sdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Update Instance")
 	request := c.apiClient.ApplicationsFunctionAPI.PartialUpdateApplicationFunctionInstance(ctx, appID, instanceID).PatchedApplicationFunctionInstanceRequest(req.PatchedApplicationFunctionInstanceRequest)
 
@@ -148,7 +148,7 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Application")
-	req := c.apiClient.ApplicationsAPI.DestroyApplication(ctx, id)
+	req := c.apiClient.ApplicationsAPI.DeleteApplication(ctx, id)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -167,7 +167,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
+func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -194,7 +194,7 @@ func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.Li
 	return resp, nil
 }
 
-func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -221,7 +221,7 @@ func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.Lis
 	return resp, nil
 }
 
-func (c *Client) GetRulesEngineRequest(ctx context.Context, edgeApplicationID, rulesID string) (RulesEngineResponse, error) {
+func (c *Client) GetRulesEngineRequest(ctx context.Context, edgeApplicationID, rulesID int64) (RulesEngineResponse, error) {
 	logger.Debug("Get Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesRetrieve(ctx, edgeApplicationID, rulesID).Execute()
 	if err != nil {
@@ -238,7 +238,7 @@ func (c *Client) GetRulesEngineRequest(ctx context.Context, edgeApplicationID, r
 	return &resp.Data, nil
 }
 
-func (c *Client) GetRulesEngineResponse(ctx context.Context, edgeApplicationID, rulesID string) (RulesEngineResponse, error) {
+func (c *Client) GetRulesEngineResponse(ctx context.Context, edgeApplicationID, rulesID int64) (RulesEngineResponse, error) {
 	logger.Debug("Get Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesRetrieve(ctx, edgeApplicationID, rulesID).Execute()
 	if err != nil {
@@ -255,9 +255,9 @@ func (c *Client) GetRulesEngineResponse(ctx context.Context, edgeApplicationID, 
 	return &resp.Data, nil
 }
 
-func (c *Client) DeleteRulesEngineRequest(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
+func (c *Client) DeleteRulesEngineRequest(ctx context.Context, edgeApplicationID int64, phase string, ruleID int64) (int, error) {
 	logger.Debug("Delete Rules Engine")
-	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
+	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.DeleteApplicationRequestRule(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -272,9 +272,9 @@ func (c *Client) DeleteRulesEngineRequest(ctx context.Context, edgeApplicationID
 	return 0, nil
 }
 
-func (c *Client) DeleteRulesEngineResponse(ctx context.Context, edgeApplicationID string, phase string, ruleID string) (int, error) {
+func (c *Client) DeleteRulesEngineResponse(ctx context.Context, edgeApplicationID int64, phase string, ruleID int64) (int, error) {
 	logger.Debug("Delete Rules Engine")
-	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.EdgeApplicationApiApplicationsResponseRulesDestroy(ctx, edgeApplicationID, ruleID).Execute()
+	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.DeleteApplicationResponseRule(ctx, edgeApplicationID, ruleID).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -289,7 +289,7 @@ func (c *Client) DeleteRulesEngineResponse(ctx context.Context, edgeApplicationI
 	return 0, nil
 }
 
-func (c *Client) GetRulesDefault(ctx context.Context, applicationID string, phase string) (int64, error) {
+func (c *Client) GetRulesDefault(ctx context.Context, applicationID int64, phase string) (int64, error) {
 	logger.Debug("Get Rules Engine Default")
 	request := c.apiClient.ApplicationsRequestRulesAPI.EdgeApplicationApiApplicationsRequestRulesList(ctx, applicationID)
 	rules, httpResp, err := request.Execute()
@@ -349,7 +349,7 @@ func (c *Client) UpdateRulesEngineResponse(ctx context.Context, req *UpdateRules
 
 }
 
-func (c *Client) Clone(ctx context.Context, name, id string) error {
+func (c *Client) Clone(ctx context.Context, name string, id int64) error {
 	logger.Debug("Cloning Application")
 	req := sdk.CloneApplicationRequest{
 		Name: name,
@@ -370,7 +370,7 @@ func (c *Client) Clone(ctx context.Context, name, id string) error {
 	return nil
 }
 
-func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID int64, phase string, req *CreateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		EdgeApplicationApiApplicationsRequestRulesCreate(ctx, edgeApplicationID).
@@ -390,7 +390,7 @@ func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID
 	return &resp.Data, nil
 }
 
-func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationID string, phase string, req *CreateRulesEngineResponse) (RulesEngineResponse, error) {
+func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationID int64, phase string, req *CreateRulesEngineResponse) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		EdgeApplicationApiApplicationsResponseRulesCreate(ctx, edgeApplicationID).
@@ -410,7 +410,7 @@ func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationI
 	return &resp.Data, nil
 }
 
-func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID string) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
 	logger.Debug("List Function Instances")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -437,9 +437,9 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 	return resp, nil
 }
 
-func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcID string) error {
+func (c *Client) DeleteFunctionInstance(ctx context.Context, appID int64, funcID int64) error {
 	logger.Debug("Delete Function Instance")
-	req := c.apiClient.ApplicationsFunctionAPI.DestroyApplicationFunctionInstance(ctx, appID, funcID)
+	req := c.apiClient.ApplicationsFunctionAPI.DeleteApplicationFunctionInstance(ctx, appID, funcID)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {
@@ -457,7 +457,7 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID string, funcI
 	return nil
 }
 
-func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID string) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID int64) (sdk.ApplicationFunctionInstance, error) {
 	logger.Debug("Create Function Instance")
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.CreateApplicationFunctionInstance(ctx, applicationID).
 		ApplicationFunctionInstanceRequest(req.ApplicationFunctionInstanceRequest).Execute()
@@ -475,7 +475,7 @@ func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceReq
 	return resp.Data, nil
 }
 
-func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanceID string) (FunctionsInstancesResponse, error) {
+func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID int64, instanceID int64) (FunctionsInstancesResponse, error) {
 	logger.Debug("Get Function Instance")
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.RetrieveApplicationFunctionInstance(ctx, edgeApplicationID, instanceID).Execute()
 	if err != nil {
@@ -493,7 +493,7 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID, instanc
 	return &resp.Data, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId string, cacheId int64, typeLang string, authorize bool) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, authorize bool) error {
 	logger.Debug("Create Rules Engine Next Application")
 
 	req := CreateRulesEngineResponse{}

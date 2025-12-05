@@ -3,23 +3,26 @@ package function
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/function"
 	api "github.com/aziontech/azion-cli/pkg/api/function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
-var functionID string
+var functionID int64
 
 type DeleteCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
-	DeleteFunction func(context.Context, string) error
+	DeleteFunction func(context.Context, int64) error
 	AskInput       func(string) (string, error)
 }
 
@@ -29,7 +32,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		DeleteFunction: func(ctx context.Context, functionID string) error {
+		DeleteFunction: func(ctx context.Context, functionID int64) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Delete(ctx, functionID)
 		},
@@ -56,7 +59,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				functionID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertFunctionId
+				}
+
+				functionID = num
 			}
 
 			ctx := context.Background()
@@ -75,7 +84,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&functionID, "function-id", "", msg.FlagID)
+	cobraCmd.Flags().Int64Var(&functionID, "function-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd
