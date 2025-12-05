@@ -10,7 +10,7 @@ var (
 	DeleteShortDescription = "Deletes a Network List"
 	DeleteLongDescription  = "Deletes a Network List based on a given ID"
 	DeleteHelpFlag         = "Displays more information about the 'delete network-list' command"
-	DeleteOutputSuccess    = "Network List %s was successfully deleted"
+	DeleteOutputSuccess    = "Network List %d was successfully deleted"
 
 	DescribeShortDescription = "Displays a Network List"
 	DescribeLongDescription  = "Displays a Network List based on a given ID"

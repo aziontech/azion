@@ -109,8 +109,9 @@ func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsI
 			if err != nil {
 				return httpResp.StatusCode, err
 			}
+			return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 		}
-		return httpResp.StatusCode, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return 0, utils.ErrorPerStatusCodeV4(errBody, nil, err)
 	}
 
 	return 0, nil
