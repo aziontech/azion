@@ -41,11 +41,11 @@ func TestDescribe(t *testing.T) {
 			name: "describe a rule engine",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/request/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/request/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -56,11 +56,11 @@ func TestDescribe(t *testing.T) {
 			name: "describe a rule engine - ask for app id",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/request/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/request/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -74,11 +74,11 @@ func TestDescribe(t *testing.T) {
 			name: "describe a rule engine - with phase flag",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/request/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/request/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -92,11 +92,11 @@ func TestDescribe(t *testing.T) {
 			name: "describe a rule engine - ask for rule id",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/request/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/request/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -110,7 +110,7 @@ func TestDescribe(t *testing.T) {
 			name: "different phases (response)",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/response/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/response/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -121,11 +121,11 @@ func TestDescribe(t *testing.T) {
 			name: "not found",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 				)
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/request/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/request/rules/173617"),
 					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 				)
 			},
@@ -136,7 +136,7 @@ func TestDescribe(t *testing.T) {
 			name: "missing mandatory flag",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/1"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/1"),
 					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 				)
 			},
@@ -147,7 +147,7 @@ func TestDescribe(t *testing.T) {
 			name: "different phases (response)",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.JSONFromFile("./fixtures/rules.json"),
 				)
 			},
@@ -158,7 +158,7 @@ func TestDescribe(t *testing.T) {
 			name: "invalid JSON response",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/1678743802/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/1678743802/rules/173617"),
 					httpmock.StringResponse("{invalid json"),
 				)
 			},
@@ -169,7 +169,7 @@ func TestDescribe(t *testing.T) {
 			name: "non-existent application ID",
 			setupMock: func(mock *httpmock.Registry) {
 				mock.Register(
-					httpmock.REST("GET", "edge_application/applications/999999999/rules/173617"),
+					httpmock.REST("GET", "workspace/applications/999999999/rules/173617"),
 					httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 				)
 			},

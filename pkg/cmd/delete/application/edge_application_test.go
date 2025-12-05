@@ -163,7 +163,7 @@ func TestCascadeDelete(t *testing.T) {
 			httpmock.StatusStringResponse(204, ""),
 		)
 		mock.Register(
-			httpmock.REST("DELETE", "edge_functions/functions/123"),
+			httpmock.REST("DELETE", "workspace/functions/123"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 
