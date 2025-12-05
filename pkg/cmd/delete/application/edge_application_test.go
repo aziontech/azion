@@ -49,7 +49,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "delete application by id",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_application/applications/1234",
+			endpoint:       "workspace/applications/1234",
 			statusCode:     204,
 			responseBody:   "",
 			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
@@ -61,7 +61,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "delete application - not found",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_application/applications/1234",
+			endpoint:       "workspace/applications/1234",
 			statusCode:     404,
 			responseBody:   "Not Found",
 			expectedOutput: "",
@@ -73,7 +73,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "error in input",
 			applicationID:  "1234",
 			method:         "DELETE",
-			endpoint:       "edge_application/applications/invalid",
+			endpoint:       "workspace/applications/invalid",
 			statusCode:     400,
 			responseBody:   "Bad Request",
 			expectedOutput: "",
@@ -85,7 +85,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 			name:           "ask for application id success",
 			applicationID:  "",
 			method:         "DELETE",
-			endpoint:       "edge_application/applications/1234",
+			endpoint:       "workspace/applications/1234",
 			statusCode:     204,
 			responseBody:   "",
 			expectedOutput: fmt.Sprintf(msg.OutputSuccess, 1234),
@@ -159,7 +159,7 @@ func TestCascadeDelete(t *testing.T) {
 		_ = json.Unmarshal(dat, options)
 
 		mock.Register(
-			httpmock.REST("DELETE", "edge_application/applications/666"),
+			httpmock.REST("DELETE", "workspace/applications/666"),
 			httpmock.StatusStringResponse(204, ""),
 		)
 		mock.Register(
