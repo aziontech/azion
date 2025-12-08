@@ -2,7 +2,7 @@ name: Package Auditing
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, labeled, unlabeled]
 
 jobs:
   PackageAuditing:
