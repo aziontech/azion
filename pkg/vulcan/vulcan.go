@@ -33,9 +33,9 @@ func NewVulcan() *VulcanPkg {
 }
 
 func NewVulcanV3() *VulcanPkg {
-	versionVulcan = "@5.3.0"
+	versionVulcan = "@5.3.1"
 	currentMajor = 5
-	firstTimeExecuting = "@5.3.0"
+	firstTimeExecuting = "@5.3.1"
 	return &VulcanPkg{
 		Command:          command,
 		CheckVulcanMajor: checkVulcanMajor,
