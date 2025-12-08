@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/manifest"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
 	"go.uber.org/zap"
 )
 
