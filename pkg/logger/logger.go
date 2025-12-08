@@ -26,9 +26,9 @@ func LogLevel(logger Logger) {
 		New(zapcore.DebugLevel)
 	case logger.Silent:
 		New(zapcore.ErrorLevel)
-	case "debug" == logger.LogLevel:
+	case logger.LogLevel == "debug":
 		New(zapcore.DebugLevel)
-	case "error" == logger.LogLevel:
+	case logger.LogLevel == "error":
 		New(zapcore.ErrorLevel)
 	default:
 		New(zapcore.InfoLevel)
@@ -45,22 +45,18 @@ func New(level zapcore.Level) {
 	config.Level = logLevel
 
 	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "ts",
+		TimeKey:        "timestamp",
 		LevelKey:       "level",
 		NameKey:        "logger",
 		FunctionKey:    zapcore.OmitKey,
 		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
+		StacktraceKey:  "",
 		LineEnding:     zapcore.DefaultLineEnding,
 		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.EpochTimeEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
-
-	encoderConfig.TimeKey = "timestamp"
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	encoderConfig.StacktraceKey = ""
 
 	config.EncoderConfig = encoderConfig
 	config.Encoding = "console"
@@ -75,10 +71,18 @@ func New(level zapcore.Level) {
 	}
 }
 
+func shouldPrint() bool {
+	core := log.Core()
+	errorEnabled := core.Enabled(zapcore.ErrorLevel)
+	debugEnabled := core.Enabled(zapcore.DebugLevel)
+	infoEnabled := core.Enabled(zapcore.InfoLevel)
+
+	return !(errorEnabled && !debugEnabled && !infoEnabled)
+}
+
 // FInfo I need to check if the debug is false because the error comes in the debug also as true
 func FInfo(w io.Writer, message string) {
-	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
-		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+	if shouldPrint() {
 		fmt.Fprintf(w, "%s", message) // nolint:all
 	}
 }
@@ -88,22 +92,19 @@ func FInfoFlags(w io.Writer, message, format, out string) {
 		return
 	}
 
-	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
-		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+	if shouldPrint() {
 		fmt.Fprintf(w, "%s", message) // nolint:all
 	}
 }
 
 func PrintHeader(table tablecli.Table, format string) {
-	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
-		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+	if shouldPrint() {
 		table.PrintHeader(format)
 	}
 }
 
 func PrintRow(table tablecli.Table, format string, row []string) {
-	if !(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.DebugLevel)) ||
-		!(log.Core().Enabled(zapcore.ErrorLevel) && !log.Core().Enabled(zapcore.InfoLevel)) {
+	if shouldPrint() {
 		table.PrintRow(format, row)
 	}
 }

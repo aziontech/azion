@@ -13,7 +13,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     container:
-      image: golang:1.25.3
+      image: golang:1.25.5
     env:
       CGO_ENABLED: 0 # Statically linked
 

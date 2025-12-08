@@ -23,24 +23,20 @@ import (
 )
 
 type Fields struct {
-	ApplicationID                  int64
-	CacheSettingID                 int64
-	Name                           string
-	browserCacheSettings           string
-	browserCacheBehavior           string
-	browserCacheMaxAge             int64
-	browserCacheSettingsMaximumTtl int64
-	cdnCacheSettings               string
-	cdnCacheSettingsMaximumTtl     int64
-	cacheByQueryString             string
-	queryStringFields              []string
-	enableQueryStringSort          string
-	cacheByCookies                 string
-	cookieNames                    []string
-	enableCachingForPost           string
-	enableCachingForOptions        string
-	l2CachingEnabled               string
-	Path                           string
+	ApplicationID           int64
+	CacheSettingID          int64
+	Name                    string
+	browserCacheSettings    string
+	browserCacheBehavior    string
+	browserCacheMaxAge      int64
+	cacheByQueryString      string
+	queryStringFields       []string
+	enableQueryStringSort   string
+	cacheByCookies          string
+	cookieNames             []string
+	enableCachingForPost    string
+	enableCachingForOptions string
+	Path                    string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {

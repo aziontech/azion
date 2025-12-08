@@ -16,8 +16,9 @@ import (
 )
 
 var (
-	isFirewall bool
-	port       int
+	isFirewall    bool
+	port          int
+	SkipFramework bool
 )
 
 type DevCmd struct {
@@ -59,6 +60,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
 	devCmd.Flags().IntVar(&port, "port", 0, msg.PortFlag)
 	devCmd.Flags().BoolVar(&isFirewall, "firewall", false, msg.IsFirewall)
+	devCmd.Flags().BoolVar(&SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	return devCmd
 }
 

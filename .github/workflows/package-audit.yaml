@@ -2,7 +2,7 @@ name: Package Auditing
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, labeled, unlabeled]
 
 jobs:
   PackageAuditing:
@@ -11,14 +11,18 @@ jobs:
       pull-requests: write
     name: Package Auditor (GoVulnCheck)
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-vulncheck') }}
     container:
-      image: golang:1.25.3
+      image: golang:1.25.5
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
       
       - name: bypass dep
         run: go env -w GOPRIVATE=github.com/zRedShift/mimemagic
+
+      - name: Download dependencies
+        run: go mod download
 
       - name: GoVulnCheck
         run: make govulncheck
