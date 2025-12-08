@@ -29,7 +29,7 @@ var (
 
 func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *SyncCmd) error {
 	opts = &contracts.ListOptions{
-		PageSize: 20,
+		PageSize: 100,
 		Page:     1,
 	}
 
@@ -110,7 +110,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-	resp, err := client.ListCacheEdgeApp(context.Background(), str)
+	resp, err := client.ListCacheEdgeApp(context.Background(), str, opts)
 	if err != nil {
 		return remoteCacheIds, err
 	}
