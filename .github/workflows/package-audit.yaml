@@ -20,5 +20,8 @@ jobs:
       - name: bypass dep
         run: go env -w GOPRIVATE=github.com/zRedShift/mimemagic
 
+      - name: Download dependencies
+        run: go mod download
+
       - name: GoVulnCheck
         run: make govulncheck
