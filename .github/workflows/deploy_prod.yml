@@ -141,22 +141,15 @@ jobs:
           (Get-Content chocolatey/azion.nuspec) -replace '<version>.*</version>', "<version>$version</version>" | Set-Content chocolatey/azion.nuspec
         shell: pwsh
 
-      # Step 4: Download the Azion executable
-      - name: Download Azion executable
-        run: |
-          $toolsDir = "$(Resolve-Path .\chocolatey\tools)"
-          New-Item -ItemType Directory -Force -Path $toolsDir | Out-Null
-          $outputFile = Join-Path $toolsDir 'azion.exe'
-          $url = 'http://downloads.azion.com/windows/x86_64/azion'
-          Invoke-WebRequest -Uri $url -OutFile $outputFile
-        shell: pwsh
-
-      # Step 5: Calculate checksum
+      # Step 4: Download file temporarily to calculate checksum (do not embed in package)
       - name: Calculate checksum
         id: calculate-checksum
         run: |
-          $outputFile = "$(Resolve-Path .\chocolatey\tools\azion.exe)"
-          $checksum = (Get-FileHash -Path $outputFile -Algorithm SHA256).Hash
+          $url = 'http://downloads.azion.com/windows/x86_64/azion'
+          $tempFile = Join-Path $env:TEMP 'azion_temp.exe'
+          Invoke-WebRequest -Uri $url -OutFile $tempFile
+          $checksum = (Get-FileHash -Path $tempFile -Algorithm SHA256).Hash
+          Remove-Item $tempFile
           echo "::set-output name=checksum::$checksum"
         shell: pwsh
 
