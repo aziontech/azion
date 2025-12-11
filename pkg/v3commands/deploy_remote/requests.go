@@ -30,7 +30,9 @@ var injectIntoFunction = `
 //     bucket: %s
 //     prefix: %s
 //---
-
+/* this temporary binding is used to inject the storage name and prefix into the function file */
+globalThis.AZION_BUCKET_NAME = '%s';
+globalThis.AZION_BUCKET_PREFIX = '%s';
 `
 
 func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *contracts.AzionApplicationOptionsV3, msgs *[]string) error {
@@ -311,7 +313,7 @@ func (cmd *DeployCmd) createFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
 	newCode := append([]byte(prependText), code...)
 
 	reqCre.SetCode(string(newCode))
@@ -356,7 +358,7 @@ func (cmd *DeployCmd) updateFunction(client *api.Client, ctx context.Context, co
 		return 0, fmt.Errorf("%s: %w", msg.ErrorCodeFlag, err)
 	}
 
-	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix)
+	prependText := fmt.Sprintf(injectIntoFunction, conf.Bucket, conf.Prefix, conf.Bucket, conf.Prefix)
 	newCode := append([]byte(prependText), code...)
 
 	reqUpd.SetCode(string(newCode))
