@@ -3,6 +3,7 @@ name: SCC Complexity Check
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, labeled, unlabeled]
 
 jobs:
   scc-check:
@@ -10,6 +11,7 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-scc') }}
     steps:
       - uses: actions/checkout@v4
         with:
