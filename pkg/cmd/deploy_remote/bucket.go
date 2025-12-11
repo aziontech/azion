@@ -20,7 +20,8 @@ func (cmd *DeployCmd) doBucket(
 	client *api.Client,
 	ctx context.Context,
 	conf *contracts.AzionApplicationOptions,
-	msgs *[]string) error {
+	msgs *[]string,
+	manifestStorage []contracts.StorageManifest) error {
 	if conf.Bucket != "" {
 		return nil
 	}
@@ -32,6 +33,8 @@ func (cmd *DeployCmd) doBucket(
 	bucketAccess := "read_only"
 	if WriteBucket {
 		bucketAccess = "read_write"
+	} else if manifestStorage[0].EdgeAccess != "" {
+		bucketAccess = manifestStorage[0].EdgeAccess
 	}
 	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
 	if err != nil {
