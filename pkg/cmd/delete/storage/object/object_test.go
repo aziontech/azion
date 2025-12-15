@@ -35,37 +35,29 @@ func TestNewObject(t *testing.T) {
 		mockInputs func(string) (string, error)
 	}{
 		{
-			name:    "delete object command - edge-storage",
-			request: httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan/objects/revolver38"),
-			response: func(req *http.Request) (*http.Response, error) {
-				return &http.Response{
-					StatusCode: http.StatusNoContent,
-				}, nil
-			},
-			args:   []string{"--bucket-name", "arthur-morgan", "--object-key", "revolver38"},
-			output: fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, "revolver38"),
+			name:     "delete object command - edge-storage",
+			request:  httpmock.REST(http.MethodDelete, "workspace/storage/buckets/arthur-morgan/objects/revolver38"),
+			response: httpmock.StatusStringResponse(http.StatusNoContent, ""),
+			args:     []string{"--bucket-name", "arthur-morgan", "--object-key", "revolver38"},
+			output:   fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, "revolver38"),
 		},
 		{
 			name:    "failed delete object internal error status 500",
-			request: httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan/objects/revolver38"),
+			request: httpmock.REST(http.MethodDelete, "workspace/storage/buckets/arthur-morgan/objects/revolver38"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
 					Body:       io.NopCloser(bytes.NewBufferString("")),
 					Header:     http.Header{"Content-Type": []string{"application/json"}},
-				}, fmt.Errorf(msg.ERROR_DELETE_OBJECT, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support")
+				}, nil
 			},
 			args: []string{"--bucket-name", "arthur-morgan", "--object-key", "revolver38"},
 			Err:  fmt.Sprintf(msg.ERROR_DELETE_OBJECT, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
 		},
 		{
-			name:    "delete object ask for input",
-			request: httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan/objects/revolver38"),
-			response: func(req *http.Request) (*http.Response, error) {
-				return &http.Response{
-					StatusCode: http.StatusNoContent,
-				}, nil
-			},
+			name:       "delete object ask for input",
+			request:    httpmock.REST(http.MethodDelete, "workspace/storage/buckets/arthur-morgan/objects/revolver38"),
+			response:   httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			args:       []string{"--bucket-name", "arthur-morgan"},
 			output:     fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, "revolver38"),
 			mockInputs: mockObject,
