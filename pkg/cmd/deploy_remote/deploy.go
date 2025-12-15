@@ -197,7 +197,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if len(manifestStructure.Storage) == 0 {
 		logger.Debug(msg.SkipBucket)
 	} else {
-		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
+		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs, manifestStructure.Storage)
 		if err != nil {
 			return err
 		}
