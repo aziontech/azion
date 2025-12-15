@@ -329,7 +329,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 					logTime = parsedTimestamp
 				}
 			}
-			time.Sleep(7 * time.Second)
+			time.Sleep(2 * time.Second)
 			continue
 		case "succeeded":
 			// Create a new HTTP request for results

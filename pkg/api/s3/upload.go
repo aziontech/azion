@@ -19,7 +19,7 @@ import (
 
 const (
 	region   = "us-east"
-	endpoint = "https://s3.us-east-005.azionstorage.net"
+	endpoint = "https://s3.us-east-005.stageazionstorage.net"
 )
 
 type CustomEndpointResolver struct {

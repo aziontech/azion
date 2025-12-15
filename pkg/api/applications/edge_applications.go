@@ -10,24 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-type GetCacheSettingsResponse interface {
-	GetId() int64
-	GetName() string
-	GetBrowserCacheSettings() string
-	GetBrowserCacheSettingsMaximumTtl() int64
-	GetCdnCacheSettingsMaximumTtl() int64
-	GetCdnCacheSettings() string
-	GetCacheByQueryString() string
-	GetQueryStringFields() []string
-	GetEnableQueryStringSort() bool
-	GetCacheByCookies() string
-	GetCookieNames() []*string
-	GetEnableCachingForPost() bool
-	GetL2CachingEnabled() bool
-	GetAdaptiveDeliveryAction() string
-	GetDeviceGroup() []int32
-}
-
 type ApplicationResponse interface {
 	GetId() int64
 	GetName() string
