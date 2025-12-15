@@ -109,7 +109,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID)
+	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID, opts)
 	if err != nil {
 		return remoteCacheIds, err
 	}
@@ -192,8 +192,11 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) error {
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	rulesAzion := []contracts.AzionJsonDataRules{}
-	info.Conf.RulesEngine.Rules = rulesAzion
+	rulesAzion := info.Conf.RulesEngine.Rules
+	existingRuleNames := make(map[string]bool)
+	for _, existingRule := range rulesAzion {
+		existingRuleNames[existingRule.Name] = true
+	}
 
 	// Initialize Applications slice if it's empty
 	if len(manifest.Applications) == 0 {
