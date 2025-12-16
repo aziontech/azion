@@ -93,6 +93,15 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 				applicationID = num
 			}
 
+			if !cmd.Flags().Changed("phase") {
+				answer, err := describe.AskInput(msg.AskInputPhase)
+				if err != nil {
+					return err
+				}
+
+				phase = answer
+			}
+
 			ctx := context.Background()
 			fields := make(map[string]string)
 			fields["Id"] = "Rules Engine ID"
