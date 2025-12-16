@@ -15,7 +15,7 @@ var (
 	//delete cmd
 	DeleteShortDescription = "Deletes a Connector"
 	DeleteLongDescription  = "Removes a Connector from the Connectors library based on its given ID"
-	DeleteOutputSuccess    = "Connector %s was successfully deleted"
+	DeleteOutputSuccess    = "Connector %d was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete connector command"
 
 	//describe cmd
