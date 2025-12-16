@@ -3,20 +3,23 @@ package functioninstance
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/function_instance"
 	api "github.com/aziontech/azion-cli/pkg/api/function_instance"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
+	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
-	edgeApplicationID  string
-	functionInstanceID string
+	edgeApplicationID  int64
+	functionInstanceID int64
 )
 
 type DeleteCmd struct {
@@ -49,12 +52,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 			var err error
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := delete.AskInput(msg.AskDeleteInput)
+				answer, err := delete.AskInput(msg.AskDeleteApplicationInput)
 				if err != nil {
 					return err
 				}
 
-				edgeApplicationID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertApplicationId
+				}
+
+				edgeApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("instance-id") {
@@ -63,7 +72,13 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				functionInstanceID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertFunctionInstanceId
+				}
+
+				functionInstanceID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -84,8 +99,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&edgeApplicationID, "application-id", "", msg.FlagId)
-	cobraCmd.Flags().StringVar(&functionInstanceID, "instance-id", "", msg.FlagId)
+	cobraCmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&functionInstanceID, "instance-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

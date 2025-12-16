@@ -20,7 +20,7 @@ import (
 )
 
 type Fields struct {
-	ID                   string
+	ID                   int64
 	Name                 string
 	Language             string
 	Code                 string
@@ -57,7 +57,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorParseResponse
 				}
 
-				fields.ID = answer
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ErrorConvertIdFunction
+				}
+
+				fields.ID = num
 			}
 
 			request := api.UpdateRequest{}
@@ -139,7 +145,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Upd
 }
 
 func addFlags(flags *pflag.FlagSet, fields *Fields) {
-	flags.StringVar(&fields.ID, "function-id", "", msg.FlagID)
+	flags.Int64Var(&fields.ID, "function-id", 0, msg.FlagID)
 	flags.StringVar(&fields.Name, "name", "", msg.UpdateFlagName)
 	flags.StringVar(&fields.Code, "code", "", msg.UpdateFlagCode)
 	flags.StringVar(&fields.Args, "args", "", msg.UpdateFlagArgs)

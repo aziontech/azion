@@ -31,7 +31,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (WorkloadRespon
 
 func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete Workload")
-	req := c.apiClient.WorkloadsAPI.DestroyWorkload(ctx, id)
+	req := c.apiClient.WorkloadsAPI.DeleteWorkload(ctx, id)
 
 	_, httpResp, err := req.Execute()
 	if err != nil {

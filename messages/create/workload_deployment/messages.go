@@ -18,4 +18,5 @@ var (
 	AskInputWorkloadID    = "Enter the Workload's ID:"
 	AskInputDeploymentID  = "Enter the Workload Deployment's ID:"
 	AskInputApplicationID = "Enter the Application's ID:"
+	AskInputFirewallID    = "Enter the Firewall's ID:"
 )

@@ -2,6 +2,7 @@ package rollback
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
@@ -19,7 +20,7 @@ import (
 )
 
 var (
-	connectorID string
+	connectorID int64
 	projectPath string
 )
 
@@ -54,7 +55,14 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				connectorID = answer
+
+				num, err := strconv.ParseInt(answer, 10, 64)
+				if err != nil {
+					logger.Debug("Error while converting answer to int64", zap.Error(err))
+					return msg.ERRORCONVERTCONNECTORID
+				}
+
+				connectorID = num
 			}
 
 			conf, err := rollback.GetAzionJsonContent(projectPath)
@@ -110,7 +118,7 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&connectorID, "connector-id", "", msg.FLAGCONNECTORID)
+	cobraCmd.Flags().Int64Var(&connectorID, "connector-id", 0, msg.FLAGCONNECTORID)
 	cobraCmd.Flags().StringVar(&projectPath, "config-dir", "azion", msg.CONFFLAG)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAGHELP)
 

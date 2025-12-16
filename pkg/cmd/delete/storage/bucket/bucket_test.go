@@ -41,14 +41,12 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket command bucket of the edge-storage",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			args:   []string{"--name", "arthur-morgan"},
 			output: fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
@@ -56,14 +54,12 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket ask for name input",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "edge_storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			output:     fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
 			mockInputs: mockBucket,
@@ -71,7 +67,9 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "failed delete bucket internal error status 500",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodPost, "edge_storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {

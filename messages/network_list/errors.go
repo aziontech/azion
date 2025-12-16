@@ -9,4 +9,5 @@ var (
 	ErrorCreateNetworkList       = errors.New("Failed to create Network List: %w")
 	ErrorUpdateNetworkList       = errors.New("Failed to update Network List: %w")
 	ErrorActiveFlag              = errors.New("Invalid value for --active flag")
+	ErrorConvertNetworkListId    = errors.New("Invalid --network-list-id flag provided. The value must be an integer. Run the command 'azion delete network-list --help' to display more information and try again")
 )

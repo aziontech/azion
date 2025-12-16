@@ -109,8 +109,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	str := strconv.FormatInt(info.Conf.Application.ID, 10)
-	resp, err := client.ListCacheEdgeApp(context.Background(), str, opts)
+	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID, opts)
 	if err != nil {
 		return remoteCacheIds, err
 	}
@@ -193,7 +192,6 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) error {
 	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	str := strconv.FormatInt(info.Conf.Application.ID, 10)
 	rulesAzion := info.Conf.RulesEngine.Rules
 	existingRuleNames := make(map[string]bool)
 	for _, existingRule := range rulesAzion {
@@ -214,7 +212,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 	}
 
 	// Get request phase rules
-	reqResp, err := client.ListRulesEngineRequest(context.Background(), opts, str)
+	reqResp, err := client.ListRulesEngineRequest(context.Background(), opts, info.Conf.Application.ID)
 	if err != nil {
 		logger.Debug("Error while listing request phase rules", zap.Error(err))
 		return fmt.Errorf("failed to list request phase rules: %w", err)
@@ -271,7 +269,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 		}
 	}
 
-	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, str)
+	respResp, err := client.ListRulesEngineResponse(context.Background(), opts, info.Conf.Application.ID)
 	if err != nil {
 		logger.Debug("Error while listing response phase rules", zap.Error(err))
 		return fmt.Errorf(msg.ERRORLISTRESPONSERULES, err)
