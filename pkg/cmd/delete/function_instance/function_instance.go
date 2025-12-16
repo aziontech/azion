@@ -52,7 +52,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 			var err error
 
 			if !cmd.Flags().Changed("application-id") {
-				answer, err := delete.AskInput(msg.AskDeleteInput)
+				answer, err := delete.AskInput(msg.AskDeleteApplicationInput)
 				if err != nil {
 					return err
 				}
