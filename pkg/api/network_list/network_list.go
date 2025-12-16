@@ -37,9 +37,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	return resp, nil
 }
 
-func (c *Client) Delete(ctx context.Context, id string) error {
+func (c *Client) Delete(ctx context.Context, id int64) error {
 	logger.Debug("Delete network list")
-	request := c.apiClient.NetworkListsAPI.DestroyNetworkList(ctx, id)
+	request := c.apiClient.NetworkListsAPI.DeleteNetworkList(ctx, id)
 
 	_, httpResp, err := request.Execute()
 
@@ -58,7 +58,7 @@ func (c *Client) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *Client) Get(ctx context.Context, id string) (sdk.NetworkListDetail, error) {
+func (c *Client) Get(ctx context.Context, id int64) (sdk.NetworkListDetail, error) {
 	logger.Debug("Get network list")
 	request := c.apiClient.NetworkListsAPI.RetrieveNetworkList(ctx, id)
 
@@ -99,7 +99,7 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkLis
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id string) (sdk.NetworkListDetail, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.NetworkListDetail, error) {
 	logger.Debug("Update network list", zap.Any("ID", id), zap.Any("Name", req.Name))
 	request := c.apiClient.NetworkListsAPI.PartialUpdateNetworkList(ctx, id).PatchedNetworkListDetailRequest(req.PatchedNetworkListDetailRequest)
 

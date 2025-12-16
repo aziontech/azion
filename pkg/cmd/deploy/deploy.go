@@ -199,7 +199,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		request := new(storage.RequestCredentials)
 		request.Name = nameBucket
 		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
-		request.Bucket = &nameBucket
+		request.Buckets = []string{nameBucket}
 		request.ExpirationDate = &oneYearLater
 
 		creds, err := storageClient.CreateCredentials(ctx, *request)
@@ -329,7 +329,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 					logTime = parsedTimestamp
 				}
 			}
-			time.Sleep(7 * time.Second)
+			time.Sleep(2 * time.Second)
 			continue
 		case "succeeded":
 			// Create a new HTTP request for results

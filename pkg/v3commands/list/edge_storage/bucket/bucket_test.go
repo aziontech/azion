@@ -29,22 +29,28 @@ func TestNewBucket(t *testing.T) {
 		err      string
 	}{
 		{
-			name:     "list success",
-			request:  httpmock.REST(http.MethodGet, "edge_storage/buckets"),
+			name: "list success",
+			request: func(req *http.Request) bool {
+				return strings.EqualFold(req.Method, http.MethodGet) && strings.Contains(req.URL.Path, "/workspace/storage/buckets")
+			},
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{""},
 			output:   "NAME                EDGE ACCESS  \narthur-morgan02     read_only    \narthur-morgan03     read_only    \narthur-morgan05     read_only    \narthur-morgan06     read_only    \nblue-bilbo          read_write   \ncourageous-thunder  read_write   \n",
 		},
 		{
-			name:     "list 2 items successfully",
-			request:  httpmock.REST(http.MethodGet, "edge_storage/buckets"),
+			name: "list 2 items successfully",
+			request: func(req *http.Request) bool {
+				return strings.EqualFold(req.Method, http.MethodGet) && strings.Contains(req.URL.Path, "/workspace/storage/buckets")
+			},
 			response: httpmock.JSONFromFile("fixtures/response_2_items.json"),
 			args:     []string{"--page", "1", "--page-size", "2"},
 			output:   "NAME                EDGE ACCESS  \narthur-morgan02     read_only    \narthur-morgan03     read_only    \n",
 		},
 		{
-			name:    "failed internal error status 500",
-			request: httpmock.REST(http.MethodGet, "edge_storage/buckets"),
+			name: "failed internal error status 500",
+			request: func(req *http.Request) bool {
+				return strings.EqualFold(req.Method, http.MethodGet) && strings.Contains(req.URL.Path, "/workspace/storage/buckets")
+			},
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,

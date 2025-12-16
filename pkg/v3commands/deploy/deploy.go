@@ -191,7 +191,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		request := new(storage.RequestCredentials)
 		request.Name = nameBucket
 		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
-		request.Bucket = &nameBucket
+		request.Buckets = []string{nameBucket}
 		request.ExpirationDate = &oneYearLater
 
 		creds, err := storageClient.CreateCredentials(ctx, *request)

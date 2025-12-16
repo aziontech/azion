@@ -15,7 +15,7 @@ var (
 	//delete cmd
 	DeleteShortDescription = "Deletes a function"
 	DeleteLongDescription  = "Removes a function from the functions library based on its given ID"
-	DeleteOutputSuccess    = "Function %s was successfully deleted"
+	DeleteOutputSuccess    = "Function %d was successfully deleted"
 	DeleteHelpFlag         = "Displays more information about the delete function command"
 
 	//describe cmd

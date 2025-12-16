@@ -1,19 +1,19 @@
 package ruleengine
 
 import (
-	"testing"
-	"os"
-	"encoding/json"
 	"context"
+	"encoding/json"
+	"os"
+	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/stretchr/testify/require"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
-	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewCmd(t *testing.T) {
@@ -24,7 +24,7 @@ func TestNewCmd(t *testing.T) {
 
 		listCmd := NewListCmd(f)
 		// Override the API call to deserialize our fixture into the SDK struct
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 			b, err := os.ReadFile("./fixtures/rules.json")
 			if err != nil {
 				return nil, err
@@ -65,7 +65,7 @@ func TestNewCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		listCmd := NewListCmd(f)
 		// Stub API to use fixture
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 			b, err := os.ReadFile("./fixtures/rules.json")
 			if err != nil {
 				return nil, err
@@ -92,7 +92,7 @@ func TestNewCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		listCmd := NewListCmd(f)
 		// Stub API to use empty fixture
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ string) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
 			b, err := os.ReadFile("./fixtures/norules.json")
 			if err != nil {
 				return nil, err

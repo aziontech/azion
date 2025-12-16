@@ -126,14 +126,12 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "happy road",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime2"),
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			factory: Factory{
 				Dir:  func() config.DirPath { return config.DirPath{} },
@@ -166,14 +164,12 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "second happy road",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime2"),
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			factory: Factory{
 				Dir:  func() config.DirPath { return config.DirPath{} },
@@ -207,14 +203,12 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "error flow serializer func marshal for when path does not exist file in path ",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime2"),
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			factory: Factory{
 				Dir:  func() config.DirPath { return config.DirPath{} },
@@ -250,14 +244,12 @@ func TestExecSchedules(t *testing.T) {
 		{
 			name: "error flow Write file for when path does not exist file in path",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/edge_storage/buckets/arthur-morgan"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime"),
+				httpmock.REST(http.MethodDelete, "workspace/storage/buckets/spirited-jaime2"),
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			factory: Factory{
 				Dir:  func() config.DirPath { return config.DirPath{} },

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
@@ -66,9 +65,8 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 				errs = append(errs, fmt.Sprintf("Failed to print missing function message: %v", err))
 			}
 		} else {
-			str := strconv.FormatInt(funcJson.ID, 10)
-			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting function with ID %s\n", str))
-			err = clientfunc.Delete(ctx, str)
+			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting function with ID %d\n", funcJson.ID))
+			err = clientfunc.Delete(ctx, funcJson.ID)
 			if err != nil {
 				errs = append(errs, fmt.Sprintf("Failed to delete function: %v", err))
 				logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete function: %v\n", err))
