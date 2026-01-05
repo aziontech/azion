@@ -171,7 +171,15 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			request := apiApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
 			request.SetFunction(funcConf.ID)
-			request.SetArgs(funcMan.Args)
+			if len(funcMan.Args) > 0 {
+				request.SetArgs(funcMan.Args)
+			} else {
+				args, err := unmarshalJsonArgs(funcConf.Args)
+				if err != nil {
+					return err
+				}
+				request.SetArgs(args)
+			}
 			request.SetName(funcMan.Name)
 			_, err := client.UpdateInstance(ctx, &request, conf.Application.ID, funcConf.InstanceID)
 			if err != nil {
@@ -180,7 +188,15 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		} else {
 			request := apiApplications.CreateInstanceRequest{}
 			request.SetActive(true)
-			request.SetArgs(funcMan.Args)
+			if len(funcMan.Args) > 0 {
+				request.SetArgs(funcMan.Args)
+			} else {
+				args, err := unmarshalJsonArgs(funcConf.Args)
+				if err != nil {
+					return err
+				}
+				request.SetArgs(args)
+			}
 			request.SetName(funcMan.Name)
 			request.SetFunction(funcConf.ID)
 			resp, err := client.CreateFuncInstances(ctx, &request, conf.Application.ID)
@@ -584,4 +600,16 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	}
 
 	return nil
+}
+
+func unmarshalJsonArgs(argsPath string) (map[string]interface{}, error) {
+	marshalledArgs, err := os.ReadFile(argsPath)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", msg.ErrorReadArgsFile, err)
+	}
+	args := make(map[string]interface{})
+	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
+		return nil, fmt.Errorf("%s: %w", msg.ErrorUnmarshalArgsFile, err)
+	}
+	return args, nil
 }
