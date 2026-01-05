@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GLOBAL_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setting GIT
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
@@ -35,7 +35,7 @@ jobs:
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}.wiki
-          token: ${{ secrets.GLOBAL_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           path: wiki
 
       - name: Copy files to wiki
