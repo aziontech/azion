@@ -10,7 +10,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/AlecAivazis/survey/v2"
+	"github.com/charmbracelet/huh"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -64,7 +64,7 @@ func Test_initCmd_Run(t *testing.T) {
 		deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 		devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 		changeDir             func(dir string) error
-		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+		runForm               func(form *huh.Form) error
 		load                  func(filenames ...string) (err error)
 		dir                   func() config.DirPath
 		mkdirTemp             func(dir, pattern string) (string, error)
@@ -124,10 +124,7 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return nil
 				},
 				dir: config.Dir,
@@ -200,10 +197,7 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return nil
 				},
 				dir: config.Dir,
@@ -277,10 +271,7 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return nil
 				},
 				dir: config.Dir,
@@ -354,11 +345,8 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return errors.New("error askOne")
+				runForm: func(form *huh.Form) error {
+					return errors.New("error runForm")
 				},
 				dir: config.Dir,
 				mkdirTemp: func(dir, pattern string) (string, error) {
@@ -431,10 +419,7 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return nil
 				},
 				dir: config.Dir,
@@ -510,10 +495,7 @@ func Test_initCmd_Run(t *testing.T) {
 					return []byte(""), errors.New("error readAll")
 				},
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return nil
 				},
 				dir: config.Dir,
@@ -589,10 +571,7 @@ func Test_initCmd_Run(t *testing.T) {
 				unmarshal: func(data []byte, v any) error {
 					return errors.New("error unmarshal")
 				},
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
+				runForm: func(form *huh.Form) error {
 					return errors.New("")
 				},
 				dir: config.Dir,
@@ -666,11 +645,8 @@ func Test_initCmd_Run(t *testing.T) {
 				},
 				readAll:   io.ReadAll,
 				unmarshal: json.Unmarshal,
-				askOne: func(p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return errors.New("error askOne")
+				runForm: func(form *huh.Form) error {
+					return errors.New("error runForm")
 				},
 				dir: config.Dir,
 				mkdirTemp: func(dir, pattern string) (string, error) {
@@ -732,7 +708,7 @@ func Test_initCmd_Run(t *testing.T) {
 				deployCmd:             tt.fields.deployCmd,
 				devCmd:                tt.fields.devCmd,
 				changeDir:             tt.fields.changeDir,
-				askOne:                tt.fields.askOne,
+				runForm:               tt.fields.runForm,
 				load:                  tt.fields.load,
 				dir:                   tt.fields.dir,
 				mkdirTemp:             tt.fields.mkdirTemp,
@@ -782,7 +758,7 @@ func Test_initCmd_deps(t *testing.T) {
 		deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 		devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 		changeDir             func(dir string) error
-		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+		runForm               func(form *huh.Form) error
 		load                  func(filenames ...string) (err error)
 		dir                   func() config.DirPath
 		mkdirTemp             func(dir, pattern string) (string, error)
@@ -904,7 +880,7 @@ func Test_initCmd_deps(t *testing.T) {
 				deployCmd:             tt.fields.deployCmd,
 				devCmd:                tt.fields.devCmd,
 				changeDir:             tt.fields.changeDir,
-				askOne:                tt.fields.askOne,
+				runForm:               tt.fields.runForm,
 				load:                  tt.fields.load,
 				dir:                   tt.fields.dir,
 				mkdirTemp:             tt.fields.mkdirTemp,

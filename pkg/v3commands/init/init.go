@@ -128,6 +128,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
+	// Set globalFlagAll from factory
+	cmd.globalFlagAll = cmd.f.GlobalFlagAll
+	
 	pathWorkingDirHere, err := cmd.getWorkDir()
 	if err != nil {
 		logger.Debug("Error while getting working directory", zap.Error(err))
@@ -136,21 +139,12 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	msgs := []string{}
 
-	// Checks for global --yes flag and that name flag was not sent
-	if cmd.globalFlagAll && cmd.name == "" {
-		cmd.name = thoth.GenerateName()
-	} else {
-		// if name was not sent we ask for input, otherwise info.Name already has the value
-		if cmd.name == "" {
-			projName, err := cmd.askForInput(msg.InitProjectQuestion, thoth.GenerateName())
-			if err != nil {
-				return err
-			}
-			cmd.name = projName
-		}
+	// Phase 1: Welcome message
+	if !cmd.auto {
+		cmd.showWelcome()
 	}
 
-	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+	// Phase 2: Template selection (moved before name prompt)
 	resp, err := cmd.get(APIURL)
 	if err != nil {
 		return err
@@ -166,50 +160,75 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	templateMap := make(map[string][]Item)
-
 	var templates []Template
 	err = cmd.unmarshal(body, &templates)
 	if err != nil {
 		return err
 	}
 
-	listTemplates := make([]string, len(templates))
-
-	for number, value := range templates {
-		templateMap[value.Name] = value.Items
-		listTemplates[number] = value.Name
+	// Flatten all templates into a single list
+	var allTemplates []Item
+	for _, template := range templates {
+		allTemplates = append(allTemplates, template.Items...)
 	}
 
-	prompt := &survey.Select{
-		Message:  "Choose a preset:",
-		Options:  listTemplates,
-		PageSize: len(listTemplates),
-	}
-
-	var answer string
-	err = cmd.askOne(prompt, &answer)
-	if err != nil {
-		return err
-	}
-
-	templateOptions := make([]string, len(templateMap[answer]))
+	// Build template options with descriptions
+	templateOptions := make([]string, len(allTemplates))
 	templateOptionsMap := make(map[string]Item)
-	for number, value := range templateMap[answer] {
-		templateOptions[number] = value.Name
-		templateOptionsMap[value.Name] = value
+	for number, value := range allTemplates {
+		// Format template option with description if available
+		optionText := value.Name
+		if value.Message != "" {
+			optionText = fmt.Sprintf("%s - %s", value.Name, value.Message)
+		}
+		templateOptions[number] = optionText
+		templateOptionsMap[optionText] = value
 	}
 
 	promptTemplate := &survey.Select{
 		Message:  "Choose a template:",
 		Options:  templateOptions,
-		PageSize: len(templateOptions),
+		PageSize: 15, // Show 15 items at a time for better UX
 	}
 
 	var answerTemplate string
 	err = cmd.askOne(promptTemplate, &answerTemplate)
 	if err != nil {
 		return err
+	}
+
+	// Store selected template info
+	selectedTemplate := templateOptionsMap[answerTemplate]
+	cmd.preset = strings.ToLower(selectedTemplate.Preset)
+
+	// Phase 3: Project configuration (name comes after template selection)
+	// Checks for global --yes flag and that name flag was not sent
+	if cmd.globalFlagAll && cmd.name == "" {
+		cmd.name = thoth.GenerateName()
+	} else {
+		// if name was not sent we ask for input, otherwise info.Name already has the value
+		if cmd.name == "" {
+			projName, err := cmd.askForInput(msg.InitProjectQuestion, thoth.GenerateName())
+			if err != nil {
+				return err
+			}
+			cmd.name = projName
+		}
+	}
+
+	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+
+	// Phase 4: Show configuration summary and confirm
+	if !cmd.auto {
+		if !cmd.showSummaryAndConfirm(answerTemplate, selectedTemplate) {
+			fmt.Fprintln(cmd.f.IOStreams.Out, "\nOperation cancelled.")
+			return nil
+		}
+	}
+
+	// Phase 5: Execute project creation with progress indicators
+	if !cmd.auto {
+		fmt.Fprintln(cmd.f.IOStreams.Out, "\nCreating your project...")
 	}
 
 	dirPath := cmd.dir()
@@ -248,10 +267,17 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return utils.ErrorMovingFiles
 	}
 
-	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
+	if !cmd.auto {
+		fmt.Fprintln(cmd.f.IOStreams.Out, "  ✓ Template downloaded")
+		fmt.Fprintln(cmd.f.IOStreams.Out, "  ✓ Files extracted")
+	}
 
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
+	}
+
+	if !cmd.auto {
+		fmt.Fprintln(cmd.f.IOStreams.Out, "  ✓ Configuration generated")
 	}
 
 	logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
@@ -269,9 +295,11 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorGetProjectInfo
 	}
 
+	// Phase 6: Show next steps
+	cmd.showNextSteps()
+
+	// Phase 7: Optional dev server
 	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskLocalDev, false) {
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
 		msgs = append(msgs, msg.ChangeWorkingDir)
 	} else {
@@ -285,25 +313,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 			logger.Debug("Error while running dev command called by init command", zap.Error(err))
 			return err
 		}
-	}
-
-	if cmd.auto || !utils.Confirm(cmd.globalFlagAll, msg.AskDeploy, false) {
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
-		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msg.InitDeployCommand)
-		msgs = append(msgs, msg.ChangeWorkingDir)
-		msgEdgeAppInitSuccessFull := fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name)
-		logger.FInfoFlags(cmd.f.IOStreams.Out, fmt.Sprintf(msg.EdgeApplicationsInitSuccessful, cmd.name),
-			cmd.f.Format, cmd.f.Out)
-		msgs = append(msgs, msgEdgeAppInitSuccessFull)
-	} else {
-		logger.Debug("Running deploy command from init command")
-		deploy := cmd.deployCmd(cmd.f)
-		err = deploy.Run(cmd.f)
-		if err != nil {
-			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
-			return err
-		}
+		return nil
 	}
 
 	initOut := output.SliceOutput{

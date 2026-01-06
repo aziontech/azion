@@ -6,89 +6,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap/zapcore"
 )
-
-func Test_initCmd_askForInput(t *testing.T) {
-	logger.New(zapcore.DebugLevel)
-
-	type fields struct {
-		askOne func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
-	}
-	type args struct {
-		msg       string
-		defaultIn string
-	}
-	tests := []struct {
-		name     string
-		fields   fields
-		args     args
-		want     string
-		wantErr  bool
-		readFile func(filename string) ([]byte, error)
-	}{
-		{
-			name: "success flow",
-			readFile: func(filename string) ([]byte, error) {
-				return nil, nil
-			},
-			fields: fields{
-				askOne: func(
-					p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return nil
-				},
-			},
-			args: args{
-				msg:       "",
-				defaultIn: "",
-			},
-			want:    "",
-			wantErr: false,
-		},
-		{
-			name: "error askOne",
-			fields: fields{
-				askOne: func(
-					p survey.Prompt,
-					response interface{},
-					opts ...survey.AskOpt,
-				) error {
-					return errors.New("error askOne")
-				},
-			},
-			args: args{
-				msg:       "",
-				defaultIn: "",
-			},
-			want:    "",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cmd := &initCmd{
-				askOne:     tt.fields.askOne,
-				fileReader: tt.readFile,
-			}
-			got, err := cmd.askForInput(tt.args.msg, tt.args.defaultIn)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("initCmd.askForInput() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("initCmd.askForInput() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
 func Test_initCmd_selectVulcanTemplates(t *testing.T) {
 	logger.New(zapcore.DebugLevel)

@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"strings"
-	"time"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
+	"github.com/charmbracelet/huh"
+	huhspinner "github.com/charmbracelet/huh/spinner"
 	msg "github.com/aziontech/azion-cli/messages/init"
 	"github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	"github.com/aziontech/azion-cli/pkg/cmd/dev"
@@ -26,7 +27,6 @@ import (
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
-	"github.com/briandowns/spinner"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/joho/godotenv"
@@ -68,7 +68,7 @@ type initCmd struct {
 	deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
 	devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	changeDir             func(dir string) error
-	askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+	runForm               func(form *huh.Form) error
 	load                  func(filenames ...string) (err error)
 	dir                   func() config.DirPath
 	mkdirTemp             func(dir, pattern string) (string, error)
@@ -101,8 +101,10 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		commandRunner:         command.RunCommandWithOutput,
 		commandRunInteractive: command.CommandRunInteractive,
 		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
-		askOne:                survey.AskOne,
-		load:                  godotenv.Load,
+		runForm: func(form *huh.Form) error {
+			return form.Run()
+		},
+		load: godotenv.Load,
 		dir:                   config.Dir,
 		readAll:               io.ReadAll,
 		get:                   http.Get,
@@ -142,21 +144,12 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	msgs := []string{}
 
-	// Checks for global --yes flag and that name flag was not sent
-	if cmd.f.GlobalFlagAll && cmd.name == "" {
-		cmd.name = thoth.GenerateName()
-	} else {
-		// if name was not sent we ask for input, otherwise info.Name already has the value
-		if cmd.name == "" {
-			projName, err := cmd.askForInput(msg.InitProjectQuestion, thoth.GenerateName())
-			if err != nil {
-				return err
-			}
-			cmd.name = projName
-		}
+	// Phase 1: Welcome message
+	if !cmd.auto {
+		cmd.showWelcome()
 	}
 
-	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+	// Phase 2: Template selection (moved before name prompt)
 	resp, err := cmd.get(APIURL)
 	if err != nil {
 		return err
@@ -172,54 +165,191 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return err
 	}
 
-	templateMap := make(map[string][]Item)
-
 	var templates []Template
 	err = cmd.unmarshal(body, &templates)
 	if err != nil {
 		return err
 	}
 
-	listTemplates := make([]string, len(templates))
-
-	for number, value := range templates {
-		templateMap[value.Name] = value.Items
-		listTemplates[number] = value.Name
-	}
-
-	prompt := &survey.Select{
-		Message:  "Choose a preset:",
-		Options:  listTemplates,
-		PageSize: len(listTemplates),
-	}
-
-	var answer string
-	err = cmd.askOne(prompt, &answer)
-	if err != nil {
-		return err
-	}
-
-	templateOptions := []string{}
-	templateOptionsMap := make(map[string]Item)
-	for _, value := range templateMap[answer] {
-		if value.RequiresAdditionalBuild != nil && *value.RequiresAdditionalBuild {
-			continue
-		}
-		templateOptions = append(templateOptions, value.Name)
-		templateOptionsMap[value.Name] = value
-	}
-
-	promptTemplate := &survey.Select{
-		Message:  "Choose a template:",
-		Options:  templateOptions,
-		PageSize: len(templateOptions),
-	}
-
+	// Prepare data structures for dynamic form
+	var selectedCategory string
+	var selectedFramework string
 	var answerTemplate string
-	err = cmd.askOne(promptTemplate, &answerTemplate)
+	var projectName string
+	var confirmProceed bool = true
+	templateOptionsMap := make(map[string]Item)
+
+	// Get unique frameworks from templates
+	frameworkSet := make(map[string]bool)
+	for _, template := range templates {
+		for _, item := range template.Items {
+			if item.RequiresAdditionalBuild != nil && *item.RequiresAdditionalBuild {
+				continue
+			}
+			if cmd.isFrameworkTemplate(item.Preset, item.Name) {
+				fw := cmd.normalizeFrameworkName(item.Preset)
+				frameworkSet[fw] = true
+			}
+		}
+	}
+
+	// Build framework options list
+	frameworks := make([]string, 0, len(frameworkSet))
+	for fw := range frameworkSet {
+		frameworks = append(frameworks, fw)
+	}
+	sort.Strings(frameworks)
+
+	// Create a single form with all steps to preserve answers on terminal
+	categories := []string{
+		"Simple Hello World",
+		"JavaScript",
+		"TypeScript",
+		"Frameworks",
+	}
+
+	// Styles for displaying answers
+	labelStyle := GetAzionLabelStyle()   // Purple (#b5b1f4)
+	answerStyle := GetAzionAnswerStyle() // Orange (#f3652b)
+	
+	// Step 1: Category selection
+	err = huh.NewSelect[string]().
+		Title("Choose a category:").
+		Options(huh.NewOptions(categories...)...).
+		Value(&selectedCategory).
+		WithTheme(ThemeAzion()).
+		Run()
 	if err != nil {
 		return err
 	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "%s %s\n", labelStyle.Render("Category:"), answerStyle.Render(selectedCategory))
+	
+	// Step 2: Framework selection (only if Frameworks category)
+	if selectedCategory == "Frameworks" {
+		err = huh.NewSelect[string]().
+			Title("Choose a framework:").
+			Options(huh.NewOptions(frameworks...)...).
+			Height(10).
+			Value(&selectedFramework).
+			WithTheme(ThemeAzion()).
+			Run()
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(cmd.f.IOStreams.Out, "%s %s\n", labelStyle.Render("Framework:"), answerStyle.Render(selectedFramework))
+	}
+	
+	// Step 3: Template selection (filtered based on category/framework)
+	var filteredTemplates []Item
+	for _, template := range templates {
+		for _, item := range template.Items {
+			if item.RequiresAdditionalBuild != nil && *item.RequiresAdditionalBuild {
+				continue
+			}
+
+			if cmd.matchesCategory(selectedCategory, item, template.Name) {
+				if selectedCategory == "Frameworks" {
+					if cmd.matchesFramework(selectedFramework, item) {
+						filteredTemplates = append(filteredTemplates, item)
+					}
+				} else {
+					filteredTemplates = append(filteredTemplates, item)
+				}
+			}
+		}
+	}
+
+	// Build template options
+	templateOptions := make([]string, len(filteredTemplates))
+	for number, value := range filteredTemplates {
+		templateName := value.Name
+		
+		// Add (Edge-Runtime) tag for NextJs templates (not OpenNext)
+		if strings.Contains(strings.ToLower(value.Preset), "next") && 
+		   !strings.Contains(strings.ToLower(value.Preset), "open") {
+			templateName = fmt.Sprintf("%s (Edge-Runtime)", value.Name)
+		}
+		
+		templateOptions[number] = templateName
+		templateOptionsMap[templateName] = value
+	}
+
+	err = huh.NewSelect[string]().
+		Title("Choose a template:").
+		Options(huh.NewOptions(templateOptions...)...).
+		Height(10).
+		Value(&answerTemplate).
+		WithTheme(ThemeAzion()).
+		Run()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.f.IOStreams.Out, "%s %s\n", labelStyle.Render("Template:"), answerStyle.Render(answerTemplate))
+	
+	// Step 4: Project name input (only if not provided via flag)
+	if cmd.name == "" && !cmd.f.GlobalFlagAll {
+		err = huh.NewInput().
+			Title(msg.InitProjectQuestion).
+			Value(&projectName).
+			Placeholder(thoth.GenerateName()).
+			Description("This will be your application identifier on Azion").
+			WithTheme(ThemeAzion()).
+			Run()
+		if err != nil {
+			return err
+		}
+		displayName := projectName
+		if displayName == "" {
+			displayName = thoth.GenerateName()
+		}
+		fmt.Fprintf(cmd.f.IOStreams.Out, "%s %s\n\n", labelStyle.Render("Project Name:"), answerStyle.Render(displayName))
+	}
+	
+	// Step 5: Confirmation (only in interactive mode)
+	if !cmd.auto {
+		name := projectName
+		if name == "" {
+			name = thoth.GenerateName()
+		}
+		if cmd.name != "" {
+			name = cmd.name
+		}
+		
+		err = huh.NewConfirm().
+			Title(fmt.Sprintf("Create project '%s' with template '%s'?", name, answerTemplate)).
+			Value(&confirmProceed).
+			Affirmative("Yes").
+			Negative("No").
+			WithTheme(ThemeAzion()).
+			Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Check if user cancelled
+	if !confirmProceed && !cmd.auto {
+		fmt.Fprintln(cmd.f.IOStreams.Out, "\nOperation cancelled.")
+		return nil
+	}
+
+	// Store selected template info
+	selectedTemplate := templateOptionsMap[answerTemplate]
+	cmd.preset = strings.ToLower(selectedTemplate.Preset)
+
+	// Set project name from form input or use default
+	if cmd.name == "" {
+		if projectName != "" {
+			cmd.name = projectName
+		} else {
+			cmd.name = thoth.GenerateName()
+		}
+	}
+
+	cmd.pathWorkingDir = path.Join(pathWorkingDirHere, cmd.name)
+
+	// Phase 5: Execute project creation with progress indicators
+	cmd.printTitle("Creating your project...")
 
 	dirPath := cmd.dir()
 
@@ -236,25 +366,41 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}()
 
-	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
-	s.Suffix = " Fetching selected template..."
-	s.FinalMSG = "Template successfully fetched\n"
+	// Use huh spinner for fetching template
+	var cloneErr error
 	if !cmd.f.Debug {
-		s.Start() // Start the spinner
+		err = huhspinner.New().
+			Title("Fetching selected template...").
+			Action(func() {
+				options := &git.CloneOptions{
+					SingleBranch:  true,
+					ReferenceName: plumbing.ReferenceName("dev"),
+				}
+				cloneErr = cmd.git.Clone(options, SAMPLESURL, tempDir)
+			}).
+			Run()
+		
+		if err != nil {
+			logger.Debug("Error running spinner", zap.Error(err))
+			return err
+		}
+		
+		if cloneErr != nil {
+			logger.Debug("Error while cloning the repository", zap.Error(cloneErr))
+			return cloneErr
+		}
+	} else {
+		// In debug mode, run without spinner
+		options := &git.CloneOptions{
+			SingleBranch:  true,
+			ReferenceName: plumbing.ReferenceName("dev"),
+		}
+		err = cmd.git.Clone(options, SAMPLESURL, tempDir)
+		if err != nil {
+			logger.Debug("Error while cloning the repository", zap.Error(err))
+			return err
+		}
 	}
-
-	// options := &git.CloneOptions{}
-	options := &git.CloneOptions{
-		SingleBranch:  true,
-		ReferenceName: plumbing.ReferenceName("dev"),
-	}
-	err = cmd.git.Clone(options, SAMPLESURL, tempDir)
-	if err != nil {
-		logger.Debug("Error while cloning the repository", zap.Error(err))
-		return err
-	}
-
-	s.Stop()
 
 	oldPath := path.Join(tempDir, "templates", templateOptionsMap[answerTemplate].Path)
 	newPath := path.Join(pathWorkingDirHere, cmd.name)
@@ -266,10 +412,15 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return utils.ErrorMovingFiles
 	}
 
+	cmd.printSuccess("Template downloaded")
+	cmd.printSuccess("Files extracted")
+
 	cmd.preset = strings.ToLower(templateOptionsMap[answerTemplate].Preset)
 	if err = cmd.createTemplateAzion(); err != nil {
 		return err
 	}
+
+	cmd.printSuccess("Configuration generated")
 
 	// Handle optional extras from the Templates API
 	selectedItem := templateOptionsMap[answerTemplate]
@@ -292,7 +443,15 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
+	if !cmd.auto {
+		successStyle := GetAzionSuccessStyle() // Orange (#f3652b)
+		fmt.Fprintln(cmd.f.IOStreams.Out, "")
+		fmt.Fprintln(cmd.f.IOStreams.Out, successStyle.Render("Template successfully configured"))
+	} else {
+		// In auto mode, use the logger
+		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.WebAppInitCmdSuccess, cmd.f.Format, cmd.f.Out)
+	}
+	
 	msgs = append(msgs, msg.WebAppInitCmdSuccess)
 
 	err = cmd.changeDir(cmd.pathWorkingDir)
@@ -310,7 +469,13 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorGetProjectInfo
 	}
 
-	if cmd.auto || !utils.Confirm(cmd.f.GlobalFlagAll, msg.AskLocalDev, false) {
+	// Phase 6: Show next steps
+	if !cmd.auto {
+		cmd.showNextSteps()
+	}
+
+	// Phase 7: Optional dev server
+	if cmd.auto || !cmd.confirmWithHuh(msg.AskLocalDev, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDevCommand, cmd.f.Format, cmd.f.Out)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDevCommand)
@@ -328,7 +493,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 	}
 
-	if cmd.auto || !utils.Confirm(cmd.f.GlobalFlagAll, msg.AskDeploy, false) {
+	if cmd.auto || !cmd.confirmWithHuh(msg.AskDeploy, false) {
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.InitDeployCommand, cmd.f.Format, cmd.f.Out)
 		logger.FInfoFlags(cmd.f.IOStreams.Out, msg.ChangeWorkingDir, cmd.f.Format, cmd.f.Out)
 		msgs = append(msgs, msg.InitDeployCommand)
@@ -362,7 +527,8 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	if !c.Flags().Changed("package-manager") {
-		if !utils.Confirm(cmd.f.GlobalFlagAll, m, true) {
+		// Use huh.Confirm for better UX
+		if !cmd.confirmWithHuh(m, true) {
 			return nil
 		}
 
@@ -383,4 +549,52 @@ func (cmd *initCmd) deps(c *cobra.Command, m string, msgs *[]string) error {
 	}
 
 	return nil
+}
+
+// confirmWithHuh shows a confirmation prompt using huh library
+func (cmd *initCmd) confirmWithHuh(message string, defaultYes bool) bool {
+	// Skip confirmation if --yes flag is set
+	if cmd.f.GlobalFlagAll {
+		return true
+	}
+
+	var confirm bool = defaultYes
+	
+	confirmForm := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title(message).
+				Value(&confirm).
+				Affirmative("Yes").
+				Negative("No"),
+		),
+	).WithTheme(ThemeAzion())
+
+	err := cmd.runForm(confirmForm)
+	if err != nil {
+		// If there's an error (e.g., user cancelled), return false
+		return false
+	}
+
+	return confirm
+}
+
+// printSuccess prints a success message with an orange checkmark
+func (cmd *initCmd) printSuccess(message string) {
+	if cmd.auto {
+		return
+	}
+	successStyle := GetAzionSuccessStyle() // Orange (#f3652b)
+	checkmark := successStyle.Render("✓")
+	fmt.Fprintf(cmd.f.IOStreams.Out, "  %s %s\n", checkmark, message)
+}
+
+// printTitle prints a title message in bold with color
+func (cmd *initCmd) printTitle(message string) {
+	if cmd.auto {
+		return
+	}
+	titleStyle := GetAzionTitleStyle() // Purple (#b5b1f4)
+	fmt.Fprintln(cmd.f.IOStreams.Out, "")
+	fmt.Fprintln(cmd.f.IOStreams.Out, titleStyle.Render(message))
 }
