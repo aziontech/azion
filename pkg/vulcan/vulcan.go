@@ -16,6 +16,8 @@ var (
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
 	firstTimeExecuting   = "@6.2.1"
 	versionVulcan        = "@6.2.1"
+	stageVersion         = "@stage"
+	releaseChannel       = ""
 )
 
 type VulcanPkg struct {
@@ -44,11 +46,16 @@ func NewVulcanV3() *VulcanPkg {
 }
 
 func command(flags, params string, f *cmdutil.Factory) string {
+	selectedVersion := versionVulcan
+	if releaseChannel == "stage" {
+		selectedVersion = stageVersion
+	}
+
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installEdgeFunctions
-		return fmt.Sprintf(installDebug, flags, versionVulcan, params)
+		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
 	}
-	return fmt.Sprintf(installEdgeFunctions, flags, versionVulcan, params)
+	return fmt.Sprintf(installEdgeFunctions, flags, selectedVersion, params)
 }
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {
