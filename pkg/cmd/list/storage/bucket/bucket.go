@@ -57,7 +57,7 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 	}
 
 	listOut := output.ListOutput{}
-	listOut.Columns = []string{"NAME", "EDGE ACCESS"}
+	listOut.Columns = []string{"NAME", "WORKLOADS ACCESS"}
 	listOut.Out = b.Factory.IOStreams.Out
 	listOut.Flags = b.Factory.Flags
 
@@ -65,7 +65,7 @@ func (b *Bucket) PrintTable(client *api.Client) error {
 		for _, v := range resp.Results {
 			ln := []string{
 				v.GetName(),
-				string(v.GetEdgeAccess()),
+				string(v.GetWorkloadsAccess()),
 			}
 			listOut.Lines = append(listOut.Lines, ln)
 		}

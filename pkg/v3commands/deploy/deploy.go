@@ -177,7 +177,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if settings.S3AccessKey == "" || settings.S3SecretKey == "" {
 		nameBucket := fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID())
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
-		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: "read_write"}})
+		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: "read_write"}})
 		if err != nil {
 			return err
 		}

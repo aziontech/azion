@@ -72,25 +72,25 @@ func (fields *FieldsBucket) CreateRequestFromFlags(cmd *cobra.Command, request *
 		}
 		fields.Name = answers
 	}
-	if !cmd.Flags().Changed("edge-access") {
+	if !cmd.Flags().Changed("workloads-access") {
 		answers, err := utils.Select(
 			utils.NewSelectPrompter(
-				msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
+				msg.ASK_WORKLOADS_ACCESS_CREATE_BUCKET,
 				[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)}))
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		fields.EdgeAccess = answers
+		fields.WorkloadsAccess = answers
 	}
 	request.SetName(fields.Name)
-	request.SetEdgeAccess(fields.EdgeAccess)
+	request.SetWorkloadsAccess(fields.WorkloadsAccess)
 	return nil
 }
 
 func (fields *FieldsBucket) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&fields.Name, "name", "", msg.FLAG_NAME_BUCKET)
-	flags.StringVar(&fields.EdgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
+	flags.StringVar(&fields.WorkloadsAccess, "workloads-access", "", msg.FLAG_WORKLOADS_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&fields.FileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }
