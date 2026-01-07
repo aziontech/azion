@@ -16,7 +16,7 @@ var (
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
 	firstTimeExecuting   = "@6.2.1"
 	versionVulcan        = "@6.2.1"
-	stageVersion         = "@6.2.2-stage.1"
+	stageVersion         = "@stage"
 	releaseChannel       = ""
 )
 
