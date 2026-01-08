@@ -33,14 +33,14 @@ func TestNewBucket(t *testing.T) {
 			request:  httpmock.REST(http.MethodGet, "workspace/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response.json"),
 			args:     []string{""},
-			output:   "NAME                EDGE ACCESS  \narthur-morgan02     read_only    \narthur-morgan03     read_only    \narthur-morgan05     read_only    \narthur-morgan06     read_only    \nblue-bilbo          read_write   \ncourageous-thunder  read_write   \n",
+			output:   "NAME                WORKLOADS ACCESS  \narthur-morgan02     read_only         \narthur-morgan03     read_only         \narthur-morgan05     read_only         \narthur-morgan06     read_only         \nblue-bilbo          read_write        \ncourageous-thunder  read_write        \n",
 		},
 		{
 			name:     "list 2 items successfully",
 			request:  httpmock.REST(http.MethodGet, "workspace/storage/buckets"),
 			response: httpmock.JSONFromFile("fixtures/response_2_items.json"),
 			args:     []string{"--page", "1", "--page-size", "2"},
-			output:   "NAME                EDGE ACCESS  \narthur-morgan02     read_only    \narthur-morgan03     read_only    \n",
+			output:   "NAME                WORKLOADS ACCESS  \narthur-morgan02     read_only         \narthur-morgan03     read_only         \n",
 		},
 		{
 			name:    "failed internal error status 500",
@@ -53,7 +53,8 @@ func TestNewBucket(t *testing.T) {
 				}, nil
 			},
 			err: fmt.Sprintf(msg.ERROR_LIST_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
-		}}
+		},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}

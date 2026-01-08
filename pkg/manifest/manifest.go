@@ -299,12 +299,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					liveIngest := connectorResp.ConnectorLiveIngest
 					conn.Id = liveIngest.GetId()
 					conn.Name = liveIngest.GetName()
-					// live ingest does not contain addresses
 				case "storage":
 					storage := connectorResp.ConnectorStorage
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
-					// storage does not contain addresses
 				default:
 					return errors.New("failed to get Connector type")
 				}

@@ -7,18 +7,17 @@
   "results": [
     {
       "name": "arthur-morgan02",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2024-08-05T12:00:00Z",
       "product_version": "string"
     },
     {
       "name": "arthur-morgan03",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2024-08-05T12:00:00Z",
       "product_version": "string"
     }
   ]
 }
-

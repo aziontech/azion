@@ -73,10 +73,10 @@ func (c *Client) DeleteBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-func (c *Client) UpdateBucket(ctx context.Context, name string, edgeAccess string) error {
+func (c *Client) UpdateBucket(ctx context.Context, name string, workloadsAccess string) error {
 	logger.Debug("Updating bucket")
 	bucket := sdk.PatchedBucketRequest{
-		EdgeAccess: &edgeAccess,
+		WorkloadsAccess: &workloadsAccess,
 	}
 	_, httpResp, err := c.apiClient.StorageBucketsAPI.UpdateBucket(ctx, name).PatchedBucketRequest(bucket).Execute()
 	if err != nil {
