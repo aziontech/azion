@@ -34,7 +34,7 @@ func TestNewBucket(t *testing.T) {
 			name:     "update bucket command bucket of the storage",
 			request:  httpmock.REST(http.MethodPatch, "workspace/storage/buckets/John-Marston"),
 			response: httpmock.StatusStringResponse(http.StatusNoContent, ""),
-			args:     []string{"--name", "John-Marston", "--edge-access", "read_only"},
+			args:     []string{"--name", "John-Marston", "--workloads-access", "read_only"},
 			output:   msg.OUTPUT_UPDATE_BUCKET,
 		},
 		{

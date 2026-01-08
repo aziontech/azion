@@ -3,42 +3,42 @@
   "results": [
     {
       "name": "arthur-morgan02",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
     },
     {
       "name": "arthur-morgan03",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
     },
     {
       "name": "arthur-morgan05",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
     },
     {
       "name": "arthur-morgan06",
-      "edge_access": "read_only",
+      "workloads_access": "read_only",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
     },
     {
       "name": "blue-bilbo",
-      "edge_access": "read_write",
+      "workloads_access": "read_write",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
     },
     {
       "name": "courageous-thunder",
-      "edge_access": "read_write",
+      "workloads_access": "read_write",
       "last_editor": "string",
       "last_modified": "2019-08-24T14:15:22Z",
       "product_version": "1.0"
