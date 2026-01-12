@@ -445,10 +445,10 @@ type FunctionInstance struct {
 
 // StorageManifest represents an edge storage entry in the manifest.json file
 type StorageManifest struct {
-	Name       string `json:"name"`
-	EdgeAccess string `json:"edge_access"` // read_write, read_only, etc.
-	Dir        string `json:"dir"`         // Directory path
-	Prefix     string `json:"prefix"`
+	Name            string `json:"name"`
+	WorkloadsAccess string `json:"workloads_access"` // read_write, read_only, etc.
+	Dir             string `json:"dir"`              // Directory path
+	Prefix          string `json:"prefix"`
 }
 
 type Applications struct {
