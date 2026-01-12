@@ -475,7 +475,7 @@ func (c *Client) GetFuncInstance(ctx context.Context, edgeApplicationID int64, i
 	return &resp.Data, nil
 }
 
-func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, cacheId int64, typeLang string, authorize bool) error {
+func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicationId int64, typeLang string) error {
 	logger.Debug("Create Rules Engine Next Application")
 
 	req := CreateRulesEngineResponse{}
