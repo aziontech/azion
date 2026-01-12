@@ -1,4 +1,4 @@
 {
 	"name": "John-Marston",
-	"edge_access": "read_only"
+	"workloads_access": "read_only"
 }

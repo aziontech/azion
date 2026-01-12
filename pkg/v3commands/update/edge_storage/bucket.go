@@ -52,7 +52,7 @@ func (b *bucket) runE(cmd *cobra.Command, args []string) error {
 		b.factory.HttpClient,
 		b.factory.Config.GetString("storage_url"),
 		b.factory.Config.GetString("token"))
-	err := client.UpdateBucket(context.Background(), request.GetName(), request.GetEdgeAccess())
+	err := client.UpdateBucket(context.Background(), request.GetName(), request.GetWorkloadsAccess())
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)
 	}
@@ -78,22 +78,22 @@ func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.Request
 
 		answers, err := utils.Select(
 			utils.NewSelectPrompter(
-				msg.ASK_EDGE_ACCESSS_CREATE_BUCKET,
+				msg.ASK_WORKLOADS_ACCESS_CREATE_BUCKET,
 				[]string{string(sdk.READ_ONLY), string(sdk.READ_WRITE), string(sdk.RESTRICTED)}))
 		if err != nil {
 			logger.Debug("Error while parsing answer", zap.Error(err))
 			return utils.ErrorParseResponse
 		}
-		b.edgeAccess = answers
+		b.workloadsAccess = answers
 	}
 	request.SetName(b.name)
-	request.SetEdgeAccess(b.edgeAccess)
+	request.SetWorkloadsAccess(b.workloadsAccess)
 	return nil
 }
 
 func (b *bucket) addFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&b.name, "name", "", msg.FLAG_NAME_BUCKET)
-	flags.StringVar(&b.edgeAccess, "edge-access", "", msg.FLAG_EDGE_ACCESS_CREATE_BUCKET)
+	flags.StringVar(&b.workloadsAccess, "edge-access", "", msg.FLAG_WORKLOADS_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&b.fileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }

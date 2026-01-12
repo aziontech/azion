@@ -47,6 +47,7 @@ jobs:
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }}
           AZION_API_V4: ${{ secrets.AZION_API_V4_STAGE }}
+          GOFLAGS: -tags=stage
         run: make build ENVFILE=./env/stage
 
       - name: Cross-build
@@ -56,6 +57,7 @@ jobs:
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }} 
           AZION_API_V4: ${{ secrets.AZION_API_V4_STAGE }}
+          GOFLAGS: -tags=stage
         run: make cross-build ENVFILE=./env/stage
 
       - name: Install AWS CLI

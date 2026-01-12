@@ -15,10 +15,10 @@ type fieldsObjects struct {
 }
 
 type FieldsBucket struct {
-	Name       string
-	EdgeAccess string
-	FileJSON   string
-	Factory    *cmdutil.Factory
+	Name            string
+	WorkloadsAccess string
+	FileJSON        string
+	Factory         *cmdutil.Factory
 }
 
 type Fields interface {

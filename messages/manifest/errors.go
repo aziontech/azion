@@ -19,4 +19,6 @@ var (
 	ErrorUpdateRule             = errors.New("Failed to update the rule in Rules Engine")
 	ErrorInvalidPhase           = errors.New("Invalid phase. Please use 'request' or 'response'")
 	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Function to your azion.config file")
+	ErrorReadArgsFile           = errors.New("Failed to read the args file: %w")
+	ErrorUnmarshalArgsFile      = errors.New("Failed to unmarshal args.json file: %w")
 )

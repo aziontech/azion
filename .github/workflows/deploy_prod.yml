@@ -97,20 +97,6 @@ jobs:
           SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
           CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
 
-
-  bump_formula:
-    permissions:
-      contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: dawidd6/action-homebrew-bump-formula@v3
-        with:
-          token: ${{secrets.RELEASE_GITHUB_TOKEN}}
-          formula: azion
-          tag: ${{needs.build.outputs.binver}}
-
   publish-choco-package:
     permissions:
       contents: write
@@ -176,7 +162,7 @@ jobs:
       contents: write
       pull-requests: write
     runs-on: windows-latest
-    needs: [build, bump_formula]
+    needs: [build]
     steps:
       # 1. Install Scoop
       - name: Install Scoop

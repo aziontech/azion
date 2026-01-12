@@ -36,7 +36,7 @@ func (cmd *DeployCmd) doBucket(
 	} else if manifestStorage[0].EdgeAccess != "" {
 		bucketAccess = manifestStorage[0].EdgeAccess
 	}
-	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, EdgeAccess: bucketAccess}})
+	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: bucketAccess}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
@@ -45,7 +45,7 @@ func (cmd *DeployCmd) doBucket(
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
 			err := client.CreateBucket(ctx, api.RequestBucket{
-				BucketCreateRequest: sdk.BucketCreateRequest{Name: nameB, EdgeAccess: bucketAccess}})
+				BucketCreateRequest: sdk.BucketCreateRequest{Name: nameB, WorkloadsAccess: bucketAccess}})
 			if err != nil {
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 					continue
