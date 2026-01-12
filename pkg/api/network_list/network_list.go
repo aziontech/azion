@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListSummaryList, error) {
 	logger.Debug("List network lists")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

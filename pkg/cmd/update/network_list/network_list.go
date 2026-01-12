@@ -79,55 +79,55 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// if cmd.Flags().Changed("add-item") || cmd.Flags().Changed("remove-item") {
-				// 	current, err := client.Get(ctx, fields.ID)
-				// 	if err != nil {
-				// 		return fmt.Errorf(msg.ErrorGetNetworkList.Error(), err)
-				// 	}
+				if cmd.Flags().Changed("add-item") || cmd.Flags().Changed("remove-item") {
+					current, err := client.Get(ctx, fields.ID)
+					if err != nil {
+						return fmt.Errorf(msg.ErrorGetNetworkList.Error(), err)
+					}
 
-				// 	currentItems := current.GetItems()
-				// 	modifiedItems := make([]string, len(currentItems))
-				// 	copy(modifiedItems, currentItems)
+					currentItems := current.GetItems()
+					modifiedItems := make([]string, len(currentItems))
+					copy(modifiedItems, currentItems)
 
-				// 	if cmd.Flags().Changed("add-item") {
-				// 		for newItem := range strings.SplitSeq(fields.AddItem, ",") {
-				// 			newItem = strings.TrimSpace(newItem)
-				// 			if newItem == "" {
-				// 				continue
-				// 			}
+					if cmd.Flags().Changed("add-item") {
+						for newItem := range strings.SplitSeq(fields.AddItem, ",") {
+							newItem = strings.TrimSpace(newItem)
+							if newItem == "" {
+								continue
+							}
 
-				// 			exists := false
-				// 			for _, item := range modifiedItems {
-				// 				if item == newItem {
-				// 					exists = true
-				// 					break
-				// 				}
-				// 			}
-				// 			if !exists {
-				// 				modifiedItems = append(modifiedItems, newItem)
-				// 			}
-				// 		}
-				// 	}
+							exists := false
+							for _, item := range modifiedItems {
+								if item == newItem {
+									exists = true
+									break
+								}
+							}
+							if !exists {
+								modifiedItems = append(modifiedItems, newItem)
+							}
+						}
+					}
 
-				// 	if cmd.Flags().Changed("remove-item") {
-				// 		removeMap := make(map[string]bool)
-				// 		for removeItem := range strings.SplitSeq(fields.RemoveItem, ",") {
-				// 			removeItem = strings.TrimSpace(removeItem)
-				// 			if removeItem != "" {
-				// 				removeMap[removeItem] = true
-				// 			}
-				// 		}
-				// 		filteredItems := []string{}
-				// 		for _, item := range modifiedItems {
-				// 			if !removeMap[item] {
-				// 				filteredItems = append(filteredItems, item)
-				// 			}
-				// 		}
-				// 		modifiedItems = filteredItems
-				// 	}
+					if cmd.Flags().Changed("remove-item") {
+						removeMap := make(map[string]bool)
+						for removeItem := range strings.SplitSeq(fields.RemoveItem, ",") {
+							removeItem = strings.TrimSpace(removeItem)
+							if removeItem != "" {
+								removeMap[removeItem] = true
+							}
+						}
+						filteredItems := []string{}
+						for _, item := range modifiedItems {
+							if !removeMap[item] {
+								filteredItems = append(filteredItems, item)
+							}
+						}
+						modifiedItems = filteredItems
+					}
 
-				// 	request.SetItems(modifiedItems)
-				// }
+					request.SetItems(modifiedItems)
+				}
 
 				err := createRequestFromFlags(cmd, fields, &request)
 				if err != nil {
