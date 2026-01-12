@@ -105,7 +105,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version without last version",
 			args: args{
-				currentVersion: "6.2.1",
+				currentVersion: "7.0.0",
 			},
 			lastVulcanVer:   "",
 			expectedVersion: firstTimeExecuting,
@@ -114,19 +114,19 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version with last version",
 			args: args{
-				currentVersion: "7.0.2",
+				currentVersion: "8.0.0",
 			},
-			lastVulcanVer:   "6.2.1",
-			expectedVersion: "@6.2.1",
+			lastVulcanVer:   "7.0.0",
+			expectedVersion: "@7.0.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "7.0.2",
+				currentVersion: "8.0.0",
 			},
-			lastVulcanVer:   "6.2.1",
-			expectedVersion: "@6.2.1",
+			lastVulcanVer:   "7.0.0",
+			expectedVersion: "@7.0.0",
 			wantErr:         false,
 		},
 		{
