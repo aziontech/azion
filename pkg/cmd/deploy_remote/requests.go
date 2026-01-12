@@ -182,31 +182,8 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 	if conf.NotFirstRun {
 		return nil
 	}
-	var cacheId int64
-	var authorize bool
-	if Auto || NoPrompt {
-		authorize = false
-	} else {
-		authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)
-	}
 
-	if authorize {
-		var reqCache apiapp.CreateCacheSettingsRequest
-		reqCache.SetName(conf.Name)
-
-		// create Cache Settings
-		cache, err := client.CreateCacheSettingsNextApplication(ctx, &reqCache, conf.Application.ID)
-		if err != nil {
-			logger.Debug("Error while creating Cache Settings", zap.Error(err))
-			return err
-		}
-		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.CacheSettingsSuccessful, cmd.F.Format, cmd.F.Out)
-		*msgs = append(*msgs, msg.CacheSettingsSuccessful)
-		cacheId = cache.GetId()
-	}
-
-	// creates gzip and cache rules
-	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, cacheId, conf.Preset, authorize)
+	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, conf.Preset)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err

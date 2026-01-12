@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	currentMajor         = 6
+	currentMajor         = 7
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@6.2.1"
-	versionVulcan        = "@6.2.1"
+	firstTimeExecuting   = "@7.0.0"
+	versionVulcan        = "@7.0.0"
 	stageVersion         = "@stage"
 	releaseChannel       = ""
 )
