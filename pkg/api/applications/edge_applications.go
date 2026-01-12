@@ -36,23 +36,23 @@ type UpdateRequest struct {
 
 type UpdateInstanceRequest struct {
 	// sdk.ApplicationUpdateInstanceRequest
-	sdk.PatchedApplicationFunctionInstanceRequest
+	sdk.PatchedFunctionInstanceRequest
 }
 
 type CreateInstanceRequest struct {
-	sdk.ApplicationFunctionInstanceRequest
+	sdk.FunctionInstanceRequest
 	ApplicationId int64
 }
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedApplicationRequestPhaseRuleEngineRequest
+	sdk.PatchedRequestPhaseRuleRequest
 	IdApplication int64
 	Phase         string
 	Id            int64
 }
 
 type UpdateRulesEngineResponse struct {
-	sdk.PatchedApplicationResponsePhaseRuleEngineRequest
+	sdk.PatchedResponsePhaseRuleRequest
 	IdApplication int64
 	Phase         string
 	Id            int64
@@ -68,11 +68,11 @@ type UpdateCacheSettingsRequest struct {
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.ApplicationRequestPhaseRuleEngineRequest
+	sdk.RequestPhaseRuleRequest
 }
 
 type CreateRulesEngineResponse struct {
-	sdk.ApplicationResponsePhaseRuleEngineRequest
+	sdk.ResponsePhaseRuleRequest
 }
 
 type FunctionsInstancesResponse interface {
@@ -108,9 +108,9 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest) (EdgeApplicatio
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID int64, instanceID int64) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest, appID int64, instanceID int64) (sdk.FunctionInstance, error) {
 	logger.Debug("Update Instance")
-	request := c.apiClient.ApplicationsFunctionAPI.PartialUpdateApplicationFunctionInstance(ctx, appID, instanceID).PatchedApplicationFunctionInstanceRequest(req.PatchedApplicationFunctionInstanceRequest)
+	request := c.apiClient.ApplicationsFunctionAPI.PartialUpdateApplicationFunctionInstance(ctx, appID, instanceID).PatchedFunctionInstanceRequest(req.PatchedFunctionInstanceRequest)
 
 	edgeApplicationsResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -119,10 +119,10 @@ func (c *Client) UpdateInstance(ctx context.Context, req *UpdateInstanceRequest,
 			logger.Debug("Error while updating an Function instance", zap.Error(err), zap.Any("ID", instanceID), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.ApplicationFunctionInstance{}, err
+				return sdk.FunctionInstance{}, err
 			}
 		}
-		return sdk.ApplicationFunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.FunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeApplicationsResponse.Data, nil
@@ -149,7 +149,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
+func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedResponsePhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -176,7 +176,7 @@ func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.Li
 	return resp, nil
 }
 
-func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -291,7 +291,7 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID int64, phase
 
 func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine", zap.Any("ID", req.Id), zap.Any("Application ID", req.IdApplication), zap.Any("Name", req.Name))
-	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.IdApplication, req.Id).PatchedApplicationRequestPhaseRuleEngineRequest(req.PatchedApplicationRequestPhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.IdApplication, req.Id).PatchedRequestPhaseRuleRequest(req.PatchedRequestPhaseRuleRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -312,7 +312,7 @@ func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesE
 
 func (c *Client) UpdateRulesEngineResponse(ctx context.Context, req *UpdateRulesEngineResponse) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.ApplicationsResponseRulesAPI.PartialUpdateApplicationResponseRule(ctx, req.IdApplication, req.Id).PatchedApplicationResponsePhaseRuleEngineRequest(req.PatchedApplicationResponsePhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsResponseRulesAPI.PartialUpdateApplicationResponseRule(ctx, req.IdApplication, req.Id).PatchedResponsePhaseRuleRequest(req.PatchedResponsePhaseRuleRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -356,7 +356,7 @@ func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		CreateApplicationRequestRule(ctx, edgeApplicationID).
-		ApplicationRequestPhaseRuleEngineRequest(req.ApplicationRequestPhaseRuleEngineRequest).Execute()
+		RequestPhaseRuleRequest(req.RequestPhaseRuleRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -376,7 +376,7 @@ func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationI
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		CreateApplicationResponseRule(ctx, edgeApplicationID).
-		ApplicationResponsePhaseRuleEngineRequest(req.ApplicationResponsePhaseRuleEngineRequest).Execute()
+		ResponsePhaseRuleRequest(req.ResponsePhaseRuleRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -392,7 +392,7 @@ func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationI
 	return &resp.Data, nil
 }
 
-func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
+func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedFunctionInstanceList, error) {
 	logger.Debug("List Function Instances")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
@@ -439,20 +439,20 @@ func (c *Client) DeleteFunctionInstance(ctx context.Context, appID int64, funcID
 	return nil
 }
 
-func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID int64) (sdk.ApplicationFunctionInstance, error) {
+func (c *Client) CreateFuncInstances(ctx context.Context, req *CreateInstanceRequest, applicationID int64) (sdk.FunctionInstance, error) {
 	logger.Debug("Create Function Instance")
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.CreateApplicationFunctionInstance(ctx, applicationID).
-		ApplicationFunctionInstanceRequest(req.ApplicationFunctionInstanceRequest).Execute()
+		FunctionInstanceRequest(req.FunctionInstanceRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating a Function instance", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.ApplicationFunctionInstance{}, err
+				return sdk.FunctionInstance{}, err
 			}
 		}
-		return sdk.ApplicationFunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.FunctionInstance{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return resp.Data, nil
 }
@@ -486,12 +486,12 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	req.SetName("enable gzip")
 
-	behaviors := make([]sdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest, 0)
+	behaviors := make([]sdk.ResponsePhaseBehaviorRequest, 0)
 
-	var behString sdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest
-	var behSet sdk.ApplicationResponsePhaseBehaviorWithoutArgsRequest
+	var behString sdk.ResponsePhaseBehaviorRequest
+	var behSet sdk.BehaviorNoArgs
 	behSet.SetType("enable_gzip")
-	behString.ApplicationResponsePhaseBehaviorWithoutArgsRequest = &behSet
+	behString.BehaviorNoArgs = &behSet
 
 	behaviors = append(behaviors, behString)
 
@@ -510,7 +510,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 
 	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		CreateApplicationResponseRule(ctx, applicationId).
-		ApplicationResponsePhaseRuleEngineRequest(req.ApplicationResponsePhaseRuleEngineRequest).Execute()
+		ResponsePhaseRuleRequest(req.ResponsePhaseRuleRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {

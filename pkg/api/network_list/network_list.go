@@ -58,7 +58,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) Get(ctx context.Context, id int64) (sdk.NetworkListDetail, error) {
+func (c *Client) Get(ctx context.Context, id int64) (sdk.NetworkList, error) {
 	logger.Debug("Get network list")
 	request := c.apiClient.NetworkListsAPI.RetrieveNetworkList(ctx, id)
 
@@ -69,19 +69,19 @@ func (c *Client) Get(ctx context.Context, id int64) (sdk.NetworkListDetail, erro
 			logger.Debug("Error while getting a network list", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.NetworkListDetail{}, err
+				return sdk.NetworkList{}, err
 			}
 		}
-		return sdk.NetworkListDetail{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.NetworkList{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
 }
 
-func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkListDetail, error) {
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkList, error) {
 	logger.Debug("Create network list")
 
-	request := c.apiClient.NetworkListsAPI.CreateNetworkList(ctx).NetworkListDetailRequest(req.NetworkListDetailRequest)
+	request := c.apiClient.NetworkListsAPI.CreateNetworkList(ctx).NetworkListRequest(req.NetworkListRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -90,18 +90,18 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.NetworkLis
 			logger.Debug("Error while creating a network list", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.NetworkListDetail{}, err
+				return sdk.NetworkList{}, err
 			}
 		}
-		return sdk.NetworkListDetail{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.NetworkList{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.NetworkListDetail, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.NetworkList, error) {
 	logger.Debug("Update network list", zap.Any("ID", id), zap.Any("Name", req.Name))
-	request := c.apiClient.NetworkListsAPI.PartialUpdateNetworkList(ctx, id).PatchedNetworkListDetailRequest(req.PatchedNetworkListDetailRequest)
+	request := c.apiClient.NetworkListsAPI.PartialUpdateNetworkList(ctx, id).PatchedNetworkListRequest(req.PatchedNetworkListRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -110,10 +110,10 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.
 			logger.Debug("Error while updating a network list", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.NetworkListDetail{}, err
+				return sdk.NetworkList{}, err
 			}
 		}
-		return sdk.NetworkListDetail{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.NetworkList{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeFuncResponse.Data, nil

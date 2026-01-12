@@ -27,7 +27,7 @@ var (
 type ListCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
-	ListInstances func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error)
+	ListInstances func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedFunctionInstanceList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -36,7 +36,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListInstances: func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedApplicationFunctionInstanceList, error) {
+		ListInstances: func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedFunctionInstanceList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts, edgeApplicationID)
 		},

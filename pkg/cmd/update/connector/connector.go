@@ -89,19 +89,12 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				request.PatchedConnectorHTTPRequest = &httpStruct
 			case "storage":
-				storageStruct := sdk.PatchedConnectorStorageRequest{}
+				storageStruct := sdk.PatchedConnectorRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-				request.PatchedConnectorStorageRequest = &storageStruct
-			case "live_ingest":
-				liveIngestStruct := sdk.PatchedConnectorLiveIngestRequest{}
-				err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
-				if err != nil {
-					return utils.ErrorUnmarshalReader
-				}
-				request.PatchedConnectorLiveIngestRequest = &liveIngestStruct
+				request.PatchedConnectorRequest = &storageStruct
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -116,10 +109,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			var id int64
 			if response.ConnectorHTTP != nil {
 				id = response.ConnectorHTTP.GetId()
-			} else if response.ConnectorLiveIngest != nil {
-				id = response.ConnectorLiveIngest.GetId()
-			} else if response.ConnectorStorage != nil {
-				id = response.ConnectorStorage.GetId()
+			} else if response.Connector != nil {
+				id = response.Connector.GetId()
 			}
 
 			updateOut := output.GeneralOutput{

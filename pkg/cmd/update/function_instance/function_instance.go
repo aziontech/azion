@@ -46,7 +46,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion update function-instance --file "update.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := sdk.PatchedApplicationFunctionInstanceRequest{}
+			request := sdk.PatchedFunctionInstanceRequest{}
 			if cmd.Flags().Changed("file") {
 				err := utils.FlagFileUnmarshalJSON(fields.Path, &request)
 				if err != nil {

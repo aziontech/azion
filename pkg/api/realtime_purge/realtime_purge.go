@@ -36,10 +36,10 @@ func NewClient(c *http.Client, url string, token string) *Client {
 func (c *Client) PurgeCache(ctx context.Context, urlToPurge []string, purgeType, layer string) error {
 	logger.Debug("Purge cache", zap.Any("purge type", purgeType), zap.Any("urls", urlToPurge))
 	request := c.apiClient.PurgeAPI.CreatePurgeRequest(ctx, purgeType)
-	purgeRequest := *sdk.NewPurgeInputRequest(urlToPurge)
+	purgeRequest := *sdk.NewPurgeRequest(urlToPurge)
 	purgeRequest.SetLayer(layer)
 
-	_, httpResp, err := request.PurgeInputRequest(purgeRequest).Execute()
+	_, httpResp, err := request.PurgeRequest(purgeRequest).Execute()
 	if err != nil {
 		errBody := ""
 		logger.Debug("Error while purging cache", zap.Error(err))

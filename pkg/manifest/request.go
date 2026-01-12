@@ -39,30 +39,10 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 		return request
 	}
 
-	if connectorRequest.ConnectorLiveIngestRequest != nil {
+	if connectorRequest.ConnectorRequest != nil {
 		request := &apiConnector.UpdateRequest{}
-		body := edgesdk.PatchedConnectorLiveIngestRequest{}
-		bodyRequest := connectorRequest.ConnectorLiveIngestRequest
-		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
-		}
-		body.SetAttributes(bodyRequest.Attributes)
-
-		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
-		}
-
-		if bodyRequest.Type != "" {
-			body.SetType(bodyRequest.Type)
-		}
-		request.PatchedConnectorLiveIngestRequest = &body
-		return request
-	}
-
-	if connectorRequest.ConnectorStorageRequest != nil {
-		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorStorageRequest
-		body := edgesdk.PatchedConnectorStorageRequest{}
+		bodyRequest := connectorRequest.ConnectorRequest
+		body := edgesdk.PatchedConnectorRequest{}
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
@@ -75,7 +55,7 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 
 		body.SetAttributes(bodyRequest.Attributes)
 
-		request.PatchedConnectorStorageRequest = &body
+		request.PatchedConnectorRequest = &body
 		return request
 	}
 
@@ -288,136 +268,118 @@ func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName
 		return connector.ConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.ConnectorLiveIngestRequest != nil {
-		return connector.ConnectorLiveIngestRequest.Name, "ingest"
-	}
-
-	if connector.ConnectorStorageRequest != nil {
-		return connector.ConnectorStorageRequest.Name, "storage"
+	if connector.ConnectorRequest != nil {
+		return connector.ConnectorRequest.Name, "storage"
 	}
 
 	return defaultName, ""
 }
 
-func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest, error) {
-	behaviorsRequest := make([]edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest, 0, len(behaviors))
+func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
+	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
 	for _, behavior := range behaviors {
-		var withArgs edgesdk.ApplicationRequestPhaseBehaviorWithArgsRequest
-		var withoutArgs edgesdk.ApplicationRequestPhaseBehaviorWithoutArgsRequest
-		var captureMatchGroups edgesdk.ApplicationRequestPhaseBehaviorCaptureMatchGroupsRequest
-		var beh edgesdk.ApplicationRuleEngineRequestPhaseBehaviorsRequest
+		var argsString edgesdk.BehaviorString
+		var argsInt edgesdk.BehaviorInteger
+		var withoutArgs edgesdk.BehaviorNoArgs
+		var captureMatchGroups edgesdk.BehaviorCapture
+		var beh edgesdk.RequestPhaseBehaviorRequest
 		switch behavior.Type {
 		case "run_function":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineStringAttributes
+			var attributes edgesdk.BehaviorStringAttributes
+			var attributesInt edgesdk.BehaviorIntegerAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			withArgs.SetType("run_function")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				funcName := *attributes.Value.String
+			argsInt.SetType("run_function")
+			if attributes.Value != "" {
+				funcName := attributes.Value
 				if _, ok := FunctionIds[funcName]; !ok {
 					return nil, msg.ErrorFuncNotFound
 				}
 				funcToWorkWith := FunctionIds[funcName]
-				v := edgesdk.ApplicationRuleEngineStringAttributesValue{
-					Int64: &funcToWorkWith.InstanceID,
-				}
-				attributes.SetValue(v)
-				withArgs.SetAttributes(attributes)
+				attributesInt.SetValue(funcToWorkWith.InstanceID)
+				argsInt.SetAttributes(attributesInt)
 			}
-			beh.ApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			beh.BehaviorInteger = &argsInt
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_cache_policy":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineStringAttributes
+			var attributes edgesdk.BehaviorStringAttributes
+			var attributesInt edgesdk.BehaviorIntegerAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			withArgs.SetType("set_cache_policy")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				cacheName := *attributes.Value.String
-				if id := CacheIdsBackup[cacheName]; id > 0 {
-					v := edgesdk.ApplicationRuleEngineStringAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
-					withArgs.SetAttributes(attributes)
-					delete(CacheIds, cacheName)
-				} else {
-					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
+			argsInt.SetType("set_cache_policy")
+			if attributes.Value != "" {
+				cacheName := attributes.Value
+				if _, ok := CacheIdsBackup[cacheName]; !ok {
 					return nil, msg.ErrorCacheNotFound
 				}
+				cacheToWorkWith := CacheIdsBackup[cacheName]
+				attributesInt.SetValue(cacheToWorkWith)
+				argsInt.SetAttributes(attributesInt)
+				delete(CacheIds, cacheName)
 			}
-			beh.ApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			beh.BehaviorInteger = &argsInt
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_connector":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineStringAttributes
+			var attributes edgesdk.BehaviorStringAttributes
+			var attributesInt edgesdk.BehaviorIntegerAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			withArgs.SetType("set_connector")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				connectorName := *attributes.Value.String
-				if id := ConnectorIds[connectorName]; id > 0 {
-					v := edgesdk.ApplicationRuleEngineStringAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
-					withArgs.SetAttributes(attributes)
-					// delete(ConnectorIds, connectorName)
-				} else {
-					logger.Debug("Connector not found", zap.Any("Target", connectorName))
+			argsInt.SetType("set_connector")
+			if attributes.Value != "" {
+				connectorName := attributes.Value
+				if _, ok := ConnectorIds[connectorName]; !ok {
 					return nil, msg.ErrorConnectorNotFound
 				}
+				connectorToWorkWith := ConnectorIds[connectorName]
+				attributesInt.SetValue(connectorToWorkWith)
+				argsInt.SetAttributes(attributesInt)
 			}
-			beh.ApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			beh.BehaviorInteger = &argsInt
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "capture_match_groups":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineCaptureMatchGroupsAttributesRequest
+			var attributes edgesdk.BehaviorCaptureMatchGroupsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
 			captureMatchGroups.SetType("capture_match_groups")
 			captureMatchGroups.SetAttributes(attributes)
-			beh.ApplicationRequestPhaseBehaviorCaptureMatchGroupsRequest = &captureMatchGroups
+			beh.BehaviorCapture = &captureMatchGroups
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "redirect_to_301", "redirect_to_302", "filter_request_cookie", "rewrite_request", "add_request_header", "filter_request_header", "add_request_cookie":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineStringAttributes
+			var attributes edgesdk.BehaviorStringAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			withArgs.SetType(behavior.Type)
-			withArgs.SetAttributes(attributes)
-			beh.ApplicationRequestPhaseBehaviorWithArgsRequest = &withArgs
+			argsString.SetType(behavior.Type)
+			argsString.SetAttributes(attributes)
+			beh.BehaviorString = &argsString
 			behaviorsRequest = append(behaviorsRequest, beh)
 		default:
 			withoutArgs.SetType(behavior.Type)
-			beh.ApplicationRequestPhaseBehaviorWithoutArgsRequest = &withoutArgs
+			beh.BehaviorNoArgs = &withoutArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		}
 	}
@@ -425,14 +387,13 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 	return behaviorsRequest, nil
 }
 
-func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest, error) {
-	behaviorsResponse := make([]edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest, 0, len(behaviors))
+func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ResponsePhaseBehaviorRequest, error) {
+	behaviorsResponse := make([]edgesdk.ResponsePhaseBehaviorRequest, 0, len(behaviors))
 
 	for _, behavior := range behaviors {
-		var withArgs edgesdk.ApplicationResponsePhaseBehaviorWithArgsRequest
-		var withoutArgs edgesdk.ApplicationResponsePhaseBehaviorWithoutArgsRequest
-		var captureMatchGroups edgesdk.ApplicationResponsePhaseBehaviorCaptureMatchGroupsRequest
-		var beh edgesdk.ApplicationRuleEngineResponsePhaseBehaviorsRequest
+		var withoutArgs edgesdk.BehaviorNoArgs
+		var captureMatchGroups edgesdk.BehaviorCapture
+		var beh edgesdk.ResponsePhaseBehaviorRequest
 
 		switch behavior.Type {
 		case "capture_match_groups":
@@ -440,31 +401,45 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineCaptureMatchGroupsAttributes
+			var attributes edgesdk.BehaviorCaptureMatchGroupsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
 			captureMatchGroups.SetType("capture_match_groups")
 			captureMatchGroups.SetAttributes(attributes)
-			beh.ApplicationResponsePhaseBehaviorCaptureMatchGroupsRequest = &captureMatchGroups
+			beh.BehaviorCapture = &captureMatchGroups
 			behaviorsResponse = append(behaviorsResponse, beh)
 		case "enable_gzip", "deliver":
 			withoutArgs.SetType(behavior.Type)
-			beh.ApplicationResponsePhaseBehaviorWithoutArgsRequest = &withoutArgs
+			beh.BehaviorNoArgs = &withoutArgs
 			behaviorsResponse = append(behaviorsResponse, beh)
 		default:
-			// Everything else is WithArgs string
+			// Everything else is WithArgs - try both string and int
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.ApplicationRuleEngineStringAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
+
+			var argsString edgesdk.BehaviorString
+			var argsInt edgesdk.BehaviorInteger
+
+			var attributesString edgesdk.BehaviorStringAttributes
+			errString := json.Unmarshal(attributesJSON, &attributesString)
+
+			var attributesInt edgesdk.BehaviorIntegerAttributes
+			errInt := json.Unmarshal(attributesJSON, &attributesInt)
+
+			if errString == nil && attributesString.Value != "" {
+				argsString.SetType(behavior.Type)
+				argsString.SetAttributes(attributesString)
+				beh.BehaviorString = &argsString
+			} else if errInt == nil {
+				argsInt.SetType(behavior.Type)
+				argsInt.SetAttributes(attributesInt)
+				beh.BehaviorInteger = &argsInt
+			} else {
+				return nil, errString
 			}
-			withArgs.SetType(behavior.Type)
-			withArgs.SetAttributes(attributes)
-			beh.ApplicationResponsePhaseBehaviorWithArgsRequest = &withArgs
 			behaviorsResponse = append(behaviorsResponse, beh)
 		}
 	}
@@ -472,8 +447,8 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 	return behaviorsResponse, nil
 }
 
-func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.ApplicationRequestPhaseRuleEngineRequest {
-	request := edgesdk.ApplicationRequestPhaseRuleEngineRequest{}
+func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRuleRequest {
+	request := edgesdk.RequestPhaseRuleRequest{}
 
 	request.SetActive(rule.Active)
 	if rule.Criteria != nil {
@@ -485,8 +460,8 @@ func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.Application
 	return request
 }
 
-func transformRuleResponseCreate(rule contracts.ManifestRule) edgesdk.ApplicationResponsePhaseRuleEngineRequest {
-	request := edgesdk.ApplicationResponsePhaseRuleEngineRequest{}
+func transformRuleResponseCreate(rule contracts.ManifestRule) edgesdk.ResponsePhaseRuleRequest {
+	request := edgesdk.ResponsePhaseRuleRequest{}
 
 	request.SetActive(rule.Active)
 	if rule.Criteria != nil {
