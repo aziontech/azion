@@ -30,8 +30,8 @@ const (
 	LONG_DESCRIPTION_DELETE_OBJECTS = "Allows users to delete their objects in Storage"
 
 	EXAMPLE_CREATE          = "$ azion create storage\n$ azion create storage --help"
-	EXAMPLE_CREATE_BUCKET   = "$ azion create storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion create storage bucket --help"
-	EXAMPLE_UPDATE_BUCKET   = "$ azion update storage bucket --name 'zorosola' --edge-access 'read_only'\n$ azion update storage bucket --help"
+	EXAMPLE_CREATE_BUCKET   = "$ azion create storage bucket --name 'zorosola' --workloads-access 'read_only'\n$ azion create storage bucket --help"
+	EXAMPLE_UPDATE_BUCKET   = "$ azion update storage bucket --name 'zorosola' --workloads-access 'read_only'\n$ azion update storage bucket --help"
 	EXAMPLE_LIST            = "$ azion list storage bucket\n$ azion list storage object --bucket-name mybucket\n$ azion list storage --help"
 	EXAMPLE_LIST_BUCKET     = "$ azion list storage bucket\n$ azion list storage bucket --page 1 --page-size 3"
 	EXAMPLE_LIST_OBJECT     = "$ azion list storage object --bucket-name 'mybucket'\n$ azion list storage object --page-size 3 --details\n$ azion list storage object --help"
