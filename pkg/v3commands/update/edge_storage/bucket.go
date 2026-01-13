@@ -74,7 +74,7 @@ func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.Request
 		}
 		b.name = answers
 	}
-	if !cmd.Flags().Changed("edge-access") {
+	if !cmd.Flags().Changed("workloads-access") {
 
 		answers, err := utils.Select(
 			utils.NewSelectPrompter(
@@ -93,7 +93,7 @@ func (b *bucket) createRequestFromFlags(cmd *cobra.Command, request *api.Request
 
 func (b *bucket) addFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&b.name, "name", "", msg.FLAG_NAME_BUCKET)
-	flags.StringVar(&b.workloadsAccess, "edge-access", "", msg.FLAG_WORKLOADS_ACCESS_CREATE_BUCKET)
+	flags.StringVar(&b.workloadsAccess, "workloads-access", "", msg.FLAG_WORKLOADS_ACCESS_CREATE_BUCKET)
 	flags.StringVar(&b.fileJSON, "file", "", msg.FLAG_FILE_JSON_CREATE_BUCKET)
 	flags.BoolP("help", "h", false, msg.FLAG_HELP_CREATE_BUCKET)
 }

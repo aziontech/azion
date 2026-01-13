@@ -33,8 +33,8 @@ func (cmd *DeployCmd) doBucket(
 	bucketAccess := "read_only"
 	if WriteBucket {
 		bucketAccess = "read_write"
-	} else if manifestStorage[0].EdgeAccess != "" {
-		bucketAccess = manifestStorage[0].EdgeAccess
+	} else if manifestStorage[0].WorkloadsAccess != "" {
+		bucketAccess = manifestStorage[0].WorkloadsAccess
 	}
 	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: bucketAccess}})
 	if err != nil {
