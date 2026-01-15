@@ -8,6 +8,7 @@ import (
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
 	function "github.com/aziontech/azion-cli/pkg/cmd/describe/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/describe/function_instance"
+	"github.com/aziontech/azion-cli/pkg/cmd/describe/kv"
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/describe/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/describe/origin"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
@@ -48,6 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeConnector.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
+	cmd.AddCommand(kv.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

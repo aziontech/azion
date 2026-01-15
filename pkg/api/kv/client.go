@@ -12,7 +12,7 @@ type Client struct {
 	apiClient *sdk.APIClient
 }
 
-func NewClientV4(c *http.Client, url string, token string) *Client {
+func NewClient(c *http.Client, url string, token string) *Client {
 	conf := sdk.NewConfiguration()
 	conf.HTTPClient = c
 	conf.AddDefaultHeader("Authorization", "token "+token)
