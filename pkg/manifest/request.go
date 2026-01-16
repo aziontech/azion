@@ -278,8 +278,7 @@ func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName
 func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
 	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
 	for _, behavior := range behaviors {
-		var argsString edgesdk.BehaviorString
-		var argsInt edgesdk.BehaviorInteger
+		var withArgs edgesdk.BehaviorWithArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
 		var beh edgesdk.RequestPhaseBehaviorRequest
@@ -289,67 +288,82 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorStringAttributes
-			var attributesInt edgesdk.BehaviorIntegerAttributes
+			var attributes edgesdk.BehaviorAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			argsInt.SetType("run_function")
-			if attributes.Value != "" {
-				funcName := attributes.Value
+			withArgs.SetType("run_function")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				funcName := *attributes.Value.String
 				if _, ok := FunctionIds[funcName]; !ok {
 					return nil, msg.ErrorFuncNotFound
 				}
 				funcToWorkWith := FunctionIds[funcName]
-				attributesInt.SetValue(funcToWorkWith.InstanceID)
-				argsInt.SetAttributes(attributesInt)
+				v := edgesdk.BehaviorAttributesValue{
+					Int64: &funcToWorkWith.InstanceID,
+				}
+				attributes.SetValue(v)
+				withArgs.SetAttributes(attributes)
 			}
-			beh.BehaviorInteger = &argsInt
+			beh.BehaviorWithArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_cache_policy":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorStringAttributes
-			var attributesInt edgesdk.BehaviorIntegerAttributes
+			var attributes edgesdk.BehaviorAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			argsInt.SetType("set_cache_policy")
-			if attributes.Value != "" {
-				cacheName := attributes.Value
-				if _, ok := CacheIdsBackup[cacheName]; !ok {
+			withArgs.SetType("set_cache_policy")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				cacheName := *attributes.Value.String
+				if id := CacheIdsBackup[cacheName]; id > 0 {
+					v := edgesdk.BehaviorAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
+					withArgs.SetAttributes(attributes)
+					delete(CacheIds, cacheName)
+				} else {
+					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
 					return nil, msg.ErrorCacheNotFound
 				}
-				cacheToWorkWith := CacheIdsBackup[cacheName]
-				attributesInt.SetValue(cacheToWorkWith)
-				argsInt.SetAttributes(attributesInt)
-				delete(CacheIds, cacheName)
 			}
-			beh.BehaviorInteger = &argsInt
+			beh.BehaviorWithArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_connector":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorStringAttributes
-			var attributesInt edgesdk.BehaviorIntegerAttributes
+			var attributes edgesdk.BehaviorAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			argsInt.SetType("set_connector")
-			if attributes.Value != "" {
-				connectorName := attributes.Value
-				if _, ok := ConnectorIds[connectorName]; !ok {
+			withArgs.SetType("set_connector")
+			if attributes.Value.Int64 != nil {
+				withArgs.SetAttributes(attributes)
+			} else if attributes.Value.String != nil {
+				connectorName := *attributes.Value.String
+				if id := ConnectorIds[connectorName]; id > 0 {
+					v := edgesdk.BehaviorAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
+					withArgs.SetAttributes(attributes)
+					// delete(ConnectorIds, connectorName)
+				} else {
+					logger.Debug("Connector not found", zap.Any("Target", connectorName))
 					return nil, msg.ErrorConnectorNotFound
 				}
-				connectorToWorkWith := ConnectorIds[connectorName]
-				attributesInt.SetValue(connectorToWorkWith)
-				argsInt.SetAttributes(attributesInt)
 			}
-			beh.BehaviorInteger = &argsInt
+			beh.BehaviorWithArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "capture_match_groups":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
@@ -369,13 +383,13 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorStringAttributes
+			var attributes edgesdk.BehaviorAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
-			argsString.SetType(behavior.Type)
-			argsString.SetAttributes(attributes)
-			beh.BehaviorString = &argsString
+			withArgs.SetType(behavior.Type)
+			withArgs.SetAttributes(attributes)
+			beh.BehaviorWithArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		default:
 			withoutArgs.SetType(behavior.Type)
@@ -391,6 +405,7 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 	behaviorsResponse := make([]edgesdk.ResponsePhaseBehaviorRequest, 0, len(behaviors))
 
 	for _, behavior := range behaviors {
+		var withArgs edgesdk.BehaviorWithArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
 		var beh edgesdk.ResponsePhaseBehaviorRequest
@@ -414,32 +429,18 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 			beh.BehaviorNoArgs = &withoutArgs
 			behaviorsResponse = append(behaviorsResponse, beh)
 		default:
-			// Everything else is WithArgs - try both string and int
+			// Everything else is WithArgs string
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-
-			var argsString edgesdk.BehaviorString
-			var argsInt edgesdk.BehaviorInteger
-
-			var attributesString edgesdk.BehaviorStringAttributes
-			errString := json.Unmarshal(attributesJSON, &attributesString)
-
-			var attributesInt edgesdk.BehaviorIntegerAttributes
-			errInt := json.Unmarshal(attributesJSON, &attributesInt)
-
-			if errString == nil && attributesString.Value != "" {
-				argsString.SetType(behavior.Type)
-				argsString.SetAttributes(attributesString)
-				beh.BehaviorString = &argsString
-			} else if errInt == nil {
-				argsInt.SetType(behavior.Type)
-				argsInt.SetAttributes(attributesInt)
-				beh.BehaviorInteger = &argsInt
-			} else {
-				return nil, errString
+			var attributes edgesdk.BehaviorAttributes
+			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
+				return nil, err
 			}
+			withArgs.SetType(behavior.Type)
+			withArgs.SetAttributes(attributes)
+			beh.BehaviorWithArgs = &withArgs
 			behaviorsResponse = append(behaviorsResponse, beh)
 		}
 	}
