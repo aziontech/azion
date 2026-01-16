@@ -40,6 +40,9 @@ func (c *DescribeOutput) Output() {
 	interfaceValue := values.Elem()
 
 	for interfaceValue.Kind() == reflect.Ptr {
+		if interfaceValue.IsNil() {
+			return
+		}
 		interfaceValue = interfaceValue.Elem()
 	}
 
