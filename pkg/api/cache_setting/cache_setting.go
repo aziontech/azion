@@ -76,7 +76,7 @@ func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeAp
 
 	return resp, nil
 }
-func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (sdk.CacheSetting, error) {
+func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (*sdk.CacheSetting, error) {
 	logger.Debug("Get Cache Settings")
 
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
@@ -86,12 +86,12 @@ func (c *ClientV4) Get(ctx context.Context, edgeApplicationID, cacheSettingsID i
 		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
 		errBody, err := utils.LogAndRewindBodyV4(httpResp)
 		if err != nil {
-			return sdk.CacheSetting{}, err
+			return nil, err
 		}
 
-		return sdk.CacheSetting{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
-	return resp.Data, nil
+	return resp, nil
 }
 
 func (c *ClientV4) Delete(ctx context.Context, edgeApplicationID, cacheSettingsID int64) (int, error) {

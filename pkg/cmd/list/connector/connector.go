@@ -99,28 +99,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			}
 			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorLiveIngest != nil {
-			vObj := v.ConnectorLiveIngest
-			if opts.Details {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-					vObj.GetLastEditor(),
-					vObj.GetLastModified().String(),
-				}
-			} else {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-				}
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorStorage != nil {
-			vObj := v.ConnectorStorage
+		} else if v.Connector != nil {
+			vObj := v.Connector
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),

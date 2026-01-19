@@ -11,25 +11,25 @@ import (
 )
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedApplicationRequestPhaseRuleEngineRequest
+	sdk.PatchedRequestPhaseRuleRequest
 	ApplicationID int64
 	RulesID       int64
 	Phase         string
 }
 
 type UpdateRulesEngineResponse struct {
-	sdk.PatchedApplicationResponsePhaseRuleEngineRequest
+	sdk.PatchedResponsePhaseRuleRequest
 	ApplicationID int64
 	RulesID       int64
 	Phase         string
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.ApplicationRequestPhaseRuleEngineRequest
+	sdk.RequestPhaseRuleRequest
 }
 
 type CreateRulesEngineResponse struct {
-	sdk.ApplicationResponsePhaseRuleEngineRequest
+	sdk.ResponsePhaseRuleRequest
 }
 
 type CreateRulesEngineRequestV3 struct {
@@ -82,7 +82,7 @@ func (c *Client) DeleteResponse(ctx context.Context, edgeApplicationID int64, ru
 
 func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedApplicationRequestPhaseRuleEngineRequest(req.PatchedApplicationRequestPhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedRequestPhaseRuleRequest(req.PatchedRequestPhaseRuleRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -102,7 +102,7 @@ func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineReques
 
 func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineResponse) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.ApplicationsResponseRulesAPI.PartialUpdateApplicationResponseRule(ctx, req.ApplicationID, req.RulesID).PatchedApplicationResponsePhaseRuleEngineRequest(req.PatchedApplicationResponsePhaseRuleEngineRequest)
+	requestUpdate := c.apiClient.ApplicationsResponseRulesAPI.PartialUpdateApplicationResponseRule(ctx, req.ApplicationID, req.RulesID).PatchedResponsePhaseRuleRequest(req.PatchedResponsePhaseRuleRequest)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -120,11 +120,11 @@ func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineRespo
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.ApplicationRequestPhaseRuleEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.RequestPhaseRuleRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		CreateApplicationRequestRule(ctx, edgeApplicationID).
-		ApplicationRequestPhaseRuleEngineRequest(req).Execute()
+		RequestPhaseRuleRequest(req).Execute()
 
 	if err != nil {
 		errBody := ""
@@ -140,11 +140,11 @@ func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req
 	return &resp.Data, nil
 }
 
-func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID int64, req sdk.ApplicationResponsePhaseRuleEngineRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID int64, req sdk.ResponsePhaseRuleRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		CreateApplicationResponseRule(ctx, edgeApplicationID).
-		ApplicationResponsePhaseRuleEngineRequest(req).Execute()
+		ResponsePhaseRuleRequest(req).Execute()
 
 	if err != nil {
 		errBody := ""

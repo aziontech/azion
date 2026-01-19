@@ -24,12 +24,12 @@ func TestNewCmd(t *testing.T) {
 
 		listCmd := NewListCmd(f)
 		// Override the API call to deserialize our fixture into the SDK struct
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 			b, err := os.ReadFile("./fixtures/rules.json")
 			if err != nil {
 				return nil, err
 			}
-			var out sdk.PaginatedApplicationRequestPhaseRuleEngineList
+			var out sdk.PaginatedRequestPhaseRuleList
 			if err := json.Unmarshal(b, &out); err != nil {
 				return nil, err
 			}
@@ -65,12 +65,12 @@ func TestNewCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		listCmd := NewListCmd(f)
 		// Stub API to use fixture
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 			b, err := os.ReadFile("./fixtures/rules.json")
 			if err != nil {
 				return nil, err
 			}
-			var out sdk.PaginatedApplicationRequestPhaseRuleEngineList
+			var out sdk.PaginatedRequestPhaseRuleList
 			if err := json.Unmarshal(b, &out); err != nil {
 				return nil, err
 			}
@@ -92,12 +92,12 @@ func TestNewCmd(t *testing.T) {
 		f, _, _ := testutils.NewFactory(mock)
 		listCmd := NewListCmd(f)
 		// Stub API to use empty fixture
-		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		listCmd.ListRulesEngineRequest = func(_ context.Context, _ *contracts.ListOptions, _ int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 			b, err := os.ReadFile("./fixtures/norules.json")
 			if err != nil {
 				return nil, err
 			}
-			var out sdk.PaginatedApplicationRequestPhaseRuleEngineList
+			var out sdk.PaginatedRequestPhaseRuleList
 			if err := json.Unmarshal(b, &out); err != nil {
 				return nil, err
 			}

@@ -5,7 +5,7 @@ import (
 )
 
 type CreateRequest struct {
-	sdk.NetworkListDetailRequest
+	sdk.NetworkListRequest
 }
 
 func NewCreateRequest() *CreateRequest {
@@ -13,7 +13,7 @@ func NewCreateRequest() *CreateRequest {
 }
 
 type UpdateRequest struct {
-	sdk.PatchedNetworkListDetailRequest
+	sdk.PatchedNetworkListRequest
 }
 
 func NewUpdateRequest() *UpdateRequest {
