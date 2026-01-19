@@ -1,5 +1,5 @@
 package kv
 
 var (
-	ErrorCreateNamespace = "Error while creating a namespace: %v"
+	ErrorCreateNamespace = "Error while creating a namespace: %s"
 )

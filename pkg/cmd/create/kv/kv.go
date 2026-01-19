@@ -44,12 +44,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.Namespace = answer
 			}
 
+			request.SetName(fields.Namespace)
+
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 			_, err := client.Create(ctx, request)
 			if err != nil {
-				return fmt.Errorf(msg.ErrorCreateNamespace, err)
+				return fmt.Errorf(msg.ErrorCreateNamespace, err.Error())
 			}
 
 			creatOut := output.GeneralOutput{

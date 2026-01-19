@@ -5,25 +5,25 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
-	msg "github.com/aziontech/azion-cli/messages/connector"
-	api "github.com/aziontech/azion-cli/pkg/api/connector"
+	msg "github.com/aziontech/azion-cli/messages/list/kv"
+	api "github.com/aziontech/azion-cli/pkg/api/kv"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/kv-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io             *iostreams.IOStreams
-	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error)
+	ListNamespaces func(context.Context, *contracts.ListOptions) (*sdk.NamespaceList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error) {
+		ListNamespaces: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.NamespaceList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},
@@ -34,113 +34,59 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	opts := &contracts.ListOptions{}
 	cmd := &cobra.Command{
 		Use:           msg.Usage,
-		Short:         msg.ListShortDescription,
-		Long:          msg.ListLongDescription,
+		Short:         msg.ShortDescription,
+		Long:          msg.LongDescription,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion list connector --details
-			$ azion list connector --order_by "id"
-			$ azion list connector --page 1
-			$ azion list connector --page_size 5
-			$ azion list connector --sort "asc"
+			$ azion list kv
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {
-				return fmt.Errorf(msg.ErrorGetConnectors.Error(), err)
+				return fmt.Errorf(msg.ErrorGetKv.Error(), err)
 			}
 			return nil
 		},
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
-	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
+	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 	return cmd
 }
 
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
-	connectors, err := list.ListConnectors(ctx, opts)
+	namespaces, err := list.ListNamespaces(ctx, opts)
 	if err != nil {
 		return err
 	}
 
 	listOut := output.ListOutput{}
-	listOut.Columns = []string{"ID", "NAME", "TYPE", "ACTIVE"}
+	listOut.Columns = []string{"NAME"}
 	listOut.Out = f.IOStreams.Out
 	listOut.Flags = f.Flags
 
 	if opts.Details {
-		listOut.Columns = []string{"ID", "NAME", "TYPE", "ACTIVE", "LAST EDITOR", "LAST MODIFIED"}
+		listOut.Columns = []string{"NAME", "CREATED AT", "LAST MODIFIED"}
 	}
 
-	if connectors == nil || len(connectors.Results) == 0 {
+	if namespaces == nil || len(namespaces.Results) == 0 {
 		return output.Print(&listOut)
 	}
-	for _, v := range connectors.Results {
+	for _, v := range namespaces.Results {
 		var ln []string
-		if v.ConnectorHTTP != nil {
-			vObj := v.ConnectorHTTP
-			if opts.Details {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-					vObj.GetLastEditor(),
-					vObj.GetLastModified().String(),
-				}
-			} else {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-				}
+		if opts.Details {
+			ln = []string{
+				v.GetName(),
+				v.GetCreatedAt().String(),
+				v.GetLastModified().String(),
 			}
-			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorLiveIngest != nil {
-			vObj := v.ConnectorLiveIngest
-			if opts.Details {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-					vObj.GetLastEditor(),
-					vObj.GetLastModified().String(),
-				}
-			} else {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-				}
+		} else {
+			ln = []string{
+				v.GetName(),
 			}
-			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorStorage != nil {
-			vObj := v.ConnectorStorage
-			if opts.Details {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-					vObj.GetLastEditor(),
-					vObj.GetLastModified().String(),
-				}
-			} else {
-				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
-					vObj.GetName(),
-					vObj.GetType(),
-					fmt.Sprintf("%v", vObj.GetActive()),
-				}
-			}
-			listOut.Lines = append(listOut.Lines, ln)
-
 		}
+		listOut.Lines = append(listOut.Lines, ln)
 	}
 
 	return output.Print(&listOut)

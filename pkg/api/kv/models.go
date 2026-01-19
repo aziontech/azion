@@ -5,5 +5,5 @@ import (
 )
 
 type CreateRequest struct {
-	ConnectorPolymorphicRequest sdk.NamespaceCreateRequest
+	sdk.NamespaceCreateRequest
 }
