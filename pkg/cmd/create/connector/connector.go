@@ -67,21 +67,21 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				request.ConnectorHTTPRequest = &httpStruct
 			case "storage":
-				storageStruct := sdk.ConnectorStorageRequest{}
+				storageStruct := sdk.ConnectorRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
 				if err != nil {
 					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				request.ConnectorStorageRequest = &storageStruct
-			case "live_ingest":
-				liveIngestStruct := sdk.ConnectorLiveIngestRequest{}
-				err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
-				if err != nil {
-					logger.Debug("Failed to unmarshal file", zap.Error(err))
-					return utils.ErrorUnmarshalReader
-				}
-				request.ConnectorLiveIngestRequest = &liveIngestStruct
+				request.ConnectorRequest = &storageStruct
+				// case "live_ingest":
+				// 	liveIngestStruct := sdk.ConnectorLiveIngestRequest{}
+				// 	err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
+				// 	if err != nil {
+				// 		logger.Debug("Failed to unmarshal file", zap.Error(err))
+				// 		return utils.ErrorUnmarshalReader
+				// 	}
+				// 	request.ConnectorLiveIngestRequest = &liveIngestStruct
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -97,9 +97,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			case "http":
 				id = response.ConnectorHTTP.GetId()
 			case "storage":
-				id = response.ConnectorStorage.GetId()
-			case "live_ingest":
-				id = response.ConnectorLiveIngest.GetId()
+				id = response.Connector.GetId()
+				// case "live_ingest":
+				// 	id = response.ConnectorLiveIngest.GetId()
 			}
 
 			creatOut := output.GeneralOutput{

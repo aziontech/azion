@@ -27,7 +27,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(ctx context.Context, id int64) (sdk.NetworkListDetail, error)
+	Get      func(ctx context.Context, id int64) (sdk.NetworkList, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -36,7 +36,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, id int64) (sdk.NetworkListDetail, error) {
+		Get: func(ctx context.Context, id int64) (sdk.NetworkList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, id)
 		},

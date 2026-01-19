@@ -30,7 +30,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, int64) (sdk.CacheSetting, error)
+	Get      func(context.Context, int64, int64) (*sdk.CacheSetting, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -39,7 +39,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, appID, cacheID int64) (sdk.CacheSetting, error) {
+		Get: func(ctx context.Context, appID, cacheID int64) (*sdk.CacheSetting, error) {
 			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, appID, cacheID)
 		},

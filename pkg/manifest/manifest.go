@@ -295,12 +295,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
 					conn.Address = http.Attributes.Addresses
-				case "ingest":
-					liveIngest := connectorResp.ConnectorLiveIngest
-					conn.Id = liveIngest.GetId()
-					conn.Name = liveIngest.GetName()
 				case "storage":
-					storage := connectorResp.ConnectorStorage
+					storage := connectorResp.Connector
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -321,12 +317,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					http := connectorResp.ConnectorHTTP
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
-				case "ingest":
-					liveIngest := connectorResp.ConnectorLiveIngest
-					conn.Id = liveIngest.GetId()
-					conn.Name = liveIngest.GetName()
 				case "storage":
-					storage := connectorResp.ConnectorStorage
+					storage := connectorResp.Connector
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -414,7 +406,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.ApplicationRequestPhaseRuleEngineRequest = createRequest
+						req.RequestPhaseRuleRequest = createRequest
 						req.Behaviors = bh
 						created, err := client.CreateRulesEngineRequest(ctx, conf.Application.ID, rule.Phase, req)
 						if err != nil {
@@ -433,7 +425,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.ApplicationResponsePhaseRuleEngineRequest = createRequest
+						req.ResponsePhaseRuleRequest = createRequest
 						req.Behaviors = bh
 						created, err := client.CreateRulesEngineResponse(ctx, conf.Application.ID, rule.Phase, req)
 						if err != nil {

@@ -84,7 +84,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				response, err := client.CreateRequest(context.Background(), fields.ApplicationID, request.ApplicationRequestPhaseRuleEngineRequest)
+				response, err := client.CreateRequest(context.Background(), fields.ApplicationID, request.RequestPhaseRuleRequest)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 				}
@@ -97,7 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while parsing <"+fields.Path+"> file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				response, err := client.CreateResponse(context.Background(), fields.ApplicationID, request.ApplicationResponsePhaseRuleEngineRequest)
+				response, err := client.CreateResponse(context.Background(), fields.ApplicationID, request.ResponsePhaseRuleRequest)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorCreateRulesEngine.Error(), err)
 				}
