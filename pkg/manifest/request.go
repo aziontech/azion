@@ -278,7 +278,7 @@ func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName
 func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
 	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
 	for _, behavior := range behaviors {
-		var withArgs edgesdk.BehaviorWithArgs
+		var withArgs edgesdk.BehaviorArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
 		var beh edgesdk.RequestPhaseBehaviorRequest
@@ -288,7 +288,7 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorAttributes
+			var attributes edgesdk.BehaviorArgsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
@@ -301,20 +301,20 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 					return nil, msg.ErrorFuncNotFound
 				}
 				funcToWorkWith := FunctionIds[funcName]
-				v := edgesdk.BehaviorAttributesValue{
+				v := edgesdk.BehaviorArgsAttributesValue{
 					Int64: &funcToWorkWith.InstanceID,
 				}
 				attributes.SetValue(v)
 				withArgs.SetAttributes(attributes)
 			}
-			beh.BehaviorWithArgs = &withArgs
+			beh.BehaviorArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_cache_policy":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorAttributes
+			var attributes edgesdk.BehaviorArgsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
@@ -324,7 +324,7 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			} else if attributes.Value.String != nil {
 				cacheName := *attributes.Value.String
 				if id := CacheIdsBackup[cacheName]; id > 0 {
-					v := edgesdk.BehaviorAttributesValue{
+					v := edgesdk.BehaviorArgsAttributesValue{
 						Int64: &id,
 					}
 					attributes.SetValue(v)
@@ -335,14 +335,14 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 					return nil, msg.ErrorCacheNotFound
 				}
 			}
-			beh.BehaviorWithArgs = &withArgs
+			beh.BehaviorArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "set_connector":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorAttributes
+			var attributes edgesdk.BehaviorArgsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
@@ -352,7 +352,7 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			} else if attributes.Value.String != nil {
 				connectorName := *attributes.Value.String
 				if id := ConnectorIds[connectorName]; id > 0 {
-					v := edgesdk.BehaviorAttributesValue{
+					v := edgesdk.BehaviorArgsAttributesValue{
 						Int64: &id,
 					}
 					attributes.SetValue(v)
@@ -363,7 +363,7 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 					return nil, msg.ErrorConnectorNotFound
 				}
 			}
-			beh.BehaviorWithArgs = &withArgs
+			beh.BehaviorArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		case "capture_match_groups":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
@@ -383,13 +383,13 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorAttributes
+			var attributes edgesdk.BehaviorArgsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
 			withArgs.SetType(behavior.Type)
 			withArgs.SetAttributes(attributes)
-			beh.BehaviorWithArgs = &withArgs
+			beh.BehaviorArgs = &withArgs
 			behaviorsRequest = append(behaviorsRequest, beh)
 		default:
 			withoutArgs.SetType(behavior.Type)
@@ -405,7 +405,7 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 	behaviorsResponse := make([]edgesdk.ResponsePhaseBehaviorRequest, 0, len(behaviors))
 
 	for _, behavior := range behaviors {
-		var withArgs edgesdk.BehaviorWithArgs
+		var withArgs edgesdk.BehaviorArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
 		var beh edgesdk.ResponsePhaseBehaviorRequest
@@ -434,13 +434,13 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 			if err != nil {
 				return nil, err
 			}
-			var attributes edgesdk.BehaviorAttributes
+			var attributes edgesdk.BehaviorArgsAttributes
 			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
 				return nil, err
 			}
 			withArgs.SetType(behavior.Type)
 			withArgs.SetAttributes(attributes)
-			beh.BehaviorWithArgs = &withArgs
+			beh.BehaviorArgs = &withArgs
 			behaviorsResponse = append(behaviorsResponse, beh)
 		}
 	}
