@@ -6,6 +6,7 @@ import (
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/create/applications"
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/create/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/create/connector"
+	firewall "github.com/aziontech/azion-cli/pkg/cmd/create/firewall"
 	edgeFunction "github.com/aziontech/azion-cli/pkg/cmd/create/function"
 	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/create/function_instance"
 	"github.com/aziontech/azion-cli/pkg/cmd/create/kv"
@@ -32,6 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion create connector -h
 		$ azion create workload -h
 		$ azion create network-list -h
+		$ azion create firewall -h		
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -53,6 +55,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(profile.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))
 	cmd.AddCommand(kv.NewCmd(f))
+	cmd.AddCommand(firewall.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

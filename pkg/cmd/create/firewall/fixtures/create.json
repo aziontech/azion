@@ -1,0 +1,16 @@
+{
+  "name": "Test Firewall",
+  "active": true,
+  "debug": false,
+  "modules": {
+    "functions": {
+      "enabled": true
+    },
+    "network_protection": {
+      "enabled": true
+    },
+    "waf": {
+      "enabled": true
+    }
+  }
+}
