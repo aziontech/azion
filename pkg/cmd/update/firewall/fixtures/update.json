@@ -1,0 +1,10 @@
+{
+  "name": "Updated Firewall",
+  "active": false,
+  "debug": true,
+  "modules": {
+    "waf": {
+      "enabled": true
+    }
+  }
+}
