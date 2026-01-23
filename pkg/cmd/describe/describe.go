@@ -7,6 +7,7 @@ import (
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall"
+	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_instance"
 	function "github.com/aziontech/azion-cli/pkg/cmd/describe/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/describe/function_instance"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/kv"
@@ -53,6 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(networklist.NewCmd(f))
 	cmd.AddCommand(kv.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))
+	cmd.AddCommand(firewallinstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
