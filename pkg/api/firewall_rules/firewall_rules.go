@@ -2,6 +2,7 @@ package firewallrules
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -80,10 +81,12 @@ func (c *Client) Create(ctx context.Context, firewallID int64, req *CreateReques
 	resp, httpResp, err := request.Execute()
 
 	if err != nil {
+		fmt.Println(err)
 		errBody := ""
 		if httpResp != nil {
 			logger.Debug("Error while creating Firewall Rule", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			fmt.Println(errBody)
 			if err != nil {
 				return sdk.FirewallRule{}, err
 			}
