@@ -51,7 +51,7 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 	}
 
 	for _, replacement := range configReplacements {
-		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", replacement.key, replacement.value)
+		cmdStr := fmt.Sprintf("manifest generate -k '%s' -v '%s'", replacement.key, replacement.value)
 		command := vul.Command("", cmdStr, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 

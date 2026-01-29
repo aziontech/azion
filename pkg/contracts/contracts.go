@@ -49,14 +49,13 @@ type DescribeOptions struct {
 }
 
 type AzionApplicationOptions struct {
-	Test          func(path string) error      `json:"-"`
-	Name          string                       `json:"name"`
-	Bucket        string                       `json:"bucket"`
-	Preset        string                       `json:"preset"` // framework: react, next, vue, angular and etc
-	Env           string                       `json:"env"`
-	Prefix        string                       `json:"prefix"`
+	Name          string                       `json:"name,omitempty"`
+	Bucket        string                       `json:"bucket,omitempty"`
+	Preset        string                       `json:"preset,omitempty"` // framework: react, next, vue, angular and etc
+	Env           string                       `json:"env,omitempty"`
+	Prefix        string                       `json:"prefix,omitempty"`
 	SkipDeletion  *bool                        `json:"skip-deletion,omitempty"`
-	NotFirstRun   bool                         `json:"not-first-run"`
+	NotFirstRun   bool                         `json:"not-first-run,omitempty"`
 	Function      []AzionJsonDataFunction      `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`
