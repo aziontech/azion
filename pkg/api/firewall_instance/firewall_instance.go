@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -14,9 +14,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, firewall
 	logger.Debug("List Firewall Function Instances")
 
 	req := c.apiClient.FirewallsFunctionAPI.
-		ListFirewallFunction(ctx, firewallID).
-		Page(opts.Page).
-		PageSize(opts.PageSize)
+		ListFirewallFunction(ctx, firewallID) //.
+		// Page(opts.Page).
+		// PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {

@@ -3,7 +3,7 @@ package applications
 import (
 	"context"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -15,7 +15,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	logger.Debug("List Applications")
 
 	req := c.apiClient.ApplicationsAPI.
-		ListApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
+		ListApplications(ctx) //.Page(opts.Page).PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {

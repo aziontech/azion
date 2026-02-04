@@ -1,11 +1,11 @@
 package connector
 
 import (
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
 type CreateRequest struct {
-	sdk.ConnectorPolymorphicRequest
+	sdk.ConnectorRequest2
 }
 
 func NewCreateRequest() *CreateRequest {
@@ -13,7 +13,7 @@ func NewCreateRequest() *CreateRequest {
 }
 
 type UpdateRequest struct {
-	sdk.PatchedConnectorPolymorphicRequest
+	sdk.PatchedConnectorRequest2
 }
 
 func NewUpdateRequest() *UpdateRequest {

@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -61,8 +61,8 @@ func (c *ClientV4) List(ctx context.Context, opts *contracts.ListOptions, edgeAp
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		ListCacheSettings(ctx, edgeApplicationID).
 		Ordering(opts.OrderBy).
-		Page(opts.Page).
-		PageSize(opts.PageSize).
+		// Page(opts.Page).
+		// PageSize(opts.PageSize).
 		Search(opts.Filter).
 		Execute()
 	if err != nil {

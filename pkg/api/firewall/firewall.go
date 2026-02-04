@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -17,8 +17,8 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	}
 	resp, httpResp, err := c.apiClient.FirewallsAPI.ListFirewalls(ctx).
 		Ordering(opts.OrderBy).
-		Page(opts.Page).
-		PageSize(opts.PageSize).
+		// Page(opts.Page).
+		// PageSize(opts.PageSize).
 		Search(opts.Sort).
 		Execute()
 

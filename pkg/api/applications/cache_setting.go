@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"go.uber.org/zap"
 )
@@ -19,7 +19,7 @@ func (c *Client) CreateCacheSettingsNextApplication(ctx context.Context, req *Cr
 	BCache := sdk.BrowserCacheModuleRequest{}
 	BCache.SetBehavior("override")
 	BCache.SetMaxAge(7200)
-	ECache := sdk.CacheSettingsEdgeCacheModuleRequest{}
+	ECache := sdk.CacheSettingsCacheModuleRequest{}
 	ECache.SetBehavior("override")
 	ECache.SetMaxAge(7200)
 
@@ -62,7 +62,8 @@ func (c *Client) CreateCacheEdgeApplication(
 func (c *Client) ListCacheEdgeApp(ctx context.Context, edgeApplicationID int64, opts *contracts.ListOptions) ([]sdk.CacheSetting, error) {
 	logger.Debug("List Cache - Application")
 	resp, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
-		ListCacheSettings(ctx, edgeApplicationID).Ordering("id").PageSize(opts.PageSize).Page(opts.Page).Execute()
+		ListCacheSettings(ctx, edgeApplicationID).Ordering("id"). //PageSize(opts.PageSize).Page(opts.Page).
+		Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
