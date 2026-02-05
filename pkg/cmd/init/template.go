@@ -14,11 +14,13 @@ func (cmd *initCmd) createTemplateAzion() error {
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
 
+	rotatePrefix := true
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:   cmd.name,
-		Env:    "production",
-		Preset: cmd.preset,
-		Prefix: "",
+		Name:         cmd.name,
+		Env:          "production",
+		Preset:       cmd.preset,
+		Prefix:       "",
+		RotatePrefix: &rotatePrefix,
 	}
 
 	azionJson.Function = []contracts.AzionJsonDataFunction{}

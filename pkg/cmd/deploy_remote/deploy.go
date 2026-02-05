@@ -143,10 +143,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}()
 
-	versionID := cmd.VersionID()
 	var oldprefix, newprefix string
 
-	oldprefix, newprefix = conf.Prefix, versionID
+	if conf.Prefix == "" || conf.RotatePrefix == nil || *conf.RotatePrefix == true {
+		versionID := cmd.VersionID()
+		oldprefix, newprefix = conf.Prefix, versionID
+	} else {
+		oldprefix, newprefix = conf.Prefix, conf.Prefix
+	}
 
 	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {
@@ -159,14 +163,15 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if !SkipBuild && conf.NotFirstRun {
 		if !SkipFramework {
 			conf.Prefix = newprefix
-			cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
-			vul := vulcanPkg.NewVulcan()
-			command := vul.Command("", cmdStr, cmd.F)
-			logger.Debug("Running the following command", zap.Any("Command", command))
-
-			err := cmd.commandRunInteractive(cmd.F, command)
-			if err != nil {
-				return err
+			if conf.RotatePrefix == nil || *conf.RotatePrefix == true {
+				cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+				vul := vulcanPkg.NewVulcan()
+				command := vul.Command("", cmdStr, cmd.F)
+				logger.Debug("Running the following command", zap.Any("Command", command))
+				err := cmd.commandRunInteractive(cmd.F, command)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
