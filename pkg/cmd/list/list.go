@@ -6,6 +6,8 @@ import (
 	applications "github.com/aziontech/azion-cli/pkg/cmd/list/applications"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_setting"
 	connector "github.com/aziontech/azion-cli/pkg/cmd/list/connector"
+	firewall "github.com/aziontech/azion-cli/pkg/cmd/list/firewall"
+	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/list/firewall_instance"
 	function "github.com/aziontech/azion-cli/pkg/cmd/list/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/list/function_instance"
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/list/network_list"
@@ -16,7 +18,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
 	wdeployments "github.com/aziontech/azion-cli/pkg/cmd/list/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/workloads"
-
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -32,6 +33,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion list origin -h
 		$ azion list function-instance -h
 		$ azion list network-list -h
+		$ azion list firewall -h
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -51,6 +53,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
+	// cmd.AddCommand(kv.NewCmd(f))
+	cmd.AddCommand(firewall.NewCmd(f))
+	cmd.AddCommand(firewallinstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

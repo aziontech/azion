@@ -20,7 +20,7 @@ type ResponseV4 interface {
 
 type GetResponseV4 interface {
 	GetCount() int64
-	GetResults() []sdk.ResponseListCacheSetting
+	GetResults() []sdk.CacheSetting
 }
 
 type UpdateRequest struct {

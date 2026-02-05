@@ -1,0 +1,7 @@
+{
+  "name": "Updated Instance",
+  "active": false,
+  "args": {
+    "updated_key": "updated_value"
+  }
+}

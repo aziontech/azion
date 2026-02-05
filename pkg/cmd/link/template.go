@@ -17,11 +17,13 @@ func (cmd *LinkCmd) createTemplateAzion(info *LinkInfo) error {
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
 
+	rotatePrefix := true
 	azionJson := &contracts.AzionApplicationOptions{
-		Name:   info.Name,
-		Env:    "production",
-		Preset: strings.ToLower(info.Preset),
-		Prefix: "",
+		Name:         info.Name,
+		Env:          "production",
+		Preset:       strings.ToLower(info.Preset),
+		Prefix:       "",
+		RotatePrefix: &rotatePrefix,
 	}
 	azionJson.Function = []contracts.AzionJsonDataFunction{}
 	azionJson.Domain.Name = "__DEFAULT__"

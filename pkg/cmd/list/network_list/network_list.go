@@ -17,13 +17,13 @@ import (
 
 type ListCmd struct {
 	Io              *iostreams.IOStreams
-	ListNetworkList func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error)
+	ListNetworkList func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListSummaryList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListNetworkList: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListList, error) {
+		ListNetworkList: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedNetworkListSummaryList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},

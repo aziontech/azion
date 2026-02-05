@@ -1,0 +1,26 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 1111,
+    "name": "string",
+    "modules": {
+      "ddos_protection": {
+        "enabled": true
+      },
+      "functions": {
+        "enabled": true
+      },
+      "network_protection": {
+        "enabled": true
+      },
+      "waf": {
+        "enabled": true
+      }
+    },
+    "debug": false,
+    "active": true,
+    "last_editor": "string",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "product_version": "string"
+  }
+}

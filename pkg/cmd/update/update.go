@@ -6,6 +6,8 @@ import (
 	application "github.com/aziontech/azion-cli/pkg/cmd/update/application"
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/update/cache_setting"
 	connector "github.com/aziontech/azion-cli/pkg/cmd/update/connector"
+	firewall "github.com/aziontech/azion-cli/pkg/cmd/update/firewall"
+	firewallInstance "github.com/aziontech/azion-cli/pkg/cmd/update/firewall_instance"
 	function "github.com/aziontech/azion-cli/pkg/cmd/update/function"
 	functionInstance "github.com/aziontech/azion-cli/pkg/cmd/update/function_instance"
 	networkList "github.com/aziontech/azion-cli/pkg/cmd/update/network_list"
@@ -29,6 +31,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		$ azion update connector -h
 		$ azion update workload -h
 		$ azion update network-list -h
+		$ azion update firewall -h
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
@@ -46,6 +49,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))
+	cmd.AddCommand(firewall.NewCmd(f))
+	cmd.AddCommand(firewallInstance.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

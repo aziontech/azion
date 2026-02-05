@@ -39,6 +39,13 @@ func (c *DescribeOutput) Output() {
 	values := reflect.ValueOf(c.Values)
 	interfaceValue := values.Elem()
 
+	for interfaceValue.Kind() == reflect.Ptr {
+		if interfaceValue.IsNil() {
+			return
+		}
+		interfaceValue = interfaceValue.Elem()
+	}
+
 	for i := 0; i < interfaceValue.NumField(); i++ {
 		field := interfaceValue.Field(i)
 

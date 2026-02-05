@@ -45,7 +45,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create function-instance --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			request := new(sdk.ApplicationFunctionInstanceRequest)
+			request := new(sdk.FunctionInstanceRequest)
 			if !cmd.Flags().Changed("application-id") {
 				answer, err := utils.AskInput(msg.AskInputApplicationID)
 				if err != nil {

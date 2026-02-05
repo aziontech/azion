@@ -25,8 +25,8 @@ var phase string
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
-	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error)
-	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error)
+	ListRulesEngineRequest  func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedRequestPhaseRuleList, error)
+	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedResponsePhaseRuleList, error)
 	AskInput                func(string) (string, error)
 	EdgeApplicationID       int64
 }
@@ -37,11 +37,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 		ReadInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedApplicationRequestPhaseRuleEngineList, error) {
+		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineRequest(ctx, opts, appID)
 		},
-		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedApplicationResponsePhaseRuleEngineList, error) {
+		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedResponsePhaseRuleList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.ListRulesEngineResponse(ctx, opts, appID)
 		},
@@ -113,7 +113,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		extractor := func(rule sdk.ApplicationRequestPhaseRuleEngine, details bool) []string {
+		extractor := func(rule sdk.RequestPhaseRule, details bool) []string {
 			if details {
 				return []string{
 					fmt.Sprintf("%d", rule.Id),
@@ -131,10 +131,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		// Ensure rules.Results is not nil before passing to RenderList
 		if rules == nil {
-			rules = &sdk.PaginatedApplicationRequestPhaseRuleEngineList{}
+			rules = &sdk.PaginatedRequestPhaseRuleList{}
 		}
 		if rules.Results == nil {
-			rules.Results = []sdk.ApplicationRequestPhaseRuleEngine{}
+			rules.Results = []sdk.RequestPhaseRule{}
 		}
 		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
 
@@ -144,7 +144,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			return err
 		}
 
-		extractor := func(rule sdk.ApplicationResponsePhaseRuleEngine, details bool) []string {
+		extractor := func(rule sdk.ResponsePhaseRule, details bool) []string {
 			if details {
 				return []string{
 					fmt.Sprintf("%d", rule.Id),
@@ -162,10 +162,10 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 
 		// Ensure rules.Results is not nil before passing to RenderList
 		if rules == nil {
-			rules = &sdk.PaginatedApplicationResponsePhaseRuleEngineList{}
+			rules = &sdk.PaginatedResponsePhaseRuleList{}
 		}
 		if rules.Results == nil {
-			rules.Results = []sdk.ApplicationResponsePhaseRuleEngine{}
+			rules.Results = []sdk.ResponsePhaseRule{}
 		}
 		return RenderList(rules.Results, opts.Details, f.IOStreams.Out, f.Flags, extractor)
 	default:
