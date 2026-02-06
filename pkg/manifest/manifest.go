@@ -305,7 +305,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				connectorConf = append(connectorConf, conn)
 			} else {
 				request := apiConnector.CreateRequest{
-					ConnectorPolymorphicRequest: connector,
+					ConnectorRequest2: connector,
 				}
 				connectorResp, err := connectorClient.Create(ctx, &request)
 				if err != nil {
@@ -406,7 +406,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.RequestPhaseRuleRequest = createRequest
+						req.RequestPhaseRule2 = createRequest
 						req.Behaviors = bh
 						created, err := client.CreateRulesEngineRequest(ctx, conf.Application.ID, rule.Phase, req)
 						if err != nil {

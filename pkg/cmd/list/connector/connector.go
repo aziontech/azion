@@ -11,19 +11,19 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
 	Io             *iostreams.IOStreams
-	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error)
+	ListConnectors func(context.Context, *contracts.ListOptions) (*sdk.PaginatedConnectorList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
-		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorPolymorphicList, error) {
+		ListConnectors: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedConnectorList, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.List(ctx, opts)
 		},

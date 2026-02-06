@@ -14,11 +14,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
-func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
+func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest2) *apiConnector.UpdateRequest {
 	if connectorRequest.ConnectorHTTPRequest != nil {
 		request := &apiConnector.UpdateRequest{}
 		bodyRequest := connectorRequest.ConnectorHTTPRequest
@@ -263,7 +263,7 @@ func transformRuleRequest(rule contracts.ManifestRule) *apiApplications.UpdateRu
 	return request
 }
 
-func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName string) (string, string) {
+func getConnectorName(connector edgesdk.ConnectorRequest2, defaultName string) (string, string) {
 	if connector.ConnectorHTTPRequest != nil {
 		return connector.ConnectorHTTPRequest.Name, "http"
 	}
@@ -275,13 +275,13 @@ func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName
 	return defaultName, ""
 }
 
-func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
-	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
+func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehavior2, error) {
+	behaviorsRequest := make([]edgesdk.RequestPhaseBehavior2, 0, len(behaviors))
 	for _, behavior := range behaviors {
 		var withArgs edgesdk.BehaviorArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
-		var beh edgesdk.RequestPhaseBehaviorRequest
+		var beh edgesdk.RequestPhaseBehavior2
 		switch behavior.Type {
 		case "run_function":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
@@ -448,8 +448,8 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 	return behaviorsResponse, nil
 }
 
-func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRuleRequest {
-	request := edgesdk.RequestPhaseRuleRequest{}
+func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRule2 {
+	request := edgesdk.RequestPhaseRule2{}
 
 	request.SetActive(rule.Active)
 	if rule.Criteria != nil {

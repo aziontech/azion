@@ -4,7 +4,7 @@ import (
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
 type FileOps struct {
@@ -228,14 +228,14 @@ type MemoryFS struct {
 }
 
 type ManifestV4 struct {
-	Build               Build                                 `json:"build"`
-	Storage             []StorageManifest                     `json:"storage"`
-	Functions           []Function                            `json:"functions"`
-	Applications        []Applications                        `json:"applications"`
-	Connectors          []edgesdk.ConnectorPolymorphicRequest `json:"connectors"`
-	Workloads           []WorkloadManifest                    `json:"workloads"`
-	WorkloadDeployments []WorkloadDeployment                  `json:"workload_deployments,omitempty"`
-	Purge               []PurgeManifest                       `json:"purge"`
+	Build               Build                       `json:"build"`
+	Storage             []StorageManifest           `json:"storage"`
+	Functions           []Function                  `json:"functions"`
+	Applications        []Applications              `json:"applications"`
+	Connectors          []edgesdk.ConnectorRequest2 `json:"connectors"`
+	Workloads           []WorkloadManifest          `json:"workloads"`
+	WorkloadDeployments []WorkloadDeployment        `json:"workload_deployments,omitempty"`
+	Purge               []PurgeManifest             `json:"purge"`
 }
 
 type PurgeManifest struct {
@@ -498,11 +498,11 @@ type ManifestRulesEngine struct {
 
 // ManifestRule represents a rule in the manifest.json file
 type ManifestRule struct {
-	Name        string                                           `json:"name"`
-	Description string                                           `json:"description,omitempty"`
-	Active      bool                                             `json:"active,omitempty"`
-	Criteria    [][]edgesdk.EdgeApplicationCriterionFieldRequest `json:"criteria"`
-	Behaviors   []ManifestRuleBehavior                           `json:"behaviors"`
+	Name        string                                       `json:"name"`
+	Description string                                       `json:"description,omitempty"`
+	Active      bool                                         `json:"active,omitempty"`
+	Criteria    [][]edgesdk.ApplicationCriterionFieldRequest `json:"criteria"`
+	Behaviors   []ManifestRuleBehavior                       `json:"behaviors"`
 }
 
 // ManifestRuleBehavior represents a behavior in a rule

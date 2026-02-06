@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"github.com/MakeNowJust/heredoc"
 	"go.uber.org/zap"
@@ -186,7 +186,7 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *sdk.Cac
 			return fmt.Errorf("%w: %q", msg.ErrorTieredCachingFlag, fields.tieredCachingEnabled)
 		}
 
-		eCache := sdk.CacheSettingsEdgeCacheModuleRequest{}
+		eCache := sdk.CacheSettingsCacheModuleRequest{}
 		tCache := sdk.CacheSettingsTieredCacheModuleRequest{}
 		tCache.SetEnabled(tiered)
 		eCache.SetTieredCache(tCache)

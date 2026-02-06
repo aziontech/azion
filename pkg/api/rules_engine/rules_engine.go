@@ -6,12 +6,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedRequestPhaseRuleRequest
+	sdk.PatchedRequestPhaseRule
 	ApplicationID int64
 	RulesID       int64
 	Phase         string
@@ -25,7 +25,7 @@ type UpdateRulesEngineResponse struct {
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.RequestPhaseRuleRequest
+	sdk.RequestPhaseRule2
 }
 
 type CreateRulesEngineResponse struct {
@@ -82,7 +82,7 @@ func (c *Client) DeleteResponse(ctx context.Context, edgeApplicationID int64, ru
 
 func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedRequestPhaseRuleRequest(req.PatchedRequestPhaseRuleRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedRequestPhaseRule(req.PatchedRequestPhaseRule)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -120,11 +120,11 @@ func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineRespo
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.RequestPhaseRuleRequest) (RulesEngineResponse, error) {
+func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.RequestPhaseRule2) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		CreateApplicationRequestRule(ctx, edgeApplicationID).
-		RequestPhaseRuleRequest(req).Execute()
+		RequestPhaseRule2(req).Execute()
 
 	if err != nil {
 		errBody := ""

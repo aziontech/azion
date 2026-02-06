@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -15,9 +15,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 	logger.Debug("List Function Instances")
 
 	req := c.apiClient.ApplicationsFunctionAPI.
-		ListApplicationFunctionInstances(ctx, edgeApplicationID).
-		Page(opts.Page).
-		PageSize(opts.PageSize)
+		ListApplicationFunctionInstances(ctx, edgeApplicationID) //.
+		// Page(opts.Page).
+		// PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {
