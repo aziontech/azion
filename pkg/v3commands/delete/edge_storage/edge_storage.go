@@ -18,8 +18,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion delete edge-storage bucket --bucket-id 1234
-		$ azion delete edge-storage object --bucket-id 1234 --object-key 'object-key'
+		$ azion delete edge-storage bucket --name 'bucket-name'
+		$ azion delete edge-storage object --bucket-name 'bucket-name' --object-key 'object-key'
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
