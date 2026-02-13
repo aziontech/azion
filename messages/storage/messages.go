@@ -42,7 +42,7 @@ const (
 	EXAMPLE_UPDATE_OBJECT   = "$ azion update storage object --bucket-name 'mybucket' --object-key 'path/index.html' --source './index.html'\n$ azion update storage object --help"
 	EXAMPLE_DESCRIBE        = "$ azion describe storage object --help"
 	EXAMPLE_DESCRIBE_OBJECT = "$ azion describe storage object --help\n$ azion describe storage object --bucket-name 'mybucket' --object-key 'test.json'\n$ azion describe storage object --bucket-name 'mybucket' --object-key 'test.json' --format json\n$ azion describe storage object --bucket-name 'mybucket' --object-key 'test.json' --out './tmp/test.json'"
-	EXAMPLE_DELETE_OBJECTS  = "$ azion delete storage object --bucket-name 'bucket-name'\n$ azion delete storage object --help"
+	EXAMPLE_DELETE_OBJECTS  = "$ azion delete storage object --bucket-name 'bucket-name' --object-key 'path/index.html'\n$ azion delete storage object --help"
 
 	FLAG_HELP                           = "Displays more information about the storage command"
 	FLAG_HELP_CREATE_BUCKET             = "Displays more information about the create storage bucket command"
