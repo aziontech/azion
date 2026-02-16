@@ -8,16 +8,12 @@
 
 set -euo pipefail
 
-# --- Error handling -----------------------------------------------------------
-
 trap 'on_error $LINENO' ERR
 
 on_error() {
     error "installation failed at line $1"
     exit 1
 }
-
-# --- Color output (terminal-aware) --------------------------------------------
 
 setup_colors() {
     if [ -t 1 ] && command -v tput >/dev/null 2>&1 && tput colors >/dev/null 2>&1; then
@@ -47,8 +43,6 @@ error() {
     printf '%s[error]%s %s\n' "${RED}" "${RESET}" "$1" >&2
 }
 
-# --- OS and architecture detection --------------------------------------------
-
 detect_os() {
     local os
     os=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -58,7 +52,7 @@ detect_os() {
         darwin*) PLATFORM="darwin" ;;
         freebsd*) PLATFORM="freebsd" ;;
         mingw*|msys*|cygwin*)
-            error "Windows is not supported. Please use WSL or download from https://github.com/aziontech/azion/releases"
+            error "Windows is not supported by this script. Please use WSL or download from https://github.com/aziontech/azion/releases or https://community.chocolatey.org/packages/azion"
             exit 1
             ;;
         *)
@@ -84,8 +78,6 @@ detect_arch() {
             ;;
     esac
 }
-
-# --- HTTP client --------------------------------------------------------------
 
 detect_http_client() {
     if command -v curl >/dev/null 2>&1; then
@@ -117,8 +109,6 @@ http_download() {
     fi
 }
 
-# --- Version resolution -------------------------------------------------------
-
 resolve_version() {
     if [ -n "${AZION_VERSION:-}" ]; then
         VERSION="$AZION_VERSION"
@@ -135,8 +125,6 @@ resolve_version() {
         info "latest version: $VERSION"
     fi
 }
-
-# --- Package manager detection ------------------------------------------------
 
 detect_package_manager() {
     PKG_MANAGER=""
@@ -168,8 +156,6 @@ detect_package_manager() {
         PKG_FORMAT="apk"
     fi
 }
-
-# --- Download and verify ------------------------------------------------------
 
 build_download_url() {
     local base="https://github.com/aziontech/azion/releases/download/${VERSION}"
@@ -222,8 +208,6 @@ download_and_verify() {
 
     verify_checksum "${TMP_DIR}/${ASSET_NAME}" "${TMP_DIR}/checksum"
 }
-
-# --- Installation -------------------------------------------------------------
 
 install_with_package_manager() {
     local pkg_file="${TMP_DIR}/${ASSET_NAME}"
@@ -281,8 +265,6 @@ install_binary() {
     configure_path "$install_dir"
 }
 
-# --- PATH configuration (binary fallback only) --------------------------------
-
 configure_path() {
     local install_dir="$1"
 
@@ -330,10 +312,7 @@ configure_path() {
     fi
 }
 
-# --- Post-install verification ------------------------------------------------
-
 verify_installation() {
-    # For binary installs, temporarily add to PATH for verification
     local install_dir="${AZION_INSTALL_DIR:-$HOME/.azion/bin}"
     export PATH="${install_dir}:$PATH"
 
@@ -358,8 +337,6 @@ verify_installation() {
     info "documentation: https://www.azion.com/en/documentation/products/azion-cli/overview/"
 }
 
-# --- Main ---------------------------------------------------------------------
-
 main() {
     setup_colors
 
@@ -383,7 +360,6 @@ main() {
         detect_http_client
         resolve_version
 
-        # Create temp directory with cleanup
         TMP_DIR=$(mktemp -d)
         trap 'rm -rf "$TMP_DIR"' EXIT
 
