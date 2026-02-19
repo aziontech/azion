@@ -22,4 +22,8 @@ var (
 	ErrorReadArgsFile           = errors.New("Failed to read the args file: %w")
 	ErrorUnmarshalArgsFile      = errors.New("Failed to unmarshal args.json file: %w")
 	ErrorReadManifest           = "Failed to read the manifest.json file: %w. Please remember to install dependencies and build your project before running the deploy command"
+	ErrorCreateFirewall         = errors.New("Failed to create the firewall")
+	ErrorUpdateFirewall         = errors.New("Failed to update the firewall")
+	ErrorCreateFirewallRule     = errors.New("Failed to create the firewall rule")
+	ErrorUpdateFirewallRule     = errors.New("Failed to update the firewall rule")
 )

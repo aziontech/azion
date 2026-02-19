@@ -2,6 +2,7 @@ package deploy
 
 import (
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
+	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
 	apiFunction "github.com/aziontech/azion-cli/pkg/api/function"
 	apiOrigin "github.com/aziontech/azion-cli/pkg/api/origin"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -16,6 +17,7 @@ type Clients struct {
 	Origin      *apiOrigin.Client
 	Bucket      *apiStorage.Client
 	Storage     *apiStorage.Client
+	Firewall    *apiFirewall.Client
 }
 
 func NewClients(f *cmdutil.Factory) *Clients {
@@ -31,5 +33,6 @@ func NewClients(f *cmdutil.Factory) *Clients {
 		Origin:      apiOrigin.NewClient(httpClient, apiURL, token),
 		Bucket:      apiStorage.NewClient(httpClient, storageURL, token),
 		Storage:     apiStorage.NewClient(httpClient, storageURL, token),
+		Firewall:    apiFirewall.NewClient(httpClient, apiURL, token),
 	}
 }

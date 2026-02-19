@@ -516,6 +516,11 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		return err
 	}
 
+	err = man.CreateFirewalls(ctx, f, conf, manifest, projectConf, msgs)
+	if err != nil {
+		return err
+	}
+
 	clipurge := apiPurge.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 	for _, purgeObj := range manifest.Purge {
 		err = clipurge.PurgeCache(ctx, purgeObj.Items, purgeObj.Type, *purgeObj.Layer)

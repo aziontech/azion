@@ -255,6 +255,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	// Deploy firewalls separately if they are not managed via the manifest
+	if len(manifestStructure.Firewalls) == 0 && len(conf.Firewalls) > 0 {
+		err = cmd.doFirewall(clients.Firewall, ctx, conf, &msgs)
+		if err != nil {
+			return err
+		}
+	}
+
 	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
 		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
 		if err != nil {

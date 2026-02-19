@@ -45,10 +45,14 @@ var (
   - Application Cache Settings: Override Cache Settings - Maximum TTL in seconds: 7200
 
 Create a Cache Settings configuration with the above specifications? (y/N)`
-	SkipBucket           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
-	SkipUpload           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
-	SkipUploadBuild      = "Skipping upload of static files due to project not being built and no new static files being generated"
-	NameInUseBucket      = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
-	NameInUseApplication = "Application name is already in use. Trying to create Application with the following name: %s\n"
-	NameInUseDomain      = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
+	SkipBucket                 = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
+	SkipUpload                 = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
+	SkipUploadBuild            = "Skipping upload of static files due to project not being built and no new static files being generated"
+	NameInUseBucket            = "Bucket name is already in use. Trying to create bucket with the following name: %s\n"
+	NameInUseApplication       = "Application name is already in use. Trying to create Application with the following name: %s\n"
+	NameInUseDomain            = "Domain name is already in use. Trying to create Domain with the following name: %s\n"
+	DeployOutputFirewallCreate = "Created Firewall %v with ID %v\n"
+	DeployOutputFirewallUpdate = "Updated Firewall %v with ID %v\n"
+	FirewallInUse              = "This Firewall's name is already in use, please try another one\n"
+	NameInUseFirewall          = "Firewall name is already in use. Trying to create Firewall with the following name: %s\n"
 )

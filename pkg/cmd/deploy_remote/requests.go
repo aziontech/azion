@@ -12,7 +12,9 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	msgRemote "github.com/aziontech/azion-cli/messages/deploy-remote"
 	apiapp "github.com/aziontech/azion-cli/pkg/api/applications"
+	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -281,6 +283,98 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return workload, nil
+}
+
+func (cmd *DeployCmd) doFirewall(client *apiFirewall.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	if len(conf.Firewalls) == 0 {
+		// No existing firewall, create a new one
+		var projName string
+		for {
+			firewallResp, err := cmd.createFirewall(client, ctx, conf, msgs)
+			if err != nil {
+				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					if NoPrompt {
+						return err
+					}
+					logger.FInfoFlags(cmd.Io.Out, msgRemote.FirewallInUse, cmd.F.Format, cmd.F.Out)
+					*msgs = append(*msgs, msgRemote.FirewallInUse)
+					if Auto {
+						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
+						msgf := fmt.Sprintf(msgRemote.NameInUseFirewall, projName)
+						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
+						*msgs = append(*msgs, msgf)
+					} else {
+						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
+						if err != nil {
+							return err
+						}
+					}
+					conf.Name = projName
+					continue
+				}
+				return err
+			}
+
+			conf.Firewalls = []contracts.AzionJsonDataFirewall{
+				{
+					Id:   firewallResp.GetId(),
+					Name: firewallResp.GetName(),
+				},
+			}
+			break
+		}
+
+		err := cmd.WriteAzionJsonContent(conf, ProjectConf)
+		if err != nil {
+			logger.Debug("Error while writing azion.json file", zap.Error(err))
+			return err
+		}
+	} else {
+		// Update the first firewall
+		err := cmd.updateFirewall(client, ctx, conf, msgs)
+		if err != nil {
+			logger.Debug("Error while updating Firewall", zap.Error(err))
+			return err
+		}
+	}
+	return nil
+}
+
+func (cmd *DeployCmd) createFirewall(client *apiFirewall.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) (edgesdk.Firewall, error) {
+	reqFw := apiFirewall.NewCreateRequest()
+	reqFw.SetName(conf.Name)
+	reqFw.SetActive(true)
+
+	firewall, err := client.Create(ctx, reqFw)
+	if err != nil {
+		return edgesdk.Firewall{}, fmt.Errorf(msgRemote.ErrorCreateFirewall.Error(), err)
+	}
+
+	msgf := fmt.Sprintf(msgRemote.DeployOutputFirewallCreate, firewall.GetName(), firewall.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
+
+	return firewall, nil
+}
+
+func (cmd *DeployCmd) updateFirewall(client *apiFirewall.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	if len(conf.Firewalls) == 0 {
+		return nil
+	}
+
+	fwConf := conf.Firewalls[0]
+	reqFw := apiFirewall.NewUpdateRequest()
+	reqFw.SetName(fwConf.Name)
+
+	firewall, err := client.Update(ctx, reqFw, fwConf.Id)
+	if err != nil {
+		return fmt.Errorf(msgRemote.ErrorUpdateFirewall.Error(), err)
+	}
+
+	msgf := fmt.Sprintf(msgRemote.DeployOutputFirewallUpdate, firewall.GetName(), firewall.GetId())
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
+	*msgs = append(*msgs, msgf)
+	return nil
 }
 
 func checkArgsJson(cmd *DeployCmd, projectPath string) error {
