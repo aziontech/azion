@@ -24,4 +24,5 @@ var (
 	ErrorApplicationIDRequired  = errors.New("Application ID is required for this operation")
 	ErrorWorkloadIDRequired     = errors.New("Workload ID is required for this operation")
 	ErrorConnectorTypeNotFound  = errors.New("Failed to determine connector type")
+	ErrorReadManifest           = "Failed to read the manifest.json file: %w. Please remember to install dependencies and build your project before running the deploy command"
 )

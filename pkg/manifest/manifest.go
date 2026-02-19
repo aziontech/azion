@@ -59,7 +59,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 
 	byteManifest, err := man.FileReader(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(msg.ErrorReadManifest, err)
 	}
 
 	err = json.Unmarshal(byteManifest, &manifest)

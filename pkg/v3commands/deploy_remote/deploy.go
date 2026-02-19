@@ -141,9 +141,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	versionID := cmd.VersionID()
-
-	conf.Prefix = versionID
+	if conf.Prefix == "" || conf.RotatePrefix == nil || *conf.RotatePrefix == true {
+		conf.Prefix = cmd.VersionID()
+	}
 
 	err = checkArgsJson(cmd, ProjectConf)
 	if err != nil {

@@ -213,7 +213,9 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf.Prefix = cmd.VersionID()
+	if conf.Prefix == "" || conf.RotatePrefix == nil || *conf.RotatePrefix == true {
+		conf.Prefix = cmd.VersionID()
+	}
 
 	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd, settings)
 	if err != nil {
