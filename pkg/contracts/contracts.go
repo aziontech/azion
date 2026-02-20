@@ -67,6 +67,7 @@ type AzionApplicationOptions struct {
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 	Workloads     AzionJsonDataWorkload        `json:"workloads"`
 	Connectors    []AzionJsonDataConnectors    `json:"connectors"`
+	Firewalls     []AzionJsonDataFirewall      `json:"firewalls,omitempty"`
 }
 
 type AzionApplicationOptionsV3 struct {
@@ -207,6 +208,17 @@ type AzionJsonDataCacheSettings struct {
 	Name string `json:"name"`
 }
 
+type AzionJsonDataFirewall struct {
+	Id    int64                       `json:"id"`
+	Name  string                      `json:"name"`
+	Rules []AzionJsonDataFirewallRule `json:"rules,omitempty"`
+}
+
+type AzionJsonDataFirewallRule struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
@@ -237,7 +249,16 @@ type ManifestV4 struct {
 	Connectors          []edgesdk.ConnectorPolymorphicRequest `json:"connectors"`
 	Workloads           []WorkloadManifest                    `json:"workloads"`
 	WorkloadDeployments []WorkloadDeployment                  `json:"workload_deployments,omitempty"`
+	Firewalls           []FirewallManifest                    `json:"firewall,omitempty"`
 	Purge               []PurgeManifest                       `json:"purge"`
+}
+
+type FirewallManifest struct {
+	Name        string                          `json:"name"`
+	Modules     *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
+	Debug       *bool                           `json:"debug,omitempty"`
+	Active      *bool                           `json:"active,omitempty"`
+	RulesEngine []edgesdk.FirewallRuleRequest   `json:"rules_engine,omitempty"`
 }
 
 type PurgeManifest struct {

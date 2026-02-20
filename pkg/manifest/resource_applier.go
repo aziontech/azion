@@ -12,6 +12,7 @@ import (
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
+	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
 	functionsApi "github.com/aziontech/azion-cli/pkg/api/function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
@@ -39,14 +40,22 @@ type ResourceContext struct {
 	ConnectorClient   *apiConnector.Client
 	FunctionClient    *functionsApi.Client
 	PurgeClient       *apiPurge.Client
+	FirewallClient    *apiFirewall.Client
 
 	// ID Mappings - these track created/existing resource IDs
-	CacheIds       map[string]int64
-	CacheIdsBackup map[string]int64
-	RuleIds        map[string]contracts.RuleIdsStruct
-	ConnectorIds   map[string]int64
-	DeploymentIds  map[string]int64
-	FunctionIds    map[string]contracts.AzionJsonDataFunction
+	CacheIds        map[string]int64
+	CacheIdsBackup  map[string]int64
+	RuleIds         map[string]contracts.RuleIdsStruct
+	ConnectorIds    map[string]int64
+	DeploymentIds   map[string]int64
+	FunctionIds     map[string]contracts.AzionJsonDataFunction
+	FirewallIds     map[string]int64
+	FirewallRuleIds map[string]firewallRuleIdRef
+}
+
+type firewallRuleIdRef struct {
+	FirewallId int64
+	RuleId     int64
 }
 
 func NewResourceContext(
@@ -77,14 +86,17 @@ func NewResourceContext(
 		ConnectorClient:   apiConnector.NewClient(f.HttpClient, apiURL, token),
 		FunctionClient:    functionsApi.NewClient(f.HttpClient, apiURL, token),
 		PurgeClient:       apiPurge.NewClient(f.HttpClient, apiURL, token),
+		FirewallClient:    apiFirewall.NewClient(f.HttpClient, apiURL, token),
 
 		// Initialize ID maps
-		CacheIds:       make(map[string]int64),
-		CacheIdsBackup: make(map[string]int64),
-		RuleIds:        make(map[string]contracts.RuleIdsStruct),
-		ConnectorIds:   make(map[string]int64),
-		DeploymentIds:  make(map[string]int64),
-		FunctionIds:    make(map[string]contracts.AzionJsonDataFunction),
+		CacheIds:        make(map[string]int64),
+		CacheIdsBackup:  make(map[string]int64),
+		RuleIds:         make(map[string]contracts.RuleIdsStruct),
+		ConnectorIds:    make(map[string]int64),
+		DeploymentIds:   make(map[string]int64),
+		FunctionIds:     make(map[string]contracts.AzionJsonDataFunction),
+		FirewallIds:     make(map[string]int64),
+		FirewallRuleIds: make(map[string]firewallRuleIdRef),
 	}
 
 	// Populate ID maps from existing config
@@ -116,6 +128,16 @@ func (rc *ResourceContext) populateIdMapsFromConfig() {
 	for _, connectorConf := range rc.Conf.Connectors {
 		rc.ConnectorIds[connectorConf.Name] = connectorConf.Id
 	}
+
+	for _, fwConf := range rc.Conf.Firewalls {
+		rc.FirewallIds[fwConf.Name] = fwConf.Id
+		for _, ruleConf := range fwConf.Rules {
+			rc.FirewallRuleIds[ruleConf.Name] = firewallRuleIdRef{
+				FirewallId: fwConf.Id,
+				RuleId:     ruleConf.Id,
+			}
+		}
+	}
 }
 
 func (rc *ResourceContext) WriteConfig() error {
@@ -140,10 +162,13 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			request.SetDefaultArgs(funcMan.DefaultArgs)
 			request.SetName(funcMan.Name)
 			request.SetCode(string(code))
-			_, err := rc.FunctionClient.Update(rc.Ctx, &request, funcConf.ID)
+			updated, err := rc.FunctionClient.Update(rc.Ctx, &request, funcConf.ID)
 			if err != nil {
 				return err
 			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateFunction, updated.GetName(), updated.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			request := functionsApi.CreateRequest{}
 			request.SetActive(true)
@@ -162,6 +187,9 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			}
 			rc.FunctionIds[funcMan.Name] = newFunc
 			rc.Conf.Function = append(rc.Conf.Function, newFunc)
+			msgf := fmt.Sprintf(msg.ManifestCreateFunction, resp.GetName(), resp.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 	}
 
@@ -188,10 +216,13 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
-			_, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, funcConf.InstanceID)
+			updated, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, funcConf.InstanceID)
 			if err != nil {
 				return err
 			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateFunctionInstance, updated.GetName(), updated.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			request := apiApplications.CreateInstanceRequest{}
 			request.SetActive(true)
@@ -219,6 +250,9 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				InstanceID: resp.GetId(),
 			}
 			rc.FunctionIds[funcConf.Name] = newFunc
+			msgf := fmt.Sprintf(msg.ManifestCreateFunctionInstance, resp.GetName(), resp.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 	}
 
@@ -236,10 +270,13 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 	if rc.Conf.Application.ID > 0 {
 		req := transformEdgeApplicationRequestUpdate(app)
 		req.Id = rc.Conf.Application.ID
-		_, err := rc.ApplicationClient.Update(rc.Ctx, req)
+		updated, err := rc.ApplicationClient.Update(rc.Ctx, req)
 		if err != nil {
 			return err
 		}
+		msgf := fmt.Sprintf(msg.ManifestUpdateEdgeApplication, updated.GetName(), updated.GetId())
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
 		createreq := transformEdgeApplicationRequestCreate(app)
 		resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
@@ -247,6 +284,9 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 			return err
 		}
 		rc.Conf.Application.ID = resp.GetId()
+		msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
 	}
 
 	return rc.WriteConfig()
@@ -299,6 +339,9 @@ func (rc *ResourceContext) updateCache(cache contracts.ManifestCacheSetting, cac
 		Id:   updated.GetData().Id,
 		Name: updated.GetData().Name,
 	}
+	msgf := fmt.Sprintf(msg.ManifestUpdateCache, newCache.Name, newCache.Id)
+	logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+	*rc.Msgs = append(*rc.Msgs, msgf)
 	return newCache, nil
 }
 
@@ -313,6 +356,9 @@ func (rc *ResourceContext) createCache(cache contracts.ManifestCacheSetting) (co
 		Name: responseCache.GetName(),
 	}
 	rc.CacheIds[newCache.Name] = newCache.Id
+	msgf := fmt.Sprintf(msg.ManifestCreateCache, newCache.Name, newCache.Id)
+	logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+	*rc.Msgs = append(*rc.Msgs, msgf)
 	return newCache, nil
 }
 
@@ -341,6 +387,9 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymor
 			default:
 				return msg.ErrorConnectorTypeNotFound
 			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateConnector, conn.Name, conn.Id)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 			connectorConf = append(connectorConf, conn)
 		} else {
 			request := apiConnector.CreateRequest{
@@ -364,6 +413,9 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymor
 				return msg.ErrorConnectorTypeNotFound
 			}
 			rc.ConnectorIds[conn.Name] = conn.Id
+			msgf := fmt.Sprintf(msg.ManifestCreateConnector, conn.Name, conn.Id)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 			connectorConf = append(connectorConf, conn)
 		}
 	}
@@ -390,6 +442,9 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 				}
 				return err
 			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateRule, newRule.Name, newRule.Id)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
 			delete(rc.RuleIds, newRule.Name)
 		} else {
@@ -397,6 +452,9 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 			if err != nil {
 				return err
 			}
+			msgf := fmt.Sprintf(msg.ManifestCreateRule, newRule.Name, newRule.Id)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
 		}
 	}
@@ -506,6 +564,9 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 		}
 		rc.Conf.Workloads.Domains = updated.GetDomains()
 		rc.Conf.Workloads.Url = utils.Concat("https://", updated.GetWorkloadDomain())
+		msgf := fmt.Sprintf(msg.ManifestUpdateWorkload, updated.GetName(), updated.GetId())
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
 		request := transformWorkloadRequestCreate(workloadMan, rc.Conf.Application.ID)
 		resp, err := rc.WorkloadClient.Create(rc.Ctx, request)
@@ -516,6 +577,9 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 		rc.Conf.Workloads.Name = resp.GetName()
 		rc.Conf.Workloads.Domains = resp.GetDomains()
 		rc.Conf.Workloads.Url = utils.Concat("https://", resp.GetWorkloadDomain())
+		msgf := fmt.Sprintf(msg.ManifestCreateWorkload, resp.GetName(), resp.GetId())
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
 	}
 
 	return rc.WriteConfig()
@@ -529,10 +593,13 @@ func (rc *ResourceContext) ApplyWorkloadDeployments(deployments []contracts.Work
 	for _, deployment := range deployments {
 		if id := rc.DeploymentIds[deployment.Name]; id > 0 {
 			request := transformWorkloadDeploymentRequestUpdate(deployment, rc.Conf)
-			_, err := rc.WorkloadClient.UpdateDeployment(rc.Ctx, request, rc.Conf.Workloads.Id, id)
+			updated, err := rc.WorkloadClient.UpdateDeployment(rc.Ctx, request, rc.Conf.Workloads.Id, id)
 			if err != nil {
 				return err
 			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateWorkloadDeployment, updated.GetName(), updated.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			request := transformWorkloadDeploymentRequestCreate(deployment, rc.Conf)
 			resp, err := rc.WorkloadClient.CreateDeployment(rc.Ctx, request, rc.Conf.Workloads.Id)
@@ -543,9 +610,119 @@ func (rc *ResourceContext) ApplyWorkloadDeployments(deployments []contracts.Work
 				Id:   resp.GetId(),
 				Name: resp.GetName(),
 			})
+			msgf := fmt.Sprintf(msg.ManifestCreateWorkloadDeployment, resp.GetName(), resp.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 	}
 
+	return rc.WriteConfig()
+}
+
+func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest) error {
+	if len(firewalls) == 0 {
+		return nil
+	}
+
+	firewallConf := []contracts.AzionJsonDataFirewall{}
+
+	for _, fwMan := range firewalls {
+		var firewallId int64
+
+		if id := rc.FirewallIds[fwMan.Name]; id > 0 {
+			updateReq := apiFirewall.NewUpdateRequest()
+			updateReq.SetName(fwMan.Name)
+			if fwMan.Active != nil {
+				updateReq.SetActive(*fwMan.Active)
+			}
+			if fwMan.Debug != nil {
+				updateReq.SetDebug(*fwMan.Debug)
+			}
+			if fwMan.Modules != nil {
+				updateReq.SetModules(*fwMan.Modules)
+			}
+			updated, err := rc.FirewallClient.Update(rc.Ctx, updateReq, id)
+			if err != nil {
+				logger.Debug("Error while updating firewall", zap.Error(err))
+				return err
+			}
+			firewallId = updated.GetId()
+			msgf := fmt.Sprintf(msg.ManifestUpdateFirewall, updated.GetName(), updated.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+		} else {
+			createReq := apiFirewall.NewCreateRequest()
+			createReq.SetName(fwMan.Name)
+			if fwMan.Active != nil {
+				createReq.SetActive(*fwMan.Active)
+			}
+			if fwMan.Debug != nil {
+				createReq.SetDebug(*fwMan.Debug)
+			}
+			if fwMan.Modules != nil {
+				createReq.SetModules(*fwMan.Modules)
+			}
+			created, err := rc.FirewallClient.Create(rc.Ctx, createReq)
+			if err != nil {
+				logger.Debug("Error while creating firewall", zap.Error(err))
+				return err
+			}
+			firewallId = created.GetId()
+			msgf := fmt.Sprintf(msg.ManifestCreateFirewall, created.GetName(), created.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+		}
+
+		fwRuleConf := []contracts.AzionJsonDataFirewallRule{}
+		for _, rule := range fwMan.RulesEngine {
+			if ruleRef := rc.FirewallRuleIds[rule.Name]; ruleRef.RuleId > 0 {
+				patchReq := edgesdk.PatchedFirewallRuleRequest{}
+				patchReq.SetName(rule.Name)
+				if rule.Active != nil {
+					patchReq.SetActive(*rule.Active)
+				}
+				if rule.Description != nil {
+					patchReq.SetDescription(*rule.Description)
+				}
+				patchReq.SetCriteria(rule.Criteria)
+				patchReq.SetBehaviors(rule.Behaviors)
+
+				updated, err := rc.FirewallClient.UpdateRule(rc.Ctx, firewallId, ruleRef.RuleId, patchReq)
+				if err != nil {
+					logger.Debug("Error while updating firewall rule", zap.Error(err))
+					return err
+				}
+				fwRuleConf = append(fwRuleConf, contracts.AzionJsonDataFirewallRule{
+					Id:   updated.GetId(),
+					Name: updated.GetName(),
+				})
+				msgf := fmt.Sprintf(msg.ManifestUpdateFirewallRule, updated.GetName(), updated.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			} else {
+				created, err := rc.FirewallClient.CreateRule(rc.Ctx, firewallId, rule)
+				if err != nil {
+					logger.Debug("Error while creating firewall rule", zap.Error(err))
+					return err
+				}
+				fwRuleConf = append(fwRuleConf, contracts.AzionJsonDataFirewallRule{
+					Id:   created.GetId(),
+					Name: created.GetName(),
+				})
+				msgf := fmt.Sprintf(msg.ManifestCreateFirewallRule, created.GetName(), created.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			}
+		}
+
+		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{
+			Id:    firewallId,
+			Name:  fwMan.Name,
+			Rules: fwRuleConf,
+		})
+	}
+
+	rc.Conf.Firewalls = firewallConf
 	return rc.WriteConfig()
 }
 
@@ -556,6 +733,9 @@ func (rc *ResourceContext) ApplyPurge(purges []contracts.PurgeManifest) error {
 			logger.Debug("Error while purging domains", zap.Error(err))
 			return err
 		}
+		msgf := fmt.Sprintf(msg.ManifestPurgeSuccess, purgeObj.Type)
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
 	}
 	return nil
 }

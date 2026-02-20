@@ -204,6 +204,13 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 		resourceCount++
 	}
 
+	if len(manifestStructure.Firewalls) > 0 {
+		if err := rc.ApplyFirewalls(manifestStructure.Firewalls); err != nil {
+			return err
+		}
+		resourceCount++
+	}
+
 	if len(manifestStructure.Purge) > 0 {
 		if err := rc.ApplyPurge(manifestStructure.Purge); err != nil {
 			return err

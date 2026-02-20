@@ -7,17 +7,16 @@ import (
 	"os"
 	"time"
 
+	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
+	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	msg "github.com/aziontech/azion-cli/messages/manifest"
+	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
+	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/briandowns/spinner"
-
-	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
-	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
-	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
-	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 )
 
 var (
@@ -134,6 +133,13 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	if len(manifest.WorkloadDeployments) > 0 {
 		logger.Debug("Applying workload deployments")
 		if err := rc.ApplyWorkloadDeployments(manifest.WorkloadDeployments); err != nil {
+			return err
+		}
+	}
+
+	if len(manifest.Firewalls) > 0 {
+		logger.Debug("Applying firewalls")
+		if err := rc.ApplyFirewalls(manifest.Firewalls); err != nil {
 			return err
 		}
 	}
