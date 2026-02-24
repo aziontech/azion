@@ -12,7 +12,7 @@
           "conditional": "if",
           "variable": "${header_accept}",
           "operator": "does_not_exist",
-          "argument": {}
+          "argument": null
         }
       ]
     ],
