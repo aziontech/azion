@@ -17,8 +17,8 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	}
 	resp, httpResp, err := c.apiClient.NetworkListsAPI.ListNetworkLists(ctx).
 		Ordering(opts.OrderBy).
-		// Page(opts.Page).
-		// PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).
 		Execute()
 

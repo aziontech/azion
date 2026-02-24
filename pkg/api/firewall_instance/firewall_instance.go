@@ -14,9 +14,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, firewall
 	logger.Debug("List Firewall Function Instances")
 
 	req := c.apiClient.FirewallsFunctionAPI.
-		ListFirewallFunction(ctx, firewallID) //.
-		// Page(opts.Page).
-		// PageSize(opts.PageSize)
+		ListFirewallFunction(ctx, firewallID).
+		Page(opts.Page).
+		PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {

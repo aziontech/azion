@@ -95,8 +95,8 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	}
 	resp, httpResp, err := c.apiClient.WorkloadsAPI.ListWorkloads(ctx).
 		Ordering(opts.OrderBy).
-		// Page(opts.Page).
-		// PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).
 		Execute()
 
@@ -122,8 +122,8 @@ func (c *Client) ListDeployments(ctx context.Context, opts *contracts.ListOption
 	}
 	resp, httpResp, err := c.apiClient.WorkloadDeploymentsAPI.ListWorkloadDeployments(ctx, id).
 		Ordering(opts.OrderBy).
-		// Page(opts.Page).
-		// PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).
 		Execute()
 

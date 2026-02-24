@@ -1,0 +1,59 @@
+{
+  "name": "giant-friend",
+  "bucket": "giant-friend",
+  "preset": "next",
+  "env": "production",
+  "prefix": "20260220120634",
+  "rotate-prefix": true,
+  "not-first-run": true,
+  "function": {
+    "id": 51358,
+    "name": "__DEFAULT__",
+    "file": ".edge/worker.js",
+    "args": "./azion/args.json",
+    "instance-id": 46147,
+    "instance-name": "__DEFAULT__",
+    "cache-id": 273157
+  },
+  "application": {
+    "id": 1771590580,
+    "name": "__DEFAULT__"
+  },
+  "domain": {
+    "id": 1771604271,
+    "name": "giant-friend",
+    "domain_name": "glt0v3209t.map.azionedge.net",
+    "url": "https://glt0v3209t.map.azionedge.net"
+  },
+  "rt-purge": {
+    "purge_on_publish": true
+  },
+  "origin": [
+    {
+      "origin-id": 253689,
+      "origin-key": "c5ca2319-c238-4470-aea4-ad4817df3eb3",
+      "name": "origin-storage-default"
+    }
+  ],
+  "rules-engine": {
+    "created": false,
+    "rules": [
+      {
+        "id": 518190,
+        "name": "Set Storage Origin for All Requests",
+        "phase": "request"
+      },
+      {
+        "id": 518191,
+        "name": "Deliver Static Assets",
+        "phase": "request"
+      },
+      {
+        "id": 518192,
+        "name": "Execute Edge Function",
+        "phase": "request"
+      }
+    ]
+  },
+  "cache-settings": []
+}

@@ -15,9 +15,9 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 	logger.Debug("List Function Instances")
 
 	req := c.apiClient.ApplicationsFunctionAPI.
-		ListApplicationFunctionInstances(ctx, edgeApplicationID) //.
-		// Page(opts.Page).
-		// PageSize(opts.PageSize)
+		ListApplicationFunctionInstances(ctx, edgeApplicationID).
+		Page(opts.Page).
+		PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {

@@ -1,0 +1,103 @@
+{
+  "build": {
+    "preset": "next",
+    "polyfills": true
+  },
+  "origin": [
+    {
+      "name": "origin-storage-default",
+      "origin_type": "object_storage",
+      "prefix": ""
+    }
+  ],
+  "functions": [
+    {
+      "name": "handler",
+      "target": ".edge/worker.js",
+      "args": {}
+    }
+  ],
+  "rules": [
+    {
+      "name": "Set Storage Origin for All Requests",
+      "phase": "request",
+      "description": "",
+      "is_active": true,
+      "order": 2,
+      "criteria": [
+        [
+          {
+            "variable": "${uri}",
+            "operator": "matches",
+            "conditional": "if",
+            "input_value": "^\\/_next\\/static\\/"
+          }
+        ]
+      ],
+      "behaviors": [
+        {
+          "name": "set_origin",
+          "target": "origin-storage-default"
+        },
+        {
+          "name": "deliver",
+          "target": null
+        }
+      ]
+    },
+    {
+      "name": "Deliver Static Assets",
+      "phase": "request",
+      "description": "",
+      "is_active": true,
+      "order": 3,
+      "criteria": [
+        [
+          {
+            "variable": "${uri}",
+            "operator": "matches",
+            "conditional": "if",
+            "input_value": ".(css|js|ttf|woff|woff2|pdf|svg|jpg|jpeg|gif|bmp|png|ico|mp4|json|xml|html)$"
+          }
+        ]
+      ],
+      "behaviors": [
+        {
+          "name": "set_origin",
+          "target": "origin-storage-default"
+        },
+        {
+          "name": "deliver",
+          "target": null
+        }
+      ]
+    },
+    {
+      "name": "Execute Edge Function",
+      "phase": "request",
+      "description": "",
+      "is_active": true,
+      "order": 4,
+      "criteria": [
+        [
+          {
+            "variable": "${uri}",
+            "operator": "matches",
+            "conditional": "if",
+            "input_value": "^/"
+          }
+        ]
+      ],
+      "behaviors": [
+        {
+          "name": "run_function",
+          "target": "handler"
+        },
+        {
+          "name": "forward_cookies",
+          "target": null
+        }
+      ]
+    }
+  ]
+}

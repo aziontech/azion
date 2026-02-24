@@ -157,8 +157,8 @@ func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.Li
 
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.ListApplicationResponseRules(ctx, edgeApplicationID).
 		Ordering(opts.OrderBy).
-		//Page(opts.Page).
-		//PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).Execute()
 
 	if err != nil {
@@ -184,8 +184,8 @@ func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.Lis
 
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.ListApplicationRequestRules(ctx, edgeApplicationID).
 		Ordering(opts.OrderBy).
-		//Page(opts.Page).
-		//PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).Execute()
 
 	if err != nil {
@@ -401,8 +401,8 @@ func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.List
 	resp, httpResp, err := c.apiClient.ApplicationsFunctionAPI.
 		ListApplicationFunctionInstances(ctx, edgeApplicationID).
 		Ordering(opts.OrderBy).
-		//Page(opts.Page).
-		//PageSize(opts.PageSize).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
 		Search(opts.Sort).Execute()
 
 	if err != nil {
