@@ -783,6 +783,7 @@ func LogAndRewindBodyV4(httpResp *http.Response) (string, error) {
 	logger.Debug("", zap.Any("Headers", httpResp.Header))
 	var errResp ErrorResponse
 	bodyBytes, err := io.ReadAll(httpResp.Body)
+	logger.Debug("Response body", zap.Any("Body", string(bodyBytes)))
 	if err != nil {
 		logger.Debug("Error while reading body of the http response", zap.Error(err))
 		return "", ErrorPerStatusCodeV4("", httpResp, err)

@@ -15,7 +15,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 	logger.Debug("List Applications")
 
 	req := c.apiClient.ApplicationsAPI.
-		ListApplications(ctx) //.Page(opts.Page).PageSize(opts.PageSize)
+		ListApplications(ctx).Page(opts.Page).PageSize(opts.PageSize)
 	resp, httpResp, err := req.Execute()
 
 	if err != nil {
