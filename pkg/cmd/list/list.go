@@ -8,6 +8,7 @@ import (
 	connector "github.com/aziontech/azion-cli/pkg/cmd/list/connector"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/list/firewall"
 	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/list/firewall_instance"
+	firewallrules "github.com/aziontech/azion-cli/pkg/cmd/list/firewall_rules"
 	function "github.com/aziontech/azion-cli/pkg/cmd/list/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/list/function_instance"
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/list/network_list"
@@ -56,6 +57,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	// cmd.AddCommand(kv.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallinstance.NewCmd(f))
+	cmd.AddCommand(firewallrules.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

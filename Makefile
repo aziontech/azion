@@ -1,6 +1,6 @@
 GO := $(shell which go)
 PATH := $(dir $(GO)):$(PATH)
-SHELL := env PATH=$(PATH) /bin/bash
+SHELL := env PATH='$(PATH)' /bin/bash
 NAME := azion
 
 ifeq (, $(GO))
