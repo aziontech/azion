@@ -16,8 +16,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-			$ azion update edge-storage bucket --bucket-id 1234 --name 'Hello'
-			$ azion update edge-storage object --object-id 1234 --name 'Hello'
+			$ azion update edge-storage bucket --name 'bucket-name'
+			$ azion update edge-storage object --bucket-name 'bucket-name' --object-key 'path/index.html'
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()

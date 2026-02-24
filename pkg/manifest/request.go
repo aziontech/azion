@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
@@ -293,18 +294,15 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("run_function")
-			if attributes.Value.Int64 != nil {
+			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
 				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				funcName := *attributes.Value.String
+			} else {
+				funcName := attributes.Value
 				if _, ok := FunctionIds[funcName]; !ok {
 					return nil, msg.ErrorFuncNotFound
 				}
 				funcToWorkWith := FunctionIds[funcName]
-				v := edgesdk.BehaviorArgsAttributesValue{
-					Int64: &funcToWorkWith.InstanceID,
-				}
-				attributes.SetValue(v)
+				attributes.SetValue(strconv.FormatInt(funcToWorkWith.InstanceID, 10))
 				withArgs.SetAttributes(attributes)
 			}
 			beh.BehaviorArgs = &withArgs
@@ -319,19 +317,16 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("set_cache_policy")
-			if attributes.Value.Int64 != nil {
+			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
 				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				cacheName := *attributes.Value.String
+			} else {
+				cacheName := attributes.Value
 				if id := CacheIdsBackup[cacheName]; id > 0 {
-					v := edgesdk.BehaviorArgsAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
+					attributes.SetValue(strconv.FormatInt(id, 10))
 					withArgs.SetAttributes(attributes)
 					delete(CacheIds, cacheName)
 				} else {
-					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
+					logger.Debug("Cache Setting not found", zap.Any("Target", attributes.Value))
 					return nil, msg.ErrorCacheNotFound
 				}
 			}
@@ -347,15 +342,12 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("set_connector")
-			if attributes.Value.Int64 != nil {
+			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
 				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				connectorName := *attributes.Value.String
+			} else {
+				connectorName := attributes.Value
 				if id := ConnectorIds[connectorName]; id > 0 {
-					v := edgesdk.BehaviorArgsAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
+					attributes.SetValue(strconv.FormatInt(id, 10))
 					withArgs.SetAttributes(attributes)
 					// delete(ConnectorIds, connectorName)
 				} else {
@@ -480,7 +472,7 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	if errors.Is(err, utils.ErrorNotFound404) {
 		logger.Debug("Cache Setting not found. Trying to create", zap.Any("Error", err))
 		logger.FInfoFlags(f.IOStreams.Out, msg.MessageDeleteResource+"\n", f.Format, f.Out)
-		return createCache(cache, clientCache, conf, ctx, edgeappman)
+		return createCache(cache, clientCache, conf, ctx)
 	}
 	if err != nil {
 		return contracts.AzionJsonDataCacheSettings{}, err
@@ -492,7 +484,7 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	return newCache, nil
 }
 
-func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context, edgeappman contracts.Applications) (contracts.AzionJsonDataCacheSettings, error) {
+func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context) (contracts.AzionJsonDataCacheSettings, error) {
 	request := transformCacheRequestCreate(cache)
 	responseCache, err := clientCache.Create(ctx, request.CacheSettingRequest, conf.Application.ID)
 	if err != nil {

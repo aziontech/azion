@@ -66,7 +66,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 
 	byteManifest, err := man.FileReader(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(msg.ErrorReadManifest, err)
 	}
 
 	err = json.Unmarshal(byteManifest, &manifest)
@@ -256,7 +256,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					}
 					CacheConf = append(CacheConf, updated)
 				} else {
-					newCache, err := createCache(cache, clientCache, conf, ctx, edgeappman)
+					newCache, err := createCache(cache, clientCache, conf, ctx)
 					if err != nil {
 						return err
 					}

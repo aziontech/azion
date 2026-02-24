@@ -498,14 +498,11 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	req.SetBehaviors(behaviors)
 
 	emptyString := ""
-	arg := sdk.ApplicationCriterionArgumentRequest{
-		String: &emptyString,
-	}
 
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${request_uri}")
 	criteria[0][0].SetOperator("exists")
-	criteria[0][0].SetArgument(arg)
+	criteria[0][0].SetArgument(emptyString)
 	req.SetCriteria(criteria)
 
 	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
