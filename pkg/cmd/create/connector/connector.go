@@ -73,7 +73,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				request.ConnectorRequest = &storageStruct
+				request.ConnectorRequest = storageStruct
 				// case "live_ingest":
 				// 	liveIngestStruct := sdk.ConnectorLiveIngestRequest{}
 				// 	err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
@@ -97,7 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			case "http":
 				id = response.ConnectorHTTP.GetId()
 			case "storage":
-				id = response.Connector.GetId()
+				id = response.ConnectorBase.GetId()
 				// case "live_ingest":
 				// 	id = response.ConnectorLiveIngest.GetId()
 			}

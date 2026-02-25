@@ -230,14 +230,14 @@ type MemoryFS struct {
 }
 
 type ManifestV4 struct {
-	Build               Build                       `json:"build"`
-	Storage             []StorageManifest           `json:"storage"`
-	Functions           []Function                  `json:"functions"`
-	Applications        []Applications              `json:"applications"`
-	Connectors          []edgesdk.ConnectorRequest2 `json:"connectors"`
-	Workloads           []WorkloadManifest          `json:"workloads"`
-	WorkloadDeployments []WorkloadDeployment        `json:"workload_deployments,omitempty"`
-	Purge               []PurgeManifest             `json:"purge"`
+	Build               Build                      `json:"build"`
+	Storage             []StorageManifest          `json:"storage"`
+	Functions           []Function                 `json:"functions"`
+	Applications        []Applications             `json:"applications"`
+	Connectors          []edgesdk.ConnectorRequest `json:"connectors"`
+	Workloads           []WorkloadManifest         `json:"workloads"`
+	WorkloadDeployments []WorkloadDeployment       `json:"workload_deployments,omitempty"`
+	Purge               []PurgeManifest            `json:"purge"`
 }
 
 type PurgeManifest struct {

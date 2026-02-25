@@ -5,7 +5,7 @@ import (
 )
 
 type CreateRequest struct {
-	sdk.ConnectorRequest2
+	sdk.ConnectorRequest
 }
 
 func NewCreateRequest() *CreateRequest {
@@ -13,7 +13,7 @@ func NewCreateRequest() *CreateRequest {
 }
 
 type UpdateRequest struct {
-	sdk.PatchedConnectorRequest2
+	sdk.PatchedConnectorRequest
 }
 
 func NewUpdateRequest() *UpdateRequest {

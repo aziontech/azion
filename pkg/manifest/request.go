@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
@@ -19,7 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest2) *apiConnector.UpdateRequest {
+func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *apiConnector.UpdateRequest {
 	if connectorRequest.ConnectorHTTPRequest != nil {
 		request := &apiConnector.UpdateRequest{}
 		bodyRequest := connectorRequest.ConnectorHTTPRequest
@@ -40,23 +39,24 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest2) *
 		return request
 	}
 
-	if connectorRequest.ConnectorRequest != nil {
+	if connectorRequest.ConnectorRequestBase != nil {
 		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorRequest
+		bodyRequest := connectorRequest.ConnectorRequestBase
 		body := edgesdk.PatchedConnectorRequest{}
+		internalBody := edgesdk.PatchedConnectorRequestBase{}
 		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
+			internalBody.SetActive(*bodyRequest.Active)
 		}
 
 		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
+			internalBody.SetName(bodyRequest.Name)
 		}
 
-		body.SetType(bodyRequest.Type)
+		internalBody.SetType(bodyRequest.Type)
 
-		body.SetAttributes(bodyRequest.Attributes)
-
-		request.PatchedConnectorRequest = &body
+		internalBody.SetAttributes(bodyRequest.Attributes)
+		body.PatchedConnectorRequestBase = &internalBody
+		request.PatchedConnectorRequest = body
 		return request
 	}
 
@@ -264,25 +264,25 @@ func transformRuleRequest(rule contracts.ManifestRule) *apiApplications.UpdateRu
 	return request
 }
 
-func getConnectorName(connector edgesdk.ConnectorRequest2, defaultName string) (string, string) {
+func getConnectorName(connector edgesdk.ConnectorRequest, defaultName string) (string, string) {
 	if connector.ConnectorHTTPRequest != nil {
 		return connector.ConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.ConnectorRequest != nil {
-		return connector.ConnectorRequest.Name, "storage"
+	if connector.ConnectorRequestBase != nil {
+		return connector.ConnectorRequestBase.Name, "storage"
 	}
 
 	return defaultName, ""
 }
 
-func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehavior2, error) {
-	behaviorsRequest := make([]edgesdk.RequestPhaseBehavior2, 0, len(behaviors))
+func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
+	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
 	for _, behavior := range behaviors {
 		var withArgs edgesdk.BehaviorArgs
 		var withoutArgs edgesdk.BehaviorNoArgs
 		var captureMatchGroups edgesdk.BehaviorCapture
-		var beh edgesdk.RequestPhaseBehavior2
+		var beh edgesdk.RequestPhaseBehaviorRequest
 		switch behavior.Type {
 		case "run_function":
 			attributesJSON, err := json.Marshal(behavior.Attributes)
@@ -294,15 +294,18 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("run_function")
-			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
+			if attributes.Value.Int64 != nil {
 				withArgs.SetAttributes(attributes)
-			} else {
-				funcName := attributes.Value
+			} else if attributes.Value.String != nil {
+				funcName := *attributes.Value.String
 				if _, ok := FunctionIds[funcName]; !ok {
 					return nil, msg.ErrorFuncNotFound
 				}
 				funcToWorkWith := FunctionIds[funcName]
-				attributes.SetValue(strconv.FormatInt(funcToWorkWith.InstanceID, 10))
+				v := edgesdk.BehaviorArgsAttributesValue{
+					Int64: &funcToWorkWith.InstanceID,
+				}
+				attributes.SetValue(v)
 				withArgs.SetAttributes(attributes)
 			}
 			beh.BehaviorArgs = &withArgs
@@ -317,16 +320,19 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("set_cache_policy")
-			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
+			if attributes.Value.Int64 != nil {
 				withArgs.SetAttributes(attributes)
-			} else {
-				cacheName := attributes.Value
+			} else if attributes.Value.String != nil {
+				cacheName := *attributes.Value.String
 				if id := CacheIdsBackup[cacheName]; id > 0 {
-					attributes.SetValue(strconv.FormatInt(id, 10))
+					v := edgesdk.BehaviorArgsAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
 					withArgs.SetAttributes(attributes)
 					delete(CacheIds, cacheName)
 				} else {
-					logger.Debug("Cache Setting not found", zap.Any("Target", attributes.Value))
+					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
 					return nil, msg.ErrorCacheNotFound
 				}
 			}
@@ -342,12 +348,15 @@ func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]ed
 				return nil, err
 			}
 			withArgs.SetType("set_connector")
-			if _, err := strconv.ParseInt(attributes.Value, 10, 64); err == nil {
+			if attributes.Value.Int64 != nil {
 				withArgs.SetAttributes(attributes)
-			} else {
-				connectorName := attributes.Value
+			} else if attributes.Value.String != nil {
+				connectorName := *attributes.Value.String
 				if id := ConnectorIds[connectorName]; id > 0 {
-					attributes.SetValue(strconv.FormatInt(id, 10))
+					v := edgesdk.BehaviorArgsAttributesValue{
+						Int64: &id,
+					}
+					attributes.SetValue(v)
 					withArgs.SetAttributes(attributes)
 					// delete(ConnectorIds, connectorName)
 				} else {
@@ -440,8 +449,8 @@ func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]e
 	return behaviorsResponse, nil
 }
 
-func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRule2 {
-	request := edgesdk.RequestPhaseRule2{}
+func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRuleRequest {
+	request := edgesdk.RequestPhaseRuleRequest{}
 
 	request.SetActive(rule.Active)
 	if rule.Criteria != nil {

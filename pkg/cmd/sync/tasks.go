@@ -51,7 +51,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 			Purge:               []contracts.PurgeManifest{},
 			Storage:             []contracts.StorageManifest{},
 			Functions:           []contracts.Function{},
-			Connectors:          []edgesdk.ConnectorRequest2{},
+			Connectors:          []edgesdk.ConnectorRequest{},
 		}
 	} else {
 		manifestStruct, err = interpreter.ReadManifest(pathManifest, f, &msgs)
@@ -63,7 +63,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 				Purge:               []contracts.PurgeManifest{},
 				Storage:             []contracts.StorageManifest{},
 				Functions:           []contracts.Function{},
-				Connectors:          []edgesdk.ConnectorRequest2{},
+				Connectors:          []edgesdk.ConnectorRequest{},
 			}
 		}
 	}

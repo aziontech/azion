@@ -95,8 +95,10 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 			attributes.SetPrefix(timestamp)
 
 			storageRequest := sdk.PatchedConnectorRequest{}
-			storageRequest.SetAttributes(attributes)
-			request.PatchedConnectorRequest = &storageRequest
+			storageConnectorRequest := sdk.PatchedConnectorRequestBase{}
+			storageConnectorRequest.SetAttributes(attributes)
+			storageRequest.PatchedConnectorRequestBase = &storageConnectorRequest
+			request.PatchedConnectorRequest = storageRequest
 
 			_, err = clientConnector.Update(context.Background(), &request, connectorID)
 			if err != nil {

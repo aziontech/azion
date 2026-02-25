@@ -68,7 +68,7 @@ type UpdateCacheSettingsRequest struct {
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.RequestPhaseRule2
+	sdk.RequestPhaseRuleRequest
 }
 
 type CreateRulesEngineResponse struct {
@@ -356,7 +356,7 @@ func (c *Client) CreateRulesEngineRequest(ctx context.Context, edgeApplicationID
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		CreateApplicationRequestRule(ctx, edgeApplicationID).
-		RequestPhaseRule2(req.RequestPhaseRule2).Execute()
+		RequestPhaseRuleRequest(req.RequestPhaseRuleRequest).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {
@@ -498,11 +498,14 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	req.SetBehaviors(behaviors)
 
 	emptyString := ""
+	arg := sdk.ApplicationCriterionArgumentRequest{
+		String: &emptyString,
+	}
 
 	criteria[0][0].SetConditional("if")
 	criteria[0][0].SetVariable("${request_uri}")
 	criteria[0][0].SetOperator("exists")
-	criteria[0][0].SetArgument(emptyString)
+	criteria[0][0].SetArgument(arg)
 	req.SetCriteria(criteria)
 
 	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.

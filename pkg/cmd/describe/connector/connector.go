@@ -27,7 +27,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.Connector2, error)
+	Get      func(context.Context, int64) (sdk.Connector, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -36,7 +36,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, connectorID int64) (sdk.Connector2, error) {
+		Get: func(ctx context.Context, connectorID int64) (sdk.Connector, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, connectorID)
 		},
@@ -90,8 +90,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			var values interface{}
 			if resp.ConnectorHTTP != nil {
 				values = resp.ConnectorHTTP
-			} else if resp.Connector != nil {
-				values = resp.Connector
+			} else if resp.ConnectorBase != nil {
+				values = resp.ConnectorBase
 			}
 
 			describeOut := output.DescribeOutput{

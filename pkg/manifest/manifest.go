@@ -296,7 +296,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Name = http.GetName()
 					conn.Address = http.Attributes.Addresses
 				case "storage":
-					storage := connectorResp.Connector
+					storage := connectorResp.ConnectorBase
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -305,7 +305,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				connectorConf = append(connectorConf, conn)
 			} else {
 				request := apiConnector.CreateRequest{
-					ConnectorRequest2: connector,
+					ConnectorRequest: connector,
 				}
 				connectorResp, err := connectorClient.Create(ctx, &request)
 				if err != nil {
@@ -318,7 +318,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
 				case "storage":
-					storage := connectorResp.Connector
+					storage := connectorResp.ConnectorBase
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -406,7 +406,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 						if err != nil {
 							return err
 						}
-						req.RequestPhaseRule2 = createRequest
+						req.RequestPhaseRuleRequest = createRequest
 						req.Behaviors = bh
 						created, err := client.CreateRulesEngineRequest(ctx, conf.Application.ID, rule.Phase, req)
 						if err != nil {

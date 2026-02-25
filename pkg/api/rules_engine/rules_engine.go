@@ -25,7 +25,7 @@ type UpdateRulesEngineResponse struct {
 }
 
 type CreateRulesEngineRequest struct {
-	sdk.RequestPhaseRule2
+	sdk.RequestPhaseRuleRequest
 }
 
 type CreateRulesEngineResponse struct {
@@ -120,11 +120,11 @@ func (c *Client) UpdateResponse(ctx context.Context, req *UpdateRulesEngineRespo
 	return &edgeApplicationsResponse.Data, nil
 }
 
-func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.RequestPhaseRule2) (RulesEngineResponse, error) {
+func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req sdk.RequestPhaseRuleRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		CreateApplicationRequestRule(ctx, edgeApplicationID).
-		RequestPhaseRule2(req).Execute()
+		RequestPhaseRuleRequest(req).Execute()
 
 	if err != nil {
 		errBody := ""
