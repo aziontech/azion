@@ -11,7 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -73,7 +73,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				request.ConnectorRequest = &storageStruct
+				request.ConnectorRequest = storageStruct
 				// case "live_ingest":
 				// 	liveIngestStruct := sdk.ConnectorLiveIngestRequest{}
 				// 	err := utils.FlagFileUnmarshalJSON(fields.InPath, &liveIngestStruct)
@@ -97,7 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			case "http":
 				id = response.ConnectorHTTP.GetId()
 			case "storage":
-				id = response.Connector.GetId()
+				id = response.ConnectorBase.GetId()
 				// case "live_ingest":
 				// 	id = response.ConnectorLiveIngest.GetId()
 			}

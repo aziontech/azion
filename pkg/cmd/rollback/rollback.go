@@ -14,7 +14,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -95,8 +95,10 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 			attributes.SetPrefix(timestamp)
 
 			storageRequest := sdk.PatchedConnectorRequest{}
-			storageRequest.SetAttributes(attributes)
-			request.PatchedConnectorRequest = &storageRequest
+			storageConnectorRequest := sdk.PatchedConnectorRequestBase{}
+			storageConnectorRequest.SetAttributes(attributes)
+			storageRequest.PatchedConnectorRequestBase = &storageConnectorRequest
+			request.PatchedConnectorRequest = storageRequest
 
 			_, err = clientConnector.Update(context.Background(), &request, connectorID)
 			if err != nil {

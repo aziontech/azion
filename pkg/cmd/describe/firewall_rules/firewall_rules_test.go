@@ -9,7 +9,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 )
@@ -28,7 +28,7 @@ func TestDescribeFirewallRule(t *testing.T) {
 				return sdk.FirewallRule{}, err
 			}
 			var wrapper struct {
-				State string          `json:"state"`
+				State string           `json:"state"`
 				Data  sdk.FirewallRule `json:"data"`
 			}
 			if err := json.Unmarshal(b, &wrapper); err != nil {

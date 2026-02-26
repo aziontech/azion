@@ -256,7 +256,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					}
 					CacheConf = append(CacheConf, updated)
 				} else {
-					newCache, err := createCache(cache, clientCache, conf, ctx, edgeappman)
+					newCache, err := createCache(cache, clientCache, conf, ctx)
 					if err != nil {
 						return err
 					}
@@ -296,7 +296,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Name = http.GetName()
 					conn.Address = http.Attributes.Addresses
 				case "storage":
-					storage := connectorResp.Connector
+					storage := connectorResp.ConnectorBase
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:
@@ -305,7 +305,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 				connectorConf = append(connectorConf, conn)
 			} else {
 				request := apiConnector.CreateRequest{
-					ConnectorPolymorphicRequest: connector,
+					ConnectorRequest: connector,
 				}
 				connectorResp, err := connectorClient.Create(ctx, &request)
 				if err != nil {
@@ -318,7 +318,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 					conn.Id = http.GetId()
 					conn.Name = http.GetName()
 				case "storage":
-					storage := connectorResp.Connector
+					storage := connectorResp.ConnectorBase
 					conn.Id = storage.GetId()
 					conn.Name = storage.GetName()
 				default:

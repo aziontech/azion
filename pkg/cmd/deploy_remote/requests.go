@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
@@ -212,7 +212,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 
 	reqUpApp := apiapp.UpdateRequest{}
 	mods := edgesdk.ApplicationModulesRequest{
-		Functions:              &edgesdk.EdgeFunctionModuleRequest{},
+		Functions:              &edgesdk.FunctionModuleRequest{},
 		ApplicationAccelerator: &edgesdk.ApplicationAcceleratorModuleRequest{},
 	}
 	mods.Functions.SetEnabled(true)
