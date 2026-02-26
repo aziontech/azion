@@ -675,17 +675,23 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 
 		fwRuleConf := []contracts.AzionJsonDataFirewallRule{}
 		for _, rule := range fwMan.RulesEngine {
+			sdkRule, err := convertFirewallRuleToSDK(rule)
+			if err != nil {
+				logger.Debug("Error converting firewall rule from manifest", zap.Error(err))
+				return err
+			}
+
 			if ruleRef := rc.FirewallRuleIds[rule.Name]; ruleRef.RuleId > 0 {
 				patchReq := edgesdk.PatchedFirewallRuleRequest{}
-				patchReq.SetName(rule.Name)
-				if rule.Active != nil {
-					patchReq.SetActive(*rule.Active)
+				patchReq.SetName(sdkRule.Name)
+				if sdkRule.Active != nil {
+					patchReq.SetActive(*sdkRule.Active)
 				}
-				if rule.Description != nil {
-					patchReq.SetDescription(*rule.Description)
+				if sdkRule.Description != nil {
+					patchReq.SetDescription(*sdkRule.Description)
 				}
-				patchReq.SetCriteria(rule.Criteria)
-				patchReq.SetBehaviors(rule.Behaviors)
+				patchReq.SetCriteria(sdkRule.Criteria)
+				patchReq.SetBehaviors(sdkRule.Behaviors)
 
 				updated, err := rc.FirewallClient.UpdateRule(rc.Ctx, firewallId, ruleRef.RuleId, patchReq)
 				if err != nil {
@@ -700,7 +706,7 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
 			} else {
-				created, err := rc.FirewallClient.CreateRule(rc.Ctx, firewallId, rule)
+				created, err := rc.FirewallClient.CreateRule(rc.Ctx, firewallId, sdkRule)
 				if err != nil {
 					logger.Debug("Error while creating firewall rule", zap.Error(err))
 					return err

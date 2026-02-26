@@ -68,7 +68,7 @@ func NewCobraCmd(apply *ApplyCmd) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&fields.ConfigDir, "config-dir", "azion", msg.FlagConfigDir)
+	cmd.Flags().StringVar(&fields.ConfigDir, "config-dir", ".", msg.FlagConfigDir)
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd
@@ -89,16 +89,18 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 
 	configDir := fields.ConfigDir
 
-	azionConfigPath := path.Join(wd, "azion.config.js")
-	if _, err := os.Stat(azionConfigPath); os.IsNotExist(err) {
-		azionConfigPath = path.Join(wd, "azion.config.ts")
-		if _, err := os.Stat(azionConfigPath); os.IsNotExist(err) {
-			azionConfigPath = path.Join(wd, "azion.config.mjs")
-			if _, err := os.Stat(azionConfigPath); os.IsNotExist(err) {
-				logger.FInfoFlags(cmd.F.IOStreams.Out, msg.AzionConfigNotFound, cmd.F.Format, cmd.F.Out)
-				return msg.ErrorAzionConfigNotFound
-			}
+	validConfigExtensions := []string{".js", ".ts", ".mjs", ".cjs"}
+	azionConfigPath := ""
+	for _, ext := range validConfigExtensions {
+		candidate := path.Join(wd, "azion.config"+ext)
+		if _, err := os.Stat(candidate); err == nil {
+			azionConfigPath = candidate
+			break
 		}
+	}
+	if azionConfigPath == "" {
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.AzionConfigNotFound, cmd.F.Format, cmd.F.Out)
+		return msg.ErrorAzionConfigNotFound
 	}
 
 	logger.Debug("Generating manifest from azion.config")

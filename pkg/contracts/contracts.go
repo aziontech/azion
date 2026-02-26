@@ -258,7 +258,31 @@ type FirewallManifest struct {
 	Modules     *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
 	Debug       *bool                           `json:"debug,omitempty"`
 	Active      *bool                           `json:"active,omitempty"`
-	RulesEngine []edgesdk.FirewallRuleRequest   `json:"rules_engine,omitempty"`
+	RulesEngine []FirewallManifestRule          `json:"rules_engine,omitempty"`
+}
+
+// FirewallManifestRule represents a firewall rule in the manifest.json file
+// using plain Go types to avoid strict SDK deserialization issues.
+type FirewallManifestRule struct {
+	Name        string                        `json:"name"`
+	Active      *bool                         `json:"active,omitempty"`
+	Criteria    [][]FirewallManifestCriterion `json:"criteria"`
+	Behaviors   []FirewallManifestBehavior    `json:"behaviors"`
+	Description *string                       `json:"description,omitempty"`
+}
+
+// FirewallManifestCriterion represents a firewall criterion in the manifest.json file.
+type FirewallManifestCriterion struct {
+	Variable    string      `json:"variable"`
+	Operator    string      `json:"operator"`
+	Conditional string      `json:"conditional"`
+	Argument    interface{} `json:"argument,omitempty"`
+}
+
+// FirewallManifestBehavior represents a firewall behavior in the manifest.json file.
+type FirewallManifestBehavior struct {
+	Type       string                 `json:"type"`
+	Attributes map[string]interface{} `json:"attributes,omitempty"`
 }
 
 type PurgeManifest struct {
