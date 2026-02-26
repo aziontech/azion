@@ -242,15 +242,15 @@ type MemoryFS struct {
 }
 
 type ManifestV4 struct {
-	Build               Build                                 `json:"build"`
-	Storage             []StorageManifest                     `json:"storage"`
-	Functions           []Function                            `json:"functions"`
-	Applications        []Applications                        `json:"applications"`
-	Connectors          []edgesdk.ConnectorPolymorphicRequest `json:"connectors"`
-	Workloads           []WorkloadManifest                    `json:"workloads"`
-	WorkloadDeployments []WorkloadDeployment                  `json:"workload_deployments,omitempty"`
-	Firewalls           []FirewallManifest                    `json:"firewall,omitempty"`
-	Purge               []PurgeManifest                       `json:"purge"`
+	Build               Build                      `json:"build"`
+	Storage             []StorageManifest          `json:"storage"`
+	Functions           []Function                 `json:"functions"`
+	Applications        []Applications             `json:"applications"`
+	Connectors          []edgesdk.ConnectorRequest `json:"connectors"`
+	Workloads           []WorkloadManifest         `json:"workloads"`
+	WorkloadDeployments []WorkloadDeployment       `json:"workload_deployments,omitempty"`
+	Firewalls           []FirewallManifest         `json:"firewall,omitempty"`
+	Purge               []PurgeManifest            `json:"purge"`
 }
 
 type FirewallManifest struct {

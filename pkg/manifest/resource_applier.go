@@ -20,7 +20,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -362,7 +362,7 @@ func (rc *ResourceContext) createCache(cache contracts.ManifestCacheSetting) (co
 	return newCache, nil
 }
 
-func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymorphicRequest) error {
+func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorRequest) error {
 	connectorConf := []contracts.AzionJsonDataConnectors{}
 
 	for _, connector := range connectors {
@@ -381,7 +381,7 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymor
 				conn.Name = http.GetName()
 				conn.Address = http.Attributes.Addresses
 			case "storage":
-				storage := connectorResp.Connector
+				storage := connectorResp.ConnectorBase
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:
@@ -393,7 +393,7 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymor
 			connectorConf = append(connectorConf, conn)
 		} else {
 			request := apiConnector.CreateRequest{
-				ConnectorPolymorphicRequest: connector,
+				ConnectorRequest: connector,
 			}
 			connectorResp, err := rc.ConnectorClient.Create(rc.Ctx, &request)
 			if err != nil {
@@ -406,7 +406,7 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorPolymor
 				conn.Id = http.GetId()
 				conn.Name = http.GetName()
 			case "storage":
-				storage := connectorResp.Connector
+				storage := connectorResp.ConnectorBase
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:
