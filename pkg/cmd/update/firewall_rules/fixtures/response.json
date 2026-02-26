@@ -1,0 +1,27 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 111,
+    "name": "string",
+    "last_editor": "string",
+    "last_modified": "2019-08-24T14:15:22Z",
+    "active": true,
+    "criteria": [
+      [
+        {
+          "conditional": "if",
+          "variable": "${header_accept}",
+          "operator": "does_not_exist",
+          "argument": null
+        }
+      ]
+    ],
+    "behaviors": [
+      {
+        "type": "deny"
+      }
+    ],
+    "description": "string",
+    "order": 0
+  }
+}

@@ -1,5 +1,4 @@
   {
-    "state": "executed",
     "data": {
       "id": 210543,
       "name": "string",
@@ -10,7 +9,7 @@
             "conditional": "if",
             "variable": "${arg_<name>}",
             "operator": "does_not_exist",
-            "argument": 0
+            "argument": "0"
           }
         ]
       ],
