@@ -11,6 +11,7 @@ import (
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmd/clone"
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
+	"github.com/aziontech/azion-cli/pkg/cmd/config"
 	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
@@ -180,6 +181,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(clone.NewCmd(fact.factory))
 	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
 	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
+	cobraCmd.AddCommand(config.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {

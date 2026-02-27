@@ -57,7 +57,7 @@ type AzionApplicationOptions struct {
 	Prefix        string                       `json:"prefix"`
 	RotatePrefix  *bool                        `json:"rotate-prefix,omitempty"`
 	SkipDeletion  *bool                        `json:"skip-deletion,omitempty"`
-	NotFirstRun   bool                         `json:"not-first-run"`
+	NotFirstRun   bool                         `json:"not-first-run,omitempty"`
 	Function      []AzionJsonDataFunction      `json:"function"`
 	Application   AzionJsonDataApplication     `json:"application"`
 	Domain        AzionJsonDataDomain          `json:"domain"`
@@ -67,6 +67,7 @@ type AzionApplicationOptions struct {
 	CacheSettings []AzionJsonDataCacheSettings `json:"cache-settings"`
 	Workloads     AzionJsonDataWorkload        `json:"workloads"`
 	Connectors    []AzionJsonDataConnectors    `json:"connectors"`
+	Firewalls     []AzionJsonDataFirewall      `json:"firewalls,omitempty"`
 }
 
 type AzionApplicationOptionsV3 struct {
@@ -207,6 +208,17 @@ type AzionJsonDataCacheSettings struct {
 	Name string `json:"name"`
 }
 
+type AzionJsonDataFirewall struct {
+	Id    int64                       `json:"id"`
+	Name  string                      `json:"name"`
+	Rules []AzionJsonDataFirewallRule `json:"rules,omitempty"`
+}
+
+type AzionJsonDataFirewallRule struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}
+
 type Manifest struct {
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
@@ -237,7 +249,40 @@ type ManifestV4 struct {
 	Connectors          []edgesdk.ConnectorRequest `json:"connectors"`
 	Workloads           []WorkloadManifest         `json:"workloads"`
 	WorkloadDeployments []WorkloadDeployment       `json:"workload_deployments,omitempty"`
+	Firewalls           []FirewallManifest         `json:"firewall,omitempty"`
 	Purge               []PurgeManifest            `json:"purge"`
+}
+
+type FirewallManifest struct {
+	Name        string                          `json:"name"`
+	Modules     *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
+	Debug       *bool                           `json:"debug,omitempty"`
+	Active      *bool                           `json:"active,omitempty"`
+	RulesEngine []FirewallManifestRule          `json:"rules_engine,omitempty"`
+}
+
+// FirewallManifestRule represents a firewall rule in the manifest.json file
+// using plain Go types to avoid strict SDK deserialization issues.
+type FirewallManifestRule struct {
+	Name        string                        `json:"name"`
+	Active      *bool                         `json:"active,omitempty"`
+	Criteria    [][]FirewallManifestCriterion `json:"criteria"`
+	Behaviors   []FirewallManifestBehavior    `json:"behaviors"`
+	Description *string                       `json:"description,omitempty"`
+}
+
+// FirewallManifestCriterion represents a firewall criterion in the manifest.json file.
+type FirewallManifestCriterion struct {
+	Variable    string      `json:"variable"`
+	Operator    string      `json:"operator"`
+	Conditional string      `json:"conditional"`
+	Argument    interface{} `json:"argument,omitempty"`
+}
+
+// FirewallManifestBehavior represents a firewall behavior in the manifest.json file.
+type FirewallManifestBehavior struct {
+	Type       string                 `json:"type"`
+	Attributes map[string]interface{} `json:"attributes,omitempty"`
 }
 
 type PurgeManifest struct {
