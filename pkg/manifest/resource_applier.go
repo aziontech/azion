@@ -1,12 +1,14 @@
 package manifest
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
@@ -15,12 +17,14 @@ import (
 	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
 	functionsApi "github.com/aziontech/azion-cli/pkg/api/function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
+	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
+	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"go.uber.org/zap"
 )
 
@@ -41,6 +45,7 @@ type ResourceContext struct {
 	FunctionClient    *functionsApi.Client
 	PurgeClient       *apiPurge.Client
 	FirewallClient    *apiFirewall.Client
+	StorageClient     *apiStorage.Client
 
 	// ID Mappings - these track created/existing resource IDs
 	CacheIds        map[string]int64
@@ -87,6 +92,7 @@ func NewResourceContext(
 		FunctionClient:    functionsApi.NewClient(f.HttpClient, apiURL, token),
 		PurgeClient:       apiPurge.NewClient(f.HttpClient, apiURL, token),
 		FirewallClient:    apiFirewall.NewClient(f.HttpClient, apiURL, token),
+		StorageClient:     apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
 
 		// Initialize ID maps
 		CacheIds:        make(map[string]int64),
@@ -170,26 +176,43 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
-			request := functionsApi.CreateRequest{}
-			request.SetActive(true)
-			request.SetDefaultArgs(funcMan.DefaultArgs)
-			request.SetName(funcMan.Name)
-			request.SetCode(string(code))
-			resp, err := rc.FunctionClient.Create(rc.Ctx, &request)
-			if err != nil {
-				return err
+			// Keep track of function name for potential retry
+			funcName := funcMan.Name
+			for {
+				request := functionsApi.CreateRequest{}
+				request.SetActive(true)
+				request.SetDefaultArgs(funcMan.DefaultArgs)
+				request.SetName(funcName)
+				request.SetCode(string(code))
+				resp, err := rc.FunctionClient.Create(rc.Ctx, &request)
+				if err != nil {
+					// if the name is already in use, we ask for another one
+					if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+						logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.FunctionInUse, rc.Factory.Format, rc.Factory.Out)
+						*rc.Msgs = append(*rc.Msgs, msg.FunctionInUse)
+						// Prompt user for a new name
+						newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", funcName, utils.Timestamp()))
+						if inputErr != nil {
+							return inputErr
+						}
+						funcName = newName
+						continue
+					}
+					return err
+				}
+				newFunc := contracts.AzionJsonDataFunction{
+					ID:   resp.GetId(),
+					Name: resp.GetName(),
+					File: funcMan.Argument,
+					Args: "./azion/args.json",
+				}
+				rc.FunctionIds[resp.GetName()] = newFunc
+				rc.Conf.Function = append(rc.Conf.Function, newFunc)
+				msgf := fmt.Sprintf(msg.ManifestCreateFunction, resp.GetName(), resp.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+				break
 			}
-			newFunc := contracts.AzionJsonDataFunction{
-				ID:   resp.GetId(),
-				Name: resp.GetName(),
-				File: funcMan.Argument,
-				Args: "./azion/args.json",
-			}
-			rc.FunctionIds[funcMan.Name] = newFunc
-			rc.Conf.Function = append(rc.Conf.Function, newFunc)
-			msgf := fmt.Sprintf(msg.ManifestCreateFunction, resp.GetName(), resp.GetId())
-			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 	}
 
@@ -274,22 +297,62 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 		if err != nil {
 			return err
 		}
+		rc.Conf.Application.Name = updated.GetName()
 		msgf := fmt.Sprintf(msg.ManifestUpdateEdgeApplication, updated.GetName(), updated.GetId())
 		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
-		createreq := transformEdgeApplicationRequestCreate(app)
-		resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
-		if err != nil {
-			return err
+		// Keep track of the app name for potential retry with new name
+		appName := app.Name
+		for {
+			createreq := transformEdgeApplicationRequestCreate(app)
+			resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
+			if err != nil {
+				// if the name is already in use, we ask for another one
+				if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.AppInUse, rc.Factory.Format, rc.Factory.Out)
+					*rc.Msgs = append(*rc.Msgs, msg.AppInUse)
+					// Prompt user for a new name
+					newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", appName, utils.Timestamp()))
+					if inputErr != nil {
+						return inputErr
+					}
+					appName = newName
+					app.Name = newName
+					continue
+				}
+				return err
+			}
+			rc.Conf.Application.ID = resp.GetId()
+			rc.Conf.Application.Name = resp.GetName()
+			rc.Conf.Name = resp.GetName()
+			msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+			break
 		}
-		rc.Conf.Application.ID = resp.GetId()
-		msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
-		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-		*rc.Msgs = append(*rc.Msgs, msgf)
 	}
 
 	return rc.WriteConfig()
+}
+
+// askForInput prompts the user for input with a message and default value
+func askForInput(promptMsg string, defaultIn string) (string, error) {
+	fmt.Println(promptMsg)
+	fmt.Printf("(default: %s): ", defaultIn)
+
+	reader := bufio.NewReader(os.Stdin)
+	userInput, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+
+	userInput = strings.TrimSpace(userInput)
+	if userInput == "" {
+		return defaultIn, nil
+	}
+
+	return userInput, nil
 }
 
 func (rc *ResourceContext) ApplyCacheSettings(cacheSettings []contracts.ManifestCacheSetting) error {
@@ -568,18 +631,36 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
-		request := transformWorkloadRequestCreate(workloadMan, rc.Conf.Application.ID)
-		resp, err := rc.WorkloadClient.Create(rc.Ctx, request)
-		if err != nil {
-			return err
+		// Keep track of workload name for potential retry
+		workloadName := workloadMan.Name
+		for {
+			workloadMan.Name = workloadName
+			request := transformWorkloadRequestCreate(workloadMan, rc.Conf.Application.ID)
+			resp, err := rc.WorkloadClient.Create(rc.Ctx, request)
+			if err != nil {
+				// if the name is already in use, we ask for another one
+				if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+					logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.WorkloadInUse, rc.Factory.Format, rc.Factory.Out)
+					*rc.Msgs = append(*rc.Msgs, msg.WorkloadInUse)
+					// Prompt user for a new name
+					newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", workloadName, utils.Timestamp()))
+					if inputErr != nil {
+						return inputErr
+					}
+					workloadName = newName
+					continue
+				}
+				return err
+			}
+			rc.Conf.Workloads.Id = resp.GetId()
+			rc.Conf.Workloads.Name = resp.GetName()
+			rc.Conf.Workloads.Domains = resp.GetDomains()
+			rc.Conf.Workloads.Url = utils.Concat("https://", resp.GetWorkloadDomain())
+			msgf := fmt.Sprintf(msg.ManifestCreateWorkload, resp.GetName(), resp.GetId())
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+			break
 		}
-		rc.Conf.Workloads.Id = resp.GetId()
-		rc.Conf.Workloads.Name = resp.GetName()
-		rc.Conf.Workloads.Domains = resp.GetDomains()
-		rc.Conf.Workloads.Url = utils.Concat("https://", resp.GetWorkloadDomain())
-		msgf := fmt.Sprintf(msg.ManifestCreateWorkload, resp.GetName(), resp.GetId())
-		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-		*rc.Msgs = append(*rc.Msgs, msgf)
 	}
 
 	return rc.WriteConfig()
@@ -628,6 +709,7 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 
 	for _, fwMan := range firewalls {
 		var firewallId int64
+		var firewallName string
 
 		if id := rc.FirewallIds[fwMan.Name]; id > 0 {
 			updateReq := apiFirewall.NewUpdateRequest()
@@ -647,30 +729,50 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				return err
 			}
 			firewallId = updated.GetId()
+			firewallName = updated.GetName()
 			msgf := fmt.Sprintf(msg.ManifestUpdateFirewall, updated.GetName(), updated.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
-			createReq := apiFirewall.NewCreateRequest()
-			createReq.SetName(fwMan.Name)
-			if fwMan.Active != nil {
-				createReq.SetActive(*fwMan.Active)
+			// Keep track of firewall name for potential retry
+			firewallName = fwMan.Name
+			for {
+				createReq := apiFirewall.NewCreateRequest()
+				createReq.SetName(firewallName)
+				if fwMan.Active != nil {
+					createReq.SetActive(*fwMan.Active)
+				}
+				if fwMan.Debug != nil {
+					createReq.SetDebug(*fwMan.Debug)
+				}
+				if fwMan.Modules != nil {
+					createReq.SetModules(*fwMan.Modules)
+				}
+				created, err := rc.FirewallClient.Create(rc.Ctx, createReq)
+				if err != nil {
+					// if the name is already in use, we ask for another one
+					if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
+						logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.FirewallInUse, rc.Factory.Format, rc.Factory.Out)
+						*rc.Msgs = append(*rc.Msgs, msg.FirewallInUse)
+						// Prompt user for a new name
+						newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", firewallName, utils.Timestamp()))
+						if inputErr != nil {
+							return inputErr
+						}
+						firewallName = newName
+						continue
+					}
+					logger.Debug("Error while creating firewall", zap.Error(err))
+					return err
+				}
+				firewallId = created.GetId()
+				firewallName = created.GetName()
+				rc.FirewallIds[firewallName] = firewallId
+				msgf := fmt.Sprintf(msg.ManifestCreateFirewall, created.GetName(), created.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+				break
 			}
-			if fwMan.Debug != nil {
-				createReq.SetDebug(*fwMan.Debug)
-			}
-			if fwMan.Modules != nil {
-				createReq.SetModules(*fwMan.Modules)
-			}
-			created, err := rc.FirewallClient.Create(rc.Ctx, createReq)
-			if err != nil {
-				logger.Debug("Error while creating firewall", zap.Error(err))
-				return err
-			}
-			firewallId = created.GetId()
-			msgf := fmt.Sprintf(msg.ManifestCreateFirewall, created.GetName(), created.GetId())
-			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 
 		fwRuleConf := []contracts.AzionJsonDataFirewallRule{}
@@ -723,7 +825,7 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 
 		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{
 			Id:    firewallId,
-			Name:  fwMan.Name,
+			Name:  firewallName,
 			Rules: fwRuleConf,
 		})
 	}
@@ -919,4 +1021,48 @@ func (rc *ResourceContext) transformBehaviorsResponse(behaviors []contracts.Mani
 	}
 
 	return behaviorsResponse, nil
+}
+
+func (rc *ResourceContext) ApplyStorage(storages []contracts.StorageManifest) error {
+	if len(storages) == 0 {
+		return nil
+	}
+
+	logger.Debug("Applying storage buckets")
+
+	for _, storage := range storages {
+		// Check if bucket already exists in config (by checking if Bucket field is set)
+		if rc.Conf.Bucket != "" {
+			// Bucket already exists, update it if needed
+			logger.Debug("Bucket already exists, updating", zap.String("name", storage.Name))
+			if storage.WorkloadsAccess != "" {
+				err := rc.StorageClient.UpdateBucket(rc.Ctx, storage.Name, storage.WorkloadsAccess)
+				if err != nil {
+					return err
+				}
+			}
+			msgf := fmt.Sprintf(msg.ManifestUpdateStorage, storage.Name)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+		} else {
+			// Create new bucket
+			logger.Debug("Creating bucket", zap.String("name", storage.Name))
+			request := apiStorage.RequestBucket{
+				BucketCreateRequest: storagesdk.BucketCreateRequest{
+					Name:            storage.Name,
+					WorkloadsAccess: storage.WorkloadsAccess,
+				},
+			}
+			err := rc.StorageClient.CreateBucket(rc.Ctx, request)
+			if err != nil {
+				return err
+			}
+			rc.Conf.Bucket = storage.Name
+			msgf := fmt.Sprintf(msg.ManifestCreateStorage, storage.Name)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
+		}
+	}
+
+	return rc.WriteConfig()
 }
