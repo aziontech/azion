@@ -151,6 +151,20 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 
 	resourceCount := 0
 
+	if len(manifestStructure.Storage) > 0 {
+		if err := rc.ApplyStorage(manifestStructure.Storage); err != nil {
+			return err
+		}
+		resourceCount++
+	}
+
+	if len(manifestStructure.Connectors) > 0 {
+		if err := rc.ApplyConnectors(manifestStructure.Connectors); err != nil {
+			return err
+		}
+		resourceCount++
+	}
+
 	if len(manifestStructure.Functions) > 0 {
 		if err := rc.ApplyFunctions(manifestStructure.Functions); err != nil {
 			return err
@@ -161,6 +175,11 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 	if len(manifestStructure.Applications) > 0 {
 		app := manifestStructure.Applications[0]
 
+		if err := rc.ApplyEdgeApplication(app); err != nil {
+			return err
+		}
+		resourceCount++
+
 		if len(app.FunctionsInstances) > 0 {
 			if err := rc.ApplyFunctionInstances(app.FunctionsInstances); err != nil {
 				return err
@@ -168,19 +187,8 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 			resourceCount++
 		}
 
-		if err := rc.ApplyEdgeApplication(app); err != nil {
-			return err
-		}
-		resourceCount++
-
 		if len(app.CacheSettings) > 0 {
 			if err := rc.ApplyCacheSettings(app.CacheSettings); err != nil {
-				return err
-			}
-		}
-
-		if len(manifestStructure.Connectors) > 0 {
-			if err := rc.ApplyConnectors(manifestStructure.Connectors); err != nil {
 				return err
 			}
 		}

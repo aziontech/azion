@@ -226,7 +226,8 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 func unmarshalJsonArgs(argsPath string) (map[string]interface{}, error) {
 	marshalledArgs, err := os.ReadFile(argsPath)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", msg.ErrorReadArgsFile, err)
+		// If args.json file doesn't exist, return empty map as default
+		return map[string]interface{}{}, nil
 	}
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
