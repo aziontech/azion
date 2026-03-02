@@ -32,7 +32,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// isNotFoundError checks if the error is a 404 Not Found error
 func isNotFoundError(err error) bool {
 	return errors.Is(err, utils.ErrorNotFound404)
 }
@@ -137,15 +136,11 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 	successCount := 0
 	failCount := 0
 
-	// Delete ALL Application Rules Engine rules from server first (not just tracked ones)
-	// This is critical because rules may reference function instances or cache settings
 	if azionJson.Application.ID != 0 {
-		// List and delete ALL request phase rules
 		listOpts := &contracts.ListOptions{PageSize: 100}
 		for {
 			requestRules, err := clientApp.ListRulesEngineRequest(ctx, listOpts, azionJson.Application.ID)
 			if err != nil {
-				// If application doesn't exist (404), there are no rules to delete - skip silently
 				if isNotFoundError(err) {
 					logger.Debug("Application not found, skipping request phase rules deletion", zap.Int64("applicationID", azionJson.Application.ID))
 					break
@@ -175,12 +170,10 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 			listOpts.Page++
 		}
 
-		// List and delete ALL response phase rules
 		listOpts = &contracts.ListOptions{PageSize: 100}
 		for {
 			responseRules, err := clientApp.ListRulesEngineResponse(ctx, listOpts, azionJson.Application.ID)
 			if err != nil {
-				// If application doesn't exist (404), there are no rules to delete - skip silently
 				if isNotFoundError(err) {
 					logger.Debug("Application not found, skipping response phase rules deletion", zap.Int64("applicationID", azionJson.Application.ID))
 					break
@@ -211,14 +204,12 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 		}
 	}
 
-	// Delete ALL Firewall Rules from server (not just tracked ones)
 	if len(azionJson.Firewalls) > 0 {
 		for _, fw := range azionJson.Firewalls {
 			listOpts := &contracts.ListOptions{PageSize: 100}
 			for {
 				fwRules, err := clientFwRules.List(ctx, listOpts, fw.Id)
 				if err != nil {
-					// If firewall doesn't exist (404), there are no rules to delete - skip silently
 					if isNotFoundError(err) {
 						logger.Debug("Firewall not found, skipping firewall rules deletion", zap.Int64("firewallID", fw.Id))
 						break
@@ -250,14 +241,11 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 		}
 	}
 
-	// Now delete ALL Function Instances from server (not just tracked ones)
-	// This must happen AFTER rules are deleted
 	if azionJson.Application.ID != 0 {
 		listOpts := &contracts.ListOptions{PageSize: 100}
 		for {
 			funcInstances, err := clientApp.EdgeFuncInstancesList(ctx, listOpts, azionJson.Application.ID)
 			if err != nil {
-				// If application doesn't exist (404), there are no function instances to delete - skip silently
 				if isNotFoundError(err) {
 					logger.Debug("Application not found, skipping function instances deletion", zap.Int64("applicationID", azionJson.Application.ID))
 					break
@@ -288,14 +276,11 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 		}
 	}
 
-	// Now delete ALL Cache Settings from server (not just tracked ones)
-	// This must happen AFTER rules are deleted
 	if azionJson.Application.ID != 0 {
 		listOpts := &contracts.ListOptions{PageSize: 100}
 		for {
 			cacheSettings, err := clientCacheSetting.List(ctx, listOpts, azionJson.Application.ID)
 			if err != nil {
-				// If application doesn't exist (404), there are no cache settings to delete - skip silently
 				if isNotFoundError(err) {
 					logger.Debug("Application not found, skipping cache settings deletion", zap.Int64("applicationID", azionJson.Application.ID))
 					break
@@ -330,7 +315,6 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 		}
 	}
 
-	// Finally delete the Application itself
 	if azionJson.Application.ID != 0 {
 		logger.FInfo(del.Io.Out, fmt.Sprintf(msg.DeletingApplication, azionJson.Application.Name, azionJson.Application.ID))
 		err := clientApp.Delete(ctx, azionJson.Application.ID)
@@ -441,19 +425,6 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 		Flags: del.f.Flags,
 	}
 	return output.Print(&deleteOut)
-}
-
-func deleteRulesEngineByPhase(ctx context.Context, client *rulesengine.Client, applicationID, ruleID int64, phase string) error {
-	logger.Debug("Deleting Rules Engine rule", zap.Int64("applicationID", applicationID), zap.Int64("ruleID", ruleID), zap.String("phase", phase))
-
-	switch phase {
-	case "request":
-		return client.DeleteRequest(ctx, applicationID, ruleID)
-	case "response":
-		return client.DeleteResponse(ctx, applicationID, ruleID)
-	default:
-		return client.DeleteRequest(ctx, applicationID, ruleID)
-	}
 }
 
 func (del *DeleteCmd) resetAzionJson(configDir string) error {
