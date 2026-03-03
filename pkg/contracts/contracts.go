@@ -209,14 +209,24 @@ type AzionJsonDataCacheSettings struct {
 }
 
 type AzionJsonDataFirewall struct {
-	Id    int64                       `json:"id"`
-	Name  string                      `json:"name"`
-	Rules []AzionJsonDataFirewallRule `json:"rules,omitempty"`
+	Id                int64                                   `json:"id"`
+	Name              string                                  `json:"name"`
+	Rules             []AzionJsonDataFirewallRule             `json:"rules,omitempty"`
+	FunctionInstances []AzionJsonDataFirewallFunctionInstance `json:"function_instances,omitempty"`
 }
 
 type AzionJsonDataFirewallRule struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+// AzionJsonDataFirewallFunctionInstance represents a firewall function instance in azion.json
+type AzionJsonDataFirewallFunctionInstance struct {
+	Id         int64                  `json:"id"`
+	Name       string                 `json:"name"`
+	FunctionId int64                  `json:"function_id"`
+	Args       map[string]interface{} `json:"args,omitempty"`
+	Active     bool                   `json:"active"`
 }
 
 type Manifest struct {
@@ -254,11 +264,12 @@ type ManifestV4 struct {
 }
 
 type FirewallManifest struct {
-	Name        string                          `json:"name"`
-	Modules     *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
-	Debug       *bool                           `json:"debug,omitempty"`
-	Active      *bool                           `json:"active,omitempty"`
-	RulesEngine []FirewallManifestRule          `json:"rules_engine,omitempty"`
+	Name               string                          `json:"name"`
+	Modules            *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
+	Debug              *bool                           `json:"debug,omitempty"`
+	Active             *bool                           `json:"active,omitempty"`
+	RulesEngine        []FirewallManifestRule          `json:"rules_engine,omitempty"`
+	FunctionsInstances []FunctionInstance              `json:"functions_instances,omitempty"`
 }
 
 // FirewallManifestRule represents a firewall rule in the manifest.json file

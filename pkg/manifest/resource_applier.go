@@ -15,6 +15,7 @@ import (
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
+	apiFirewallInstance "github.com/aziontech/azion-cli/pkg/api/firewall_instance"
 	functionsApi "github.com/aziontech/azion-cli/pkg/api/function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -38,29 +39,36 @@ type ResourceContext struct {
 	WriteConfigFunc func(conf *contracts.AzionApplicationOptions, confPath string) error
 
 	// API Clients
-	ApplicationClient *apiApplications.Client
-	CacheClient       *apiCache.ClientV4
-	WorkloadClient    *apiWorkloads.Client
-	ConnectorClient   *apiConnector.Client
-	FunctionClient    *functionsApi.Client
-	PurgeClient       *apiPurge.Client
-	FirewallClient    *apiFirewall.Client
-	StorageClient     *apiStorage.Client
+	ApplicationClient          *apiApplications.Client
+	CacheClient                *apiCache.ClientV4
+	WorkloadClient             *apiWorkloads.Client
+	ConnectorClient            *apiConnector.Client
+	FunctionClient             *functionsApi.Client
+	PurgeClient                *apiPurge.Client
+	FirewallClient             *apiFirewall.Client
+	FirewallFunctionInstClient *apiFirewallInstance.Client
+	StorageClient              *apiStorage.Client
 
 	// ID Mappings - these track created/existing resource IDs
-	CacheIds        map[string]int64
-	CacheIdsBackup  map[string]int64
-	RuleIds         map[string]contracts.RuleIdsStruct
-	ConnectorIds    map[string]int64
-	DeploymentIds   map[string]int64
-	FunctionIds     map[string]contracts.AzionJsonDataFunction
-	FirewallIds     map[string]int64
-	FirewallRuleIds map[string]firewallRuleIdRef
+	CacheIds                map[string]int64
+	CacheIdsBackup          map[string]int64
+	RuleIds                 map[string]contracts.RuleIdsStruct
+	ConnectorIds            map[string]int64
+	DeploymentIds           map[string]int64
+	FunctionIds             map[string]contracts.AzionJsonDataFunction
+	FirewallIds             map[string]int64
+	FirewallRuleIds         map[string]firewallRuleIdRef
+	FirewallFunctionInstIds map[string]firewallFunctionInstIdRef
 }
 
 type firewallRuleIdRef struct {
 	FirewallId int64
 	RuleId     int64
+}
+
+type firewallFunctionInstIdRef struct {
+	FirewallId         int64
+	FunctionInstanceId int64
 }
 
 func NewResourceContext(
@@ -85,24 +93,26 @@ func NewResourceContext(
 		WriteConfigFunc: writeConfigFunc,
 
 		// Initialize clients
-		ApplicationClient: apiApplications.NewClient(f.HttpClient, apiURL, token),
-		CacheClient:       apiCache.NewClientV4(f.HttpClient, apiURL, token),
-		WorkloadClient:    apiWorkloads.NewClient(f.HttpClient, apiURL, token),
-		ConnectorClient:   apiConnector.NewClient(f.HttpClient, apiURL, token),
-		FunctionClient:    functionsApi.NewClient(f.HttpClient, apiURL, token),
-		PurgeClient:       apiPurge.NewClient(f.HttpClient, apiURL, token),
-		FirewallClient:    apiFirewall.NewClient(f.HttpClient, apiURL, token),
-		StorageClient:     apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
+		ApplicationClient:          apiApplications.NewClient(f.HttpClient, apiURL, token),
+		CacheClient:                apiCache.NewClientV4(f.HttpClient, apiURL, token),
+		WorkloadClient:             apiWorkloads.NewClient(f.HttpClient, apiURL, token),
+		ConnectorClient:            apiConnector.NewClient(f.HttpClient, apiURL, token),
+		FunctionClient:             functionsApi.NewClient(f.HttpClient, apiURL, token),
+		PurgeClient:                apiPurge.NewClient(f.HttpClient, apiURL, token),
+		FirewallClient:             apiFirewall.NewClient(f.HttpClient, apiURL, token),
+		FirewallFunctionInstClient: apiFirewallInstance.NewClient(f.HttpClient, apiURL, token),
+		StorageClient:              apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
 
 		// Initialize ID maps
-		CacheIds:        make(map[string]int64),
-		CacheIdsBackup:  make(map[string]int64),
-		RuleIds:         make(map[string]contracts.RuleIdsStruct),
-		ConnectorIds:    make(map[string]int64),
-		DeploymentIds:   make(map[string]int64),
-		FunctionIds:     make(map[string]contracts.AzionJsonDataFunction),
-		FirewallIds:     make(map[string]int64),
-		FirewallRuleIds: make(map[string]firewallRuleIdRef),
+		CacheIds:                make(map[string]int64),
+		CacheIdsBackup:          make(map[string]int64),
+		RuleIds:                 make(map[string]contracts.RuleIdsStruct),
+		ConnectorIds:            make(map[string]int64),
+		DeploymentIds:           make(map[string]int64),
+		FunctionIds:             make(map[string]contracts.AzionJsonDataFunction),
+		FirewallIds:             make(map[string]int64),
+		FirewallRuleIds:         make(map[string]firewallRuleIdRef),
+		FirewallFunctionInstIds: make(map[string]firewallFunctionInstIdRef),
 	}
 
 	// Populate ID maps from existing config
@@ -141,6 +151,12 @@ func (rc *ResourceContext) populateIdMapsFromConfig() {
 			rc.FirewallRuleIds[ruleConf.Name] = firewallRuleIdRef{
 				FirewallId: fwConf.Id,
 				RuleId:     ruleConf.Id,
+			}
+		}
+		for _, funcInstConf := range fwConf.FunctionInstances {
+			rc.FirewallFunctionInstIds[funcInstConf.Name] = firewallFunctionInstIdRef{
+				FirewallId:         fwConf.Id,
+				FunctionInstanceId: funcInstConf.Id,
 			}
 		}
 	}
@@ -823,10 +839,75 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 			}
 		}
 
+		fwFuncInstConf := []contracts.AzionJsonDataFirewallFunctionInstance{}
+		for _, funcInst := range fwMan.FunctionsInstances {
+			funcConf, funcExists := rc.FunctionIds[funcInst.Function]
+			if !funcExists || funcConf.ID == 0 {
+				logger.Debug("Function not found in FunctionIds map", zap.String("function", funcInst.Function))
+				return msg.ErrorFuncNotFound
+			}
+
+			if funcInstRef := rc.FirewallFunctionInstIds[funcInst.Name]; funcInstRef.FunctionInstanceId > 0 {
+				updateReq := apiFirewallInstance.NewUpdateRequest()
+				updateReq.SetName(funcInst.Name)
+				updateReq.SetActive(funcInst.Active)
+				updateReq.SetFunction(funcConf.ID)
+				if len(funcInst.Args) > 0 {
+					updateReq.SetArgs(funcInst.Args)
+				}
+
+				updated, err := rc.FirewallFunctionInstClient.Update(rc.Ctx, firewallId, funcInstRef.FunctionInstanceId, updateReq)
+				if err != nil {
+					logger.Debug("Error while updating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         updated.GetId(),
+					Name:       updated.GetName(),
+					FunctionId: funcConf.ID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+				msgf := fmt.Sprintf(msg.ManifestUpdateFirewallFunctionInstance, updated.GetName(), updated.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			} else {
+				createReq := apiFirewallInstance.NewCreateRequest()
+				createReq.SetName(funcInst.Name)
+				createReq.SetActive(funcInst.Active)
+				createReq.SetFunction(funcConf.ID)
+				if len(funcInst.Args) > 0 {
+					createReq.SetArgs(funcInst.Args)
+				}
+
+				created, err := rc.FirewallFunctionInstClient.Create(rc.Ctx, firewallId, createReq)
+				if err != nil {
+					logger.Debug("Error while creating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         created.GetId(),
+					Name:       created.GetName(),
+					FunctionId: funcConf.ID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+
+				rc.FirewallFunctionInstIds[funcInst.Name] = firewallFunctionInstIdRef{
+					FirewallId:         firewallId,
+					FunctionInstanceId: created.GetId(),
+				}
+				msgf := fmt.Sprintf(msg.ManifestCreateFirewallFunctionInstance, created.GetName(), created.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			}
+		}
+
 		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{
-			Id:    firewallId,
-			Name:  firewallName,
-			Rules: fwRuleConf,
+			Id:                firewallId,
+			Name:              firewallName,
+			Rules:             fwRuleConf,
+			FunctionInstances: fwFuncInstConf,
 		})
 	}
 
