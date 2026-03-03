@@ -60,8 +60,8 @@ func (f *Fields) RunE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf(msg.ERROR_DESCRIBE_OBJECT, err)
 	}
 
-	describeOut := output.GeneralOutput{
-		Msg:   string(bFile),
+	describeOut := output.RawOutput{
+		Bytes: bFile,
 		Out:   f.Factory.IOStreams.Out,
 		Flags: f.Factory.Flags,
 	}
