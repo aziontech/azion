@@ -10,15 +10,15 @@ import (
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
-// convertFirewallRuleToSDK converts a FirewallManifestRule (lenient JSON types)
-// to an edgesdk.FirewallRuleRequest (strict SDK types).
-func convertFirewallRuleToSDK(rule contracts.FirewallManifestRule) (edgesdk.FirewallRuleRequest, error) {
+type FuncInstLookup func(name string) (int64, bool)
+
+func convertFirewallRuleToSDK(rule contracts.FirewallManifestRule, funcInstLookup FuncInstLookup) (edgesdk.FirewallRuleRequest, error) {
 	criteria, err := convertFirewallCriteria(rule.Criteria)
 	if err != nil {
 		return edgesdk.FirewallRuleRequest{}, fmt.Errorf("error converting criteria for rule %q: %w", rule.Name, err)
 	}
 
-	behaviors, err := convertFirewallBehaviors(rule.Behaviors)
+	behaviors, err := convertFirewallBehaviors(rule.Behaviors, funcInstLookup)
 	if err != nil {
 		return edgesdk.FirewallRuleRequest{}, fmt.Errorf("error converting behaviors for rule %q: %w", rule.Name, err)
 	}
@@ -37,7 +37,6 @@ func convertFirewallRuleToSDK(rule contracts.FirewallManifestRule) (edgesdk.Fire
 	return sdkRule, nil
 }
 
-// convertFirewallCriteria converts manifest criterion slices to SDK types.
 func convertFirewallCriteria(criteria [][]contracts.FirewallManifestCriterion) ([][]edgesdk.FirewallCriterionFieldRequest, error) {
 	result := make([][]edgesdk.FirewallCriterionFieldRequest, len(criteria))
 	for i, group := range criteria {
@@ -73,10 +72,10 @@ func convertFirewallCriteria(criteria [][]contracts.FirewallManifestCriterion) (
 }
 
 // convertFirewallBehaviors converts manifest behaviors to SDK types.
-func convertFirewallBehaviors(behaviors []contracts.FirewallManifestBehavior) ([]edgesdk.FirewallBehaviorRequest, error) {
+func convertFirewallBehaviors(behaviors []contracts.FirewallManifestBehavior, funcInstLookup FuncInstLookup) ([]edgesdk.FirewallBehaviorRequest, error) {
 	result := make([]edgesdk.FirewallBehaviorRequest, len(behaviors))
 	for i, b := range behaviors {
-		sdkBehavior, err := convertSingleFirewallBehavior(b)
+		sdkBehavior, err := convertSingleFirewallBehavior(b, funcInstLookup)
 		if err != nil {
 			return nil, fmt.Errorf("error converting behavior %q: %w", b.Type, err)
 		}
@@ -86,7 +85,7 @@ func convertFirewallBehaviors(behaviors []contracts.FirewallManifestBehavior) ([
 }
 
 // convertSingleFirewallBehavior converts a single manifest behavior to an SDK behavior.
-func convertSingleFirewallBehavior(b contracts.FirewallManifestBehavior) (edgesdk.FirewallBehaviorRequest, error) {
+func convertSingleFirewallBehavior(b contracts.FirewallManifestBehavior, funcInstLookup FuncInstLookup) (edgesdk.FirewallBehaviorRequest, error) {
 	switch b.Type {
 	case "deny", "drop":
 		// No-args behaviors
@@ -96,9 +95,20 @@ func convertSingleFirewallBehavior(b contracts.FirewallManifestBehavior) (edgesd
 
 	case "run_function":
 		// Args behavior (simple argument)
+		// First try to get the value directly as an int64
 		value, err := toInt64(b.Attributes["value"])
 		if err != nil {
-			return edgesdk.FirewallBehaviorRequest{}, fmt.Errorf("run_function behavior requires integer 'value' attribute: %w", err)
+			// If that fails, try to look it up by name (string)
+			name, strErr := toString(b.Attributes["value"])
+			if strErr != nil {
+				return edgesdk.FirewallBehaviorRequest{}, fmt.Errorf("run_function behavior requires integer 'value' attribute or function instance name: %w", err)
+			}
+			// Look up the function instance ID by name
+			instID, found := funcInstLookup(name)
+			if !found {
+				return edgesdk.FirewallBehaviorRequest{}, fmt.Errorf("run_function behavior: function instance %q not found", name)
+			}
+			value = instID
 		}
 		attrs := edgesdk.FirewallBehaviorRunFunctionAttributesRequest{
 			Value: value,

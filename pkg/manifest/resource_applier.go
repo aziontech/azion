@@ -235,19 +235,67 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 	return rc.WriteConfig()
 }
 
+// resolveFunctionReference resolves a FunctionReference to a function ID and its config.
+// It handles both name-based references (string) and direct ID references (int64).
+// Returns the function ID, the function config from FunctionIds map, and whether it was found.
+func (rc *ResourceContext) resolveFunctionReference(ref contracts.FunctionReference) (int64, contracts.AzionJsonDataFunction, bool) {
+	// If the reference has a direct ID, use it
+	if ref.ID > 0 {
+		logger.Debug("resolveFunctionReference: using direct ID from manifest",
+			zap.Int64("id", ref.ID),
+			zap.String("name", ref.Name))
+		for _, funcConf := range rc.FunctionIds {
+			if funcConf.ID == ref.ID {
+				logger.Debug("resolveFunctionReference: ID found in azion.json map",
+					zap.Int64("id", ref.ID),
+					zap.String("name_from_map", funcConf.Name))
+				return ref.ID, funcConf, true
+			}
+		}
+		// ID was specified but not found in map - return the ID anyway for API calls
+		logger.Debug("resolveFunctionReference: ID not found in azion.json map, using ID directly",
+			zap.Int64("id", ref.ID))
+		return ref.ID, contracts.AzionJsonDataFunction{ID: ref.ID}, true
+	}
+
+	// Otherwise, look up by name
+	logger.Debug("resolveFunctionReference: looking up by name in azion.json map",
+		zap.String("name", ref.Name),
+		zap.Int64("id", ref.ID))
+	if funcConf, ok := rc.FunctionIds[ref.Name]; ok {
+		logger.Debug("resolveFunctionReference: name found in azion.json map",
+			zap.String("name", ref.Name),
+			zap.Int64("id_from_map", funcConf.ID))
+		return funcConf.ID, funcConf, true
+	}
+
+	logger.Debug("resolveFunctionReference: name not found in azion.json map",
+		zap.String("name", ref.Name))
+	return 0, contracts.AzionJsonDataFunction{}, false
+}
+
 func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.FunctionInstance) error {
 	if rc.Conf.Application.ID == 0 {
 		return msg.ErrorApplicationIDRequired
 	}
 
 	for _, funcMan := range instances {
-		if funcConf := rc.FunctionIds[funcMan.Function]; funcConf.InstanceID > 0 {
+		// Resolve the function reference to get the function ID and config
+		funcID, funcConf, found := rc.resolveFunctionReference(funcMan.Function)
+		if !found {
+			logger.Debug("Function not found for function instance", zap.Any("function", funcMan.Function))
+			return msg.ErrorFuncNotFound
+		}
+
+		// Check if this function instance already exists (by name in FunctionIds map)
+		instanceKey := funcMan.Name
+		if existingFunc, ok := rc.FunctionIds[instanceKey]; ok && existingFunc.InstanceID > 0 {
 			request := apiApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
-			request.SetFunction(funcConf.ID)
+			request.SetFunction(funcID)
 			if len(funcMan.Args) > 0 {
 				request.SetArgs(funcMan.Args)
-			} else {
+			} else if funcConf.Args != "" {
 				args, err := unmarshalJsonArgs(funcConf.Args)
 				if err != nil {
 					return err
@@ -255,7 +303,7 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
-			updated, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, funcConf.InstanceID)
+			updated, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, existingFunc.InstanceID)
 			if err != nil {
 				return err
 			}
@@ -267,7 +315,7 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 			request.SetActive(true)
 			if len(funcMan.Args) > 0 {
 				request.SetArgs(funcMan.Args)
-			} else {
+			} else if funcConf.Args != "" {
 				args, err := unmarshalJsonArgs(funcConf.Args)
 				if err != nil {
 					return err
@@ -275,20 +323,21 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
-			request.SetFunction(funcConf.ID)
+			request.SetFunction(funcID)
 			resp, err := rc.ApplicationClient.CreateFuncInstances(rc.Ctx, &request, rc.Conf.Application.ID)
 			if err != nil {
 				return err
 			}
+			// Update or create the function config entry with the new instance ID
 			newFunc := contracts.AzionJsonDataFunction{
-				ID:         funcConf.ID,
+				ID:         funcID,
 				CacheId:    funcConf.CacheId,
-				Name:       funcConf.Name,
+				Name:       funcMan.Name,
 				File:       funcConf.File,
 				Args:       funcConf.Args,
 				InstanceID: resp.GetId(),
 			}
-			rc.FunctionIds[funcConf.Name] = newFunc
+			rc.FunctionIds[funcMan.Name] = newFunc
 			msgf := fmt.Sprintf(msg.ManifestCreateFunctionInstance, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
@@ -791,9 +840,86 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 			}
 		}
 
+		fwFuncInstConf := []contracts.AzionJsonDataFirewallFunctionInstance{}
+		for _, funcInst := range fwMan.FunctionsInstances {
+			funcID, funcConf, found := rc.resolveFunctionReference(funcInst.Function)
+			if !found {
+				logger.Debug("Function not found for firewall function instance",
+					zap.Any("function", funcInst.Function))
+				return msg.ErrorFuncNotFound
+			}
+
+			if funcInstRef := rc.FirewallFunctionInstIds[funcInst.Name]; funcInstRef.FunctionInstanceId > 0 {
+				updateReq := apiFirewallInstance.NewUpdateRequest()
+				updateReq.SetName(funcInst.Name)
+				updateReq.SetActive(funcInst.Active)
+				updateReq.SetFunction(funcID)
+				if len(funcInst.Args) > 0 {
+					updateReq.SetArgs(funcInst.Args)
+				}
+
+				updated, err := rc.FirewallFunctionInstClient.Update(rc.Ctx, firewallId, funcInstRef.FunctionInstanceId, updateReq)
+				if err != nil {
+					logger.Debug("Error while updating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         updated.GetId(),
+					Name:       updated.GetName(),
+					FunctionId: funcID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+				msgf := fmt.Sprintf(msg.ManifestUpdateFirewallFunctionInstance, updated.GetName(), updated.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			} else {
+				createReq := apiFirewallInstance.NewCreateRequest()
+				createReq.SetName(funcInst.Name)
+				createReq.SetActive(funcInst.Active)
+				createReq.SetFunction(funcID)
+				if len(funcInst.Args) > 0 {
+					createReq.SetArgs(funcInst.Args)
+				}
+
+				created, err := rc.FirewallFunctionInstClient.Create(rc.Ctx, firewallId, createReq)
+				if err != nil {
+					logger.Debug("Error while creating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         created.GetId(),
+					Name:       created.GetName(),
+					FunctionId: funcID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+
+				rc.FirewallFunctionInstIds[funcInst.Name] = firewallFunctionInstIdRef{
+					FirewallId:         firewallId,
+					FunctionInstanceId: created.GetId(),
+				}
+				msgf := fmt.Sprintf(msg.ManifestCreateFirewallFunctionInstance, created.GetName(), created.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			}
+			// Use funcConf to avoid unused variable error if only ID was provided
+			_ = funcConf
+		}
+
+		// Create a lookup function for resolving function instance names to IDs
+		// This is used when processing rules that reference function instances by name
+		funcInstLookup := func(name string) (int64, bool) {
+			if ref, ok := rc.FirewallFunctionInstIds[name]; ok {
+				return ref.FunctionInstanceId, true
+			}
+			return 0, false
+		}
+
+		// Now process rules - they can reference function instances by name
 		fwRuleConf := []contracts.AzionJsonDataFirewallRule{}
 		for _, rule := range fwMan.RulesEngine {
-			sdkRule, err := convertFirewallRuleToSDK(rule)
+			sdkRule, err := convertFirewallRuleToSDK(rule, funcInstLookup)
 			if err != nil {
 				logger.Debug("Error converting firewall rule from manifest", zap.Error(err))
 				return err
@@ -834,70 +960,6 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 					Name: created.GetName(),
 				})
 				msgf := fmt.Sprintf(msg.ManifestCreateFirewallRule, created.GetName(), created.GetId())
-				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-				*rc.Msgs = append(*rc.Msgs, msgf)
-			}
-		}
-
-		fwFuncInstConf := []contracts.AzionJsonDataFirewallFunctionInstance{}
-		for _, funcInst := range fwMan.FunctionsInstances {
-			funcConf, funcExists := rc.FunctionIds[funcInst.Function]
-			if !funcExists || funcConf.ID == 0 {
-				logger.Debug("Function not found in FunctionIds map", zap.String("function", funcInst.Function))
-				return msg.ErrorFuncNotFound
-			}
-
-			if funcInstRef := rc.FirewallFunctionInstIds[funcInst.Name]; funcInstRef.FunctionInstanceId > 0 {
-				updateReq := apiFirewallInstance.NewUpdateRequest()
-				updateReq.SetName(funcInst.Name)
-				updateReq.SetActive(funcInst.Active)
-				updateReq.SetFunction(funcConf.ID)
-				if len(funcInst.Args) > 0 {
-					updateReq.SetArgs(funcInst.Args)
-				}
-
-				updated, err := rc.FirewallFunctionInstClient.Update(rc.Ctx, firewallId, funcInstRef.FunctionInstanceId, updateReq)
-				if err != nil {
-					logger.Debug("Error while updating firewall function instance", zap.Error(err))
-					return err
-				}
-				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
-					Id:         updated.GetId(),
-					Name:       updated.GetName(),
-					FunctionId: funcConf.ID,
-					Active:     funcInst.Active,
-					Args:       funcInst.Args,
-				})
-				msgf := fmt.Sprintf(msg.ManifestUpdateFirewallFunctionInstance, updated.GetName(), updated.GetId())
-				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
-				*rc.Msgs = append(*rc.Msgs, msgf)
-			} else {
-				createReq := apiFirewallInstance.NewCreateRequest()
-				createReq.SetName(funcInst.Name)
-				createReq.SetActive(funcInst.Active)
-				createReq.SetFunction(funcConf.ID)
-				if len(funcInst.Args) > 0 {
-					createReq.SetArgs(funcInst.Args)
-				}
-
-				created, err := rc.FirewallFunctionInstClient.Create(rc.Ctx, firewallId, createReq)
-				if err != nil {
-					logger.Debug("Error while creating firewall function instance", zap.Error(err))
-					return err
-				}
-				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
-					Id:         created.GetId(),
-					Name:       created.GetName(),
-					FunctionId: funcConf.ID,
-					Active:     funcInst.Active,
-					Args:       funcInst.Args,
-				})
-
-				rc.FirewallFunctionInstIds[funcInst.Name] = firewallFunctionInstIdRef{
-					FirewallId:         firewallId,
-					FunctionInstanceId: created.GetId(),
-				}
-				msgf := fmt.Sprintf(msg.ManifestCreateFirewallFunctionInstance, created.GetName(), created.GetId())
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
 			}
