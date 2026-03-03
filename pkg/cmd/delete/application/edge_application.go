@@ -117,11 +117,11 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 }
 
 func updateAzionJson(cmd *DeleteCmd) error {
-	paths, err := utils.GetWorkingDir()
+	wd, err := utils.GetWorkingDir()
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := path.Join(paths, "azion", "azion.json")
+	azionJson := path.Join(wd, ProjectConf, "azion.json")
 
 	azionJsonFile := &contracts.AzionApplicationOptions{
 		Env:    "production",
