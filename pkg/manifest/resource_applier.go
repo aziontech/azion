@@ -212,6 +212,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			request.SetDefaultArgs(funcMan.DefaultArgs)
 			request.SetName(funcMan.Name)
 			request.SetCode(string(code))
+			request.SetExecutionEnvironment(funcMan.ExecutionEnvironment)
 			updated, err := rc.FunctionClient.Update(rc.Ctx, &request, funcConf.ID)
 			if err != nil {
 				return err
@@ -230,6 +231,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 				request.SetDefaultArgs(funcMan.DefaultArgs)
 				request.SetName(funcName)
 				request.SetCode(string(code))
+				request.SetExecutionEnvironment(funcMan.ExecutionEnvironment)
 				resp, err := rc.FunctionClient.Create(rc.Ctx, &request)
 				if err != nil {
 					// if the name is already in use, we ask for another one
@@ -411,11 +413,9 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 			createreq.SetName(appName)
 			resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
 			if err != nil {
-				// if the name is already in use, we ask for another one
 				if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.AppInUse, rc.Factory.Format, rc.Factory.Out)
 					*rc.Msgs = append(*rc.Msgs, msg.AppInUse)
-					// Prompt user for a new name
 					newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", appName, utils.Timestamp()))
 					if inputErr != nil {
 						return inputErr
