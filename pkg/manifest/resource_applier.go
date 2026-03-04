@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	apiFirewall "github.com/aziontech/azion-cli/pkg/api/firewall"
+	apiFirewallInstance "github.com/aziontech/azion-cli/pkg/api/firewall_instance"
 	functionsApi "github.com/aziontech/azion-cli/pkg/api/function"
 	apiPurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
@@ -22,6 +24,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
@@ -38,29 +41,36 @@ type ResourceContext struct {
 	WriteConfigFunc func(conf *contracts.AzionApplicationOptions, confPath string) error
 
 	// API Clients
-	ApplicationClient *apiApplications.Client
-	CacheClient       *apiCache.ClientV4
-	WorkloadClient    *apiWorkloads.Client
-	ConnectorClient   *apiConnector.Client
-	FunctionClient    *functionsApi.Client
-	PurgeClient       *apiPurge.Client
-	FirewallClient    *apiFirewall.Client
-	StorageClient     *apiStorage.Client
+	ApplicationClient          *apiApplications.Client
+	CacheClient                *apiCache.ClientV4
+	WorkloadClient             *apiWorkloads.Client
+	ConnectorClient            *apiConnector.Client
+	FunctionClient             *functionsApi.Client
+	PurgeClient                *apiPurge.Client
+	FirewallClient             *apiFirewall.Client
+	FirewallFunctionInstClient *apiFirewallInstance.Client
+	StorageClient              *apiStorage.Client
 
 	// ID Mappings - these track created/existing resource IDs
-	CacheIds        map[string]int64
-	CacheIdsBackup  map[string]int64
-	RuleIds         map[string]contracts.RuleIdsStruct
-	ConnectorIds    map[string]int64
-	DeploymentIds   map[string]int64
-	FunctionIds     map[string]contracts.AzionJsonDataFunction
-	FirewallIds     map[string]int64
-	FirewallRuleIds map[string]firewallRuleIdRef
+	CacheIds                map[string]int64
+	CacheIdsBackup          map[string]int64
+	RuleIds                 map[string]contracts.RuleIdsStruct
+	ConnectorIds            map[string]int64
+	DeploymentIds           map[string]int64
+	FunctionIds             map[string]contracts.AzionJsonDataFunction
+	FirewallIds             map[string]int64
+	FirewallRuleIds         map[string]firewallRuleIdRef
+	FirewallFunctionInstIds map[string]firewallFunctionInstIdRef
 }
 
 type firewallRuleIdRef struct {
 	FirewallId int64
 	RuleId     int64
+}
+
+type firewallFunctionInstIdRef struct {
+	FirewallId         int64
+	FunctionInstanceId int64
 }
 
 func NewResourceContext(
@@ -85,24 +95,26 @@ func NewResourceContext(
 		WriteConfigFunc: writeConfigFunc,
 
 		// Initialize clients
-		ApplicationClient: apiApplications.NewClient(f.HttpClient, apiURL, token),
-		CacheClient:       apiCache.NewClientV4(f.HttpClient, apiURL, token),
-		WorkloadClient:    apiWorkloads.NewClient(f.HttpClient, apiURL, token),
-		ConnectorClient:   apiConnector.NewClient(f.HttpClient, apiURL, token),
-		FunctionClient:    functionsApi.NewClient(f.HttpClient, apiURL, token),
-		PurgeClient:       apiPurge.NewClient(f.HttpClient, apiURL, token),
-		FirewallClient:    apiFirewall.NewClient(f.HttpClient, apiURL, token),
-		StorageClient:     apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
+		ApplicationClient:          apiApplications.NewClient(f.HttpClient, apiURL, token),
+		CacheClient:                apiCache.NewClientV4(f.HttpClient, apiURL, token),
+		WorkloadClient:             apiWorkloads.NewClient(f.HttpClient, apiURL, token),
+		ConnectorClient:            apiConnector.NewClient(f.HttpClient, apiURL, token),
+		FunctionClient:             functionsApi.NewClient(f.HttpClient, apiURL, token),
+		PurgeClient:                apiPurge.NewClient(f.HttpClient, apiURL, token),
+		FirewallClient:             apiFirewall.NewClient(f.HttpClient, apiURL, token),
+		FirewallFunctionInstClient: apiFirewallInstance.NewClient(f.HttpClient, apiURL, token),
+		StorageClient:              apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
 
 		// Initialize ID maps
-		CacheIds:        make(map[string]int64),
-		CacheIdsBackup:  make(map[string]int64),
-		RuleIds:         make(map[string]contracts.RuleIdsStruct),
-		ConnectorIds:    make(map[string]int64),
-		DeploymentIds:   make(map[string]int64),
-		FunctionIds:     make(map[string]contracts.AzionJsonDataFunction),
-		FirewallIds:     make(map[string]int64),
-		FirewallRuleIds: make(map[string]firewallRuleIdRef),
+		CacheIds:                make(map[string]int64),
+		CacheIdsBackup:          make(map[string]int64),
+		RuleIds:                 make(map[string]contracts.RuleIdsStruct),
+		ConnectorIds:            make(map[string]int64),
+		DeploymentIds:           make(map[string]int64),
+		FunctionIds:             make(map[string]contracts.AzionJsonDataFunction),
+		FirewallIds:             make(map[string]int64),
+		FirewallRuleIds:         make(map[string]firewallRuleIdRef),
+		FirewallFunctionInstIds: make(map[string]firewallFunctionInstIdRef),
 	}
 
 	// Populate ID maps from existing config
@@ -143,6 +155,12 @@ func (rc *ResourceContext) populateIdMapsFromConfig() {
 				RuleId:     ruleConf.Id,
 			}
 		}
+		for _, funcInstConf := range fwConf.FunctionInstances {
+			rc.FirewallFunctionInstIds[funcInstConf.Name] = firewallFunctionInstIdRef{
+				FirewallId:         fwConf.Id,
+				FunctionInstanceId: funcInstConf.Id,
+			}
+		}
 	}
 }
 
@@ -150,6 +168,32 @@ func (rc *ResourceContext) WriteConfig() error {
 	err := rc.WriteConfigFunc(rc.Conf, rc.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+// runConfigReplace executes the "config replace -k" command to update the azion.config file
+// with the new resource name after a successful creation with a renamed resource.
+// It uses the original name (from manifest) as key and the new name (that succeeded) as value.
+func (rc *ResourceContext) runConfigReplace(originalName, newName string) error {
+	logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.UpdateAzionConfig, rc.Factory.Format, rc.Factory.Out)
+	logger.Debug("Running config replace to update azion.config with new resource name",
+		zap.String("originalName", originalName),
+		zap.String("newName", newName))
+
+	vul := vulcanPkg.NewVulcan()
+	cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", originalName, newName)
+	command := vul.Command("", cmdStr, rc.Factory)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+
+	cmd := exec.Command("sh", "-c", command)
+	cmd.Stdin = rc.Factory.IOStreams.In
+	cmd.Stdout = rc.Factory.IOStreams.Out
+	cmd.Stderr = rc.Factory.IOStreams.Err
+	err := cmd.Run()
+	if err != nil {
+		logger.Debug("Error running config replace command", zap.Error(err))
 		return err
 	}
 	return nil
@@ -168,6 +212,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			request.SetDefaultArgs(funcMan.DefaultArgs)
 			request.SetName(funcMan.Name)
 			request.SetCode(string(code))
+			request.SetExecutionEnvironment(funcMan.ExecutionEnvironment)
 			updated, err := rc.FunctionClient.Update(rc.Ctx, &request, funcConf.ID)
 			if err != nil {
 				return err
@@ -177,13 +222,16 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			// Keep track of function name for potential retry
+			originalName := funcMan.Name
 			funcName := funcMan.Name
+			nameWasChanged := false
 			for {
 				request := functionsApi.CreateRequest{}
 				request.SetActive(true)
 				request.SetDefaultArgs(funcMan.DefaultArgs)
 				request.SetName(funcName)
 				request.SetCode(string(code))
+				request.SetExecutionEnvironment(funcMan.ExecutionEnvironment)
 				resp, err := rc.FunctionClient.Create(rc.Ctx, &request)
 				if err != nil {
 					// if the name is already in use, we ask for another one
@@ -196,6 +244,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 							return inputErr
 						}
 						funcName = newName
+						nameWasChanged = true
 						continue
 					}
 					return err
@@ -211,6 +260,11 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 				msgf := fmt.Sprintf(msg.ManifestCreateFunction, resp.GetName(), resp.GetId())
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
+				if nameWasChanged {
+					if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}
@@ -219,19 +273,67 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 	return rc.WriteConfig()
 }
 
+// resolveFunctionReference resolves a FunctionReference to a function ID and its config.
+// It handles both name-based references (string) and direct ID references (int64).
+// Returns the function ID, the function config from FunctionIds map, and whether it was found.
+func (rc *ResourceContext) resolveFunctionReference(ref contracts.FunctionReference) (int64, contracts.AzionJsonDataFunction, bool) {
+	// If the reference has a direct ID, use it
+	if ref.ID > 0 {
+		logger.Debug("resolveFunctionReference: using direct ID from manifest",
+			zap.Int64("id", ref.ID),
+			zap.String("name", ref.Name))
+		for _, funcConf := range rc.FunctionIds {
+			if funcConf.ID == ref.ID {
+				logger.Debug("resolveFunctionReference: ID found in azion.json map",
+					zap.Int64("id", ref.ID),
+					zap.String("name_from_map", funcConf.Name))
+				return ref.ID, funcConf, true
+			}
+		}
+		// ID was specified but not found in map - return the ID anyway for API calls
+		logger.Debug("resolveFunctionReference: ID not found in azion.json map, using ID directly",
+			zap.Int64("id", ref.ID))
+		return ref.ID, contracts.AzionJsonDataFunction{ID: ref.ID}, true
+	}
+
+	// Otherwise, look up by name
+	logger.Debug("resolveFunctionReference: looking up by name in azion.json map",
+		zap.String("name", ref.Name),
+		zap.Int64("id", ref.ID))
+	if funcConf, ok := rc.FunctionIds[ref.Name]; ok {
+		logger.Debug("resolveFunctionReference: name found in azion.json map",
+			zap.String("name", ref.Name),
+			zap.Int64("id_from_map", funcConf.ID))
+		return funcConf.ID, funcConf, true
+	}
+
+	logger.Debug("resolveFunctionReference: name not found in azion.json map",
+		zap.String("name", ref.Name))
+	return 0, contracts.AzionJsonDataFunction{}, false
+}
+
 func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.FunctionInstance) error {
 	if rc.Conf.Application.ID == 0 {
 		return msg.ErrorApplicationIDRequired
 	}
 
 	for _, funcMan := range instances {
-		if funcConf := rc.FunctionIds[funcMan.Function]; funcConf.InstanceID > 0 {
+		// Resolve the function reference to get the function ID and config
+		funcID, funcConf, found := rc.resolveFunctionReference(funcMan.Function)
+		if !found {
+			logger.Debug("Function not found for function instance", zap.Any("function", funcMan.Function))
+			return msg.ErrorFuncNotFound
+		}
+
+		// Check if this function instance already exists (by name in FunctionIds map)
+		instanceKey := funcMan.Name
+		if existingFunc, ok := rc.FunctionIds[instanceKey]; ok && existingFunc.InstanceID > 0 {
 			request := apiApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
-			request.SetFunction(funcConf.ID)
+			request.SetFunction(funcID)
 			if len(funcMan.Args) > 0 {
 				request.SetArgs(funcMan.Args)
-			} else {
+			} else if funcConf.Args != "" {
 				args, err := unmarshalJsonArgs(funcConf.Args)
 				if err != nil {
 					return err
@@ -239,7 +341,7 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
-			updated, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, funcConf.InstanceID)
+			updated, err := rc.ApplicationClient.UpdateInstance(rc.Ctx, &request, rc.Conf.Application.ID, existingFunc.InstanceID)
 			if err != nil {
 				return err
 			}
@@ -251,7 +353,7 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 			request.SetActive(true)
 			if len(funcMan.Args) > 0 {
 				request.SetArgs(funcMan.Args)
-			} else {
+			} else if funcConf.Args != "" {
 				args, err := unmarshalJsonArgs(funcConf.Args)
 				if err != nil {
 					return err
@@ -259,20 +361,21 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
-			request.SetFunction(funcConf.ID)
+			request.SetFunction(funcID)
 			resp, err := rc.ApplicationClient.CreateFuncInstances(rc.Ctx, &request, rc.Conf.Application.ID)
 			if err != nil {
 				return err
 			}
+			// Update or create the function config entry with the new instance ID
 			newFunc := contracts.AzionJsonDataFunction{
-				ID:         funcConf.ID,
+				ID:         funcID,
 				CacheId:    funcConf.CacheId,
-				Name:       funcConf.Name,
+				Name:       funcMan.Name,
 				File:       funcConf.File,
 				Args:       funcConf.Args,
 				InstanceID: resp.GetId(),
 			}
-			rc.FunctionIds[funcConf.Name] = newFunc
+			rc.FunctionIds[funcMan.Name] = newFunc
 			msgf := fmt.Sprintf(msg.ManifestCreateFunctionInstance, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
@@ -302,23 +405,23 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
-		// Keep track of the app name for potential retry with new name
+		originalName := app.Name
 		appName := app.Name
+		nameWasChanged := false
 		for {
 			createreq := transformEdgeApplicationRequestCreate(app)
+			createreq.SetName(appName)
 			resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
 			if err != nil {
-				// if the name is already in use, we ask for another one
 				if errors.Is(err, utils.ErrorNameInUse) || strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
 					logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.AppInUse, rc.Factory.Format, rc.Factory.Out)
 					*rc.Msgs = append(*rc.Msgs, msg.AppInUse)
-					// Prompt user for a new name
 					newName, inputErr := askForInput(msg.AskInputName, fmt.Sprintf("%s-%s", appName, utils.Timestamp()))
 					if inputErr != nil {
 						return inputErr
 					}
 					appName = newName
-					app.Name = newName
+					nameWasChanged = true
 					continue
 				}
 				return err
@@ -329,6 +432,11 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 			msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
+			if nameWasChanged {
+				if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+					return err
+				}
+			}
 			break
 		}
 	}
@@ -632,7 +740,9 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
 		// Keep track of workload name for potential retry
+		originalName := workloadMan.Name
 		workloadName := workloadMan.Name
+		nameWasChanged := false
 		for {
 			workloadMan.Name = workloadName
 			request := transformWorkloadRequestCreate(workloadMan, rc.Conf.Application.ID)
@@ -648,6 +758,7 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 						return inputErr
 					}
 					workloadName = newName
+					nameWasChanged = true
 					continue
 				}
 				return err
@@ -659,6 +770,11 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 			msgf := fmt.Sprintf(msg.ManifestCreateWorkload, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
+			if nameWasChanged {
+				if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+					return err
+				}
+			}
 			break
 		}
 	}
@@ -735,7 +851,9 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			// Keep track of firewall name for potential retry
+			originalName := fwMan.Name
 			firewallName = fwMan.Name
+			nameWasChanged := false
 			for {
 				createReq := apiFirewall.NewCreateRequest()
 				createReq.SetName(firewallName)
@@ -760,6 +878,7 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 							return inputErr
 						}
 						firewallName = newName
+						nameWasChanged = true
 						continue
 					}
 					logger.Debug("Error while creating firewall", zap.Error(err))
@@ -771,13 +890,95 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				msgf := fmt.Sprintf(msg.ManifestCreateFirewall, created.GetName(), created.GetId())
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
+				if nameWasChanged {
+					if err := rc.runConfigReplace(originalName, firewallName); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}
 
+		fwFuncInstConf := []contracts.AzionJsonDataFirewallFunctionInstance{}
+		for _, funcInst := range fwMan.FunctionsInstances {
+			funcID, funcConf, found := rc.resolveFunctionReference(funcInst.Function)
+			if !found {
+				logger.Debug("Function not found for firewall function instance",
+					zap.Any("function", funcInst.Function))
+				return msg.ErrorFuncNotFound
+			}
+
+			if funcInstRef := rc.FirewallFunctionInstIds[funcInst.Name]; funcInstRef.FunctionInstanceId > 0 {
+				updateReq := apiFirewallInstance.NewUpdateRequest()
+				updateReq.SetName(funcInst.Name)
+				updateReq.SetActive(funcInst.Active)
+				updateReq.SetFunction(funcID)
+				if len(funcInst.Args) > 0 {
+					updateReq.SetArgs(funcInst.Args)
+				}
+
+				updated, err := rc.FirewallFunctionInstClient.Update(rc.Ctx, firewallId, funcInstRef.FunctionInstanceId, updateReq)
+				if err != nil {
+					logger.Debug("Error while updating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         updated.GetId(),
+					Name:       updated.GetName(),
+					FunctionId: funcID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+				msgf := fmt.Sprintf(msg.ManifestUpdateFirewallFunctionInstance, updated.GetName(), updated.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			} else {
+				createReq := apiFirewallInstance.NewCreateRequest()
+				createReq.SetName(funcInst.Name)
+				createReq.SetActive(funcInst.Active)
+				createReq.SetFunction(funcID)
+				if len(funcInst.Args) > 0 {
+					createReq.SetArgs(funcInst.Args)
+				}
+
+				created, err := rc.FirewallFunctionInstClient.Create(rc.Ctx, firewallId, createReq)
+				if err != nil {
+					logger.Debug("Error while creating firewall function instance", zap.Error(err))
+					return err
+				}
+				fwFuncInstConf = append(fwFuncInstConf, contracts.AzionJsonDataFirewallFunctionInstance{
+					Id:         created.GetId(),
+					Name:       created.GetName(),
+					FunctionId: funcID,
+					Active:     funcInst.Active,
+					Args:       funcInst.Args,
+				})
+
+				rc.FirewallFunctionInstIds[funcInst.Name] = firewallFunctionInstIdRef{
+					FirewallId:         firewallId,
+					FunctionInstanceId: created.GetId(),
+				}
+				msgf := fmt.Sprintf(msg.ManifestCreateFirewallFunctionInstance, created.GetName(), created.GetId())
+				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+				*rc.Msgs = append(*rc.Msgs, msgf)
+			}
+			// Use funcConf to avoid unused variable error if only ID was provided
+			_ = funcConf
+		}
+
+		// Create a lookup function for resolving function instance names to IDs
+		// This is used when processing rules that reference function instances by name
+		funcInstLookup := func(name string) (int64, bool) {
+			if ref, ok := rc.FirewallFunctionInstIds[name]; ok {
+				return ref.FunctionInstanceId, true
+			}
+			return 0, false
+		}
+
+		// Now process rules - they can reference function instances by name
 		fwRuleConf := []contracts.AzionJsonDataFirewallRule{}
 		for _, rule := range fwMan.RulesEngine {
-			sdkRule, err := convertFirewallRuleToSDK(rule)
+			sdkRule, err := convertFirewallRuleToSDK(rule, funcInstLookup)
 			if err != nil {
 				logger.Debug("Error converting firewall rule from manifest", zap.Error(err))
 				return err
@@ -824,9 +1025,10 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 		}
 
 		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{
-			Id:    firewallId,
-			Name:  firewallName,
-			Rules: fwRuleConf,
+			Id:                firewallId,
+			Name:              firewallName,
+			Rules:             fwRuleConf,
+			FunctionInstances: fwFuncInstConf,
 		})
 	}
 

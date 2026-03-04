@@ -1,6 +1,7 @@
 package contracts
 
 import (
+	"encoding/json"
 	"os"
 
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -209,14 +210,24 @@ type AzionJsonDataCacheSettings struct {
 }
 
 type AzionJsonDataFirewall struct {
-	Id    int64                       `json:"id"`
-	Name  string                      `json:"name"`
-	Rules []AzionJsonDataFirewallRule `json:"rules,omitempty"`
+	Id                int64                                   `json:"id"`
+	Name              string                                  `json:"name"`
+	Rules             []AzionJsonDataFirewallRule             `json:"rules,omitempty"`
+	FunctionInstances []AzionJsonDataFirewallFunctionInstance `json:"function_instances,omitempty"`
 }
 
 type AzionJsonDataFirewallRule struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
+}
+
+// AzionJsonDataFirewallFunctionInstance represents a firewall function instance in azion.json
+type AzionJsonDataFirewallFunctionInstance struct {
+	Id         int64                  `json:"id"`
+	Name       string                 `json:"name"`
+	FunctionId int64                  `json:"function_id"`
+	Args       map[string]interface{} `json:"args,omitempty"`
+	Active     bool                   `json:"active"`
 }
 
 type Manifest struct {
@@ -254,11 +265,12 @@ type ManifestV4 struct {
 }
 
 type FirewallManifest struct {
-	Name        string                          `json:"name"`
-	Modules     *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
-	Debug       *bool                           `json:"debug,omitempty"`
-	Active      *bool                           `json:"active,omitempty"`
-	RulesEngine []FirewallManifestRule          `json:"rules_engine,omitempty"`
+	Name               string                          `json:"name"`
+	Modules            *edgesdk.FirewallModulesRequest `json:"modules,omitempty"`
+	Debug              *bool                           `json:"debug,omitempty"`
+	Active             *bool                           `json:"active,omitempty"`
+	RulesEngine        []FirewallManifestRule          `json:"rules_engine,omitempty"`
+	FunctionsInstances []FunctionInstance              `json:"functions_instances,omitempty"`
 }
 
 // FirewallManifestRule represents a firewall rule in the manifest.json file
@@ -482,12 +494,46 @@ type DevicesCacheSettings struct {
 	DeviceGroup []string `json:"device_group,omitempty"`
 }
 
-// FunctionInstance represents an edge function instance in the manifest.json file
 type FunctionInstance struct {
 	Name     string                 `json:"name"`
-	Function string                 `json:"function"`
+	Function FunctionReference      `json:"function"`
 	Active   bool                   `json:"active"`
 	Args     map[string]interface{} `json:"args,omitempty"`
+}
+
+// FunctionReference represents a function reference that can be either a name (string) or an ID (int64)
+type FunctionReference struct {
+	Name string
+	ID   int64
+}
+
+// MarshalJSON implements json.Marshaler for FunctionReference
+func (fr FunctionReference) MarshalJSON() ([]byte, error) {
+	if fr.ID > 0 {
+		return json.Marshal(fr.ID)
+	}
+	return json.Marshal(fr.Name)
+}
+
+// UnmarshalJSON implements json.Unmarshaler for FunctionReference
+// It accepts both a string (function name) or a number (function ID)
+func (fr *FunctionReference) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as string first
+	var name string
+	if err := json.Unmarshal(data, &name); err == nil {
+		fr.Name = name
+		fr.ID = 0
+		return nil
+	}
+
+	// Try to unmarshal as number
+	var id int64
+	if err := json.Unmarshal(data, &id); err != nil {
+		return err
+	}
+	fr.ID = id
+	fr.Name = ""
+	return nil
 }
 
 // StorageManifest represents an edge storage entry in the manifest.json file
