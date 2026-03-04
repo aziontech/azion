@@ -6,11 +6,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
-func (c *Client) Get(ctx context.Context, id int64) (sdk.EdgeFunctions, error) {
+func (c *Client) Get(ctx context.Context, id int64) (sdk.Functions, error) {
 	logger.Debug("Get Function")
 	request := c.apiClient.FunctionsAPI.RetrieveFunction(ctx, id)
 
@@ -21,10 +21,10 @@ func (c *Client) Get(ctx context.Context, id int64) (sdk.EdgeFunctions, error) {
 			logger.Debug("Error while getting a Function", zap.Error(err))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeFunctions{}, err
+				return sdk.Functions{}, err
 			}
 		}
-		return sdk.EdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.Functions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return res.Data, nil
@@ -51,12 +51,12 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFunctions, error) {
+func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.Functions, error) {
 	// Although there's only one option, the API requires the `language` field.
 	// Hard-coding javascript for now
 	logger.Debug("Create Function")
 
-	request := c.apiClient.FunctionsAPI.CreateFunction(ctx).EdgeFunctionsRequest(req.EdgeFunctionsRequest)
+	request := c.apiClient.FunctionsAPI.CreateFunction(ctx).FunctionsRequest(req.FunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -65,18 +65,18 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest) (sdk.EdgeFuncti
 			logger.Debug("Error while creating a Function", zap.Error(err), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeFunctions{}, err
+				return sdk.Functions{}, err
 			}
 		}
-		return sdk.EdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.Functions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.EdgeFunctions, error) {
+func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.Functions, error) {
 	logger.Debug("Update Function", zap.Any("Function ID", id), zap.Any("Function name", req.Name))
-	request := c.apiClient.FunctionsAPI.PartialUpdateFunction(ctx, id).PatchedEdgeFunctionsRequest(req.PatchedEdgeFunctionsRequest)
+	request := c.apiClient.FunctionsAPI.PartialUpdateFunction(ctx, id).PatchedFunctionsRequest(req.PatchedFunctionsRequest)
 
 	edgeFuncResponse, httpResp, err := request.Execute()
 	if err != nil {
@@ -85,16 +85,16 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.
 			logger.Debug("Error while updating a Function", zap.Error(err), zap.Any("ID", id), zap.Any("Name", req.Name))
 			errBody, err = utils.LogAndRewindBodyV4(httpResp)
 			if err != nil {
-				return sdk.EdgeFunctions{}, err
+				return sdk.Functions{}, err
 			}
 		}
-		return sdk.EdgeFunctions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+		return sdk.Functions{}, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionsList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedFunctionsList, error) {
 	logger.Debug("List Functions")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"

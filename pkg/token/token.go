@@ -42,7 +42,7 @@ func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 		return false, UserInfo{}, err
 	}
 	req.Header.Add("Accept", "application/json; version=3")
-	req.Header.Add("Authorization", "token "+*token)
+	req.Header.Add("Authorization", "Token "+*token)
 
 	resp, err := t.client.Do(req)
 	if err != nil {

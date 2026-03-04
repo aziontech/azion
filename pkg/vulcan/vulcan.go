@@ -14,8 +14,8 @@ import (
 var (
 	currentMajor         = 7
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@7.1.0"
-	versionVulcan        = "@7.1.0"
+	firstTimeExecuting   = "@7.1.1"
+	versionVulcan        = "@7.1.1"
 	stageVersion         = "@stage"
 	releaseChannel       = ""
 )

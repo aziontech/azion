@@ -14,11 +14,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
-func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphicRequest) *apiConnector.UpdateRequest {
+func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *apiConnector.UpdateRequest {
 	if connectorRequest.ConnectorHTTPRequest != nil {
 		request := &apiConnector.UpdateRequest{}
 		bodyRequest := connectorRequest.ConnectorHTTPRequest
@@ -39,23 +39,24 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorPolymorphic
 		return request
 	}
 
-	if connectorRequest.ConnectorRequest != nil {
+	if connectorRequest.ConnectorRequestBase != nil {
 		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorRequest
+		bodyRequest := connectorRequest.ConnectorRequestBase
 		body := edgesdk.PatchedConnectorRequest{}
+		internalBody := edgesdk.PatchedConnectorRequestBase{}
 		if bodyRequest.Active != nil {
-			body.SetActive(*bodyRequest.Active)
+			internalBody.SetActive(*bodyRequest.Active)
 		}
 
 		if bodyRequest.Name != "" {
-			body.SetName(bodyRequest.Name)
+			internalBody.SetName(bodyRequest.Name)
 		}
 
-		body.SetType(bodyRequest.Type)
+		internalBody.SetType(bodyRequest.Type)
 
-		body.SetAttributes(bodyRequest.Attributes)
-
-		request.PatchedConnectorRequest = &body
+		internalBody.SetAttributes(bodyRequest.Attributes)
+		body.PatchedConnectorRequestBase = &internalBody
+		request.PatchedConnectorRequest = body
 		return request
 	}
 
@@ -263,13 +264,13 @@ func transformRuleRequest(rule contracts.ManifestRule) *apiApplications.UpdateRu
 	return request
 }
 
-func getConnectorName(connector edgesdk.ConnectorPolymorphicRequest, defaultName string) (string, string) {
+func getConnectorName(connector edgesdk.ConnectorRequest, defaultName string) (string, string) {
 	if connector.ConnectorHTTPRequest != nil {
 		return connector.ConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.ConnectorRequest != nil {
-		return connector.ConnectorRequest.Name, "storage"
+	if connector.ConnectorRequestBase != nil {
+		return connector.ConnectorRequestBase.Name, "storage"
 	}
 
 	return defaultName, ""
@@ -480,7 +481,7 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	if errors.Is(err, utils.ErrorNotFound404) {
 		logger.Debug("Cache Setting not found. Trying to create", zap.Any("Error", err))
 		logger.FInfoFlags(f.IOStreams.Out, msg.MessageDeleteResource+"\n", f.Format, f.Out)
-		return createCache(cache, clientCache, conf, ctx, edgeappman)
+		return createCache(cache, clientCache, conf, ctx)
 	}
 	if err != nil {
 		return contracts.AzionJsonDataCacheSettings{}, err
@@ -492,7 +493,7 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	return newCache, nil
 }
 
-func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context, edgeappman contracts.Applications) (contracts.AzionJsonDataCacheSettings, error) {
+func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context) (contracts.AzionJsonDataCacheSettings, error) {
 	request := transformCacheRequestCreate(cache)
 	responseCache, err := clientCache.Create(ctx, request.CacheSettingRequest, conf.Application.ID)
 	if err != nil {

@@ -1,10 +1,10 @@
 GO := $(shell which go)
 PATH := $(dir $(GO)):$(PATH)
-SHELL := env PATH=$(PATH) /bin/bash
+SHELL := env PATH='$(PATH)' /bin/bash
 NAME := azion
 
 ifeq (, $(GO))
-$(error "No go binary found in your system, please install go 1.25.6 before continuing")
+$(error "No go binary found in your system, please install go 1.25.7 before continuing")
 endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)
