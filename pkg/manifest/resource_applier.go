@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
@@ -171,6 +173,32 @@ func (rc *ResourceContext) WriteConfig() error {
 	return nil
 }
 
+// runConfigReplace executes the "config replace -k" command to update the azion.config file
+// with the new resource name after a successful creation with a renamed resource.
+// It uses the original name (from manifest) as key and the new name (that succeeded) as value.
+func (rc *ResourceContext) runConfigReplace(originalName, newName string) error {
+	logger.FInfoFlags(rc.Factory.IOStreams.Out, msg.UpdateAzionConfig, rc.Factory.Format, rc.Factory.Out)
+	logger.Debug("Running config replace to update azion.config with new resource name",
+		zap.String("originalName", originalName),
+		zap.String("newName", newName))
+
+	vul := vulcanPkg.NewVulcan()
+	cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", originalName, newName)
+	command := vul.Command("", cmdStr, rc.Factory)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+
+	cmd := exec.Command("sh", "-c", command)
+	cmd.Stdin = rc.Factory.IOStreams.In
+	cmd.Stdout = rc.Factory.IOStreams.Out
+	cmd.Stderr = rc.Factory.IOStreams.Err
+	err := cmd.Run()
+	if err != nil {
+		logger.Debug("Error running config replace command", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error {
 	for _, funcMan := range functions {
 		code, err := os.ReadFile(path.Join(".edge", funcMan.Path))
@@ -193,7 +221,9 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			// Keep track of function name for potential retry
+			originalName := funcMan.Name
 			funcName := funcMan.Name
+			nameWasChanged := false
 			for {
 				request := functionsApi.CreateRequest{}
 				request.SetActive(true)
@@ -212,6 +242,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 							return inputErr
 						}
 						funcName = newName
+						nameWasChanged = true
 						continue
 					}
 					return err
@@ -227,6 +258,11 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 				msgf := fmt.Sprintf(msg.ManifestCreateFunction, resp.GetName(), resp.GetId())
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
+				if nameWasChanged {
+					if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}
@@ -367,10 +403,12 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
-		// Keep track of the app name for potential retry with new name
+		originalName := app.Name
 		appName := app.Name
+		nameWasChanged := false
 		for {
 			createreq := transformEdgeApplicationRequestCreate(app)
+			createreq.SetName(appName)
 			resp, err := rc.ApplicationClient.Create(rc.Ctx, createreq)
 			if err != nil {
 				// if the name is already in use, we ask for another one
@@ -383,7 +421,7 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 						return inputErr
 					}
 					appName = newName
-					app.Name = newName
+					nameWasChanged = true
 					continue
 				}
 				return err
@@ -394,6 +432,11 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 			msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
+			if nameWasChanged {
+				if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+					return err
+				}
+			}
 			break
 		}
 	}
@@ -697,7 +740,9 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 		*rc.Msgs = append(*rc.Msgs, msgf)
 	} else {
 		// Keep track of workload name for potential retry
+		originalName := workloadMan.Name
 		workloadName := workloadMan.Name
+		nameWasChanged := false
 		for {
 			workloadMan.Name = workloadName
 			request := transformWorkloadRequestCreate(workloadMan, rc.Conf.Application.ID)
@@ -713,6 +758,7 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 						return inputErr
 					}
 					workloadName = newName
+					nameWasChanged = true
 					continue
 				}
 				return err
@@ -724,6 +770,11 @@ func (rc *ResourceContext) ApplyWorkloads(workloads []contracts.WorkloadManifest
 			msgf := fmt.Sprintf(msg.ManifestCreateWorkload, resp.GetName(), resp.GetId())
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
+			if nameWasChanged {
+				if err := rc.runConfigReplace(originalName, resp.GetName()); err != nil {
+					return err
+				}
+			}
 			break
 		}
 	}
@@ -800,7 +851,9 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 			*rc.Msgs = append(*rc.Msgs, msgf)
 		} else {
 			// Keep track of firewall name for potential retry
+			originalName := fwMan.Name
 			firewallName = fwMan.Name
+			nameWasChanged := false
 			for {
 				createReq := apiFirewall.NewCreateRequest()
 				createReq.SetName(firewallName)
@@ -825,6 +878,7 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 							return inputErr
 						}
 						firewallName = newName
+						nameWasChanged = true
 						continue
 					}
 					logger.Debug("Error while creating firewall", zap.Error(err))
@@ -836,6 +890,11 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				msgf := fmt.Sprintf(msg.ManifestCreateFirewall, created.GetName(), created.GetId())
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
+				if nameWasChanged {
+					if err := rc.runConfigReplace(originalName, firewallName); err != nil {
+						return err
+					}
+				}
 				break
 			}
 		}

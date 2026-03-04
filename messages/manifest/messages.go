@@ -45,4 +45,5 @@ const (
 	MessageDeleteResource                  = `It seems this resource was deleted from a previous version of the application.
 One cause may be that the resource is not being used in any rule.
 To avoid deleting resources that are not being used, you can add the field 'skip-deletion' to your azion.json file.`
+	UpdateAzionConfig = "Updating azion.config file with new resource name\n"
 )
