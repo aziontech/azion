@@ -17,6 +17,7 @@ import (
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/list/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/waf"
 	wdeployments "github.com/aziontech/azion-cli/pkg/cmd/list/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -58,6 +59,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallinstance.NewCmd(f))
 	cmd.AddCommand(firewallrules.NewCmd(f))
+	cmd.AddCommand(waf.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

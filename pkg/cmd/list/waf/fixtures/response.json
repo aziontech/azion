@@ -1,0 +1,33 @@
+{
+  "count": 1,
+  "total_pages": 1,
+  "page": 1,
+  "page_size": 10,
+  "next": "https://api.example.com/items?page=3",
+  "previous": "https://api.example.com/items?page=1",
+  "results": [
+    {
+      "id": 666,
+      "active": true,
+      "name": "string",
+      "last_editor": "string",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "product_version": "1.0",
+      "engine_settings": {
+        "engine_version": "2021-Q3",
+        "type": "score",
+        "attributes": {
+          "rulesets": [
+            1
+          ],
+          "thresholds": [
+            {
+              "threat": "cross_site_scripting",
+              "sensitivity": "highest"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

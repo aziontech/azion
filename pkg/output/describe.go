@@ -30,6 +30,7 @@ func (d *DescribeOutput) Format() (bool, error) {
 }
 
 func (c *DescribeOutput) Output() {
+	tablecli.WidthPersist = nil
 	tbl := tablecli.New("", "")
 
 	if !c.Flags.NoColor {

@@ -16,6 +16,7 @@ import (
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/update/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/update/variables"
+	"github.com/aziontech/azion-cli/pkg/cmd/update/waf"
 	"github.com/aziontech/azion-cli/pkg/cmd/update/workloads"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -53,6 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallInstance.NewCmd(f))
 	cmd.AddCommand(firewallRules.NewCmd(f))
+	cmd.AddCommand(waf.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
