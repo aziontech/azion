@@ -1,0 +1,17 @@
+{
+  "name": "Updated WAF",
+  "active": true,
+  "engine_settings": {
+    "engine_version": "2021-Q3",
+    "type": "score",
+    "attributes": {
+      "rulesets": [1, 2, 3],
+      "thresholds": [
+        {
+          "threat": "cross_site_scripting",
+          "sensitivity": "highest"
+        }
+      ]
+    }
+  }
+}
