@@ -1,7 +1,7 @@
 package wafexceptions
 
 var (
-	Usage            = "waf-exception"
+	Usage            = "waf-exceptions"
 	ShortDescription = "Creates a new WAF Exception"
 	LongDescription  = "Creates a WAF Exception based on given attributes"
 	FlagName         = "The WAF Exception's name"

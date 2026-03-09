@@ -40,9 +40,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-		$ azion create waf-exception --name "My Exception" --waf-id 1234
-		$ azion create waf-exception --name "My Exception" --waf-id 1234 --rule-id 1000
-		$ azion create waf-exception --file "create.json" --waf-id 1234
+		$ azion create waf-exceptions --name "My Exception" --waf-id 1234
+		$ azion create waf-exceptions --name "My Exception" --waf-id 1234 --rule-id 1000
+		$ azion create waf-exceptions --file "create.json" --waf-id 1234
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("waf-id") {

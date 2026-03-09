@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-vulncheck') }}
     container:
-      image: golang:1.25.7
+      image: golang:1.25.8
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
