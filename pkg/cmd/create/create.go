@@ -19,6 +19,7 @@ import (
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/create/storage"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/create/waf"
+	wafExceptions "github.com/aziontech/azion-cli/pkg/cmd/create/waf_exceptions"
 	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/create/workload_deployment"
 	workloads "github.com/aziontech/azion-cli/pkg/cmd/create/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -61,6 +62,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(firewallInstance.NewCmd(f))
 	cmd.AddCommand(firewallRules.NewCmd(f))
 	cmd.AddCommand(waf.NewCmd(f))
+	cmd.AddCommand(wafExceptions.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

@@ -62,8 +62,8 @@ You can find the URL for each package in our Releases page https://github.com/az
 ```sh
 docker run -it --rm alpine:latest sh -c '
     cd && \
-    wget https://github.com/aziontech/azion/releases/download/1.36.1/azion_1.36.1_linux_arm64.apk && \
-    apk add --allow-untrusted azion_1.36.1_linux_arm64.apk && \
+    wget https://github.com/aziontech/azion/releases/download/4.18.0/azion_4.18.0_linux_amd64.apk && \
+    apk add --allow-untrusted azion_4.18.0_linux_amd64.apk && \
     azion version; \
     exec sh'
 ```
