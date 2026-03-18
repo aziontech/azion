@@ -9,6 +9,7 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
 	app "github.com/aziontech/azion-cli/pkg/api/applications"
+	connector "github.com/aziontech/azion-cli/pkg/api/connector"
 	fun "github.com/aziontech/azion-cli/pkg/api/function"
 	workload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	store "github.com/aziontech/azion-cli/pkg/cmd/delete/storage/bucket"
@@ -34,6 +35,7 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	clientworkload := workload.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
+	clientconnector := connector.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	storagecmd := store.NewBucket(del.f)
 
 	// Collect all errors
@@ -50,11 +52,22 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	}
 
 	// Delete edge application
-	logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting edge application with ID %d\n", azionJson.Application.ID))
+	logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting application with ID %d\n", azionJson.Application.ID))
 	err = clientapp.Delete(ctx, azionJson.Application.ID)
 	if err != nil {
 		errs = append(errs, fmt.Sprintf("Failed to delete application: %v", err))
 		logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete application: %v\n", err))
+	}
+
+	for _, conn := range azionJson.Connectors {
+		if conn.Id != 0 {
+			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting connector with ID %d\n", conn.Id))
+			err = clientconnector.Delete(ctx, conn.Id)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("Failed to delete connector: %v", err))
+				logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete connector: %v\n", err))
+			}
+		}
 	}
 
 	// Delete functions
