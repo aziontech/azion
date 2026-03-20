@@ -188,8 +188,13 @@ func (rc *ResourceContext) runConfigReplace(originalName, newName string) error 
 		return fmt.Errorf("failed to marshal replacements: %w", err)
 	}
 
+	// Escape backslashes and single quotes before embedding JSON in a single-quoted shell string.
+	jsonStr := string(replacementsJSON)
+	jsonStr = strings.ReplaceAll(jsonStr, `\`, `\\`)
+	jsonStr = strings.ReplaceAll(jsonStr, "'", "\\'")
+
 	vul := vulcanPkg.NewVulcan()
-	cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
+	cmdStr := fmt.Sprintf("config replace --replacements '%s'", jsonStr)
 	command := vul.Command("", cmdStr, rc.Factory)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 
