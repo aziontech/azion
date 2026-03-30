@@ -16,8 +16,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/storage"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
+	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
+	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
+	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
+	workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -56,6 +58,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallinstance.NewCmd(f))
 	cmd.AddCommand(firewallrules.NewCmd(f))
+	cmd.AddCommand(waf.NewCmd(f))
+	cmd.AddCommand(wafexceptions.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

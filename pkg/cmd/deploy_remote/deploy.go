@@ -164,7 +164,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		if !SkipFramework {
 			conf.Prefix = newprefix
 			if conf.RotatePrefix == nil || *conf.RotatePrefix == true {
-				cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+				replacements := map[string]string{oldprefix: conf.Prefix}
+				replacementsJSON, jsonErr := json.Marshal(replacements)
+				if jsonErr != nil {
+					return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
+				}
+				cmdStr := fmt.Sprintf("config replace --replacements %s", string(replacementsJSON))
 				vul := vulcanPkg.NewVulcan()
 				command := vul.Command("", cmdStr, cmd.F)
 				logger.Debug("Running the following command", zap.Any("Command", command))

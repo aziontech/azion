@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
@@ -36,29 +37,30 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		return err
 	}
 
-	configReplacements := []struct {
-		key   string
-		value string
-	}{
-		{"$FUNCTION_NAME", conf.Name},
-		{"$APPLICATION_NAME", conf.Name},
-		{"$BUCKET_NAME", conf.Bucket},
-		{"$BUCKET_PREFIX", conf.Prefix},
-		{"$CONNECTOR_NAME", conf.Name},
-		{"$WORKLOAD_NAME", conf.Name},
-		{"$DEPLOYMENT_NAME", conf.Name},
-		{"$FUNCTION_INSTANCE_NAME", conf.Name},
+	// Build replacements map and execute in a single command
+	replacements := map[string]string{
+		"$FUNCTION_NAME":          conf.Name,
+		"$APPLICATION_NAME":       conf.Name,
+		"$BUCKET_NAME":            conf.Bucket,
+		"$BUCKET_PREFIX":          conf.Prefix,
+		"$CONNECTOR_NAME":         conf.Name,
+		"$WORKLOAD_NAME":          conf.Name,
+		"$DEPLOYMENT_NAME":        conf.Name,
+		"$FUNCTION_INSTANCE_NAME": conf.Name,
 	}
 
-	for _, replacement := range configReplacements {
-		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", replacement.key, replacement.value)
-		command := vul.Command("", cmdStr, cmd.F)
-		logger.Debug("Running the following command", zap.Any("Command", command))
+	replacementsJSON, err := json.Marshal(replacements)
+	if err != nil {
+		return fmt.Errorf("failed to marshal replacements: %w", err)
+	}
 
-		err := cmd.commandRunInteractive(cmd.F, command)
-		if err != nil {
-			return err
-		}
+	cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
+	command := vul.Command("", cmdStr, cmd.F)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+
+	err = cmd.commandRunInteractive(cmd.F, command)
+	if err != nil {
+		return err
 	}
 	return nil
 }
