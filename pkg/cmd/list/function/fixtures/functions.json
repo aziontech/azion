@@ -10,7 +10,6 @@
         "active": true,
         "runtime": "azion_js",
         "execution_environment": "application",
-        "code": "string",
         "default_args": {
           "arg_01": "value_01"
         },
