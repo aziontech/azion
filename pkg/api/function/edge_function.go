@@ -94,7 +94,7 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, id int64) (sdk.
 	return edgeFuncResponse.Data, nil
 }
 
-func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedFunctionsList, error) {
+func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedEdgeFunctionList, error) {
 	logger.Debug("List Functions")
 	if opts.OrderBy == "" {
 		opts.OrderBy = "id"
