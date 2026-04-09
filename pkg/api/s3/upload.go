@@ -63,10 +63,9 @@ func UploadFile(ctx context.Context, cfg aws.Config, fileOps *contracts.FileOps,
 
 	logger.Debug("Object_key: " + file)
 	uploadInput := &s3.PutObjectInput{
-		Bucket:      aws.String(bucketName),
-		Key:         aws.String(file), // Name of the file in the bucket
-		Body:        fileOps.FileContent,
-		ContentType: &fileOps.MimeType,
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(file), // Name of the file in the bucket
+		Body:   fileOps.FileContent,
 	}
 
 	_, err := s3Client.PutObject(ctx, uploadInput)
