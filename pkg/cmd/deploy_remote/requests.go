@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
@@ -66,6 +67,7 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 }
 
 func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	doApplicationStart := time.Now()
 	if conf.Application.ID == 0 {
 		var projName string
 		for {
@@ -103,17 +105,20 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
+		GlobalTimingSummary.ApplicationCreateTime = time.Since(doApplicationStart)
 	} else {
 		err := cmd.updateApplication(client, ctx, conf, msgs)
 		if err != nil {
 			logger.Debug("Error while updating Application", zap.Error(err))
 			return err
 		}
+		GlobalTimingSummary.ApplicationUpdateTime = time.Since(doApplicationStart)
 	}
 	return nil
 }
 
 func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
+	doWorkloadStart := time.Now()
 	var workload apiworkload.WorkloadResponse
 	var err error
 
@@ -160,6 +165,7 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
+		GlobalTimingSummary.WorkloadCreateTime = time.Since(doWorkloadStart)
 
 	} else {
 		workload, err = cmd.updateWorkload(client, ctx, conf, msgs)
@@ -167,6 +173,7 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			logger.Debug("Error while updating workload", zap.Error(err))
 			return err
 		}
+		GlobalTimingSummary.WorkloadUpdateTime = time.Since(doWorkloadStart)
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newWorkload {
@@ -185,11 +192,15 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return nil
 	}
 
+	doRulesDeployStart := time.Now()
+	apiCallStart := time.Now()
 	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, conf.Preset)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
 	}
+	GlobalTimingSummary.AddAPICallTime("RulesEngine.Create", time.Since(apiCallStart))
+	GlobalTimingSummary.RulesEngineCreateTime = time.Since(doRulesDeployStart)
 
 	return nil
 }
@@ -202,10 +213,12 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 		reqApp.SetName(conf.Application.Name)
 	}
 
+	apiCallStart := time.Now()
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Create", time.Since(apiCallStart))
 
 	msgf := fmt.Sprintf(
 		msg.DeployOutputEdgeApplicationCreate, application.GetName(), application.GetId())
@@ -222,10 +235,12 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	reqUpApp.SetModules(mods)
 	reqUpApp.Id = application.GetId()
 
+	apiCallStart = time.Now()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Update (modules)", time.Since(apiCallStart))
 
 	return application.GetId(), nil
 }
@@ -238,10 +253,12 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 		reqApp.SetName(conf.Application.Name)
 	}
 	reqApp.Id = conf.Application.ID
+	apiCallStart := time.Now()
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Update", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(
 		msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -257,10 +274,12 @@ func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Con
 		reqWork.SetName(conf.Workloads.Name)
 	}
 	reqWork.SetActive(true)
+	apiCallStart := time.Now()
 	workload, err := client.Create(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Workload.Create", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(msg.DeployOutputWorkloadCreate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
@@ -275,10 +294,12 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 		reqWork.SetName(conf.Workloads.Name)
 	}
 	reqWork.Id = conf.Workloads.Id
+	apiCallStart := time.Now()
 	workload, err := client.Update(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Workload.Update", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(msg.DeployOutputWorkloadUpdate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)

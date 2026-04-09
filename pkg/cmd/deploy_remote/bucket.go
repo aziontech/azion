@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 
@@ -22,6 +23,8 @@ func (cmd *DeployCmd) doBucket(
 	conf *contracts.AzionApplicationOptions,
 	msgs *[]string,
 	manifestStorage []contracts.StorageManifest) error {
+
+	doBucketStart := time.Now()
 	if conf.Bucket != "" {
 		return nil
 	}
@@ -36,6 +39,7 @@ func (cmd *DeployCmd) doBucket(
 	} else if manifestStorage[0].WorkloadsAccess != "" {
 		bucketAccess = manifestStorage[0].WorkloadsAccess
 	}
+	apiCallStart := time.Now()
 	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: bucketAccess}})
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
@@ -44,20 +48,26 @@ func (cmd *DeployCmd) doBucket(
 			msgf := fmt.Sprintf(msg.NameInUseBucket, nameB)
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
+			apiCallStart = time.Now()
 			err := client.CreateBucket(ctx, api.RequestBucket{
 				BucketCreateRequest: sdk.BucketCreateRequest{Name: nameB, WorkloadsAccess: bucketAccess}})
 			if err != nil {
+				GlobalTimingSummary.AddAPICallTime("Bucket.Create (retry)", time.Since(apiCallStart))
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
 					continue
 				}
 				return err
 			}
+			GlobalTimingSummary.AddAPICallTime("Bucket.Create", time.Since(apiCallStart))
 			conf.Bucket = nameB
 			break
 		}
 	} else {
+		GlobalTimingSummary.AddAPICallTime("Bucket.Create", time.Since(apiCallStart))
 		conf.Bucket = nameBucket
 	}
+
+	GlobalTimingSummary.BucketCreateTime = time.Since(doBucketStart)
 
 	msgf := fmt.Sprintf(msg.BucketSuccessful, conf.Bucket)
 	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)

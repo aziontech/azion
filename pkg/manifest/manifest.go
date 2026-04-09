@@ -19,6 +19,12 @@ import (
 	"github.com/briandowns/spinner"
 )
 
+// TimingCallback is a callback function type for reporting timing
+type TimingCallback func(name string, duration time.Duration)
+
+// GlobalTimingCallback is the global callback for timing reports
+var GlobalTimingCallback TimingCallback
+
 var (
 	CacheIds         map[string]int64
 	CacheIdsBackup   map[string]int64
@@ -82,72 +88,112 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	rc := NewResourceContext(f, conf, manifest, projectConf, msgs, man.WriteAzionJsonContent)
 
 	if len(manifest.Functions) > 0 {
+		start := time.Now()
 		if err := rc.ApplyFunctions(manifest.Functions); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestFunctions", time.Since(start))
 		}
 	}
 
 	if len(manifest.Applications) > 0 && len(manifest.Applications[0].FunctionsInstances) > 0 {
 		logger.Debug("Applying function instances")
+		start := time.Now()
 		if err := rc.ApplyFunctionInstances(manifest.Applications[0].FunctionsInstances); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestFunctionInstances", time.Since(start))
 		}
 	}
 
 	if len(manifest.Applications) > 0 {
 		edgeappman := manifest.Applications[0]
 		logger.Debug("Applying edge application")
+		start := time.Now()
 		if err := rc.ApplyEdgeApplication(edgeappman); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestEdgeApplication", time.Since(start))
 		}
 
 		if len(edgeappman.CacheSettings) > 0 {
 			logger.Debug("Applying cache settings")
+			start := time.Now()
 			if err := rc.ApplyCacheSettings(edgeappman.CacheSettings); err != nil {
 				return err
+			}
+			if GlobalTimingCallback != nil {
+				GlobalTimingCallback("ManifestCacheSettings", time.Since(start))
 			}
 		}
 
 		if len(manifest.Connectors) > 0 {
 			logger.Debug("Applying connectors")
+			start := time.Now()
 			if err := rc.ApplyConnectors(manifest.Connectors); err != nil {
 				return err
+			}
+			if GlobalTimingCallback != nil {
+				GlobalTimingCallback("ManifestConnectors", time.Since(start))
 			}
 		}
 
 		if len(edgeappman.Rules) > 0 {
 			logger.Debug("Applying rules engine")
+			start := time.Now()
 			if err := rc.ApplyRulesEngine(edgeappman.Rules); err != nil {
 				return err
+			}
+			if GlobalTimingCallback != nil {
+				GlobalTimingCallback("ManifestRulesEngine", time.Since(start))
 			}
 		}
 	}
 
 	if len(manifest.Workloads) > 0 {
 		logger.Debug("Applying workloads")
+		start := time.Now()
 		if err := rc.ApplyWorkloads(manifest.Workloads); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestWorkloads", time.Since(start))
 		}
 	}
 
 	if len(manifest.WorkloadDeployments) > 0 {
 		logger.Debug("Applying workload deployments")
+		start := time.Now()
 		if err := rc.ApplyWorkloadDeployments(manifest.WorkloadDeployments); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestWorkloadDeployments", time.Since(start))
 		}
 	}
 
 	if len(manifest.Firewalls) > 0 {
 		logger.Debug("Applying firewalls")
+		start := time.Now()
 		if err := rc.ApplyFirewalls(manifest.Firewalls); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestFirewalls", time.Since(start))
 		}
 	}
 
 	if len(manifest.Purge) > 0 {
 		logger.Debug("Applying purge")
+		start := time.Now()
 		if err := rc.ApplyPurge(manifest.Purge); err != nil {
 			return err
+		}
+		if GlobalTimingCallback != nil {
+			GlobalTimingCallback("ManifestPurge", time.Since(start))
 		}
 	}
 
