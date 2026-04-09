@@ -15,11 +15,6 @@ type TimingSummary struct {
 	TotalDeployTime       time.Duration
 	UploadStaticFilesTime time.Duration
 	BucketCreateTime      time.Duration
-	ApplicationCreateTime time.Duration
-	ApplicationUpdateTime time.Duration
-	WorkloadCreateTime    time.Duration
-	WorkloadUpdateTime    time.Duration
-	RulesEngineCreateTime time.Duration
 	ManifestCreateTime    time.Duration
 	ReadManifestTime      time.Duration
 	// Manifest resource timings
@@ -103,33 +98,18 @@ func (ts *TimingSummary) PrintSummary() {
 	if ts.BucketCreateTime > 0 {
 		logger.Debug(fmt.Sprintf("Bucket Creation: %v", ts.BucketCreateTime))
 	}
-	if ts.ApplicationCreateTime > 0 {
-		logger.Debug(fmt.Sprintf("Application Creation: %v", ts.ApplicationCreateTime))
-	}
-	if ts.ApplicationUpdateTime > 0 {
-		logger.Debug(fmt.Sprintf("Application Update: %v", ts.ApplicationUpdateTime))
-	}
-	if ts.WorkloadCreateTime > 0 {
-		logger.Debug(fmt.Sprintf("Workload Creation: %v", ts.WorkloadCreateTime))
-	}
-	if ts.WorkloadUpdateTime > 0 {
-		logger.Debug(fmt.Sprintf("Workload Update: %v", ts.WorkloadUpdateTime))
-	}
-	if ts.RulesEngineCreateTime > 0 {
-		logger.Debug(fmt.Sprintf("Rules Engine Creation: %v", ts.RulesEngineCreateTime))
-	}
-	if ts.ManifestCreateTime > 0 {
-		logger.Debug(fmt.Sprintf("Manifest Creation (CreateResources): %v", ts.ManifestCreateTime))
-	}
 	if ts.ReadManifestTime > 0 {
 		logger.Debug(fmt.Sprintf("Read Manifest: %v", ts.ReadManifestTime))
+	}
+	if ts.ManifestCreateTime > 0 {
+		logger.Debug(fmt.Sprintf("Manifest Apply: %v", ts.ManifestCreateTime))
 	}
 
 	// Always print manifest resource breakdown
 	logger.Debug("--- Manifest Resource Timings ---")
 	logger.Debug(fmt.Sprintf("  Functions: %v", ts.ManifestFunctionsTime))
 	logger.Debug(fmt.Sprintf("  Function Instances: %v", ts.ManifestFunctionInstancesTime))
-	logger.Debug(fmt.Sprintf("  Edge Application: %v", ts.ManifestEdgeApplicationTime))
+	logger.Debug(fmt.Sprintf("  Application: %v", ts.ManifestEdgeApplicationTime))
 	logger.Debug(fmt.Sprintf("  Cache Settings: %v", ts.ManifestCacheSettingsTime))
 	logger.Debug(fmt.Sprintf("  Connectors: %v", ts.ManifestConnectorsTime))
 	logger.Debug(fmt.Sprintf("  Rules Engine: %v", ts.ManifestRulesEngineTime))

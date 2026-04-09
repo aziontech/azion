@@ -67,7 +67,6 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 }
 
 func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	doApplicationStart := time.Now()
 	if conf.Application.ID == 0 {
 		var projName string
 		for {
@@ -105,20 +104,17 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		GlobalTimingSummary.ApplicationCreateTime = time.Since(doApplicationStart)
 	} else {
 		err := cmd.updateApplication(client, ctx, conf, msgs)
 		if err != nil {
 			logger.Debug("Error while updating Application", zap.Error(err))
 			return err
 		}
-		GlobalTimingSummary.ApplicationUpdateTime = time.Since(doApplicationStart)
 	}
 	return nil
 }
 
 func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	doWorkloadStart := time.Now()
 	var workload apiworkload.WorkloadResponse
 	var err error
 
@@ -165,7 +161,6 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
 		}
-		GlobalTimingSummary.WorkloadCreateTime = time.Since(doWorkloadStart)
 
 	} else {
 		workload, err = cmd.updateWorkload(client, ctx, conf, msgs)
@@ -173,7 +168,6 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			logger.Debug("Error while updating workload", zap.Error(err))
 			return err
 		}
-		GlobalTimingSummary.WorkloadUpdateTime = time.Since(doWorkloadStart)
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newWorkload {
@@ -192,7 +186,6 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return nil
 	}
 
-	doRulesDeployStart := time.Now()
 	apiCallStart := time.Now()
 	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, conf.Preset)
 	if err != nil {
@@ -200,7 +193,6 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return err
 	}
 	GlobalTimingSummary.AddAPICallTime("RulesEngine.Create", time.Since(apiCallStart))
-	GlobalTimingSummary.RulesEngineCreateTime = time.Since(doRulesDeployStart)
 
 	return nil
 }
