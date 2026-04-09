@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
@@ -116,6 +117,12 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env str
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
+	InitTimingSummary()
+	totalStart := time.Now()
+
+	// Set up callback for manifest package timing
+	manifestInt.GlobalTimingCallback = HandleManifestTimingCallback
+
 	msgs := []string{}
 	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
@@ -198,19 +205,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	// Time ReadManifest operation
+	readManifestStart := time.Now()
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ReadManifestTime = time.Since(readManifestStart)
 
 	// Check if directory exists; if not, we skip creating bucket
 	if len(manifestStructure.Storage) == 0 {
 		logger.Debug(msg.SkipBucket)
 	} else {
+		bucketStart := time.Now()
 		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs, manifestStructure.Storage)
 		if err != nil {
 			return err
 		}
+		GlobalTimingSummary.BucketCreateTime = time.Since(bucketStart)
 	}
 
 	if !conf.NotFirstRun && (!SkipBuild || !SkipFramework) {
@@ -227,10 +239,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
+	// Time second ReadManifest operation
+	readManifestStart = time.Now()
 	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ReadManifestTime += time.Since(readManifestStart)
 
 	// Check if directory exists; if not, we skip uploading static files
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
@@ -238,12 +253,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	} else if SkipBuild || SkipFramework {
 		logger.Debug(msg.SkipUploadBuild)
 	} else {
+		uploadStart := time.Now()
 		for _, storage := range manifestStructure.Storage {
 			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
 			if err != nil {
 				return err
 			}
 		}
+		GlobalTimingSummary.UploadStaticFilesTime = time.Since(uploadStart)
 	}
 
 	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
@@ -255,10 +272,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.NotFirstRun = true
 
+	// Time CreateResources operation
+	manifestCreateStart := time.Now()
 	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ManifestCreateTime = time.Since(manifestCreateStart)
 
 	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
 		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
@@ -266,6 +286,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 	}
+
+	// Calculate total deploy time
+	GlobalTimingSummary.TotalDeployTime = time.Since(totalStart)
+
+	// Print timing summary before success messages
+	GlobalTimingSummary.PrintSummary()
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
