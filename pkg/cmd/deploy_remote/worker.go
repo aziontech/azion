@@ -3,15 +3,17 @@ package deploy
 import (
 	"context"
 	"sync/atomic"
+	"time"
 
-	"github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aziontech/azion-cli/pkg/api/s3"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
 )
 
 // worker reads the range of jobs and uploads the file, if there is an error during upload, we returning it through the results channel
-func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, clientUpload *storage.Client, conf *contracts.AzionApplicationOptions, bucket string) {
+func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *int64, cfg aws.Config, bucket, prefix string) {
 	for job := range jobs {
 		// Once ENG-27343 is completed, we might be able to remove this piece of code
 		fileInfo, err := job.FileContent.Stat()
@@ -30,15 +32,13 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 			continue
 		}
 
-		if err := clientUpload.Upload(context.Background(), &job, conf, bucket); err != nil {
+		if err := s3.UploadFile(context.Background(), cfg, &job, bucket, prefix); err != nil {
 			logger.Debug("Error while worker tried to upload file: <"+job.Path+"> to storage api", zap.Error(err))
 
-			fileRetries := 0
-			maxRetries := 5
-
-			for fileRetries < maxRetries {
-				fileRetries++
+			for Retries < 20 {
 				atomic.AddInt64(&Retries, 1)
+
+				time.Sleep(time.Second * time.Duration(Retries))
 
 				_, seekErr := job.FileContent.Seek(0, 0)
 				if seekErr != nil {
@@ -46,15 +46,15 @@ func Worker(jobs <-chan contracts.FileOps, results chan<- error, currentFile *in
 					break
 				}
 
-				logger.Debug("Retrying to upload file", zap.Int("attempt", fileRetries), zap.Int("maxRetries", maxRetries), zap.String("path", job.Path))
-				err = clientUpload.Upload(context.Background(), &job, conf, bucket)
+				logger.Debug("Retrying to upload the following file: <"+job.Path+"> to storage api", zap.Error(err))
+				err = s3.UploadFile(context.Background(), cfg, &job, bucket, prefix)
 				if err == nil {
 					break
 				}
 			}
 
-			if fileRetries >= maxRetries {
-				logger.Debug("Failed to upload file after retries", zap.Int("maxRetries", maxRetries), zap.String("path", job.Path))
+			if Retries >= 20 {
+				logger.Debug("There have been 20 retries already, quitting upload")
 				results <- err
 				return
 			}

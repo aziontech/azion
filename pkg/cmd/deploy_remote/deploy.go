@@ -19,6 +19,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -43,6 +44,7 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
+	ReadSettings          func(path string) (token.Settings, error)
 }
 
 var (
@@ -77,6 +79,7 @@ func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 		F:                     f,
 		Interpreter:           manifestInt.NewManifestInterpreter,
 		VersionID:             utils.Timestamp,
+		ReadSettings:          token.ReadSettings,
 	}
 }
 
@@ -253,9 +256,16 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	} else if SkipBuild || SkipFramework {
 		logger.Debug(msg.SkipUploadBuild)
 	} else {
+		// Read settings for S3 credentials
+		activeProfile := f.GetActiveProfile()
+		settings, err := cmd.ReadSettings(activeProfile)
+		if err != nil {
+			return err
+		}
+
 		uploadStart := time.Now()
 		for _, storage := range manifestStructure.Storage {
-			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
+			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir, conf.Bucket, settings)
 			if err != nil {
 				return err
 			}

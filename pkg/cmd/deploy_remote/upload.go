@@ -1,15 +1,17 @@
 package deploy
 
 import (
+	"errors"
 	"os"
 	"path"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	"github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aziontech/azion-cli/pkg/api/s3"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/schollz/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
@@ -20,11 +22,19 @@ var (
 	Retries    int64
 )
 
+// ReadSettings reads the settings file for S3 credentials
+func ReadSettings(path string) (token.Settings, error) {
+	return token.ReadSettings(path)
+}
+
 func (cmd *DeployCmd) uploadFiles(
-	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, dir string) error {
+	f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, dir string, bucket string, settings token.Settings) error {
 	logger.Debug("Path to be uploaded: " + dir)
 
-	clientUpload := storage.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("storage_url"), cmd.F.Config.GetString("token"))
+	cfg, err := s3.New(settings.S3AccessKey, settings.S3SecretKey)
+	if err != nil {
+		return errors.New(msg.ErrorUnableSDKConfig + err.Error())
+	}
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
@@ -84,7 +94,7 @@ func (cmd *DeployCmd) uploadFiles(
 
 	// Create worker goroutines
 	for i := 1; i <= noOfWorkers; i++ {
-		go Worker(jobsChan, results, &currentFile, clientUpload, conf, conf.Bucket)
+		go Worker(jobsChan, results, &currentFile, cfg, bucket, conf.Prefix)
 	}
 
 	bar := progressbar.NewOptions(
@@ -126,4 +136,9 @@ func (cmd *DeployCmd) uploadFiles(
 	*msgs = append(*msgs, msg.UploadSuccessful)
 
 	return nil
+}
+
+// UploadFiles is the package-level function that calls the method
+func UploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, dir string, bucket string, settings token.Settings, cmd *DeployCmd) error {
+	return cmd.uploadFiles(f, conf, msgs, dir, bucket, settings)
 }
