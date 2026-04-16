@@ -7,7 +7,7 @@ const (
 	EXAMPLE             = "$ azion init\n$ azion init --help\n$ azion init --name testproject"
 	FLAG_NAME           = "The Application's name"
 	FLAG_PRESET         = "The Preset's name"
-	FLAG_TEMPLATE       = "The Template's name"
+	FLAG_TEMPLATE       = "Template name to use for initialization (skips interactive selection)"
 	FLAG_PACKAGE_MANAGE = "Specify the package manager to use (e.g., npm, yarn, pnpm)"
 	FLAG_AUTO           = "If sent, the entire flow of the command will be run without interruptions"
 	FLAG_SYNC           = "Synchronizes the local azion.json file with remote resources. Use this flag when deploying your project from this command"
