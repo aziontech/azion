@@ -144,6 +144,9 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, l
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
+	InitTimingSummary()
+	totalStart := time.Now()
+
 	activeProfile := f.GetActiveProfile()
 
 	if DryRun {
@@ -183,12 +186,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	//create credentials if they are not found on settings file
 	if settings.S3AccessKey == "" || settings.S3SecretKey == "" {
+		bucketStart := time.Now()
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
 		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: "read_only"}})
 		if err != nil {
 			return err
 		}
+		GlobalTimingSummary.BucketCreateTime = time.Since(bucketStart)
 
 		// Get the current time
 		now := time.Now()
@@ -196,6 +201,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		// Add one year to the current time
 		oneYearLater := now.AddDate(1, 0, 0)
 
+		credentialsStart := time.Now()
 		request := new(storage.RequestCredentials)
 		request.Name = nameBucket
 		request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
@@ -209,6 +215,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		settings.S3AccessKey = creds.Data.GetAccessKey()
 		settings.S3SecretKey = creds.Data.GetSecretKey()
 		settings.S3Bucket = nameBucket
+		GlobalTimingSummary.CredentialsTime = time.Since(credentialsStart)
 
 		err = token.WriteSettings(settings, activeProfile)
 		if err != nil {
@@ -225,25 +232,37 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		conf.Prefix = cmd.VersionID()
 	}
 
+	uploadStart := time.Now()
 	err = cmd.UploadFiles(f, conf, &msgs, localDir, settings.S3Bucket, cmd, settings)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.UploadFilesTime = time.Since(uploadStart)
 
+	scriptStart := time.Now()
 	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecretKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ScriptCallTime = time.Since(scriptStart)
 
 	err = cmd.OpenBrowser(f, fmt.Sprintf("%s/create/deploy/%s", DeployURL, id), cmd)
 	if err != nil {
 		return err
 	}
 
+	logsStart := time.Now()
 	err = cmd.CaptureLogs(id, settings.Token, cmd)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.LogsCaptureTime = time.Since(logsStart)
+
+	// Calculate total deploy time
+	GlobalTimingSummary.TotalDeployTime = time.Since(totalStart)
+
+	// Print timing summary before success messages
+	GlobalTimingSummary.PrintSummary()
 
 	conf, err = cmd.GetAzionJsonContent(ProjectConf)
 	if err != nil {
