@@ -46,6 +46,7 @@ type initCmd struct {
 	sync                  bool
 	local                 bool
 	SkipFramework         bool
+	template              string
 	packageManager        string
 	pathWorkingDir        string
 	f                     *cmdutil.Factory
@@ -130,6 +131,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolVar(&init.sync, "sync", false, msg.FLAG_SYNC)
 	cmd.Flags().BoolVar(&init.local, "local", false, msg.FLAG_LOCAL)
 	cmd.Flags().BoolVar(&init.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	cmd.Flags().StringVar(&init.template, "template", "", msg.FLAG_TEMPLATE)
 	return cmd
 }
 
@@ -187,38 +189,68 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		listTemplates[number] = value.Name
 	}
 
-	prompt := &survey.Select{
-		Message:  "Choose a preset:",
-		Options:  listTemplates,
-		PageSize: len(listTemplates),
-	}
-
-	var answer string
-	err = cmd.askOne(prompt, &answer)
-	if err != nil {
-		return err
-	}
-
-	templateOptions := []string{}
-	templateOptionsMap := make(map[string]Item)
-	for _, value := range templateMap[answer] {
-		if value.RequiresAdditionalBuild != nil && *value.RequiresAdditionalBuild {
-			continue
-		}
-		templateOptions = append(templateOptions, value.Name)
-		templateOptionsMap[value.Name] = value
-	}
-
-	promptTemplate := &survey.Select{
-		Message:  "Choose a template:",
-		Options:  templateOptions,
-		PageSize: len(templateOptions),
-	}
-
 	var answerTemplate string
-	err = cmd.askOne(promptTemplate, &answerTemplate)
-	if err != nil {
-		return err
+	templateOptionsMap := make(map[string]Item)
+
+	// Handle --template flag: skip TUI and match template directly
+	if cmd.template != "" {
+		cmd.auto = true // Implies auto behavior
+
+		// Search all templates across all presets
+		var foundTemplate *Item
+		for _, items := range templateMap {
+			for i := range items {
+				if items[i].Name == cmd.template {
+					foundTemplate = &items[i]
+					break
+				}
+			}
+			if foundTemplate != nil {
+				break
+			}
+		}
+
+		if foundTemplate == nil {
+			return fmt.Errorf(msg.ErrorTemplateNotFound, cmd.template)
+		}
+
+		// Set preset and template info
+		// Note: cmd.preset will be set later from templateOptionsMap[answerTemplate].Preset
+		answerTemplate = foundTemplate.Name
+		templateOptionsMap[answerTemplate] = *foundTemplate
+	} else {
+		// Existing TUI flow for preset selection
+		prompt := &survey.Select{
+			Message:  "Choose a preset:",
+			Options:  listTemplates,
+			PageSize: len(listTemplates),
+		}
+
+		var answer string
+		err = cmd.askOne(prompt, &answer)
+		if err != nil {
+			return err
+		}
+
+		templateOptions := []string{}
+		for _, value := range templateMap[answer] {
+			if value.RequiresAdditionalBuild != nil && *value.RequiresAdditionalBuild {
+				continue
+			}
+			templateOptions = append(templateOptions, value.Name)
+			templateOptionsMap[value.Name] = value
+		}
+
+		promptTemplate := &survey.Select{
+			Message:  "Choose a template:",
+			Options:  templateOptions,
+			PageSize: len(templateOptions),
+		}
+
+		err = cmd.askOne(promptTemplate, &answerTemplate)
+		if err != nil {
+			return err
+		}
 	}
 
 	dirPath := cmd.dir()
