@@ -57,6 +57,7 @@ azion init [flags]
 | `--package-manager <string>` | Package manager (npm/yarn/pnpm) |
 | `--skip-framework-build` | Skip framework build phase |
 | `--sync` | Sync local azion.json with remote |
+| `--template <string>` | Use a specific starter template |
 | `-h, --help` | Show help |
 
 **Examples:**
@@ -64,6 +65,19 @@ azion init [flags]
 azion init
 azion init --name "my-project"
 azion init --name "my-project" --preset nextjs --auto
+azion init --name "my-project" --template nextjs-starter
+```
+
+**Template Examples:**
+```bash
+# Use a Next.js starter template
+azion init --template nextjs-starter --name "my-nextjs-app"
+
+# Use a React starter template
+azion init --template react-starter --name "my-react-app"
+
+# Combine with auto mode for CI/CD
+azion init --template vue-starter --name "my-vue-app" --auto
 ```
 
 ---

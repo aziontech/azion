@@ -67,7 +67,7 @@ azion list application
 ### New Project from Template
 
 ```bash
-# 1. Initialize project
+# 1. Initialize project (interactive mode)
 azion init --name "my-project"
 
 # 2. Follow interactive prompts to select:
@@ -75,10 +75,13 @@ azion init --name "my-project"
 #    - Package manager
 #    - Deploy options
 
-# 3. Or use fully automated mode
+# 3. Or use fully automated mode with preset
 azion init --name "my-project" --preset nextjs --auto
 
-# 4. Build and deploy
+# 4. Or use a specific starter template
+azion init --name "my-project" --template nextjs-starter
+
+# 5. Build and deploy
 azion build
 azion deploy --auto
 ```

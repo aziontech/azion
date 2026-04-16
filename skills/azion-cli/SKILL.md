@@ -9,6 +9,7 @@ description: |
   - Has questions about CLI troubleshooting
   - Wants to generate azion.json or args.json configurations
   - Mentions "azion" in the context of commands, deployment, or configuration
+  - Asks about edge computing, CDN deployment, or static site deployment on Azion
 
   Trigger even if the user doesn't explicitly say "CLI" - they might ask "how do I deploy to Azion" or "how do I create an edge application."
 ---
@@ -17,19 +18,57 @@ description: |
 
 Comprehensive reference for Azion CLI v4.19.1 commands, workflows, and patterns.
 
-## Overview
-
-Azion CLI is a command-line interface for managing Azion edge applications, functions, and resources. Install with:
+## Quick Start
 
 ```bash
+# Install
 curl -fsSL https://cli.azion.app/install.sh | bash
-# Or via package managers:
-brew install azion
-choco install azion
-winget install aziontech.azion
+
+# Login
+azion login
+
+# Deploy a new project
+azion init --name "my-project"
+azion build && azion deploy --auto
 ```
 
-## Quick Command Reference
+## Decision Trees
+
+### New Project vs Existing Project
+
+```
+User has...
+├── No code yet → azion init --name "project-name"
+│                  └── Use --template flag for specific templates
+│
+└── Existing code → azion link --name "project-name" --preset <framework>
+                     └── Then: azion deploy --auto
+```
+
+### When to Use --auto
+
+| Scenario | Use --auto? | Why |
+|----------|-------------|-----|
+| CI/CD pipelines | Yes | No interactive prompts |
+| Quick prototypes | Yes | Faster iteration |
+| First-time setup | No | Learn the options |
+| Custom configuration | No | Need to specify options |
+
+### Choosing a Preset
+
+| Framework | Preset Value | Notes |
+|-----------|--------------|-------|
+| Next.js | `next` | Most common for React SSR |
+| React SPA | `react` | Client-side only |
+| Vue.js | `vue` | Vue 3 recommended |
+| Angular | `angular` | Requires specific build |
+| Astro | `astro` | Static/hybrid |
+| Hexo | `hexo` | Static blog |
+| Pure HTML | `static` | No build step |
+| Vanilla JS | `javascript` | No framework |
+| TypeScript | `typescript` | No framework |
+
+## Command Quick Reference
 
 ### Project Lifecycle
 | Command | Purpose |
@@ -76,63 +115,6 @@ winget install aziontech.azion
 | `azion rollback` | Revert to previous deployment |
 | `azion clone` | Clone applications |
 
-## Common Workflows
-
-### New Project Setup
-```bash
-# Login first
-azion login
-
-# Initialize from template
-azion init --name "my-project"
-
-# Build and deploy
-azion build
-azion deploy
-```
-
-### Deploy Existing Project
-```bash
-# Link existing codebase
-azion link --name "my-app" --preset nextjs
-
-# Deploy
-azion deploy
-```
-
-### Configuration as Code
-```bash
-# Create config file
-azion config init --config-dir ./config
-
-# Edit azion.json as needed, then apply
-azion config apply --config-dir ./config
-```
-
-### Debugging Applications
-```bash
-# View function logs in real-time
-azion logs cells --tail --function-id 1234
-
-# View HTTP logs
-azion logs http --tail --limit 50
-
-# Check application details
-azion describe application --id 1234
-```
-
-### Cache Management
-```bash
-# Purge by URL
-azion purge --urls "example.com/path1,example.com/path2"
-
-# Purge by wildcard
-azion purge --wildcard "example.com/*"
-
-# Warmup cache
-azion warmup --url "https://example.com" --max-urls 500
-```
-
 ## Global Flags
 
 Available on ALL commands:
@@ -151,20 +133,114 @@ Available on ALL commands:
 | `-t, --token <token>` | Personal token for auth |
 | `-y, --yes` | Auto-answer yes to prompts |
 
-## Framework Presets
+## Common Workflows
 
-Supported frameworks for `init` and `link`:
-
+### New Project Setup
+```bash
+azion login
+azion init --name "my-project"
+azion build
+azion deploy
 ```
-next           Next.js
-react          React
-vue            Vue.js
-angular        Angular
-astro          Astro
-hexo           Hexo
-static         Static HTML
-javascript     Vanilla JavaScript
-typescript     Vanilla TypeScript
+
+### Deploy Existing Project
+```bash
+azion link --name "my-app" --preset nextjs
+azion deploy
+```
+
+### Configuration as Code
+```bash
+azion config init --config-dir ./config
+# Edit azion.json as needed
+azion config apply --config-dir ./config
+```
+
+### Debugging Applications
+```bash
+azion logs cells --tail --function-id 1234
+azion logs http --tail --limit 50
+azion describe application --id 1234
+```
+
+### Cache Management
+```bash
+azion purge --urls "example.com/path1,example.com/path2"
+azion purge --wildcard "example.com/*"
+azion warmup --url "https://example.com" --max-urls 500
+```
+
+## Common Pitfalls
+
+### 1. v3 vs v4 API Confusion
+
+**Problem:** Some users have legacy v3 API access which uses different commands.
+
+**Solution:**
+- v4 is the **primary and long-term supported API**
+- v3 commands are in `pkg/v3commands/` (legacy, deprecated)
+- If you see v3-style commands failing, ensure your account has v4 access
+- Use `pkg/cmd/`, `pkg/api/`, `pkg/manifest/` paths for new features
+
+### 2. Token Expiration
+
+**Problem:** Personal tokens expire and commands suddenly fail with 401 errors.
+
+**Solution:**
+```bash
+# Check current auth
+azion whoami
+
+# Create long-lived token (up to 9 months)
+azion create personal-token --name "ci-token" --expiration "9m"
+
+# Use token directly
+azion --token "your-token" deploy --auto
+```
+
+### 3. Build Failures
+
+**Problem:** Build fails due to framework-specific issues.
+
+**Solution:**
+```bash
+# Skip framework build if issues
+azion build --skip-framework-build
+
+# Use custom entrypoint
+azion build --entry ./src/index.js
+
+# Enable debug logging
+azion build --debug
+```
+
+### 4. Deployment Timeout
+
+**Problem:** Deploy takes too long and times out.
+
+**Solution:**
+```bash
+# Increase timeout
+azion deploy --timeout 120
+
+# Use dry-run to test
+azion deploy --dry-run
+
+# Check logs for issues
+azion logs cells --tail
+```
+
+### 5. Missing Template Flag
+
+**Problem:** Want to use a specific starter template.
+
+**Solution:** Use the `--template` flag:
+```bash
+# List available templates (future feature)
+azion init --help
+
+# Use specific template
+azion init --template nextjs-starter --name "my-project"
 ```
 
 ## Resource Types for Create/Update/Delete
@@ -221,44 +297,15 @@ jobs:
           AZION_TOKEN: ${{ secrets.AZION_TOKEN }}
 ```
 
-## Troubleshooting
-
-### Authentication Issues
-```bash
-# Re-login if token expired
-azion logout
-azion login --username your@email.com --password "password"
-
-# Or use token directly
-azion --token "your-personal-token" deploy
-```
-
-### Build Failures
-```bash
-# Skip framework build if issues
-azion build --skip-framework-build
-
-# Use custom entrypoint
-azion build --entry ./src/index.js
-
-# Enable debug logging
-azion build --debug
-```
-
-### Deployment Issues
-```bash
-# Dry run to test without deploying
-azion deploy --dry-run
-
-# Sync local config with remote
-azion deploy --sync
-
-# Check logs
-azion logs cells --tail
-```
-
 ## Reference Files
 
 For complete command documentation, see:
 - `references/commands.md` - Full command reference with all flags
 - `references/workflows.md` - Step-by-step workflow guides
+- `scripts/generate_config.py` - Configuration file generator
+
+## When to Read Reference Files
+
+- **Need all flags for a command?** → Read `references/commands.md`
+- **Setting up CI/CD?** → Read `references/workflows.md` → CI/CD Integration section
+- **Creating config files programmatically?** → Run `scripts/generate_config.py`
