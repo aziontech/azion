@@ -199,7 +199,12 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		// Search all templates across all presets
 		var foundTemplate *Item
 		for _, items := range templateMap {
-			for i := range items {
+			for _, i := range items {
+				if i.Name == cmd.template {
+					foundTemplate = &i
+					break
+				}
+			}
 				if items[i].Name == cmd.template {
 					foundTemplate = &items[i]
 					break
