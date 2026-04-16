@@ -194,19 +194,12 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 
 	// Handle --template flag: skip TUI and match template directly
 	if cmd.template != "" {
-		cmd.auto = true // Implies auto behavior
-
 		// Search all templates across all presets
 		var foundTemplate *Item
 		for _, items := range templateMap {
 			for _, i := range items {
 				if i.Name == cmd.template {
 					foundTemplate = &i
-					break
-				}
-			}
-				if items[i].Name == cmd.template {
-					foundTemplate = &items[i]
 					break
 				}
 			}
