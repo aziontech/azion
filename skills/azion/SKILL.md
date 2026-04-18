@@ -1,5 +1,5 @@
 ---
-name: azion-cli
+name: azion
 description: |
   Azion CLI command reference and workflow patterns. Use this skill whenever the user:
   - Asks how to use azion CLI commands (build, deploy, init, create, etc.)
