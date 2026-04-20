@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	DEFAULT_DIR      = ".azion"
-	DEFAULT_SETTINGS = "settings.toml"
-	DEFAULT_METRICS  = "metrics.json"
-	DEFAULT_SCHEDULE = "schedule.json"
-	DEFAULT_PROFILES = "profiles.json"
+	DEFAULT_DIR         = ".azion"
+	DEFAULT_SETTINGS    = "settings.toml"
+	DEFAULT_METRICS     = "metrics.json"
+	DEFAULT_SCHEDULE    = "schedule.json"
+	DEFAULT_PROFILES    = "profiles.json"
+	DEFAULT_CREDENTIALS = "credentials.toml"
 )
 
 var (
@@ -43,11 +44,12 @@ func GetPath() string {
 }
 
 type DirPath struct {
-	Dir      string
-	Settings string
-	Metrics  string
-	Schedule string
-	Profiles string
+	Dir         string
+	Settings    string
+	Metrics     string
+	Schedule    string
+	Profiles    string
+	Credentials string
 }
 
 func Dir() DirPath {
@@ -58,11 +60,12 @@ func Dir() DirPath {
 	}
 
 	dirPath := DirPath{
-		Dir:      filepath.Join(home, pathDir),
-		Settings: pathSettings,
-		Profiles: pathProfiles,
-		Metrics:  DEFAULT_METRICS,
-		Schedule: DEFAULT_SCHEDULE,
+		Dir:         filepath.Join(home, pathDir),
+		Settings:    pathSettings,
+		Profiles:    pathProfiles,
+		Metrics:     DEFAULT_METRICS,
+		Schedule:    DEFAULT_SCHEDULE,
+		Credentials: DEFAULT_CREDENTIALS,
 	}
 	return dirPath
 }

@@ -195,3 +195,133 @@ func Test_ReadSettings(t *testing.T) {
 		}
 	})
 }
+
+func Test_ReadWriteCredentials(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	t.Run("write and read credentials", func(t *testing.T) {
+		errSetPath := config.SetPath("/tmp/testazioncreds/test.toml")
+		if errSetPath != nil {
+			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
+		}
+
+		bucketName := "test-bucket-123"
+		expectedCreds := S3Credentials{
+			S3AccessKey: "test-access-key",
+			S3SecretKey: "test-secret-key",
+		}
+
+		// Write credentials
+		err := SaveCredentialsForBucket("test", bucketName, expectedCreds)
+		if err != nil {
+			t.Fatalf("SaveCredentialsForBucket() error: %s", err)
+		}
+
+		// Read credentials
+		creds, exists, err := GetCredentialsForBucket("test", bucketName)
+		if err != nil {
+			t.Fatalf("GetCredentialsForBucket() error: %s", err)
+		}
+
+		if !exists {
+			t.Fatalf("GetCredentialsForBucket() exists = %v; want true", exists)
+		}
+
+		if creds.S3AccessKey != expectedCreds.S3AccessKey || creds.S3SecretKey != expectedCreds.S3SecretKey {
+			t.Errorf("GetCredentialsForBucket() = %v; want %v", creds, expectedCreds)
+		}
+	})
+
+	t.Run("read credentials from non-existing bucket", func(t *testing.T) {
+		errSetPath := config.SetPath("/tmp/testazioncreds/nonexistent.toml")
+		if errSetPath != nil {
+			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
+		}
+
+		creds, exists, err := GetCredentialsForBucket("nonexistent", "nonexistent-bucket")
+		if err != nil {
+			t.Fatalf("GetCredentialsForBucket() error = %v; want nil", err)
+		}
+
+		if exists {
+			t.Fatalf("GetCredentialsForBucket() exists = %v; want false", exists)
+		}
+
+		if creds.S3AccessKey != "" || creds.S3SecretKey != "" {
+			t.Errorf("GetCredentialsForBucket() = %v; want empty credentials", creds)
+		}
+	})
+
+	t.Run("read credentials from non-existing file returns empty map", func(t *testing.T) {
+		errSetPath := config.SetPath("/tmp/testazioncreds/newprofile/test.toml")
+		if errSetPath != nil {
+			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
+		}
+
+		credentials, err := ReadCredentials("newprofile")
+		if err != nil {
+			t.Fatalf("ReadCredentials() error = %v; want nil", err)
+		}
+
+		if credentials == nil {
+			t.Fatalf("ReadCredentials() = nil; want empty map")
+		}
+
+		if len(credentials) != 0 {
+			t.Errorf("ReadCredentials() = %v; want empty map", credentials)
+		}
+	})
+
+	t.Run("write multiple buckets and read them", func(t *testing.T) {
+		errSetPath := config.SetPath("/tmp/testazioncreds/multi/test.toml")
+		if errSetPath != nil {
+			t.Fatalf("SetPath() error: %s;", errSetPath.Error())
+		}
+
+		bucket1 := "bucket-one"
+		creds1 := S3Credentials{
+			S3AccessKey: "access-key-1",
+			S3SecretKey: "secret-key-1",
+		}
+
+		bucket2 := "bucket-two"
+		creds2 := S3Credentials{
+			S3AccessKey: "access-key-2",
+			S3SecretKey: "secret-key-2",
+		}
+
+		// Write both credentials
+		err := SaveCredentialsForBucket("multi", bucket1, creds1)
+		if err != nil {
+			t.Fatalf("SaveCredentialsForBucket() error for bucket1: %s", err)
+		}
+
+		err = SaveCredentialsForBucket("multi", bucket2, creds2)
+		if err != nil {
+			t.Fatalf("SaveCredentialsForBucket() error for bucket2: %s", err)
+		}
+
+		// Verify both credentials exist and are correct
+		readCreds1, exists1, err := GetCredentialsForBucket("multi", bucket1)
+		if err != nil {
+			t.Fatalf("GetCredentialsForBucket() error for bucket1: %s", err)
+		}
+		if !exists1 {
+			t.Fatalf("GetCredentialsForBucket() exists for bucket1 = %v; want true", exists1)
+		}
+		if readCreds1.S3AccessKey != creds1.S3AccessKey || readCreds1.S3SecretKey != creds1.S3SecretKey {
+			t.Errorf("GetCredentialsForBucket() bucket1 = %v; want %v", readCreds1, creds1)
+		}
+
+		readCreds2, exists2, err := GetCredentialsForBucket("multi", bucket2)
+		if err != nil {
+			t.Fatalf("GetCredentialsForBucket() error for bucket2: %s", err)
+		}
+		if !exists2 {
+			t.Fatalf("GetCredentialsForBucket() exists for bucket2 = %v; want true", exists2)
+		}
+		if readCreds2.S3AccessKey != creds2.S3AccessKey || readCreds2.S3SecretKey != creds2.S3SecretKey {
+			t.Errorf("GetCredentialsForBucket() bucket2 = %v; want %v", readCreds2, creds2)
+		}
+	})
+}

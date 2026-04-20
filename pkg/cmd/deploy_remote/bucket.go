@@ -12,8 +12,10 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -73,6 +75,66 @@ func (cmd *DeployCmd) doBucket(
 	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
 	return cmd.WriteAzionJsonContent(conf, ProjectConf)
+}
+
+// CreateBucketCredentials creates S3 credentials for a specific bucket and saves them to the credentials file
+func CreateBucketCredentials(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error) {
+	logger.Debug("Creating S3 credentials for bucket")
+
+	storageClient := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+
+	// Get the current time
+	now := time.Now()
+
+	// Add one year to the current time
+	oneYearLater := now.AddDate(1, 0, 0)
+
+	request := api.RequestCredentials{}
+	request.Name = bucketName
+	request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
+	request.Buckets = []string{bucketName}
+	request.ExpirationDate = &oneYearLater
+
+	creds, err := storageClient.CreateCredentials(ctx, request)
+	if err != nil {
+		return token.S3Credentials{}, fmt.Errorf("failed to create credentials for bucket %s: %w", bucketName, err)
+	}
+
+	s3Creds := token.S3Credentials{
+		S3AccessKey: creds.Data.GetAccessKey(),
+		S3SecretKey: creds.Data.GetSecretKey(),
+	}
+
+	return s3Creds, nil
+}
+
+// GetOrCreateCredentials retrieves existing credentials for a bucket or creates new ones if they don't exist
+func (cmd *DeployCmd) GetOrCreateCredentials(ctx context.Context, bucketName string, profile string) (token.S3Credentials, error) {
+	// First, check if credentials already exist for this bucket
+	creds, exists, err := cmd.GetCredentialsForBucket(profile, bucketName)
+	if err != nil {
+		return token.S3Credentials{}, fmt.Errorf("failed to read credentials: %w", err)
+	}
+
+	if exists {
+		logger.Debug("Found existing credentials for bucket")
+		return creds, nil
+	}
+
+	// Credentials don't exist, create them
+	logger.Debug("Creating new credentials for bucket")
+	creds, err = CreateBucketCredentials(ctx, bucketName, cmd.F, profile)
+	if err != nil {
+		return token.S3Credentials{}, err
+	}
+
+	// Save the credentials to the credentials file
+	err = cmd.SaveCredentialsForBucket(profile, bucketName, creds)
+	if err != nil {
+		return token.S3Credentials{}, fmt.Errorf("failed to save credentials: %w", err)
+	}
+
+	return creds, nil
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {
