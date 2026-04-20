@@ -212,3 +212,128 @@ func ReadSettings(path string) (Settings, error) {
 
 	return settings, nil
 }
+
+// ReadCredentials reads the credentials file for a given profile and returns a map of bucket names to credentials
+func ReadCredentials(path string) (CredentialsMap, error) {
+	if path == "" {
+		path = "default"
+	}
+
+	dir := config.Dir()
+	dir.Dir = filepath.Join(dir.Dir, path)
+	filePath := filepath.Join(dir.Dir, dir.Credentials)
+
+	// Check if the file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// File does not exist, return empty credentials map
+		return CredentialsMap{}, nil
+	}
+
+	// Read the file
+	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Define a struct to hold TOML data with string keys
+	type CredentialsFile struct {
+		Credentials map[string]S3Credentials `toml:"credentials"`
+	}
+
+	var credsFile CredentialsFile
+	err = toml.Unmarshal(fileData, &credsFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse credentials file: %w", err)
+	}
+
+	// If no credentials key exists, return empty map
+	if credsFile.Credentials == nil {
+		return CredentialsMap{}, nil
+	}
+
+	return credsFile.Credentials, nil
+}
+
+// WriteCredentials writes the credentials map to the credentials file for a given profile
+func WriteCredentials(credentials CredentialsMap, subdir string) error {
+	dir := config.Dir()
+
+	if subdir != "" {
+		dir.Dir = filepath.Join(dir.Dir, subdir)
+	}
+
+	// Check if the directory exists, create it if not
+	if err := os.MkdirAll(dir.Dir, 0777); err != nil {
+		return fmt.Errorf("error creating directory: %w", err)
+	}
+
+	// Define a struct to hold TOML data with string keys
+	type CredentialsFile struct {
+		Credentials map[string]S3Credentials `toml:"credentials"`
+	}
+
+	credsFile := CredentialsFile{
+		Credentials: credentials,
+	}
+
+	b, err := toml.Marshal(credsFile)
+	if err != nil {
+		return err
+	}
+
+	if err := os.WriteFile(filepath.Join(dir.Dir, dir.Credentials), b, 0777); err != nil {
+		return fmt.Errorf(utils.ErrorWriteSettings.Error(), err)
+	}
+
+	return nil
+}
+
+// GetCredentialsForBucket retrieves credentials for a specific bucket from the credentials file
+func GetCredentialsForBucket(path string, bucketName string) (S3Credentials, bool, error) {
+	credentials, err := ReadCredentials(path)
+	if err != nil {
+		return S3Credentials{}, false, err
+	}
+
+	creds, exists := credentials[bucketName]
+	return creds, exists, nil
+}
+
+// SaveCredentialsForBucket saves credentials for a specific bucket to the credentials file
+func SaveCredentialsForBucket(path string, bucketName string, creds S3Credentials) error {
+	credentials, err := ReadCredentials(path)
+	if err != nil {
+		return err
+	}
+
+	if credentials == nil {
+		credentials = make(CredentialsMap)
+	}
+
+	credentials[bucketName] = creds
+	return WriteCredentials(credentials, path)
+}
+
+// DeleteCredentialsForBucket deletes credentials for a specific bucket from the credentials file
+func DeleteCredentialsForBucket(path string, bucketName string) error {
+	credentials, err := ReadCredentials(path)
+	if err != nil {
+		return err
+	}
+
+	// If no credentials exist or bucket not found, nothing to do
+	if credentials == nil {
+		return nil
+	}
+
+	// Check if the bucket exists in credentials
+	if _, exists := credentials[bucketName]; !exists {
+		return nil
+	}
+
+	// Delete the bucket from the credentials map
+	delete(credentials, bucketName)
+
+	// Write the updated credentials back to the file
+	return WriteCredentials(credentials, path)
+}

@@ -19,6 +19,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -26,23 +27,27 @@ import (
 )
 
 type DeployCmd struct {
-	Io                    *iostreams.IOStreams
-	GetWorkDir            func() (string, error)
-	FileReader            func(path string) ([]byte, error)
-	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
-	commandRunInteractive func(f *cmdutil.Factory, comm string) error
-	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
-	WriteManifest         func(manifest *contracts.ManifestV4, pathMan string) error
-	EnvLoader             func(path string) ([]string, error)
-	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
-	Open                  func(name string) (*os.File, error)
-	FilepathWalk          func(root string, fn filepath.WalkFunc) error
-	F                     *cmdutil.Factory
-	Unmarshal             func(data []byte, v interface{}) error
-	Interpreter           func() *manifestInt.ManifestInterpreter
-	VersionID             func() string
+	Io                       *iostreams.IOStreams
+	GetWorkDir               func() (string, error)
+	FileReader               func(path string) ([]byte, error)
+	WriteFile                func(filename string, data []byte, perm fs.FileMode) error
+	GetAzionJsonContent      func(pathConfig string) (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent    func(conf *contracts.AzionApplicationOptions, confConf string) error
+	commandRunInteractive    func(f *cmdutil.Factory, comm string) error
+	commandRunnerOutput      func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
+	WriteManifest            func(manifest *contracts.ManifestV4, pathMan string) error
+	EnvLoader                func(path string) ([]string, error)
+	BuildCmd                 func(f *cmdutil.Factory) *build.BuildCmd
+	Open                     func(name string) (*os.File, error)
+	FilepathWalk             func(root string, fn filepath.WalkFunc) error
+	F                        *cmdutil.Factory
+	Unmarshal                func(data []byte, v interface{}) error
+	Interpreter              func() *manifestInt.ManifestInterpreter
+	VersionID                func() string
+	ReadSettings             func(path string) (token.Settings, error)
+	GetCredentialsForBucket  func(path string, bucketName string) (token.S3Credentials, bool, error)
+	SaveCredentialsForBucket func(path string, bucketName string, creds token.S3Credentials) error
+	CreateBucketCredentials  func(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error)
 }
 
 var (
@@ -60,23 +65,27 @@ var (
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
-		Io:                    f.IOStreams,
-		GetWorkDir:            utils.GetWorkingDir,
-		FileReader:            os.ReadFile,
-		WriteFile:             os.WriteFile,
-		EnvLoader:             utils.LoadEnvVarsFromFile,
-		BuildCmd:              build.NewBuildCmd,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
-		commandRunInteractive: command.CommandRunInteractive,
-		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
-		WriteManifest:         WriteManifest,
-		Open:                  os.Open,
-		FilepathWalk:          filepath.Walk,
-		Unmarshal:             json.Unmarshal,
-		F:                     f,
-		Interpreter:           manifestInt.NewManifestInterpreter,
-		VersionID:             utils.Timestamp,
+		Io:                       f.IOStreams,
+		GetWorkDir:               utils.GetWorkingDir,
+		FileReader:               os.ReadFile,
+		WriteFile:                os.WriteFile,
+		EnvLoader:                utils.LoadEnvVarsFromFile,
+		BuildCmd:                 build.NewBuildCmd,
+		GetAzionJsonContent:      utils.GetAzionJsonContent,
+		WriteAzionJsonContent:    utils.WriteAzionJsonContent,
+		commandRunInteractive:    command.CommandRunInteractive,
+		commandRunnerOutput:      command.CommandRunInteractiveWithOutput,
+		WriteManifest:            WriteManifest,
+		Open:                     os.Open,
+		FilepathWalk:             filepath.Walk,
+		Unmarshal:                json.Unmarshal,
+		F:                        f,
+		Interpreter:              manifestInt.NewManifestInterpreter,
+		VersionID:                utils.Timestamp,
+		ReadSettings:             token.ReadSettings,
+		GetCredentialsForBucket:  token.GetCredentialsForBucket,
+		SaveCredentialsForBucket: token.SaveCredentialsForBucket,
+		CreateBucketCredentials:  CreateBucketCredentials,
 	}
 }
 
@@ -253,9 +262,20 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	} else if SkipBuild || SkipFramework {
 		logger.Debug(msg.SkipUploadBuild)
 	} else {
+		// Get the active profile for credentials storage
+		activeProfile := f.GetActiveProfile()
+
+		// Get or create credentials for this bucket
+		credentialsStart := time.Now()
+		creds, err := cmd.GetOrCreateCredentials(ctx, conf.Bucket, activeProfile)
+		if err != nil {
+			return err
+		}
+		GlobalTimingSummary.CredentialsTime = time.Since(credentialsStart)
+
 		uploadStart := time.Now()
 		for _, storage := range manifestStructure.Storage {
-			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
+			err = cmd.uploadFilesWithCreds(f, conf, &msgs, storage.Dir, conf.Bucket, creds)
 			if err != nil {
 				return err
 			}
