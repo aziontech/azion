@@ -61,6 +61,7 @@ var (
 	Env           string
 	FunctionIds   map[string]contracts.AzionJsonDataFunction
 	WriteBucket   bool
+	Workers       int
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -114,7 +115,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool, workers int) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
@@ -122,6 +123,7 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env str
 	SkipBuild = skipBuild
 	SkipFramework = skipFramework
 	WriteBucket = writeBucket
+	Workers = workers
 	return cmd.Run(f)
 }
 
