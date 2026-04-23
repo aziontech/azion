@@ -68,6 +68,7 @@ var (
 	Local         bool
 	Env           string
 	SkipFramework bool
+	Workers       int
 	Logs          = contracts.Logs{}
 	Result        = contracts.ResultsV4{}
 	DeployURL     = "https://console.azion.com"
@@ -128,6 +129,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&WriteBucket, "writable-bucket", false, msg.WritableBucketFlag)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
 	deployCmd.Flags().BoolVar(&SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	deployCmd.Flags().IntVar(&Workers, "workers", 0, msg.WorkersFlag)
 	return deployCmd
 }
 
@@ -160,7 +162,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if Local {
 		deployLocal := deploy.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild, WriteBucket, SkipFramework)
+		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild, WriteBucket, SkipFramework, Workers)
 	}
 
 	msgs := []string{}
