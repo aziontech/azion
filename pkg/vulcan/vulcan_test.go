@@ -32,7 +32,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes  edge-functions%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
 		},
 		{
 			name: "with flags - debug off",
@@ -41,7 +41,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier edge-functions%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
 		},
 		{
 			name: "no params - debug off",
@@ -49,7 +49,7 @@ func TestCommand(t *testing.T) {
 				flags: "--loglevel=error --no-update-notifier",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier edge-functions%s ", versionVulcan),
+			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s ", versionVulcan),
 		},
 		{
 			name: "no flags - debug on",
@@ -57,7 +57,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes  edge-functions%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
 		},
 		{
 			name: "with flags - debug on",
@@ -66,7 +66,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier edge-functions%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
 		},
 		{
 			name: "no params - debug on",
@@ -74,7 +74,7 @@ func TestCommand(t *testing.T) {
 				flags: "--loglevel=error --no-update-notifier",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier edge-functions%s ", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s ", versionVulcan),
 		},
 	}
 	for _, tt := range tests {
@@ -108,7 +108,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version without last version",
 			args: args{
-				currentVersion: "7.2.0",
+				currentVersion: "2.0.0",
 			},
 			lastVulcanVer:   "",
 			expectedVersion: firstTimeExecuting,
@@ -117,19 +117,19 @@ func TestCheckVulcanMajor(t *testing.T) {
 		{
 			name: "new major version with last version",
 			args: args{
-				currentVersion: "8.0.0",
+				currentVersion: "2.0.0",
 			},
-			lastVulcanVer:   "7.2.0",
-			expectedVersion: "@7.2.0",
+			lastVulcanVer:   "1.0.0",
+			expectedVersion: "@1.0.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "8.0.0",
+				currentVersion: "1.0.0",
 			},
-			lastVulcanVer:   "7.2.0",
-			expectedVersion: "@7.2.0",
+			lastVulcanVer:   "1.0.0",
+			expectedVersion: "@1.0.0",
 			wantErr:         false,
 		},
 		{
@@ -146,7 +146,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 			args: args{
 				currentVersion: "",
 			},
-			lastVulcanVer:   "2.5.0",
+			lastVulcanVer:   "0.5.0",
 			expectedVersion: firstTimeExecuting,
 			wantErr:         false,
 		},
