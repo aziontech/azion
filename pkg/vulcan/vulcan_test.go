@@ -1,3 +1,6 @@
+//go:build !stage
+// +build !stage
+
 package vulcan
 
 import (
