@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path"
-	"runtime"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
@@ -13,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/pkg/workers"
 	"github.com/schollz/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
@@ -21,40 +21,6 @@ import (
 var (
 	PathStatic = ".edge/storage"
 )
-
-const (
-	maxWorkers     = 20
-	minWorkers     = 5
-	workersPerCore = 3
-)
-
-// calculateOptimalWorkers calculates the optimal number of workers based on CPU cores
-// If workers is 0 (not set), it auto-calculates based on CPU cores
-// The result is clamped between minWorkers and maxWorkers
-func calculateOptimalWorkers(workers int) int {
-	if workers > 0 {
-		// User specified a value, clamp it to reasonable bounds
-		if workers > maxWorkers {
-			return maxWorkers
-		}
-		if workers < 1 {
-			return minWorkers
-		}
-		return workers
-	}
-
-	cpuCores := runtime.NumCPU()
-	optimal := cpuCores * workersPerCore
-
-	if optimal > maxWorkers {
-		optimal = maxWorkers
-	}
-	if optimal < minWorkers {
-		optimal = minWorkers
-	}
-
-	return optimal
-}
 
 // ReadSettings reads the settings file for S3 credentials
 func ReadSettings(path string) (token.Settings, error) {
@@ -73,7 +39,7 @@ func (cmd *DeployCmd) uploadFiles(
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	noOfWorkers := calculateOptimalWorkers(Workers)
+	noOfWorkers := workers.CalculateOptimal(Workers)
 	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
 
 	var currentFile int64
@@ -187,7 +153,7 @@ func (cmd *DeployCmd) uploadFilesWithCreds(
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	noOfWorkers := calculateOptimalWorkers(Workers)
+	noOfWorkers := workers.CalculateOptimal(Workers)
 	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
 
 	var currentFile int64
