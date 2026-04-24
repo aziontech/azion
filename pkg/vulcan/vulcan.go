@@ -16,8 +16,8 @@ var (
 	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
 	firstTimeExecuting   = "@7.2.0"
 	versionVulcan        = "@7.2.0"
-	stageVersion         = "@stage"
 	releaseChannel       = ""
+	StagePkgURL          = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
 
 type VulcanPkg struct {
@@ -46,11 +46,16 @@ func NewVulcanV3() *VulcanPkg {
 }
 
 func command(flags, params string, f *cmdutil.Factory) string {
-	selectedVersion := versionVulcan
 	if releaseChannel == "stage" {
-		selectedVersion = stageVersion
+		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
+		if f.Logger.Debug {
+			stageCmd = "DEBUG=true " + stageCmd
+		}
+		return fmt.Sprintf(stageCmd, flags, params)
 	}
 
+	// Production builds use the standard npm package format
+	selectedVersion := versionVulcan
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installEdgeFunctions
 		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
