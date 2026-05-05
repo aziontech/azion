@@ -15,6 +15,8 @@ import (
 	store "github.com/aziontech/azion-cli/pkg/cmd/delete/storage/bucket"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
+	"go.uber.org/zap"
 )
 
 func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
@@ -95,6 +97,14 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 		if err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to delete storage bucket: %v", err))
 			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete storage bucket: %v\n", err))
+		}
+
+		// Delete bucket credentials from credentials.toml
+		activeProfile := del.f.GetActiveProfile()
+		err = token.DeleteCredentialsForBucket(activeProfile, azionJson.Bucket)
+		if err != nil {
+			logger.Debug("Error while deleting bucket credentials", zap.Error(err), zap.String("bucket", azionJson.Bucket))
+			// Don't fail the cascade delete if credentials deletion fails, just log it
 		}
 	}
 

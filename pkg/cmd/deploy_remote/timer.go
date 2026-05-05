@@ -15,6 +15,7 @@ type TimingSummary struct {
 	TotalDeployTime       time.Duration
 	UploadStaticFilesTime time.Duration
 	BucketCreateTime      time.Duration
+	CredentialsTime       time.Duration
 	ManifestCreateTime    time.Duration
 	ReadManifestTime      time.Duration
 	// Manifest resource timings
@@ -97,6 +98,9 @@ func (ts *TimingSummary) PrintSummary() {
 	}
 	if ts.BucketCreateTime > 0 {
 		logger.Debug(fmt.Sprintf("Bucket Creation: %v", ts.BucketCreateTime))
+	}
+	if ts.CredentialsTime > 0 {
+		logger.Debug(fmt.Sprintf("Credentials: %v", ts.CredentialsTime))
 	}
 	if ts.ReadManifestTime > 0 {
 		logger.Debug(fmt.Sprintf("Read Manifest: %v", ts.ReadManifestTime))

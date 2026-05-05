@@ -53,3 +53,12 @@ type Response struct {
 	CreatedAt string `json:"created_at"`
 	ExpiresAt string `json:"expires_at"`
 }
+
+// S3Credentials represents the S3 credentials for a specific bucket
+type S3Credentials struct {
+	S3AccessKey string `toml:"s3_access_key"`
+	S3SecretKey string `toml:"s3_secret_key"`
+}
+
+// CredentialsMap is a map of bucket names to their S3 credentials
+type CredentialsMap map[string]S3Credentials

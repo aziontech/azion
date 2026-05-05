@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.13
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.97.3
 	github.com/aziontech/azionapi-go-sdk v0.143.0
-	github.com/aziontech/go-thoth v0.0.0-20240228144710-d061a88cc39f
+	github.com/aziontech/go-thoth v0.0.0-20260415185858-889a60cbe191
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.19.0

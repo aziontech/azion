@@ -12,12 +12,13 @@ import (
 )
 
 var (
-	currentMajor         = 7
-	installEdgeFunctions = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting   = "@7.2.0"
-	versionVulcan        = "@7.2.0"
-	stageVersion         = "@stage"
-	releaseChannel       = ""
+	currentMajor       = 1
+	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
+	installVulcanV3    = "npx --yes %s edge-functions%s %s"
+	firstTimeExecuting = "@1.0.0"
+	versionVulcan      = "@1.0.0"
+	releaseChannel     = ""
+	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
 
 type VulcanPkg struct {
@@ -39,23 +40,47 @@ func NewVulcanV3() *VulcanPkg {
 	currentMajor = 5
 	firstTimeExecuting = "@5.3.1"
 	return &VulcanPkg{
-		Command:          command,
+		Command:          commandV3,
 		CheckVulcanMajor: checkVulcanMajor,
 		ReadSettings:     token.ReadSettings,
 	}
 }
 
 func command(flags, params string, f *cmdutil.Factory) string {
-	selectedVersion := versionVulcan
 	if releaseChannel == "stage" {
-		selectedVersion = stageVersion
+		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
+		if f.Logger.Debug {
+			stageCmd = "DEBUG=true " + stageCmd
+		}
+		return fmt.Sprintf(stageCmd, flags, params)
 	}
 
+	// Production builds use @aziontech/bundler for V4
+	selectedVersion := versionVulcan
 	if f.Logger.Debug {
-		installDebug := "DEBUG=true " + installEdgeFunctions
+		installDebug := "DEBUG=true " + installBundler
 		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
 	}
-	return fmt.Sprintf(installEdgeFunctions, flags, selectedVersion, params)
+	return fmt.Sprintf(installBundler, flags, selectedVersion, params)
+}
+
+// commandV3 uses edge-functions for V3 compatibility
+func commandV3(flags, params string, f *cmdutil.Factory) string {
+	if releaseChannel == "stage" {
+		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
+		if f.Logger.Debug {
+			stageCmd = "DEBUG=true " + stageCmd
+		}
+		return fmt.Sprintf(stageCmd, flags, params)
+	}
+
+	// V3 uses edge-functions package
+	selectedVersion := versionVulcan
+	if f.Logger.Debug {
+		installDebug := "DEBUG=true " + installVulcanV3
+		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
+	}
+	return fmt.Sprintf(installVulcanV3, flags, selectedVersion, params)
 }
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {
