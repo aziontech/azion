@@ -15,12 +15,13 @@ import (
 )
 
 type command struct {
-	TotalSuccess  int
-	TotalFailed   int
-	ExecutionTime float64
-	CLIVersion    string
-	VulcanVersion string
-	Shell         string
+	TotalSuccess   int
+	TotalFailed    int
+	ExecutionTime  float64
+	CLIVersion     string
+	VulcanVersion  string // Deprecated: kept for legacy metrics compatibility
+	BundlerVersion string
+	Shell          string
 }
 
 var ignoredCommands = map[string]bool{
@@ -87,7 +88,8 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 	data[commandName].ExecutionTime = executionTime
 	data[commandName].CLIVersion = version.BinVersion
 	if len(tagName) > 0 {
-		data[commandName].VulcanVersion = tagName[1:]
+		data[commandName].VulcanVersion = tagName[1:] // Deprecated: kept for legacy metrics compatibility
+		data[commandName].BundlerVersion = tagName[1:]
 	}
 
 	data[commandName].Shell = shell

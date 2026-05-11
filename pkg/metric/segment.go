@@ -62,7 +62,8 @@ func Send(settings *token.Settings, profile string) {
 			Properties: analytics.NewProperties().
 				Set("email", settings.Email).
 				Set("cli version", cmd.CLIVersion).
-				Set("vulcan version", cmd.VulcanVersion).
+				Set("vulcan version", cmd.VulcanVersion). // Deprecated: kept for legacy metrics compatibility
+				Set("bundler version", cmd.BundlerVersion).
 				Set("total successful", cmd.TotalSuccess).
 				Set("total failed", cmd.TotalFailed).
 				Set("total", cmd.TotalSuccess+cmd.TotalFailed).
