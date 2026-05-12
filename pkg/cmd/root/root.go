@@ -92,6 +92,7 @@ type globals struct {
 	commandName    string
 	globalSettings *token.Settings
 	startTime      time.Time
+	apiVersion     string
 }
 
 func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error {
@@ -214,10 +215,13 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 	hasFlag, err := HasBlockAPIV4Flag(fact.factory.Config.GetString("token"), fact)
 	if err != nil {
 		logger.Debug("Failed to get client flags for this user", zap.Error(err))
+		fact.apiVersion = "v3"
 		fact.setV3Cmds(cobraCmd)
 	} else if hasFlag {
+		fact.apiVersion = "v3"
 		fact.setV3Cmds(cobraCmd)
 	} else {
+		fact.apiVersion = "v4"
 		fact.setCmds(cobraCmd)
 	}
 
@@ -245,7 +249,7 @@ func Execute(f *factoryRoot) {
 	if f.globalSettings != nil {
 		if f.globalSettings.AuthorizeMetricsCollection == 1 {
 			activeProfile := f.factory.GetActiveProfile()
-			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err, activeProfile)
+			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err, activeProfile, f.apiVersion)
 			if errMetrics != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}

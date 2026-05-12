@@ -64,6 +64,8 @@ func Send(settings *token.Settings, profile string) {
 				Set("cli version", cmd.CLIVersion).
 				Set("vulcan version", cmd.VulcanVersion). // Deprecated: kept for legacy metrics compatibility
 				Set("bundler version", cmd.BundlerVersion).
+				Set("aziontech/azion version", cmd.AzionVersion).
+				Set("api version", cmd.APIVersion).
 				Set("total successful", cmd.TotalSuccess).
 				Set("total failed", cmd.TotalFailed).
 				Set("total", cmd.TotalSuccess+cmd.TotalFailed).

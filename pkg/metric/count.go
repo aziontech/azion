@@ -21,6 +21,8 @@ type command struct {
 	CLIVersion     string
 	VulcanVersion  string // Deprecated: kept for legacy metrics compatibility
 	BundlerVersion string
+	AzionVersion   string
+	APIVersion     string
 	Shell          string
 }
 
@@ -29,7 +31,7 @@ var ignoredCommands = map[string]bool{
 	"completion": true,
 }
 
-func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string) error {
+func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string, apiVersion string) error {
 	if commandName == "" {
 		return nil
 	}
@@ -90,8 +92,10 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 	if len(tagName) > 0 {
 		data[commandName].VulcanVersion = tagName[1:] // Deprecated: kept for legacy metrics compatibility
 		data[commandName].BundlerVersion = tagName[1:]
+		data[commandName].AzionVersion = tagName[1:]
 	}
 
+	data[commandName].APIVersion = apiVersion
 	data[commandName].Shell = shell
 	if success {
 		data[commandName].TotalSuccess++
