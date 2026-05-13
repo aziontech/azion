@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -437,7 +438,11 @@ func (rc *ResourceContext) ApplyEdgeApplication(app contracts.Applications) erro
 				}
 				return err
 			}
-			rc.Conf.Application.ID = resp.GetId()
+			intId, err := strconv.ParseInt(resp.GetId(), 10, 64)
+			if err != nil {
+				return err
+			}
+			rc.Conf.Application.ID = intId
 			rc.Conf.Application.Name = resp.GetName()
 			rc.Conf.Name = resp.GetName()
 			msgf := fmt.Sprintf(msg.ManifestCreateEdgeApplication, resp.GetName(), resp.GetId())
@@ -558,12 +563,12 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorRequest
 			conn := contracts.AzionJsonDataConnectors{}
 			switch connType {
 			case "http":
-				http := connectorResp.ConnectorHTTP
+				http := connectorResp.ConnectorConnectorHTTP
 				conn.Id = http.GetId()
 				conn.Name = http.GetName()
 				conn.Address = http.Attributes.Addresses
 			case "storage":
-				storage := connectorResp.ConnectorBase
+				storage := connectorResp.ConnectorConnectorStorage
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:
@@ -584,11 +589,11 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorRequest
 			conn := contracts.AzionJsonDataConnectors{}
 			switch connType {
 			case "http":
-				http := connectorResp.ConnectorHTTP
+				http := connectorResp.ConnectorConnectorHTTP
 				conn.Id = http.GetId()
 				conn.Name = http.GetName()
 			case "storage":
-				storage := connectorResp.ConnectorBase
+				storage := connectorResp.ConnectorConnectorStorage
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:

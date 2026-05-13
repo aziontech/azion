@@ -19,11 +19,11 @@ import (
 )
 
 func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *apiConnector.UpdateRequest {
-	if connectorRequest.ConnectorHTTPRequest != nil {
+	if connectorRequest.ConnectorConnectorHTTPRequest != nil {
 		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorHTTPRequest
+		bodyRequest := connectorRequest.ConnectorConnectorHTTPRequest
 		atts := bodyRequest.Attributes
-		body := edgesdk.PatchedConnectorHTTPRequest{}
+		body := edgesdk.ConnectorConnectorHTTPRequest{}
 		if bodyRequest.Active != nil {
 			body.SetActive(*bodyRequest.Active)
 		}
@@ -35,15 +35,15 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *a
 		body.SetType(bodyRequest.Type)
 
 		body.SetAttributes(atts)
-		request.PatchedConnectorHTTPRequest = &body
+		request.ConnectorConnectorHTTPRequest = &body
 		return request
 	}
 
-	if connectorRequest.ConnectorRequestBase != nil {
+	if connectorRequest.ConnectorConnectorStorageRequest != nil {
 		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorRequestBase
+		bodyRequest := connectorRequest.ConnectorConnectorStorageRequest
 		body := edgesdk.PatchedConnectorRequest{}
-		internalBody := edgesdk.PatchedConnectorRequestBase{}
+		internalBody := edgesdk.ConnectorConnectorStorageRequest{}
 		if bodyRequest.Active != nil {
 			internalBody.SetActive(*bodyRequest.Active)
 		}
@@ -55,7 +55,7 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *a
 		internalBody.SetType(bodyRequest.Type)
 
 		internalBody.SetAttributes(bodyRequest.Attributes)
-		body.PatchedConnectorRequestBase = &internalBody
+		body.ConnectorConnectorStorageRequest = &internalBody
 		request.PatchedConnectorRequest = body
 		return request
 	}
@@ -265,12 +265,12 @@ func transformRuleRequest(rule contracts.ManifestRule) *apiApplications.UpdateRu
 }
 
 func getConnectorName(connector edgesdk.ConnectorRequest, defaultName string) (string, string) {
-	if connector.ConnectorHTTPRequest != nil {
-		return connector.ConnectorHTTPRequest.Name, "http"
+	if connector.ConnectorConnectorHTTPRequest != nil {
+		return connector.ConnectorConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.ConnectorRequestBase != nil {
-		return connector.ConnectorRequestBase.Name, "storage"
+	if connector.ConnectorConnectorStorageRequest != nil {
+		return connector.ConnectorConnectorStorageRequest.Name, "storage"
 	}
 
 	return defaultName, ""

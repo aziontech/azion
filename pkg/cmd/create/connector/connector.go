@@ -59,13 +59,13 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			switch fields.Type {
 			case "http":
-				httpStruct := sdk.ConnectorHTTPRequest{}
+				httpStruct := sdk.ConnectorConnectorHTTPRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &httpStruct)
 				if err != nil {
 					logger.Debug("Failed to unmarshal file", zap.Error(err))
 					return utils.ErrorUnmarshalReader
 				}
-				request.ConnectorHTTPRequest = &httpStruct
+				request.ConnectorConnectorHTTPRequest = &httpStruct
 			case "storage":
 				storageStruct := sdk.ConnectorRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
@@ -95,9 +95,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			var id int64
 			switch fields.Type {
 			case "http":
-				id = response.ConnectorHTTP.GetId()
+				id = response.ConnectorConnectorHTTP.GetId()
 			case "storage":
-				id = response.ConnectorBase.GetId()
+				id = response.ConnectorConnectorStorage.GetId()
 				// case "live_ingest":
 				// 	id = response.ConnectorLiveIngest.GetId()
 			}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -225,7 +226,11 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	mods.Functions.SetEnabled(true)
 	mods.ApplicationAccelerator.SetEnabled(true)
 	reqUpApp.SetModules(mods)
-	reqUpApp.Id = application.GetId()
+	intId, err := strconv.ParseInt(application.GetId(), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	reqUpApp.Id = intId
 
 	apiCallStart = time.Now()
 	application, err = client.Update(ctx, &reqUpApp)
@@ -234,7 +239,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	}
 	GlobalTimingSummary.AddAPICallTime("Application.Update (modules)", time.Since(apiCallStart))
 
-	return application.GetId(), nil
+	return intId, nil
 }
 
 func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Context, conf *contracts.AzionApplicationOptions, msgs *[]string) error {

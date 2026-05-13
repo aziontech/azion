@@ -11,7 +11,7 @@ import (
 )
 
 type ApplicationResponse interface {
-	GetId() int64
+	GetId() string
 	GetName() string
 	GetActive() bool
 	GetDebug() bool

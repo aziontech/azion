@@ -31,7 +31,7 @@ type ResponseCreate interface {
 }
 
 type EdgeApplicationsResponse interface {
-	GetId() int64
+	GetId() string
 	GetName() string
 }
 

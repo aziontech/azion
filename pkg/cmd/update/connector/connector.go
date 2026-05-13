@@ -82,19 +82,19 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			switch fields.Type {
 			case "http":
-				httpStruct := sdk.PatchedConnectorHTTPRequest{}
+				httpStruct := sdk.ConnectorConnectorHTTPRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &httpStruct)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-				request.PatchedConnectorHTTPRequest = &httpStruct
+				request.ConnectorConnectorHTTPRequest = &httpStruct
 			case "storage":
-				storageStruct := sdk.PatchedConnectorRequest{}
+				storageStruct := sdk.ConnectorConnectorStorageRequest{}
 				err := utils.FlagFileUnmarshalJSON(fields.InPath, &storageStruct)
 				if err != nil {
 					return utils.ErrorUnmarshalReader
 				}
-				request.PatchedConnectorRequest = storageStruct
+				request.ConnectorConnectorStorageRequest = &storageStruct
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
@@ -107,10 +107,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var id int64
-			if response.ConnectorHTTP != nil {
-				id = response.ConnectorHTTP.GetId()
-			} else if response.ConnectorBase != nil {
-				id = response.ConnectorBase.GetId()
+			if response.ConnectorConnectorHTTP != nil {
+				id = response.ConnectorConnectorHTTP.GetId()
+			} else if response.ConnectorConnectorStorage != nil {
+				id = response.ConnectorConnectorStorage.GetId()
 			}
 
 			updateOut := output.GeneralOutput{

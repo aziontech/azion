@@ -31,7 +31,7 @@ const (
 	ManifestUpdateFunction                 = "Function %s with id %d successfully updated\n"
 	ManifestCreateFunctionInstance         = "Function Instance %s with id %d successfully created\n"
 	ManifestUpdateFunctionInstance         = "Function Instance %s with id %d successfully updated\n"
-	ManifestCreateEdgeApplication          = "Edge Application %s with id %d successfully created\n"
+	ManifestCreateEdgeApplication          = "Edge Application %s with id %s successfully created\n"
 	ManifestUpdateEdgeApplication          = "Edge Application %s with id %d successfully updated\n"
 	ManifestCreateConnector                = "Connector %s with id %d successfully created\n"
 	ManifestUpdateConnector                = "Connector %s with id %d successfully updated\n"

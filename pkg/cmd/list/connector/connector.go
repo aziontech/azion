@@ -79,8 +79,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 	}
 	for _, v := range connectors.Results {
 		var ln []string
-		if v.ConnectorHTTP != nil {
-			vObj := v.ConnectorHTTP
+		if v.ConnectorConnectorHTTP != nil {
+			vObj := v.ConnectorConnectorHTTP
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),
@@ -99,8 +99,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			}
 			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorBase != nil {
-			vObj := v.ConnectorBase
+		} else if v.ConnectorConnectorStorage != nil {
+			vObj := v.ConnectorConnectorStorage
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),
