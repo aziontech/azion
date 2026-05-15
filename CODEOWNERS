@@ -1,1 +1,14 @@
 * @aziontech/team-dev-tools-integrations
+
+# Engineering standards — requires Delivery Engineering review
+/.github/                           @aziontech/team-delivery-engineering
+/CODEOWNERS                         @aziontech/team-delivery-engineering
+/SECURITY.md                        @aziontech/security-office @aziontech/team-delivery-engineering
+/.github/workflows/ci-security.yml  @aziontech/security-office @aziontech/team-delivery-engineering
+
+# Security tool configs — validated bypasses require security-office review
+.gitleaks.toml                      @aziontech/security-office
+.gitleaksignore                     @aziontech/security-office
+.semgrepignore                      @aziontech/security-office
+osv-scanner.toml                    @aziontech/security-office
+zizmor.yml                          @aziontech/security-office

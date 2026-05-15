@@ -1,0 +1,23 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+Project: azion
+Classification: Tier 1 (CLIENT_DISTRIBUTED)
+Generated: 2026-05-14
+
+This project incorporates components from the projects listed below.
+The original copyright notices and license terms are listed here.
+
+--------------------------------------------------------------------------------
+
+Package: github.com/bmizerany/assert
+License: UNKNOWN
+
+Package: github.com/go-git/go-git/v5
+License: Apache-2.0
+
+Package: github.com/segmentio/backo-go
+License: UNKNOWN
+Copyright: Copyright (c) 2015 Segment, Inc.
+
+Package: github.com/zRedShift/mimemagic
+License: GPL-2.0
+Copyright: Copyright (C) 1989, 1991 Free Software Foundation, Inc.
