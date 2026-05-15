@@ -109,8 +109,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			var id int64
 			if response.ConnectorHTTP != nil {
 				id = response.ConnectorHTTP.GetId()
-			} else if response.ConnectorBase != nil {
-				id = response.ConnectorBase.GetId()
+			} else if response.ConnectorStorage != nil {
+				id = response.ConnectorStorage.GetId()
 			}
 
 			updateOut := output.GeneralOutput{
