@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.242.0
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.249.0
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.0.11 // indirect
@@ -54,7 +54,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.23 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.23 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.24 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.15 // indirect
