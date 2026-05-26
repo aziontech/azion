@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
+	installcmd "github.com/aziontech/azion-cli/pkg/cmd/install"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
@@ -155,6 +156,7 @@ func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(v3sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3rollback.NewCmd(fact.factory))
 	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
+	cobraCmd.AddCommand(installcmd.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
@@ -183,6 +185,7 @@ func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
 	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
 	cobraCmd.AddCommand(config.NewCmd(fact.factory))
+	cobraCmd.AddCommand(installcmd.NewCmd(fact.factory))
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {
