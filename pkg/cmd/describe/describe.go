@@ -20,6 +20,7 @@ import (
 	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
 	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
+	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/describe/workload_deployment"
 	workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -46,6 +47,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(ruleEngine.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(workloaddeployment.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))

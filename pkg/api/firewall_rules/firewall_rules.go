@@ -13,6 +13,9 @@ import (
 
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, firewallID int64) (*sdk.PaginatedFirewallRuleList, error) {
 	logger.Debug("List Firewall Rules")
+	if opts.OrderBy == "" {
+		opts.OrderBy = "order"
+	}
 
 	req := c.apiClient.FirewallsRulesEngineAPI.
 		ListFirewallRules(ctx, firewallID).
