@@ -1,0 +1,6 @@
+{
+  "name": "My Updated CRL",
+  "issuer": "My CA",
+  "active": true,
+  "crl": "-----BEGIN X509 CRL-----\nMIIBdummy==\n-----END X509 CRL-----\n"
+}

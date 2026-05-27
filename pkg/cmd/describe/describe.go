@@ -6,6 +6,8 @@ import (
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/describe/applications"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
+	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
+	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
 	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall"
 	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_instance"
@@ -64,6 +66,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(waf.NewCmd(f))
 	cmd.AddCommand(wafexceptions.NewCmd(f))
 	cmd.AddCommand(digitalcertificate.NewCmd(f))
+	cmd.AddCommand(csr.NewCmd(f))
+	cmd.AddCommand(crl.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
