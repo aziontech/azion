@@ -39,11 +39,11 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *a
 		return request
 	}
 
-	if connectorRequest.ConnectorRequestBase != nil {
+	if connectorRequest.ConnectorStorageRequest != nil {
 		request := &apiConnector.UpdateRequest{}
-		bodyRequest := connectorRequest.ConnectorRequestBase
+		bodyRequest := connectorRequest.ConnectorStorageRequest
 		body := edgesdk.PatchedConnectorRequest{}
-		internalBody := edgesdk.PatchedConnectorRequestBase{}
+		internalBody := edgesdk.PatchedConnectorStorageRequest{}
 		if bodyRequest.Active != nil {
 			internalBody.SetActive(*bodyRequest.Active)
 		}
@@ -55,7 +55,7 @@ func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *a
 		internalBody.SetType(bodyRequest.Type)
 
 		internalBody.SetAttributes(bodyRequest.Attributes)
-		body.PatchedConnectorRequestBase = &internalBody
+		body.PatchedConnectorStorageRequest = &internalBody
 		request.PatchedConnectorRequest = body
 		return request
 	}
@@ -269,8 +269,8 @@ func getConnectorName(connector edgesdk.ConnectorRequest, defaultName string) (s
 		return connector.ConnectorHTTPRequest.Name, "http"
 	}
 
-	if connector.ConnectorRequestBase != nil {
-		return connector.ConnectorRequestBase.Name, "storage"
+	if connector.ConnectorStorageRequest != nil {
+		return connector.ConnectorStorageRequest.Name, "storage"
 	}
 
 	return defaultName, ""

@@ -90,8 +90,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			var values interface{}
 			if resp.ConnectorHTTP != nil {
 				values = resp.ConnectorHTTP
-			} else if resp.ConnectorBase != nil {
-				values = resp.ConnectorBase
+			} else if resp.ConnectorStorage != nil {
+				values = resp.ConnectorStorage
 			}
 
 			describeOut := output.DescribeOutput{

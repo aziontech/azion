@@ -563,7 +563,7 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorRequest
 				conn.Name = http.GetName()
 				conn.Address = http.Attributes.Addresses
 			case "storage":
-				storage := connectorResp.ConnectorBase
+				storage := connectorResp.ConnectorStorage
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:
@@ -588,7 +588,7 @@ func (rc *ResourceContext) ApplyConnectors(connectors []edgesdk.ConnectorRequest
 				conn.Id = http.GetId()
 				conn.Name = http.GetName()
 			case "storage":
-				storage := connectorResp.ConnectorBase
+				storage := connectorResp.ConnectorStorage
 				conn.Id = storage.GetId()
 				conn.Name = storage.GetName()
 			default:
