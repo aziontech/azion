@@ -1,0 +1,12 @@
+{
+  "name": "My CSR",
+  "common_name": "example.com",
+  "country": "US",
+  "state": "California",
+  "locality": "San Francisco",
+  "organization": "Example Corp",
+  "organization_unity": "IT",
+  "email": "admin@example.com",
+  "alternative_names": ["www.example.com", "api.example.com"],
+  "key_algorithm": "rsa_2048"
+}

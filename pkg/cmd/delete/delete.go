@@ -6,6 +6,8 @@ import (
 	application "github.com/aziontech/azion-cli/pkg/cmd/delete/application"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/delete/cache_setting"
 	connector "github.com/aziontech/azion-cli/pkg/cmd/delete/connector"
+	crl "github.com/aziontech/azion-cli/pkg/cmd/delete/crl"
+	csr "github.com/aziontech/azion-cli/pkg/cmd/delete/csr"
 	digitalCertificate "github.com/aziontech/azion-cli/pkg/cmd/delete/digital_certificate"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/delete/firewall"
 	firewallInstance "github.com/aziontech/azion-cli/pkg/cmd/delete/firewall_instance"
@@ -62,6 +64,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(waf.NewCmd(f))
 	cmd.AddCommand(wafExceptions.NewCmd(f))
 	cmd.AddCommand(digitalCertificate.NewCmd(f))
+	cmd.AddCommand(csr.NewCmd(f))
+	cmd.AddCommand(crl.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
