@@ -16,6 +16,7 @@ import (
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/list/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
+	presets "github.com/aziontech/azion-cli/pkg/cmd/list/presets"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/list/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
@@ -66,6 +67,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(wafexceptions.NewCmd(f))
 	cmd.AddCommand(digitalcertificate.NewCmd(f))
 	cmd.AddCommand(crl.NewCmd(f))
+	cmd.AddCommand(presets.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd
