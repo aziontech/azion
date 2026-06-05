@@ -14,7 +14,7 @@ jobs:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-unit-tests') }}
     runs-on: ubuntu-latest
     container:
-      image: golang:go1.25.11
+      image: golang:1.25.11
 
     steps:
       - name: Setting GIT
