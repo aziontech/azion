@@ -28,7 +28,11 @@ var successResponse string = `
     "default_args": {
       "arg_01": "value_01"
     },
-    "code": "console.log('hello');"
+    "code": "console.log('hello');",
+    "is_versioned": true,
+    "resource_version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `

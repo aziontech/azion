@@ -21,6 +21,10 @@
     },
     "active": true,
     "debug": false,
-    "product_version": "string"
+    "product_version": "string",
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }

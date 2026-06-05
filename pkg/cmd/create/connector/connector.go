@@ -97,7 +97,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			case "http":
 				id = response.ConnectorHTTP.GetId()
 			case "storage":
-				id = response.ConnectorBase.GetId()
+				id = response.ConnectorStorage.GetId()
 				// case "live_ingest":
 				// 	id = response.ConnectorLiveIngest.GetId()
 			}

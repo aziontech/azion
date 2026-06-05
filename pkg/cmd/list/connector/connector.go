@@ -99,8 +99,8 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			}
 			listOut.Lines = append(listOut.Lines, ln)
-		} else if v.ConnectorBase != nil {
-			vObj := v.ConnectorBase
+		} else if v.ConnectorStorage != nil {
+			vObj := v.ConnectorStorage
 			if opts.Details {
 				ln = []string{
 					fmt.Sprintf("%d", vObj.Id),

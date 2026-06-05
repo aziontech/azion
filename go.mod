@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.25.10
+go 1.25.11
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.242.0
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.251.0
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.1.0 // indirect
