@@ -6,6 +6,9 @@ import (
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/describe/applications"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
+	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
+	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
+	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall"
 	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_instance"
 	firewallrules "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_rules"
@@ -19,6 +22,7 @@ import (
 	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
 	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
+	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/describe/workload_deployment"
 	workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
@@ -45,6 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(ruleEngine.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(workloaddeployment.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))
@@ -60,6 +65,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(firewallrules.NewCmd(f))
 	cmd.AddCommand(waf.NewCmd(f))
 	cmd.AddCommand(wafexceptions.NewCmd(f))
+	cmd.AddCommand(digitalcertificate.NewCmd(f))
+	cmd.AddCommand(csr.NewCmd(f))
+	cmd.AddCommand(crl.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

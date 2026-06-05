@@ -1,0 +1,5 @@
+{
+  "name": "My CRL",
+  "issuer": "My CA",
+  "crl": "-----BEGIN X509 CRL-----\nMIIBdummycrlcontentforunittestsonly==\n-----END X509 CRL-----\n"
+}
