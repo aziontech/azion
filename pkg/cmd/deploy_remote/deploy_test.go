@@ -26,7 +26,11 @@ const successResponseApp = `
     "debug": true,
     "last_editor": "tester",
     "last_modified": "2025-06-20T16:55:19Z",
-    "product_version": "1.0.0"
+    "product_version": "1.0.0",
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }`
 
