@@ -27,7 +27,11 @@ var successResponse string = `
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -187,7 +191,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -228,7 +236,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -271,7 +283,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -315,7 +331,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -357,7 +377,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `
@@ -399,7 +423,11 @@ func TestUpdate(t *testing.T) {
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
     "created_at": "2019-08-24T14:15:22Z",
-    "active": true
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `

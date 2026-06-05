@@ -152,7 +152,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedResponsePhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
+		opts.OrderBy = "order"
 	}
 
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.ListApplicationResponseRules(ctx, edgeApplicationID).
@@ -179,7 +179,7 @@ func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.Li
 func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
+		opts.OrderBy = "order"
 	}
 
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.ListApplicationRequestRules(ctx, edgeApplicationID).

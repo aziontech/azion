@@ -44,17 +44,21 @@ There are two ways to download and use the `azion` CLI:
 
 To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://github.com/aziontech/azion-cli/releases) page, and download the desired package.
 
-To download azion CLI through Homebrew, run:
+To download and install azion CLI, run:
 
 ```sh
-brew install azion
+curl -fsSL https://cli.azion.app/install.sh | bash
 ``````
 
-To download azion CLI through WinGet, run:
+If your are a Windows user, download azion CLI through WinGet:
 
 ```sh
 winget install aziontech.azion
 ``````
+or Chocolatey:
+```sh
+choco install azion
+```
 
 ## Using Azion CLI with docker
 You can find the URL for each package in our Releases page https://github.com/aziontech/azion/releases.
@@ -62,7 +66,7 @@ You can find the URL for each package in our Releases page https://github.com/az
 ```sh
 docker run -it --rm alpine:latest sh -c '
     cd && \
-    wget https://github.com/aziontech/azion/releases/download/4.18.0/azion_4.18.0_linux_amd64.apk && \
+    wget https://github.com/aziontech/azion/releases/download/<version>/azion_<version>_linux_amd64.apk && \
     apk add --allow-untrusted azion_4.18.0_linux_amd64.apk && \
     azion version; \
     exec sh'

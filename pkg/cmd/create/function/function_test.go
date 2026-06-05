@@ -55,7 +55,11 @@ var successResponse string = `
 	  },
 	  "reference_count": 0,
 	  "version": "string",
-	  "vendor": "string"
+	  "vendor": "string",
+	  "is_versioned": true,
+	  "resource_version": 1,
+	  "version_state": "string",
+	  "version_id": "string"
 	}
   }
 `
