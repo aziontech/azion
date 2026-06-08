@@ -119,21 +119,21 @@ func TestCheckVulcanMajor(t *testing.T) {
 			args: args{
 				currentVersion: "2.0.0",
 			},
-			lastVulcanVer:   "1.0.0",
-			expectedVersion: "@1.0.0",
+			lastVulcanVer:   "1.1.0",
+			expectedVersion: "@1.1.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "1.0.0",
+				currentVersion: "1.1.0",
 			},
-			lastVulcanVer:   "1.0.0",
-			expectedVersion: "@1.0.0",
+			lastVulcanVer:   "1.1.0",
+			expectedVersion: "@1.1.0",
 			wantErr:         false,
 		},
 		{
-			name: "failed to parse version",
+			name: "failed to parse bundler version",
 			args: args{
 				currentVersion: "invalid",
 			},
