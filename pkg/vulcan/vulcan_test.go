@@ -133,7 +133,7 @@ func TestCheckVulcanMajor(t *testing.T) {
 			wantErr:         false,
 		},
 		{
-			name: "failed to parse version",
+			name: "failed to parse bundler version",
 			args: args{
 				currentVersion: "invalid",
 			},
