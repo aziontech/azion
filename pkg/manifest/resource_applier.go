@@ -613,6 +613,20 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 
 	ruleConf := []contracts.AzionJsonDataRules{}
 
+	// Collect rule IDs per phase in the order they appear in the manifest so we
+	// can define the execution order through the ordering endpoint afterwards.
+	requestOrder := []int64{}
+	responseOrder := []int64{}
+
+	appendOrder := func(rule contracts.AzionJsonDataRules) {
+		switch rule.Phase {
+		case "response":
+			responseOrder = append(responseOrder, rule.Id)
+		default:
+			requestOrder = append(requestOrder, rule.Id)
+		}
+	}
+
 	for _, rule := range rules {
 		if r := rc.RuleIds[rule.Rule.Name]; r.Id > 0 {
 			newRule, err := rc.updateRule(rule, r)
@@ -628,6 +642,7 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
+			appendOrder(newRule)
 			delete(rc.RuleIds, newRule.Name)
 		} else {
 			newRule, err := rc.createRule(rule)
@@ -638,11 +653,34 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
+			appendOrder(newRule)
 		}
 	}
 
 	rc.Conf.RulesEngine.Rules = ruleConf
-	return rc.WriteConfig()
+	if err := rc.WriteConfig(); err != nil {
+		return err
+	}
+
+	// Always order the rules whenever rules exist, following the manifest order.
+	if len(requestOrder) > 0 {
+		if err := rc.ApplicationClient.OrderRulesEngineRequest(rc.Ctx, rc.Conf.Application.ID, requestOrder); err != nil {
+			return err
+		}
+		msgf := fmt.Sprintf(msg.ManifestOrderRule, rc.Conf.Application.ID, "request")
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
+	}
+	if len(responseOrder) > 0 {
+		if err := rc.ApplicationClient.OrderRulesEngineResponse(rc.Ctx, rc.Conf.Application.ID, responseOrder); err != nil {
+			return err
+		}
+		msgf := fmt.Sprintf(msg.ManifestOrderRule, rc.Conf.Application.ID, "response")
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
+	}
+
+	return nil
 }
 
 func (rc *ResourceContext) updateRule(rule contracts.ManifestRulesEngine, existing contracts.RuleIdsStruct) (contracts.AzionJsonDataRules, error) {
@@ -1033,6 +1071,22 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
 			}
+		}
+
+		// Always order the firewall rules whenever rules exist, following the
+		// order in which they appear in the manifest.
+		if len(fwRuleConf) > 0 {
+			orderIds := make([]int64, 0, len(fwRuleConf))
+			for _, r := range fwRuleConf {
+				orderIds = append(orderIds, r.Id)
+			}
+			if err := rc.FirewallClient.OrderRules(rc.Ctx, firewallId, orderIds); err != nil {
+				logger.Debug("Error while ordering firewall rules", zap.Error(err))
+				return err
+			}
+			msgf := fmt.Sprintf(msg.ManifestOrderFirewallRule, firewallId)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 
 		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{

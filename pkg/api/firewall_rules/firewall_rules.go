@@ -100,6 +100,29 @@ func (c *Client) Create(ctx context.Context, firewallID int64, req *CreateReques
 	return resp.Data, nil
 }
 
+func (c *Client) Order(ctx context.Context, firewallID int64, order []int64) error {
+	logger.Debug("Order Firewall Rules")
+	body := sdk.NewFirewallRuleEngineOrderRequest(order)
+	request := c.apiClient.FirewallsRulesEngineAPI.
+		OrderFirewallRules(ctx, firewallID).
+		FirewallRuleEngineOrderRequest(*body)
+	_, httpResp, err := request.Execute()
+
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Firewall Rules", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+
+	return nil
+}
+
 func (c *Client) Update(ctx context.Context, firewallID, ruleID int64, req *UpdateRequest) (sdk.FirewallRule, error) {
 	logger.Debug("Update Firewall Rule")
 	request := c.apiClient.FirewallsRulesEngineAPI.PartialUpdateFirewallRule(ctx, firewallID, ruleID).PatchedFirewallRuleRequest(req.PatchedFirewallRuleRequest)

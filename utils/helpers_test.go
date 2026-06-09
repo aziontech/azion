@@ -1733,3 +1733,28 @@ func TestOrderPreservation(t *testing.T) {
 		}
 	})
 }
+
+func TestParseInt64Slice(t *testing.T) {
+	t.Run("parses ordered ids", func(t *testing.T) {
+		got, err := ParseInt64Slice("123,456,789")
+		assert.NoError(t, err)
+		assert.Equal(t, []int64{123, 456, 789}, got)
+	})
+
+	t.Run("trims whitespace and skips empty entries", func(t *testing.T) {
+		got, err := ParseInt64Slice(" 1 , 2 ,, 3 ,")
+		assert.NoError(t, err)
+		assert.Equal(t, []int64{1, 2, 3}, got)
+	})
+
+	t.Run("empty string returns empty slice", func(t *testing.T) {
+		got, err := ParseInt64Slice("")
+		assert.NoError(t, err)
+		assert.Empty(t, got)
+	})
+
+	t.Run("invalid value returns error", func(t *testing.T) {
+		_, err := ParseInt64Slice("1,abc,3")
+		assert.Error(t, err)
+	})
+}
