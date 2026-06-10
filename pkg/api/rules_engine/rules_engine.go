@@ -140,6 +140,46 @@ func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req
 	return &resp.Data, nil
 }
 
+func (c *Client) OrderRequest(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Request Phase Rules Engine")
+	body := sdk.NewApplicationRequestPhaseRuleEngineOrder(order)
+	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
+		UpdateApplicationRequestRulesOrder(ctx, applicationID).
+		ApplicationRequestPhaseRuleEngineOrder(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) OrderResponse(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Response Phase Rules Engine")
+	body := sdk.NewApplicationResponsePhaseRuleEngineOrderRequest(order)
+	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
+		UpdateApplicationResponseRulesOrder(ctx, applicationID).
+		ApplicationResponsePhaseRuleEngineOrderRequest(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
 func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID int64, req sdk.ResponsePhaseRuleRequest) (RulesEngineResponse, error) {
 	logger.Debug("Create Rules Engine")
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
