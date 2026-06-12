@@ -2,7 +2,7 @@ package device_groups
 
 var (
 	// [ device groups ]
-	DeviceGroupsUsage            = "device_groups"
+	DeviceGroupsUsage            = "device-group"
 	DeviceGroupsShortDescription = "Device groups is an Application capability that allows you to identify the devices sending requests to your application."
 	DeviceGroupsLongDescription  = "Device groups is an Application capability that allows you to identify the devices sending requests to your application and categorize them into groups."
 	DeviceGroupsFlagHelp         = "Displays more information about the Device Groups command"
@@ -38,6 +38,7 @@ var (
 	DeviceGroupsUpdateFlagUserAgent    = "The device group flag user agent"
 	DeviceGroupsUpdateFlagIn           = "Path to a JSON file containing the attributes of the  device group that will be created; you can use - for reading from stdin"
 	DeviceGroupsUpdateOutputSuccess    = "Device Group %d was updated\n"
+	DeviceGroupsUpdateHelpFlag         = "Displays more information about the update subcommand"
 
 	// [ create ]
 	DeviceGroupsCreateUsage                 = "create [flags]"
@@ -52,4 +53,16 @@ var (
 
 	ApplicationFlagId = "Unique identifier for the Application that implements this device group. The '--application-id' flag is required"
 	DeviceGroupFlagId = "Unique identifier for a device group. The '--group-id' flag is required"
+
+	// [ ask input prompts ]
+	DeviceGroupsCreateAskInputApplicationID   = "Enter the ID of the Application the device group will be linked to:"
+	DeviceGroupsCreateAskInputName            = "Enter the new device group's name:"
+	DeviceGroupsCreateAskInputUserAgent       = "Enter the new device group's user agent:"
+	DeviceGroupsListAskInputApplicationID     = "Enter the ID of the Application the device groups are linked to:"
+	DeviceGroupsDescribeAskInputApplicationID = "Enter the ID of the Application the device group is linked to:"
+	DeviceGroupsDescribeAskInputGroupID       = "Enter the ID of the device group you wish to describe:"
+	DeviceGroupsUpdateAskInputApplicationID   = "Enter the ID of the Application the device group is linked to:"
+	DeviceGroupsUpdateAskInputGroupID         = "Enter the ID of the device group you wish to update:"
+	DeviceGroupsDeleteAskInputApplicationID   = "Enter the ID of the Application the device group is linked to:"
+	DeviceGroupsDeleteAskInputGroupID         = "Enter the ID of the device group you wish to delete:"
 )
