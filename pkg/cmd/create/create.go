@@ -10,6 +10,7 @@ import (
 	csr "github.com/aziontech/azion-cli/pkg/cmd/create/csr"
 	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/create/device_groups"
 	digitalCertificate "github.com/aziontech/azion-cli/pkg/cmd/create/digital_certificate"
+	dnsZone "github.com/aziontech/azion-cli/pkg/cmd/create/dns_zone"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/create/firewall"
 	firewallInstance "github.com/aziontech/azion-cli/pkg/cmd/create/firewall_instance"
 	firewallRules "github.com/aziontech/azion-cli/pkg/cmd/create/firewall_rules"
@@ -53,6 +54,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cacheSetting.NewCmd(f))
 	cmd.AddCommand(deviceGroups.NewCmd(f))
+	cmd.AddCommand(dnsZone.NewCmd(f))
 	cmd.AddCommand(edgeFunction.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
