@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.25.11
+go 1.26.2
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.24
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.23
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.103.3
-	github.com/aziontech/azionapi-go-sdk v0.143.0
+	github.com/aziontech/azionapi-go-sdk v0.145.0
 	github.com/aziontech/go-thoth v0.0.0-20260415185858-889a60cbe191
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
 	github.com/briandowns/spinner v1.23.2
