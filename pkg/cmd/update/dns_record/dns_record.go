@@ -49,7 +49,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
-			request := sdk.RecordRequest{}
+			request := sdk.PatchedRecordRequest{}
 
 			if !cmd.Flags().Changed("zone-id") {
 				answers, err := utils.AskInput(msg.DNSRecordUpdateAskInputZoneID)

@@ -30,12 +30,12 @@ func (c *Client) Create(ctx context.Context, req sdk.DeviceGroupRequest, applica
 	return resp.GetData(), nil
 }
 
-func (c *Client) Update(ctx context.Context, req sdk.DeviceGroupRequest, applicationID, deviceGroupID int64) (sdk.DeviceGroup, error) {
+func (c *Client) Update(ctx context.Context, req sdk.PatchedDeviceGroupRequest, applicationID, deviceGroupID int64) (sdk.DeviceGroup, error) {
 	logger.Debug("Update Device Group")
 
 	request := c.apiClient.ApplicationsDeviceGroupsAPI.
-		UpdateDeviceGroup(ctx, applicationID, deviceGroupID).
-		DeviceGroupRequest(req)
+		PartialUpdateDeviceGroup(ctx, applicationID, deviceGroupID).
+		PatchedDeviceGroupRequest(req)
 	resp, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a Device Group", zap.Any("ID", deviceGroupID), zap.Error(err))
