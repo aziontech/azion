@@ -25,7 +25,7 @@ func TestUpdate(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1337/records/1111"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1337/records/1111"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -42,7 +42,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("update with file", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1337/records/1111"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1337/records/1111"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 

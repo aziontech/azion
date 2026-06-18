@@ -20,7 +20,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("update DNS zone with name and active", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1337"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -42,7 +42,7 @@ func TestUpdate(t *testing.T) {
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1337"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -59,7 +59,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("update with file", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1337"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1337"),
 			httpmock.JSONFromFile("./fixtures/response.json"),
 		)
 
@@ -76,7 +76,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("not found", func(t *testing.T) {
 		mock := &httpmock.Registry{}
 		mock.Register(
-			httpmock.REST("PUT", "workspace/dns/zones/1234"),
+			httpmock.REST("PATCH", "workspace/dns/zones/1234"),
 			httpmock.StatusStringResponse(http.StatusNotFound, "Not Found"),
 		)
 

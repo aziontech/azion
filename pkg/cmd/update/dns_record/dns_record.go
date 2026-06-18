@@ -90,9 +90,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// The DNS record update is a full replacement (PUT); name, type
-				// and rdata are required. Fetch the current record and preserve
-				// any attribute the user didn't provide.
+				// The update is a partial update (PATCH). Fetch the current
+				// record and preserve any attribute the user didn't provide.
 				current, err := client.Get(context.Background(), fields.ZoneID, fields.RecordID)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorGetDNSRecord.Error(), err)

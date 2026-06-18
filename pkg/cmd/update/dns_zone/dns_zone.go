@@ -67,9 +67,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// The DNS zone update is a full replacement (PUT), and both
-				// name and active are required. Fetch the current values for
-				// any attribute the user didn't provide so they are preserved.
+				// The update is a partial update (PATCH). Fetch the current
+				// values for any attribute the user didn't provide so they are
+				// preserved.
 				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("active") {
 					current, err := client.Get(context.Background(), fields.ZoneID)
 					if err != nil {

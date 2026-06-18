@@ -84,9 +84,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// The device group update is a full replacement (PUT), and both
-				// name and user_agent are required. Fetch the current values for
-				// any attribute the user didn't provide so they are preserved.
 				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("user-agent") {
 					current, err := client.Get(context.Background(), fields.ApplicationID, fields.GroupID)
 					if err != nil {
