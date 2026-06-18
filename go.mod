@@ -37,7 +37,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.251.0
+require github.com/aziontech/azionapi-v4-go-sdk-dev v0.259.0
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.4.1 // indirect
