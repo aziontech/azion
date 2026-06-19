@@ -1,0 +1,19 @@
+{
+  "state": "executed",
+  "data": {
+    "enabled": true,
+    "status": "active",
+    "delegation_signer": {
+      "algorithm_type": {
+        "id": 13,
+        "slug": "ecdsap256sha256"
+      },
+      "digest": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      "digest_type": {
+        "id": 2,
+        "slug": "sha256"
+      },
+      "key_tag": 12345
+    }
+  }
+}
