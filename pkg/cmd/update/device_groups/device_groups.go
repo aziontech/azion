@@ -43,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
-			request := sdk.DeviceGroupRequest{}
+			request := sdk.PatchedDeviceGroupRequest{}
 
 			if !cmd.Flags().Changed("application-id") {
 				answers, err := utils.AskInput(msg.DeviceGroupsUpdateAskInputApplicationID)
@@ -84,9 +84,6 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorUnmarshalReader
 				}
 			} else {
-				// The device group update is a full replacement (PUT), and both
-				// name and user_agent are required. Fetch the current values for
-				// any attribute the user didn't provide so they are preserved.
 				if !cmd.Flags().Changed("name") || !cmd.Flags().Changed("user-agent") {
 					current, err := client.Get(context.Background(), fields.ApplicationID, fields.GroupID)
 					if err != nil {

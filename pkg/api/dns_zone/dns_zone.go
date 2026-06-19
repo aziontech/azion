@@ -30,12 +30,12 @@ func (c *Client) Create(ctx context.Context, req sdk.ZoneRequest) (sdk.Zone, err
 	return resp.GetData(), nil
 }
 
-func (c *Client) Update(ctx context.Context, req sdk.UpdateZoneRequest, zoneID int64) (sdk.Zone, error) {
+func (c *Client) Update(ctx context.Context, req sdk.PatchedUpdateZoneRequest, zoneID int64) (sdk.Zone, error) {
 	logger.Debug("Update DNS Zone")
 
 	request := c.apiClient.DNSZonesAPI.
-		UpdateDnsZone(ctx, zoneID).
-		UpdateZoneRequest(req)
+		PartialUpdateDnsZone(ctx, zoneID).
+		PatchedUpdateZoneRequest(req)
 	resp, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a DNS Zone", zap.Any("ID", zoneID), zap.Error(err))

@@ -799,6 +799,10 @@ func LogAndRewindBody(httpResp *http.Response) error {
 }
 
 func LogAndRewindBodyV4(httpResp *http.Response) (string, error) {
+	if httpResp == nil {
+		return "", nil
+	}
+
 	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 	logger.Debug("", zap.Any("Headers", httpResp.Header))
 	var errResp ErrorResponse
