@@ -555,7 +555,17 @@ func ErrorPerStatusCodeV4(errorResp string, httpResp *http.Response, err error) 
 		if errorResp != "" {
 			return errors.New(errorResp)
 		}
-		return err
+		if err != nil {
+			return err
+		}
+		// Safety net: this function is only reached from error-handling paths,
+		// but callers commonly clobber the original SDK error when they read the
+		// response body (errBody, err = LogAndRewindBodyV4(...)). When the body
+		// carries no recognizable error message, both errorResp and err end up
+		// empty/nil. Returning nil here would let callers treat the failed call
+		// as a success and dereference a nil response (nil pointer panic), so we
+		// always return a non-nil error tied to the status code instead.
+		return fmt.Errorf("unexpected response with status code %d", statusCode)
 	}
 }
 
