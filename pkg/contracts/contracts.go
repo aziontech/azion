@@ -240,7 +240,6 @@ type Manifest struct {
 
 type Build struct {
 	Preset    string    `json:"preset,omitempty"`
-	Entry     []string  `json:"entry,omitempty"`
 	Polyfills bool      `json:"polyfills,omitempty"`
 	Bundler   string    `json:"bundler,omitempty"`
 	Worker    bool      `json:"worker,omitempty"`
