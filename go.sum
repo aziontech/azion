@@ -132,6 +132,8 @@ github.com/aziontech/azionapi-v4-go-sdk-dev v0.251.0 h1:H9zfxB9t3u8u90yj6RarpZky
 github.com/aziontech/azionapi-v4-go-sdk-dev v0.251.0/go.mod h1:kJOyMICpeA+2xeo7/trGKGzMLdBMRKXM9A270vknSbI=
 github.com/aziontech/go-thoth v0.0.0-20260415185858-889a60cbe191 h1:8M49dhwhT9m/sabM1vPPUW92sUm67WtobGUA31b8tGc=
 github.com/aziontech/go-thoth v0.0.0-20260415185858-889a60cbe191/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
+github.com/aziontech/go-thoth v0.0.0-20260622173333-6d2670b80b5c h1:BDnm0uA3suLjlW9wwVfI601HCrbc/vWj+FZp+ztO/Gg=
+github.com/aziontech/go-thoth v0.0.0-20260622173333-6d2670b80b5c/go.mod h1:v4AMg2JrM68ckr2nt7c7PRuOELek/JbVRa62+inlprQ=
 github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e h1:4jnF5abLeCo+SqWNvegJjFuK1FUpIuuy09Fsfj2Ys+0=
 github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e/go.mod h1:1GXfg8O4vlOUrZRtMShaaUjJ0d9CQ5acecAMkpZ+fOo=
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 h1:DDGfHa7BWjL4YnC6+E63dPcxHo2sUxDIu8g3QgEJdRY=
