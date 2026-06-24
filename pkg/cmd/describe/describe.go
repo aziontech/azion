@@ -7,6 +7,7 @@ import (
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
 	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
+	customPages "github.com/aziontech/azion-cli/pkg/cmd/describe/custom_pages"
 	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
 	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/describe/device_groups"
 	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
@@ -65,6 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeStorage.NewCmd(f))
 	cmd.AddCommand(personal_token.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
+	cmd.AddCommand(customPages.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
 	// cmd.AddCommand(kv.NewCmd(f))
