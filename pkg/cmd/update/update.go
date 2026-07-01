@@ -24,6 +24,7 @@ import (
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
 	rulesEngineOrder "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine_order"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/update/storage"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/update/data_stream"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/update/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/update/waf"
 	wafExceptions "github.com/aziontech/azion-cli/pkg/cmd/update/waf_exceptions"
@@ -65,6 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(workloads.NewCmd(f))
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
+	cmd.AddCommand(dataStream.NewCmd(f))
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))

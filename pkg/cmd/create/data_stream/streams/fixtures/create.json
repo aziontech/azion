@@ -1,0 +1,25 @@
+{
+  "name": "Created via File",
+  "active": true,
+  "inputs": [
+    {
+      "type": "raw_logs",
+      "attributes": {
+        "data_source": "workloads"
+      }
+    }
+  ],
+  "transform": [],
+  "outputs": [
+    {
+      "type": "standard",
+      "attributes": {
+        "type": "standard",
+        "url": "https://example.com/datastream",
+        "headers": {
+          "Authorization": "Bearer token"
+        }
+      }
+    }
+  ]
+}
