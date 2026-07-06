@@ -23,6 +23,22 @@ func NewUpdateRequest() *UpdateRequest {
 	return &UpdateRequest{}
 }
 
+type CreateTemplateRequest struct {
+	sdk.TemplateRequest
+}
+
+func NewCreateTemplateRequest() *CreateTemplateRequest {
+	return &CreateTemplateRequest{}
+}
+
+type UpdateTemplateRequest struct {
+	sdk.PatchedTemplateRequest
+}
+
+func NewUpdateTemplateRequest() *UpdateTemplateRequest {
+	return &UpdateTemplateRequest{}
+}
+
 // Response, ListResponse and DataStream are decoded by the CLI instead of relying
 // on the generated SDK types: the SDK fails to unmarshal the polymorphic
 // inputs/transform/outputs returned by the Data Stream API (oneOf discriminator
