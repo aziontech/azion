@@ -1,0 +1,13 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 1111,
+    "name": "www",
+    "type": "A",
+    "rdata": [
+      "192.0.2.1"
+    ],
+    "ttl": 3600,
+    "policy": "simple"
+  }
+}

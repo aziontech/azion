@@ -21,7 +21,7 @@ token=$TOKEN
 # Function to list and delete edge storage buckets
 delete_edge_storage_buckets() {
   # List the buckets with page size 1000, skip the header line, and delete each bucket
-  "$full_bin_path" list storage bucket --page-size 1000 | awk 'NR>1 {print $1}' | while read -r name; do
+  "$full_bin_path" list storage bucket --page-size 100 | awk 'NR>1 {print $1}' | while read -r name; do
     "$full_bin_path" delete storage bucket --name "$name" --force
   done
 }

@@ -1,0 +1,20 @@
+{
+  "name": "testingname",
+  "active": true,
+  "criteria": [
+    [
+      {
+        "conditional": "if",
+        "variable": "${header_accept}",
+        "operator": "starts_with",
+        "argument": "/"
+      }
+    ]
+  ],
+  "behaviors": [
+    {
+      "type": "deny"
+    }
+  ],
+  "description": "string"
+}

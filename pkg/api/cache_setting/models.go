@@ -2,7 +2,7 @@ package cachesetting
 
 import (
 	sdkOld "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
 type Request struct {
@@ -34,7 +34,7 @@ type CreateRequest struct {
 func NewCreateRequest() *sdk.CacheSettingRequest {
 	return &sdk.CacheSettingRequest{
 		Modules: &sdk.CacheSettingsModulesRequest{
-			Cache:                  &sdk.CacheSettingsEdgeCacheModuleRequest{},
+			Cache:                  &sdk.CacheSettingsCacheModuleRequest{},
 			ApplicationAccelerator: &sdk.CacheSettingsApplicationAcceleratorModuleRequest{},
 		},
 		Name:         "",

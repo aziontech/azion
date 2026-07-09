@@ -58,7 +58,7 @@ jobs:
       # You may add the --sync flag to sync local and remote resources
       - name: Azion Deploy
         run: |
-          azion deploy --local --skip-build
+          azion deploy --local --debug
 
       - name: Commit Azion files
         run: |

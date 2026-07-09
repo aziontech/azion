@@ -27,6 +27,7 @@ var (
 	SkipFrameworkBuild                   = "Indicates whether to bypass the framework build phase before executing 'azion build'"
 	WritableBucketFlag                   = "If sent, the project bucket will be created with read-write access"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
+	WorkersFlag                          = "Number of concurrent upload workers (default: auto-calculated based on CPU cores, max 20)"
 	OriginsSuccessful                    = "Created Origin for Application\n"
 	OriginsUpdateSuccessful              = "Updated Origin for Application %v with ID %v \n"
 	CacheSettingsSuccessful              = "Created Cache Settings for Application\n"

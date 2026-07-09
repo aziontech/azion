@@ -16,6 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/aziontech/azion-cli/pkg/workers"
 	"github.com/schollz/progressbar/v3"
 	"github.com/zRedShift/mimemagic"
 	"go.uber.org/zap"
@@ -25,8 +26,17 @@ var (
 	Retries int64
 )
 
-func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error) {
-	var listFiles []contracts.FileOps
+// FileInfo represents a file's metadata without the file handle
+type FileInfo struct {
+	Path         string
+	AbsolutePath string
+	MimeType     string
+	Size         int64
+}
+
+// CollectFileInfos walks the directory and collects file metadata without opening files
+func CollectFileInfos(pathStatic string, cmd *DeployCmd) ([]FileInfo, error) {
+	var fileInfos []FileInfo
 
 	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -41,9 +51,51 @@ func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error
 		}
 
 		// Skip directories like node_modules
-		if resolvedInfo.IsDir() && (strings.Contains(path, "node_modules")) {
+		if resolvedInfo.IsDir() && strings.Contains(path, "node_modules") {
 			logger.Debug("Skipping directory: " + path)
 			return filepath.SkipDir
+		}
+
+		// Process files only
+		if !resolvedInfo.IsDir() {
+			fileString := strings.TrimPrefix(path, pathStatic)
+			mimeType, err := mimemagic.MatchFilePath(path, -1)
+			if err != nil {
+				logger.Debug("Error while matching file path", zap.Error(err))
+				return err
+			}
+
+			fileInfos = append(fileInfos, FileInfo{
+				Path:         fileString,
+				AbsolutePath: path,
+				MimeType:     mimeType.MediaType(),
+				Size:         resolvedInfo.Size(),
+			})
+		}
+
+		return nil
+	}); err != nil {
+		logger.Debug("Error while reading files", zap.Error(err))
+		return nil, err
+	}
+
+	return fileInfos, nil
+}
+
+// ReadAllFiles is kept for backward compatibility but now processes files in batches
+func ReadAllFiles(pathStatic string, cmd *DeployCmd) ([]contracts.FileOps, error) {
+	var listFiles []contracts.FileOps
+
+	if err := cmd.FilepathWalk(pathStatic, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Handle symlinks and resolve actual path type
+		resolvedInfo, statErr := os.Stat(path)
+		if statErr != nil {
+			logger.Debug("Error resolving path", zap.String("path", path), zap.Error(statErr))
+			return statErr
 		}
 
 		// Process files
@@ -88,13 +140,14 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	// create lots zip files
-	allFiles, err := ReadAllFiles(pathStatic, cmd)
+	// Collect file information without opening files (avoids "too many open files" error)
+	fileInfos, err := CollectFileInfos(pathStatic, cmd)
 	if err != nil {
 		return err
 	}
 
-	createdZipPaths, err := CreateZipsInBatches(allFiles)
+	// Create zip files in batches, opening and closing files as needed
+	createdZipPaths, err := CreateZipsFromFileInfos(fileInfos)
 	if err != nil {
 		return err
 	}
@@ -125,7 +178,9 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 
 	numFiles := len(listZip)
 
-	noOfWorkers := 5
+	noOfWorkers := workers.CalculateOptimal(Workers)
+	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
+
 	var currentFile int64
 	results := make(chan error, noOfWorkers)
 	Jobs := make(chan contracts.FileOps, numFiles)

@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
@@ -18,6 +19,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -25,23 +27,27 @@ import (
 )
 
 type DeployCmd struct {
-	Io                    *iostreams.IOStreams
-	GetWorkDir            func() (string, error)
-	FileReader            func(path string) ([]byte, error)
-	WriteFile             func(filename string, data []byte, perm fs.FileMode) error
-	GetAzionJsonContent   func(pathConfig string) (*contracts.AzionApplicationOptions, error)
-	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confConf string) error
-	commandRunInteractive func(f *cmdutil.Factory, comm string) error
-	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
-	WriteManifest         func(manifest *contracts.ManifestV4, pathMan string) error
-	EnvLoader             func(path string) ([]string, error)
-	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
-	Open                  func(name string) (*os.File, error)
-	FilepathWalk          func(root string, fn filepath.WalkFunc) error
-	F                     *cmdutil.Factory
-	Unmarshal             func(data []byte, v interface{}) error
-	Interpreter           func() *manifestInt.ManifestInterpreter
-	VersionID             func() string
+	Io                       *iostreams.IOStreams
+	GetWorkDir               func() (string, error)
+	FileReader               func(path string) ([]byte, error)
+	WriteFile                func(filename string, data []byte, perm fs.FileMode) error
+	GetAzionJsonContent      func(pathConfig string) (*contracts.AzionApplicationOptions, error)
+	WriteAzionJsonContent    func(conf *contracts.AzionApplicationOptions, confConf string) error
+	commandRunInteractive    func(f *cmdutil.Factory, comm string) error
+	commandRunnerOutput      func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
+	WriteManifest            func(manifest *contracts.ManifestV4, pathMan string) error
+	EnvLoader                func(path string) ([]string, error)
+	BuildCmd                 func(f *cmdutil.Factory) *build.BuildCmd
+	Open                     func(name string) (*os.File, error)
+	FilepathWalk             func(root string, fn filepath.WalkFunc) error
+	F                        *cmdutil.Factory
+	Unmarshal                func(data []byte, v interface{}) error
+	Interpreter              func() *manifestInt.ManifestInterpreter
+	VersionID                func() string
+	ReadSettings             func(path string) (token.Settings, error)
+	GetCredentialsForBucket  func(path string, bucketName string) (token.S3Credentials, bool, error)
+	SaveCredentialsForBucket func(path string, bucketName string, creds token.S3Credentials) error
+	CreateBucketCredentials  func(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error)
 }
 
 var (
@@ -55,27 +61,32 @@ var (
 	Env           string
 	FunctionIds   map[string]contracts.AzionJsonDataFunction
 	WriteBucket   bool
+	Workers       int
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
-		Io:                    f.IOStreams,
-		GetWorkDir:            utils.GetWorkingDir,
-		FileReader:            os.ReadFile,
-		WriteFile:             os.WriteFile,
-		EnvLoader:             utils.LoadEnvVarsFromFile,
-		BuildCmd:              build.NewBuildCmd,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
-		commandRunInteractive: command.CommandRunInteractive,
-		commandRunnerOutput:   command.CommandRunInteractiveWithOutput,
-		WriteManifest:         WriteManifest,
-		Open:                  os.Open,
-		FilepathWalk:          filepath.Walk,
-		Unmarshal:             json.Unmarshal,
-		F:                     f,
-		Interpreter:           manifestInt.NewManifestInterpreter,
-		VersionID:             utils.Timestamp,
+		Io:                       f.IOStreams,
+		GetWorkDir:               utils.GetWorkingDir,
+		FileReader:               os.ReadFile,
+		WriteFile:                os.WriteFile,
+		EnvLoader:                utils.LoadEnvVarsFromFile,
+		BuildCmd:                 build.NewBuildCmd,
+		GetAzionJsonContent:      utils.GetAzionJsonContent,
+		WriteAzionJsonContent:    utils.WriteAzionJsonContent,
+		commandRunInteractive:    command.CommandRunInteractive,
+		commandRunnerOutput:      command.CommandRunInteractiveWithOutput,
+		WriteManifest:            WriteManifest,
+		Open:                     os.Open,
+		FilepathWalk:             filepath.Walk,
+		Unmarshal:                json.Unmarshal,
+		F:                        f,
+		Interpreter:              manifestInt.NewManifestInterpreter,
+		VersionID:                utils.Timestamp,
+		ReadSettings:             token.ReadSettings,
+		GetCredentialsForBucket:  token.GetCredentialsForBucket,
+		SaveCredentialsForBucket: token.SaveCredentialsForBucket,
+		CreateBucketCredentials:  CreateBucketCredentials,
 	}
 }
 
@@ -104,7 +115,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool, workers int) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
@@ -112,10 +123,17 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env str
 	SkipBuild = skipBuild
 	SkipFramework = skipFramework
 	WriteBucket = writeBucket
+	Workers = workers
 	return cmd.Run(f)
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
+	InitTimingSummary()
+	totalStart := time.Now()
+
+	// Set up callback for manifest package timing
+	manifestInt.GlobalTimingCallback = HandleManifestTimingCallback
+
 	msgs := []string{}
 	logger.FInfoFlags(cmd.F.IOStreams.Out, "Running deploy command\n", cmd.F.Format, cmd.F.Out)
 	msgs = append(msgs, "Running deploy command")
@@ -164,7 +182,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		if !SkipFramework {
 			conf.Prefix = newprefix
 			if conf.RotatePrefix == nil || *conf.RotatePrefix == true {
-				cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", oldprefix, conf.Prefix)
+				replacements := map[string]string{oldprefix: conf.Prefix}
+				replacementsJSON, jsonErr := json.Marshal(replacements)
+				if jsonErr != nil {
+					return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
+				}
+				cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
 				vul := vulcanPkg.NewVulcan()
 				command := vul.Command("", cmdStr, cmd.F)
 				logger.Debug("Running the following command", zap.Any("Command", command))
@@ -193,19 +216,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	// Time ReadManifest operation
+	readManifestStart := time.Now()
 	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ReadManifestTime = time.Since(readManifestStart)
 
 	// Check if directory exists; if not, we skip creating bucket
 	if len(manifestStructure.Storage) == 0 {
 		logger.Debug(msg.SkipBucket)
 	} else {
+		bucketStart := time.Now()
 		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs, manifestStructure.Storage)
 		if err != nil {
 			return err
 		}
+		GlobalTimingSummary.BucketCreateTime = time.Since(bucketStart)
 	}
 
 	if !conf.NotFirstRun && (!SkipBuild || !SkipFramework) {
@@ -222,10 +250,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 	}
 
+	// Time second ReadManifest operation
+	readManifestStart = time.Now()
 	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ReadManifestTime += time.Since(readManifestStart)
 
 	// Check if directory exists; if not, we skip uploading static files
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
@@ -233,12 +264,25 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	} else if SkipBuild || SkipFramework {
 		logger.Debug(msg.SkipUploadBuild)
 	} else {
+		// Get the active profile for credentials storage
+		activeProfile := f.GetActiveProfile()
+
+		// Get or create credentials for this bucket
+		credentialsStart := time.Now()
+		creds, err := cmd.GetOrCreateCredentials(ctx, conf.Bucket, activeProfile)
+		if err != nil {
+			return err
+		}
+		GlobalTimingSummary.CredentialsTime = time.Since(credentialsStart)
+
+		uploadStart := time.Now()
 		for _, storage := range manifestStructure.Storage {
-			err = cmd.uploadFiles(f, conf, &msgs, storage.Dir)
+			err = cmd.uploadFilesWithCreds(f, conf, &msgs, storage.Dir, conf.Bucket, creds)
 			if err != nil {
 				return err
 			}
 		}
+		GlobalTimingSummary.UploadStaticFilesTime = time.Since(uploadStart)
 	}
 
 	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
@@ -250,10 +294,13 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	conf.NotFirstRun = true
 
+	// Time CreateResources operation
+	manifestCreateStart := time.Now()
 	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.ManifestCreateTime = time.Since(manifestCreateStart)
 
 	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
 		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
@@ -261,6 +308,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 	}
+
+	// Calculate total deploy time
+	GlobalTimingSummary.TotalDeployTime = time.Since(totalStart)
+
+	// Print timing summary before success messages
+	GlobalTimingSummary.PrintSummary()
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)

@@ -103,6 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 				id = response.GetId()
 			default:
+				return msg.ErrorInvalidPhase
 			}
 
 			creatOut := output.GeneralOutput{

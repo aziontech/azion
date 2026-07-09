@@ -48,7 +48,12 @@ var successResponse string = `
     ],
     "last_editor": "user@example.com",
     "last_modified": "2019-08-24T14:15:22Z",
-    "active": true
+    "created_at": "2019-08-24T14:15:22Z",
+    "active": true,
+    "is_versioned": true,
+    "version": 1,
+    "version_state": "string",
+    "version_id": "string"
   }
 }
 `

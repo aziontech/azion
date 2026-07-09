@@ -1,7 +1,7 @@
 package networklist
 
 import (
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
 type CreateRequest struct {

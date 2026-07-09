@@ -14,6 +14,89 @@ import (
 	"go.uber.org/zap"
 )
 
+// CreateZipsFromFileInfos creates ZIP files in batches from FileInfo slices
+// This function opens files in batches to avoid "too many open files" error
+func CreateZipsFromFileInfos(fileInfos []FileInfo) ([]string, error) {
+	const maxBatchSize = 1 * 1024 * 1024 // 1MB in bytes
+	const maxOpenFiles = 100             // Maximum files to keep open at once
+	var createdZips []string
+	tempDir := os.TempDir()
+
+	batchNumber := 1
+
+	for i := 0; i < len(fileInfos); {
+		var currentBatch []FileInfo
+		var currentSize int64 = 0
+
+		// Build a batch respecting both size and file count limits
+		for j := i; j < len(fileInfos) && len(currentBatch) < maxOpenFiles; j++ {
+			fileInfo := fileInfos[j]
+			if currentSize+fileInfo.Size > maxBatchSize && len(currentBatch) > 0 {
+				break
+			}
+			currentBatch = append(currentBatch, fileInfo)
+			currentSize += fileInfo.Size
+		}
+
+		if len(currentBatch) == 0 {
+			break
+		}
+
+		// Create ZIP for the current batch
+		zipPath, err := createZipFromInfos(currentBatch, tempDir, batchNumber)
+		if err != nil {
+			return nil, err
+		}
+		createdZips = append(createdZips, zipPath)
+
+		batchNumber++
+		i += len(currentBatch)
+	}
+
+	return createdZips, nil
+}
+
+// createZipFromInfos creates a ZIP file from FileInfo entries, opening and closing files as needed
+func createZipFromInfos(batch []FileInfo, destDir string, batchNumber int) (string, error) {
+	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
+	zipFilePath := filepath.Join(destDir, zipFileName)
+	logger.Debug("Creating ZIP file", zap.String("path", zipFilePath), zap.Int("files", len(batch)))
+
+	zipFile, err := os.Create(zipFilePath)
+	if err != nil {
+		return "", fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
+	}
+	defer zipFile.Close()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	for _, fileInfo := range batch {
+		// Open file, copy content, and close immediately to limit open file handles
+		file, err := os.Open(fileInfo.AbsolutePath)
+		if err != nil {
+			return "", fmt.Errorf("error opening file %s: %v", fileInfo.AbsolutePath, err)
+		}
+
+		// Add a file to the ZIP with the relative path
+		writer, err := zipWriter.Create(fileInfo.Path)
+		if err != nil {
+			file.Close()
+			return "", fmt.Errorf(msg.ErrorCreateZip, fileInfo.Path, err)
+		}
+
+		_, err = io.Copy(writer, file)
+		file.Close() // Close immediately after copying
+
+		if err != nil {
+			return "", fmt.Errorf(msg.ErrorCopyContentFile, fileInfo.Path, err)
+		}
+	}
+
+	logger.Debug("Created ZIP file successfully", zap.String("path", zipFilePath), zap.Int("files", len(batch)))
+	return zipFilePath, nil
+}
+
 func CreateZipsInBatches(files []contracts.FileOps) ([]string, error) {
 	const maxBatchSize = 1 * 1024 * 1024 // 1MB em bytes
 	var currentBatch []contracts.FileOps

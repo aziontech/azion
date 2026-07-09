@@ -6,16 +6,26 @@ import (
 	applications "github.com/aziontech/azion-cli/pkg/cmd/list/applications"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/list/cache_setting"
 	connector "github.com/aziontech/azion-cli/pkg/cmd/list/connector"
+	crl "github.com/aziontech/azion-cli/pkg/cmd/list/crl"
+	customPages "github.com/aziontech/azion-cli/pkg/cmd/list/custom_pages"
+	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/list/device_groups"
+	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/list/digital_certificate"
+	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/list/dns_record"
+	dnsZone "github.com/aziontech/azion-cli/pkg/cmd/list/dns_zone"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/list/firewall"
 	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/list/firewall_instance"
+	firewallrules "github.com/aziontech/azion-cli/pkg/cmd/list/firewall_rules"
 	function "github.com/aziontech/azion-cli/pkg/cmd/list/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/list/function_instance"
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/list/network_list"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/list/origin"
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
+	presets "github.com/aziontech/azion-cli/pkg/cmd/list/presets"
 	rule "github.com/aziontech/azion-cli/pkg/cmd/list/rule_engine"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/list/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/waf"
+	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/list/waf_exceptions"
 	wdeployments "github.com/aziontech/azion-cli/pkg/cmd/list/workload_deployment"
 	"github.com/aziontech/azion-cli/pkg/cmd/list/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -47,15 +57,25 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(token.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
+	cmd.AddCommand(deviceGroups.NewCmd(f))
+	cmd.AddCommand(dnsZone.NewCmd(f))
+	cmd.AddCommand(dnsRecord.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(storage.NewCmd(f))
 	cmd.AddCommand(connector.NewCmd(f))
+	cmd.AddCommand(customPages.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
 	// cmd.AddCommand(kv.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallinstance.NewCmd(f))
+	cmd.AddCommand(firewallrules.NewCmd(f))
+	cmd.AddCommand(waf.NewCmd(f))
+	cmd.AddCommand(wafexceptions.NewCmd(f))
+	cmd.AddCommand(digitalcertificate.NewCmd(f))
+	cmd.AddCommand(crl.NewCmd(f))
+	cmd.AddCommand(presets.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/MakeNowJust/heredoc"
@@ -118,11 +119,11 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 }
 
 func updateAzionJson(cmd *DeleteCmd) error {
-	path, err := utils.GetWorkingDir()
+	wd, err := utils.GetWorkingDir()
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := path + "/azion/azion.json"
+	azionJson := filepath.Join(wd, ProjectConf, "azion.json")
 	byteAzionJson, err := cmd.ReadFile(azionJson)
 	if err != nil {
 		logger.Debug("Error while parsing json", zap.Error(err))

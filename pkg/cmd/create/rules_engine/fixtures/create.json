@@ -9,7 +9,7 @@
     "criteria": [
       [
         {
-          "argument": 0,
+          "argument": "0",
           "variable": "${arg_<name>}",
           "conditional": "if",
           "operator": "does_not_exist"

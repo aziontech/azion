@@ -21,5 +21,8 @@ var (
 	ErrorFuncNotFound           = errors.New("The Function Name informed does not exists. Please make sure to add this Function to your azion.config file")
 	ErrorReadArgsFile           = errors.New("Failed to read the args file: %w")
 	ErrorUnmarshalArgsFile      = errors.New("Failed to unmarshal args.json file: %w")
+	ErrorApplicationIDRequired  = errors.New("Application ID is required for this operation")
+	ErrorWorkloadIDRequired     = errors.New("Workload ID is required for this operation")
+	ErrorConnectorTypeNotFound  = errors.New("Failed to determine connector type")
 	ErrorReadManifest           = "Failed to read the manifest.json file: %w. Please remember to install dependencies and build your project before running the deploy command"
 )

@@ -6,12 +6,12 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	sdkv3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedRequestPhaseRuleRequest
+	sdk.PatchedRequestPhaseRule
 	ApplicationID int64
 	RulesID       int64
 	Phase         string
@@ -82,7 +82,7 @@ func (c *Client) DeleteResponse(ctx context.Context, edgeApplicationID int64, ru
 
 func (c *Client) UpdateRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine")
-	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedRequestPhaseRuleRequest(req.PatchedRequestPhaseRuleRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.ApplicationID, req.RulesID).PatchedRequestPhaseRule(req.PatchedRequestPhaseRule)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -138,6 +138,46 @@ func (c *Client) CreateRequest(ctx context.Context, edgeApplicationID int64, req
 		return nil, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
 	return &resp.Data, nil
+}
+
+func (c *Client) OrderRequest(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Request Phase Rules Engine")
+	body := sdk.NewApplicationRequestPhaseRuleEngineOrder(order)
+	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
+		UpdateApplicationRequestRulesOrder(ctx, applicationID).
+		ApplicationRequestPhaseRuleEngineOrder(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) OrderResponse(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Response Phase Rules Engine")
+	body := sdk.NewApplicationResponsePhaseRuleEngineOrderRequest(order)
+	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
+		UpdateApplicationResponseRulesOrder(ctx, applicationID).
+		ApplicationResponsePhaseRuleEngineOrderRequest(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
 }
 
 func (c *Client) CreateResponse(ctx context.Context, edgeApplicationID int64, req sdk.ResponsePhaseRuleRequest) (RulesEngineResponse, error) {

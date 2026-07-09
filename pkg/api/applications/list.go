@@ -3,7 +3,7 @@ package applications
 import (
 	"context"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"

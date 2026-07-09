@@ -17,7 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/manifest"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -51,7 +51,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 			Purge:               []contracts.PurgeManifest{},
 			Storage:             []contracts.StorageManifest{},
 			Functions:           []contracts.Function{},
-			Connectors:          []edgesdk.ConnectorPolymorphicRequest{},
+			Connectors:          []edgesdk.ConnectorRequest{},
 		}
 	} else {
 		manifestStruct, err = interpreter.ReadManifest(pathManifest, f, &msgs)
@@ -63,7 +63,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 				Purge:               []contracts.PurgeManifest{},
 				Storage:             []contracts.StorageManifest{},
 				Functions:           []contracts.Function{},
-				Connectors:          []edgesdk.ConnectorPolymorphicRequest{},
+				Connectors:          []edgesdk.ConnectorRequest{},
 			}
 		}
 	}
@@ -224,7 +224,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
-		var criteria [][]edgesdk.EdgeApplicationCriterionFieldRequest
+		var criteria [][]edgesdk.ApplicationCriterionFieldRequest
 		criteriaBytes, err := json.Marshal(rule.Criteria)
 		if err != nil {
 			return fmt.Errorf(msg.ERRORMARSHALCRITERIA, err)
@@ -281,7 +281,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 			continue
 		}
 
-		var criteria [][]edgesdk.EdgeApplicationCriterionFieldRequest
+		var criteria [][]edgesdk.ApplicationCriterionFieldRequest
 		criteriaBytes, err := json.Marshal(rule.Criteria)
 		if err != nil {
 			return fmt.Errorf(msg.ERRORMARSHALCRITERIA, err)

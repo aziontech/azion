@@ -100,7 +100,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.Int64Var(&fields.WorkloadId, "domain-id", 0, msg.FlagWorkloadID)
+	flags.Int64Var(&fields.WorkloadId, "workload-id", 0, msg.FlagWorkloadID)
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringSliceVar(&fields.Domains, "domains", []string{}, msg.FlagDomains)
 	flags.StringVar(&fields.Active, "active", "true", msg.FlagActive)

@@ -9,11 +9,14 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
 	app "github.com/aziontech/azion-cli/pkg/api/applications"
+	connector "github.com/aziontech/azion-cli/pkg/api/connector"
 	fun "github.com/aziontech/azion-cli/pkg/api/function"
 	workload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	store "github.com/aziontech/azion-cli/pkg/cmd/delete/storage/bucket"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/token"
+	"go.uber.org/zap"
 )
 
 func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
@@ -34,6 +37,7 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	clientworkload := workload.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
+	clientconnector := connector.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
 	storagecmd := store.NewBucket(del.f)
 
 	// Collect all errors
@@ -50,11 +54,22 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	}
 
 	// Delete edge application
-	logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting edge application with ID %d\n", azionJson.Application.ID))
+	logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting application with ID %d\n", azionJson.Application.ID))
 	err = clientapp.Delete(ctx, azionJson.Application.ID)
 	if err != nil {
 		errs = append(errs, fmt.Sprintf("Failed to delete application: %v", err))
 		logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete application: %v\n", err))
+	}
+
+	for _, conn := range azionJson.Connectors {
+		if conn.Id != 0 {
+			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Deleting connector with ID %d\n", conn.Id))
+			err = clientconnector.Delete(ctx, conn.Id)
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("Failed to delete connector: %v", err))
+				logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete connector: %v\n", err))
+			}
+		}
 	}
 
 	// Delete functions
@@ -82,6 +97,14 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 		if err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to delete storage bucket: %v", err))
 			logger.FInfo(del.f.IOStreams.Out, fmt.Sprintf("Failed to delete storage bucket: %v\n", err))
+		}
+
+		// Delete bucket credentials from credentials.toml
+		activeProfile := del.f.GetActiveProfile()
+		err = token.DeleteCredentialsForBucket(activeProfile, azionJson.Bucket)
+		if err != nil {
+			logger.Debug("Error while deleting bucket credentials", zap.Error(err), zap.String("bucket", azionJson.Bucket))
+			// Don't fail the cascade delete if credentials deletion fails, just log it
 		}
 	}
 

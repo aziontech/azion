@@ -6,8 +6,17 @@ import (
 	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/describe/applications"
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
+	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
+	customPages "github.com/aziontech/azion-cli/pkg/cmd/describe/custom_pages"
+	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
+	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/describe/device_groups"
+	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
+	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/describe/dns_record"
+	dnsZone "github.com/aziontech/azion-cli/pkg/cmd/describe/dns_zone"
+	dnssec "github.com/aziontech/azion-cli/pkg/cmd/describe/dnssec"
 	firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall"
 	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_instance"
+	firewallrules "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_rules"
 	function "github.com/aziontech/azion-cli/pkg/cmd/describe/function"
 	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/describe/function_instance"
 	networklist "github.com/aziontech/azion-cli/pkg/cmd/describe/network_list"
@@ -15,8 +24,11 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/storage"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
+	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
+	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
+	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
+	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/describe/workload_deployment"
+	workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
@@ -42,18 +54,30 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(edgeApplications.NewCmd(f))
 	cmd.AddCommand(ruleEngine.NewCmd(f))
 	cmd.AddCommand(workloads.NewCmd(f))
+	cmd.AddCommand(workloaddeployment.NewCmd(f))
 	cmd.AddCommand(origin.NewCmd(f))
 	cmd.AddCommand(cache.NewCmd(f))
+	cmd.AddCommand(deviceGroups.NewCmd(f))
+	cmd.AddCommand(dnsZone.NewCmd(f))
+	cmd.AddCommand(dnsRecord.NewCmd(f))
+	cmd.AddCommand(dnssec.NewCmd(f))
 	cmd.AddCommand(function.NewCmd(f))
 	cmd.AddCommand(variables.NewCmd(f))
 	cmd.AddCommand(edgeStorage.NewCmd(f))
 	cmd.AddCommand(personal_token.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
+	cmd.AddCommand(customPages.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
 	// cmd.AddCommand(kv.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))
 	cmd.AddCommand(firewallinstance.NewCmd(f))
+	cmd.AddCommand(firewallrules.NewCmd(f))
+	cmd.AddCommand(waf.NewCmd(f))
+	cmd.AddCommand(wafexceptions.NewCmd(f))
+	cmd.AddCommand(digitalcertificate.NewCmd(f))
+	cmd.AddCommand(csr.NewCmd(f))
+	cmd.AddCommand(crl.NewCmd(f))
 
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 	return cmd

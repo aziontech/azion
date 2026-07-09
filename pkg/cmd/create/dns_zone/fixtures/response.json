@@ -1,0 +1,14 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 1111,
+    "name": "my zone",
+    "domain": "example.com",
+    "active": true,
+    "nameservers": [
+      "ns1.aziondns.net",
+      "ns2.aziondns.com"
+    ],
+    "product_version": "1.0"
+  }
+}

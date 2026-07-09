@@ -1,5 +1,4 @@
   {
-    "state": "executed",
     "data": {
       "id": 210543,
       "name": "string",
@@ -10,7 +9,7 @@
             "conditional": "if",
             "variable": "${arg_<name>}",
             "operator": "does_not_exist",
-            "argument": 0
+            "argument": "0"
           }
         ]
       ],
@@ -22,6 +21,7 @@
       "description": "string",
       "order": 0,
       "last_editor": "string",
-      "last_modified": "2019-08-24T14:15:22Z"
+      "last_modified": "2019-08-24T14:15:22Z",
+      "created_at": "2019-08-24T14:15:22Z"
     }
   }

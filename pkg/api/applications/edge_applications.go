@@ -6,7 +6,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
 )
 
@@ -45,7 +45,7 @@ type CreateInstanceRequest struct {
 }
 
 type UpdateRulesEngineRequest struct {
-	sdk.PatchedRequestPhaseRuleRequest
+	sdk.PatchedRequestPhaseRule
 	IdApplication int64
 	Phase         string
 	Id            int64
@@ -152,7 +152,7 @@ func (c *Client) Delete(ctx context.Context, id int64) error {
 func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedResponsePhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
+		opts.OrderBy = "order"
 	}
 
 	resp, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.ListApplicationResponseRules(ctx, edgeApplicationID).
@@ -179,7 +179,7 @@ func (c *Client) ListRulesEngineResponse(ctx context.Context, opts *contracts.Li
 func (c *Client) ListRulesEngineRequest(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
 	logger.Debug("List Rules Engine")
 	if opts.OrderBy == "" {
-		opts.OrderBy = "id"
+		opts.OrderBy = "order"
 	}
 
 	resp, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.ListApplicationRequestRules(ctx, edgeApplicationID).
@@ -291,7 +291,7 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID int64, phase
 
 func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {
 	logger.Debug("Update Rules Engine", zap.Any("ID", req.Id), zap.Any("Application ID", req.IdApplication), zap.Any("Name", req.Name))
-	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.IdApplication, req.Id).PatchedRequestPhaseRuleRequest(req.PatchedRequestPhaseRuleRequest)
+	requestUpdate := c.apiClient.ApplicationsRequestRulesAPI.PartialUpdateApplicationRequestRule(ctx, req.IdApplication, req.Id).PatchedRequestPhaseRule(req.PatchedRequestPhaseRule)
 
 	edgeApplicationsResponse, httpResp, err := requestUpdate.Execute()
 	if err != nil {
@@ -392,6 +392,46 @@ func (c *Client) CreateRulesEngineResponse(ctx context.Context, edgeApplicationI
 	return &resp.Data, nil
 }
 
+func (c *Client) OrderRulesEngineRequest(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Request Phase Rules Engine")
+	body := sdk.NewApplicationRequestPhaseRuleEngineOrder(order)
+	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
+		UpdateApplicationRequestRulesOrder(ctx, applicationID).
+		ApplicationRequestPhaseRuleEngineOrder(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering a Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
+func (c *Client) OrderRulesEngineResponse(ctx context.Context, applicationID int64, order []int64) error {
+	logger.Debug("Order Response Phase Rules Engine")
+	body := sdk.NewApplicationResponsePhaseRuleEngineOrderRequest(order)
+	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
+		UpdateApplicationResponseRulesOrder(ctx, applicationID).
+		ApplicationResponsePhaseRuleEngineOrderRequest(*body).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering a Rules Engine", zap.Error(err))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+	return nil
+}
+
 func (c *Client) EdgeFuncInstancesList(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedFunctionInstanceList, error) {
 	logger.Debug("List Function Instances")
 	if opts.OrderBy == "" {
@@ -479,9 +519,9 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	logger.Debug("Create Rules Engine Next Application")
 
 	req := CreateRulesEngineResponse{}
-	criteria := make([][]sdk.EdgeApplicationCriterionFieldRequest, 1)
+	criteria := make([][]sdk.ApplicationCriterionFieldRequest, 1)
 	for i := 0; i < 1; i++ {
-		criteria[i] = make([]sdk.EdgeApplicationCriterionFieldRequest, 1)
+		criteria[i] = make([]sdk.ApplicationCriterionFieldRequest, 1)
 	}
 
 	req.SetName("enable gzip")
@@ -498,7 +538,7 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 	req.SetBehaviors(behaviors)
 
 	emptyString := ""
-	arg := sdk.EdgeApplicationCriterionPolymorphicArgumentRequest{
+	arg := sdk.ApplicationCriterionArgumentRequest{
 		String: &emptyString,
 	}
 

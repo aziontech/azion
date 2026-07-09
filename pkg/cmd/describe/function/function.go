@@ -15,7 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -27,7 +27,7 @@ var (
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.EdgeFunctions, error)
+	Get      func(context.Context, int64) (sdk.Functions, error)
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -36,7 +36,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 		AskInput: func(prompt string) (string, error) {
 			return utils.AskInput(prompt)
 		},
-		Get: func(ctx context.Context, functionID int64) (sdk.EdgeFunctions, error) {
+		Get: func(ctx context.Context, functionID int64) (sdk.Functions, error) {
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 			return client.Get(ctx, functionID)
 		},

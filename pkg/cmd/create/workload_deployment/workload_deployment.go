@@ -12,7 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -41,8 +41,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
-        $ azion create workload-deployment --name workloadName
-        $ azion create workload-deployment --name withargs --active true --current true
+        $ azion create workload-deployment --workload-id 1234 --name workloadName
+        $ azion create workload-deployment --workload-id 1234 --name withargs --active true --current true
         $ azion create workload-deployment --name withstrategy --strategy-type default --application-id 123
         $ azion create workload-deployment --file "create.json"
         `),

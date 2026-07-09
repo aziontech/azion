@@ -12,7 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
@@ -134,7 +134,7 @@ func createRequestFromFlags(fields *Fields, request *api.CreateRequest) error {
 			return utils.ErrorConvertingStringToBool
 		}
 
-		eFunction := sdk.EdgeFunctionModuleRequest{
+		eFunction := sdk.FunctionModuleRequest{
 			Enabled: &edgeFunctions,
 		}
 

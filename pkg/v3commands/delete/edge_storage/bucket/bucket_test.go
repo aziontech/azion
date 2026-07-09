@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
+	"github.com/aziontech/azion-cli/utils"
 )
 
 func mockBucket(msg string) (string, error) {
@@ -41,14 +42,12 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket command bucket of the edge-storage",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			args:   []string{"--name", "arthur-morgan"},
 			output: fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
@@ -56,14 +55,12 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "delete bucket ask for name input",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodDelete, "v4/storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
-				func(req *http.Request) (*http.Response, error) {
-					return &http.Response{
-						StatusCode: http.StatusNoContent,
-					}, nil
-				},
+				httpmock.StatusStringResponse(http.StatusNoContent, ""),
 			},
 			output:     fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, "arthur-morgan"),
 			mockInputs: mockBucket,
@@ -71,7 +68,9 @@ func TestNewBucket(t *testing.T) {
 		{
 			name: "failed delete bucket internal error status 500",
 			requests: []httpmock.Matcher{
-				httpmock.REST(http.MethodPost, "v4/storage/buckets/arthur-morgan"),
+				func(req *http.Request) bool {
+					return strings.EqualFold(req.Method, http.MethodDelete) && strings.Contains(req.URL.Path, "/workspace/storage/buckets/arthur-morgan")
+				},
 			},
 			responses: []httpmock.Responder{
 				func(req *http.Request) (*http.Response, error) {
@@ -83,7 +82,7 @@ func TestNewBucket(t *testing.T) {
 				},
 			},
 			args: []string{"--name", "arthur-morgan"},
-			Err:  fmt.Sprintf(msg.ERROR_DELETE_BUCKET, "The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support"),
+			Err:  fmt.Sprintf(msg.ERROR_DELETE_BUCKET, utils.ErrorInternalServerError),
 		},
 	}
 	for _, tt := range tests {

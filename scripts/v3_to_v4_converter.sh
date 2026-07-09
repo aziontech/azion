@@ -5,6 +5,11 @@
 # If domain exists in V3, creates a workload using Azion CLI
 # Optionally reads a manifest.json to configure workloads and connectors
 #
+# V3 resource details (domain/origins) are fetched directly from the V3 API
+# (https://api.azionapi.net) using the token of the active Azion CLI profile.
+# V4 resources (workload, workload-deployment, connector, bucket) are created
+# through the Azion CLI.
+#
 # V3 → V4 mapping:
 #   - V3 domain  → V4 workload  (manifest.workloads config applied)
 #   - V3 origin  → V4 connector (manifest.connectors config applied)
@@ -29,6 +34,18 @@ CREATE_WORKLOAD=false
 CREATE_CONNECTORS=false
 EXISTING_WORKLOAD_ID=""
 
+# V3 API access (used to fetch V3 domain/origin details directly).
+# Token/URL resolution order:
+#   1. --token / --api-url flags
+#   2. AZIONCLI_TOKEN / AZIONCLI_API_URL environment variables
+#   3. The active Azion CLI profile (~/.azion/profiles.json -> <profile>/settings.toml)
+TOKEN="${AZIONCLI_TOKEN:-}"
+API_V3_URL="${AZIONCLI_API_URL:-https://api.azionapi.net}"
+AZION_DIR="${AZION_DIR:-$HOME/.azion}"
+TOKEN_RESOLVED=false
+# Origins fetched from the V3 API (populated before connector creation)
+V3_ORIGINS_JSON=""
+
 # Function to display usage information
 usage() {
     echo "Usage: $0 [OPTIONS]"
@@ -44,6 +61,8 @@ usage() {
     echo "  -c, --create-connectors    Create connectors from V3 origins using manifest config (requires --manifest)"
     echo "  -d, --dry-run              Show what would be done without making changes"
     echo "  -W, --workload-id ID       Use an existing workload ID instead of creating a new one"
+    echo "  -T, --token TOKEN          V3 API token (defaults to AZIONCLI_TOKEN or the active Azion profile)"
+    echo "      --api-url URL          V3 API base URL (default: https://api.azionapi.net)"
     echo "  -h, --help                 Display this help message"
     echo ""
     echo "V3 to V4 Mapping:"
@@ -95,6 +114,14 @@ while [[ $# -gt 0 ]]; do
             EXISTING_WORKLOAD_ID="$2"
             shift 2
             ;;
+        -T|--token)
+            TOKEN="$2"
+            shift 2
+            ;;
+        --api-url)
+            API_V3_URL="$2"
+            shift 2
+            ;;
         -d|--dry-run)
             DRY_RUN=true
             shift
@@ -125,6 +152,12 @@ fi
 # Check if azion CLI is installed
 if ! command -v azion &> /dev/null; then
     echo "Error: azion CLI is required but not installed. Please install azion CLI first."
+    exit 1
+fi
+
+# Check if curl is installed (used to call the V3 API directly)
+if ! command -v curl &> /dev/null; then
+    echo "Error: curl is required but not installed. Please install curl first."
     exit 1
 fi
 
@@ -213,6 +246,8 @@ WORKLOAD_ID=""
 DOMAIN_NAME=""
 APP_ID=""
 APP_NAME=""
+V3_EDGE_APP_ID=""
+V3_EDGE_FIREWALL_ID=""
 
 # Create temp directory for intermediate JSON files
 TEMP_DIR=$(mktemp -d)
@@ -362,8 +397,92 @@ build_workload_create_json() {
 }
 
 # ============================================================================
+# Function: ensure_token
+# Resolves the V3 API token to use, in priority order:
+#   1. --token flag / AZIONCLI_TOKEN env (already assigned to $TOKEN)
+#   2. The active Azion CLI profile:
+#        ~/.azion/profiles.json  -> Name = '<profile>'
+#        ~/.azion/<profile>/settings.toml -> Token = "<token>"
+# Sets the global $TOKEN. Returns 1 if no token could be resolved.
+# ============================================================================
+ensure_token() {
+    if [ "$TOKEN_RESOLVED" = true ]; then
+        [ -n "$TOKEN" ] && return 0 || return 1
+    fi
+    TOKEN_RESOLVED=true
+
+    if [ -n "$TOKEN" ]; then
+        log "Using V3 API token from flag/environment"
+        return 0
+    fi
+
+    # Determine the active profile name (TOML: Name = 'profile'). Defaults to "default".
+    local profile_name="default"
+    local profiles_file="$AZION_DIR/profiles.json"
+    if [ -f "$profiles_file" ]; then
+        local parsed
+        parsed=$(grep -iE '^[[:space:]]*Name[[:space:]]*=' "$profiles_file" | head -1 \
+            | sed -E "s/^[[:space:]]*[Nn]ame[[:space:]]*=[[:space:]]*['\"]?([^'\"]+)['\"]?.*/\1/")
+        if [ -n "$parsed" ]; then
+            profile_name="$parsed"
+        fi
+    fi
+
+    # Read the token from the profile's settings.toml (TOML: Token = "value")
+    local settings_file="$AZION_DIR/$profile_name/settings.toml"
+    if [ ! -f "$settings_file" ]; then
+        error "Could not find settings for profile '$profile_name' at $settings_file"
+        error "Provide a token with --token, set AZIONCLI_TOKEN, or run 'azion login' first."
+        return 1
+    fi
+
+    TOKEN=$(grep -iE '^[[:space:]]*Token[[:space:]]*=' "$settings_file" | head -1 \
+        | sed -E "s/^[[:space:]]*[Tt]oken[[:space:]]*=[[:space:]]*['\"]?([^'\"]+)['\"]?.*/\1/")
+
+    if [ -z "$TOKEN" ]; then
+        error "Could not read token from $settings_file"
+        error "Provide a token with --token, set AZIONCLI_TOKEN, or run 'azion login' first."
+        return 1
+    fi
+
+    log "Using V3 API token from Azion profile '$profile_name'"
+    return 0
+}
+
+# ============================================================================
+# Function: v3_api_get
+# Performs an authenticated GET against the V3 API and prints the response body.
+# Usage: v3_api_get <path> <response-file>
+# Returns non-zero on transport error or non-2xx status.
+# ============================================================================
+v3_api_get() {
+    local path="$1"
+    local resp_file="$2"
+
+    ensure_token || return 1
+
+    local http_code
+    http_code=$(curl -sS -o "$resp_file" -w '%{http_code}' \
+        -H "Authorization: token $TOKEN" \
+        -H "Accept: application/json;version=3" \
+        "${API_V3_URL}${path}" 2>/dev/null) || {
+        log "Transport error calling V3 API: ${API_V3_URL}${path}"
+        return 1
+    }
+
+    if [ -z "$http_code" ] || [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+        log "V3 API returned HTTP ${http_code:-000} for ${path}: $(cat "$resp_file" 2>/dev/null)"
+        return 1
+    fi
+
+    return 0
+}
+
+# ============================================================================
 # Function: fetch_v3_domain_details
-# Fetches the full V3 domain details from the API using azion describe domain.
+# Fetches the full V3 domain details directly from the V3 API:
+#   GET {api_url}/domains/{id}   (Accept: application/json;version=3)
+# The V3 API wraps the payload in a "results" object, which this returns.
 # V3 domain fields: name, cnames, cname_access_only, is_active, edge_application_id,
 #   digital_certificate_id, is_mtls_enabled, mtls_verification,
 #   mtls_trusted_ca_certificate_id, edge_firewall_id, crl_list
@@ -376,15 +495,55 @@ fetch_v3_domain_details() {
         return 1
     fi
 
-    local result
-    result=$(azion describe domain --domain-id "$domain_id" --format json 2>&1) || true
-
-    if echo "$result" | grep -qi "error\|fail"; then
-        log "Could not fetch V3 domain details for ID $domain_id: $result"
+    local resp_file="$TEMP_DIR/v3_domain_${domain_id}.json"
+    if ! v3_api_get "/domains/${domain_id}" "$resp_file"; then
+        log "Could not fetch V3 domain details for ID $domain_id"
         return 1
     fi
 
-    echo "$result"
+    # V3 wraps the payload in a "results" object; fall back to the raw body.
+    local details
+    details=$(jq -c '.results // .' "$resp_file" 2>/dev/null)
+
+    if [ -z "$details" ] || [ "$details" = "null" ]; then
+        log "V3 domain details for ID $domain_id are empty or not valid JSON"
+        return 1
+    fi
+
+    echo "$details"
+}
+
+# ============================================================================
+# Function: fetch_v3_origins
+# Fetches the origins of a V3 edge application directly from the V3 API:
+#   GET {api_url}/edge_applications/{edge_application_id}/origins
+# Returns a JSON array of origin objects (from the "results" field).
+# V3 origin fields: name, origin_type, addresses[{address,weight,server_role,is_active}],
+#   host_header, origin_protocol_policy, origin_path, ...
+# ============================================================================
+fetch_v3_origins() {
+    local edge_app_id="$1"
+
+    if [ -z "$edge_app_id" ] || [ "$edge_app_id" = "0" ] || [ "$edge_app_id" = "null" ]; then
+        log "No edge_application_id available, cannot fetch V3 origins"
+        return 1
+    fi
+
+    local resp_file="$TEMP_DIR/v3_origins_${edge_app_id}.json"
+    if ! v3_api_get "/edge_applications/${edge_app_id}/origins?page_size=100" "$resp_file"; then
+        log "Could not fetch V3 origins for edge application $edge_app_id"
+        return 1
+    fi
+
+    local origins
+    origins=$(jq -c '.results // []' "$resp_file" 2>/dev/null)
+
+    if [ -z "$origins" ] || [ "$origins" = "null" ]; then
+        log "No origins returned from V3 API for edge application $edge_app_id"
+        return 1
+    fi
+
+    echo "$origins"
 }
 
 # ============================================================================
@@ -396,7 +555,7 @@ fetch_v3_domain_details() {
 #   is_active                      → active
 #   is_mtls_enabled                → mtls.enabled
 #   mtls_verification              → mtls.config.verification
-#   mtls_trusted_ca_certificate_id → mtls.certificate
+#   mtls_trusted_ca_certificate_id → mtls.config.certificate
 #   crl_list                       → mtls.config.crl
 #
 # V3 fields NOT mapped (warnings emitted):
@@ -431,11 +590,12 @@ build_workload_from_v3_domain() {
     if [ "$is_mtls_enabled" = "true" ]; then
         local mtls_json='{"enabled": true}'
 
-        # Map mtls_trusted_ca_certificate_id → mtls.certificate
+        # Map mtls_trusted_ca_certificate_id → mtls.config.certificate
         local mtls_cert_id
         mtls_cert_id=$(echo "$domain_json" | jq '.mtls_trusted_ca_certificate_id // 0')
         if [ "$mtls_cert_id" != "0" ] && [ "$mtls_cert_id" != "null" ]; then
-            mtls_json=$(echo "$mtls_json" | jq --argjson cert "$mtls_cert_id" '. + {certificate: $cert}')
+            mtls_json=$(echo "$mtls_json" | jq --argjson cert "$mtls_cert_id" \
+                '.config = (.config // {}) | .config.certificate = $cert')
         fi
 
         # Map mtls_verification → mtls.config.verification
@@ -661,8 +821,19 @@ create_connectors_from_manifest() {
         return 1
     fi
 
+    # Resolve the origins source: prefer authoritative origins fetched from the
+    # V3 API; fall back to the origins recorded in the local azion.json.
+    local origins_json
+    if [ -n "$V3_ORIGINS_JSON" ] && [ "$V3_ORIGINS_JSON" != "[]" ] && [ "$V3_ORIGINS_JSON" != "null" ]; then
+        origins_json="$V3_ORIGINS_JSON"
+        log "Using origins fetched from the V3 API"
+    else
+        origins_json=$(echo "$V3_JSON" | jq -c '.origin // []')
+        log "Using origins from $INPUT_FILE"
+    fi
+
     local origin_count
-    origin_count=$(echo "$V3_JSON" | jq '.origin | length')
+    origin_count=$(echo "$origins_json" | jq 'length')
 
     local connector_count
     connector_count=$(echo "$MANIFEST_JSON" | jq '.connectors | length')
@@ -687,7 +858,7 @@ create_connectors_from_manifest() {
 
     while [ $i -lt "$origin_count" ]; do
         local origin_json
-        origin_json=$(echo "$V3_JSON" | jq --argjson idx "$i" '.origin[$idx]')
+        origin_json=$(echo "$origins_json" | jq --argjson idx "$i" '.[$idx]')
 
         local origin_name
         origin_name=$(echo "$origin_json" | jq -r '.name // ""')
@@ -834,10 +1005,10 @@ create_connectors_from_manifest() {
                 echo "Bucket '$old_bucket' is invalid. Creating new bucket '$new_bucket'..."
 
                 # Create the new bucket using the CLI
-                local bucket_result
-                bucket_result=$(azion create storage bucket --name "$new_bucket" --workloads-access read_only 2>&1) || true
+                local bucket_result bucket_status=0
+                bucket_result=$(azion create storage bucket --name "$new_bucket" --workloads-access read_only 2>&1) || bucket_status=$?
 
-                if echo "$bucket_result" | grep -qi "error\|fail"; then
+                if [ "$bucket_status" -ne 0 ]; then
                     warn "Failed to create bucket '$new_bucket': $bucket_result"
                     warn "Failed to create connector for origin '$origin_name'"
                     i=$((i + 1))
@@ -950,10 +1121,10 @@ create_manifest_connectors_directly() {
                 log "  Bucket '$old_bucket' not found (likely account change). Creating new bucket '$new_bucket'..."
                 echo "Bucket '$old_bucket' is invalid. Creating new bucket '$new_bucket'..."
 
-                local bucket_result
-                bucket_result=$(azion create storage bucket --name "$new_bucket" --workloads-access read_only 2>&1) || true
+                local bucket_result bucket_status=0
+                bucket_result=$(azion create storage bucket --name "$new_bucket" --workloads-access read_only 2>&1) || bucket_status=$?
 
-                if echo "$bucket_result" | grep -qi "error\|fail"; then
+                if [ "$bucket_status" -ne 0 ]; then
                     warn "Failed to create bucket '$new_bucket': $bucket_result"
                     warn "Failed to create connector '$connector_name'"
                     i=$((i + 1))
@@ -1044,8 +1215,9 @@ if [ "$HAS_DOMAIN" = "true" ]; then
             WORKLOAD_NAME="existing_workload"
         else
             log "Getting details for workload ID: $WORKLOAD_ID"
-            WORKLOAD_DETAILS=$(azion describe workload --workload-id "$WORKLOAD_ID" --format json 2>&1) || true
-            if echo "$WORKLOAD_DETAILS" | grep -qi "error\|fail"; then
+            WORKLOAD_STATUS=0
+            WORKLOAD_DETAILS=$(azion describe workload --workload-id "$WORKLOAD_ID" --format json 2>&1) || WORKLOAD_STATUS=$?
+            if [ "$WORKLOAD_STATUS" -ne 0 ] || ! echo "$WORKLOAD_DETAILS" | jq empty 2>/dev/null; then
                 warn "Failed to get workload details: $WORKLOAD_DETAILS"
                 log "Continuing with conversion using only the workload ID"
                 WORKLOAD_NAME="unknown_workload"
@@ -1224,6 +1396,27 @@ HAS_ORIGINS=$(echo "$V3_JSON" | jq -r 'if .origin and (.origin | length > 0) the
 
 
 if [ "$CREATE_CONNECTORS" = true ]; then
+    # Fetch authoritative origins from the V3 API using the edge application id.
+    # Prefer the id from the V3 domain details, fall back to azion.json application.id.
+    if [ "$DRY_RUN" != true ]; then
+        ORIGIN_APP_ID=""
+        if [ -n "$V3_EDGE_APP_ID" ] && [ "$V3_EDGE_APP_ID" != "0" ] && [ "$V3_EDGE_APP_ID" != "null" ]; then
+            ORIGIN_APP_ID="$V3_EDGE_APP_ID"
+        elif [ -n "$APP_ID" ] && [ "$APP_ID" != "0" ] && [ "$APP_ID" != "null" ]; then
+            ORIGIN_APP_ID="$APP_ID"
+        fi
+
+        if [ -n "$ORIGIN_APP_ID" ]; then
+            log "Fetching V3 origins for edge application $ORIGIN_APP_ID..."
+            V3_ORIGINS_JSON=$(fetch_v3_origins "$ORIGIN_APP_ID") || true
+            if [ -n "$V3_ORIGINS_JSON" ] && [ "$V3_ORIGINS_JSON" != "[]" ] && [ "$V3_ORIGINS_JSON" != "null" ]; then
+                log "Fetched $(echo "$V3_ORIGINS_JSON" | jq 'length') origin(s) from the V3 API"
+            else
+                log "No origins fetched from V3 API; will use origins from $INPUT_FILE"
+            fi
+        fi
+    fi
+
     create_connectors_from_manifest
 fi
 

@@ -2,11 +2,13 @@ package deploy
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
-	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/edge-api"
+	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	thoth "github.com/aziontech/go-thoth"
 	"go.uber.org/zap"
@@ -36,29 +38,30 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		return err
 	}
 
-	configReplacements := []struct {
-		key   string
-		value string
-	}{
-		{"$FUNCTION_NAME", conf.Name},
-		{"$APPLICATION_NAME", conf.Name},
-		{"$BUCKET_NAME", conf.Bucket},
-		{"$BUCKET_PREFIX", conf.Prefix},
-		{"$CONNECTOR_NAME", conf.Name},
-		{"$WORKLOAD_NAME", conf.Name},
-		{"$DEPLOYMENT_NAME", conf.Name},
-		{"$FUNCTION_INSTANCE_NAME", conf.Name},
+	// Build replacements map and execute in a single command
+	replacements := map[string]string{
+		"$FUNCTION_NAME":          conf.Name,
+		"$APPLICATION_NAME":       conf.Name,
+		"$BUCKET_NAME":            conf.Bucket,
+		"$BUCKET_PREFIX":          conf.Prefix,
+		"$CONNECTOR_NAME":         conf.Name,
+		"$WORKLOAD_NAME":          conf.Name,
+		"$DEPLOYMENT_NAME":        conf.Name,
+		"$FUNCTION_INSTANCE_NAME": conf.Name,
 	}
 
-	for _, replacement := range configReplacements {
-		cmdStr := fmt.Sprintf("config replace -k '%s' -v '%s'", replacement.key, replacement.value)
-		command := vul.Command("", cmdStr, cmd.F)
-		logger.Debug("Running the following command", zap.Any("Command", command))
+	replacementsJSON, err := json.Marshal(replacements)
+	if err != nil {
+		return fmt.Errorf("failed to marshal replacements: %w", err)
+	}
 
-		err := cmd.commandRunInteractive(cmd.F, command)
-		if err != nil {
-			return err
-		}
+	cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
+	command := vul.Command("", cmdStr, cmd.F)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+
+	err = cmd.commandRunInteractive(cmd.F, command)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -183,11 +186,13 @@ func (cmd *DeployCmd) doRulesDeploy(ctx context.Context, conf *contracts.AzionAp
 		return nil
 	}
 
+	apiCallStart := time.Now()
 	err := client.CreateRulesEngineNextApplication(ctx, conf.Application.ID, conf.Preset)
 	if err != nil {
 		logger.Debug("Error while creating rules engine", zap.Error(err))
 		return err
 	}
+	GlobalTimingSummary.AddAPICallTime("RulesEngine.Create", time.Since(apiCallStart))
 
 	return nil
 }
@@ -200,10 +205,12 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 		reqApp.SetName(conf.Application.Name)
 	}
 
+	apiCallStart := time.Now()
 	application, err := client.Create(ctx, &reqApp)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorCreateApplication.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Create", time.Since(apiCallStart))
 
 	msgf := fmt.Sprintf(
 		msg.DeployOutputEdgeApplicationCreate, application.GetName(), application.GetId())
@@ -212,7 +219,7 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 
 	reqUpApp := apiapp.UpdateRequest{}
 	mods := edgesdk.ApplicationModulesRequest{
-		Functions:              &edgesdk.EdgeFunctionModuleRequest{},
+		Functions:              &edgesdk.FunctionModuleRequest{},
 		ApplicationAccelerator: &edgesdk.ApplicationAcceleratorModuleRequest{},
 	}
 	mods.Functions.SetEnabled(true)
@@ -220,10 +227,12 @@ func (cmd *DeployCmd) createApplication(client *apiapp.Client, ctx context.Conte
 	reqUpApp.SetModules(mods)
 	reqUpApp.Id = application.GetId()
 
+	apiCallStart = time.Now()
 	application, err = client.Update(ctx, &reqUpApp)
 	if err != nil {
 		return 0, fmt.Errorf(msg.ErrorUpdateApplication.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Update (modules)", time.Since(apiCallStart))
 
 	return application.GetId(), nil
 }
@@ -236,10 +245,12 @@ func (cmd *DeployCmd) updateApplication(client *apiapp.Client, ctx context.Conte
 		reqApp.SetName(conf.Application.Name)
 	}
 	reqApp.Id = conf.Application.ID
+	apiCallStart := time.Now()
 	application, err := client.Update(ctx, &reqApp)
 	if err != nil {
 		return err
 	}
+	GlobalTimingSummary.AddAPICallTime("Application.Update", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(
 		msg.DeployOutputEdgeApplicationUpdate, application.GetName(), application.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -255,10 +266,12 @@ func (cmd *DeployCmd) createWorkload(client *apiworkload.Client, ctx context.Con
 		reqWork.SetName(conf.Workloads.Name)
 	}
 	reqWork.SetActive(true)
+	apiCallStart := time.Now()
 	workload, err := client.Create(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorCreateDomain.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Workload.Create", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(msg.DeployOutputWorkloadCreate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
@@ -273,10 +286,12 @@ func (cmd *DeployCmd) updateWorkload(client *apiworkload.Client, ctx context.Con
 		reqWork.SetName(conf.Workloads.Name)
 	}
 	reqWork.Id = conf.Workloads.Id
+	apiCallStart := time.Now()
 	workload, err := client.Update(ctx, &reqWork)
 	if err != nil {
 		return nil, fmt.Errorf(msg.ErrorUpdateDomain.Error(), err)
 	}
+	GlobalTimingSummary.AddAPICallTime("Workload.Update", time.Since(apiCallStart))
 	msgf := fmt.Sprintf(msg.DeployOutputWorkloadUpdate, conf.Name, workload.GetId())
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)

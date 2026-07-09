@@ -28,6 +28,26 @@ import (
 	"go.uber.org/zap"
 )
 
+// ParseInt64Slice parses a comma-separated list of integers into a []int64,
+// preserving the order in which the values appear. Surrounding whitespace
+// around each value is ignored and empty entries are skipped.
+func ParseInt64Slice(value string) ([]int64, error) {
+	parts := strings.Split(value, ",")
+	result := make([]int64, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed == "" {
+			continue
+		}
+		num, err := strconv.ParseInt(trimmed, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, num)
+	}
+	return result, nil
+}
+
 type ErrorResponse struct {
 	Errors []ErrorDetail `json:"errors"`
 }
@@ -779,10 +799,15 @@ func LogAndRewindBody(httpResp *http.Response) error {
 }
 
 func LogAndRewindBodyV4(httpResp *http.Response) (string, error) {
+	if httpResp == nil {
+		return "", nil
+	}
+
 	logger.Debug("", zap.Any("Status Code", httpResp.StatusCode))
 	logger.Debug("", zap.Any("Headers", httpResp.Header))
 	var errResp ErrorResponse
 	bodyBytes, err := io.ReadAll(httpResp.Body)
+	logger.Debug("Response body", zap.Any("Body", string(bodyBytes)))
 	if err != nil {
 		logger.Debug("Error while reading body of the http response", zap.Error(err))
 		return "", ErrorPerStatusCodeV4("", httpResp, err)
