@@ -47,7 +47,7 @@ To use `rpm`, `deb` and `apk` packages, please visit our [releases](https://gith
 To download and install azion CLI, run:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/aziontech/azion/refs/heads/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aziontech/azion/refs/heads/main/scripts/install.sh | bash
 ``````
 
 If your are a Windows user, download azion CLI through WinGet:
