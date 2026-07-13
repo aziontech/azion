@@ -29,7 +29,7 @@ func ParseExpirationDate(currentDate time.Time, expirationString string) (time.T
 	lastChar := expirationString[len(expirationString)-1]
 	if interval, ok := suffixMapping[lastChar]; ok {
 		intervalValue := 0
-		_, err := fmt.Sscanf(string(expirationString[0]), "%d", &intervalValue)
+		_, err := fmt.Sscanf(expirationString[:len(expirationString)-1], "%d", &intervalValue)
 		if err != nil {
 			return time.Time{}, err
 		}

@@ -24,6 +24,12 @@ func TestParseExpirationDate(t *testing.T) {
 			name: "1 day", args: args{currentDate, "1d"},
 			want: time.Date(2008, 11, 02, 0, 0, 0, 0, &time.Location{})},
 		{
+			name: "30 days", args: args{currentDate, "30d"},
+			want: time.Date(2008, 12, 01, 0, 0, 0, 0, &time.Location{})},
+		{
+			name: "10 weeks", args: args{currentDate, "10w"},
+			want: time.Date(2009, 01, 10, 0, 0, 0, 0, &time.Location{})},
+		{
 			name: "1 week", args: args{time.Date(2024, 03, 06, 0, 0, 0, 0, &time.Location{}), "1w"},
 			want: time.Date(2024, 03, 13, 0, 0, 0, 0, &time.Location{}),
 		},
