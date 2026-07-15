@@ -1,0 +1,47 @@
+name: OSSF Scorecard
+
+on:
+  pull_request:
+    branches: ['main', 'dev']
+  schedule:
+    - cron: '0 6 * * 1' # weekly measurement on the default branch
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  scorecard:
+    name: OSSF Scorecard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      THRESHOLD: '8'
+      MODE: 'warn'
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard
+        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        with:
+          results_file: results.json
+          results_format: json
+          publish_results: false
+
+      - name: Gate on aggregate score
+        run: |
+          SCORE=$(jq -r '.score' results.json)
+          echo "OSSF aggregate = ${SCORE}  (threshold ${THRESHOLD}, mode ${MODE})"
+          if [ "$SCORE" = "-1" ] || [ "$SCORE" = "null" ]; then
+            echo "::warning::Scorecard returned inconclusive score — not gating"; exit 0
+          fi
+          below=$(awk -v s="$SCORE" -v t="$THRESHOLD" 'BEGIN{print (s<t)?1:0}')
+          if [ "$below" = "1" ]; then
+            if [ "$MODE" = "enforce" ]; then
+              echo "::error::OSSF ${SCORE} < ${THRESHOLD} — blocking merge"; exit 1
+            else
+              echo "::warning::OSSF ${SCORE} < ${THRESHOLD} — warn mode, not blocking"
+            fi
+          fi
