@@ -6,6 +6,9 @@ on:
     branches-ignore:
       - main 
 
+permissions:
+  contents: read
+
 jobs:
   build:
     permissions:
@@ -21,14 +24,14 @@ jobs:
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Setting up a secure repository
         run: git config --global --add safe.directory /__w/azion/azion
 
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         name: run goreleaser check
         with:
           distribution: goreleaser
@@ -54,4 +57,4 @@ jobs:
           make sec
 
       - name: Go Report
-        uses: creekorful/goreportcard-action@v1.0
+        uses: creekorful/goreportcard-action@1f35ced8cdac2cba28c9a2f2288a16aacfd507f9 # v1.0

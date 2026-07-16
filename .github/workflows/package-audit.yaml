@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
 
+permissions:
+  contents: read
+
 jobs:
   PackageAuditing:
     permissions:
@@ -16,7 +19,7 @@ jobs:
       image: golang:1.25.12
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       
       - name: bypass dep
         run: go env -w GOPRIVATE=github.com/zRedShift/mimemagic

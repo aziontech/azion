@@ -6,6 +6,9 @@ on:
     branches:
       - dev
 
+permissions:
+  contents: read
+
 jobs:
   build:
     permissions:
@@ -22,7 +25,7 @@ jobs:
         run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -31,7 +34,7 @@ jobs:
 
       - name: Bump version and push tag
         id: tag_ver
-        uses: anothrNick/github-tag-action@1.37.0
+        uses: anothrNick/github-tag-action@3272e7a58f6c71ee9ede35f53b114e1bb9a91347 # 1.37.0
         env:
           RELEASE_BRANCHES: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +69,7 @@ jobs:
           apt install -y awscli
 
       - name: Configure AWS Credentials (azion-downloads)
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1
         with:
           aws-access-key-id: ${{ secrets.CLI_S3_DOWNLOADS_ID }}
           aws-secret-access-key: ${{ secrets.CLI_S3_DOWNLOADS_SECRET }}
