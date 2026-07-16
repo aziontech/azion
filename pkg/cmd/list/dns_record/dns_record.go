@@ -52,6 +52,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list dns-record --zone-id 107313
 			$ azion list dns-record --zone-id 107313 --details
+			$ azion list dns-record --zone-id 107313 --order-by "name"
+			$ azion list dns-record --zone-id 107313 --order-by "-name"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("zone-id") {
