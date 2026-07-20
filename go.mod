@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.42.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.30
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.29
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.105.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.105.2
 	github.com/aziontech/azionapi-go-sdk v0.143.0
 	github.com/aziontech/go-thoth v0.0.0-20260622173333-6d2670b80b5c
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
