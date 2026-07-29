@@ -40,10 +40,11 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 			$ azion list firewall --details
-			$ azion list firewall --order_by "id"
+			$ azion list firewall --order-by "id"
+			$ azion list firewall --order-by "name"
+			$ azion list firewall --order-by "-name"
 			$ azion list firewall --page 1
-			$ azion list firewall --page_size 5
-			$ azion list firewall --sort "asc"
+			$ azion list firewall --page-size 5
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {

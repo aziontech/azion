@@ -44,6 +44,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list application
 			$ azion list application --details
+			$ azion list application --order-by "name"
+			$ azion list application --order-by "-name"
 			$ azion list application --page 1
 			$ azion list application --page-size 5
 		`),

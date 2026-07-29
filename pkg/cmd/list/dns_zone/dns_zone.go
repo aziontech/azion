@@ -47,6 +47,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list dns-zone
 			$ azion list dns-zone --details
+			$ azion list dns-zone --order-by "name"
+			$ azion list dns-zone --order-by "-name"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, opts, list); err != nil {

@@ -50,6 +50,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list workload
 			$ azion list workload --details
+			$ azion list workload --order-by "name"
+			$ azion list workload --order-by "-name"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {

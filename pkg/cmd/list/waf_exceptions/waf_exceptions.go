@@ -55,6 +55,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list waf-exceptions
 			$ azion list waf-exceptions --waf-id 16736354321 --details
+			$ azion list waf-exceptions --waf-id 16736354321 --order-by "name"
+			$ azion list waf-exceptions --waf-id 16736354321 --order-by "-name"
 			$ azion list waf-exceptions --waf-id 16736354321 --page 1
 			$ azion list waf-exceptions --waf-id 16736354321 --page-size 5
 		`),
