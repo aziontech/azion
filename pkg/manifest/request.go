@@ -486,9 +486,10 @@ func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clien
 	if err != nil {
 		return contracts.AzionJsonDataCacheSettings{}, err
 	}
+	updatedData := updated.GetData()
 	newCache := contracts.AzionJsonDataCacheSettings{
-		Id:   updated.GetData().Id,
-		Name: updated.GetData().Name,
+		Id:   updatedData.GetId(),
+		Name: updatedData.Name,
 	}
 	return newCache, nil
 }

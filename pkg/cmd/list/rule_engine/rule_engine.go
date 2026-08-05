@@ -118,15 +118,15 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		extractor := func(rule sdk.RequestPhaseRule, details bool) []string {
 			if details {
 				return []string{
-					fmt.Sprintf("%d", rule.Id),
+					fmt.Sprintf("%d", rule.GetId()),
 					rule.Name,
-					fmt.Sprintf("%d", rule.Order),
+					fmt.Sprintf("%d", rule.GetOrder()),
 					phase,
-					fmt.Sprintf("%v", rule.Active),
+					fmt.Sprintf("%v", rule.GetActive()),
 				}
 			}
 			return []string{
-				fmt.Sprintf("%d", rule.Id),
+				fmt.Sprintf("%d", rule.GetId()),
 				rule.Name,
 			}
 		}
@@ -149,15 +149,15 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 		extractor := func(rule sdk.ResponsePhaseRule, details bool) []string {
 			if details {
 				return []string{
-					fmt.Sprintf("%d", rule.Id),
+					fmt.Sprintf("%d", rule.GetId()),
 					rule.Name,
-					fmt.Sprintf("%d", rule.Order),
+					fmt.Sprintf("%d", rule.GetOrder()),
 					phase,
-					fmt.Sprintf("%v", rule.Active),
+					fmt.Sprintf("%v", rule.GetActive()),
 				}
 			}
 			return []string{
-				fmt.Sprintf("%d", rule.Id),
+				fmt.Sprintf("%d", rule.GetId()),
 				rule.Name,
 			}
 		}

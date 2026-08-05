@@ -109,14 +109,14 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 			modules := v.GetModules()
 			applicationControls := modules.GetCache()
 			ln = []string{
-				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%d", v.GetId()),
 				v.Name,
 				cache.GetBehavior(),
 				applicationControls.GetBehavior(),
 			}
 		} else {
 			ln = []string{
-				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%d", v.GetId()),
 				v.Name,
 				v.BrowserCache.GetBehavior(),
 			}

@@ -135,9 +135,9 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	}
 
 	for _, cache := range resp {
-		remoteCacheIds[strconv.FormatInt(cache.Id, 10)] = contracts.AzionJsonDataCacheSettings{
-			Id:   cache.Id,
-			Name: cache.Name,
+		remoteCacheIds[strconv.FormatInt(cache.GetId(), 10)] = contracts.AzionJsonDataCacheSettings{
+			Id:   cache.GetId(),
+			Name: cache.GetName(),
 		}
 
 		if !existingCacheNames[cache.GetName()] {

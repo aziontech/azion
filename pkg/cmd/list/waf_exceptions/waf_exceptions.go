@@ -120,21 +120,21 @@ func PrintTable(cmd *cobra.Command, list *ListCmd, f *cmdutil.Factory, opts *con
 		}
 		if opts.Details {
 			ln = []string{
-				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%d", v.GetId()),
 				utils.TruncateString(v.Name),
-				fmt.Sprintf("%d", v.RuleId),
+				fmt.Sprintf("%d", v.GetRuleId()),
 				path,
-				fmt.Sprintf("%v", *v.Active),
-				v.LastEditor,
-				v.LastModified.String(),
+				fmt.Sprintf("%v", v.GetActive()),
+				v.GetLastEditor(),
+				v.GetLastModified().String(),
 			}
 		} else {
 			ln = []string{
-				fmt.Sprintf("%d", v.Id),
+				fmt.Sprintf("%d", v.GetId()),
 				utils.TruncateString(v.Name),
-				fmt.Sprintf("%d", v.RuleId),
+				fmt.Sprintf("%d", v.GetRuleId()),
 				path,
-				fmt.Sprintf("%v", *v.Active),
+				fmt.Sprintf("%v", v.GetActive()),
 			}
 		}
 
