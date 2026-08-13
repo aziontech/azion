@@ -279,7 +279,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	req.Header.Set("Authorization", "Token "+token)
 
 	// Send the request
-	client := &http.Client{}
+	client := cmd.F.HttpClient
 
 	for {
 		resp, err := client.Do(req)
@@ -318,7 +318,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			requestResults.Header.Set("Authorization", "Token "+token)
 
 			// Send the request
-			clientResults := &http.Client{}
+			clientResults := cmd.F.HttpClient
 
 			respResults, err := clientResults.Do(requestResults)
 			if err != nil {

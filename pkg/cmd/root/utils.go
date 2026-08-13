@@ -35,7 +35,7 @@ func HasBlockAPIV4Flag(token string, f *factoryRoot) (bool, error) {
 	req.Header.Set("Accept", "application/json; version=1")
 	req.Header.Set("Authorization", "Token "+token)
 
-	client := &http.Client{}
+	client := f.factory.HttpClient
 	resp, err := client.Do(req)
 	if err != nil {
 		return false, err
