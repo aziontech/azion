@@ -16,7 +16,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     container:
-      image: golang:1.25.12
+      image: golang:1.25.13
     outputs:
       binver: ${{ steps.binversion.outputs.BIN_VERSION }}
     env:
