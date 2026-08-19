@@ -46,6 +46,7 @@ type initCmd struct {
 	sync                  bool
 	local                 bool
 	SkipFramework         bool
+	aliasEnv              string
 	packageManager        string
 	pathWorkingDir        string
 	f                     *cmdutil.Factory
@@ -130,6 +131,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolVar(&init.sync, "sync", false, msg.FLAG_SYNC)
 	cmd.Flags().BoolVar(&init.local, "local", false, msg.FLAG_LOCAL)
 	cmd.Flags().BoolVar(&init.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	cmd.Flags().StringVar(&init.aliasEnv, "alias-env", "", msg.AliasEnvFlag)
 	return cmd
 }
 
@@ -343,7 +345,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 		logger.Debug("Running deploy command from init command")
 		deploy := cmd.deployCmd(cmd.f)
-		err = deploy.ExternalRun(cmd.f, "azion", cmd.sync, cmd.local, cmd.SkipFramework)
+		err = deploy.ExternalRun(cmd.f, "azion", cmd.sync, cmd.local, cmd.SkipFramework, cmd.aliasEnv)
 		if err != nil {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err

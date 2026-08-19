@@ -57,6 +57,7 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	buildCmd.Flags().StringVar(&fields.OwnWorker, "use-own-worker", "", msg.FlagWorker)
 	buildCmd.Flags().StringVar(&fields.ProjectPath, "config-dir", "azion", msg.ProjectConfFlag)
 	buildCmd.Flags().BoolVar(&fields.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	buildCmd.Flags().StringVar(&fields.AliasEnv, "alias-env", "", msg.FlagAliasEnv)
 
 	return buildCmd
 }

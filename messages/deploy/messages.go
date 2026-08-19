@@ -25,6 +25,7 @@ var (
 	EdgeApplicationDeployLocal           = "Runs the entire build and deploy process locally"
 	EdgeApplicationDeployDryrun          = "Simulates the deploy process without carrying out any actual action"
 	SkipFrameworkBuild                   = "Indicates whether to bypass the framework build phase before executing 'azion build'"
+	AliasEnvFlag                         = "Environment alias forwarded to Bundler's --alias-env option during build"
 	WritableBucketFlag                   = "If sent, the project bucket will be created with read-write access"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
 	WorkersFlag                          = "Number of concurrent upload workers (default: auto-calculated based on CPU cores, max 20)"

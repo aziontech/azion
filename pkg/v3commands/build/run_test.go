@@ -3,6 +3,7 @@ package build
 import (
 	"io"
 	"io/fs"
+	"strings"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/build"
@@ -288,6 +289,65 @@ func TestBuildCmd_run(t *testing.T) {
 			}
 			if err := b.run(tt.args.fields, tt.args.msgs); (err != nil) != tt.wantErr {
 				t.Errorf("BuildCmd.run() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestBuildCmd_run_aliasEnv(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	tests := []struct {
+		name     string
+		aliasEnv string
+		want     string
+		wantHas  bool
+	}{
+		{
+			name:     "alias env sent to bundler",
+			aliasEnv: "production",
+			want:     " --alias-env production",
+			wantHas:  true,
+		},
+		{
+			name:     "alias env not informed",
+			aliasEnv: "",
+			want:     "--alias-env",
+			wantHas:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var commandRun string
+			b := &BuildCmd{
+				Io: iostreams.System(),
+				GetAzionJsonContent: func(pathConf string) (*contracts.AzionApplicationOptionsV3, error) {
+					return &contracts.AzionApplicationOptionsV3{}, nil
+				},
+				WriteAzionJsonContent: func(conf *contracts.AzionApplicationOptionsV3, confPath string) error {
+					return nil
+				},
+				CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+					return "", nil
+				},
+				CommandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					commandRun = comm
+					return nil
+				},
+				f: &cmdutil.Factory{
+					IOStreams: iostreams.System(),
+					Config:    viper.New(),
+				},
+			}
+
+			msgs := []string{}
+			if err := b.run(&contracts.BuildInfoV3{AliasEnv: tt.aliasEnv}, &msgs); err != nil {
+				t.Fatalf("BuildCmd.run() error = %v", err)
+			}
+
+			if strings.Contains(commandRun, tt.want) != tt.wantHas {
+				t.Errorf("BuildCmd.run() command = %q, want contains %q = %v", commandRun, tt.want, tt.wantHas)
 			}
 		})
 	}

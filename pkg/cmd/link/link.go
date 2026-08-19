@@ -43,6 +43,7 @@ type LinkInfo struct {
 	Sync           bool
 	SkipFramework  bool
 	Local          bool
+	AliasEnv       string
 }
 
 type LinkCmd struct {
@@ -130,6 +131,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
 	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
 	cobraCmd.Flags().BoolVar(&info.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	cobraCmd.Flags().StringVar(&info.AliasEnv, "alias-env", "", msg.AliasEnvFlag)
 
 	return cobraCmd
 }
@@ -257,6 +259,11 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 		if len(info.Preset) > 0 {
 			cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, info.Preset)
 		}
+
+		if len(info.AliasEnv) > 0 {
+			cmdVulcanBuild = fmt.Sprintf("%s --alias-env %s", cmdVulcanBuild, info.AliasEnv)
+		}
+
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", cmdVulcanBuild, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
@@ -273,7 +280,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 			logger.Debug("Running build command from link command")
 			buildCmd := cmd.BuildCmd(cmd.F)
-			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: strings.ToLower(info.Preset)}, info.projectPath, &msgs, info.SkipFramework)
+			err := buildCmd.ExternalRun(&contracts.BuildInfo{Preset: strings.ToLower(info.Preset), AliasEnv: info.AliasEnv}, info.projectPath, &msgs, info.SkipFramework)
 			if err != nil {
 				logger.Debug("Error while running build command called by link command", zap.Error(err))
 				return err
@@ -308,7 +315,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local, info.SkipFramework)
+				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local, info.SkipFramework, info.AliasEnv)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err
