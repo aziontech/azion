@@ -5,6 +5,9 @@ on:
     branches: [main]
     types: [opened, synchronize, labeled, unlabeled]
 
+permissions:
+  contents: read
+
 jobs:
   scc-check:
     permissions:
@@ -13,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-scc') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - uses: aziontech/scc_check@main
+      - uses: aziontech/scc_check@ef8c23bc9056bf6c21cc8a391fed67412a5fd3c1 # main
