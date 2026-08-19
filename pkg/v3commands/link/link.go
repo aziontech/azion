@@ -37,7 +37,7 @@ type LinkInfo struct {
 	projectPath    string
 	Sync           bool
 	Local          bool
-	AliasEnv       string
+	AliasEnv       bool
 }
 
 type LinkCmd struct {
@@ -122,7 +122,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
 	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
 	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
-	cobraCmd.Flags().StringVar(&info.AliasEnv, "alias-env", "", msg.AliasEnvFlag)
+	cobraCmd.Flags().BoolVar(&info.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 
 	return cobraCmd
 }

@@ -22,7 +22,7 @@ type BuildInfo struct {
 	OwnWorker     string
 	ProjectPath   string
 	SkipFramework bool
-	AliasEnv      string
+	AliasEnv      bool
 }
 
 type BuildInfoV3 struct {
@@ -32,7 +32,7 @@ type BuildInfoV3 struct {
 	OwnWorker     string
 	ProjectPath   string
 	IsFirewall    bool
-	AliasEnv      string
+	AliasEnv      bool
 }
 
 type ListOptions struct {

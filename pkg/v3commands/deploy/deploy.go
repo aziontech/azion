@@ -65,7 +65,7 @@ var (
 	DryRun      bool
 	Local       bool
 	Env         string
-	AliasEnv    string
+	AliasEnv    bool
 	Logs        = contracts.Logs{}
 	Result      = contracts.Results{}
 	DeployURL   = "https://console.azion.com"
@@ -123,7 +123,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
 	deployCmd.Flags().BoolVar(&Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
-	deployCmd.Flags().StringVar(&AliasEnv, "alias-env", "", msg.AliasEnvFlag)
+	deployCmd.Flags().BoolVar(&AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -131,7 +131,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local bool, sync bool, aliasEnv string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local bool, sync bool, aliasEnv bool) error {
 	ProjectConf = configPath
 	Local = local
 	Sync = sync

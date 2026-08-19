@@ -18,5 +18,5 @@ var (
 	FlagEntry             = "Code entrypoint; (default: ./main.js)"
 	ProjectConfFlag       = "Relative path to where your custom azion.json and args.json files are stored"
 	SkipFrameworkBuild    = "Indicates whether to bypass the framework build phase before executing 'azion build'."
-	FlagAliasEnv          = "Environment alias forwarded to Bundler's --alias-env option during build"
+	FlagAliasEnv          = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 )

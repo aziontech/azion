@@ -48,8 +48,8 @@ func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 		cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, cmd.preset)
 	}
 
-	if len(cmd.aliasEnv) > 0 {
-		cmdVulcanBuild = fmt.Sprintf("%s --alias-env %s", cmdVulcanBuild, cmd.aliasEnv)
+	if cmd.aliasEnv {
+		cmdVulcanBuild = fmt.Sprintf("%s --alias-env", cmdVulcanBuild)
 	}
 
 	command := vul.Command("", cmdVulcanBuild, cmd.f)

@@ -43,5 +43,5 @@ var (
 	WrittenGitignore                      = "Sucessfully written to your .gitignore file\n"
 	ChangeWorkingDir                      = "Make sure to change to the new working directory before running building or deploying your project\n"
 	SkipFrameworkBuild                    = "Indicates whether to bypass the framework build phase before executing 'azion build'"
-	AliasEnvFlag                          = "Environment alias forwarded to Bundler's --alias-env option during build"
+	AliasEnvFlag                          = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 )

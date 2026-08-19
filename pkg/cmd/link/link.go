@@ -43,7 +43,7 @@ type LinkInfo struct {
 	Sync           bool
 	SkipFramework  bool
 	Local          bool
-	AliasEnv       string
+	AliasEnv       bool
 }
 
 type LinkCmd struct {
@@ -131,7 +131,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
 	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
 	cobraCmd.Flags().BoolVar(&info.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
-	cobraCmd.Flags().StringVar(&info.AliasEnv, "alias-env", "", msg.AliasEnvFlag)
+	cobraCmd.Flags().BoolVar(&info.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 
 	return cobraCmd
 }
@@ -260,8 +260,8 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			cmdVulcanBuild = fmt.Sprintf("%s --preset '%s' --only-generate-config", cmdVulcanBuild, info.Preset)
 		}
 
-		if len(info.AliasEnv) > 0 {
-			cmdVulcanBuild = fmt.Sprintf("%s --alias-env %s", cmdVulcanBuild, info.AliasEnv)
+		if info.AliasEnv {
+			cmdVulcanBuild = fmt.Sprintf("%s --alias-env", cmdVulcanBuild)
 		}
 
 		vul := vulcanPkg.NewVulcan()

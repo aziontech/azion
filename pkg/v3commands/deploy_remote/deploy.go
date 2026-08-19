@@ -51,7 +51,7 @@ var (
 	ProjectConf string
 	Sync        bool
 	Env         string
-	AliasEnv    string
+	AliasEnv    bool
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -95,7 +95,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
-	deployCmd.Flags().StringVar(&AliasEnv, "alias-env", "", msg.AliasEnvFlag)
+	deployCmd.Flags().BoolVar(&AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -103,7 +103,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool, aliasEnv string) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, aliasEnv bool) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env

@@ -46,7 +46,7 @@ type initCmd struct {
 	sync                  bool
 	local                 bool
 	SkipFramework         bool
-	aliasEnv              string
+	aliasEnv              bool
 	packageManager        string
 	pathWorkingDir        string
 	f                     *cmdutil.Factory
@@ -131,7 +131,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolVar(&init.sync, "sync", false, msg.FLAG_SYNC)
 	cmd.Flags().BoolVar(&init.local, "local", false, msg.FLAG_LOCAL)
 	cmd.Flags().BoolVar(&init.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
-	cmd.Flags().StringVar(&init.aliasEnv, "alias-env", "", msg.AliasEnvFlag)
+	cmd.Flags().BoolVar(&init.aliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return cmd
 }
 

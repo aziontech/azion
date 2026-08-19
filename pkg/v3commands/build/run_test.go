@@ -299,20 +299,17 @@ func TestBuildCmd_run_aliasEnv(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		aliasEnv string
-		want     string
+		aliasEnv bool
 		wantHas  bool
 	}{
 		{
 			name:     "alias env sent to bundler",
-			aliasEnv: "production",
-			want:     " --alias-env production",
+			aliasEnv: true,
 			wantHas:  true,
 		},
 		{
 			name:     "alias env not informed",
-			aliasEnv: "",
-			want:     "--alias-env",
+			aliasEnv: false,
 			wantHas:  false,
 		},
 	}
@@ -346,8 +343,8 @@ func TestBuildCmd_run_aliasEnv(t *testing.T) {
 				t.Fatalf("BuildCmd.run() error = %v", err)
 			}
 
-			if strings.Contains(commandRun, tt.want) != tt.wantHas {
-				t.Errorf("BuildCmd.run() command = %q, want contains %q = %v", commandRun, tt.want, tt.wantHas)
+			if strings.Contains(commandRun, "--alias-env") != tt.wantHas {
+				t.Errorf("BuildCmd.run() command = %q, want contains --alias-env = %v", commandRun, tt.wantHas)
 			}
 		})
 	}
