@@ -6,6 +6,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   build:
     permissions:
@@ -13,13 +16,13 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     container:
-      image: golang:1.25.11
+      image: golang:1.25.13
     env:
       CGO_ENABLED: 0 # Statically linked
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -31,7 +34,7 @@ jobs:
         run: go run ./cmd/gen_docs/main.go --file-type "md" --doc-path "/tmp/docs"
 
       - name: Checkout wiki repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
           repository: ${{ github.repository }}.wiki

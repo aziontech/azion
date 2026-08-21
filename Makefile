@@ -4,7 +4,7 @@ SHELL := env PATH='$(PATH)' /bin/bash
 NAME := azion
 
 ifeq (, $(GO))
-$(error "No go binary found in your system, please install go 1.25.11 before continuing")
+$(error "No go binary found in your system, please install go 1.25.13 before continuing")
 endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)

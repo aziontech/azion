@@ -54,6 +54,8 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list cache-setting --application-id 16736354321
 			$ azion list cache-setting --application-id 16736354321 --details
+			$ azion list cache-setting --application-id 16736354321 --order-by "name"
+			$ azion list cache-setting --application-id 16736354321 --order-by "-name"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if !cmd.Flags().Changed("application-id") {

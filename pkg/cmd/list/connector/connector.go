@@ -40,10 +40,11 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 			$ azion list connector --details
-			$ azion list connector --order_by "id"
+			$ azion list connector --order-by "id"
+			$ azion list connector --order-by "name"
+			$ azion list connector --order-by "-name"
 			$ azion list connector --page 1
-			$ azion list connector --page_size 5
-			$ azion list connector --sort "asc"
+			$ azion list connector --page-size 5
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {
