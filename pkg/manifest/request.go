@@ -1,21 +1,12 @@
 package manifest
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-
-	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
 	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
 	apiWorkloads "github.com/aziontech/azion-cli/pkg/api/workloads"
-	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
-	"go.uber.org/zap"
 )
 
 func transformEdgeConnectorRequest(connectorRequest edgesdk.ConnectorRequest) *apiConnector.UpdateRequest {
@@ -276,179 +267,6 @@ func getConnectorName(connector edgesdk.ConnectorRequest, defaultName string) (s
 	return defaultName, ""
 }
 
-func transformBehaviorsRequest(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.RequestPhaseBehaviorRequest, error) {
-	behaviorsRequest := make([]edgesdk.RequestPhaseBehaviorRequest, 0, len(behaviors))
-	for _, behavior := range behaviors {
-		var withArgs edgesdk.BehaviorArgs
-		var withoutArgs edgesdk.BehaviorNoArgs
-		var captureMatchGroups edgesdk.BehaviorCapture
-		var beh edgesdk.RequestPhaseBehaviorRequest
-		switch behavior.Type {
-		case "run_function":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorArgsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			withArgs.SetType("run_function")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				funcName := *attributes.Value.String
-				if _, ok := FunctionIds[funcName]; !ok {
-					return nil, msg.ErrorFuncNotFound
-				}
-				funcToWorkWith := FunctionIds[funcName]
-				v := edgesdk.BehaviorArgsAttributesValue{
-					Int64: &funcToWorkWith.InstanceID,
-				}
-				attributes.SetValue(v)
-				withArgs.SetAttributes(attributes)
-			}
-			beh.BehaviorArgs = &withArgs
-			behaviorsRequest = append(behaviorsRequest, beh)
-		case "set_cache_policy":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorArgsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			withArgs.SetType("set_cache_policy")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				cacheName := *attributes.Value.String
-				if id := CacheIdsBackup[cacheName]; id > 0 {
-					v := edgesdk.BehaviorArgsAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
-					withArgs.SetAttributes(attributes)
-					delete(CacheIds, cacheName)
-				} else {
-					logger.Debug("Cache Setting not found", zap.Any("Target", *attributes.Value.String))
-					return nil, msg.ErrorCacheNotFound
-				}
-			}
-			beh.BehaviorArgs = &withArgs
-			behaviorsRequest = append(behaviorsRequest, beh)
-		case "set_connector":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorArgsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			withArgs.SetType("set_connector")
-			if attributes.Value.Int64 != nil {
-				withArgs.SetAttributes(attributes)
-			} else if attributes.Value.String != nil {
-				connectorName := *attributes.Value.String
-				if id := ConnectorIds[connectorName]; id > 0 {
-					v := edgesdk.BehaviorArgsAttributesValue{
-						Int64: &id,
-					}
-					attributes.SetValue(v)
-					withArgs.SetAttributes(attributes)
-					// delete(ConnectorIds, connectorName)
-				} else {
-					logger.Debug("Connector not found", zap.Any("Target", connectorName))
-					return nil, msg.ErrorConnectorNotFound
-				}
-			}
-			beh.BehaviorArgs = &withArgs
-			behaviorsRequest = append(behaviorsRequest, beh)
-		case "capture_match_groups":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorCaptureMatchGroupsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			captureMatchGroups.SetType("capture_match_groups")
-			captureMatchGroups.SetAttributes(attributes)
-			beh.BehaviorCapture = &captureMatchGroups
-			behaviorsRequest = append(behaviorsRequest, beh)
-		case "redirect_to_301", "redirect_to_302", "filter_request_cookie", "rewrite_request", "add_request_header", "filter_request_header", "add_request_cookie":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorArgsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			withArgs.SetType(behavior.Type)
-			withArgs.SetAttributes(attributes)
-			beh.BehaviorArgs = &withArgs
-			behaviorsRequest = append(behaviorsRequest, beh)
-		default:
-			withoutArgs.SetType(behavior.Type)
-			beh.BehaviorNoArgs = &withoutArgs
-			behaviorsRequest = append(behaviorsRequest, beh)
-		}
-	}
-
-	return behaviorsRequest, nil
-}
-
-func transformBehaviorsResponse(behaviors []contracts.ManifestRuleBehavior) ([]edgesdk.ResponsePhaseBehaviorRequest, error) {
-	behaviorsResponse := make([]edgesdk.ResponsePhaseBehaviorRequest, 0, len(behaviors))
-
-	for _, behavior := range behaviors {
-		var withArgs edgesdk.BehaviorArgs
-		var withoutArgs edgesdk.BehaviorNoArgs
-		var captureMatchGroups edgesdk.BehaviorCapture
-		var beh edgesdk.ResponsePhaseBehaviorRequest
-
-		switch behavior.Type {
-		case "capture_match_groups":
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorCaptureMatchGroupsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			captureMatchGroups.SetType("capture_match_groups")
-			captureMatchGroups.SetAttributes(attributes)
-			beh.BehaviorCapture = &captureMatchGroups
-			behaviorsResponse = append(behaviorsResponse, beh)
-		case "enable_gzip", "deliver":
-			withoutArgs.SetType(behavior.Type)
-			beh.BehaviorNoArgs = &withoutArgs
-			behaviorsResponse = append(behaviorsResponse, beh)
-		default:
-			// Everything else is WithArgs string
-			attributesJSON, err := json.Marshal(behavior.Attributes)
-			if err != nil {
-				return nil, err
-			}
-			var attributes edgesdk.BehaviorArgsAttributes
-			if err := json.Unmarshal(attributesJSON, &attributes); err != nil {
-				return nil, err
-			}
-			withArgs.SetType(behavior.Type)
-			withArgs.SetAttributes(attributes)
-			beh.BehaviorArgs = &withArgs
-			behaviorsResponse = append(behaviorsResponse, beh)
-		}
-	}
-
-	return behaviorsResponse, nil
-}
-
 func transformRuleRequestCreate(rule contracts.ManifestRule) edgesdk.RequestPhaseRuleRequest {
 	request := edgesdk.RequestPhaseRuleRequest{}
 
@@ -473,36 +291,4 @@ func transformRuleResponseCreate(rule contracts.ManifestRule) edgesdk.ResponsePh
 	request.SetName(rule.Name)
 
 	return request
-}
-
-func updateCache(f *cmdutil.Factory, cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, r int64, ctx context.Context, edgeappman contracts.Applications) (contracts.AzionJsonDataCacheSettings, error) {
-	request := transformCacheRequest(cache)
-	updated, err := clientCache.Update(ctx, request, conf.Application.ID, r)
-	if errors.Is(err, utils.ErrorNotFound404) {
-		logger.Debug("Cache Setting not found. Trying to create", zap.Any("Error", err))
-		logger.FInfoFlags(f.IOStreams.Out, msg.MessageDeleteResource+"\n", f.Format, f.Out)
-		return createCache(cache, clientCache, conf, ctx)
-	}
-	if err != nil {
-		return contracts.AzionJsonDataCacheSettings{}, err
-	}
-	newCache := contracts.AzionJsonDataCacheSettings{
-		Id:   updated.GetData().Id,
-		Name: updated.GetData().Name,
-	}
-	return newCache, nil
-}
-
-func createCache(cache contracts.ManifestCacheSetting, clientCache *apiCache.ClientV4, conf *contracts.AzionApplicationOptions, ctx context.Context) (contracts.AzionJsonDataCacheSettings, error) {
-	request := transformCacheRequestCreate(cache)
-	responseCache, err := clientCache.Create(ctx, request.CacheSettingRequest, conf.Application.ID)
-	if err != nil {
-		return contracts.AzionJsonDataCacheSettings{}, err
-	}
-	newCache := contracts.AzionJsonDataCacheSettings{
-		Id:   responseCache.GetId(),
-		Name: responseCache.GetName(),
-	}
-	CacheIds[newCache.Name] = newCache.Id
-	return newCache, nil
 }

@@ -28,13 +28,12 @@ type TimingCallback func(name string, duration time.Duration)
 // GlobalTimingCallback is the global callback for timing reports
 var GlobalTimingCallback TimingCallback
 
+// CacheIds and RuleIds carry the resources tracked by azion.json into
+// deleteResources, which removes the ones the manifest no longer declares.
+// Every other id map lives on ResourceContext for the duration of a run.
 var (
 	CacheIds         map[string]int64
-	CacheIdsBackup   map[string]int64
 	RuleIds          map[string]contracts.RuleIdsStruct
-	ConnectorIds     map[string]int64
-	DeploymentIds    map[string]int64
-	FunctionIds      map[string]contracts.AzionJsonDataFunction
 	manifestFilePath = "/.edge/manifest.json"
 )
 
@@ -89,17 +88,6 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	defer s.Stop()
 
 	rc := NewResourceContext(f, conf, manifest, projectConf, msgs, man.WriteAzionJsonContent)
-
-	// The package-level maps alias the ones owned by the resource context, so
-	// that resources applied during this run (e.g. the "run_function" behavior
-	// looking up a function instance created moments earlier) see the ids as
-	// soon as they are known.
-	CacheIds = rc.CacheIds
-	CacheIdsBackup = rc.CacheIdsBackup
-	RuleIds = rc.RuleIds
-	ConnectorIds = rc.ConnectorIds
-	DeploymentIds = rc.DeploymentIds
-	FunctionIds = rc.FunctionIds
 
 	if len(manifest.Functions) > 0 {
 		start := time.Now()
@@ -210,6 +198,11 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 			GlobalTimingCallback("ManifestPurge", time.Since(start))
 		}
 	}
+
+	// Hand the tracked ids to deleteResources, minus the ones consumed during
+	// this run (a cache setting still referenced by a rule is not an orphan).
+	CacheIds = rc.CacheIds
+	RuleIds = rc.RuleIds
 
 	if err := rc.DeleteOrphanedResources(); err != nil {
 		return err
