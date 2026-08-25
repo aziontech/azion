@@ -14,8 +14,16 @@ import (
 func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.GetApplicationsResponse, error) {
 	logger.Debug("List Edge Application")
 
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
 	resp, httpResp, err := c.apiClient.EdgeApplicationsMainSettingsAPI.
-		EdgeApplicationsGet(ctx).Page(opts.Page).PageSize(opts.PageSize).Execute()
+		EdgeApplicationsGet(ctx).
+		OrderBy(opts.OrderBy).
+		Page(opts.Page).
+		PageSize(opts.PageSize).
+		Sort(opts.Sort).Execute()
 
 	if err != nil {
 		logger.Debug("Error while listing Edge Applications", zap.Error(err))
