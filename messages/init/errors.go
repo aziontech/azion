@@ -23,4 +23,6 @@ var (
 	ErrorReadingGitignore              = errors.New("Failed to read your .gitignore file")
 	ErrorWritingGitignore              = errors.New("Failed to write to your .gitignore file")
 	ErrorGetProjectInfo                = errors.New("Failed to get project preset")
+
+	ErrorTemplateNotFound = "Template '%s' not found. Run 'azion init' without --template to see available options."
 )

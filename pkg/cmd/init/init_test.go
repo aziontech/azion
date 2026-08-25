@@ -41,6 +41,7 @@ func Test_initCmd_Run(t *testing.T) {
 		name                  string
 		preset                string
 		auto                  bool
+		template              string
 		packageManager        string
 		pathWorkingDir        string
 		globalFlagAll         bool
@@ -704,6 +705,161 @@ func Test_initCmd_Run(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "valid template name",
+			fields: fields{
+				auto:     true,
+				template: "Angular Boilerplate",
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+					Config:    viper.New(),
+				},
+				globalFlagAll: false,
+				name:          "project-piece",
+				getWorkDir: func() (string, error) {
+					return "/path/full", nil
+				},
+				get: func(url string) (resp *http.Response, err error) {
+					b, err := os.ReadFile("./.fixtures/project_samples.json")
+					if err != nil {
+						return nil, err
+					}
+
+					responseBody := io.NopCloser(bytes.NewReader(b))
+					resp = &http.Response{
+						StatusCode: 200,
+						Body:       responseBody,
+						Header:     make(http.Header),
+					}
+					return resp, nil
+				},
+				readAll:   io.ReadAll,
+				unmarshal: json.Unmarshal,
+				askOne: func(p survey.Prompt,
+					response interface{},
+					opts ...survey.AskOpt,
+				) error {
+					// Should not be called when template flag is provided
+					return errors.New("askOne should not be called when template is provided")
+				},
+				dir: config.Dir,
+				mkdirTemp: func(dir, pattern string) (string, error) {
+					return "", nil
+				},
+				removeAll: os.RemoveAll,
+				rename: func(oldpath, newpath string) error {
+					return nil
+				},
+				mkdir:         func(path string, perm os.FileMode) error { return nil },
+				marshalIndent: json.MarshalIndent,
+				writeFile: func(filename string, data []byte, perm fs.FileMode) error {
+					return nil
+				},
+				changeDir: func(dir string) error { return nil },
+				commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "angular")
+					return nil
+				},
+				git: github.Github{
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
+						return nil
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid template name",
+			fields: fields{
+				auto:     true,
+				template: "NonExistent Template",
+				fileReader: func(filename string) ([]byte, error) {
+					return []byte(infoJsonData), nil
+				},
+				f: &cmdutil.Factory{
+					Flags: cmdutil.Flags{
+						GlobalFlagAll: false,
+						Format:        "",
+						Out:           "",
+						NoColor:       false,
+					},
+					IOStreams: iostreams.System(),
+					Config:    viper.New(),
+				},
+				globalFlagAll: false,
+				name:          "project-piece",
+				getWorkDir: func() (string, error) {
+					return "/path/full", nil
+				},
+				get: func(url string) (resp *http.Response, err error) {
+					b, err := os.ReadFile("./.fixtures/project_samples.json")
+					if err != nil {
+						return nil, err
+					}
+
+					responseBody := io.NopCloser(bytes.NewReader(b))
+					resp = &http.Response{
+						StatusCode: 200,
+						Body:       responseBody,
+						Header:     make(http.Header),
+					}
+					return resp, nil
+				},
+				readAll:   io.ReadAll,
+				unmarshal: json.Unmarshal,
+				askOne: func(p survey.Prompt,
+					response interface{},
+					opts ...survey.AskOpt,
+				) error {
+					return nil
+				},
+				dir: config.Dir,
+				mkdirTemp: func(dir, pattern string) (string, error) {
+					return "", nil
+				},
+				removeAll: os.RemoveAll,
+				rename: func(oldpath, newpath string) error {
+					return nil
+				},
+				mkdir:         func(path string, perm os.FileMode) error { return nil },
+				marshalIndent: json.MarshalIndent,
+				writeFile: func(filename string, data []byte, perm fs.FileMode) error {
+					return nil
+				},
+				changeDir: func(dir string) error { return nil },
+				commandRunnerOutput: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
+					return "3.2.1", nil
+				},
+				commandRunInteractive: func(f *cmdutil.Factory, comm string) error {
+					return nil
+				},
+				load: func(filenames ...string) (err error) {
+					os.Setenv("preset", "vite")
+					return nil
+				},
+				git: github.Github{
+					Clone: func(cloneOptions *git.CloneOptions, url, path string) error {
+						return nil
+					},
+				},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -711,6 +867,7 @@ func Test_initCmd_Run(t *testing.T) {
 				name:                  tt.fields.name,
 				preset:                tt.fields.preset,
 				auto:                  tt.fields.auto,
+				template:              tt.fields.template,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
 				f:                     tt.fields.f,
@@ -760,6 +917,7 @@ func Test_initCmd_deps(t *testing.T) {
 		name                  string
 		preset                string
 		auto                  bool
+		template              string
 		packageManager        string
 		pathWorkingDir        string
 		f                     *cmdutil.Factory
@@ -882,6 +1040,7 @@ func Test_initCmd_deps(t *testing.T) {
 				name:                  tt.fields.name,
 				preset:                tt.fields.preset,
 				auto:                  tt.fields.auto,
+				template:              tt.fields.template,
 				packageManager:        tt.fields.packageManager,
 				pathWorkingDir:        tt.fields.pathWorkingDir,
 				f:                     tt.fields.f,
