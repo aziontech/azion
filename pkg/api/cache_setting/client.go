@@ -2,7 +2,6 @@ package cachesetting
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	sdkV3 "github.com/aziontech/azionapi-go-sdk/edgeapplications"
@@ -22,7 +21,6 @@ func NewClientV4(c *http.Client, url string, token string) *ClientV4 {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
-	conf.HTTPClient.Timeout = 50 * time.Second
 
 	return &ClientV4{
 		apiClient: sdk.NewAPIClient(conf),
@@ -42,7 +40,6 @@ func NewClientV3(c *http.Client, url string, token string) *ClientV3 {
 	conf.Servers = sdkV3.ServerConfigurations{
 		{URL: url},
 	}
-	conf.HTTPClient.Timeout = 50 * time.Second
 
 	return &ClientV3{
 		apiClient: sdkV3.NewAPIClient(conf),
