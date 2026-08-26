@@ -121,3 +121,50 @@ func Test_initCmd_createTemplateAzion(t *testing.T) {
 		})
 	}
 }
+
+func Test_initCmd_createTemplateAzion_ConfigDir(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	tests := []struct {
+		name        string
+		projectPath string
+		expectedDir string
+	}{
+		{name: "default config dir", projectPath: "azion", expectedDir: "myproject/azion"},
+		{name: "custom config dir", projectPath: "myconf", expectedDir: "myproject/myconf"},
+		{name: "nested config dir", projectPath: "conf/azion", expectedDir: "myproject/conf/azion"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var createdDir, writtenFile string
+			cmd := &initCmd{
+				name:           "project_piece",
+				preset:         "vite",
+				pathWorkingDir: "myproject",
+				projectPath:    tt.projectPath,
+				marshalIndent:  json.MarshalIndent,
+				fileReader:     func(string) ([]byte, error) { return nil, nil },
+				mkdir: func(path string, perm os.FileMode) error {
+					createdDir = path
+					return nil
+				},
+				writeFile: func(filename string, data []byte, perm fs.FileMode) error {
+					writtenFile = filename
+					return nil
+				},
+			}
+
+			if err := cmd.createTemplateAzion(); err != nil {
+				t.Fatalf("createTemplateAzion() error = %v", err)
+			}
+			if createdDir != tt.expectedDir {
+				t.Errorf("created directory = %q, want %q", createdDir, tt.expectedDir)
+			}
+			expectedFile := tt.expectedDir + "/azion.json"
+			if writtenFile != expectedFile {
+				t.Errorf("wrote azion.json to %q, want %q", writtenFile, expectedFile)
+			}
+		})
+	}
+}

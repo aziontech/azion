@@ -59,7 +59,6 @@ var (
 	ProjectConf   string
 	Sync          bool
 	Env           string
-	FunctionIds   map[string]contracts.AzionJsonDataFunction
 	WriteBucket   bool
 	Workers       int
 )
@@ -296,7 +295,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	// Time CreateResources operation
 	manifestCreateStart := time.Now()
-	err = interpreter.CreateResources(conf, manifestStructure, FunctionIds, f, ProjectConf, &msgs)
+	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}
