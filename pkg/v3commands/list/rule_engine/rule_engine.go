@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -87,6 +88,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
+	cmd.Flags().StringVar(&opts.Sort, "sort", "", general.ApiListFlagSort)
 	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
 	cmd.Flags().StringVar(&list.Phase, "phase", "request", msg.RulesEnginePhase)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)

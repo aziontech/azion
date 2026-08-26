@@ -128,7 +128,14 @@ func (rc *ResourceContext) populateIdMapsFromConfig() {
 		rc.CacheIds[cacheConf.Name] = cacheConf.Id
 	}
 
-	for _, funcConf := range rc.Conf.Function {
+	for i, funcConf := range rc.Conf.Function {
+		// Entries written before args paths were recorded (or by hand) carry no
+		// path at all; point them at the project's args file so the arguments
+		// are picked up and azion.json shows where they come from.
+		if funcConf.Args == "" {
+			funcConf.Args = rc.argsFilePath()
+			rc.Conf.Function[i].Args = funcConf.Args
+		}
 		rc.FunctionIds[funcConf.Name] = funcConf
 	}
 
@@ -162,6 +169,36 @@ func (rc *ResourceContext) populateIdMapsFromConfig() {
 			}
 		}
 	}
+}
+
+// argsFilePath returns the path to the project's args.json file, honoring the
+// --config-dir flag instead of assuming the default "azion" directory.
+func (rc *ResourceContext) argsFilePath() string {
+	return path.Join(rc.ProjectConf, "args.json")
+}
+
+// argsPathFor returns the args file a function instance should read. Functions
+// resolved by id alone are not described in azion.json, so they fall back to
+// the project's args file.
+func (rc *ResourceContext) argsPathFor(funcConf contracts.AzionJsonDataFunction) string {
+	if funcConf.Args != "" {
+		return funcConf.Args
+	}
+	return rc.argsFilePath()
+}
+
+// resolveInstanceArgs returns the arguments to send for a function instance.
+// Arguments declared inline in the manifest win over the project's args file.
+// The boolean report is false when neither source exists, in which case the
+// caller must leave the field out of the request.
+func (rc *ResourceContext) resolveInstanceArgs(
+	manifestArgs map[string]interface{},
+	funcConf contracts.AzionJsonDataFunction,
+) (map[string]interface{}, bool, error) {
+	if len(manifestArgs) > 0 {
+		return manifestArgs, true, nil
+	}
+	return unmarshalJsonArgs(rc.argsPathFor(funcConf))
 }
 
 func (rc *ResourceContext) WriteConfig() error {
@@ -264,7 +301,7 @@ func (rc *ResourceContext) ApplyFunctions(functions []contracts.Function) error 
 					ID:   resp.GetId(),
 					Name: resp.GetName(),
 					File: funcMan.Argument,
-					Args: "./azion/args.json",
+					Args: rc.argsFilePath(),
 				}
 				rc.FunctionIds[resp.GetName()] = newFunc
 				rc.Conf.Function = append(rc.Conf.Function, newFunc)
@@ -342,13 +379,11 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 			request := apiApplications.UpdateInstanceRequest{}
 			request.SetActive(funcMan.Active)
 			request.SetFunction(funcID)
-			if len(funcMan.Args) > 0 {
-				request.SetArgs(funcMan.Args)
-			} else if funcConf.Args != "" {
-				args, err := unmarshalJsonArgs(funcConf.Args)
-				if err != nil {
-					return err
-				}
+			args, hasArgs, err := rc.resolveInstanceArgs(funcMan.Args, funcConf)
+			if err != nil {
+				return err
+			}
+			if hasArgs {
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
@@ -362,13 +397,11 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 		} else {
 			request := apiApplications.CreateInstanceRequest{}
 			request.SetActive(true)
-			if len(funcMan.Args) > 0 {
-				request.SetArgs(funcMan.Args)
-			} else if funcConf.Args != "" {
-				args, err := unmarshalJsonArgs(funcConf.Args)
-				if err != nil {
-					return err
-				}
+			args, hasArgs, err := rc.resolveInstanceArgs(funcMan.Args, funcConf)
+			if err != nil {
+				return err
+			}
+			if hasArgs {
 				request.SetArgs(args)
 			}
 			request.SetName(funcMan.Name)
@@ -383,7 +416,7 @@ func (rc *ResourceContext) ApplyFunctionInstances(instances []contracts.Function
 				CacheId:    funcConf.CacheId,
 				Name:       funcMan.Name,
 				File:       funcConf.File,
-				Args:       funcConf.Args,
+				Args:       rc.argsPathFor(funcConf),
 				InstanceID: resp.GetId(),
 			}
 			rc.FunctionIds[funcMan.Name] = newFunc
@@ -613,6 +646,20 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 
 	ruleConf := []contracts.AzionJsonDataRules{}
 
+	// Collect rule IDs per phase in the order they appear in the manifest so we
+	// can define the execution order through the ordering endpoint afterwards.
+	requestOrder := []int64{}
+	responseOrder := []int64{}
+
+	appendOrder := func(rule contracts.AzionJsonDataRules) {
+		switch rule.Phase {
+		case "response":
+			responseOrder = append(responseOrder, rule.Id)
+		default:
+			requestOrder = append(requestOrder, rule.Id)
+		}
+	}
+
 	for _, rule := range rules {
 		if r := rc.RuleIds[rule.Rule.Name]; r.Id > 0 {
 			newRule, err := rc.updateRule(rule, r)
@@ -628,6 +675,7 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
+			appendOrder(newRule)
 			delete(rc.RuleIds, newRule.Name)
 		} else {
 			newRule, err := rc.createRule(rule)
@@ -638,11 +686,34 @@ func (rc *ResourceContext) ApplyRulesEngine(rules []contracts.ManifestRulesEngin
 			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 			*rc.Msgs = append(*rc.Msgs, msgf)
 			ruleConf = append(ruleConf, newRule)
+			appendOrder(newRule)
 		}
 	}
 
 	rc.Conf.RulesEngine.Rules = ruleConf
-	return rc.WriteConfig()
+	if err := rc.WriteConfig(); err != nil {
+		return err
+	}
+
+	// Always order the rules whenever rules exist, following the manifest order.
+	if len(requestOrder) > 0 {
+		if err := rc.ApplicationClient.OrderRulesEngineRequest(rc.Ctx, rc.Conf.Application.ID, requestOrder); err != nil {
+			return err
+		}
+		msgf := fmt.Sprintf(msg.ManifestOrderRule, rc.Conf.Application.ID, "request")
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
+	}
+	if len(responseOrder) > 0 {
+		if err := rc.ApplicationClient.OrderRulesEngineResponse(rc.Ctx, rc.Conf.Application.ID, responseOrder); err != nil {
+			return err
+		}
+		msgf := fmt.Sprintf(msg.ManifestOrderRule, rc.Conf.Application.ID, "response")
+		logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+		*rc.Msgs = append(*rc.Msgs, msgf)
+	}
+
+	return nil
 }
 
 func (rc *ResourceContext) updateRule(rule contracts.ManifestRulesEngine, existing contracts.RuleIdsStruct) (contracts.AzionJsonDataRules, error) {
@@ -924,8 +995,12 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				updateReq.SetName(funcInst.Name)
 				updateReq.SetActive(funcInst.Active)
 				updateReq.SetFunction(funcID)
-				if len(funcInst.Args) > 0 {
-					updateReq.SetArgs(funcInst.Args)
+				args, hasArgs, err := rc.resolveInstanceArgs(funcInst.Args, funcConf)
+				if err != nil {
+					return err
+				}
+				if hasArgs {
+					updateReq.SetArgs(args)
 				}
 
 				updated, err := rc.FirewallFunctionInstClient.Update(rc.Ctx, firewallId, funcInstRef.FunctionInstanceId, updateReq)
@@ -948,8 +1023,12 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				createReq.SetName(funcInst.Name)
 				createReq.SetActive(funcInst.Active)
 				createReq.SetFunction(funcID)
-				if len(funcInst.Args) > 0 {
-					createReq.SetArgs(funcInst.Args)
+				args, hasArgs, err := rc.resolveInstanceArgs(funcInst.Args, funcConf)
+				if err != nil {
+					return err
+				}
+				if hasArgs {
+					createReq.SetArgs(args)
 				}
 
 				created, err := rc.FirewallFunctionInstClient.Create(rc.Ctx, firewallId, createReq)
@@ -973,8 +1052,6 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
 			}
-			// Use funcConf to avoid unused variable error if only ID was provided
-			_ = funcConf
 		}
 
 		// Create a lookup function for resolving function instance names to IDs
@@ -1033,6 +1110,22 @@ func (rc *ResourceContext) ApplyFirewalls(firewalls []contracts.FirewallManifest
 				logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
 				*rc.Msgs = append(*rc.Msgs, msgf)
 			}
+		}
+
+		// Always order the firewall rules whenever rules exist, following the
+		// order in which they appear in the manifest.
+		if len(fwRuleConf) > 0 {
+			orderIds := make([]int64, 0, len(fwRuleConf))
+			for _, r := range fwRuleConf {
+				orderIds = append(orderIds, r.Id)
+			}
+			if err := rc.FirewallClient.OrderRules(rc.Ctx, firewallId, orderIds); err != nil {
+				logger.Debug("Error while ordering firewall rules", zap.Error(err))
+				return err
+			}
+			msgf := fmt.Sprintf(msg.ManifestOrderFirewallRule, firewallId)
+			logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)
+			*rc.Msgs = append(*rc.Msgs, msgf)
 		}
 
 		firewallConf = append(firewallConf, contracts.AzionJsonDataFirewall{

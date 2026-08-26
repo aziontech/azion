@@ -159,6 +159,29 @@ func (c *Client) UpdateRule(ctx context.Context, firewallId int64, ruleId int64,
 	return ruleResponse.Data, nil
 }
 
+func (c *Client) OrderRules(ctx context.Context, firewallId int64, order []int64) error {
+	logger.Debug("Order Firewall Rules", zap.Any("Firewall ID", firewallId))
+	body := sdk.NewFirewallRuleEngineOrderRequest(order)
+	request := c.apiClient.FirewallsRulesEngineAPI.
+		OrderFirewallRules(ctx, firewallId).
+		FirewallRuleEngineOrderRequest(*body)
+
+	_, httpResp, err := request.Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while ordering Firewall Rules", zap.Error(err), zap.Any("Firewall ID", firewallId))
+			errBody, err = utils.LogAndRewindBodyV4(httpResp)
+			if err != nil {
+				return err
+			}
+		}
+		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
+	}
+
+	return nil
+}
+
 func (c *Client) DeleteRule(ctx context.Context, firewallId int64, ruleId int64) error {
 	logger.Debug("Delete Firewall Rule", zap.Any("Firewall ID", firewallId), zap.Any("Rule ID", ruleId))
 	req := c.apiClient.FirewallsRulesEngineAPI.DeleteFirewallRule(ctx, firewallId, ruleId)

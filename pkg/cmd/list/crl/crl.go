@@ -41,9 +41,10 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ azion list crl --details
 			$ azion list crl --order-by "id"
+			$ azion list crl --order-by "name"
+			$ azion list crl --order-by "-name"
 			$ azion list crl --page 1
 			$ azion list crl --page-size 5
-			$ azion list crl --sort "asc"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {

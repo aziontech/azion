@@ -1,0 +1,18 @@
+{
+  "name": "Created via File",
+  "active": true,
+  "pages": [
+    {
+      "code": "default",
+      "page": {
+        "type": "page_connector",
+        "attributes": {
+          "connector": 1234,
+          "ttl": 0,
+          "uri": "/custom-error.html",
+          "custom_status_code": 404
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 1337,
+    "name": "renamed zone",
+    "domain": "example.com",
+    "active": false,
+    "nameservers": [
+      "ns1.aziondns.net",
+      "ns2.aziondns.com"
+    ],
+    "product_version": "1.0"
+  }
+}

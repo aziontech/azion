@@ -1,0 +1,19 @@
+{
+  "count": 1,
+  "total_pages": 1,
+  "page": 1,
+  "page_size": 10,
+  "results": [
+    {
+      "id": 1111,
+      "name": "my zone",
+      "domain": "example.com",
+      "active": true,
+      "nameservers": [
+        "ns1.aziondns.net",
+        "ns2.aziondns.com"
+      ],
+      "product_version": "1.0"
+    }
+  ]
+}
