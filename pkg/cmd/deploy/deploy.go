@@ -310,7 +310,7 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	req.Header.Set("Authorization", "Token "+token)
 
 	// Reuse single HTTP client for all requests
-	client := &http.Client{}
+	client := cmd.F.HttpClient
 	logTime := time.Now()
 	lastLog := ""
 	// Custom layout for parsing the timestamp

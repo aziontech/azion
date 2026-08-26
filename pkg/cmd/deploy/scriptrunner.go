@@ -79,7 +79,7 @@ func callScript(token, id, secret, prefix, name, confDir string, cmd *DeployCmd)
 	req.Header.Set("Authorization", "Token "+token)
 
 	// Send the request
-	client := &http.Client{}
+	client := cmd.F.HttpClient
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Debug("Error sending request", zap.Error(err))
