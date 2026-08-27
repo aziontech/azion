@@ -22,18 +22,42 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 20
+          node-version: 22
 
-	  # If you want to change package manager, change the command below and add the necessary configurations
-      - name: Install dependencies
-        run: npm install
+      - name: Detect package manager
+        id: pm
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            echo "name=pnpm" >> "$GITHUB_OUTPUT"
+          elif [ -f yarn.lock ]; then
+            echo "name=yarn" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=npm" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Enable Corepack
+        if: steps.pm.outputs.name != 'npm'
+        run: corepack enable
+
+      - name: Install dependencies (npm)
+        if: steps.pm.outputs.name == 'npm'
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Install dependencies (pnpm)
+        if: steps.pm.outputs.name == 'pnpm'
+        run: pnpm i --ignore-scripts --frozen-lockfile && pnpm approve-builds --all && pnpm i --frozen-lockfile
+
+      - name: Install dependencies (yarn)
+        if: steps.pm.outputs.name == 'yarn'
+        run: yarn install --immutable
 
       - name: Install Azion CLI
         run: |
@@ -44,8 +68,8 @@ jobs:
       - name: CLI version
         run: azion --version
 
-		# Configure a personal token in your github secrets
-		# You may create a personal token by running 'azion create personal-token'
+      # Configure a personal token in your github secrets
+      # You may create a personal token by running 'azion create personal-token'
       - name: Configure token
         run: |
           azion -t ${{ secrets.AZION_PERSONAL_TOKEN }}  
