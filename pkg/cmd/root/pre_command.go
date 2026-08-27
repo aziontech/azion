@@ -36,13 +36,8 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 		return err
 	}
 
-	// Apply timeout based on the parsed flags
-	timeout, err := cmd.Flags().GetInt("timeout")
-	if err != nil {
-		return msg.ErrorParseTimeout
-	}
-
-	fact.factory.HttpClient.Timeout = time.Duration(timeout) * time.Second
+	fact.factory.HttpClient.Timeout = time.Duration(fact.timeout) * time.Second
+	logger.Debug("HTTP client timeout applied", zap.Stringer("timeout", fact.factory.HttpClient.Timeout))
 
 	// get full command run and rewrite with our metrics pattern
 	fact.commandName = cmd.CommandPath()

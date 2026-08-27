@@ -3,8 +3,10 @@ package manifest
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
@@ -17,6 +19,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/briandowns/spinner"
+	"go.uber.org/zap"
 )
 
 // TimingCallback is a callback function type for reporting timing
@@ -25,13 +28,12 @@ type TimingCallback func(name string, duration time.Duration)
 // GlobalTimingCallback is the global callback for timing reports
 var GlobalTimingCallback TimingCallback
 
+// CacheIds and RuleIds carry the resources tracked by azion.json into
+// deleteResources, which removes the ones the manifest no longer declares.
+// Every other id map lives on ResourceContext for the duration of a run.
 var (
 	CacheIds         map[string]int64
-	CacheIdsBackup   map[string]int64
 	RuleIds          map[string]contracts.RuleIdsStruct
-	ConnectorIds     map[string]int64
-	DeploymentIds    map[string]int64
-	FunctionIds      map[string]contracts.AzionJsonDataFunction
 	manifestFilePath = "/.edge/manifest.json"
 )
 
@@ -75,7 +77,7 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 	return manifest, nil
 }
 
-func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, functions map[string]contracts.AzionJsonDataFunction, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
+func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
 	logger.Debug("Applying manifest resources")
 	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
 	s.Suffix = " " + msg.CreatingManifest
@@ -197,12 +199,10 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 		}
 	}
 
+	// Hand the tracked ids to deleteResources, minus the ones consumed during
+	// this run (a cache setting still referenced by a rule is not an orphan).
 	CacheIds = rc.CacheIds
-	CacheIdsBackup = rc.CacheIdsBackup
 	RuleIds = rc.RuleIds
-	ConnectorIds = rc.ConnectorIds
-	DeploymentIds = rc.DeploymentIds
-	FunctionIds = rc.FunctionIds
 
 	if err := rc.DeleteOrphanedResources(); err != nil {
 		return err
@@ -269,15 +269,40 @@ func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.Az
 	return nil
 }
 
-func unmarshalJsonArgs(argsPath string) (map[string]interface{}, error) {
-	marshalledArgs, err := os.ReadFile(argsPath)
-	if err != nil {
-		// If args.json file doesn't exist, return empty map as default
-		return map[string]interface{}{}, nil
+// unmarshalJsonArgs reads the args file referenced by azion.json. The recorded
+// path is relative to the project root, so it is resolved against the working
+// directory rather than the process' current directory.
+//
+// The boolean report tells whether the file was there at all. Instances are
+// updated with PATCH, so a project without an args file must leave the field
+// out of the request instead of sending an empty object, which would wipe
+// arguments defined elsewhere.
+func unmarshalJsonArgs(argsPath string) (map[string]interface{}, bool, error) {
+	resolvedPath := argsPath
+	if !filepath.IsAbs(resolvedPath) {
+		workingDir, err := utils.GetWorkingDir()
+		if err != nil {
+			return nil, false, err
+		}
+		resolvedPath = filepath.Join(workingDir, argsPath)
 	}
+
+	marshalledArgs, err := os.ReadFile(resolvedPath)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			// The args file is optional: a function without arguments is valid
+			logger.Debug("Args file not found, no arguments will be sent",
+				zap.String("path", resolvedPath))
+			return map[string]interface{}{}, false, nil
+		}
+		logger.Debug("Error while reading args file",
+			zap.String("path", resolvedPath), zap.Error(err))
+		return nil, false, err
+	}
+
 	args := make(map[string]interface{})
 	if err := json.Unmarshal(marshalledArgs, &args); err != nil {
-		return nil, fmt.Errorf("%s: %w", msg.ErrorUnmarshalArgsFile, err)
+		return nil, false, fmt.Errorf("%s: %w", msg.ErrorUnmarshalArgsFile, err)
 	}
-	return args, nil
+	return args, true, nil
 }

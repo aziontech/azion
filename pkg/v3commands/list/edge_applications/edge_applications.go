@@ -9,6 +9,7 @@ import (
 	"github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -58,6 +59,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	flags := cmd.Flags()
 	flags.BoolP("help", "h", false, msg.HelpFlag)
 	cmdutil.AddAzionApiFlags(cmd, opts)
+	cmd.Flags().StringVar(&opts.Sort, "sort", "", general.ApiListFlagSort)
 
 	return cmd
 }

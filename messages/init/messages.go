@@ -12,6 +12,7 @@ const (
 	FLAG_AUTO           = "If sent, the entire flow of the command will be run without interruptions"
 	FLAG_SYNC           = "Synchronizes the local azion.json file with remote resources. Use this flag when deploying your project from this command"
 	FLAG_LOCAL          = "Runs the entire build and deploy process locally. Use this flag when deploying your project from this command"
+	FLAG_CONFIG_DIR     = "Relative path to where your custom azion.json and args.json files are stored"
 )
 
 var (

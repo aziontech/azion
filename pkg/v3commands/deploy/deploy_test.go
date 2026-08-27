@@ -206,12 +206,13 @@ func TestDeploy_Run(t *testing.T) {
 func TestCaptureLogs(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	tests := []struct {
-		name            string
-		logsResponse    string
-		resultsResponse string
-		logStruct       contracts.Logs
-		resultStruct    contracts.Results
-		expectError     bool
+		name              string
+		logsResponse      string
+		logsRetryResponse string
+		resultsResponse   string
+		logStruct         contracts.Logs
+		resultStruct      contracts.Results
+		expectError       bool
 	}{
 		{
 			name:            "Successful deployment",
@@ -235,11 +236,12 @@ func TestCaptureLogs(t *testing.T) {
 			expectError: true,
 		},
 		{
-			name:            "Log status running, succeeds on retry",
-			logsResponse:    `{"status": "running"}`,
-			resultsResponse: `{"result": {"azion": {"key": "value"}, "errors": null}}`,
-			expectError:     false,
-			logStruct:       contracts.Logs{Status: "succeeded"},
+			name:              "Log status running, succeeds on retry",
+			logsResponse:      `{"status": "running"}`,
+			logsRetryResponse: `{"status": "succeeded"}`,
+			resultsResponse:   `{"result": {"azion": {"key": "value"}, "errors": null}}`,
+			expectError:       false,
+			logStruct:         contracts.Logs{Status: "succeeded"},
 		},
 		{
 			name:         "Unknown log status",
@@ -252,10 +254,22 @@ func TestCaptureLogs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
-			mock.Register(
-				httpmock.REST(http.MethodGet, "api/script-runner/executions/e89b32a6-c912-4fba-bae7-1e7ff115256f/logs"),
-				httpmock.JSONFromString(tt.logsResponse),
-			)
+			logsPath := httpmock.REST(http.MethodGet, "api/script-runner/executions/e89b32a6-c912-4fba-bae7-1e7ff115256f/logs")
+
+			// the logs endpoint is polled until it leaves a pending status, and
+			// stubs are single-use, so the retried poll needs its own stub. It is
+			// gated on the first one having been served so both never match at once.
+			firstPollServed := false
+			mock.Register(logsPath, func(req *http.Request) (*http.Response, error) {
+				firstPollServed = true
+				return httpmock.JSONFromString(tt.logsResponse)(req)
+			})
+			if tt.logsRetryResponse != "" {
+				mock.Register(
+					func(req *http.Request) bool { return firstPollServed && logsPath(req) },
+					httpmock.JSONFromString(tt.logsRetryResponse),
+				)
+			}
 			mock.Register(
 				httpmock.REST(http.MethodGet, "api/script-runner/executions/e89b32a6-c912-4fba-bae7-1e7ff115256f/results"),
 				httpmock.JSONFromString(tt.resultsResponse),
@@ -356,7 +370,7 @@ func TestCallScript(t *testing.T) {
 
 			// Register the mock API responses for logs and results
 			mock.Register(
-				httpmock.REST(http.MethodPost, "/api/template-engine/templates/17ac912d-5ce9-4806-9fa7-480779e43f58/instantiate"),
+				httpmock.REST(http.MethodPost, "api/template-engine/templates/17ac912d-5ce9-4806-9fa7-480779e43f58/instantiate"),
 				httpmock.JSONFromString(tt.resultsResponse),
 			)
 

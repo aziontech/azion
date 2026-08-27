@@ -125,11 +125,7 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 	} else if !skipManifest {
 		// Initialize maps to track resources
 		manifestInt.CacheIds = make(map[string]int64)
-		manifestInt.CacheIdsBackup = make(map[string]int64)
 		manifestInt.RuleIds = make(map[string]contracts.RuleIdsStruct)
-		manifestInt.ConnectorIds = make(map[string]int64)
-		manifestInt.DeploymentIds = make(map[string]int64)
-		manifestInt.FunctionIds = make(map[string]contracts.AzionJsonDataFunction)
 
 		// Local maps for origin tracking (not in manifest package)
 		OriginKeys := make(map[string]string)
@@ -146,19 +142,9 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 			}
 		}
 
-		for _, funcConf := range conf.Function {
-			manifestInt.FunctionIds[funcConf.Name] = funcConf
-		}
-
-		for _, deploymentConf := range conf.Workloads.Deployments {
-			manifestInt.DeploymentIds[deploymentConf.Name] = deploymentConf.Id
-		}
-
 		for _, originConf := range conf.Origin {
 			OriginKeys[originConf.Name] = originConf.OriginKey
 			OriginIds[originConf.Name] = originConf.OriginId
-			// Also initialize ConnectorIds with the same data
-			manifestInt.ConnectorIds[originConf.Name] = originConf.OriginId
 		}
 
 		if len(manifestStructure.Workloads) > 0 && manifestStructure.Workloads[0].Name != "" {
@@ -202,11 +188,6 @@ func (dry *DryrunStruct) SimulateDeploy(workingDir, projConf string) error {
 		// 		}
 		// 	}
 		// }
-
-		//backup cache ids
-		for k, v := range manifestInt.CacheIds {
-			manifestInt.CacheIdsBackup[k] = v
-		}
 
 		// Process rules from manifest
 		// for _, rule := range manifestStructure.Rules {
