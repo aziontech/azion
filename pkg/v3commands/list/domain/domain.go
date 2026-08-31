@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/domain"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -60,6 +61,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
+	cmd.Flags().StringVar(&opts.Sort, "sort", "", general.ApiListFlagSort)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cmd

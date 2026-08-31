@@ -12,6 +12,7 @@ const (
 	FLAG_AUTO           = "If sent, the entire flow of the command will be run without interruptions"
 	FLAG_SYNC           = "Synchronizes the local azion.json file with remote resources. Use this flag when deploying your project from this command"
 	FLAG_LOCAL          = "Runs the entire build and deploy process locally. Use this flag when deploying your project from this command"
+	FLAG_CONFIG_DIR     = "Relative path to where your custom azion.json and args.json files are stored"
 )
 
 var (
@@ -43,4 +44,5 @@ var (
 	WrittenGitignore                      = "Sucessfully written to your .gitignore file\n"
 	ChangeWorkingDir                      = "Make sure to change to the new working directory before running building or deploying your project\n"
 	SkipFrameworkBuild                    = "Indicates whether to bypass the framework build phase before executing 'azion build'"
+	AliasEnvFlag                          = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 )

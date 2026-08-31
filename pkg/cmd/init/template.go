@@ -9,7 +9,7 @@ import (
 )
 
 func (cmd *initCmd) createTemplateAzion() error {
-	err := cmd.mkdir(path.Join(cmd.pathWorkingDir, "azion"), 0755) // 0755 is the permission mode for the new directories
+	err := cmd.mkdir(path.Join(cmd.pathWorkingDir, cmd.projectPath), 0755) // 0755 is the permission mode for the new directories
 	if err != nil {
 		return msg.ErrorFailedCreatingAzionDirectory
 	}
@@ -38,7 +38,7 @@ func (cmd *initCmd) createJsonFile(options *contracts.AzionApplicationOptions) e
 		return msg.ErrorUnmarshalAzionFile
 	}
 
-	err = cmd.writeFile(path.Join(cmd.pathWorkingDir, "azion", "azion.json"), data, 0644)
+	err = cmd.writeFile(path.Join(cmd.pathWorkingDir, cmd.projectPath, "azion.json"), data, 0644)
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}

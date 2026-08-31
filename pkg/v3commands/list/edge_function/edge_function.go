@@ -6,6 +6,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/function"
+	"github.com/aziontech/azion-cli/messages/general"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
@@ -40,9 +41,9 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
 			$ azion list edge-function --details
-			$ azion list edge-function --order_by "id"
+			$ azion list edge-function --order-by "id"
 			$ azion list edge-function --page 1
-			$ azion list edge-function --page_size 5
+			$ azion list edge-function --page-size 5
 			$ azion list edge-function --sort "asc"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -54,6 +55,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
+	cmd.Flags().StringVar(&opts.Sort, "sort", "", general.ApiListFlagSort)
 	cmd.Flags().BoolP("help", "h", false, msg.ListHelpFlag)
 	return cmd
 }

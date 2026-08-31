@@ -2,7 +2,6 @@ package applications
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
@@ -21,7 +20,6 @@ func NewClient(c *http.Client, url string, token string) *Client {
 	conf.Servers = sdk.ServerConfigurations{
 		{URL: url},
 	}
-	conf.HTTPClient.Timeout = 50 * time.Second
 
 	return &Client{
 		apiClient: sdk.NewAPIClient(conf),

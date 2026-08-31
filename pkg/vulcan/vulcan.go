@@ -15,8 +15,8 @@ var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
 	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.1.2"
-	versionVulcan      = "@1.1.2"
+	firstTimeExecuting = "@1.1.4"
+	versionVulcan      = "@1.1.4"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
@@ -36,9 +36,9 @@ func NewVulcan() *VulcanPkg {
 }
 
 func NewVulcanV3() *VulcanPkg {
-	versionVulcan = "@5.3.1"
+	versionVulcan = "@5.3.2"
 	currentMajor = 5
-	firstTimeExecuting = "@5.3.1"
+	firstTimeExecuting = "@5.3.2"
 	return &VulcanPkg{
 		Command:          commandV3,
 		CheckVulcanMajor: checkVulcanMajor,
