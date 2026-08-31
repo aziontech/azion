@@ -7,7 +7,7 @@ bin/
 dist/
 docs/
 .vscode/
-azion/
+/azion/
 .edge/
 
 utils/azion
