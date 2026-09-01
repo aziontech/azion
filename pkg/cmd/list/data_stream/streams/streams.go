@@ -43,7 +43,6 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 			$ azion list streams --order_by "id"
 			$ azion list streams --page 1
 			$ azion list streams --page_size 5
-			$ azion list streams --sort "asc"
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := PrintTable(cmd, f, list, opts); err != nil {

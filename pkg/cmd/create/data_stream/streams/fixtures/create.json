@@ -14,7 +14,6 @@
     {
       "type": "standard",
       "attributes": {
-        "type": "standard",
         "url": "https://example.com/datastream",
         "headers": {
           "Authorization": "Bearer token"

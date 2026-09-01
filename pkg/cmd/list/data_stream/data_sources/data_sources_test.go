@@ -86,7 +86,7 @@ func TestList(t *testing.T) {
 		f, stdout, _ := testutils.NewFactory(mock)
 
 		cmd := NewCmd(f)
-		cmd.SetArgs([]string{"--order-by", "slug", "--page", "2", "--page-size", "10", "--sort", "asc"})
+		cmd.SetArgs([]string{"--order-by", "slug", "--page", "2", "--page-size", "10"})
 
 		_, err := cmd.ExecuteC()
 		require.NoError(t, err)
