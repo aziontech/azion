@@ -126,7 +126,7 @@ func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token
 	activeProfile := fact.factory.GetActiveProfile()
 	logger.Debug("Checking if the configured token is still valid", zap.String("profile", activeProfile), zap.String("command", command))
 
-	valid, user, err := tokenStr.Validate(&fact.globalSettings.Token)
+	valid, _, err := tokenStr.Validate(&fact.globalSettings.Token)
 	if err != nil {
 		logger.Debug("Could not validate the configured token", zap.Error(err))
 		return utils.ErrorToken401
