@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
-	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/data-stream-api"
+	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 )
 
 type CreateRequest struct {
