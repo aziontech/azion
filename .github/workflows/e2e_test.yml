@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e') }}
     container:
-      image: golang:1.25.13
+      image: golang:1.26.8
     env:
       CGO_ENABLED: 0 # Statically linked
 
@@ -57,9 +57,6 @@ jobs:
             4. Remove the `skip-e2e` label from this PR
 
             Once configured, the E2E tests will run automatically on future pull requests.
-
-      - name: Setting GIT
-        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
 
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:

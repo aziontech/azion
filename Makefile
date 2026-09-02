@@ -4,7 +4,7 @@ SHELL := env PATH='$(PATH)' /bin/bash
 NAME := azion
 
 ifeq (, $(GO))
-$(error "No go binary found in your system, please install go 1.25.13 before continuing")
+$(error "No go binary found in your system, please install go 1.26.8 before continuing")
 endif
 
 GOPATH ?= $(shell $(GO) env GOPATH)
@@ -22,15 +22,16 @@ BIN := azion
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
+# Keep this list in sync with the `ldflags` blocks in .goreleaser.yaml.
+# Both build paths (make build / cross-build -> S3, goreleaser -> GitHub Release)
+# must inject the same set of variables, in the same order.
 LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
-		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
-		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL=$$API_V4_URL \
+		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
+		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$CONSOLE \
-		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID=$$SCRIPT_ID \
-		-X github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init.TemplateBranch=$$TEMPLATE_BRANCH \
-		-X github.com/aziontech/azion-cli/pkg/cmd/edge_applications/init.TemplateMajor=$$TEMPLATE_MAJOR
+		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID=$$SCRIPT_ID
 LDFLAGS_STRIP=-s -w
 NAME_WITH_VERSION=$(NAME)-$(BIN_VERSION)
 
