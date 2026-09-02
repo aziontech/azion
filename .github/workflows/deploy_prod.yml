@@ -93,6 +93,7 @@ jobs:
           API_V4_URL: https://api.azion.com/v4
           STORAGE_URL: https://api.azion.com/v4
           AUTH_URL: https://sso.azion.com/api
+          SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt
           CONSOLE: https://console.azion.com
           SCRIPT_ID: 17ac912d-5ce9-4806-9fa7-480779e43f58
           CHOCOLATEY_TOKEN: ${{ secrets.CHOCO_TOKEN }}
