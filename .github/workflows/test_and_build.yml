@@ -20,9 +20,6 @@ jobs:
       image: golang:1.25.13
 
     steps:
-      - name: Setting GIT
-        run: git config --global url."https://${{ secrets.GLOBAL_TOKEN }}:x-oauth-basic@github.com/aziontech".insteadOf "https://github.com/aziontech"
-
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -37,8 +34,6 @@ jobs:
           distribution: goreleaser
           version: 2.3.2
           args: check
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
 
       - name: Build & Test (skip v3 tests)
         run: |
