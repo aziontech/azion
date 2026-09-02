@@ -24,6 +24,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/storage"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/describe/data_stream"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
 	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
@@ -67,6 +68,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(personal_token.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
+	cmd.AddCommand(dataStream.NewCmd(f))
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
 	// cmd.AddCommand(kv.NewCmd(f))

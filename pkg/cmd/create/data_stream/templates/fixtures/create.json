@@ -1,0 +1,5 @@
+{
+  "name": "Created via File",
+  "active": true,
+  "data_set": "{\"time\":\"$time\",\"host\":\"$host\",\"request_uri\":\"$request_uri\",\"status\":\"$status\"}"
+}
