@@ -122,13 +122,20 @@ func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factor
 	return output.Print(&listOut)
 }
 
-func dumpVariables(resp []api.Response) error {
+func dumpVariables(resp []api.Response) (err error) {
 	file, err := os.Create(".env")
 	if err != nil {
 		logger.Debug("Error creating .env file", zap.Error(err))
 		return err
 	}
-	defer file.Close()
+	// Write errors deferred by the OS surface on Close; reporting them keeps a
+	// truncated .env from being treated as a complete dump.
+	defer func() {
+		if cerr := file.Close(); err == nil && cerr != nil {
+			logger.Debug("Error closing .env file", zap.Error(cerr))
+			err = cerr
+		}
+	}()
 
 	for _, v := range resp {
 		envLine := fmt.Sprintf("%s=%s\n", v.GetKey(), v.GetValue())
