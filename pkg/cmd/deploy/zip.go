@@ -57,7 +57,7 @@ func CreateZipsFromFileInfos(fileInfos []FileInfo) ([]string, error) {
 }
 
 // createZipFromInfos creates a ZIP file from FileInfo entries, opening and closing files as needed
-func createZipFromInfos(batch []FileInfo, destDir string, batchNumber int) (string, error) {
+func createZipFromInfos(batch []FileInfo, destDir string, batchNumber int) (zipPath string, err error) {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
 	logger.Debug("Creating ZIP file", zap.String("path", zipFilePath), zap.Int("files", len(batch)))
@@ -66,10 +66,19 @@ func createZipFromInfos(batch []FileInfo, destDir string, batchNumber int) (stri
 	if err != nil {
 		return "", fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
 	}
-	defer zipFile.Close()
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	// zipWriter.Close writes the archive's central directory and zipFile.Close
+	// may surface deferred write errors: losing either yields a corrupt zip
+	// reported as a success. Both must run, in this order.
+	defer func() {
+		if cerr := zipWriter.Close(); err == nil && cerr != nil {
+			err = fmt.Errorf(msg.ErrorCreateZip, zipFilePath, cerr)
+		}
+		if cerr := zipFile.Close(); err == nil && cerr != nil {
+			err = fmt.Errorf(msg.ErrorCreateZip, zipFilePath, cerr)
+		}
+	}()
 
 	for _, fileInfo := range batch {
 		// Open file, copy content, and close immediately to limit open file handles
@@ -146,7 +155,7 @@ func CreateZipsInBatches(files []contracts.FileOps) ([]string, error) {
 	return createdZips, nil
 }
 
-func createZip(batch []contracts.FileOps, destDir string, batchNumber int) (string, error) {
+func createZip(batch []contracts.FileOps, destDir string, batchNumber int) (createdPath string, err error) {
 	zipFileName := fmt.Sprintf("batch_%d.zip", batchNumber)
 	zipFilePath := filepath.Join(destDir, zipFileName)
 	logger.Debug("Creating ZIP file", zap.String("path", zipFilePath), zap.Int("batch", len(batch)))
@@ -155,10 +164,17 @@ func createZip(batch []contracts.FileOps, destDir string, batchNumber int) (stri
 	if err != nil {
 		return "", fmt.Errorf(msg.ErrorCreateZip, zipFilePath, err)
 	}
-	defer zipFile.Close()
 
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	// See createZipFromInfos: both closes must run and neither error may be lost.
+	defer func() {
+		if cerr := zipWriter.Close(); err == nil && cerr != nil {
+			err = fmt.Errorf(msg.ErrorCreateZip, zipFilePath, cerr)
+		}
+		if cerr := zipFile.Close(); err == nil && cerr != nil {
+			err = fmt.Errorf(msg.ErrorCreateZip, zipFilePath, cerr)
+		}
+	}()
 
 	for _, fileOp := range batch {
 		relPath, err := filepath.Rel(destDir, fileOp.Path)

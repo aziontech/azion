@@ -31,7 +31,7 @@ var ignoredCommands = map[string]bool{
 	"completion": true,
 }
 
-func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string, apiVersion string) error {
+func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime float64, errExec error, profile string, apiVersion string) (err error) {
 	if commandName == "" {
 		return nil
 	}
@@ -56,7 +56,13 @@ func TotalCommandsCount(cmd cmdutil.Command, commandName string, executionTime f
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	// This function truncates and rewrites the file, so write errors may only
+	// surface on Close. Report them instead of losing the metrics silently.
+	defer func() {
+		if cerr := file.Close(); err == nil && cerr != nil {
+			err = cerr
+		}
+	}()
 
 	var data map[string]*command
 
