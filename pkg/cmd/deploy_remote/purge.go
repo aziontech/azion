@@ -52,7 +52,7 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 	return nil
 }
 
-func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse, confPath string, msgs *[]string) error {
+func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse, confPath string, msgs *[]string) (err error) {
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		return nil
 	}
@@ -111,7 +111,13 @@ func PurgeForUpdatedFiles(cmd *DeployCmd, workload apiworkload.WorkloadResponse,
 	if err != nil {
 		return err
 	}
-	defer jsonlFile.Close()
+	// Write errors deferred by the OS surface on Close; reporting them keeps a
+	// truncated files.json from being treated as a complete manifest.
+	defer func() {
+		if cerr := jsonlFile.Close(); err == nil && cerr != nil {
+			err = cerr
+		}
+	}()
 
 	if _, err := jsonlFile.Write(jsonl); err != nil {
 		return err

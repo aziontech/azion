@@ -559,7 +559,6 @@ func (c *Client) CreateRulesEngineNextApplication(ctx context.Context, applicati
 			if err != nil {
 				return err
 			}
-			return utils.ErrorPerStatusCode(httpResp, err)
 		}
 		return utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
