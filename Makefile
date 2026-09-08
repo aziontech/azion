@@ -22,9 +22,7 @@ BIN := azion
 # Version Info
 BIN_VERSION=$(shell git describe --tags)
 # The variables with $$ should be sourced from an envfile
-# Keep this list in sync with the `ldflags` blocks in .goreleaser.yaml.
-# Both build paths (make build / cross-build -> S3, goreleaser -> GitHub Release)
-# must inject the same set of variables, in the same order.
+# Keep this list in sync with the `ldflags` blocks in .goreleaser.yaml
 LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL=$$API_V4_URL \
