@@ -27,7 +27,6 @@ type Fields struct {
 	CacheSettingID          int64
 	Name                    string
 	browserCacheSettings    string
-	browserCacheBehavior    string
 	browserCacheMaxAge      int64
 	cacheByQueryString      string
 	queryStringFields       []string
@@ -158,102 +157,119 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Req
 		}
 
 		req := sdk.BrowserCacheModuleRequest{}
-		req.SetBehavior(fields.browserCacheBehavior)
+		req.SetBehavior(fields.browserCacheSettings)
 		req.SetMaxAge(fields.browserCacheMaxAge)
 		request.SetBrowserCache(req)
 	}
 
-	if cmd.Flags().Changed("query-string-fields") {
-		if request.GetModules().ApplicationAccelerator == nil {
-			mods := request.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.SetModules(mods)
-		}
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetFields(fields.queryStringFields)
+	if !anyFlagChanged(cmd, acceleratorFlags...) {
+		return nil
 	}
 
-	if cmd.Flags().Changed("cookie-names") {
-		if request.GetModules().ApplicationAccelerator == nil {
-			mods := request.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.SetModules(mods)
-		}
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
-		controls.SetCookieNames(fields.cookieNames)
+	// The sub-objects are pointers in the SDK, so they must be allocated before
+	// being written to, and the modules struct must be set back on the request.
+	mods := request.GetModules()
+	if mods.ApplicationAccelerator == nil {
+		mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
 	}
+	appAcc := mods.ApplicationAccelerator
 
-	if cmd.Flags().Changed("cache-by-cookies") {
-		if request.GetModules().ApplicationAccelerator == nil {
-			mods := request.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.SetModules(mods)
-		}
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByCookies
-		controls.SetBehavior(fields.cacheByCookies)
-	}
-
-	if cmd.Flags().Changed("cache-by-query-string") {
-		if request.GetModules().ApplicationAccelerator == nil {
-			mods := request.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.SetModules(mods)
-		}
-		controls := request.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetBehavior(fields.cacheByQueryString)
-	}
-
-	if cmd.Flags().Changed("enable-caching-for-options") {
-		cachingOptions, err := strconv.ParseBool(fields.enableCachingForOptions)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
+	// Allocate each sub-object only when a flag actually writes to it, so a
+	// PATCH never carries an empty object for a module the user did not touch.
+	if anyFlagChanged(cmd, "query-string-fields", "cache-by-query-string", "enable-caching-string-sort") {
+		if appAcc.CacheVaryByQuerystring == nil {
+			appAcc.CacheVaryByQuerystring = &sdk.CacheVaryByQuerystringModuleRequest{}
 		}
 
-		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
-			mods := request.PatchedCacheSettingRequest.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.PatchedCacheSettingRequest.SetModules(mods)
+		if cmd.Flags().Changed("query-string-fields") {
+			appAcc.CacheVaryByQuerystring.SetFields(fields.queryStringFields)
 		}
 
-		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
-		if cachingOptions {
-			edgeCache = append(edgeCache, "options")
+		if cmd.Flags().Changed("cache-by-query-string") {
+			appAcc.CacheVaryByQuerystring.SetBehavior(fields.cacheByQueryString)
+		}
+
+		if cmd.Flags().Changed("enable-caching-string-sort") {
+			stringSort, err := strconv.ParseBool(fields.enableQueryStringSort)
+			if err != nil {
+				return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
+			}
+			appAcc.CacheVaryByQuerystring.SetSortEnabled(stringSort)
 		}
 	}
 
-	if cmd.Flags().Changed("enable-caching-for-post") {
-		cachingPost, err := strconv.ParseBool(fields.enableCachingForPost)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
+	if anyFlagChanged(cmd, "cookie-names", "cache-by-cookies") {
+		if appAcc.CacheVaryByCookies == nil {
+			appAcc.CacheVaryByCookies = &sdk.CacheVaryByCookiesModuleRequest{}
 		}
 
-		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
-			mods := request.PatchedCacheSettingRequest.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.PatchedCacheSettingRequest.SetModules(mods)
+		if cmd.Flags().Changed("cookie-names") {
+			appAcc.CacheVaryByCookies.SetCookieNames(fields.cookieNames)
 		}
 
-		edgeCache := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByMethod
-		if cachingPost {
-			edgeCache = append(edgeCache, "post")
+		if cmd.Flags().Changed("cache-by-cookies") {
+			appAcc.CacheVaryByCookies.SetBehavior(fields.cacheByCookies)
 		}
 	}
 
-	if cmd.Flags().Changed("enable-caching-string-sort") {
-		stringSort, err := strconv.ParseBool(fields.enableQueryStringSort)
-		if err != nil {
-			return fmt.Errorf("%w: %q", msg.ErrorCachingStringSortFlag, fields.enableQueryStringSort)
+	if anyFlagChanged(cmd, "enable-caching-for-options", "enable-caching-for-post") {
+		cacheByMethod := appAcc.GetCacheVaryByMethod()
+
+		if cmd.Flags().Changed("enable-caching-for-options") {
+			cachingOptions, err := strconv.ParseBool(fields.enableCachingForOptions)
+			if err != nil {
+				return fmt.Errorf("%w: %q", msg.ErrorCachingForOptionsFlag, fields.enableCachingForOptions)
+			}
+			cacheByMethod = setCacheVaryByMethod(cacheByMethod, "options", cachingOptions)
 		}
 
-		if request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator == nil {
-			mods := request.PatchedCacheSettingRequest.GetModules()
-			mods.ApplicationAccelerator = &sdk.CacheSettingsApplicationAcceleratorModuleRequest{}
-			request.PatchedCacheSettingRequest.SetModules(mods)
+		if cmd.Flags().Changed("enable-caching-for-post") {
+			cachingPost, err := strconv.ParseBool(fields.enableCachingForPost)
+			if err != nil {
+				return fmt.Errorf("%w: %q", msg.ErrorCachingForPostFlag, fields.enableCachingForPost)
+			}
+			cacheByMethod = setCacheVaryByMethod(cacheByMethod, "post", cachingPost)
 		}
 
-		controls := request.PatchedCacheSettingRequest.GetModules().ApplicationAccelerator.CacheVaryByQuerystring
-		controls.SetSortEnabled(stringSort)
+		appAcc.SetCacheVaryByMethod(cacheByMethod)
 	}
 
+	request.SetModules(mods)
 	return nil
+}
+
+// acceleratorFlags are the flags handled by the Application Accelerator module.
+var acceleratorFlags = []string{
+	"query-string-fields",
+	"cache-by-query-string",
+	"enable-caching-string-sort",
+	"cookie-names",
+	"cache-by-cookies",
+	"enable-caching-for-options",
+	"enable-caching-for-post",
+}
+
+func anyFlagChanged(cmd *cobra.Command, names ...string) bool {
+	for _, name := range names {
+		if cmd.Flags().Changed(name) {
+			return true
+		}
+	}
+	return false
+}
+
+// setCacheVaryByMethod adds method to the cache_vary_by_method list when enabled
+// is true and removes it when false, keeping the other methods untouched. The
+// returned slice is always non-nil so that clearing the list serializes as [].
+func setCacheVaryByMethod(methods []string, method string, enabled bool) []string {
+	out := make([]string, 0, len(methods)+1)
+	for _, m := range methods {
+		if m != method {
+			out = append(out, m)
+		}
+	}
+	if enabled {
+		out = append(out, method)
+	}
+	return out
 }
