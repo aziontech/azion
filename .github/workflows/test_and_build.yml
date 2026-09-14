@@ -1,10 +1,10 @@
 name: Test and Build
 
 on:
+  # Runnable on demand against any ref, independent of the branch flow.
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
-    branches-ignore:
-      - main 
 
 permissions:
   contents: read

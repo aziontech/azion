@@ -1,10 +1,10 @@
 name: End-to-End test
 
 on:
+  # Runnable on demand against any ref, independent of the branch flow.
+  workflow_dispatch:
   pull_request:
     types: [opened, synchronize, labeled, unlabeled]
-    branches-ignore:
-      - main 
 
 permissions:
   contents: read
@@ -32,7 +32,7 @@ jobs:
           fi
 
       - name: Add skip-e2e label if E2E_TOKEN is missing
-        if: steps.check_secret.outputs.secret_exists == 'false'
+        if: github.event_name == 'pull_request' && steps.check_secret.outputs.secret_exists == 'false'
         uses: actions-ecosystem/action-add-labels@18f1af5e3544586314bbe15c0273249c770b2daf # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
             skip-e2e
 
       - name: Comment on PR if E2E_TOKEN is missing
-        if: steps.check_secret.outputs.secret_exists == 'false'
+        if: github.event_name == 'pull_request' && steps.check_secret.outputs.secret_exists == 'false'
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

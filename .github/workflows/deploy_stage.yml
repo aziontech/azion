@@ -1,10 +1,12 @@
 name: Deploy to Stage
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - dev
+      - main
+  # Also runnable on demand against any ref, so a stage build never
+  # requires a merge.
+  workflow_dispatch:
 
 permissions:
   contents: read
