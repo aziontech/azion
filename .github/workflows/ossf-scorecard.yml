@@ -2,7 +2,7 @@ name: OSSF Scorecard
 
 on:
   pull_request:
-    branches: ['main', 'dev']
+    branches: ['main']
   schedule:
     - cron: '0 6 * * 1' # weekly measurement on the default branch
   workflow_dispatch:

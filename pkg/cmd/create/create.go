@@ -7,8 +7,9 @@ import (
 	cacheSetting "github.com/aziontech/azion-cli/pkg/cmd/create/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/create/connector"
 	crl "github.com/aziontech/azion-cli/pkg/cmd/create/crl"
-	customPages "github.com/aziontech/azion-cli/pkg/cmd/create/custom_pages"
 	csr "github.com/aziontech/azion-cli/pkg/cmd/create/csr"
+	customPages "github.com/aziontech/azion-cli/pkg/cmd/create/custom_pages"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/create/data_stream"
 	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/create/device_groups"
 	digitalCertificate "github.com/aziontech/azion-cli/pkg/cmd/create/digital_certificate"
 	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/create/dns_record"
@@ -65,6 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(workloaddeployment.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
+	cmd.AddCommand(dataStream.NewCmd(f))
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(profile.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))

@@ -37,6 +37,7 @@ type LinkInfo struct {
 	projectPath    string
 	Sync           bool
 	Local          bool
+	AliasEnv       bool
 }
 
 type LinkCmd struct {
@@ -121,6 +122,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 	cobraCmd.Flags().StringVar(&info.projectPath, "config-dir", "azion", msg.FLAGPATHCONF)
 	cobraCmd.Flags().BoolVar(&info.Sync, "sync", false, msg.FLAG_SYNC)
 	cobraCmd.Flags().BoolVar(&info.Local, "local", false, msg.FLAG_LOCAL)
+	cobraCmd.Flags().BoolVar(&info.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 
 	return cobraCmd
 }
@@ -256,7 +258,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 
 				logger.Debug("Running deploy command from link command")
 				deploy := cmd.DeployCmd(cmd.F)
-				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local)
+				err = deploy.ExternalRun(cmd.F, info.projectPath, info.Sync, info.Local, info.AliasEnv)
 				if err != nil {
 					logger.Debug("Error while running deploy command called by link command", zap.Error(err))
 					return err

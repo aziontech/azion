@@ -61,6 +61,10 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 		paramsBuilder.WriteString(" --skip-framework-build")
 	}
 
+	if fields.AliasEnv {
+		paramsBuilder.WriteString(" --alias-env")
+	}
+
 	vul := vulcanPkg.NewVulcan()
 	return b.vulcan(vul, conf, paramsBuilder.String(), fields, msgs)
 }

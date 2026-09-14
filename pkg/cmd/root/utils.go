@@ -54,7 +54,7 @@ func HasBlockAPIV4Flag(token string, f *factoryRoot) (bool, error) {
 	}
 
 	for _, flag := range info.ClientFlags {
-		if flag == "block_apiv4_incompatible_endpoints" {
+		if flag == "block_apiv4_incompatible_endpoints" || flag == "block_apiv3_access" {
 			return true, nil
 		}
 	}

@@ -1,0 +1,5 @@
+{
+  "name": "Updated via File",
+  "active": false,
+  "data_set": "{\"time\":\"$time\",\"host\":\"$host\",\"status\":\"$status\"}"
+}
