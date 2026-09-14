@@ -35,7 +35,16 @@ jobs:
         id: tag_ver
         uses: anothrNick/github-tag-action@3272e7a58f6c71ee9ede35f53b114e1bb9a91347 # 1.37.0
         env:
-          RELEASE_BRANCHES: main
+          # This pipeline only ever mints pre-release tags (X.Y.Z-dev.N), the way it
+          # always did when it ran off the dev branch. deploy_prod.yml is the single
+          # producer of clean X.Y.Z release tags.
+          #
+          # RELEASE_BRANCHES is matched against the current branch as an unanchored
+          # bash regex, and a branch matching none of the entries stays a pre-release,
+          # so this value must simply never match a real branch name. It cannot be
+          # left unset: the action then defaults to "master,main", which would make
+          # every push to main a clean release tag.
+          RELEASE_BRANCHES: __no_release_from_stage__
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRERELEASE_SUFFIX: dev
 

@@ -128,8 +128,11 @@ func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token
 
 	valid, _, err := tokenStr.Validate(&fact.globalSettings.Token)
 	if err != nil {
-		logger.Debug("Could not validate the configured token", zap.Error(err))
-		return utils.ErrorToken401
+		// the API could not be reached, so there is no way to tell whether the token
+		// expired. The command runs and reports the network failure in its own context,
+		// instead of asking the user to replace a token that may be perfectly valid
+		logger.Debug("Skipping token expiration check, the API could not be reached", zap.Error(err))
+		return nil
 	}
 
 	if !valid {
