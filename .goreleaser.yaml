@@ -6,9 +6,9 @@ builds:
     env:
       - CGO_ENABLED=0
     main: ./cmd/azion
-    # Keep this list in sync with LDFLAGS in the Makefile, with one deliberate
-    # exception: deploy.ScriptID is NOT injected here. Release binaries use the
-    # default in pkg/cmd/deploy/deploy.go so this path needs no SCRIPT_ID env var.
+    # Keep this list in sync with LDFLAGS in the Makefile.
+    # Both build paths (make build / cross-build -> S3, goreleaser -> GitHub Release)
+    # must inject the same set of variables, in the same order.
     ldflags:
       - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
@@ -16,6 +16,7 @@ builds:
       - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
       - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL={{ .Env.CONSOLE }}
+      - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID={{ .Env.SCRIPT_ID }}
     binary: azion
     goos:
       - linux
@@ -37,9 +38,9 @@ builds:
     env:
       - CGO_ENABLED=0
     main: ./cmd/azion
-    # Keep this list in sync with LDFLAGS in the Makefile, with one deliberate
-    # exception: deploy.ScriptID is NOT injected here. Release binaries use the
-    # default in pkg/cmd/deploy/deploy.go so this path needs no SCRIPT_ID env var.
+    # Keep this list in sync with LDFLAGS in the Makefile.
+    # Both build paths (make build / cross-build -> S3, goreleaser -> GitHub Release)
+    # must inject the same set of variables, in the same order.
     ldflags:
       - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
@@ -47,6 +48,7 @@ builds:
       - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
       - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL={{ .Env.CONSOLE }}
+      - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID={{ .Env.SCRIPT_ID }}
     binary: azion
     goos:
       - windows
