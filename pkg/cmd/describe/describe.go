@@ -7,8 +7,9 @@ import (
 	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
 	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
 	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
-	customPages "github.com/aziontech/azion-cli/pkg/cmd/describe/custom_pages"
 	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
+	customPages "github.com/aziontech/azion-cli/pkg/cmd/describe/custom_pages"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/describe/data_stream"
 	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/describe/device_groups"
 	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
 	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/describe/dns_record"
@@ -24,7 +25,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
 	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/storage"
-	dataStream "github.com/aziontech/azion-cli/pkg/cmd/describe/data_stream"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
 	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
@@ -68,10 +68,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(personal_token.NewCmd(f))
 	cmd.AddCommand(edgeConnector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
-<<<<<<< HEAD
-=======
 	cmd.AddCommand(dataStream.NewCmd(f))
->>>>>>> repo-update-security-scans
 	cmd.AddCommand(functioninstance.NewCmd(f))
 	cmd.AddCommand(networklist.NewCmd(f))
 	// cmd.AddCommand(kv.NewCmd(f))

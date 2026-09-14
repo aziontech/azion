@@ -133,10 +133,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.Flags().BoolVar(&init.sync, "sync", false, msg.FLAG_SYNC)
 	cmd.Flags().BoolVar(&init.local, "local", false, msg.FLAG_LOCAL)
 	cmd.Flags().BoolVar(&init.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
-<<<<<<< HEAD
-=======
 	cmd.Flags().BoolVar(&init.aliasEnv, "alias-env", false, msg.AliasEnvFlag)
->>>>>>> repo-update-security-scans
 	cmd.Flags().StringVar(&init.projectPath, "config-dir", "azion", msg.FLAG_CONFIG_DIR)
 	return cmd
 }
@@ -351,11 +348,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		}
 		logger.Debug("Running deploy command from init command")
 		deploy := cmd.deployCmd(cmd.f)
-<<<<<<< HEAD
-		err = deploy.ExternalRun(cmd.f, cmd.projectPath, cmd.sync, cmd.local, cmd.SkipFramework)
-=======
 		err = deploy.ExternalRun(cmd.f, cmd.projectPath, cmd.sync, cmd.local, cmd.SkipFramework, cmd.aliasEnv)
->>>>>>> repo-update-security-scans
 		if err != nil {
 			logger.Debug("Error while running deploy command called by init command", zap.Error(err))
 			return err

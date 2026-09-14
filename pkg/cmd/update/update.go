@@ -8,6 +8,7 @@ import (
 	connector "github.com/aziontech/azion-cli/pkg/cmd/update/connector"
 	crl "github.com/aziontech/azion-cli/pkg/cmd/update/crl"
 	customPages "github.com/aziontech/azion-cli/pkg/cmd/update/custom_pages"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/update/data_stream"
 	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/update/device_groups"
 	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/update/digital_certificate"
 	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/update/dns_record"
@@ -24,7 +25,6 @@ import (
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine"
 	rulesEngineOrder "github.com/aziontech/azion-cli/pkg/cmd/update/rules_engine_order"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/update/storage"
-	dataStream "github.com/aziontech/azion-cli/pkg/cmd/update/data_stream"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/update/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/update/waf"
 	wafExceptions "github.com/aziontech/azion-cli/pkg/cmd/update/waf_exceptions"
@@ -66,10 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(workloads.NewCmd(f))
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
-<<<<<<< HEAD
-=======
 	cmd.AddCommand(dataStream.NewCmd(f))
->>>>>>> repo-update-security-scans
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))
 	cmd.AddCommand(firewall.NewCmd(f))
