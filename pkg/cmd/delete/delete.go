@@ -24,6 +24,7 @@ import (
 	profile "github.com/aziontech/azion-cli/pkg/cmd/delete/profile"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/cmd/delete/rules_engine"
 	storage "github.com/aziontech/azion-cli/pkg/cmd/delete/storage"
+	dataStream "github.com/aziontech/azion-cli/pkg/cmd/delete/data_stream"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/delete/variables"
 	waf "github.com/aziontech/azion-cli/pkg/cmd/delete/waf"
 	wafExceptions "github.com/aziontech/azion-cli/pkg/cmd/delete/waf_exceptions"
@@ -63,6 +64,10 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd.AddCommand(storage.NewCmd(f))
 	cmd.AddCommand(connector.NewCmd(f))
 	cmd.AddCommand(customPages.NewCmd(f))
+<<<<<<< HEAD
+=======
+	cmd.AddCommand(dataStream.NewCmd(f))
+>>>>>>> repo-update-security-scans
 	cmd.AddCommand(functionInstance.NewCmd(f))
 	cmd.AddCommand(profile.NewCmd(f))
 	cmd.AddCommand(networkList.NewCmd(f))

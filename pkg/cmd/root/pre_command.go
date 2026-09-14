@@ -81,7 +81,78 @@ func doPreCommandCheck(cmd *cobra.Command, fact *factoryRoot) error {
 		}
 	}
 
+	if err := checkTokenNotExpired(cmd, fact, t); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// commandsWithoutToken holds the top-level commands that must keep working even
+// when the stored token is missing or no longer valid
+var commandsWithoutToken = map[string]bool{
+	"":           true, // root command, it only prints the help message
+	"login":      true,
+	"logout":     true,
+	"version":    true,
+	"completion": true,
+	"help":       true,
+	"profiles":   true,
+	"config":     true,
+}
+
+// checkTokenNotExpired validates the stored token against the API, the very same
+// way it is validated when the user configures it, so an expired token is
+// reported here instead of failing later with an obscure error
+func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token.Token) error {
+	// the token sent through the --token flag was already validated by checkTokenSent
+	if cmd.Flags().Changed("token") {
+		logger.Debug("Skipping token expiration check, token was just sent and validated")
+		return nil
+	}
+
+	command := topLevelCommandName(cmd)
+	if commandsWithoutToken[command] || strings.HasPrefix(command, "__") {
+		logger.Debug("Skipping token expiration check", zap.String("command", command))
+		return nil
+	}
+
+	if fact.globalSettings == nil || fact.globalSettings.Token == "" {
+		// no token configured yet, the command itself asks the user to log in
+		logger.Debug("Skipping token expiration check, no token configured")
+		return nil
+	}
+
+	activeProfile := fact.factory.GetActiveProfile()
+	logger.Debug("Checking if the configured token is still valid", zap.String("profile", activeProfile), zap.String("command", command))
+
+	valid, _, err := tokenStr.Validate(&fact.globalSettings.Token)
+	if err != nil {
+		logger.Debug("Could not validate the configured token", zap.Error(err))
+		return utils.ErrorToken401
+	}
+
+	if !valid {
+		logger.Debug("The configured token was rejected by the API", zap.String("profile", activeProfile))
+		return utils.ErrorToken401
+	}
+
+	return nil
+}
+
+// topLevelCommandName returns the name of the top-level command being run,
+// an empty string when the root command itself is being run
+func topLevelCommandName(cmd *cobra.Command) string {
+	current := cmd
+	for current.HasParent() && current.Parent().HasParent() {
+		current = current.Parent()
+	}
+
+	if !current.HasParent() {
+		return ""
+	}
+
+	return current.Name()
 }
 
 func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token.Token) error {
