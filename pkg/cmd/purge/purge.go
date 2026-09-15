@@ -14,21 +14,19 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	urls      string
-	wildcard  string
-	cachekeys string
-	Layer     string
-)
-
 type PurgeCmd struct {
 	Io           *iostreams.IOStreams
 	GetPurgeType func() (string, error)
 	AskForInput  func() ([]string, error)
+	Layer        string
+	Cachekeys    string
+	Urls         string
+	Wildcard     string
 }
 
 func NewPurgeCmd(f *cmdutil.Factory) *PurgeCmd {
 	return &PurgeCmd{
+		Layer:        "cache",
 		Io:           f.IOStreams,
 		GetPurgeType: getPurgeType,
 		AskForInput:  askForInput,
@@ -53,10 +51,10 @@ func NewCobraCmd(purge *PurgeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&urls, "urls", "", msg.FlagUrls)
-	cobraCmd.Flags().StringVar(&wildcard, "wildcard", "", msg.FlagWildcard)
-	cobraCmd.Flags().StringVar(&cachekeys, "cachekey", "", msg.FlagCacheKeys)
-	cobraCmd.Flags().StringVar(&Layer, "layer", "cache", msg.FlagLayer)
+	cobraCmd.Flags().StringVar(&purge.Urls, "urls", "", msg.FlagUrls)
+	cobraCmd.Flags().StringVar(&purge.Wildcard, "wildcard", "", msg.FlagWildcard)
+	cobraCmd.Flags().StringVar(&purge.Cachekeys, "cachekey", "", msg.FlagCacheKeys)
+	cobraCmd.Flags().StringVar(&purge.Layer, "layer", "cache", msg.FlagLayer)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cobraCmd
@@ -79,7 +77,7 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 			return err
 		}
 
-		err = clipurge.PurgeCache(ctx, listOfUrls, answer, Layer)
+		err = clipurge.PurgeCache(ctx, listOfUrls, answer, purge.Layer)
 		if err != nil {
 			logger.Debug("Error while purging domains", zap.Error(err))
 			return err
@@ -91,7 +89,7 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 	}
 
 	if cmd.Flags().Changed("urls") {
-		err := clipurge.PurgeCache(ctx, strings.Split(urls, ","), "url", Layer)
+		err := clipurge.PurgeCache(ctx, strings.Split(purge.Urls, ","), "url", purge.Layer)
 		if err != nil {
 			logger.Debug("Error while purging domains", zap.Error(err))
 			return err
@@ -99,12 +97,12 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 	}
 
 	if cmd.Flags().Changed("wildcard") {
-		splitWildcard := strings.Split(wildcard, ",")
+		splitWildcard := strings.Split(purge.Wildcard, ",")
 		if len(splitWildcard) > 1 {
 			logger.Debug("More than one URL for wildcard", zap.Any("Amount of URLs", len(splitWildcard)))
 			return msg.ErrorTooManyUrls
 		}
-		err := clipurge.PurgeCache(ctx, splitWildcard, "wildcard", Layer)
+		err := clipurge.PurgeCache(ctx, splitWildcard, "wildcard", purge.Layer)
 		if err != nil {
 			logger.Debug("Error while purging domains", zap.Error(err))
 			return err
@@ -112,7 +110,7 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 	}
 
 	if cmd.Flags().Changed("cachekey") {
-		err := clipurge.PurgeCache(ctx, strings.Split(cachekeys, ","), "cachekey", Layer)
+		err := clipurge.PurgeCache(ctx, strings.Split(purge.Cachekeys, ","), "cachekey", purge.Layer)
 		if err != nil {
 			logger.Debug("Error while purging domains", zap.Error(err))
 			return err

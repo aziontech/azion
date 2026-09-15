@@ -107,7 +107,7 @@ func (l *login) browserLogin(srv Server) error {
 			}
 
 			if paramValue != "" {
-				tokenValue = paramValue
+				l.TokenValue = paramValue
 			}
 			globalCancel()
 		})

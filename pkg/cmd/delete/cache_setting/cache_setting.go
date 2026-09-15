@@ -17,16 +17,13 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	applicationID   int64
-	cacheSettingsID int64
-)
-
 type DeleteCmd struct {
-	Io          *iostreams.IOStreams
-	ReadInput   func(string) (string, error)
-	DeleteCache func(context.Context, int64, int64) (int, error)
-	AskInput    func(msg string) (string, error)
+	Io              *iostreams.IOStreams
+	ReadInput       func(string) (string, error)
+	DeleteCache     func(context.Context, int64, int64) (int, error)
+	AskInput        func(msg string) (string, error)
+	ApplicationID   int64
+	CacheSettingsID int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -68,7 +65,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				delete.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("cache-setting-id") {
@@ -83,18 +80,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				cacheSettingsID = num
+				delete.CacheSettingsID = num
 			}
 
 			ctx := context.Background()
 
-			_, err = delete.DeleteCache(ctx, applicationID, cacheSettingsID)
+			_, err = delete.DeleteCache(ctx, delete.ApplicationID, delete.CacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, cacheSettingsID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.CacheSettingsID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -103,8 +100,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DeleteFlagApplicationID)
-	cobraCmd.Flags().Int64Var(&cacheSettingsID, "cache-setting-id", 0, msg.DeleteFlagCacheSettingsID)
+	cobraCmd.Flags().Int64Var(&delete.ApplicationID, "application-id", 0, msg.DeleteFlagApplicationID)
+	cobraCmd.Flags().Int64Var(&delete.CacheSettingsID, "cache-setting-id", 0, msg.DeleteFlagCacheSettingsID)
 
 	return cobraCmd
 }

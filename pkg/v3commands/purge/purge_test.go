@@ -69,7 +69,7 @@ func TestUpdate(t *testing.T) {
 
 		f, _, _ := testutils.NewFactory(mock)
 
-		err := purgeCacheKeys([]string{"www.example.com/@@cookie_name=cookie_value"}, f)
+		err := purgeCacheKeys([]string{"www.example.com/@@cookie_name=cookie_value"}, f, "")
 
 		require.NoError(t, err)
 	})

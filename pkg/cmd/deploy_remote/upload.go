@@ -18,9 +18,7 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	PathStatic = ".edge/storage"
-)
+const PathStatic = ".edge/storage"
 
 // ReadSettings reads the settings file for S3 credentials
 func ReadSettings(path string) (token.Settings, error) {
@@ -39,7 +37,7 @@ func (cmd *DeployCmd) uploadFiles(
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	noOfWorkers := workers.CalculateOptimal(Workers)
+	noOfWorkers := workers.CalculateOptimal(cmd.Workers)
 	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
 
 	var currentFile int64
@@ -153,7 +151,7 @@ func (cmd *DeployCmd) uploadFilesWithCreds(
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UploadStart, f.Format, f.Out)
 	*msgs = append(*msgs, msg.UploadStart)
 
-	noOfWorkers := workers.CalculateOptimal(Workers)
+	noOfWorkers := workers.CalculateOptimal(cmd.Workers)
 	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
 
 	var currentFile int64

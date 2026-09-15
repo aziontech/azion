@@ -53,26 +53,28 @@ type DeployCmd struct {
 	ReadSettings          func(string) (token.Settings, error)
 	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptionsV3, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error
 	OpenBrowserFunc       func(input string) error
+	Auto                  bool
+	DryRun                bool
+	Env                   string
+	Local                 bool
+	NoPrompt              bool
+	Path                  string
+	ProjectConf           string
+	SkipBuild             bool
+	Sync                  bool
+	Logs                  contracts.Logs
+	Result                contracts.Results
 }
 
-var (
-	Path        string
-	Auto        bool
-	NoPrompt    bool
-	SkipBuild   bool
-	ProjectConf string
-	Sync        bool
-	DryRun      bool
-	Local       bool
-	Env         string
-	Logs        = contracts.Logs{}
-	Result      = contracts.Results{}
-	DeployURL   = "https://console.azion.com"
-	ScriptID    = "17ac912d-5ce9-4806-9fa7-480779e43f58"
+const (
+	DeployURL = "https://console.azion.com"
+	ScriptID  = "17ac912d-5ce9-4806-9fa7-480779e43f58"
 )
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
+		ProjectConf:           "azion",
+		Env:                   ".edge/.env",
 		Io:                    f.IOStreams,
 		GetWorkDir:            utils.GetWorkingDir,
 		FileReader:            os.ReadFile,
@@ -113,15 +115,15 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		},
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
-	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
-	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
-	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
-	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
-	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
-	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
-	deployCmd.Flags().BoolVar(&DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
-	deployCmd.Flags().BoolVar(&Local, "local", false, msg.EdgeApplicationDeployLocal)
-	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
+	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
+	deployCmd.Flags().BoolVar(&deploy.SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
+	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
+	deployCmd.Flags().BoolVar(&deploy.Sync, "sync", false, msg.EdgeApplicationDeploySync)
+	deployCmd.Flags().BoolVar(&deploy.DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
+	deployCmd.Flags().BoolVar(&deploy.Local, "local", false, msg.EdgeApplicationDeployLocal)
+	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
 
@@ -130,26 +132,26 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local bool, sync bool) error {
-	ProjectConf = configPath
-	Local = local
-	Sync = sync
+	cmd.ProjectConf = configPath
+	cmd.Local = local
+	cmd.Sync = sync
 	return cmd.Run(f)
 }
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	activeProfile := f.GetActiveProfile()
-	if DryRun {
+	if cmd.DryRun {
 		dryStructure := dryrun.NewDryrunCmd(f)
 		pathWorkingDir, err := cmd.GetWorkDir()
 		if err != nil {
 			return err
 		}
-		return dryStructure.SimulateDeploy(pathWorkingDir, ProjectConf)
+		return dryStructure.SimulateDeploy(pathWorkingDir, cmd.ProjectConf)
 	}
 
-	if Local {
+	if cmd.Local {
 		deployLocal := deployRemote.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, ProjectConf, Env, Sync, Auto, SkipBuild)
+		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild)
 	}
 
 	msgs := []string{}
@@ -167,7 +169,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	conf, err := cmd.GetAzionJsonContent(cmd.ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -222,7 +224,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecretKey, conf.Prefix, settings.S3Bucket, ProjectConf, cmd)
+	id, err := cmd.CallScript(settings.Token, settings.S3AccessKey, settings.S3SecretKey, conf.Prefix, settings.S3Bucket, cmd.ProjectConf, cmd)
 	if err != nil {
 		return err
 	}
@@ -237,7 +239,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	conf, err = cmd.GetAzionJsonContent(ProjectConf)
+	conf, err = cmd.GetAzionJsonContent(cmd.ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -295,12 +297,12 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 			return err
 		}
 
-		if err := cmd.Unmarshal(body, &Logs); err != nil {
+		if err := cmd.Unmarshal(body, &cmd.Logs); err != nil {
 			logger.Debug("Error unmarshalling response", zap.Error(err))
 			return err
 		}
 
-		switch Logs.Status {
+		switch cmd.Logs.Status {
 		case "queued", "running", "started", "pending finish":
 			time.Sleep(7 * time.Second)
 			continue
@@ -333,16 +335,16 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 				return err
 			}
 
-			if err := cmd.Unmarshal(body, &Result); err != nil {
+			if err := cmd.Unmarshal(body, &cmd.Result); err != nil {
 				logger.Debug("Error unmarshalling response", zap.Error(err))
 				return err
 			}
 
-			if Result.Result.Errors != nil {
-				return fmt.Errorf(msg.ERRORCAPTURELOGS, Result.Result.Errors.Stack)
+			if cmd.Result.Result.Errors != nil {
+				return fmt.Errorf(msg.ERRORCAPTURELOGS, cmd.Result.Result.Errors.Stack)
 			}
 
-			err = cmd.WriteAzionJsonContent(Result.Result.Azion, ProjectConf)
+			err = cmd.WriteAzionJsonContent(cmd.Result.Result.Azion, cmd.ProjectConf)
 			if err != nil {
 				return err
 			}

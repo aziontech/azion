@@ -59,8 +59,8 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *Sy
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
 
-	if IaC {
-		if IaCFormat != "mjs" && IaCFormat != "cjs" && IaCFormat != "js" && IaCFormat != "ts" {
+	if synch.IaC {
+		if synch.IaCFormat != "mjs" && synch.IaCFormat != "cjs" && synch.IaCFormat != "js" && synch.IaCFormat != "ts" {
 			return msg.INVALIDFORMAT
 		}
 
@@ -69,7 +69,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *Sy
 			return err
 		}
 		defer os.Remove("manifesttoconvert.json")
-		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
+		fileName := fmt.Sprintf("azion.config.%s", synch.IaCFormat)
 
 		vul := vulcanPkg.NewVulcanV3()
 		command := vul.Command("", "manifest -o %s transform %s", f)
@@ -128,7 +128,7 @@ func (synch *SyncCmd) syncOrigin(info contracts.SyncOptsV3, f *cmdutil.Factory, 
 		originsAzion = append(originsAzion, newOrigin)
 		info.Conf.Origin = originsAzion
 	}
-	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return remoteOriginIds, err
@@ -187,7 +187,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOptsV3, f *cmdutil.Factory, m
 		cacheAzion = append(cacheAzion, newCache)
 		info.Conf.CacheSettings = cacheAzion
 	}
-	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return remoteCacheIds, err
@@ -240,7 +240,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOptsV3, f *cmdutil.Factory, m
 		rulesAzion = append(rulesAzion, newRule)
 		info.Conf.RulesEngine.Rules = rulesAzion
 	}
-	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err
@@ -286,7 +286,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOptsV3, f *cmdutil.Factory, m
 		info.Conf.RulesEngine.Rules = rulesAzion
 	}
 
-	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentV3PreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err

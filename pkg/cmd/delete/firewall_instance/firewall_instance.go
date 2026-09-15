@@ -17,15 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	firewallID                 int64
-	firewallFunctionInstanceID int64
-)
-
 type DeleteCmd struct {
-	Io        *iostreams.IOStreams
-	ReadInput func(string) (string, error)
-	AskInput  func(string) (string, error)
+	Io                         *iostreams.IOStreams
+	ReadInput                  func(string) (string, error)
+	AskInput                   func(string) (string, error)
+	FirewallFunctionInstanceID int64
+	FirewallID                 int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -63,7 +60,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFirewallId
 				}
 
-				firewallID = num
+				delete.FirewallID = num
 			}
 
 			if !cmd.Flags().Changed("instance-id") {
@@ -78,20 +75,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFirewallFunctionInstanceId
 				}
 
-				firewallFunctionInstanceID = num
+				delete.FirewallFunctionInstanceID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, firewallID, firewallFunctionInstanceID)
+			err = client.Delete(ctx, delete.FirewallID, delete.FirewallFunctionInstanceID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeletInstance.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, firewallFunctionInstanceID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.FirewallFunctionInstanceID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -99,8 +96,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&firewallID, "firewall-id", 0, msg.FlagId)
-	cobraCmd.Flags().Int64Var(&firewallFunctionInstanceID, "instance-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.FirewallID, "firewall-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.FirewallFunctionInstanceID, "instance-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

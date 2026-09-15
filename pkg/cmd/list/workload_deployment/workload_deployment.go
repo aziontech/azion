@@ -19,13 +19,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var workloadId int64
-
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
 	ListWorkloadDeployments func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedWorkloadDeploymentList, error)
 	AskInput                func(string) (string, error)
+	WorkloadId              int64
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -69,7 +68,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				workloadId = num
+				list.WorkloadId = num
 			}
 
 			if err := PrintTable(cmd, f, list, opts); err != nil {
@@ -81,7 +80,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
-	cmd.Flags().Int64Var(&workloadId, "workload-id", 0, msg.WorkloadIdFlag)
+	cmd.Flags().Int64Var(&list.WorkloadId, "workload-id", 0, msg.WorkloadIdFlag)
 
 	return cmd
 }
@@ -89,7 +88,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *contracts.ListOptions) error {
 	ctx := context.Background()
 
-	response, err := list.ListWorkloadDeployments(ctx, opts, workloadId)
+	response, err := list.ListWorkloadDeployments(ctx, opts, list.WorkloadId)
 	if err != nil {
 		return err
 	}

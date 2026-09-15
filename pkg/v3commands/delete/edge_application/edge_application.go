@@ -22,17 +22,16 @@ import (
 	"go.uber.org/zap"
 )
 
-var ProjectConf string
-
 type DeleteCmd struct {
-	Io         *iostreams.IOStreams
-	GetAzion   func(confPath string) (*contracts.AzionApplicationOptionsV3, error)
-	f          *cmdutil.Factory
-	UpdateJson func(cmd *DeleteCmd) error
-	Cascade    func(ctx context.Context, del *DeleteCmd) error
-	AskInput   func(string) (string, error)
-	ReadFile   func(name string) ([]byte, error)
-	WriteFile  func(name string, data []byte, perm fs.FileMode) error
+	Io          *iostreams.IOStreams
+	GetAzion    func(confPath string) (*contracts.AzionApplicationOptionsV3, error)
+	f           *cmdutil.Factory
+	UpdateJson  func(cmd *DeleteCmd) error
+	Cascade     func(ctx context.Context, del *DeleteCmd) error
+	AskInput    func(string) (string, error)
+	ReadFile    func(name string) ([]byte, error)
+	WriteFile   func(name string, data []byte, perm fs.FileMode) error
+	ProjectConf string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -72,7 +71,7 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	cmd.Flags().Int64Var(&application_id, "application-id", 0, msg.FlagId)
 	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
-	cmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
+	cmd.Flags().StringVar(&delete.ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 
 	return cmd
 }
@@ -123,7 +122,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := filepath.Join(wd, ProjectConf, "azion.json")
+	azionJson := filepath.Join(wd, cmd.ProjectConf, "azion.json")
 	byteAzionJson, err := cmd.ReadFile(azionJson)
 	if err != nil {
 		logger.Debug("Error while parsing json", zap.Error(err))

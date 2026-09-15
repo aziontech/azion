@@ -19,14 +19,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	applicationID int64
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (api.ApplicationResponse, error)
+	Io            *iostreams.IOStreams
+	AskInput      func(string) (string, error)
+	Get           func(context.Context, int64) (api.ApplicationResponse, error)
+	ApplicationID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -67,11 +64,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdApplication
 				}
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, applicationID)
+			resp, err := describe.Get(ctx, describe.ApplicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
 			}
@@ -97,7 +94,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

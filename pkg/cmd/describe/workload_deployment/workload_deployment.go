@@ -17,15 +17,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	workloadID   int64
-	deploymentID int64
-)
-
 type DescribeCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
 	GetDeployment func(ctx context.Context, id, deploymentid int64) (api.DeploymentResponse, error)
+	DeploymentID  int64
+	WorkloadID    int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -61,7 +58,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				workloadID, err = strconv.ParseInt(answer, 10, 64)
+				describe.WorkloadID, err = strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					return msg.ErrorConvertWorkloadId
 				}
@@ -73,14 +70,14 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				deploymentID, err = strconv.ParseInt(answer, 10, 64)
+				describe.DeploymentID, err = strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					return msg.ErrorConvertDeploymentId
 				}
 			}
 
 			ctx := context.Background()
-			workload, err := describe.GetDeployment(ctx, workloadID, deploymentID)
+			workload, err := describe.GetDeployment(ctx, describe.WorkloadID, describe.DeploymentID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDeployment.Error(), err.Error())
 			}
@@ -103,8 +100,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagWorkloadID)
-	cobraCmd.Flags().Int64Var(&deploymentID, "deployment-id", 0, msg.FlagDeploymentID)
+	cobraCmd.Flags().Int64Var(&describe.WorkloadID, "workload-id", 0, msg.FlagWorkloadID)
+	cobraCmd.Flags().Int64Var(&describe.DeploymentID, "deployment-id", 0, msg.FlagDeploymentID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

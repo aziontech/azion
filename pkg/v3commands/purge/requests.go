@@ -42,11 +42,11 @@ func purgeUrls(urls []string, f *cmdutil.Factory) error {
 	return nil
 }
 
-func purgeCacheKeys(urls []string, f *cmdutil.Factory) error {
+func purgeCacheKeys(urls []string, f *cmdutil.Factory, layer string) error {
 	ctx := context.Background()
 
 	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
-	err := clipurge.PurgeCacheKey(ctx, urls, Layer)
+	err := clipurge.PurgeCacheKey(ctx, urls, layer)
 	if err != nil {
 		logger.Debug("Error while purging domains", zap.Error(err))
 		return err

@@ -23,7 +23,7 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 			return err
 		}
 
-		username = answer
+		l.Username = answer
 	}
 
 	if !cmd.Flags().Changed("password") {
@@ -32,10 +32,10 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 			return err
 		}
 
-		password = answer
+		l.Password = answer
 	}
 
-	resp, err := l.token.Create(b64(username, password))
+	resp, err := l.token.Create(b64(l.Username, l.Password))
 	if err != nil {
 		logger.Debug("Error while creating basic token", zap.Error(err))
 		return err
@@ -55,7 +55,7 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 	}
 
 	request := api.Request{}
-	request.SetName(username)
+	request.SetName(l.Username)
 	request.SetExpiresAt(date)
 	clientPersonalToken := api.NewClient(l.factory.HttpClient, l.factory.Config.GetString("api_url"), l.factory.Config.GetString("token"))
 	response, err := clientPersonalToken.Create(context.Background(), &request)
@@ -63,8 +63,8 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 		return fmt.Errorf(msg.ErrorLogin.Error(), err.Error())
 	}
 
-	tokenValue = response.GetKey()
-	uuid = response.GetUuid()
+	l.TokenValue = response.GetKey()
+	l.Uuid = response.GetUuid()
 
 	return nil
 }

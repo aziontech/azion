@@ -284,8 +284,8 @@ func TestCaptureLogs(t *testing.T) {
 			token := "test-token"
 			execID := "e89b32a6-c912-4fba-bae7-1e7ff115256f"
 			cmd := NewDeployCmd(f)
-			Logs = tt.logStruct
-			Result = tt.resultStruct
+			cmd.Logs = tt.logStruct
+			cmd.Result = tt.resultStruct
 
 			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptions, confConf string) error {
 				return nil
@@ -489,4 +489,38 @@ func TestOpenBrowser(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Flag state lives on DeployCmd, not on package-level variables, so the same
+// command can be built more than once in a single process without the
+// instances overwriting each other's flags.
+func TestFlagStateIsPerInstance(t *testing.T) {
+	f, _, _ := testutils.NewFactory(nil)
+
+	first := NewDeployCmd(f)
+	firstCobra := NewCobraCmd(first)
+	require.NoError(t, firstCobra.ParseFlags([]string{"--config-dir", "first", "--sync", "--workers", "4"}))
+
+	second := NewDeployCmd(f)
+	secondCobra := NewCobraCmd(second)
+	require.NoError(t, secondCobra.ParseFlags([]string{"--config-dir", "second"}))
+
+	assert.Equal(t, "first", first.ProjectConf)
+	assert.True(t, first.Sync)
+	assert.Equal(t, 4, first.Workers)
+
+	assert.Equal(t, "second", second.ProjectConf)
+	assert.False(t, second.Sync)
+	assert.Equal(t, 0, second.Workers)
+}
+
+// NewDeployCmd seeds the same defaults the flags declare, so callers that skip
+// Cobra entirely (init, link) get today's values.
+func TestNewDeployCmdSeedsFlagDefaults(t *testing.T) {
+	f, _, _ := testutils.NewFactory(nil)
+
+	cmd := NewDeployCmd(f)
+
+	assert.Equal(t, "azion", cmd.ProjectConf)
+	assert.Equal(t, ".edge/.env", cmd.Env)
 }

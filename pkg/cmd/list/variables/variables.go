@@ -20,8 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dump bool
-
 type ListCmd struct {
 	Io               *iostreams.IOStreams
 	ListAllVariables func(context.Context, *api.Client, *cmdutil.Factory, *contracts.ListOptions) error
@@ -29,12 +27,13 @@ type ListCmd struct {
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
-	return &ListCmd{
+	list := &ListCmd{
 		Io: f.IOStreams,
-		ListAllVariables: func(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-			return listAllVariables(ctx, client, f, opts)
-		},
 	}
+	list.ListAllVariables = func(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+		return listAllVariables(ctx, client, f, opts, list.Dump)
+	}
+	return list
 }
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
@@ -61,13 +60,13 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	cmd.Flags().BoolVar(&dump, "dump", false, "")
+	cmd.Flags().BoolVar(&list.Dump, "dump", false, "")
 	cmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
 
 	return cmd
 }
 
-func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions, dump bool) error {
 	resp, err := client.List(ctx)
 	if err != nil {
 		return err

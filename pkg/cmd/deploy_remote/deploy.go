@@ -48,23 +48,22 @@ type DeployCmd struct {
 	GetCredentialsForBucket  func(path string, bucketName string) (token.S3Credentials, bool, error)
 	SaveCredentialsForBucket func(path string, bucketName string, creds token.S3Credentials) error
 	CreateBucketCredentials  func(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error)
+	Auto                     bool
+	Env                      string
+	NoPrompt                 bool
+	Path                     string
+	ProjectConf              string
+	Sync                     bool
+	SkipBuild                bool
+	SkipFramework            bool
+	WriteBucket              bool
+	Workers                  int
 }
-
-var (
-	Path          string
-	Auto          bool
-	NoPrompt      bool
-	SkipBuild     bool
-	SkipFramework bool
-	ProjectConf   string
-	Sync          bool
-	Env           string
-	WriteBucket   bool
-	Workers       int
-)
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
+		ProjectConf:              "azion",
+		Env:                      ".edge/.env",
 		Io:                       f.IOStreams,
 		GetWorkDir:               utils.GetWorkingDir,
 		FileReader:               os.ReadFile,
@@ -101,12 +100,12 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		},
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
-	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
-	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
-	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
-	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
-	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
-	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
+	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
+	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
+	deployCmd.Flags().BoolVar(&deploy.Sync, "sync", false, msg.EdgeApplicationDeploySync)
+	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
 
@@ -115,14 +114,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool, workers int) error {
-	ProjectConf = configPath
-	Sync = shouldSync
-	Env = env
-	Auto = auto
-	SkipBuild = skipBuild
-	SkipFramework = skipFramework
-	WriteBucket = writeBucket
-	Workers = workers
+	cmd.ProjectConf = configPath
+	cmd.Sync = shouldSync
+	cmd.Env = env
+	cmd.Auto = auto
+	cmd.SkipBuild = skipBuild
+	cmd.SkipFramework = skipFramework
+	cmd.WriteBucket = writeBucket
+	cmd.Workers = workers
 	return cmd.Run(f)
 }
 
@@ -138,24 +137,24 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	if Sync {
-		sync.ProjectConf = ProjectConf
+	if cmd.Sync {
 		syncCmd := sync.NewSyncCmd(f)
-		syncCmd.EnvPath = Env
+		syncCmd.ProjectConf = cmd.ProjectConf
+		syncCmd.EnvPath = cmd.Env
 		if err := sync.Run(syncCmd); err != nil {
 			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
 			return err
 		}
 	}
 
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	conf, err := cmd.GetAzionJsonContent(cmd.ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
 	}
 
 	defer func() {
-		if err := cmd.WriteAzionJsonContent(conf, ProjectConf); err != nil {
+		if err := cmd.WriteAzionJsonContent(conf, cmd.ProjectConf); err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 		}
 	}()
@@ -169,7 +168,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		oldprefix, newprefix = conf.Prefix, conf.Prefix
 	}
 
-	err = checkArgsJson(cmd, ProjectConf)
+	err = checkArgsJson(cmd, cmd.ProjectConf)
 	if err != nil {
 		return err
 	}
@@ -177,8 +176,8 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
 
-	if !SkipBuild && conf.NotFirstRun {
-		if !SkipFramework {
+	if !cmd.SkipBuild && conf.NotFirstRun {
+		if !cmd.SkipFramework {
 			conf.Prefix = newprefix
 			if conf.RotatePrefix == nil || *conf.RotatePrefix == true {
 				replacements := map[string]string{oldprefix: conf.Prefix}
@@ -198,7 +197,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -235,14 +234,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		GlobalTimingSummary.BucketCreateTime = time.Since(bucketStart)
 	}
 
-	if !conf.NotFirstRun && (!SkipBuild || !SkipFramework) {
+	if !conf.NotFirstRun && (!cmd.SkipBuild || !cmd.SkipFramework) {
 		conf.Prefix = newprefix
 		err = cmd.callBundlerInit(conf)
 		if err != nil {
 			return err
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -260,7 +259,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	// Check if directory exists; if not, we skip uploading static files
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
 		logger.Debug(msg.SkipUpload)
-	} else if SkipBuild || SkipFramework {
+	} else if cmd.SkipBuild || cmd.SkipFramework {
 		logger.Debug(msg.SkipUploadBuild)
 	} else {
 		// Get the active profile for credentials storage
@@ -295,7 +294,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	// Time CreateResources operation
 	manifestCreateStart := time.Now()
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	err = interpreter.CreateResources(conf, manifestStructure, f, cmd.ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}

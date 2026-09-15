@@ -20,8 +20,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var ProjectConf string
-
 type DeleteCmd struct {
 	Io                    *iostreams.IOStreams
 	GetAzion              func(confPath string) (*contracts.AzionApplicationOptions, error)
@@ -31,6 +29,7 @@ type DeleteCmd struct {
 	AskInput              func(string) (string, error)
 	ReadFile              func(name string) ([]byte, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	ProjectConf           string
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
@@ -70,7 +69,7 @@ func NewCobraCmd(delete *DeleteCmd) *cobra.Command {
 	cmd.Flags().Int64Var(&application_id, "application-id", 0, msg.FlagId)
 	cmd.Flags().Bool("cascade", true, msg.CascadeFlag)
 	cmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
-	cmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
+	cmd.Flags().StringVar(&delete.ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 
 	return cmd
 }
@@ -121,7 +120,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 	if err != nil {
 		return utils.ErrorInternalServerError
 	}
-	azionJson := path.Join(wd, ProjectConf, "azion.json")
+	azionJson := path.Join(wd, cmd.ProjectConf, "azion.json")
 
 	azionJsonFile := &contracts.AzionApplicationOptions{
 		Env:    "production",
@@ -132,7 +131,7 @@ func updateAzionJson(cmd *DeleteCmd) error {
 	azionJsonFile.Application.Name = "__DEFAULT__"
 	azionJsonFile.RtPurge.PurgeOnPublish = true
 
-	err = cmd.WriteAzionJsonContent(azionJsonFile, ProjectConf)
+	err = cmd.WriteAzionJsonContent(azionJsonFile, cmd.ProjectConf)
 	if err != nil {
 		return fmt.Errorf(utils.ErrorCreateFile.Error(), azionJson)
 	}

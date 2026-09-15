@@ -16,14 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID string
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (api.EdgeApplicationResponse, error)
+	Io            *iostreams.IOStreams
+	AskInput      func(string) (string, error)
+	Get           func(context.Context, string) (api.EdgeApplicationResponse, error)
+	ApplicationID string
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -59,11 +56,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				applicationID = answer
+				describe.ApplicationID = answer
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, applicationID)
+			resp, err := describe.Get(ctx, describe.ApplicationID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetApplication.Error(), err)
 			}
@@ -102,7 +99,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&applicationID, "application-id", "", msg.FlagId)
+	cobraCmd.Flags().StringVar(&describe.ApplicationID, "application-id", "", msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

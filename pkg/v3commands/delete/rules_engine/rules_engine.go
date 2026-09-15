@@ -17,17 +17,14 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	ruleID        int64
-	applicationID int64
-	phase         string
-)
-
 type DeleteCmd struct {
-	Io         *iostreams.IOStreams
-	ReadInput  func(string) (string, error)
-	DeleteRule func(context.Context, int64, int64, string) error
-	AskInput   func(string) (string, error)
+	Io            *iostreams.IOStreams
+	ReadInput     func(string) (string, error)
+	DeleteRule    func(context.Context, int64, int64, string) error
+	AskInput      func(string) (string, error)
+	ApplicationID int64
+	Phase         string
+	RuleID        int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -68,7 +65,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdRule
 				}
-				ruleID = num
+				delete.RuleID = num
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -81,7 +78,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdApplication
 				}
-				applicationID = num
+				delete.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -89,18 +86,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				phase = answer
+				delete.Phase = answer
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteRule(ctx, ruleID, applicationID, phase)
+			err = delete.DeleteRule(ctx, delete.RuleID, delete.ApplicationID, delete.Phase)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, ruleID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.RuleID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -108,9 +105,9 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cobraCmd.Flags().StringVar(&phase, "phase", "", msg.FlagPhase)
+	cobraCmd.Flags().Int64Var(&delete.RuleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().Int64Var(&delete.ApplicationID, "application-id", 0, msg.FlagAppID)
+	cobraCmd.Flags().StringVar(&delete.Phase, "phase", "", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

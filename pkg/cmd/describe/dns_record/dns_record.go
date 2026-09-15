@@ -21,15 +21,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	zoneID   int64
-	recordID int64
-)
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(context.Context, int64, int64) (sdk.Record, error)
+	RecordID int64
+	ZoneID   int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -71,7 +68,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdZone
 				}
 
-				zoneID = num
+				describe.ZoneID = num
 			}
 
 			if !cmd.Flags().Changed("record-id") {
@@ -86,11 +83,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRecord
 				}
 
-				recordID = num
+				describe.RecordID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, zoneID, recordID)
+			resp, err := describe.Get(ctx, describe.ZoneID, describe.RecordID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDNSRecord.Error(), err)
 			}
@@ -118,8 +115,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&zoneID, "zone-id", 0, msg.DNSRecordFlagZoneID)
-	cobraCmd.Flags().Int64Var(&recordID, "record-id", 0, msg.DNSRecordFlagRecordID)
+	cobraCmd.Flags().Int64Var(&describe.ZoneID, "zone-id", 0, msg.DNSRecordFlagZoneID)
+	cobraCmd.Flags().Int64Var(&describe.RecordID, "record-id", 0, msg.DNSRecordFlagRecordID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DNSRecordDescribeHelpFlag)
 	return cobraCmd
 }

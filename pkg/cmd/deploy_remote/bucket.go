@@ -36,7 +36,7 @@ func (cmd *DeployCmd) doBucket(
 	nameBucket := utils.ReplaceInvalidCharsBucket(conf.Name)
 
 	bucketAccess := "read_only"
-	if WriteBucket {
+	if cmd.WriteBucket {
 		bucketAccess = "read_write"
 	} else if manifestStorage[0].WorkloadsAccess != "" {
 		bucketAccess = manifestStorage[0].WorkloadsAccess
@@ -74,7 +74,7 @@ func (cmd *DeployCmd) doBucket(
 	msgf := fmt.Sprintf(msg.BucketSuccessful, conf.Bucket)
 	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
-	return cmd.WriteAzionJsonContent(conf, ProjectConf)
+	return cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 }
 
 // CreateBucketCredentials creates S3 credentials for a specific bucket and saves them to the credentials file

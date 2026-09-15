@@ -20,12 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var digitalCertificateID int64
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.Certificate, error)
+	Io                   *iostreams.IOStreams
+	AskInput             func(string) (string, error)
+	Get                  func(context.Context, int64) (sdk.Certificate, error)
+	DigitalCertificateID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -66,33 +65,33 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdDigitalCertificate
 				}
-				digitalCertificateID = num
+				describe.DigitalCertificateID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, digitalCertificateID)
+			resp, err := describe.Get(ctx, describe.DigitalCertificateID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDigitalCertificate, err.Error())
 			}
 
 			fields := map[string]string{
-				"Id":             "ID",
-				"Name":           "Name",
-				"Type":           "Type",
-				"Issuer":         "Issuer",
-				"SubjectName":    "Subject Names",
-				"Validity":       "Validity",
-				"Status":         "Status",
-				"StatusDetail":   "Status Detail",
-				"Managed":        "Managed",
-				"Authority":      "Authority",
-				"Challenge":      "Challenge",
-				"KeyAlgorithm":   "Key Algorithm",
-				"Active":         "Active",
-				"LastEditor":     "Last Editor",
-				"LastModified":   "Last Modified",
-				"CreatedAt":      "Created At",
-				"RenewedAt":      "Renewed At",
+				"Id":           "ID",
+				"Name":         "Name",
+				"Type":         "Type",
+				"Issuer":       "Issuer",
+				"SubjectName":  "Subject Names",
+				"Validity":     "Validity",
+				"Status":       "Status",
+				"StatusDetail": "Status Detail",
+				"Managed":      "Managed",
+				"Authority":    "Authority",
+				"Challenge":    "Challenge",
+				"KeyAlgorithm": "Key Algorithm",
+				"Active":       "Active",
+				"LastEditor":   "Last Editor",
+				"LastModified": "Last Modified",
+				"CreatedAt":    "Created At",
+				"RenewedAt":    "Renewed At",
 			}
 
 			describeOut := output.DescribeOutput{
@@ -108,7 +107,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&digitalCertificateID, "digital-certificate-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&describe.DigitalCertificateID, "digital-certificate-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

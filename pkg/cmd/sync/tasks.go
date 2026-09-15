@@ -83,8 +83,8 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		return fmt.Errorf(msg.ERRORSYNC, err.Error())
 	}
 
-	if IaC {
-		if IaCFormat != "mjs" && IaCFormat != "cjs" && IaCFormat != "js" && IaCFormat != "ts" {
+	if synch.IaC {
+		if synch.IaCFormat != "mjs" && synch.IaCFormat != "cjs" && synch.IaCFormat != "js" && synch.IaCFormat != "ts" {
 			return msg.INVALIDFORMAT
 		}
 
@@ -93,7 +93,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 			return err
 		}
 		defer os.Remove("manifesttoconvert.json")
-		fileName := fmt.Sprintf("azion.config.%s", IaCFormat)
+		fileName := fmt.Sprintf("azion.config.%s", synch.IaCFormat)
 
 		vul := vulcanPkg.NewVulcan()
 		command := vul.Command("", "manifest transform --output %s --entry %s", f)
@@ -182,7 +182,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 	}
 
 	info.Conf.CacheSettings = cacheAzion
-	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return remoteCacheIds, err
@@ -327,7 +327,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 	// Update the configuration with all rules
 	info.Conf.RulesEngine.Rules = rulesAzion
-	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, ProjectConf)
+	err = utils.WriteAzionJsonContentPreserveOrder(info.Conf, synch.ProjectConf)
 	if err != nil {
 		logger.Debug("Error while writing azion.json file", zap.Error(err))
 		return err

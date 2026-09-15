@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var networkListID int64
-
 type DeleteCmd struct {
 	Io                *iostreams.IOStreams
 	ReadInput         func(string) (string, error)
 	DeleteNetworkList func(context.Context, int64) error
 	AskInput          func(string) (string, error)
+	NetworkListID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertNetworkListId
 				}
 
-				networkListID = num
+				delete.NetworkListID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteNetworkList(ctx, networkListID)
+			err = delete.DeleteNetworkList(ctx, delete.NetworkListID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteNetworkList.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, networkListID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.NetworkListID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&networkListID, "network-list-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&delete.NetworkListID, "network-list-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd
