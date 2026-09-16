@@ -22,3 +22,5 @@ completions
 
 *.orig
 .DS_Store
+
+doc/plan.md
