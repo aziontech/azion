@@ -15,11 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	port          int
-	SkipFramework bool
-)
-
 type DevCmd struct {
 	Io                    *iostreams.IOStreams
 	CommandRunnerStream   func(out io.Writer, cmd string, envvars []string) error
@@ -27,6 +22,8 @@ type DevCmd struct {
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
 	Vulcan                func() *vulcanPkg.VulcanPkg
+	SkipFramework         bool
+	Port                  int
 }
 
 func NewDevCmd(f *cmdutil.Factory) *DevCmd {
@@ -57,8 +54,8 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		},
 	}
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
-	devCmd.Flags().IntVar(&port, "port", 0, msg.PortFlag)
-	devCmd.Flags().BoolVar(&SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	devCmd.Flags().IntVar(&dev.Port, "port", 0, msg.PortFlag)
+	devCmd.Flags().BoolVar(&dev.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	return devCmd
 }
 
@@ -67,7 +64,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *DevCmd) ExternalRun(f *cmdutil.Factory, skipFramework bool) error {
-	SkipFramework = skipFramework
+	cmd.SkipFramework = skipFramework
 	return cmd.Run(f)
 }
 
@@ -83,7 +80,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		return output.Print(&outGen)
 	}
 
-	err := vulcan(cmd, port)
+	err := vulcan(cmd, cmd.Port)
 	if err != nil {
 		return err
 	}

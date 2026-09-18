@@ -19,7 +19,6 @@ import (
 	"go.uber.org/zap"
 )
 
-
 type urlCache struct {
 	sync.RWMutex
 	visited map[string]bool
@@ -66,6 +65,7 @@ func (c *urlCache) failedURLs() []string {
 	}
 	return urls
 }
+
 var blacklist = []string{
 	".pdf", ".zip", ".rar", ".7z", ".tar", ".gz",
 	".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
@@ -89,11 +89,9 @@ var (
 	bgRegex        = regexp.MustCompile(`background(?:-image)?:\s*url\(["']?([^"')]+)["']?\)`)
 )
 
-
 func formatLog(format string, args ...interface{}) string {
 	return fmt.Sprintf(format, args...)
 }
-
 
 func warmupCache(ctx context.Context, baseUrl string, maxUrls int, maxConcurrent int, timeout int, f *cmdutil.Factory) error {
 
@@ -101,7 +99,6 @@ func warmupCache(ctx context.Context, baseUrl string, maxUrls int, maxConcurrent
 	if err != nil {
 		return msg.ErrorInvalidUrl
 	}
-
 
 	cache := newUrlCache()
 	pendingUrls := make([]string, 0)
@@ -174,11 +171,10 @@ func warmupCache(ctx context.Context, baseUrl string, maxUrls int, maxConcurrent
 	logger.FInfo(f.IOStreams.Out, formatLog("Successful: %d\n", totalProcessed-cache.failedCount()))
 	logger.FInfo(f.IOStreams.Out, formatLog("Failed: %d\n", cache.failedCount()))
 	logger.FInfo(f.IOStreams.Out, formatLog("Total time: %.1fs\n", duration.Seconds()))
-	
+
 	if totalProcessed > 0 {
 		logger.FInfo(f.IOStreams.Out, formatLog("Speed: %.1f URLs/s\n", float64(totalProcessed)/duration.Seconds()))
 	}
-
 
 	failedURLs := cache.failedURLs()
 	if len(failedURLs) > 0 && len(failedURLs) <= 10 {
@@ -199,7 +195,7 @@ func processURL(currentURL string, timeoutMs int, cache *urlCache, processed int
 	cache.markVisited(currentURL)
 
 	shortURL := formatURL(currentURL, baseURL)
-	
+
 	logMutex.Lock()
 	logger.FInfo(out, formatLog("[%d/%d] %s\n", processed+1, maxUrls, shortURL))
 	logMutex.Unlock()
@@ -239,13 +235,13 @@ func processURL(currentURL string, timeoutMs int, cache *urlCache, processed int
 
 func extractLinks(html, baseURL string, out io.Writer, logMutex *sync.Mutex) []string {
 	foundLinks := make(map[string]bool)
-	
+
 	// List of regex patterns to process
 	regexPatterns := []*regexp.Regexp{
 		linkRegex, formRegex, cssRegex, jsRegex, metaRegex,
 		canonicalRegex, imgRegex, iconRegex, fontRegex, bgRegex,
 	}
-	
+
 	// Process all regex patterns
 	for _, regex := range regexPatterns {
 		matches := regex.FindAllStringSubmatch(html, -1)
@@ -255,16 +251,16 @@ func extractLinks(html, baseURL string, out io.Writer, logMutex *sync.Mutex) []s
 			}
 		}
 	}
-	
+
 	links := make([]string, 0, len(foundLinks))
 	for link := range foundLinks {
 		links = append(links, link)
 	}
-	
+
 	if len(links) > 0 {
 		logMutex.Lock()
 		logger.FInfo(out, formatLog("  Found links: %d\n", len(links)))
-		
+
 		examples := min(5, len(links))
 		if examples > 0 {
 			logger.FInfo(out, "  Examples:\n")
@@ -274,7 +270,7 @@ func extractLinks(html, baseURL string, out io.Writer, logMutex *sync.Mutex) []s
 		}
 		logMutex.Unlock()
 	}
-	
+
 	return links
 }
 
@@ -282,7 +278,7 @@ func processFoundLink(link, baseURL string, foundLinks map[string]bool) {
 	if isBlacklisted(link) {
 		return
 	}
-	
+
 	normalizedLink := normalizeURL(link, baseURL)
 	if normalizedLink != "" {
 		foundLinks[normalizedLink] = true
@@ -348,47 +344,47 @@ func normalizeURL(link, baseURL string) string {
 	if link == "" || link == "#" {
 		return ""
 	}
-	
+
 	if strings.Contains(link, "#") {
 		link = strings.Split(link, "#")[0]
 		if link == "" {
 			return ""
 		}
 	}
-	
+
 	baseURLParsed, err := url.Parse(baseURL)
 	if err != nil {
 		return ""
 	}
-	
+
 	// Use url.ResolveReference for proper URL resolution
 	linkURL, err := url.Parse(link)
 	if err != nil {
 		return ""
 	}
-	
+
 	resolvedURL := baseURLParsed.ResolveReference(linkURL)
-	
+
 	// Only allow same-host URLs
 	if resolvedURL.Host != baseURLParsed.Host {
 		return ""
 	}
-	
+
 	// Clean up the URL
 	resolvedURL.Fragment = ""
-	
+
 	// Keep only important query parameters for cache warming
 	paramsToKeep := []string{"id", "category", "product", "page", "search", "q", "query", "filter", "sort", "lang", "locale"}
 	query := resolvedURL.Query()
 	newQuery := make(url.Values)
-	
+
 	for _, param := range paramsToKeep {
 		if value := query.Get(param); value != "" {
 			newQuery.Set(param, value)
 		}
 	}
-	
+
 	resolvedURL.RawQuery = newQuery.Encode()
-	
+
 	return resolvedURL.String()
-} 
+}

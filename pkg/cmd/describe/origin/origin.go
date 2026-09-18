@@ -21,15 +21,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID int64
-	originKey     string
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, string) (api.GetResponse, error)
+	Io            *iostreams.IOStreams
+	AskInput      func(string) (string, error)
+	Get           func(context.Context, int64, string) (api.GetResponse, error)
+	ApplicationID int64
+	OriginKey     string
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -72,7 +69,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorConvertingStringToInt
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
@@ -82,11 +79,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return utils.ErrorParseResponse
 				}
 
-				originKey = answer
+				describe.OriginKey = answer
 			}
 
 			ctx := context.Background()
-			origin, err := describe.Get(ctx, applicationID, originKey)
+			origin, err := describe.Get(ctx, describe.ApplicationID, describe.OriginKey)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetOrigin.Error(), err)
 			}
@@ -122,8 +119,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
-	cobraCmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cobraCmd.Flags().StringVar(&describe.OriginKey, "origin-key", "", msg.FlagOriginKey)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd

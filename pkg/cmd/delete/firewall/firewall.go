@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var firewallID int64
-
 type DeleteCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
 	DeleteFunction func(context.Context, int64) error
 	AskInput       func(string) (string, error)
+	FirewallID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				firewallID = num
+				delete.FirewallID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteFunction(ctx, firewallID)
+			err = delete.DeleteFunction(ctx, delete.FirewallID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteFirewall, err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, firewallID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.FirewallID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&firewallID, "firewall-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.FirewallID, "firewall-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

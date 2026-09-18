@@ -21,12 +21,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var zoneID int64
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(context.Context, int64) (sdk.DNSSEC, error)
+	ZoneID   int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -68,11 +67,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdZone
 				}
 
-				zoneID = num
+				describe.ZoneID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, zoneID)
+			resp, err := describe.Get(ctx, describe.ZoneID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDNSSEC.Error(), err)
 			}
@@ -94,7 +93,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&zoneID, "zone-id", 0, msg.DNSSECFlagZoneID)
+	cobraCmd.Flags().Int64Var(&describe.ZoneID, "zone-id", 0, msg.DNSSECFlagZoneID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DNSSECDescribeHelpFlag)
 	return cobraCmd
 }

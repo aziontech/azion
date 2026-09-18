@@ -20,14 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	functionID int64
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.Functions, error)
+	Io         *iostreams.IOStreams
+	AskInput   func(string) (string, error)
+	Get        func(context.Context, int64) (sdk.Functions, error)
+	FunctionID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -70,11 +67,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFunctionId
 				}
 
-				functionID = num
+				describe.FunctionID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, functionID)
+			resp, err := describe.Get(ctx, describe.FunctionID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetFunction.Error(), err)
 			}
@@ -110,7 +107,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&functionID, "function-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&describe.FunctionID, "function-id", 0, msg.FlagID)
 	cobraCmd.Flags().Bool("with-code", false, msg.DescribeFlagWithCode)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 

@@ -18,12 +18,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var zoneID int64
-
 type DeleteCmd struct {
 	Io            *iostreams.IOStreams
 	DeleteDNSZone func(context.Context, int64) error
 	AskInput      func(string) (string, error)
+	ZoneID        int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -60,18 +59,18 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdZone
 				}
 
-				zoneID = num
+				del.ZoneID = num
 			}
 
 			ctx := context.Background()
 
-			err := del.DeleteDNSZone(ctx, zoneID)
+			err := del.DeleteDNSZone(ctx, del.ZoneID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DNSZoneDeleteOutputSuccess, zoneID),
+				Msg:   fmt.Sprintf(msg.DNSZoneDeleteOutputSuccess, del.ZoneID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -79,7 +78,7 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&zoneID, "zone-id", 0, msg.DNSZoneFlagId)
+	cobraCmd.Flags().Int64Var(&del.ZoneID, "zone-id", 0, msg.DNSZoneFlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DNSZoneDeleteHelpFlag)
 
 	return cobraCmd

@@ -19,17 +19,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID int64
-	ruleID        int64
-	phase         string
-)
-
 type DescribeCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
 	GetRulesEngine func(context.Context, int64, int64, string) (api.RulesEngineResponse, error)
 	AskInput       func(string) (string, error)
+	ApplicationID  int64
+	Phase          string
+	RuleID         int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -73,7 +70,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRule
 				}
 
-				ruleID = num
+				describe.RuleID = num
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -88,7 +85,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRule
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -97,11 +94,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				phase = answer
+				describe.Phase = answer
 			}
 
 			ctx := context.Background()
-			rules, err := describe.GetRulesEngine(ctx, applicationID, ruleID, phase)
+			rules, err := describe.GetRulesEngine(ctx, describe.ApplicationID, describe.RuleID, describe.Phase)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
 			}
@@ -127,9 +124,9 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cobraCmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.FlagAppID)
+	cobraCmd.Flags().Int64Var(&describe.RuleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().StringVar(&describe.Phase, "phase", "request", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

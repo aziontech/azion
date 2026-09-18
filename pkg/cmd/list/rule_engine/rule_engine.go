@@ -20,8 +20,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var phase string
-
 type ListCmd struct {
 	Io                      *iostreams.IOStreams
 	ReadInput               func(string) (string, error)
@@ -29,6 +27,7 @@ type ListCmd struct {
 	ListRulesEngineResponse func(context.Context, *contracts.ListOptions, int64) (*sdk.PaginatedResponsePhaseRuleList, error)
 	AskInput                func(string) (string, error)
 	EdgeApplicationID       int64
+	Phase                   string
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -87,7 +86,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				phase = answer
+				list.Phase = answer
 			}
 
 			if err := PrintTable(cmd, f, opts, list); err != nil {
@@ -99,7 +98,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	cmdutil.AddAzionApiFlags(cmd, opts)
 	cmd.Flags().Int64Var(&list.EdgeApplicationID, "application-id", 0, msg.ApplicationFlagId)
-	cmd.Flags().StringVar(&phase, "phase", "request", msg.RulesEnginePhase)
+	cmd.Flags().StringVar(&list.Phase, "phase", "request", msg.RulesEnginePhase)
 	cmd.Flags().BoolP("help", "h", false, msg.RulesEngineListHelpFlag)
 
 	return cmd
@@ -108,7 +107,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOptions, list *ListCmd) error {
 	ctx := context.Background()
 
-	switch phase {
+	switch list.Phase {
 	case "request":
 		rules, err := list.ListRulesEngineRequest(ctx, opts, list.EdgeApplicationID)
 		if err != nil {
@@ -121,7 +120,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 					fmt.Sprintf("%d", rule.Id),
 					rule.Name,
 					fmt.Sprintf("%d", rule.Order),
-					phase,
+					list.Phase,
 					fmt.Sprintf("%v", rule.Active),
 				}
 			}
@@ -152,7 +151,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, opts *contracts.ListOpti
 					fmt.Sprintf("%d", rule.Id),
 					rule.Name,
 					fmt.Sprintf("%d", rule.Order),
-					phase,
+					list.Phase,
 					fmt.Sprintf("%v", rule.Active),
 				}
 			}

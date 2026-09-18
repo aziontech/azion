@@ -41,6 +41,12 @@ type Settings struct {
 	S3AccessKey                string
 	S3SecretKey                string
 	S3Bucket                   string
+	// Resolved API generation for this profile, cached to avoid asking the SSO
+	// service on every invocation. Absent in settings files written by older
+	// CLI versions, which simply reads as a cache miss.
+	APIVersion          string
+	APIVersionCheckedAt time.Time
+	APIVersionTokenHash string
 }
 
 type Config struct {

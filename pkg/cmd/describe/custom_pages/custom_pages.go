@@ -20,12 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var customPageID int64
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.CustomPage, error)
+	Io           *iostreams.IOStreams
+	AskInput     func(string) (string, error)
+	Get          func(context.Context, int64) (sdk.CustomPage, error)
+	CustomPageID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -67,11 +66,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertCustomPageId
 				}
 
-				customPageID = num
+				describe.CustomPageID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, customPageID)
+			resp, err := describe.Get(ctx, describe.CustomPageID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetCustomPage.Error(), err)
 			}
@@ -98,7 +97,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&customPageID, "custom-page-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&describe.CustomPageID, "custom-page-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd

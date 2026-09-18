@@ -56,7 +56,7 @@ func (cmd *DeployCmd) doBucket(
 	msgf := fmt.Sprintf(msg.BucketSuccessful, conf.Bucket)
 	logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 	*msgs = append(*msgs, msgf)
-	return cmd.WriteAzionJsonContent(conf, ProjectConf)
+	return cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 }
 
 func askForInput(msg string, defaultIn string) (string, error) {

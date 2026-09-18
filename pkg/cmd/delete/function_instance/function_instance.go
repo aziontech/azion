@@ -17,15 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	edgeApplicationID  int64
-	functionInstanceID int64
-)
-
 type DeleteCmd struct {
-	Io        *iostreams.IOStreams
-	ReadInput func(string) (string, error)
-	AskInput  func(string) (string, error)
+	Io                 *iostreams.IOStreams
+	ReadInput          func(string) (string, error)
+	AskInput           func(string) (string, error)
+	EdgeApplicationID  int64
+	FunctionInstanceID int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -63,7 +60,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertApplicationId
 				}
 
-				edgeApplicationID = num
+				delete.EdgeApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("instance-id") {
@@ -78,20 +75,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFunctionInstanceId
 				}
 
-				functionInstanceID = num
+				delete.FunctionInstanceID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, edgeApplicationID, functionInstanceID)
+			err = client.Delete(ctx, delete.EdgeApplicationID, delete.FunctionInstanceID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeletInstance.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, functionInstanceID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.FunctionInstanceID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -99,8 +96,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&edgeApplicationID, "application-id", 0, msg.FlagId)
-	cobraCmd.Flags().Int64Var(&functionInstanceID, "instance-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.EdgeApplicationID, "application-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.FunctionInstanceID, "instance-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

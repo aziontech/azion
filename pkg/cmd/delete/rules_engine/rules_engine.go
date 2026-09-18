@@ -17,18 +17,15 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	ruleID        int64
-	applicationID int64
-	phase         string
-)
-
 type DeleteCmd struct {
 	Io                 *iostreams.IOStreams
 	ReadInput          func(string) (string, error)
 	DeleteRuleRequest  func(context.Context, int64, int64) error
 	DeleteRuleResponse func(context.Context, int64, int64) error
 	AskInput           func(string) (string, error)
+	ApplicationID      int64
+	Phase              string
+	RuleID             int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -75,7 +72,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRule
 				}
 
-				ruleID = num
+				delete.RuleID = num
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -90,7 +87,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				delete.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -99,19 +96,19 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				phase = answer
+				delete.Phase = answer
 			}
 
 			ctx := context.Background()
 
-			switch phase {
+			switch delete.Phase {
 			case "request":
-				err = delete.DeleteRuleRequest(ctx, ruleID, applicationID)
+				err = delete.DeleteRuleRequest(ctx, delete.RuleID, delete.ApplicationID)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 				}
 			case "response":
-				err = delete.DeleteRuleResponse(ctx, ruleID, applicationID)
+				err = delete.DeleteRuleResponse(ctx, delete.RuleID, delete.ApplicationID)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 				}
@@ -121,7 +118,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, ruleID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.RuleID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -129,9 +126,9 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cobraCmd.Flags().StringVar(&phase, "phase", "request", msg.FlagPhase)
+	cobraCmd.Flags().Int64Var(&delete.RuleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().Int64Var(&delete.ApplicationID, "application-id", 0, msg.FlagAppID)
+	cobraCmd.Flags().StringVar(&delete.Phase, "phase", "request", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

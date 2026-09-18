@@ -41,20 +41,19 @@ type DeployCmd struct {
 	Unmarshal             func(data []byte, v interface{}) error
 	Interpreter           func() *manifestInt.ManifestInterpreter
 	VersionID             func() string
+	Auto                  bool
+	Env                   string
+	NoPrompt              bool
+	Path                  string
+	ProjectConf           string
+	SkipBuild             bool
+	Sync                  bool
 }
-
-var (
-	Path        string
-	Auto        bool
-	NoPrompt    bool
-	SkipBuild   bool
-	ProjectConf string
-	Sync        bool
-	Env         string
-)
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
 	return &DeployCmd{
+		ProjectConf:           "azion",
+		Env:                   ".edge/.env",
 		Io:                    f.IOStreams,
 		GetWorkDir:            utils.GetWorkingDir,
 		FileReader:            os.ReadFile,
@@ -87,13 +86,13 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		},
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
-	deployCmd.Flags().StringVar(&Path, "path", "", msg.EdgeApplicationDeployPathFlag)
-	deployCmd.Flags().BoolVar(&Auto, "auto", false, msg.DeployFlagAuto)
-	deployCmd.Flags().BoolVar(&NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
-	deployCmd.Flags().BoolVar(&SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
-	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
-	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
-	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
+	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
+	deployCmd.Flags().BoolVar(&deploy.SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
+	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
+	deployCmd.Flags().BoolVar(&deploy.Sync, "sync", false, msg.EdgeApplicationDeploySync)
+	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
 	return deployCmd
 }
 
@@ -102,11 +101,11 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
-	ProjectConf = configPath
-	Sync = shouldSync
-	Env = env
-	Auto = auto
-	SkipBuild = skipBuild
+	cmd.ProjectConf = configPath
+	cmd.Sync = shouldSync
+	cmd.Env = env
+	cmd.Auto = auto
+	cmd.SkipBuild = skipBuild
 	return cmd.Run(f)
 }
 
@@ -116,26 +115,26 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgs = append(msgs, "Running deploy command")
 	ctx := context.Background()
 
-	if Sync {
-		sync.ProjectConf = ProjectConf
+	if cmd.Sync {
 		syncCmd := sync.NewSyncCmd(f)
-		syncCmd.EnvPath = Env
+		syncCmd.ProjectConf = cmd.ProjectConf
+		syncCmd.EnvPath = cmd.Env
 		if err := sync.Run(syncCmd); err != nil {
 			logger.Debug("Error while synchronizing local resources with remove resources", zap.Error(err))
 			return err
 		}
 	}
 
-	if !SkipBuild {
+	if !cmd.SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{}, ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{}, cmd.ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
 		}
 	}
 
-	conf, err := cmd.GetAzionJsonContent(ProjectConf)
+	conf, err := cmd.GetAzionJsonContent(cmd.ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -145,7 +144,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		conf.Prefix = cmd.VersionID()
 	}
 
-	err = checkArgsJson(cmd, ProjectConf)
+	err = checkArgsJson(cmd, cmd.ProjectConf)
 	if err != nil {
 		return err
 	}
@@ -245,7 +244,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
-	err = interpreter.CreateResources(conf, manifestStructure, f, ProjectConf, &msgs)
+	err = interpreter.CreateResources(conf, manifestStructure, f, cmd.ProjectConf, &msgs)
 	if err != nil {
 		return err
 	}

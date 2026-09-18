@@ -18,14 +18,11 @@ import (
 )
 
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (api.Response, error)
+	Io         *iostreams.IOStreams
+	AskInput   func(string) (string, error)
+	Get        func(context.Context, string) (api.Response, error)
+	VariableID string
 }
-
-var (
-	variableID string
-)
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 	return &DescribeCmd{
@@ -60,11 +57,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				variableID = answer
+				describe.VariableID = answer
 			}
 
 			ctx := context.Background()
-			variable, err := describe.Get(ctx, variableID)
+			variable, err := describe.Get(ctx, describe.VariableID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetItem.Error(), err)
 			}
@@ -93,7 +90,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
+	cobraCmd.Flags().StringVar(&describe.VariableID, "variable-id", "", msg.FlagVariableID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd

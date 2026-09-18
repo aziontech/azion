@@ -20,15 +20,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	wafID       int64
-	exceptionID int64
-)
-
 type DescribeCmd struct {
 	Io              *iostreams.IOStreams
 	AskInput        func(string) (string, error)
 	GetWafException func(ctx context.Context, wafId, exceptionId int64) (sdk.WAFRule, error)
+	ExceptionID     int64
+	WafID           int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -70,7 +67,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertWafID
 				}
 
-				wafID = num
+				describe.WafID = num
 			}
 
 			if !cmd.Flags().Changed("exception-id") {
@@ -85,11 +82,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertExceptionID
 				}
 
-				exceptionID = num
+				describe.ExceptionID = num
 			}
 
 			ctx := context.Background()
-			exception, err := describe.GetWafException(ctx, wafID, exceptionID)
+			exception, err := describe.GetWafException(ctx, describe.WafID, describe.ExceptionID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetWafException, err.Error())
 			}
@@ -117,8 +114,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&wafID, "waf-id", 0, msg.FlagWafID)
-	cobraCmd.Flags().Int64Var(&exceptionID, "exception-id", 0, msg.FlagExceptionID)
+	cobraCmd.Flags().Int64Var(&describe.WafID, "waf-id", 0, msg.FlagWafID)
+	cobraCmd.Flags().Int64Var(&describe.ExceptionID, "exception-id", 0, msg.FlagExceptionID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

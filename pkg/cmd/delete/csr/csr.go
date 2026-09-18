@@ -17,12 +17,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var csrID int64
-
 type DeleteCmd struct {
 	Io        *iostreams.IOStreams
 	DeleteCSR func(context.Context, int64) error
 	AskInput  func(string) (string, error)
+	CsrID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -59,18 +58,18 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				csrID = num
+				del.CsrID = num
 			}
 
 			ctx := context.Background()
 
-			err := del.DeleteCSR(ctx, csrID)
+			err := del.DeleteCSR(ctx, del.CsrID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteCSR, err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, csrID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, del.CsrID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -78,7 +77,7 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&csrID, "csr-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&del.CsrID, "csr-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

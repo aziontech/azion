@@ -17,14 +17,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	namespace string
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(ctx context.Context, namespace string) (*sdk.Namespace, error)
+	Io        *iostreams.IOStreams
+	AskInput  func(string) (string, error)
+	Get       func(ctx context.Context, namespace string) (*sdk.Namespace, error)
+	Namespace string
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -59,11 +56,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				namespace = answer
+				describe.Namespace = answer
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, namespace)
+			resp, err := describe.Get(ctx, describe.Namespace)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetNamespace, err)
 			}
@@ -88,7 +85,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&namespace, "namespace", "", msg.FlagNamespace)
+	cobraCmd.Flags().StringVar(&describe.Namespace, "namespace", "", msg.FlagNamespace)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

@@ -121,7 +121,7 @@ func TestDeleteWithAskInput(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mock := &httpmock.Registry{}
 			// Use a broad matcher to intercept the SDK request regardless of exact path structure
-            mock.Register(httpmock.MatchAny, httpmock.StatusStringResponse(tt.statusCode, tt.responseBody))
+			mock.Register(httpmock.MatchAny, httpmock.StatusStringResponse(tt.statusCode, tt.responseBody))
 
 			f, stdout, _ := testutils.NewFactory(mock)
 

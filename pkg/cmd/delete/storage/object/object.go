@@ -14,17 +14,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	bucket    string
-	objectKey string
-)
-
 type DeleteObjectCmd struct {
 	Io           *iostreams.IOStreams
 	ReadInput    func(string) (string, error)
 	DeleteObject func(context.Context, string, string) error
 	AskInput     func(string) (string, error)
 	PrintOutput  func(*output.GeneralOutput) error
+	Bucket       string
+	ObjectKey    string
 }
 
 func NewDeleteObjectCmd(f *cmdutil.Factory) *DeleteObjectCmd {
@@ -60,7 +57,7 @@ func NewObjectCmd(delete *DeleteObjectCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				bucket = answer
+				delete.Bucket = answer
 			}
 
 			if !cmd.Flags().Changed("object-key") {
@@ -68,18 +65,18 @@ func NewObjectCmd(delete *DeleteObjectCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				objectKey = answer
+				delete.ObjectKey = answer
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteObject(ctx, bucket, objectKey)
+			err = delete.DeleteObject(ctx, delete.Bucket, delete.ObjectKey)
 			if err != nil {
 				return fmt.Errorf(msg.ERROR_DELETE_OBJECT, err.Error())
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, objectKey),
+				Msg:   fmt.Sprintf(msg.OUTPUT_DELETE_OBJECT, delete.ObjectKey),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -87,8 +84,8 @@ func NewObjectCmd(delete *DeleteObjectCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&bucket, "bucket-name", "", msg.FLAG_NAME_BUCKET)
-	cobraCmd.Flags().StringVar(&objectKey, "object-key", "", msg.FLAG_OBJECT_KEY_OBJECT)
+	cobraCmd.Flags().StringVar(&delete.Bucket, "bucket-name", "", msg.FLAG_NAME_BUCKET)
+	cobraCmd.Flags().StringVar(&delete.ObjectKey, "object-key", "", msg.FLAG_OBJECT_KEY_OBJECT)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
 
 	return cobraCmd

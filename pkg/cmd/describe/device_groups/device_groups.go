@@ -21,15 +21,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID int64
-	deviceGroupID int64
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, int64) (sdk.DeviceGroup, error)
+	Io            *iostreams.IOStreams
+	AskInput      func(string) (string, error)
+	Get           func(context.Context, int64, int64) (sdk.DeviceGroup, error)
+	ApplicationID int64
+	DeviceGroupID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -71,7 +68,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("group-id") {
@@ -86,11 +83,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdDeviceGroup
 				}
 
-				deviceGroupID = num
+				describe.DeviceGroupID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, applicationID, deviceGroupID)
+			resp, err := describe.Get(ctx, describe.ApplicationID, describe.DeviceGroupID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDeviceGroups.Error(), err)
 			}
@@ -113,8 +110,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.ApplicationFlagId)
-	cobraCmd.Flags().Int64Var(&deviceGroupID, "group-id", 0, msg.DeviceGroupFlagId)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.ApplicationFlagId)
+	cobraCmd.Flags().Int64Var(&describe.DeviceGroupID, "group-id", 0, msg.DeviceGroupFlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeviceGroupsDescribeHelpFlag)
 	return cobraCmd
 }

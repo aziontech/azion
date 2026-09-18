@@ -123,7 +123,7 @@ func TestDeploy_Run(t *testing.T) {
 				cmd.ReadSettings = func(string) (token.Settings, error) {
 					return token.Settings{
 						S3AccessKey: "test-access-key",
-						S3SecretKey: "test-secret-key", 
+						S3SecretKey: "test-secret-key",
 						S3Bucket:    "test-bucket",
 					}, nil
 				}
@@ -281,8 +281,8 @@ func TestCaptureLogs(t *testing.T) {
 			token := "test-token"
 			execID := "e89b32a6-c912-4fba-bae7-1e7ff115256f"
 			cmd := NewDeployCmd(f)
-			Logs = tt.logStruct
-			Result = tt.resultStruct
+			cmd.Logs = tt.logStruct
+			cmd.Result = tt.resultStruct
 
 			cmd.WriteAzionJsonContent = func(conf *contracts.AzionApplicationOptionsV3, confConf string) error {
 				return nil

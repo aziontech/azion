@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var connectorID int64
-
 type DeleteCmd struct {
 	Io              *iostreams.IOStreams
 	ReadInput       func(string) (string, error)
 	DeleteConnector func(context.Context, int64) error
 	AskInput        func(string) (string, error)
+	ConnectorID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertConnectorId
 				}
 
-				connectorID = num
+				delete.ConnectorID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteConnector(ctx, connectorID)
+			err = delete.DeleteConnector(ctx, delete.ConnectorID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteConnector.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, connectorID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.ConnectorID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&connectorID, "connector-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&delete.ConnectorID, "connector-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

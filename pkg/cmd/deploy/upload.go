@@ -178,7 +178,7 @@ func uploadFiles(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, ms
 
 	numFiles := len(listZip)
 
-	noOfWorkers := workers.CalculateOptimal(Workers)
+	noOfWorkers := workers.CalculateOptimal(cmd.Workers)
 	logger.Debug("Using workers for upload", zap.Int("worker_count", noOfWorkers))
 
 	var currentFile int64

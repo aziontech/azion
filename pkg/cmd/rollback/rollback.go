@@ -19,15 +19,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	connectorID int64
-	projectPath string
-)
-
 type RollbackCmd struct {
 	AskInput              func(string) (string, error)
 	GetAzionJsonContent   func(pathConf string) (*contracts.AzionApplicationOptions, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	ConnectorID           int64
+	ProjectPath           string
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *RollbackCmd {
@@ -62,10 +59,10 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ERRORCONVERTCONNECTORID
 				}
 
-				connectorID = num
+				rollback.ConnectorID = num
 			}
 
-			conf, err := rollback.GetAzionJsonContent(projectPath)
+			conf, err := rollback.GetAzionJsonContent(rollback.ProjectPath)
 			if err != nil {
 				logger.Debug("Error while reading azion.json file", zap.Error(err))
 				return msg.ERRORAZION
@@ -100,13 +97,13 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 			storageRequest.PatchedConnectorStorageRequest = &storageConnectorRequest
 			request.PatchedConnectorRequest = storageRequest
 
-			_, err = clientConnector.Update(context.Background(), &request, connectorID)
+			_, err = clientConnector.Update(context.Background(), &request, rollback.ConnectorID)
 			if err != nil {
 				return msg.ERRORROLLBACK
 			}
 
 			conf.Prefix = timestamp
-			err = rollback.WriteAzionJsonContent(conf, projectPath)
+			err = rollback.WriteAzionJsonContent(conf, rollback.ProjectPath)
 			if err != nil {
 				return msg.ERRORROLLBACK
 			}
@@ -120,8 +117,8 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&connectorID, "connector-id", 0, msg.FLAGCONNECTORID)
-	cobraCmd.Flags().StringVar(&projectPath, "config-dir", "azion", msg.CONFFLAG)
+	cobraCmd.Flags().Int64Var(&rollback.ConnectorID, "connector-id", 0, msg.FLAGCONNECTORID)
+	cobraCmd.Flags().StringVar(&rollback.ProjectPath, "config-dir", "azion", msg.CONFFLAG)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAGHELP)
 
 	return cobraCmd

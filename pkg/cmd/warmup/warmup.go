@@ -11,18 +11,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	baseUrl       string
-	maxUrls       int
-	maxConcurrent int
-	timeout       int
-)
-
 // WarmupCmd defines the command structure
 type WarmupCmd struct {
-	Io          *iostreams.IOStreams
-	WarmupCache func(ctx context.Context, baseUrl string, maxUrls int, maxConcurrent int, timeout int, f *cmdutil.Factory) error
-	AskForUrl   func() (string, error)
+	Io            *iostreams.IOStreams
+	WarmupCache   func(ctx context.Context, baseUrl string, maxUrls int, maxConcurrent int, timeout int, f *cmdutil.Factory) error
+	AskForUrl     func() (string, error)
+	BaseUrl       string
+	MaxConcurrent int
+	MaxUrls       int
+	Timeout       int
 }
 
 // NewWarmupCmd creates a new WarmupCmd instance
@@ -53,10 +50,10 @@ func NewCobraCmd(warmup *WarmupCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&baseUrl, "url", "", msg.FlagUrl)
-	cobraCmd.Flags().IntVar(&maxUrls, "max-urls", 1500, msg.FlagMaxUrls)
-	cobraCmd.Flags().IntVar(&maxConcurrent, "max-concurrent", 2, msg.FlagMaxConcurrent)
-	cobraCmd.Flags().IntVar(&timeout, "timeout", 8000, msg.FlagTimeout)
+	cobraCmd.Flags().StringVar(&warmup.BaseUrl, "url", "", msg.FlagUrl)
+	cobraCmd.Flags().IntVar(&warmup.MaxUrls, "max-urls", 1500, msg.FlagMaxUrls)
+	cobraCmd.Flags().IntVar(&warmup.MaxConcurrent, "max-concurrent", 2, msg.FlagMaxConcurrent)
+	cobraCmd.Flags().IntVar(&warmup.Timeout, "timeout", 8000, msg.FlagTimeout)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cobraCmd
@@ -69,10 +66,10 @@ func (warmup *WarmupCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil
 		if err != nil {
 			return err
 		}
-		baseUrl = url
+		warmup.BaseUrl = url
 	}
 
-	err := warmup.WarmupCache(ctx, baseUrl, maxUrls, maxConcurrent, timeout, f)
+	err := warmup.WarmupCache(ctx, warmup.BaseUrl, warmup.MaxUrls, warmup.MaxConcurrent, warmup.Timeout, f)
 	if err != nil {
 		return err
 	}

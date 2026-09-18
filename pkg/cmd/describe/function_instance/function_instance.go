@@ -20,15 +20,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	applicationID int64
-	instanceID    int64
-)
-
 type DescribeCmd struct {
 	Io                  *iostreams.IOStreams
 	AskInput            func(string) (string, error)
 	GetFunctionInstance func(ctx context.Context, applicationId, instanceId int64) (sdk.FunctionInstance, error)
+	ApplicationID       int64
+	InstanceID          int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -70,7 +67,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertApplicationId
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("instance-id") {
@@ -85,11 +82,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFunctionInstanceId
 				}
 
-				instanceID = num
+				describe.InstanceID = num
 			}
 
 			ctx := context.Background()
-			instance, err := describe.GetFunctionInstance(ctx, applicationID, instanceID)
+			instance, err := describe.GetFunctionInstance(ctx, describe.ApplicationID, describe.InstanceID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetFunctionInstance, err.Error())
 			}
@@ -114,8 +111,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagApplicationID)
-	cobraCmd.Flags().Int64Var(&instanceID, "instance-id", 0, msg.FlagFunctionInstanceID)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.FlagApplicationID)
+	cobraCmd.Flags().Int64Var(&describe.InstanceID, "instance-id", 0, msg.FlagFunctionInstanceID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

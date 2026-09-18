@@ -20,14 +20,11 @@ import (
 )
 
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, string) (*sdk.PersonalTokenResponseGet, error)
+	Io              *iostreams.IOStreams
+	AskInput        func(string) (string, error)
+	Get             func(context.Context, string) (*sdk.PersonalTokenResponseGet, error)
+	PersonalTokenID string
 }
-
-var (
-	personalTokenID string
-)
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 	return &DescribeCmd{
@@ -63,11 +60,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				personalTokenID = answer
+				describe.PersonalTokenID = answer
 			}
 
 			ctx := context.Background()
-			personalToken, err := describe.Get(ctx, personalTokenID)
+			personalToken, err := describe.Get(ctx, describe.PersonalTokenID)
 			if err != nil {
 				return fmt.Errorf(msg.ERROR_GET_PERSONAL_TOKEN, err)
 			}
@@ -94,7 +91,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&personalTokenID, "id", "", msg.FLAG_PERSONAL_TOKEN_ID)
+	cobraCmd.Flags().StringVar(&describe.PersonalTokenID, "id", "", msg.FLAG_PERSONAL_TOKEN_ID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP_DESCRIBE)
 
 	return cobraCmd

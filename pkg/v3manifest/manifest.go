@@ -334,7 +334,7 @@ func (man *ManifestInterpreter) CreateResources(
 				return nil
 			}
 		case "cachekey":
-			err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, f)
+			err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, f, purgeCmd.Layer)
 			if err != nil {
 				logger.Debug("Error while purging cache keys", zap.Error(err))
 				return nil

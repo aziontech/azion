@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var domainID int64
-
 type DeleteCmd struct {
 	Io           *iostreams.IOStreams
 	ReadInput    func(string) (string, error)
 	DeleteDomain func(context.Context, int64) error
 	AskInput     func(string) (string, error)
+	DomainID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,20 +64,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				domainID = num
+				delete.DomainID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, domainID)
+			err = client.Delete(ctx, delete.DomainID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteDomain.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, domainID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.DomainID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -86,7 +85,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&domainID, "domain-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.DomainID, "domain-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd
