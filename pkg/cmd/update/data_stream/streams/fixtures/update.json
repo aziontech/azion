@@ -1,0 +1,13 @@
+{
+  "name": "Updated via File",
+  "active": false,
+  "inputs": [
+    {
+      "type": "raw_logs",
+      "attributes": {
+        "data_source": "workloads"
+      }
+    }
+  ],
+  "transform": []
+}

@@ -116,7 +116,7 @@ func checkGitignore(path string) (bool, error) {
 	return true, nil
 }
 
-func writeGitignore(path string) error {
+func writeGitignore(path string) (err error) {
 	logger.Debug("Writing .gitignore file")
 	path = filepath.Join(path, ".gitignore")
 
@@ -127,7 +127,14 @@ func writeGitignore(path string) error {
 		logger.Error("Error opening file", zap.Error(err))
 		return err
 	}
-	defer file.Close()
+	// Flush only pushes the bufio buffer into the file; write errors deferred by
+	// the OS surface on Close. Report them instead of claiming success.
+	defer func() {
+		if cerr := file.Close(); err == nil && cerr != nil {
+			logger.Error("Error closing .gitignore file", zap.Error(cerr))
+			err = cerr
+		}
+	}()
 
 	writer := bufio.NewWriter(file)
 

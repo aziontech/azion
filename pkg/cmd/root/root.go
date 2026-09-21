@@ -217,11 +217,11 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 		fact.apiVersion = "v3"
 		fact.setV3Cmds(cobraCmd)
 	} else if hasFlag {
-		fact.apiVersion = "v3"
-		fact.setV3Cmds(cobraCmd)
-	} else {
 		fact.apiVersion = "v4"
 		fact.setCmds(cobraCmd)
+	} else {
+		fact.apiVersion = "v3"
+		fact.setV3Cmds(cobraCmd)
 	}
 
 	return cobraCmd

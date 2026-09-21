@@ -21,6 +21,7 @@ var (
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
+	AliasEnvFlag                         = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 	OriginsSuccessful                    = "Created Origin for Application\n"
 	OriginsUpdateSuccessful              = "Updated Origin for Application %v with ID %v \n"
 	CacheSettingsSuccessful              = "Created Cache Settings for Application\n"

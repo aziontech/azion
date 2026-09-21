@@ -56,6 +56,7 @@ var (
 	NoPrompt      bool
 	SkipBuild     bool
 	SkipFramework bool
+	AliasEnv      bool
 	ProjectConf   string
 	Sync          bool
 	Env           string
@@ -107,6 +108,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().StringVar(&Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().BoolVar(&AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -114,7 +116,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool, workers int) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework, aliasEnv bool, workers int) error {
 	ProjectConf = configPath
 	Sync = shouldSync
 	Env = env
@@ -123,6 +125,7 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env str
 	SkipFramework = skipFramework
 	WriteBucket = writeBucket
 	Workers = workers
+	AliasEnv = aliasEnv
 	return cmd.Run(f)
 }
 
@@ -198,7 +201,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, ProjectConf, &msgs, SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset, AliasEnv: AliasEnv}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -242,7 +245,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, ProjectConf, &msgs, SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{AliasEnv: AliasEnv}, ProjectConf, &msgs, SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

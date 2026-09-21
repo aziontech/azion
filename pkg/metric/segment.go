@@ -26,7 +26,9 @@ func location(profile string) string {
 }
 
 func readLocalMetrics(profile string) map[string]command {
-	file, err := os.OpenFile(location(profile), os.O_RDWR|os.O_CREATE, 0666)
+	// Opened read-only: this function only decodes the file. A writable handle
+	// would make the deferred Close a potential source of silent write errors.
+	file, err := os.OpenFile(location(profile), os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return nil
 	}

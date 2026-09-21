@@ -35,10 +35,12 @@ func New(c *Config) *Token {
 }
 
 func (t *Token) Validate(token *string) (bool, UserInfo, error) {
-	logger.Debug("Validate token")
+	endpoint := utils.Concat(t.Endpoint, "/user/me")
+	logger.Debug("Validate token", zap.String("endpoint", endpoint))
 
-	req, err := http.NewRequest("GET", utils.Concat(t.Endpoint, "/user/me"), nil)
+	req, err := http.NewRequest("GET", endpoint, nil)
 	if err != nil {
+		logger.Debug("Failed to build the token validation request", zap.Error(err))
 		return false, UserInfo{}, err
 	}
 	req.Header.Add("Accept", "application/json; version=3")
@@ -46,18 +48,31 @@ func (t *Token) Validate(token *string) (bool, UserInfo, error) {
 
 	resp, err := t.client.Do(req)
 	if err != nil {
+		logger.Debug("Failed to reach the authentication endpoint", zap.Error(err))
 		return false, UserInfo{}, err
 	}
+	defer resp.Body.Close()
+
+	logger.Debug("Token validation response", zap.String("status", resp.Status))
 
 	if resp.StatusCode != http.StatusOK {
+		body, errBody := io.ReadAll(resp.Body)
+		if errBody != nil {
+			logger.Debug("Failed to read the token validation response body", zap.Error(errBody))
+		} else {
+			logger.Debug("Token validation response body", zap.String("body", string(body)))
+		}
 		return false, UserInfo{}, nil
 	}
 
 	var userInfo UserInfo
 	err = json.NewDecoder(resp.Body).Decode(&userInfo)
 	if err != nil {
+		logger.Debug("Failed to decode the token validation response", zap.Error(err))
 		return false, UserInfo{}, err
 	}
+
+	logger.Debug("Token is valid", zap.String("client_id", userInfo.Results.ClientID), zap.String("email", userInfo.Results.Email))
 
 	t.valid = true
 

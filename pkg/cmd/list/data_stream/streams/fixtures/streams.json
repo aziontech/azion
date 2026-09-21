@@ -1,0 +1,17 @@
+{
+  "count": 1,
+  "results": [
+    {
+      "id": 0,
+      "name": "string",
+      "last_editor": "user@example.com",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "created": "2019-08-24T14:15:22Z",
+      "active": true,
+      "product_version": "1.0",
+      "inputs": [],
+      "transform": [],
+      "outputs": []
+    }
+  ]
+}
