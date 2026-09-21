@@ -114,6 +114,14 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		S3Bucket:                   "",
 	}
 
+	// Carry over the cached API generation that resolution just wrote, so a
+	// --token invocation does not have to ask the SSO service again next time.
+	// The entry is bound to the credential that produced it, so an entry left by
+	// a different token is simply a miss.
+	if stored, err := token.ReadSettings(activeProfile); err == nil {
+		strToken.SetAPIVersionCache(stored.APIVersionCache())
+	}
+
 	// Save token to the active profile's settings
 	err = token.WriteSettings(strToken, activeProfile)
 	if err != nil {

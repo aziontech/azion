@@ -1,13 +1,17 @@
 package root
 
 import (
+	"io"
+	"strings"
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
 	"github.com/aziontech/azion-cli/pkg/apiversion"
+	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
@@ -18,7 +22,7 @@ import (
 // the credential that produced it, so a new login, a profile switch or a
 // different token re-resolves instead of trusting a stale answer.
 func (fact *factoryRoot) resolveAPIVersion() apiversion.Version {
-	tok := fact.factory.Config.GetString("token")
+	tok := fact.effectiveToken()
 
 	// With no credential there is nothing to ask about; this is the logged-out
 	// CLI, which has always been served the default generation.
@@ -137,4 +141,61 @@ func (fact *factoryRoot) cacheAPIVersion(settings *token.Settings, version apive
 	if err := token.WriteSettings(*settings, activeProfile); err != nil {
 		logger.Debug("Could not cache the resolved API version", zap.Error(err))
 	}
+}
+
+// preParseGlobalFlags reads --token and --config straight from the argument
+// list, before the command tree exists.
+//
+// CmdRoot builds the tree — and therefore resolves the API generation — before
+// Cobra has parsed anything, so neither flag is available through the normal
+// binding at the moment it is needed. Without this pass, `azion --token <v4>`
+// builds its tree from whatever credential happens to be on disk, which is
+// defect: a CI pipeline that authenticates only through --token can be shown
+// the commands of the wrong generation entirely.
+//
+// The pass is best effort by design. It reuses the real root flag set, so it
+// never drifts from it, and anything it cannot parse simply leaves the previous
+// behaviour in place; Cobra parses the arguments properly moments later and is
+// still the one that reports malformed input to the user.
+func (fact *factoryRoot) preParseGlobalFlags(args []string) {
+	probe := &cobra.Command{}
+	fact.setFlags(probe)
+
+	flags := probe.PersistentFlags()
+	flags.ParseErrorsAllowlist.UnknownFlags = true
+	flags.SetOutput(io.Discard)
+	flags.Usage = func() {}
+
+	if err := flags.Parse(args); err != nil {
+		logger.Debug("Could not pre-parse global flags; falling back to stored configuration", zap.Error(err))
+	}
+}
+
+// applyConfigFlag points the CLI at the configuration folder given by --config
+// before any profile is read.
+//
+// Cobra applies this flag in doPreCommandCheck, which runs after the tree is
+// built, so version resolution would otherwise read the cached version and the
+// stored credential from the default profile even when the user asked for
+// another one. Errors are ignored here on purpose: the same call runs again in
+// doPreCommandCheck, which is where a bad path is reported to the user.
+func (fact *factoryRoot) applyConfigFlag() {
+	if fact.configFlag == "" || strings.HasPrefix(fact.configFlag, PREFIX_FLAG) {
+		return
+	}
+	if err := config.SetPath(fact.configFlag); err != nil {
+		logger.Debug("Could not apply --config before resolving the API version", zap.Error(err))
+	}
+}
+
+// effectiveToken reports the credential this invocation authenticates with.
+//
+// An explicit --token wins, which is the whole point of the pre-parse pass.
+// Otherwise the value Viper already holds is used, so the environment keeps the
+// precedence it has always had.
+func (fact *factoryRoot) effectiveToken() string {
+	if fact.tokenFlag != "" {
+		return fact.tokenFlag
+	}
+	return fact.factory.Config.GetString("token")
 }

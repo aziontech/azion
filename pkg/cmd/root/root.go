@@ -211,6 +211,11 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 
 	fact.setFlags(cobraCmd)
 
+	// The tree below is chosen from the account's API generation, which depends
+	// on --token and --config. Cobra has not parsed them yet, so read them now.
+	fact.preParseGlobalFlags(os.Args[1:])
+	fact.applyConfigFlag()
+
 	// set template for -v flag
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 

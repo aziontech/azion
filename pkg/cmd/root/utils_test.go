@@ -3,6 +3,7 @@ package root
 import (
 	"bytes"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 
@@ -289,4 +290,95 @@ func TestAPIVersionSourceIsRecorded(t *testing.T) {
 		fact, _ := newRootFactory(t, &httpmock.Registry{}, "")
 		assert.NotPanics(t, fact.logAPIVersionSource)
 	})
+}
+
+func TestPreParseGlobalFlags(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	tests := []struct {
+		name       string
+		args       []string
+		wantToken  string
+		wantConfig string
+	}{
+		{"long form with a space", []string{"--token", "tok123", "list", "workload"}, "tok123", ""},
+		{"long form with equals", []string{"--token=tok123", "list"}, "tok123", ""},
+		{"shorthand with a space", []string{"-t", "tok123"}, "tok123", ""},
+		{"shorthand glued", []string{"-ttok123"}, "tok123", ""},
+		{"after the subcommand", []string{"list", "workload", "--token", "tok123"}, "tok123", ""},
+		{"config long form", []string{"--config", "/tmp/x.toml"}, "", "/tmp/x.toml"},
+		{"config shorthand", []string{"-c", "/tmp/x.toml"}, "", "/tmp/x.toml"},
+		{"both together", []string{"--config", "/tmp/x.toml", "--token", "tok123"}, "tok123", "/tmp/x.toml"},
+		{"alongside other global flags", []string{"--debug", "--format", "json", "-t", "tok123"}, "tok123", ""},
+		{"alongside unknown subcommand flags", []string{"deploy", "--path", "dist", "--token", "tok123"}, "tok123", ""},
+		{"absent", []string{"list", "workload"}, "", ""},
+		{"no arguments at all", []string{}, "", ""},
+		{"after a terminator is not a flag", []string{"--", "--token", "tok123"}, "", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fact, _ := newRootFactory(t, &httpmock.Registry{}, "")
+
+			fact.preParseGlobalFlags(tt.args)
+
+			assert.Equal(t, tt.wantToken, fact.tokenFlag)
+			assert.Equal(t, tt.wantConfig, fact.configFlag)
+		})
+	}
+}
+
+// Malformed input must not panic or abort here; Cobra reports it moments later.
+func TestPreParseGlobalFlagsToleratesBadInput(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	for _, args := range [][]string{
+		{"--token"},              // value missing
+		{"--config"},             // value missing
+		{"--", "--"},             // nothing after the terminator
+		{"-"},                    // a bare dash
+		{"--unknown-flag", "vv"}, // a flag this build does not know
+	} {
+		fact, _ := newRootFactory(t, &httpmock.Registry{}, "")
+		assert.NotPanics(t, func() { fact.preParseGlobalFlags(args) }, "args=%v", args)
+	}
+}
+
+func TestEffectiveTokenPrefersTheFlag(t *testing.T) {
+	fact, _ := newRootFactory(t, &httpmock.Registry{}, "stored-token")
+	assert.Equal(t, "stored-token", fact.effectiveToken(), "without the flag, the stored credential is used")
+
+	fact.tokenFlag = "flag-token"
+	assert.Equal(t, "flag-token", fact.effectiveToken(), "--token wins")
+}
+
+func TestCmdRootPicksTreeFromTheTokenFlag(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	mock := &httpmock.Registry{}
+	mock.Register(
+		func(req *http.Request) bool {
+			return req.Header.Get("Authorization") == "Token flag-token" &&
+				httpmock.REST("GET", "account/info")(req)
+		},
+		httpmock.JSONFromString(`{"client_flags":["`+apiversion.BlockAPIV3Access+`"]}`),
+	)
+	// the stored credential belongs to a legacy account
+	fact, _ := newRootFactory(t, mock, "stored-token")
+	writeCache(t, apiversion.Refreshed(apiversion.V3, "stored-token", time.Now()))
+
+	// CmdRoot pre-parses os.Args itself, after setFlags has reset the bindings.
+	defer func(saved []string) { os.Args = saved }(os.Args)
+	os.Args = []string{"azion", "--token", "flag-token", "list", "workload"}
+
+	cmd := fact.CmdRoot().(*cobra.Command)
+
+	assert.Equal(t, apiversion.V4, fact.factory.APIVersion,
+		"the account behind --token decides the generation")
+
+	names := map[string]bool{}
+	for _, c := range cmd.Commands() {
+		names[c.Name()] = true
+	}
+	assert.True(t, names["warmup"], "the v4 tree must be built for a v4 --token")
 }
