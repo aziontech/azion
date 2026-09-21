@@ -48,6 +48,7 @@ type DeployCmd struct {
 	ProjectConf           string
 	SkipBuild             bool
 	Sync                  bool
+	AliasEnv              bool
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -93,6 +94,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&deploy.Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().BoolVar(&deploy.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -100,7 +102,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, aliasEnv bool) error {
+	cmd.AliasEnv = aliasEnv
 	cmd.ProjectConf = configPath
 	cmd.Sync = shouldSync
 	cmd.Env = env
@@ -127,7 +130,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !cmd.SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{}, cmd.ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

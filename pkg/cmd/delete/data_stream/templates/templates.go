@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var templateID int64
-
 type DeleteCmd struct {
 	Io             *iostreams.IOStreams
 	ReadInput      func(string) (string, error)
 	DeleteTemplate func(context.Context, int64) error
 	AskInput       func(string) (string, error)
+	TemplateID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertTemplateId
 				}
 
-				templateID = num
+				delete.TemplateID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteTemplate(ctx, templateID)
+			err = delete.DeleteTemplate(ctx, delete.TemplateID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteTemplate.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, templateID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.TemplateID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&templateID, "template-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&delete.TemplateID, "template-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

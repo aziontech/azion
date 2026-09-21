@@ -62,6 +62,7 @@ type DeployCmd struct {
 	ProjectConf           string
 	SkipBuild             bool
 	Sync                  bool
+	AliasEnv              bool
 	Logs                  contracts.Logs
 	Result                contracts.Results
 }
@@ -124,6 +125,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&deploy.DryRun, "dry-run", false, msg.EdgeApplicationDeployDryrun)
 	deployCmd.Flags().BoolVar(&deploy.Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().BoolVar(&deploy.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -131,7 +133,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local bool, sync bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local bool, sync bool, aliasEnv bool) error {
+	cmd.AliasEnv = aliasEnv
 	cmd.ProjectConf = configPath
 	cmd.Local = local
 	cmd.Sync = sync
@@ -151,7 +154,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if cmd.Local {
 		deployLocal := deployRemote.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild)
+		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild, cmd.AliasEnv)
 	}
 
 	msgs := []string{}

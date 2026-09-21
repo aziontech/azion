@@ -227,9 +227,6 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 		fact.setV3Cmds(cobraCmd)
 	default: // apiversion.V4 today; a new generation gets its own case
 		fact.setCmds(cobraCmd)
-	} else {
-		fact.apiVersion = "v3"
-		fact.setV3Cmds(cobraCmd)
 	}
 
 	return cobraCmd

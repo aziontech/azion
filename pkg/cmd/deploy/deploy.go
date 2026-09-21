@@ -65,6 +65,7 @@ type DeployCmd struct {
 	SkipFramework         bool
 	Sync                  bool
 	Workers               int
+	AliasEnv              bool
 	WriteBucket           bool
 	Logs                  contracts.Logs
 	Result                contracts.ResultsV4
@@ -132,6 +133,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
 	deployCmd.Flags().BoolVar(&deploy.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	deployCmd.Flags().IntVar(&deploy.Workers, "workers", 0, msg.WorkersFlag)
+	deployCmd.Flags().BoolVar(&deploy.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -139,7 +141,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, local, skipFramework bool) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, sync, local, skipFramework, aliasEnv bool) error {
+	cmd.AliasEnv = aliasEnv
 	cmd.Local = local
 	cmd.Sync = sync
 	cmd.ProjectConf = configPath
@@ -164,7 +167,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if cmd.Local {
 		deployLocal := deploy.NewDeployCmd(f)
-		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild, cmd.WriteBucket, cmd.SkipFramework, cmd.Workers)
+		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild, cmd.WriteBucket, cmd.SkipFramework, cmd.AliasEnv, cmd.Workers)
 	}
 
 	msgs := []string{}

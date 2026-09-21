@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var streamID int64
-
 type DeleteCmd struct {
 	Io           *iostreams.IOStreams
 	ReadInput    func(string) (string, error)
 	DeleteStream func(context.Context, int64) error
 	AskInput     func(string) (string, error)
+	StreamID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertStreamId
 				}
 
-				streamID = num
+				delete.StreamID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteStream(ctx, streamID)
+			err = delete.DeleteStream(ctx, delete.StreamID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteStream.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, streamID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.StreamID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&streamID, "stream-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&delete.StreamID, "stream-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

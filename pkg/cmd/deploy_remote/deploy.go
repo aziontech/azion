@@ -58,6 +58,7 @@ type DeployCmd struct {
 	SkipFramework            bool
 	WriteBucket              bool
 	Workers                  int
+	AliasEnv                 bool
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -106,6 +107,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
 	deployCmd.Flags().BoolVar(&deploy.Sync, "sync", false, msg.EdgeApplicationDeploySync)
 	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
+	deployCmd.Flags().BoolVar(&deploy.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
 	return deployCmd
 }
 
@@ -113,7 +115,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	return NewCobraCmd(NewDeployCmd(f))
 }
 
-func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework bool, workers int) error {
+func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, env string, shouldSync, auto, skipBuild, writeBucket, skipFramework, aliasEnv bool, workers int) error {
+	cmd.AliasEnv = aliasEnv
 	cmd.ProjectConf = configPath
 	cmd.Sync = shouldSync
 	cmd.Env = env
@@ -197,7 +200,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		}
 
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset, AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err
@@ -241,7 +244,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 			return err
 		}
 		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
+		err = buildCmd.ExternalRun(&contracts.BuildInfo{AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

@@ -20,12 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var templateID int64
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (sdk.Template, error)
+	Io         *iostreams.IOStreams
+	AskInput   func(string) (string, error)
+	Get        func(context.Context, int64) (sdk.Template, error)
+	TemplateID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -67,11 +66,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertTemplateId
 				}
 
-				templateID = num
+				describe.TemplateID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, templateID)
+			resp, err := describe.Get(ctx, describe.TemplateID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetTemplate.Error(), err)
 			}
@@ -100,7 +99,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&templateID, "template-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&describe.TemplateID, "template-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd
