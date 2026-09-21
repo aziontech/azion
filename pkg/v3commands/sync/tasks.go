@@ -9,12 +9,12 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
+	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	edgeApp "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/v3api/origin"
-	varApi "github.com/aziontech/azion-cli/pkg/v3api/variables"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"

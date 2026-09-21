@@ -6,10 +6,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/personal_token"
+	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/personal_token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )

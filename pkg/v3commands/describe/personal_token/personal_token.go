@@ -9,11 +9,11 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/personal_token"
 
+	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/personal_token"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/personal_tokens"
 	"github.com/spf13/cobra"

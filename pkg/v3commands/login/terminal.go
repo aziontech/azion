@@ -7,9 +7,9 @@ import (
 	"time"
 
 	msg "github.com/aziontech/azion-cli/messages/login"
+	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	cmdPersToken "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	api "github.com/aziontech/azion-cli/pkg/v3api/personal_token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

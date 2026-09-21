@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aziontech/azion-cli/pkg/api/graphql/http"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	"github.com/aziontech/azion-cli/pkg/v3api/graphql/http"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
