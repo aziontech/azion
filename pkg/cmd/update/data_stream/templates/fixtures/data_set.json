@@ -1,0 +1,4 @@
+{
+  "http_user_agent": "$http_user_agent",
+  "status": "$status"
+}

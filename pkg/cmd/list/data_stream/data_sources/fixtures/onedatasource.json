@@ -1,0 +1,10 @@
+{
+  "count": 1,
+  "results": [
+    {
+      "slug": "http",
+      "name": "string",
+      "active": true
+    }
+  ]
+}

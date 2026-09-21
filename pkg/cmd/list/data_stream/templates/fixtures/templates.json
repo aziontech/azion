@@ -1,0 +1,15 @@
+{
+  "count": 1,
+  "results": [
+    {
+      "id": 0,
+      "name": "string",
+      "last_editor": "user@example.com",
+      "created_at": "2019-08-24T14:15:22Z",
+      "last_modified": "2019-08-24T14:15:22Z",
+      "custom": true,
+      "active": true,
+      "data_set": "{\"time\":\"$time\"}"
+    }
+  ]
+}
