@@ -56,11 +56,11 @@ func TestWarmupCmd_Run(t *testing.T) {
 			f, stdout, _ := testutils.NewFactory(mock)
 
 			cmd := &cobra.Command{}
-			baseUrl = "https://example.com"
 
 			warmupCmd := &WarmupCmd{
 				Io: f.IOStreams,
 			}
+			warmupCmd.BaseUrl = "https://example.com"
 
 			tt.mock(warmupCmd)
 

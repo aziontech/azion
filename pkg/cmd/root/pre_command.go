@@ -101,6 +101,20 @@ var commandsWithoutToken = map[string]bool{
 	"config":     true,
 }
 
+// pathsWithoutToken holds the subcommands that must keep working even when the
+// stored token is missing or no longer valid, keyed by the command path below
+// the binary name.
+//
+// These are how a user recovers from a broken credential: create profile asks
+// for a new token and validates it, and delete profile only touches local
+// files. Gating them behind a valid token locks the user out of the CLI with no
+// way back in, which is exactly what happens after deleting the profile that
+// held the only working credential.
+var pathsWithoutToken = map[string]bool{
+	"create profile": true,
+	"delete profile": true,
+}
+
 // checkTokenNotExpired validates the stored token against the API, the very same
 // way it is validated when the user configures it, so an expired token is
 // reported here instead of failing later with an obscure error
@@ -114,6 +128,11 @@ func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token
 	command := topLevelCommandName(cmd)
 	if commandsWithoutToken[command] || strings.HasPrefix(command, "__") {
 		logger.Debug("Skipping token expiration check", zap.String("command", command))
+		return nil
+	}
+
+	if path := commandPathWithoutBinary(cmd); pathsWithoutToken[path] {
+		logger.Debug("Skipping token expiration check", zap.String("command", path))
 		return nil
 	}
 
@@ -141,6 +160,12 @@ func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token
 	}
 
 	return nil
+}
+
+// commandPathWithoutBinary returns the command being run without the binary
+// name, so `azion create profile` reads as "create profile".
+func commandPathWithoutBinary(cmd *cobra.Command) string {
+	return strings.TrimSpace(strings.TrimPrefix(cmd.CommandPath(), cmd.Root().Name()))
 }
 
 // topLevelCommandName returns the name of the top-level command being run,
@@ -186,6 +211,14 @@ func checkTokenSent(fact *factoryRoot, settings *token.Settings, tokenStr *token
 		S3AccessKey:                "",
 		S3SecretKey:                "",
 		S3Bucket:                   "",
+	}
+
+	// Carry over the cached API generation that resolution just wrote, so a
+	// --token invocation does not have to ask the SSO service again next time.
+	// The entry is bound to the credential that produced it, so an entry left by
+	// a different token is simply a miss.
+	if stored, err := token.ReadSettings(activeProfile); err == nil {
+		strToken.SetAPIVersionCache(stored.APIVersionCache())
 	}
 
 	// Save token to the active profile's settings

@@ -16,7 +16,7 @@ import (
 )
 
 func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
-	azionJson, err := del.GetAzion(ProjectConf)
+	azionJson, err := del.GetAzion(del.ProjectConf)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return msg.ErrorMissingAzionJson

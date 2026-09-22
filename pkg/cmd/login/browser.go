@@ -51,7 +51,7 @@ func (l *login) browserLogin() error {
 			paramValue := r.URL.Query().Get("c")
 			_, _ = io.WriteString(w, msg.BrowserMsg)
 			if paramValue != "" {
-				tokenValue = paramValue
+				l.TokenValue = paramValue
 			}
 			globalCancel()
 		})

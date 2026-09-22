@@ -20,14 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	wafID int64
-)
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(context.Context, int64) (sdk.WAF, error)
+	WafID    int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -68,11 +65,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdWaf
 				}
-				wafID = num
+				describe.WafID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, wafID)
+			resp, err := describe.Get(ctx, describe.WafID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetWaf, err.Error())
 			}
@@ -101,7 +98,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&wafID, "waf-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&describe.WafID, "waf-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

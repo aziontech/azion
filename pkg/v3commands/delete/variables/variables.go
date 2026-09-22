@@ -6,24 +6,21 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/variables"
+	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/variables"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
-var (
-	variableID string
-)
-
 type DeleteCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Delete   func(context.Context, string) error
+	Io         *iostreams.IOStreams
+	AskInput   func(string) (string, error)
+	Delete     func(context.Context, string) error
+	VariableID string
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -60,18 +57,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while parsing answer", zap.Error(err))
 					return utils.ErrorParseResponse
 				}
-				variableID = answer
+				delete.VariableID = answer
 			}
 
 			ctx := context.Background()
 
-			err = delete.Delete(ctx, variableID)
+			err = delete.Delete(ctx, delete.VariableID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteVariable.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, variableID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.VariableID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -79,7 +76,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&variableID, "variable-id", "", msg.FlagVariableID)
+	cobraCmd.Flags().StringVar(&delete.VariableID, "variable-id", "", msg.FlagVariableID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

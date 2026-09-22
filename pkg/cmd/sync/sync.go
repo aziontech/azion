@@ -15,12 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	ProjectConf string
-	IaC         bool
-	IaCFormat   string
-)
-
 type SyncCmd struct {
 	Io                    *iostreams.IOStreams
 	GetAzionJsonContent   func(confPath string) (*contracts.AzionApplicationOptions, error)
@@ -31,10 +25,16 @@ type SyncCmd struct {
 	ReadEnv               func(filenames ...string) (envMap map[string]string, err error)
 	WriteManifest         func(manifest *contracts.ManifestV4, pathMan string) error
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
+	IaC                   bool
+	IaCFormat             string
+	ProjectConf           string
 }
 
 func NewSyncCmd(f *cmdutil.Factory) *SyncCmd {
 	return &SyncCmd{
+		ProjectConf:           "azion",
+		EnvPath:               ".edge/.env",
+		IaCFormat:             "mjs",
 		F:                     f,
 		Io:                    f.IOStreams,
 		GetAzionJsonContent:   utils.GetAzionJsonContent,
@@ -63,10 +63,10 @@ func NewCobraCmd(sync *SyncCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HELPFLAG)
-	cobraCmd.Flags().StringVar(&ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
+	cobraCmd.Flags().StringVar(&sync.ProjectConf, "config-dir", "azion", msg.CONFDIRFLAG)
 	cobraCmd.Flags().StringVar(&sync.EnvPath, "env", ".edge/.env", msg.ENVFLAG)
-	cobraCmd.Flags().BoolVar(&IaC, "iac", false, msg.IACFLAG)
-	cobraCmd.Flags().StringVar(&IaCFormat, "extension", "mjs", msg.IACFORMATFLAG)
+	cobraCmd.Flags().BoolVar(&sync.IaC, "iac", false, msg.IACFLAG)
+	cobraCmd.Flags().StringVar(&sync.IaCFormat, "extension", "mjs", msg.IACFORMATFLAG)
 
 	return cobraCmd
 }
@@ -77,7 +77,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func Run(cmdFac *SyncCmd) error {
 	logger.Debug("Running sync command")
-	conf, err := cmdFac.GetAzionJsonContent(ProjectConf)
+	conf, err := cmdFac.GetAzionJsonContent(cmdFac.ProjectConf)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err

@@ -57,7 +57,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			conf.Function.ID = functionId
 		}
 
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err = cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -70,7 +70,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 				if errors.Is(err, utils.ErrorNameInUse) {
 					logger.FInfoFlags(cmd.Io.Out, msg.FuncInstInUse, cmd.F.Format, cmd.F.Out)
 					*msgs = append(*msgs, msg.FuncInstInUse)
-					if Auto {
+					if cmd.Auto {
 						projName = thoth.GenerateName()
 					} else {
 						projName, err = askForInput(msg.AskInputName, thoth.GenerateName())
@@ -86,7 +86,7 @@ func (cmd *DeployCmd) doFunction(clients *Clients, ctx context.Context, conf *co
 			conf.Function.InstanceID = instance.GetId()
 			break
 		}
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err = cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -120,12 +120,12 @@ func (cmd *DeployCmd) doApplication(
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
+					if cmd.NoPrompt {
 						return err
 					}
 					logger.FInfoFlags(cmd.Io.Out, msg.AppInUse, cmd.F.Format, cmd.F.Out)
 					*msgs = append(*msgs, msg.AppInUse)
-					if Auto {
+					if cmd.Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
 						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
 						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -145,7 +145,7 @@ func (cmd *DeployCmd) doApplication(
 			break
 		}
 
-		err := cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err := cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -172,12 +172,12 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
+					if cmd.NoPrompt {
 						return err
 					}
 					logger.FInfoFlags(cmd.Io.Out, msg.DomainInUse, cmd.F.Format, cmd.F.Out)
 					*msgs = append(*msgs, msg.DomainInUse)
-					if Auto {
+					if cmd.Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
 						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
 						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -202,7 +202,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 			break
 		}
 
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err = cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -217,7 +217,7 @@ func (cmd *DeployCmd) doDomain(client *apidom.Client, ctx context.Context, conf 
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newDomain {
-		err = PurgeForUpdatedFiles(cmd, domain, ProjectConf, msgs)
+		err = PurgeForUpdatedFiles(cmd, domain, cmd.ProjectConf, msgs)
 		if err != nil {
 			logger.Debug("Error while purging domain", zap.Error(err))
 			return err
@@ -237,7 +237,7 @@ func (cmd *DeployCmd) doRulesDeploy(
 	}
 	var cacheId int64
 	var authorize bool
-	if Auto || NoPrompt {
+	if cmd.Auto || cmd.NoPrompt {
 		authorize = false
 	} else {
 		authorize = utils.Confirm(cmd.F.GlobalFlagAll, msg.AskCreateCacheSettings, false)

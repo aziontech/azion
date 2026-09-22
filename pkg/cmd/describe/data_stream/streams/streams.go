@@ -20,12 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var streamID int64
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(context.Context, int64) (sdk.DataStream, error)
+	StreamID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -67,11 +66,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertStreamId
 				}
 
-				streamID = num
+				describe.StreamID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, streamID)
+			resp, err := describe.Get(ctx, describe.StreamID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetStream.Error(), err)
 			}
@@ -99,7 +98,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&streamID, "stream-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&describe.StreamID, "stream-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd

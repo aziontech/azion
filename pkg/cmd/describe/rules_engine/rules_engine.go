@@ -18,18 +18,15 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	applicationID int64
-	ruleID        int64
-	phase         string
-)
-
 type DescribeCmd struct {
 	Io                     *iostreams.IOStreams
 	ReadInput              func(string) (string, error)
 	GetRulesEngineRequest  func(context.Context, int64, int64) (api.RulesEngineResponse, error)
 	GetRulesEngineResponse func(context.Context, int64, int64) (api.RulesEngineResponse, error)
 	AskInput               func(string) (string, error)
+	ApplicationID          int64
+	Phase                  string
+	RuleID                 int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -75,7 +72,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRule
 				}
 
-				ruleID = num
+				describe.RuleID = num
 			}
 
 			if !cmd.Flags().Changed("application-id") {
@@ -90,7 +87,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("phase") {
@@ -99,7 +96,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				phase = answer
+				describe.Phase = answer
 			}
 
 			ctx := context.Background()
@@ -112,9 +109,9 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 			fields["Behaviors"] = "Behaviours"
 			fields["Criteria"] = "Criteria"
 
-			switch phase {
+			switch describe.Phase {
 			case "request":
-				rules, err := describe.GetRulesEngineRequest(ctx, applicationID, ruleID)
+				rules, err := describe.GetRulesEngineRequest(ctx, describe.ApplicationID, describe.RuleID)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
 				}
@@ -129,7 +126,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 				}
 				return output.Print(&describeOut)
 			case "response":
-				rules, err := describe.GetRulesEngineResponse(ctx, applicationID, ruleID)
+				rules, err := describe.GetRulesEngineResponse(ctx, describe.ApplicationID, describe.RuleID)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorGetRulesEngine.Error(), err)
 				}
@@ -149,9 +146,9 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagAppID)
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
-	cobraCmd.Flags().StringVar(&phase, "phase", "", msg.FlagPhase)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.FlagAppID)
+	cobraCmd.Flags().Int64Var(&describe.RuleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().StringVar(&describe.Phase, "phase", "", msg.FlagPhase)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

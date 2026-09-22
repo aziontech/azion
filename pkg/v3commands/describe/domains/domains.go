@@ -16,14 +16,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	domainID string
-)
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(context.Context, string) (api.DomainResponse, error)
+	DomainID string
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -59,11 +56,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				domainID = answer
+				describe.DomainID = answer
 			}
 
 			ctx := context.Background()
-			domain, err := describe.Get(ctx, domainID)
+			domain, err := describe.Get(ctx, describe.DomainID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
@@ -90,7 +87,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&domainID, "domain-id", "", msg.FlagDomainID)
+	cobraCmd.Flags().StringVar(&describe.DomainID, "domain-id", "", msg.FlagDomainID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

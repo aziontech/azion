@@ -6,9 +6,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/logs/cells"
+	"github.com/aziontech/azion-cli/pkg/api/graphql/cells"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/v3api/graphql/cells"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )

@@ -79,7 +79,7 @@ func TestDev(t *testing.T) {
 			devCmd.Vulcan = tt.mockVulcan
 			devCmd.CommandRunInteractive = tt.mockCommandRun
 
-			isFirewall = tt.isFirewall
+			devCmd.IsFirewall = tt.isFirewall
 
 			err := devCmd.Run(f)
 			if tt.expectedError != nil {

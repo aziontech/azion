@@ -22,7 +22,7 @@ func vulcan(cmd *DevCmd, port int) error {
 		commandBuilder.WriteString(fmt.Sprintf("%d", port))
 	}
 
-	if SkipFramework {
+	if cmd.SkipFramework {
 		commandBuilder.WriteString(" --skip-framework-build")
 	}
 

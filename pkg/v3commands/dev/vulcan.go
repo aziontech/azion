@@ -21,7 +21,7 @@ func vulcan(cmd *DevCmd, isFirewall bool, port int) error {
 		command = fmt.Sprintf("%s --firewall", command)
 	}
 
-	if SkipFramework {
+	if cmd.SkipFramework {
 		command = fmt.Sprintf("%s --skip-framework-build", command)
 	}
 

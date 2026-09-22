@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var digitalCertificateID int64
-
 type DeleteCmd struct {
-	Io                        *iostreams.IOStreams
-	ReadInput                 func(string) (string, error)
-	DeleteDigitalCertificate  func(context.Context, int64) error
-	AskInput                  func(string) (string, error)
+	Io                       *iostreams.IOStreams
+	ReadInput                func(string) (string, error)
+	DeleteDigitalCertificate func(context.Context, int64) error
+	AskInput                 func(string) (string, error)
+	DigitalCertificateID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				digitalCertificateID = num
+				delete.DigitalCertificateID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteDigitalCertificate(ctx, digitalCertificateID)
+			err = delete.DeleteDigitalCertificate(ctx, delete.DigitalCertificateID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteDigitalCertificate, err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, digitalCertificateID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.DigitalCertificateID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&digitalCertificateID, "digital-certificate-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.DigitalCertificateID, "digital-certificate-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

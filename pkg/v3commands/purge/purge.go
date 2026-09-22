@@ -12,24 +12,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	urls      string
-	wildcard  string
-	cachekeys string
-	Layer     string
-)
-
 type PurgeCmd struct {
 	Io             *iostreams.IOStreams
 	PurgeUrls      func([]string, *cmdutil.Factory) error
 	PurgeWildcard  func([]string, *cmdutil.Factory) error
-	PurgeCacheKeys func([]string, *cmdutil.Factory) error
+	PurgeCacheKeys func([]string, *cmdutil.Factory, string) error
 	GetPurgeType   func() (string, error)
 	AskForInput    func() ([]string, error)
+	Layer          string
+	Cachekeys      string
+	Urls           string
+	Wildcard       string
 }
 
 func NewPurgeCmd(f *cmdutil.Factory) *PurgeCmd {
 	return &PurgeCmd{
+		Layer:          "edge_caching",
 		Io:             f.IOStreams,
 		PurgeUrls:      purgeUrls,
 		PurgeWildcard:  purgeWildcard,
@@ -57,10 +55,10 @@ func NewCobraCmd(purge *PurgeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&urls, "urls", "", msg.FlagUrls)
-	cobraCmd.Flags().StringVar(&wildcard, "wildcard", "", msg.FlagWildcard)
-	cobraCmd.Flags().StringVar(&cachekeys, "cache-key", "", msg.FlagCacheKeys)
-	cobraCmd.Flags().StringVar(&Layer, "layer", "edge_caching", msg.FlagLayer)
+	cobraCmd.Flags().StringVar(&purge.Urls, "urls", "", msg.FlagUrls)
+	cobraCmd.Flags().StringVar(&purge.Wildcard, "wildcard", "", msg.FlagWildcard)
+	cobraCmd.Flags().StringVar(&purge.Cachekeys, "cache-key", "", msg.FlagCacheKeys)
+	cobraCmd.Flags().StringVar(&purge.Layer, "layer", "edge_caching", msg.FlagLayer)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cobraCmd
@@ -90,7 +88,7 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 				return err
 			}
 		case "cache-key":
-			err := purge.PurgeCacheKeys(listOfUrls, f)
+			err := purge.PurgeCacheKeys(listOfUrls, f, purge.Layer)
 			if err != nil {
 				return err
 			}
@@ -100,21 +98,21 @@ func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.F
 	}
 
 	if cmd.Flags().Changed("urls") {
-		err := purge.PurgeUrls(strings.Split(urls, ","), f)
+		err := purge.PurgeUrls(strings.Split(purge.Urls, ","), f)
 		if err != nil {
 			return err
 		}
 	}
 
 	if cmd.Flags().Changed("wildcard") {
-		err := purge.PurgeWildcard(strings.Split(wildcard, ","), f)
+		err := purge.PurgeWildcard(strings.Split(purge.Wildcard, ","), f)
 		if err != nil {
 			return err
 		}
 	}
 
 	if cmd.Flags().Changed("cache-key") {
-		err := purge.PurgeCacheKeys(strings.Split(cachekeys, ","), f)
+		err := purge.PurgeCacheKeys(strings.Split(purge.Cachekeys, ","), f, purge.Layer)
 		if err != nil {
 			return err
 		}

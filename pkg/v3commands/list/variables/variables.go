@@ -11,16 +11,14 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/variables"
+	api "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/variables"
 	"github.com/spf13/cobra"
 )
-
-var dump bool
 
 type ListCmd struct {
 	Io               *iostreams.IOStreams
@@ -29,12 +27,13 @@ type ListCmd struct {
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
-	return &ListCmd{
+	list := &ListCmd{
 		Io: f.IOStreams,
-		ListAllVariables: func(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
-			return listAllVariables(ctx, client, f, opts)
-		},
 	}
+	list.ListAllVariables = func(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+		return listAllVariables(ctx, client, f, opts, list.Dump)
+	}
+	return list
 }
 
 func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
@@ -61,13 +60,13 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&opts.Details, "details", false, general.ApiListFlagDetails)
-	cmd.Flags().BoolVar(&dump, "dump", false, "")
+	cmd.Flags().BoolVar(&list.Dump, "dump", false, "")
 	cmd.Flags().BoolP("help", "h", false, msg.VariablesListHelpFlag)
 
 	return cmd
 }
 
-func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions) error {
+func listAllVariables(ctx context.Context, client *api.Client, f *cmdutil.Factory, opts *contracts.ListOptions, dump bool) error {
 	resp, err := client.List(ctx)
 	if err != nil {
 		return err

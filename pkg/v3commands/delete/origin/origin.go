@@ -17,16 +17,13 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	applicationID int64
-	originKey     string
-)
-
 type DeleteCmd struct {
 	Io            *iostreams.IOStreams
 	ReadInput     func(string) (string, error)
 	DeleteOrigins func(context.Context, int64, string) error
 	AskInput      func(string) (string, error)
+	ApplicationID int64
+	OriginKey     string
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -67,7 +64,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					logger.Debug("Error while converting answer to int64", zap.Error(err))
 					return msg.ErrorConvertIdApp
 				}
-				applicationID = num
+				delete.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("origin-key") {
@@ -75,18 +72,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				originKey = answer
+				delete.OriginKey = answer
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteOrigins(ctx, applicationID, originKey)
+			err = delete.DeleteOrigins(ctx, delete.ApplicationID, delete.OriginKey)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, originKey),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.OriginKey),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -94,8 +91,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.FlagEdgeApplicationID)
-	cobraCmd.Flags().StringVar(&originKey, "origin-key", "", msg.FlagOriginKey)
+	cobraCmd.Flags().Int64Var(&delete.ApplicationID, "application-id", 0, msg.FlagEdgeApplicationID)
+	cobraCmd.Flags().StringVar(&delete.OriginKey, "origin-key", "", msg.FlagOriginKey)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 	return cobraCmd
 }

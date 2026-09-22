@@ -74,12 +74,12 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
+					if cmd.NoPrompt {
 						return err
 					}
 					logger.FInfoFlags(cmd.Io.Out, msg.AppInUse, cmd.F.Format, cmd.F.Out)
 					*msgs = append(*msgs, msg.AppInUse)
-					if Auto {
+					if cmd.Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
 						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
 						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -99,7 +99,7 @@ func (cmd *DeployCmd) doApplication(client *apiapp.Client, ctx context.Context, 
 			break
 		}
 
-		err := cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err := cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -126,12 +126,12 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			if err != nil {
 				// if the name is already in use, we ask for another one
 				if strings.Contains(err.Error(), utils.ErrorNameInUse.Error()) {
-					if NoPrompt {
+					if cmd.NoPrompt {
 						return err
 					}
 					logger.FInfoFlags(cmd.Io.Out, msg.DomainInUse, cmd.F.Format, cmd.F.Out)
 					*msgs = append(*msgs, msg.DomainInUse)
-					if Auto {
+					if cmd.Auto {
 						projName = fmt.Sprintf("%s-%s", conf.Name, utils.Timestamp())
 						msgf := fmt.Sprintf(msg.NameInUseApplication, projName)
 						logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
@@ -156,7 +156,7 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 			break
 		}
 
-		err = cmd.WriteAzionJsonContent(conf, ProjectConf)
+		err = cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 		if err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))
 			return err
@@ -171,7 +171,7 @@ func (cmd *DeployCmd) doWorkload(client *apiworkload.Client, ctx context.Context
 	}
 
 	if conf.RtPurge.PurgeOnPublish && !newWorkload {
-		err = PurgeForUpdatedFiles(cmd, workload, ProjectConf, msgs)
+		err = PurgeForUpdatedFiles(cmd, workload, cmd.ProjectConf, msgs)
 		if err != nil {
 			logger.Debug("Error while purging workload", zap.Error(err))
 			return err

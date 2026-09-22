@@ -27,12 +27,9 @@ type DeleteBucketCmd struct {
 	DeleteAll     func(*api.Client, context.Context, string, string) error
 	ConfirmDelete func(bool, string, bool) bool
 	PrintOutput   func(*output.GeneralOutput) error
+	BucketName    string
+	ForceDelete   bool
 }
-
-var (
-	bucketName  string
-	forceDelete bool
-)
 
 func NewDeleteBucketCmd(f *cmdutil.Factory) *DeleteBucketCmd {
 	return &DeleteBucketCmd{
@@ -69,31 +66,31 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				bucketName = answer
+				delete.BucketName = answer
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.DeleteBucket(ctx, bucketName)
+			err = client.DeleteBucket(ctx, delete.BucketName)
 			if err != nil {
 				if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET) {
-					if !forceDelete {
+					if !delete.ForceDelete {
 						if !delete.ConfirmDelete(f.GlobalFlagAll, msg.ASK_NOT_EMPTY_BUCKET, false) {
 							return nil
 						}
 					}
 					logger.FInfo(f.IOStreams.Out, "Delete all objects from bucket\n")
 					logger.FInfo(f.IOStreams.Out, "Deleting objects...\n")
-					if err := delete.DeleteAll(client, ctx, bucketName, ""); err != nil {
+					if err := delete.DeleteAll(client, ctx, delete.BucketName, ""); err != nil {
 						return err
 					}
-					err := client.DeleteBucket(ctx, bucketName)
+					err := client.DeleteBucket(ctx, delete.BucketName)
 					if err != nil {
 						if strings.Contains(err.Error(), msg.ERROR_NO_EMPTY_BUCKET) {
 							logger.FInfo(f.IOStreams.Out, "Bucket deletion was scheduled successfully\n")
-							return schedule.NewSchedule(nil, f, bucketName, schedule.DELETE_BUCKET)
+							return schedule.NewSchedule(nil, f, delete.BucketName, schedule.DELETE_BUCKET)
 						} else {
 							return fmt.Errorf(msg.ERROR_DELETE_BUCKET, err.Error())
 						}
@@ -104,7 +101,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, bucketName),
+				Msg:   fmt.Sprintf(msg.OUTPUT_DELETE_BUCKET, delete.BucketName),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -112,8 +109,8 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&bucketName, "name", "", msg.FLAG_NAME_BUCKET)
-	cobraCmd.Flags().BoolVar(&forceDelete, "force", false, msg.FLAG_FORCE)
+	cobraCmd.Flags().StringVar(&delete.BucketName, "name", "", msg.FLAG_NAME_BUCKET)
+	cobraCmd.Flags().BoolVar(&delete.ForceDelete, "force", false, msg.FLAG_FORCE)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.FLAG_HELP_DELETE_BUCKET)
 
 	return cobraCmd

@@ -17,14 +17,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	workloadID int64
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64) (api.WorkloadResponse, error)
+	Io         *iostreams.IOStreams
+	AskInput   func(string) (string, error)
+	Get        func(context.Context, int64) (api.WorkloadResponse, error)
+	WorkloadID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -60,14 +57,14 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return err
 				}
 
-				workloadID, err = strconv.ParseInt(answer, 10, 64)
+				describe.WorkloadID, err = strconv.ParseInt(answer, 10, 64)
 				if err != nil {
 					return msg.ErrorConvertWorkloadId
 				}
 			}
 
 			ctx := context.Background()
-			workload, err := describe.Get(ctx, workloadID)
+			workload, err := describe.Get(ctx, describe.WorkloadID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetDomain.Error(), err.Error())
 			}
@@ -92,7 +89,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagDomainID)
+	cobraCmd.Flags().Int64Var(&describe.WorkloadID, "workload-id", 0, msg.FlagDomainID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

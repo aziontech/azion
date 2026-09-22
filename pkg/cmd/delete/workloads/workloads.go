@@ -17,12 +17,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var workloadID int64
-
 type DeleteCmd struct {
-	Io        *iostreams.IOStreams
-	ReadInput func(string) (string, error)
-	AskInput  func(string) (string, error)
+	Io         *iostreams.IOStreams
+	ReadInput  func(string) (string, error)
+	AskInput   func(string) (string, error)
+	WorkloadID int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -60,20 +59,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertId
 				}
 
-				workloadID = num
+				delete.WorkloadID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, workloadID)
+			err = client.Delete(ctx, delete.WorkloadID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteWorkload.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, workloadID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.WorkloadID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -81,7 +80,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&workloadID, "workload-id", 0, msg.FlagId)
+	cobraCmd.Flags().Int64Var(&delete.WorkloadID, "workload-id", 0, msg.FlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

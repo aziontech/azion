@@ -17,15 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	wafID       int64
-	exceptionID int64
-)
-
 type DeleteCmd struct {
-	Io        *iostreams.IOStreams
-	ReadInput func(string) (string, error)
-	AskInput  func(string) (string, error)
+	Io          *iostreams.IOStreams
+	ReadInput   func(string) (string, error)
+	AskInput    func(string) (string, error)
+	ExceptionID int64
+	WafID       int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -63,7 +60,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertWafID
 				}
 
-				wafID = num
+				delete.WafID = num
 			}
 
 			if !cmd.Flags().Changed("exception-id") {
@@ -78,20 +75,20 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertExceptionID
 				}
 
-				exceptionID = num
+				delete.ExceptionID = num
 			}
 
 			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
 
 			ctx := context.Background()
 
-			err = client.Delete(ctx, wafID, exceptionID)
+			err = client.Delete(ctx, delete.WafID, delete.ExceptionID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteException.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, exceptionID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.ExceptionID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -99,8 +96,8 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&wafID, "waf-id", 0, msg.FlagWafID)
-	cobraCmd.Flags().Int64Var(&exceptionID, "exception-id", 0, msg.FlagExceptionID)
+	cobraCmd.Flags().Int64Var(&delete.WafID, "waf-id", 0, msg.FlagWafID)
+	cobraCmd.Flags().Int64Var(&delete.ExceptionID, "exception-id", 0, msg.FlagExceptionID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

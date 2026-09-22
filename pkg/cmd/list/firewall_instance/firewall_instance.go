@@ -20,14 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	FirewallID int64
-)
-
 type ListCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
 	ListInstances func(ctx context.Context, opts *contracts.ListOptions, firewallID int64) (*sdk.PaginatedFirewallFunctionInstanceList, error)
+	FirewallID    int64
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -73,7 +70,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFirewallId
 				}
 
-				FirewallID = num
+				list.FirewallID = num
 			}
 
 			if err := PrintTable(cmd, list, f, opts); err != nil {
@@ -85,7 +82,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolP("help", "h", false, msg.HelpFlag)
-	flags.Int64Var(&FirewallID, "firewall-id", 0, msg.FirewallIdFlag)
+	flags.Int64Var(&list.FirewallID, "firewall-id", 0, msg.FirewallIdFlag)
 	cmdutil.AddAzionApiFlags(cmd, opts)
 
 	return cmd
@@ -94,7 +91,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, list *ListCmd, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	ctx := context.Background()
 
-	resp, err := list.ListInstances(ctx, opts, FirewallID)
+	resp, err := list.ListInstances(ctx, opts, list.FirewallID)
 	if err != nil {
 		return err
 	}

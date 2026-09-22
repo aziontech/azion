@@ -18,15 +18,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	zoneID   int64
-	recordID int64
-)
-
 type DeleteCmd struct {
 	Io              *iostreams.IOStreams
 	DeleteDNSRecord func(context.Context, int64, int64) error
 	AskInput        func(string) (string, error)
+	RecordID        int64
+	ZoneID          int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -63,7 +60,7 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdZone
 				}
 
-				zoneID = num
+				del.ZoneID = num
 			}
 
 			if !cmd.Flags().Changed("record-id") {
@@ -78,18 +75,18 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdRecord
 				}
 
-				recordID = num
+				del.RecordID = num
 			}
 
 			ctx := context.Background()
 
-			err := del.DeleteDNSRecord(ctx, zoneID, recordID)
+			err := del.DeleteDNSRecord(ctx, del.ZoneID, del.RecordID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DNSRecordDeleteOutputSuccess, recordID),
+				Msg:   fmt.Sprintf(msg.DNSRecordDeleteOutputSuccess, del.RecordID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -97,8 +94,8 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&zoneID, "zone-id", 0, msg.DNSRecordFlagZoneID)
-	cobraCmd.Flags().Int64Var(&recordID, "record-id", 0, msg.DNSRecordFlagRecordID)
+	cobraCmd.Flags().Int64Var(&del.ZoneID, "zone-id", 0, msg.DNSRecordFlagZoneID)
+	cobraCmd.Flags().Int64Var(&del.RecordID, "record-id", 0, msg.DNSRecordFlagRecordID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DNSRecordDeleteHelpFlag)
 
 	return cobraCmd

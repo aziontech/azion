@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -14,6 +15,9 @@ type Factory struct {
 	HttpClient *http.Client
 	IOStreams  *iostreams.IOStreams
 	Config     config.Config
+	// APIVersion is the API generation this invocation talks to. It is resolved
+	// once, in root.CmdRoot, before the command tree is built.
+	APIVersion apiversion.Version
 	Flags
 }
 

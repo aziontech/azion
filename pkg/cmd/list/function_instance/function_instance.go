@@ -20,14 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	ApplicationID int64
-)
-
 type ListCmd struct {
 	Io            *iostreams.IOStreams
 	AskInput      func(string) (string, error)
 	ListInstances func(ctx context.Context, opts *contracts.ListOptions, edgeApplicationID int64) (*sdk.PaginatedFunctionInstanceList, error)
+	ApplicationID int64
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
@@ -73,7 +70,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertApplicationId
 				}
 
-				ApplicationID = num
+				list.ApplicationID = num
 			}
 
 			if err := PrintTable(cmd, list, f, opts); err != nil {
@@ -85,7 +82,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 
 	flags := cmd.Flags()
 	flags.BoolP("help", "h", false, msg.HelpFlag)
-	flags.Int64Var(&ApplicationID, "application-id", 0, msg.ApplicationIdFlag)
+	flags.Int64Var(&list.ApplicationID, "application-id", 0, msg.ApplicationIdFlag)
 	cmdutil.AddAzionApiFlags(cmd, opts)
 
 	return cmd
@@ -94,7 +91,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 func PrintTable(cmd *cobra.Command, list *ListCmd, f *cmdutil.Factory, opts *contracts.ListOptions) error {
 	ctx := context.Background()
 
-	resp, err := list.ListInstances(ctx, opts, ApplicationID)
+	resp, err := list.ListInstances(ctx, opts, list.ApplicationID)
 	if err != nil {
 		return err
 	}

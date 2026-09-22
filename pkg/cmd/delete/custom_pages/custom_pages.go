@@ -17,13 +17,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var customPageID int64
-
 type DeleteCmd struct {
 	Io               *iostreams.IOStreams
 	ReadInput        func(string) (string, error)
 	DeleteCustomPage func(context.Context, int64) error
 	AskInput         func(string) (string, error)
+	CustomPageID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -65,18 +64,18 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertCustomPageId
 				}
 
-				customPageID = num
+				delete.CustomPageID = num
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteCustomPage(ctx, customPageID)
+			err = delete.DeleteCustomPage(ctx, delete.CustomPageID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDeleteCustomPage.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, customPageID),
+				Msg:   fmt.Sprintf(msg.DeleteOutputSuccess, delete.CustomPageID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -84,7 +83,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&customPageID, "custom-page-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&delete.CustomPageID, "custom-page-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeleteHelpFlag)
 
 	return cobraCmd

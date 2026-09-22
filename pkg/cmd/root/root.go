@@ -32,6 +32,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/schedule"
 
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
@@ -91,12 +92,15 @@ type globals struct {
 	commandName    string
 	globalSettings *token.Settings
 	startTime      time.Time
-	apiVersion     string
+	// how this invocation's API version was obtained; logged once the
+	// requested log level is in effect
+	apiVersionSource apiVersionSource
 }
 
 func (fact *factoryRoot) persistentPreRunE(cmd *cobra.Command, _ []string) error {
 	fact.startTime = time.Now()
 	logger.LogLevel(fact.factory.Logger)
+	fact.logAPIVersionSource()
 
 	if strings.HasPrefix(fact.configFlag, PREFIX_FLAG) {
 		return msg.ErrorPrefix
@@ -207,21 +211,22 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 
 	fact.setFlags(cobraCmd)
 
+	// The tree below is chosen from the account's API generation, which depends
+	// on --token and --config. Cobra has not parsed them yet, so read them now.
+	fact.preParseGlobalFlags(os.Args[1:])
+	fact.applyConfigFlag()
+
 	// set template for -v flag
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
-	logger.Debug("Checking client flags")
-	hasFlag, err := HasBlockAPIV4Flag(fact.factory.Config.GetString("token"), fact)
-	if err != nil {
-		logger.Debug("Failed to get client flags for this user", zap.Error(err))
-		fact.apiVersion = "v3"
+	apiVersion := fact.resolveAPIVersion()
+	fact.factory.APIVersion = apiVersion
+
+	switch apiVersion {
+	case apiversion.V3:
 		fact.setV3Cmds(cobraCmd)
-	} else if hasFlag {
-		fact.apiVersion = "v4"
+	default: // apiversion.V4 today; a new generation gets its own case
 		fact.setCmds(cobraCmd)
-	} else {
-		fact.apiVersion = "v3"
-		fact.setV3Cmds(cobraCmd)
 	}
 
 	return cobraCmd
@@ -248,7 +253,7 @@ func Execute(f *factoryRoot) {
 	if f.globalSettings != nil {
 		if f.globalSettings.AuthorizeMetricsCollection == 1 {
 			activeProfile := f.factory.GetActiveProfile()
-			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err, activeProfile, f.apiVersion)
+			errMetrics := metric.TotalCommandsCount(cmd, f.commandName, executionTime, err, activeProfile, f.factory.APIVersion.String())
 			if errMetrics != nil {
 				logger.Debug("Error while saving metrics", zap.Error(err))
 			}

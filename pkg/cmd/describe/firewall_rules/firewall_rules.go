@@ -20,15 +20,12 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	firewallID int64
-	ruleID     int64
-)
-
 type DescribeCmd struct {
 	Io              *iostreams.IOStreams
 	AskInput        func(string) (string, error)
 	GetFirewallRule func(ctx context.Context, firewallId, ruleId int64) (sdk.FirewallRule, error)
+	FirewallID      int64
+	RuleID          int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -70,7 +67,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertFirewallId
 				}
 
-				firewallID = num
+				describe.FirewallID = num
 			}
 
 			if !cmd.Flags().Changed("rule-id") {
@@ -85,11 +82,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertRuleId
 				}
 
-				ruleID = num
+				describe.RuleID = num
 			}
 
 			ctx := context.Background()
-			rule, err := describe.GetFirewallRule(ctx, firewallID, ruleID)
+			rule, err := describe.GetFirewallRule(ctx, describe.FirewallID, describe.RuleID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetFirewallRule, err.Error())
 			}
@@ -115,8 +112,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&firewallID, "firewall-id", 0, msg.FlagFirewallID)
-	cobraCmd.Flags().Int64Var(&ruleID, "rule-id", 0, msg.FlagRuleID)
+	cobraCmd.Flags().Int64Var(&describe.FirewallID, "firewall-id", 0, msg.FlagFirewallID)
+	cobraCmd.Flags().Int64Var(&describe.RuleID, "rule-id", 0, msg.FlagRuleID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 
 	return cobraCmd

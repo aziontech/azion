@@ -20,24 +20,24 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-var (
-	username, password, tokenValue, uuid string
-	userInfo                             token.UserInfo
-	createNewProfile                     bool
-	newProfileName                       string
-)
-
 var confirmFn = utils.Confirm
 
 type login struct {
-	factory     *cmdutil.Factory
-	askOne      func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
-	run         func(input string) error
-	server      Server
-	token       token.TokenInterface
-	marshalToml func(v interface{}) ([]byte, error)
-	askInput    func(msg string) (string, error)
-	askPassword func(msg string) (string, error)
+	factory          *cmdutil.Factory
+	askOne           func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
+	run              func(input string) error
+	server           Server
+	token            token.TokenInterface
+	marshalToml      func(v interface{}) ([]byte, error)
+	askInput         func(msg string) (string, error)
+	askPassword      func(msg string) (string, error)
+	Username         string
+	Password         string
+	TokenValue       string
+	Uuid             string
+	UserInfo         token.UserInfo
+	CreateNewProfile bool
+	NewProfileName   string
 }
 
 func New(f *cmdutil.Factory) *cobra.Command {
@@ -68,13 +68,13 @@ func cmd(l *login) *cobra.Command {
 		$ azion login --username fulanodasilva@gmail.com --password "senhasecreta"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			createNewProfile = confirmFn(l.factory.GlobalFlagAll, msg.QuestionCreateProfile, true)
-			if createNewProfile {
+			l.CreateNewProfile = confirmFn(l.factory.GlobalFlagAll, msg.QuestionCreateProfile, true)
+			if l.CreateNewProfile {
 				profileNameInput, err := utils.AskInput(msg.AskProfileName)
 				if err != nil {
 					return fmt.Errorf(msg.ErrorGetProfileName.Error(), err)
 				}
-				newProfileName = profileNameInput
+				l.NewProfileName = profileNameInput
 			}
 
 			answer, err := l.selectLoginMode()
@@ -97,7 +97,7 @@ func cmd(l *login) *cobra.Command {
 				return msg.ErrorInvalidLogin
 			}
 
-			err = l.validateToken(tokenValue)
+			err = l.validateToken(l.TokenValue)
 			if err != nil {
 				return err
 			}
@@ -117,8 +117,8 @@ func cmd(l *login) *cobra.Command {
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&username, "username", "", msg.FlagUsername)
-	flags.StringVar(&password, "password", "", msg.FlagPassword)
+	flags.StringVar(&l.Username, "username", "", msg.FlagUsername)
+	flags.StringVar(&l.Password, "password", "", msg.FlagPassword)
 	flags.BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd
@@ -138,18 +138,18 @@ func (l *login) selectLoginMode() (answer string, err error) {
 
 func (l *login) saveSettings() error {
 	settings := token.Settings{
-		UUID:        uuid,
-		Token:       tokenValue,
-		ClientId:    userInfo.Results.ClientID,
-		Email:       userInfo.Results.Email,
+		UUID:        l.Uuid,
+		Token:       l.TokenValue,
+		ClientId:    l.UserInfo.Results.ClientID,
+		Email:       l.UserInfo.Results.Email,
 		S3AccessKey: "",
 		S3SecretKey: "",
 		S3Bucket:    "",
 	}
 
 	var profileName string
-	if createNewProfile {
-		profileName = newProfileName
+	if l.CreateNewProfile {
+		profileName = l.NewProfileName
 
 		err := token.WriteSettings(settings, profileName)
 		if err != nil {
@@ -177,7 +177,7 @@ func (l *login) saveSettings() error {
 
 func (l *login) validateToken(token string) error {
 	tokenValid, user, err := l.token.Validate(&token)
-	userInfo = user
+	l.UserInfo = user
 	if err != nil {
 		logger.Debug("Error while validating the token", zap.Error(err))
 		return err

@@ -14,14 +14,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	tokenID string
-)
-
 type DeleteCmd struct {
 	Io         *iostreams.IOStreams
 	AskInput   func(string) (string, error)
 	DeleteFunc func(context.Context, string) error
+	TokenID    string
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -55,22 +52,22 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 				if err != nil {
 					return err
 				}
-				tokenID = answer
+				delete.TokenID = answer
 			}
 
-			if utils.IsEmpty(tokenID) {
+			if utils.IsEmpty(delete.TokenID) {
 				return utils.ErrorArgumentIsEmpty
 			}
 
 			ctx := context.Background()
 
-			err = delete.DeleteFunc(ctx, tokenID)
+			err = delete.DeleteFunc(ctx, delete.TokenID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete, err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.OutputSuccess, tokenID),
+				Msg:   fmt.Sprintf(msg.OutputSuccess, delete.TokenID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -78,7 +75,7 @@ func NewCobraCmd(delete *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().StringVar(&tokenID, "id", "", msg.FlagID)
+	cobraCmd.Flags().StringVar(&delete.TokenID, "id", "", msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
 	return cobraCmd
 }

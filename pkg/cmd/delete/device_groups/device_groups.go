@@ -18,15 +18,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID int64
-	deviceGroupID int64
-)
-
 type DeleteCmd struct {
 	Io                *iostreams.IOStreams
 	DeleteDeviceGroup func(context.Context, int64, int64) error
 	AskInput          func(string) (string, error)
+	ApplicationID     int64
+	DeviceGroupID     int64
 }
 
 func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
@@ -63,7 +60,7 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				del.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("group-id") {
@@ -78,18 +75,18 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdDeviceGroup
 				}
 
-				deviceGroupID = num
+				del.DeviceGroupID = num
 			}
 
 			ctx := context.Background()
 
-			err := del.DeleteDeviceGroup(ctx, applicationID, deviceGroupID)
+			err := del.DeleteDeviceGroup(ctx, del.ApplicationID, del.DeviceGroupID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorFailToDelete.Error(), err)
 			}
 
 			deleteOut := output.GeneralOutput{
-				Msg:   fmt.Sprintf(msg.DeviceGroupsDeleteOutputSuccess, deviceGroupID),
+				Msg:   fmt.Sprintf(msg.DeviceGroupsDeleteOutputSuccess, del.DeviceGroupID),
 				Out:   f.IOStreams.Out,
 				Flags: f.Flags,
 			}
@@ -97,8 +94,8 @@ func NewCobraCmd(del *DeleteCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.ApplicationFlagId)
-	cobraCmd.Flags().Int64Var(&deviceGroupID, "group-id", 0, msg.DeviceGroupFlagId)
+	cobraCmd.Flags().Int64Var(&del.ApplicationID, "application-id", 0, msg.ApplicationFlagId)
+	cobraCmd.Flags().Int64Var(&del.DeviceGroupID, "group-id", 0, msg.DeviceGroupFlagId)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DeviceGroupsDeleteHelpFlag)
 
 	return cobraCmd

@@ -22,15 +22,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	applicationID   int64
-	cacheSettingsID int64
-)
-
 type DescribeCmd struct {
-	Io       *iostreams.IOStreams
-	AskInput func(string) (string, error)
-	Get      func(context.Context, int64, int64) (sdk.CacheSetting, error)
+	Io              *iostreams.IOStreams
+	AskInput        func(string) (string, error)
+	Get             func(context.Context, int64, int64) (sdk.CacheSetting, error)
+	ApplicationID   int64
+	CacheSettingsID int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -73,7 +70,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				applicationID = num
+				describe.ApplicationID = num
 			}
 
 			if !cmd.Flags().Changed("cache-setting-id") {
@@ -88,11 +85,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertIdApplication
 				}
 
-				cacheSettingsID = num
+				describe.CacheSettingsID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, applicationID, cacheSettingsID)
+			resp, err := describe.Get(ctx, describe.ApplicationID, describe.CacheSettingsID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetCache.Error(), err)
 			}
@@ -116,8 +113,8 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&applicationID, "application-id", 0, msg.DescribeFlagApplicationID)
-	cobraCmd.Flags().Int64Var(&cacheSettingsID, "cache-setting-id", 0, msg.DescribeFlagCacheSettingsID)
+	cobraCmd.Flags().Int64Var(&describe.ApplicationID, "application-id", 0, msg.DescribeFlagApplicationID)
+	cobraCmd.Flags().Int64Var(&describe.CacheSettingsID, "cache-setting-id", 0, msg.DescribeFlagCacheSettingsID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 	return cobraCmd
 }

@@ -14,10 +14,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const PathStatic = ".edge/storage"
+
 var (
-	PathStatic = ".edge/storage"
-	Jobs       chan contracts.FileOps
-	Retries    int64
+	Jobs    chan contracts.FileOps
+	Retries int64
 )
 
 func (cmd *DeployCmd) uploadFiles(

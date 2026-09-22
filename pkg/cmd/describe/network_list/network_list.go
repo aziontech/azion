@@ -20,14 +20,11 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	id int64
-)
-
 type DescribeCmd struct {
 	Io       *iostreams.IOStreams
 	AskInput func(string) (string, error)
 	Get      func(ctx context.Context, id int64) (sdk.NetworkList, error)
+	ID       int64
 }
 
 func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
@@ -70,11 +67,11 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 					return msg.ErrorConvertNetworkListId
 				}
 
-				id = num
+				describe.ID = num
 			}
 
 			ctx := context.Background()
-			resp, err := describe.Get(ctx, id)
+			resp, err := describe.Get(ctx, describe.ID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorGetNetworkList.Error(), err)
 			}
@@ -103,7 +100,7 @@ func NewCobraCmd(describe *DescribeCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
-	cobraCmd.Flags().Int64Var(&id, "network-list-id", 0, msg.FlagID)
+	cobraCmd.Flags().Int64Var(&describe.ID, "network-list-id", 0, msg.FlagID)
 	cobraCmd.Flags().BoolP("help", "h", false, msg.DescribeHelpFlag)
 
 	return cobraCmd
