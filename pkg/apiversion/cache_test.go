@@ -130,3 +130,30 @@ func TestCacheAge(t *testing.T) {
 	assert.Equal(t, 3*time.Hour, Refreshed(V4, "t", now.Add(-3*time.Hour)).Age(now))
 	assert.Zero(t, Cache{}.Age(now), "an empty cache has no age")
 }
+
+// A version decided by superseded rules may say the opposite of what the
+// current rules would decide, so it must not be used — not as a hit, and not as
+// a fallback when the lookup fails.
+func TestCacheIgnoresEntriesFromAnOlderEpoch(t *testing.T) {
+	now := time.Now()
+	const tok = "a-token"
+
+	stale := Refreshed(V4, tok, now)
+	stale.Epoch = ResolverEpoch - 1
+
+	got, status := stale.Lookup(tok, now)
+	assert.Equal(t, CacheMissEpoch, status)
+	assert.Empty(t, got)
+
+	_, ok := stale.Stale()
+	assert.False(t, ok, "an entry from an older epoch is not a usable fallback")
+
+	// an entry written by a CLI that predates the epoch field at all
+	legacy := Cache{Version: V4, CheckedAt: now, TokenHash: TokenHash(tok)}
+	_, status = legacy.Lookup(tok, now)
+	assert.Equal(t, CacheMissEpoch, status)
+}
+
+func TestRefreshedStampsTheCurrentEpoch(t *testing.T) {
+	assert.Equal(t, ResolverEpoch, Refreshed(V4, "t", time.Now()).Epoch)
+}

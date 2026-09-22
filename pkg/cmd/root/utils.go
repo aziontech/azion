@@ -1,6 +1,7 @@
 package root
 
 import (
+	"errors"
 	"io"
 	"strings"
 	"time"
@@ -61,11 +62,20 @@ func (fact *factoryRoot) resolveAPIVersion() apiversion.Version {
 			return cached
 		}
 
-		// Nothing cached: fall back as the CLI always has, but say so out loud
-		// instead of only in a debug log.
 		fact.apiVersionSource = apiVersionSource{source: sourceFallback, version: apiversion.V3, status: status, err: err}
-		logger.FInfoFlags(fact.factory.IOStreams.Out, msg.APIVersionLookupFailed,
-			fact.factory.Format, fact.factory.Out)
+
+		// A rejected credential is not a failed lookup: the account's generation
+		// is simply unknowable until the user logs in again, and the command
+		// being run says so in its own terms. Warning here would only repeat it
+		// on every invocation and point at `azion profiles --refresh`, which
+		// cannot work either while the credential is bad.
+		if !errors.Is(err, apiversion.ErrUnauthorized) {
+			// Nothing cached and the lookup itself could not be completed: fall
+			// back as the CLI always has, but say so out loud instead of only in
+			// a debug log.
+			logger.FInfoFlags(fact.factory.IOStreams.Out, msg.APIVersionLookupFailed,
+				fact.factory.Format, fact.factory.Out)
+		}
 		return apiversion.V3
 	}
 

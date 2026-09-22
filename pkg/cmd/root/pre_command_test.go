@@ -394,3 +394,36 @@ func TestCheckTokenNotExpired(t *testing.T) {
 		})
 	}
 }
+
+// Deleting the profile that held the only working credential used to leave the
+// CLI unusable: the commands that create or remove a profile were themselves
+// gated behind a valid token, so there was no way back in.
+func TestProfileManagementIsNotGatedByTheToken(t *testing.T) {
+	root := &cobra.Command{Use: "azion"}
+	for _, verb := range []string{"create", "delete"} {
+		parent := &cobra.Command{Use: verb}
+		parent.AddCommand(&cobra.Command{Use: "profile"})
+		parent.AddCommand(&cobra.Command{Use: "variables"})
+		root.AddCommand(parent)
+	}
+
+	find := func(path ...string) *cobra.Command {
+		cur := root
+		for _, name := range path {
+			for _, c := range cur.Commands() {
+				if c.Name() == name {
+					cur = c
+					break
+				}
+			}
+		}
+		return cur
+	}
+
+	assert.Equal(t, "create profile", commandPathWithoutBinary(find("create", "profile")))
+	assert.Equal(t, "delete profile", commandPathWithoutBinary(find("delete", "profile")))
+
+	assert.True(t, pathsWithoutToken["create profile"], "creating a profile is how a user recovers")
+	assert.True(t, pathsWithoutToken["delete profile"], "deleting a broken profile must not need a token")
+	assert.False(t, pathsWithoutToken["create variables"], "real resources still require a valid credential")
+}

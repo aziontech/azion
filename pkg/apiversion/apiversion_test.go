@@ -15,12 +15,11 @@ func TestSelect(t *testing.T) {
 		info AccountInfo
 		want Version
 	}{
-		{"no client flags stays on the legacy generation", AccountInfo{}, V3},
-		{"unrelated flags do not opt the account into v4", AccountInfo{ClientFlags: []string{"other"}}, V3},
-		{"block_apiv4_incompatible_endpoints opts into v4", AccountInfo{ClientFlags: []string{BlockAPIV4IncompatibleEndpoints}}, V4},
-		{"block_apiv3_access opts into v4", AccountInfo{ClientFlags: []string{BlockAPIV3Access}}, V4},
-		{"either flag is enough alongside others", AccountInfo{ClientFlags: []string{"other", BlockAPIV3Access}}, V4},
-		{"both flags together resolve to v4", AccountInfo{ClientFlags: []string{BlockAPIV4IncompatibleEndpoints, BlockAPIV3Access}}, V4},
+		{"no client flags means the current generation", AccountInfo{}, V4},
+		{"unrelated flags do not change the generation", AccountInfo{ClientFlags: []string{"other"}}, V4},
+		{"block_apiv4_incompatible_endpoints blocks v4, so v3", AccountInfo{ClientFlags: []string{BlockAPIV4IncompatibleEndpoints}}, V3},
+		{"block_apiv3_access blocks v3, so v4", AccountInfo{ClientFlags: []string{BlockAPIV3Access}}, V4},
+		{"the v4 block wins alongside unrelated flags", AccountInfo{ClientFlags: []string{"waf_mode", BlockAPIV4IncompatibleEndpoints}}, V3},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -47,7 +46,7 @@ func TestResolve(t *testing.T) {
 		got, err := Resolve(srv.Client(), srv.URL, "a-token")
 
 		require.NoError(t, err)
-		assert.Equal(t, V4, got)
+		assert.Equal(t, V4, got, "block_apiv3_access leaves the account on v4")
 		assert.Equal(t, "Token a-token", gotAuth)
 		assert.Equal(t, "/account/info", gotPath)
 	})
@@ -86,4 +85,63 @@ func TestResolve(t *testing.T) {
 		require.Error(t, err)
 		assert.Empty(t, got)
 	})
+}
+
+// A rejected credential must be distinguishable from a lookup that could not be
+// completed: the caller stays quiet about the version in the first case and
+// warns in the second.
+func TestResolveReportsUnauthorizedDistinctly(t *testing.T) {
+	for _, status := range []int{http.StatusUnauthorized, http.StatusForbidden} {
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(status)
+		}))
+
+		_, err := Resolve(srv.Client(), srv.URL, "a-token")
+		srv.Close()
+
+		require.Error(t, err)
+		assert.ErrorIs(t, err, ErrUnauthorized, "status %d must report a rejected credential", status)
+	}
+}
+
+func TestResolveDoesNotReportOtherFailuresAsUnauthorized(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	_, err := Resolve(srv.Client(), srv.URL, "a-token")
+
+	require.Error(t, err)
+	assert.NotErrorIs(t, err, ErrUnauthorized, "a server fault is not a credential problem")
+}
+
+// Each client flag blocks one generation, so each points at the other. These
+// cases are taken from live accounts: profiles carrying
+// block_apiv4_incompatible_endpoints are v3, profiles carrying
+// block_apiv3_access are v4.
+//
+// PR #1553 inverted this by swapping the caller's branches, which served the v4
+// tree to blocked accounts and the v3 tree to everyone else.
+func TestFlagsBlockTheirOwnGeneration(t *testing.T) {
+	cases := []struct {
+		name  string
+		flags []string
+		want  Version
+	}{
+		// observed payloads, profile name in the comment
+		{"blocked from v4", []string{BlockAPIV4IncompatibleEndpoints, "waf_mode"}, V3},                                 // PabloV3Prod, ProdV3P
+		{"blocked from v3", []string{BlockAPIV3Access, "waf_mode"}, V4},                                                // ConsoleTemplateDemo
+		{"blocked from v3, console redirect", []string{"force_redirect_to_console", BlockAPIV3Access, "waf_mode"}, V4}, // ProdV4
+		{"unrelated flag only", []string{"waf_mode"}, V4},
+		{"no flags at all", nil, V4},
+		// contradictory configuration: cannot use v3 wins, the legacy tree would
+		// be useless to such an account
+		{"both block flags", []string{BlockAPIV4IncompatibleEndpoints, BlockAPIV3Access}, V4},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			assert.Equal(t, c.want, Select(AccountInfo{ClientFlags: c.flags}))
+		})
+	}
 }

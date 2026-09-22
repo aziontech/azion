@@ -47,6 +47,7 @@ type Settings struct {
 	APIVersion          string
 	APIVersionCheckedAt time.Time
 	APIVersionTokenHash string
+	APIVersionEpoch     int
 }
 
 type Config struct {

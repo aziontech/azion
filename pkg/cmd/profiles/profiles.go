@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -125,6 +126,9 @@ func runRefresh(f *cmdutil.Factory) error {
 
 	current, err := apiversion.Resolve(f.HttpClient, constants.AuthURL, tok)
 	if err != nil {
+		if errors.Is(err, apiversion.ErrUnauthorized) {
+			return fmt.Errorf(msg.ErrorRefreshUnauthorized.Error(), profile.Name)
+		}
 		return fmt.Errorf(msg.ErrorRefreshFailed.Error(), profile.Name, err)
 	}
 

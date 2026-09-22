@@ -41,6 +41,7 @@ require github.com/aziontech/azionapi-v4-go-sdk-dev v0.266.0
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.8.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect

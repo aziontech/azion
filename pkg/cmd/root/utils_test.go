@@ -66,16 +66,16 @@ func TestResolveAPIVersionQueriesAndCaches(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `["`+apiversion.BlockAPIV4IncompatibleEndpoints+`"]`)
 	fact, _ := newRootFactory(t, mock, "a-token")
 
 	got := fact.resolveAPIVersion()
 
-	assert.Equal(t, apiversion.V4, got)
+	assert.Equal(t, apiversion.V3, got, "a blocked account resolves to the legacy generation")
 	assert.Len(t, mock.Requests, 1, "a cold cache asks the SSO service once")
 
 	cached := readCache(t)
-	assert.Equal(t, apiversion.V4, cached.Version)
+	assert.Equal(t, apiversion.V3, cached.Version)
 	assert.Equal(t, apiversion.TokenHash("a-token"), cached.TokenHash)
 	assert.WithinDuration(t, time.Now(), cached.CheckedAt, time.Minute)
 }
@@ -98,7 +98,7 @@ func TestResolveAPIVersionRechecksWhenCacheIsStale(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `[]`)
 	fact, _ := newRootFactory(t, mock, "a-token")
 	writeCache(t, apiversion.Refreshed(apiversion.V3, "a-token", time.Now().Add(-apiversion.TTL-time.Minute)))
 
@@ -115,7 +115,7 @@ func TestResolveAPIVersionRechecksWhenCredentialChanges(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `[]`)
 	fact, _ := newRootFactory(t, mock, "new-token")
 	writeCache(t, apiversion.Refreshed(apiversion.V3, "old-token", time.Now()))
 
@@ -167,7 +167,7 @@ func TestResolveAPIVersionWithoutToken(t *testing.T) {
 
 	got := fact.resolveAPIVersion()
 
-	assert.Equal(t, apiversion.V3, got)
+	assert.Equal(t, apiversion.V4, got, "with no credential there is no block flag, so the current generation applies")
 	assert.Empty(t, mock.Requests, "there is nothing to ask about without a credential")
 	assert.Contains(t, out.String(), "Please remember to login")
 	assert.Empty(t, readCache(t).Version, "a logged-out CLI caches nothing")
@@ -185,9 +185,10 @@ func TestCmdRootResolvesVersionAndPicksTree(t *testing.T) {
 		wantVersion apiversion.Version
 		wantWarmup  bool
 	}{
-		{"no token builds the v3 tree", "", "", apiversion.V3, false},
-		{"account with no flags builds the v3 tree", "a-token", `[]`, apiversion.V3, false},
-		{"account flagged for v4 builds the v4 tree", "a-token", `["` + apiversion.BlockAPIV3Access + `"]`, apiversion.V4, true},
+		{"no token builds the v4 tree", "", "", apiversion.V4, true},
+		{"account with no flags builds the v4 tree", "a-token", `[]`, apiversion.V4, true},
+		{"account blocked from v4 builds the v3 tree", "a-token", `["` + apiversion.BlockAPIV4IncompatibleEndpoints + `"]`, apiversion.V3, false},
+		{"account blocked from v3 builds the v4 tree", "a-token", `["` + apiversion.BlockAPIV3Access + `"]`, apiversion.V4, true},
 	}
 
 	for _, tt := range tests {
@@ -234,7 +235,7 @@ func TestAPIVersionSourceIsRecorded(t *testing.T) {
 
 	t.Run("an expired entry records the lookup and why it happened", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+		stubAccountInfo(mock, `[]`)
 		fact, _ := newRootFactory(t, mock, "a-token")
 		writeCache(t, apiversion.Refreshed(apiversion.V3, "a-token", time.Now().Add(-apiversion.TTL-time.Minute)))
 
@@ -249,7 +250,7 @@ func TestAPIVersionSourceIsRecorded(t *testing.T) {
 
 	t.Run("a changed credential is recorded as the reason", func(t *testing.T) {
 		mock := &httpmock.Registry{}
-		stubAccountInfo(mock, `[]`)
+		stubAccountInfo(mock, `["`+apiversion.BlockAPIV4IncompatibleEndpoints+`"]`)
 		fact, _ := newRootFactory(t, mock, "new-token")
 		writeCache(t, apiversion.Refreshed(apiversion.V4, "old-token", time.Now()))
 
@@ -361,7 +362,7 @@ func TestCmdRootPicksTreeFromTheTokenFlag(t *testing.T) {
 			return req.Header.Get("Authorization") == "Token flag-token" &&
 				httpmock.REST("GET", "account/info")(req)
 		},
-		httpmock.JSONFromString(`{"client_flags":["`+apiversion.BlockAPIV3Access+`"]}`),
+		httpmock.JSONFromString(`{"client_flags":[]}`),
 	)
 	// the stored credential belongs to a legacy account
 	fact, _ := newRootFactory(t, mock, "stored-token")
@@ -381,4 +382,39 @@ func TestCmdRootPicksTreeFromTheTokenFlag(t *testing.T) {
 		names[c.Name()] = true
 	}
 	assert.True(t, names["warmup"], "the v4 tree must be built for a v4 --token")
+}
+
+// A rejected credential is reported by the command being run, not by the
+// version resolver. Warning here would repeat on every invocation and point at
+// `azion profiles --refresh`, which cannot work while the credential is bad.
+func TestResolveAPIVersionStaysQuietWhenCredentialIsRejected(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	for _, status := range []int{401, 403} {
+		mock := &httpmock.Registry{}
+		mock.Register(httpmock.REST("GET", "account/info"), httpmock.StatusStringResponse(status, `{"detail":"Invalid token."}`))
+		fact, out := newRootFactory(t, mock, "expired-token")
+
+		got := fact.resolveAPIVersion()
+
+		assert.Equal(t, apiversion.V3, got)
+		assert.NotContains(t, out.String(), "could not verify which Azion API version",
+			"status %d must not print the lookup warning", status)
+		assert.Equal(t, sourceFallback, fact.apiVersionSource.source)
+	}
+}
+
+// The warning must still fire when the lookup itself could not be completed,
+// which is the case D3 narrowed it to.
+func TestResolveAPIVersionStillWarnsOnLookupFailure(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	mock := &httpmock.Registry{}
+	mock.Register(httpmock.REST("GET", "account/info"), httpmock.StatusStringResponse(500, "boom"))
+	fact, out := newRootFactory(t, mock, "a-token")
+
+	got := fact.resolveAPIVersion()
+
+	assert.Equal(t, apiversion.V3, got)
+	assert.Contains(t, out.String(), "could not verify which Azion API version")
 }

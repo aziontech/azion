@@ -11,10 +11,19 @@ package apiversion
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/davecgh/go-spew/spew"
 )
+
+// ErrUnauthorized reports that the authentication service rejected the
+// credential. The account's generation is unknowable until the credential is
+// fixed, and the command being run reports that problem in its own terms, so
+// callers should stay quiet about the version rather than add noise.
+var ErrUnauthorized = errors.New("credential rejected by the authentication service")
 
 // Version identifies a generation of the Azion API.
 //
@@ -35,15 +44,10 @@ func (v Version) String() string {
 	return string(v)
 }
 
-// Client flags that mark an account as being on API v4. Either one is
-// sufficient; accounts carrying neither stay on the legacy generation.
 const (
 	BlockAPIV4IncompatibleEndpoints = "block_apiv4_incompatible_endpoints"
 	BlockAPIV3Access                = "block_apiv3_access"
 )
-
-// V4Flags is the set of client flags that entitle an account to API v4.
-var V4Flags = []string{BlockAPIV4IncompatibleEndpoints, BlockAPIV3Access}
 
 // AccountInfo is the subset of the SSO account payload the CLI reads.
 type AccountInfo struct {
@@ -73,12 +77,21 @@ type generation struct {
 // is served the first generation it is entitled to, so adding a generation means
 // adding an entry here rather than another boolean branch.
 //
-// Entitlement to v4 is opt-in: the account must carry one of V4Flags. The legacy
-// entry is unconditional, so it is also the answer for an account with no flags.
+// v4 is the default: an account only reaches the legacy entry by carrying the
+// flag that blocks it from v4. The legacy entry is unconditional, so it is also
+// the answer when no generation above it accepts the account.
 var generations = []generation{
 	{
-		version:  V4,
-		entitled: func(info AccountInfo) bool { return info.HasAnyFlag(V4Flags...) },
+		version: V4,
+		entitled: func(info AccountInfo) bool {
+			// Being blocked from v3 is the same statement from the other side,
+			// and wins if both flags are somehow set: an account that cannot use
+			// v3 at all is only ever worse off on the legacy tree.
+			if info.HasAnyFlag(BlockAPIV3Access) {
+				return true
+			}
+			return !info.HasAnyFlag(BlockAPIV4IncompatibleEndpoints)
+		},
 	},
 	{
 		version:  V3,
@@ -90,6 +103,7 @@ var generations = []generation{
 // account is entitled to. The last entry is unconditional, so this always
 // returns a version.
 func Select(info AccountInfo) Version {
+	spew.Dump(info.ClientFlags)
 	for _, gen := range generations {
 		if gen.entitled(info) {
 			return gen.version
@@ -129,6 +143,9 @@ func FetchAccountInfo(client *http.Client, authURL, token string) (AccountInfo, 
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+			return info, fmt.Errorf("%w: %d", ErrUnauthorized, resp.StatusCode)
+		}
 		return info, fmt.Errorf("non-200 response: %d, body: %s", resp.StatusCode, string(body))
 	}
 

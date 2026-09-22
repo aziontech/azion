@@ -8,6 +8,7 @@ func (s Settings) APIVersionCache() apiversion.Cache {
 		Version:   apiversion.Version(s.APIVersion),
 		CheckedAt: s.APIVersionCheckedAt,
 		TokenHash: s.APIVersionTokenHash,
+		Epoch:     s.APIVersionEpoch,
 	}
 }
 
@@ -16,4 +17,5 @@ func (s *Settings) SetAPIVersionCache(c apiversion.Cache) {
 	s.APIVersion = c.Version.String()
 	s.APIVersionCheckedAt = c.CheckedAt
 	s.APIVersionTokenHash = c.TokenHash
+	s.APIVersionEpoch = c.Epoch
 }

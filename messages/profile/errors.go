@@ -16,4 +16,5 @@ var (
 	ErrorSetDefault          = errors.New("Failed to set profile as default: %w")
 	ErrorRefreshNoToken      = errors.New("Profile '%s' has no credential configured. Run 'azion login' before refreshing it")
 	ErrorRefreshFailed       = errors.New("Failed to check the API version for profile '%s': %w")
+	ErrorRefreshUnauthorized = errors.New("The credential configured for profile '%s' was rejected. Run 'azion login' or 'azion create profile' to configure a valid token")
 )

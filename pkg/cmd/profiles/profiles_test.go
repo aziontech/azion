@@ -51,7 +51,7 @@ func TestRefreshRecordsTheCurrentVersion(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `["`+apiversion.BlockAPIV4IncompatibleEndpoints+`"]`)
 	f, out := newFactory(t, mock)
 	seedProfile(t, token.Settings{Token: "a-token"})
 
@@ -60,10 +60,10 @@ func TestRefreshRecordsTheCurrentVersion(t *testing.T) {
 	settings, err := token.ReadSettings(testProfile)
 	require.NoError(t, err)
 	cached := settings.APIVersionCache()
-	assert.Equal(t, apiversion.V4, cached.Version)
+	assert.Equal(t, apiversion.V3, cached.Version)
 	assert.Equal(t, apiversion.TokenHash("a-token"), cached.TokenHash)
 	assert.WithinDuration(t, time.Now(), cached.CheckedAt, time.Minute)
-	assert.Contains(t, out.String(), "is on Azion API v4")
+	assert.Contains(t, out.String(), "is on Azion API v3")
 }
 
 // The point of the flag: an account that migrated should not have to wait out
@@ -72,7 +72,7 @@ func TestRefreshReportsAChangedGeneration(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `[]`)
 	f, out := newFactory(t, mock)
 	seedProfile(t, token.Settings{Token: "a-token"})
 
@@ -144,7 +144,7 @@ func TestRefreshUsesTheEffectiveCredential(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 
 	mock := &httpmock.Registry{}
-	stubAccountInfo(mock, `["`+apiversion.BlockAPIV3Access+`"]`)
+	stubAccountInfo(mock, `[]`)
 	f, _ := newFactory(t, mock)
 	f.Config.(*viper.Viper).Set("token", "env-token")
 	seedProfile(t, token.Settings{Token: "stored-token"})
