@@ -12,10 +12,10 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/storage"
-	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -58,8 +58,7 @@ func (o *object) runE(cmd *cobra.Command, args []string) error {
 		logger.Debug("Error while matching file path", zap.Error(err))
 		return err
 	}
-	client := api.NewClient(
-		o.factory.HttpClient, o.factory.Config.GetString("storage_url"), o.factory.Config.GetString("token"))
+	client := registry.Storage(o.factory)
 	err = client.UpdateObject(
 		context.Background(), o.BucketName, o.ObjectKey, mimeType.MediaType(), file)
 	if err != nil {

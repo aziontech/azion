@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -42,7 +43,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 			}
 
 			var id int64
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.RulesEngine(f)
 			switch fields.Phase {
 			case "request":
 				request := api.UpdateRulesEngineRequest{}

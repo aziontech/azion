@@ -8,13 +8,10 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
-	app "github.com/aziontech/azion-cli/pkg/api/applications"
-	connector "github.com/aziontech/azion-cli/pkg/api/connector"
-	fun "github.com/aziontech/azion-cli/pkg/api/function"
-	workload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	store "github.com/aziontech/azion-cli/pkg/cmd/delete/storage/bucket"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"go.uber.org/zap"
 )
@@ -34,10 +31,10 @@ func CascadeDelete(ctx context.Context, del *DeleteCmd) error {
 	}
 
 	// Initialize clients
-	clientapp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientfunc := fun.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientworkload := workload.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientconnector := connector.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
+	clientapp := registry.Applications(del.f)
+	clientfunc := registry.Function(del.f)
+	clientworkload := registry.Workloads(del.f)
+	clientconnector := registry.Connector(del.f)
 	storagecmd := store.NewBucket(del.f)
 
 	// Collect all errors

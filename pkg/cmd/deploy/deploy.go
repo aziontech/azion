@@ -23,6 +23,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	storagesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
@@ -195,7 +196,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if settings.S3AccessKey == "" || settings.S3SecretKey == "" {
 		bucketStart := time.Now()
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
-		storageClient := storage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+		storageClient := registry.Storage(f)
 		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: "read_only"}})
 		if err != nil {
 			return err

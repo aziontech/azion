@@ -45,7 +45,7 @@ func (fact *factoryRoot) resolveAPIVersion() apiversion.Version {
 	if status.Hit() {
 		fact.apiVersionSource = apiVersionSource{
 			source: sourceCache, version: version, status: status,
-			age: cache.Age(now), checkedAt: cache.CheckedAt,
+			age: cache.Age(now), checkedAt: cache.CheckedAt, tokenHash: cache.TokenHash,
 		}
 		return version
 	}
@@ -57,12 +57,15 @@ func (fact *factoryRoot) resolveAPIVersion() apiversion.Version {
 		if cached, ok := cache.Stale(); ok {
 			fact.apiVersionSource = apiVersionSource{
 				source: sourceStaleCache, version: cached, status: status,
-				age: cache.Age(now), checkedAt: cache.CheckedAt, err: err,
+				age: cache.Age(now), checkedAt: cache.CheckedAt, tokenHash: cache.TokenHash, err: err,
 			}
 			return cached
 		}
 
-		fact.apiVersionSource = apiVersionSource{source: sourceFallback, version: apiversion.V3, status: status, err: err}
+		fact.apiVersionSource = apiVersionSource{
+			source: sourceFallback, version: apiversion.V3, status: status,
+			tokenHash: apiversion.TokenHash(tok), err: err,
+		}
 
 		// A rejected credential is not a failed lookup: the account's generation
 		// is simply unknowable until the user logs in again, and the command
@@ -81,7 +84,7 @@ func (fact *factoryRoot) resolveAPIVersion() apiversion.Version {
 
 	fact.apiVersionSource = apiVersionSource{
 		source: sourceLookup, version: version, previous: cache.Version, status: status,
-		age: cache.Age(now), checkedAt: cache.CheckedAt,
+		age: cache.Age(now), checkedAt: cache.CheckedAt, tokenHash: apiversion.TokenHash(tok),
 	}
 	fact.cacheAPIVersion(&settings, version, tok, activeProfile)
 	return version
@@ -107,6 +110,7 @@ type apiVersionSource struct {
 	status    apiversion.CacheStatus
 	age       time.Duration
 	checkedAt time.Time
+	tokenHash string
 	err       error
 }
 
@@ -208,4 +212,49 @@ func (fact *factoryRoot) effectiveToken() string {
 		return fact.tokenFlag
 	}
 	return fact.factory.Config.GetString("token")
+}
+
+// credentialStatus is what the API version lookup already established about the
+// credential, before any command asks about it separately.
+type credentialStatus int
+
+const (
+	// credentialUnknown means nothing usable was established and the credential
+	// has to be checked on its own.
+	credentialUnknown credentialStatus = iota
+	// credentialAccepted means the authentication service accepted it, either
+	// on this invocation or within the cache TTL.
+	credentialAccepted
+	// credentialRejected means the service refused it.
+	credentialRejected
+)
+
+// credentialStatusFor reports what resolving the API version already proved
+// about the given credential.
+//
+// Resolution authenticates against the same service with the same token, so a
+// successful lookup is itself a validation, and a cached result is one that was
+// valid within apiversion.TTL. That is what lets the CLI stop validating the
+// token on every single invocation.
+//
+// The answer only counts for the credential the lookup actually used: with a
+// different token in play the caller has to check for itself.
+func (fact *factoryRoot) credentialStatusFor(tok string) credentialStatus {
+	src := fact.apiVersionSource
+	if src.source == "" || tok == "" || src.tokenHash != apiversion.TokenHash(tok) {
+		return credentialUnknown
+	}
+
+	switch src.source {
+	case sourceCache, sourceLookup:
+		return credentialAccepted
+	case sourceFallback:
+		if errors.Is(src.err, apiversion.ErrUnauthorized) {
+			return credentialRejected
+		}
+	}
+
+	// sourceStaleCache means the service could not be reached, so nothing new
+	// was established about the credential.
+	return credentialUnknown
 }

@@ -17,6 +17,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +51,7 @@ func NewCobraCmd(list *ListCmd, f *cmdutil.Factory) *cobra.Command {
 			$ azion list variables
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.Variables(f)
 
 			if err := list.ListAllVariables(context.Background(), client, f, opts); err != nil {
 				return err

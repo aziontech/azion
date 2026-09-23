@@ -12,11 +12,11 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
-	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -51,7 +51,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create cache-setting --application-id 1673635839 --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.CacheSettings(f)
 
 			request := sdk.CacheSettingRequest{}
 

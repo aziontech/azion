@@ -12,6 +12,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/crl"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -40,7 +41,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create crl --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.CRL(f)
 			ctx := context.Background()
 
 			req := api.NewCreateRequest()

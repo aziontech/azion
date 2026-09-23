@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListCaches: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (api.GetResponseV4, error) {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.CacheSettings(f)
 			return client.List(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {

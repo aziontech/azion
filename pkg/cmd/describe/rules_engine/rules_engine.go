@@ -13,6 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -36,11 +37,11 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		GetRulesEngineRequest: func(ctx context.Context, appID, ruleID int64) (api.RulesEngineResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			return client.GetRulesEngineRequest(ctx, appID, ruleID)
 		},
 		GetRulesEngineResponse: func(ctx context.Context, appID, ruleID int64) (api.RulesEngineResponse, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			return client.GetRulesEngineResponse(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,

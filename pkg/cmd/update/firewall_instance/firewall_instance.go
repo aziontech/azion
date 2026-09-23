@@ -16,6 +16,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -112,7 +113,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.FirewallInstance(f)
 			response, err := client.Update(context.Background(), fields.FirewallID, fields.InstanceID, request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorUpdate.Error(), err)

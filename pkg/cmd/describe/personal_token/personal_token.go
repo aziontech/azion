@@ -9,11 +9,11 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/personal_token"
 
-	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/personal_tokens"
 	"github.com/spf13/cobra"
@@ -33,7 +33,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		Get: func(ctx context.Context, id string) (*sdk.PersonalTokenResponseGet, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.PersonalToken(f)
 			return client.Get(ctx, id)
 		},
 	}

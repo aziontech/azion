@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -48,10 +49,7 @@ func (b *bucket) runE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	client := api.NewClient(
-		b.factory.HttpClient,
-		b.factory.Config.GetString("storage_url"),
-		b.factory.Config.GetString("token"))
+	client := registry.Storage(b.factory)
 	err := client.UpdateBucket(context.Background(), request.GetName(), request.GetWorkloadsAccess())
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_UPDATE_BUCKET, err)

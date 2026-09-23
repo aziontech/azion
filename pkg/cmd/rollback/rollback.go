@@ -8,11 +8,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/rollback"
 	apiConnector "github.com/aziontech/azion-cli/pkg/api/connector"
-	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -84,7 +84,7 @@ func NewCobraCmd(rollback *RollbackCmd, f *cmdutil.Factory) *cobra.Command {
 
 			logger.Debug("Rolling back to previous timestamp", zap.String("from", conf.Prefix), zap.String("to", timestamp))
 
-			clientConnector := apiConnector.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			clientConnector := registry.Connector(f)
 			request := apiConnector.UpdateRequest{}
 
 			attributes := sdk.ConnectorStorageAttributesRequest{}
@@ -130,7 +130,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName string) (string, error) {
 	logger.Debug("Checking if there are previous static files for the following bucket", zap.Any("Bucket name", bucketName))
-	client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+	client := registry.Storage(f)
 	c := context.Background()
 
 	var prevTimestamp string

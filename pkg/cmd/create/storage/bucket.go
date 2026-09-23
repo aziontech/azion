@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -50,7 +51,7 @@ func (fields *FieldsBucket) RunE(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
-	client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+	client := registry.Storage(f)
 	err := client.CreateBucket(context.Background(), request)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_CREATE_BUCKET, err)

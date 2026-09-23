@@ -9,12 +9,12 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/workload_deployment"
-	api "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -145,7 +145,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				request.Strategy = strategy
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Workloads(f)
 			response, err := client.CreateDeployment(context.Background(), request, fields.WorkloadID)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateWorkloadDeployment.Error(), err)

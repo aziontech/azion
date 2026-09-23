@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/root"
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
@@ -143,6 +144,24 @@ func checkTokenNotExpired(cmd *cobra.Command, fact *factoryRoot, tokenStr *token
 	}
 
 	activeProfile := fact.factory.GetActiveProfile()
+
+	// Resolving the API version authenticates against the same service with the
+	// same credential, and that result is cached for 24h. Reuse it instead of
+	// spending a second round trip on every invocation.
+	switch fact.credentialStatusFor(fact.globalSettings.Token) {
+	case credentialAccepted:
+		logger.Debug("Skipping token validation, the API version lookup already accepted this credential",
+			zap.String("profile", activeProfile),
+			zap.String("source", string(fact.apiVersionSource.source)),
+			zap.Duration("age", fact.apiVersionSource.age),
+			zap.Duration("ttl", apiversion.TTL))
+		return nil
+	case credentialRejected:
+		logger.Debug("The configured token was refused by the authentication service",
+			zap.String("profile", activeProfile))
+		return utils.ErrorToken401
+	}
+
 	logger.Debug("Checking if the configured token is still valid", zap.String("profile", activeProfile), zap.String("command", command))
 
 	valid, _, err := tokenStr.Validate(&fact.globalSettings.Token)

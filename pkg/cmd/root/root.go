@@ -49,7 +49,6 @@ import (
 	//v3 imports
 	v3rollback "github.com/aziontech/azion-cli/pkg/cmd/rollback"
 	v3buildCmd "github.com/aziontech/azion-cli/pkg/v3commands/build"
-	v3completion "github.com/aziontech/azion-cli/pkg/v3commands/completion"
 	v3create "github.com/aziontech/azion-cli/pkg/v3commands/create"
 	v3delete "github.com/aziontech/azion-cli/pkg/v3commands/delete"
 	v3deploycmd "github.com/aziontech/azion-cli/pkg/v3commands/deploy"
@@ -60,14 +59,11 @@ import (
 	v3list "github.com/aziontech/azion-cli/pkg/v3commands/list"
 	v3login "github.com/aziontech/azion-cli/pkg/v3commands/login"
 	v3logout "github.com/aziontech/azion-cli/pkg/v3commands/logout"
-	v3logcmd "github.com/aziontech/azion-cli/pkg/v3commands/logs"
 	v3purge "github.com/aziontech/azion-cli/pkg/v3commands/purge"
 	v3reset "github.com/aziontech/azion-cli/pkg/v3commands/reset"
 	v3sync "github.com/aziontech/azion-cli/pkg/v3commands/sync"
 	v3unlink "github.com/aziontech/azion-cli/pkg/v3commands/unlink"
 	v3update "github.com/aziontech/azion-cli/pkg/v3commands/update"
-	v3version "github.com/aziontech/azion-cli/pkg/v3commands/version"
-	v3whoami "github.com/aziontech/azion-cli/pkg/v3commands/whoami"
 )
 
 const PREFIX_FLAG = "--"
@@ -137,13 +133,13 @@ func (fact *factoryRoot) setFlags(cobraCmd *cobra.Command) {
 
 func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(v3initcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3logcmd.NewCmd(fact.factory))
+	cobraCmd.AddCommand(logcmd.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3deploycmd.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3buildCmd.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3devcmd.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3linkcmd.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3unlink.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3completion.NewCmd(fact.factory))
+	cobraCmd.AddCommand(completion.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3describe.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3login.New(fact.factory))
 	cobraCmd.AddCommand(v3logout.NewCmd(fact.factory))
@@ -151,8 +147,8 @@ func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(v3list.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3delete.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3update.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3version.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3whoami.NewCmd(fact.factory))
+	cobraCmd.AddCommand(version.NewCmd(fact.factory))
+	cobraCmd.AddCommand(whoami.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3purge.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3sync.NewCmd(fact.factory))

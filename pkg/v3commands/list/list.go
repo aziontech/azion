@@ -3,13 +3,13 @@ package list
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list"
+	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
 	cache "github.com/aziontech/azion-cli/pkg/v3commands/list/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/v3commands/list/edge_applications"
 	function "github.com/aziontech/azion-cli/pkg/v3commands/list/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/v3commands/list/edge_storage"
 	origin "github.com/aziontech/azion-cli/pkg/v3commands/list/origin"
-	token "github.com/aziontech/azion-cli/pkg/v3commands/list/personal_token"
 	rule "github.com/aziontech/azion-cli/pkg/v3commands/list/rule_engine"
 	"github.com/aziontech/azion-cli/pkg/v3commands/list/variables"
 

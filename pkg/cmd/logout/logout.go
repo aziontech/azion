@@ -6,10 +6,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/logout"
-	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/spf13/cobra"
 )
@@ -27,7 +27,7 @@ func NewLogoutCmd(f *cmdutil.Factory) *LogoutCmd {
 		ReadSettings:  token.ReadSettings,
 		WriteSettings: token.WriteSettings,
 		DeleteToken: func(ctx context.Context, uuid string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.PersonalToken(f)
 			return client.Delete(ctx, uuid)
 		},
 	}

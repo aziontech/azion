@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
@@ -81,7 +82,7 @@ func (cmd *DeployCmd) doBucket(
 func CreateBucketCredentials(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error) {
 	logger.Debug("Creating S3 credentials for bucket")
 
-	storageClient := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+	storageClient := registry.Storage(f)
 
 	// Get the current time
 	now := time.Now()

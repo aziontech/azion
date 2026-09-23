@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 )
 
 type Bucket struct {
@@ -42,10 +43,7 @@ func NewBucket(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (b *Bucket) RunE(cmd *cobra.Command, args []string) error {
-	client := api.NewClient(
-		b.Factory.HttpClient,
-		b.Factory.Config.GetString("storage_url"),
-		b.Factory.Config.GetString("token"))
+	client := registry.Storage(b.Factory)
 	return b.PrintTable(client)
 }
 
