@@ -58,9 +58,7 @@ import (
 	v3linkcmd "github.com/aziontech/azion-cli/pkg/v3commands/link"
 	v3list "github.com/aziontech/azion-cli/pkg/v3commands/list"
 	v3login "github.com/aziontech/azion-cli/pkg/v3commands/login"
-	v3logout "github.com/aziontech/azion-cli/pkg/v3commands/logout"
 	v3purge "github.com/aziontech/azion-cli/pkg/v3commands/purge"
-	v3reset "github.com/aziontech/azion-cli/pkg/v3commands/reset"
 	v3sync "github.com/aziontech/azion-cli/pkg/v3commands/sync"
 	v3unlink "github.com/aziontech/azion-cli/pkg/v3commands/unlink"
 	v3update "github.com/aziontech/azion-cli/pkg/v3commands/update"
@@ -142,7 +140,7 @@ func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(completion.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3describe.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3login.New(fact.factory))
-	cobraCmd.AddCommand(v3logout.NewCmd(fact.factory))
+	cobraCmd.AddCommand(logout.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3create.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3list.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3delete.NewCmd(fact.factory))
@@ -150,7 +148,7 @@ func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
 	cobraCmd.AddCommand(version.NewCmd(fact.factory))
 	cobraCmd.AddCommand(whoami.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3purge.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3reset.NewCmd(fact.factory))
+	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3sync.NewCmd(fact.factory))
 	cobraCmd.AddCommand(v3rollback.NewCmd(fact.factory))
 	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))

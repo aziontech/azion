@@ -4,6 +4,7 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list"
 	token "github.com/aziontech/azion-cli/pkg/cmd/list/personal_token"
+	"github.com/aziontech/azion-cli/pkg/cmd/list/variables"
 	cache "github.com/aziontech/azion-cli/pkg/v3commands/list/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/list/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/v3commands/list/edge_applications"
@@ -11,7 +12,6 @@ import (
 	edgeStorage "github.com/aziontech/azion-cli/pkg/v3commands/list/edge_storage"
 	origin "github.com/aziontech/azion-cli/pkg/v3commands/list/origin"
 	rule "github.com/aziontech/azion-cli/pkg/v3commands/list/rule_engine"
-	"github.com/aziontech/azion-cli/pkg/v3commands/list/variables"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
