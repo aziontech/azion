@@ -2,6 +2,7 @@ package firewallinstance
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetFirewallFunctionInstance       = "failed to describe the Firewall Function Instance: %s"
 	ErrorConvertFirewallId                 = errors.New("invalid Firewall ID. The value must be an integer")

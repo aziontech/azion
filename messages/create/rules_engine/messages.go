@@ -1,11 +1,11 @@
 package rules_engine
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage                 = "rules-engine"
 	ShortDescription      = "Creates a rule in Rules Engine"
 	LongDescription       = "Creates a rule in Rules Engine based on given attributes to be used in Applications"
 	FlagEdgeApplicationID = "Unique identifier for an Application"
-	FlagName              = "The rule name"
 	FlagPhase             = "The phase is either 'request' or 'response'"
 	FlagFile              = "Path to a JSON file containing the attributes of the rule that will be created; you can use - for reading from stdin"
 	OutputSuccess         = "Created Rules Engine with ID %d"

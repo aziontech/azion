@@ -2,9 +2,7 @@ package warmup
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
-	ErrorInvalidUrl        = errors.New("Invalid URL provided. URL must be a valid HTTP/HTTPS URL")
-	ErrorMaxUrlsExceeded   = errors.New("Maximum number of URLs exceeded")
-	ErrorRequestTimeout    = errors.New("Request timed out")
-	ErrorProcessingFailed  = errors.New("Failed to process URL")
-) 
+	ErrorInvalidUrl = errors.New("Invalid URL provided. URL must be a valid HTTP/HTTPS URL")
+)

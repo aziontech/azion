@@ -1,23 +1,15 @@
 package variables
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage = "variables"
 
-	// [ variables ]
-	ShortDescription = "Manages your environment variables and secrets"
-	LongDescription  = "Manages your environment variables and secrets to be used inside Functions"
-	FlagHelp         = "Displays more information about the variables command"
-	FlagVariableID   = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
+	FlagVariableID = "Unique identifier for a variable. The '--variable-id' flag is mandatory"
 
 	// [ describe ]
 	DescribeShortDescription = "Returns the specific variable's key and value"
 	DescribeLongDescription  = "Displays information about a variable based on a given UUID to show the variable's attributes in detail"
-	DescribeFlagOut          = "Exports the output to the given filepath, such as: <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe subcommand"
-
-	// [ general ]
-	FileWritten = "File successfully written to: %s\n"
 
 	// [ list ]
 	VariablesListShortDescription = "Displays your variables in a list"

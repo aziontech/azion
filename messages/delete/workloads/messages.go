@@ -1,5 +1,6 @@
 package workloads
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "workload"
 	ShortDescription = "Deletes a Workload"

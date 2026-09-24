@@ -1,11 +1,9 @@
 package streams
 
+// Used only by the v4 command tree.
 var (
 	// general
-	Usage            = "streams"
-	FileWritten      = "File successfully written to: %s\n"
-	ShortDescription = "Manages your Data Stream streams"
-	LongDescription  = "Manages the Data Stream streams used to send your data to external endpoints and analytics tools"
+	Usage = "streams"
 
 	// create cmd
 	CreateShortDescription = "Creates a new stream"
@@ -22,8 +20,6 @@ var (
 	// describe cmd
 	DescribeShortDescription = "Returns the stream data"
 	DescribeLongDescription  = "Displays information about the stream via a given ID to show its attributes in detail"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe streams command"
 
 	// list cmd

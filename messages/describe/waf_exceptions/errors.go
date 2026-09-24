@@ -2,6 +2,7 @@ package wafexceptions
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetWafException    = "failed to describe the WAF Exception: %s"
 	ErrorConvertWafID       = errors.New("invalid WAF ID. The value must be an integer")

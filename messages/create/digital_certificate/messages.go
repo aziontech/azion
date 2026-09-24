@@ -1,5 +1,6 @@
 package digitalcertificate
 
+// Used only by the v4 command tree.
 var (
 	Usage                  = "digital-certificate"
 	CreateShortDescription = "Creates a Digital Certificate"
@@ -20,10 +21,7 @@ var (
 	FlagAlternativeNames = "Comma-separated list of Subject Alternative Names (SANs) for the requested certificate"
 	FlagKeyAlgorithm     = "Key algorithm used to generate the certificate (rsa_2048, rsa_4096, or ecc_384)"
 
-	AskName            = "Enter the Digital Certificate's name:"
-	AskCertificate     = "Enter the path to the certificate file:"
-	AskPrivateKey      = "Enter the path to the private key file:"
-	AskCertificateType = "Enter the Digital Certificate's type:"
-	AskChallenge       = "Enter the ACME challenge method (dns or http):"
-	AskCommonName      = "Enter the Common Name (CN) of the certificate:"
+	AskName       = "Enter the Digital Certificate's name:"
+	AskChallenge  = "Enter the ACME challenge method (dns or http):"
+	AskCommonName = "Enter the Common Name (CN) of the certificate:"
 )

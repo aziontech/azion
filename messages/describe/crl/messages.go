@@ -1,5 +1,6 @@
 package crl
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "crl"
 	ShortDescription = "Returns the Certificate Revocation List data"

@@ -1,5 +1,6 @@
 package networklist
 
+// Used only by the v4 command tree.
 var (
 	Usage = "network-list"
 
@@ -31,7 +32,6 @@ var (
 	AskName          = "Enter the Network List's name:"
 	AskType          = "Select the Network List type:"
 	AskItems         = "Enter the items (comma-separated):"
-	AskActive        = "Should the Network List be active?"
 
 	FlagID         = "Unique identifier of the Network List"
 	FlagName       = "Name of the Network List"

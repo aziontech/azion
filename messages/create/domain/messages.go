@@ -1,5 +1,6 @@
 package domain
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage                    = "domain"
 	ShortDescription         = "Creates a new Domain"

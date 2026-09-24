@@ -1,5 +1,6 @@
 package waf
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "waf"
 	ShortDescription = "Deletes a WAF"

@@ -1,5 +1,6 @@
 package workloaddeployments
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "workload-deployment"
 	ShortDescription = "Displays your Workload Deployments"

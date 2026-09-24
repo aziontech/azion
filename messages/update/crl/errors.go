@@ -2,6 +2,7 @@ package crl
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorUpdateCRL    = errors.New("Failed to update the Certificate Revocation List: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorActiveFlag   = errors.New("Invalid value for --active flag")

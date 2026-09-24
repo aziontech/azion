@@ -2,6 +2,7 @@ package root
 
 import "errors"
 
+// Used by both the v3 and the v4 command trees.
 var (
 	ErrorCurrentUser          = errors.New("Failed to get current user's information.")
 	ErrorMarshalUserInfo      = errors.New("Failed to marshal current user information.")

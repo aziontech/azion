@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetDNSZone    = errors.New("Failed to describe the DNS zone: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorCreateDNSZone = errors.New("Failed to create the DNS zone: %s. Check your settings and try again. If the error persists, contact Azion support.")

@@ -1,5 +1,6 @@
 package firewallrules
 
+// Used only by the v4 command tree.
 var (
 	Usage              = "firewall-rule"
 	ShortDescription   = "Returns details about a specific Firewall Rule"

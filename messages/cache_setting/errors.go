@@ -4,32 +4,29 @@ import (
 	"errors"
 )
 
+// Used by both the v3 and the v4 command trees.
 var (
-	ErrorGetCaches          = errors.New("Failed to list your Cache Settings configurations. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorGetCache           = errors.New("Failed to get Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorMandatoryListFlags = errors.New("A Required flag is missing. You must provide the application-id flag. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorGetCaches                = errors.New("Failed to list your Cache Settings configurations. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorGetCache                 = errors.New("Failed to get Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorCachingForOptionsFlag    = errors.New("Invalid --enable-caching-for-options flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorCachingForPostFlag       = errors.New("Invalid --enable-caching-for-post flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorCachingStringSortFlag    = errors.New("Invalid --enable-caching-string-sort flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorCreateCacheSettings      = errors.New("Failed to create the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorBrowserMaximumTtlNotSent = errors.New("When browser Cache Settings is 'override' you must inform the --browser-cache-max-age flag.")
+	ErrorFailToDelete             = errors.New("Failed to delete the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
+	ErrorConvertIdApplication     = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list application' command to check your application ID")
+)
 
-	ErrorMandatoryCreateFlags   = errors.New("Required flags are missing. You must provide the application-id and name flags when --in flag is not provided. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorMandatoryCreateFlagsIn = errors.New("A required flag is missing. You must provide the application-id flag when the --in flag is provided. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorCachingForOptionsFlag  = errors.New("Invalid --enable-caching-for-options flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorCachingForPostFlag     = errors.New("Invalid --enable-caching-for-post flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorCachingStringSortFlag  = errors.New("Invalid --enable-caching-string-sort flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorSliceConfigurationFlag = errors.New("Invalid --slice-configuration-enable flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorSliceL2CachingFlag     = errors.New("Invalid --slice-l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorTieredCachingFlag      = errors.New("Invalid --tiered-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorL2CachingEnabledFlag   = errors.New("Invalid --l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+// Used only by the v4 command tree.
+var (
+	ErrorTieredCachingFlag   = errors.New("Invalid --tiered-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorUpdateCacheSettings = errors.New("Failed to update the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
+)
 
-	ErrorCreateCacheSettings               = errors.New("Failed to create the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorUpdateCacheSettings               = errors.New("Failed to update the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
-	ErrorBrowserMaximumTtlNotSent          = errors.New("When browser Cache Settings is 'override' you must inform the --browser-cache-max-age flag.")
+// Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
+var (
+	ErrorSliceConfigurationFlag            = errors.New("Invalid --slice-configuration-enable flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorSliceL2CachingFlag                = errors.New("Invalid --slice-l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
+	ErrorL2CachingEnabledFlag              = errors.New("Invalid --l2-caching-enabled flag provided. The value must be either 'true' or 'false'. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
 	ErrorApplicationAccelerationNotEnabled = errors.New("When --enable-caching-string-sort, --enable-caching-for-post or --enable-caching-for-options is sent, application acceleration must be enabled.")
-
-	ErrorMissingArguments = errors.New("Required flags are missing. You must supply application-id and cache-settings-id as arguments. Run 'azion <command> <subcommand> --help' command to display more information and try again.")
-
-	ErrorFailToDelete = errors.New("Failed to delete the Cache Settings configuration: %s. Check your settings and try again. If the error persists, contact Azion support.")
-
-	ErrorMandatoryUpdateFlags   = errors.New("Required flags are missing. You must provide the application-id and cache-settings-id flags when --in flag is not provided. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-	ErrorMandatoryUpdateInFlags = errors.New("Required flags are missing. You must provide the application-id flag when --in flag is not provided. Run the command 'azion <command> <subcommand> --help' to display more information and try again.")
-
-	ErrorConvertIdApplication = errors.New("The application ID you provided is invalid. The value must be an integer. You may run the 'azion list application' command to check your application ID")
 )

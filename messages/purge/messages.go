@@ -1,5 +1,6 @@
 package purge
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "purge"
 	ShortDescription = "Removes cache object before time-out"

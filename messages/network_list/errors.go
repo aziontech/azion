@@ -2,6 +2,7 @@ package networklist
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetNetworkLists         = errors.New("Failed to list your network lists. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorFailToDeleteNetworkList = errors.New("Failed to delete Network List: %w")

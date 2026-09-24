@@ -2,6 +2,7 @@ package workloads
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorUpdateDomain      = errors.New("Failed to update the Workload: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorActiveFlag        = errors.New("Invalid --active flag provided. The flag must have  'true' or 'false' values. Run the command 'azion update workload --help' to display more information and try again.")

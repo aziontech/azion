@@ -1,5 +1,6 @@
 package waf
 
+// Used only by the v4 command tree.
 var (
 	Usage                  = "waf"
 	CreateShortDescription = "Creates a WAF"
@@ -17,6 +18,5 @@ var (
 	FlagRulesets      = "Comma-separated list of ruleset IDs to enable"
 	FlagThresholds    = "Comma-separated list of threat=sensitivity pairs"
 
-	AskName   = "Enter the WAF's name:"
-	AskActive = "Is the WAF active?"
+	AskName = "Enter the WAF's name:"
 )

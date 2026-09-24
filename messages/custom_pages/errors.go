@@ -2,6 +2,7 @@ package custompages
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetCustomPage          = errors.New("Failed to get the Custom Page: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorGetCustomPages         = errors.New("Failed to list the Custom Pages: %s. Check your settings and try again. If the error persists, contact Azion support")

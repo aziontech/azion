@@ -1,29 +1,18 @@
 package dns_zone
 
+// Used only by the v4 command tree.
 var (
 	// [ dns zone ]
-	DNSZoneUsage            = "dns-zone"
-	DNSZoneShortDescription = "Manages Intelligent DNS zones"
-	DNSZoneLongDescription  = "Intelligent DNS zones allow you to host and manage your domain's DNS records on Azion's edge network."
-	DNSZoneFlagHelp         = "Displays more information about the dns-zone command"
+	DNSZoneUsage = "dns-zone"
 
-	// [ list ]
-	DNSZoneListUsage            = "list [flags]"
 	DNSZoneListShortDescription = "Displays your DNS zones"
 	DNSZoneListLongDescription  = "Displays all DNS zones in your account"
 	DNSZoneListHelpFlag         = "Displays more information about the list subcommand"
 
-	// [ describe ]
-	DNSZoneDescribeUsage            = "describe --zone-id <zone_id> [flags]"
 	DNSZoneDescribeShortDescription = "Returns the information related to a specific DNS zone"
 	DNSZoneDescribeLongDescription  = "Returns the information related to a specific DNS zone, informed through the flag '--zone-id', in detail"
-	DNSZoneDescribeFlagOut          = "Exports the output of the subcommand 'describe' to the given file path <file_path/file_name.ext>"
-	DNSZoneDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	DNSZoneDescribeHelpFlag         = "Displays more information about the describe subcommand"
-	DNSZoneFileWritten              = "File successfully written to: %s\n"
 
-	// [ create ]
-	DNSZoneCreateUsage            = "create [flags]"
 	DNSZoneCreateShortDescription = "Creates a new DNS zone"
 	DNSZoneCreateLongDescription  = "Creates a DNS zone based on given attributes"
 	DNSZoneCreateFlagName         = "The name of your DNS zone"
@@ -33,8 +22,6 @@ var (
 	DNSZoneCreateOutputSuccess    = "Created DNS zone with ID %d\n"
 	DNSZoneCreateHelpFlag         = "Displays more information about the create subcommand"
 
-	// [ update ]
-	DNSZoneUpdateUsage            = "update [flags]"
 	DNSZoneUpdateShortDescription = "Updates a DNS zone"
 	DNSZoneUpdateLongDescription  = "Updates a DNS zone based on given attributes"
 	DNSZoneUpdateFlagName         = "The name of your DNS zone"
@@ -43,8 +30,6 @@ var (
 	DNSZoneUpdateOutputSuccess    = "DNS zone %d was updated\n"
 	DNSZoneUpdateHelpFlag         = "Displays more information about the update subcommand"
 
-	// [ delete ]
-	DNSZoneDeleteUsage            = "delete [flags]"
 	DNSZoneDeleteShortDescription = "Deletes a DNS zone"
 	DNSZoneDeleteLongDescription  = "Deletes a DNS zone based on the given '--zone-id'"
 	DNSZoneDeleteOutputSuccess    = "DNS zone %d was successfully deleted\n"

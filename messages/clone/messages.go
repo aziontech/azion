@@ -1,5 +1,6 @@
 package clone
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "clone <subcommand> [flags]"
 	ShortDescription = "Clones a resource"

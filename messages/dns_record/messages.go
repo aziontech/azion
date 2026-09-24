@@ -1,29 +1,18 @@
 package dns_record
 
+// Used only by the v4 command tree.
 var (
 	// [ dns record ]
-	DNSRecordUsage            = "dns-record"
-	DNSRecordShortDescription = "Manages records of an Intelligent DNS zone"
-	DNSRecordLongDescription  = "Manages the DNS records hosted in a specific Intelligent DNS zone on Azion's edge network."
-	DNSRecordFlagHelp         = "Displays more information about the dns-record command"
+	DNSRecordUsage = "dns-record"
 
-	// [ list ]
-	DNSRecordListUsage            = "list [flags]"
 	DNSRecordListShortDescription = "Displays the records of a DNS zone"
 	DNSRecordListLongDescription  = "Displays all records related to a specific DNS zone"
 	DNSRecordListHelpFlag         = "Displays more information about the list subcommand"
 
-	// [ describe ]
-	DNSRecordDescribeUsage            = "describe --zone-id <zone_id> --record-id <record_id> [flags]"
 	DNSRecordDescribeShortDescription = "Returns the information related to a specific DNS record"
 	DNSRecordDescribeLongDescription  = "Returns the information related to a specific DNS record, informed through the flag '--record-id', in detail"
-	DNSRecordDescribeFlagOut          = "Exports the output of the subcommand 'describe' to the given file path <file_path/file_name.ext>"
-	DNSRecordDescribeFlagFormat       = "Changes the output format passing the json value to the flag. Example '--format json'"
 	DNSRecordDescribeHelpFlag         = "Displays more information about the describe subcommand"
-	DNSRecordFileWritten              = "File successfully written to: %s\n"
 
-	// [ create ]
-	DNSRecordCreateUsage            = "create [flags]"
 	DNSRecordCreateShortDescription = "Creates a new DNS record"
 	DNSRecordCreateLongDescription  = "Creates a DNS record in a given DNS zone based on given attributes"
 	DNSRecordCreateFlagName         = "The name (entry) of the DNS record"
@@ -37,8 +26,6 @@ var (
 	DNSRecordCreateOutputSuccess    = "Created DNS record with ID %d\n"
 	DNSRecordCreateHelpFlag         = "Displays more information about the create subcommand"
 
-	// [ update ]
-	DNSRecordUpdateUsage            = "update [flags]"
 	DNSRecordUpdateShortDescription = "Updates a DNS record"
 	DNSRecordUpdateLongDescription  = "Updates a DNS record based on given attributes"
 	DNSRecordUpdateFlagName         = "The name (entry) of the DNS record"
@@ -52,8 +39,6 @@ var (
 	DNSRecordUpdateOutputSuccess    = "DNS record %d was updated\n"
 	DNSRecordUpdateHelpFlag         = "Displays more information about the update subcommand"
 
-	// [ delete ]
-	DNSRecordDeleteUsage            = "delete [flags]"
 	DNSRecordDeleteShortDescription = "Deletes a DNS record"
 	DNSRecordDeleteLongDescription  = "Deletes a DNS record based on the given '--zone-id' and '--record-id'"
 	DNSRecordDeleteOutputSuccess    = "DNS record %d was successfully deleted\n"

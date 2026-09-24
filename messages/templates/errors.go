@@ -2,6 +2,7 @@ package templates
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetTemplate          = errors.New("Failed to get the template: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorGetTemplates         = errors.New("Failed to list the templates: %s. Check your settings and try again. If the error persists, contact Azion support")

@@ -1,5 +1,6 @@
 package origins
 
+// Used by both the v3 and the v4 command trees.
 var (
 	// [ origins ]
 	Usage = "origin"
@@ -21,22 +22,18 @@ var (
 	// [describe]
 	DescribeShortDescription = "Returns information about a specific Origin"
 	DescribeLongDescription  = "Returns information about a specific Origin, based on a given ID, in details"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe Origin command"
 
 	// [list]
-	ListShortDescription      = "Displays your origins"
-	ListLongDescription       = "Displays all origins related to your applications"
-	ListHelpFlag              = "Displays more information about the list Origin command"
-	ListAskInputApplicationId = "Enter the ID of the Application the Origins are linked to:"
+	ListShortDescription = "Displays your origins"
+	ListLongDescription  = "Displays all origins related to your applications"
+	ListHelpFlag         = "Displays more information about the list Origin command"
 
 	// [update]
-	UpdateShortDescription      = "Updates an Origin"
-	UpdateLongDescription       = "Updates an Origin based on its key and given attributes"
-	UpdateFlagEdgeApplicationId = "Unique identifier for an Application"
-	UpdateFlagHelp              = "Displays more information about the update Origin command"
-	UpdateOutputSuccess         = "Updated Origin with key %s"
+	UpdateShortDescription = "Updates an Origin"
+	UpdateLongDescription  = "Updates an Origin based on its key and given attributes"
+	UpdateFlagHelp         = "Displays more information about the update Origin command"
+	UpdateOutputSuccess    = "Updated Origin with key %s"
 
 	// [ ask ]
 	AskAppID      = "Enter the ID of the Application this Origin is linked to:"
@@ -66,5 +63,4 @@ var (
 	FlagPrefixUpdate         = "The Origin's prefix"
 	FlagHmacSecretKey        = "Informs Hmac Secret Key"
 	FlagFile                 = "Path to a JSON file containing the attributes of the Origin that will be created; you can use - for reading from stdin"
-	OriginsFileWritten       = "File successfully written to: %s\n"
 )

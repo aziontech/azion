@@ -1,5 +1,6 @@
 package presets
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "presets"
 	ShortDescription = "Displays the available presets in a list"

@@ -1,5 +1,6 @@
 package describe
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "describe <subcommand> [flags]"
 	ShortDescription = "Displays information related to a service or resource"

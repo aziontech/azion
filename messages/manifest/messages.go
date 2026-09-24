@@ -1,27 +1,20 @@
 package manifest
 
+// Used by both the v3 and the v4 command trees.
 const (
-	CREATING             = "Azion CLI was unable to find an azion.json file, thus we will create new resources\n"
-	ManifestUpdateCache  = "Cache Setting %s with id %d successfully updated\n"
-	ManifestUpdateRule   = "Rule Engine %s with id %d successfully updated\n"
-	ManifestCreateCache  = "Cache Setting %s with id %d successfully created\n"
-	ManifestCreateRule   = "Rule Engine %s with id %d successfully created\n"
-	ManifestOrderRule    = "Rules Engine of Application with id %d successfully ordered (%s phase)\n"
-	ManifestCreateOrigin = "Origin %s with id %d successfully created\n"
-	ManifestUpdateOrigin = "Origin %s with key %s successfully updated\n"
-	ManifestUpdateDomain = "Domain %s with id %s successfully updated\n"
-	ManifestCreateDomain = "Domain %s with id %d successfully created\n"
-	ReadingManifest      = "Reading manifest.json file\n"
-	CreatingManifest     = "Creating resources found in manifest.json file\n"
-	SkipDeletion         = "Skipping deletion of resources based on configuration found on azion.json file\n"
-	// Name in use messages
-	ResourceNameInUse                      = "This resource's name is already in use, please try another one\n"
+	ManifestUpdateCache                    = "Cache Setting %s with id %d successfully updated\n"
+	ManifestUpdateRule                     = "Rule Engine %s with id %d successfully updated\n"
+	ManifestCreateCache                    = "Cache Setting %s with id %d successfully created\n"
+	ManifestCreateRule                     = "Rule Engine %s with id %d successfully created\n"
+	ManifestOrderRule                      = "Rules Engine of Application with id %d successfully ordered (%s phase)\n"
+	ReadingManifest                        = "Reading manifest.json file\n"
+	CreatingManifest                       = "Creating resources found in manifest.json file\n"
+	SkipDeletion                           = "Skipping deletion of resources based on configuration found on azion.json file\n"
 	AppInUse                               = "This Application's name is already in use, please try another one\n"
 	FunctionInUse                          = "This Function's name is already in use, please try another one\n"
 	WorkloadInUse                          = "This Workload's name is already in use, please try another one\n"
 	FirewallInUse                          = "This Firewall's name is already in use, please try another one\n"
 	AskInputName                           = "Type the new name:"
-	NameInUseApplication                   = "Application name is already in use. Trying to create Application with the following name: %s\n"
 	ManifestCreateFirewall                 = "Firewall %s with id %d successfully created\n"
 	ManifestUpdateFirewall                 = "Firewall %s with id %d successfully updated\n"
 	ManifestCreateFirewallRule             = "Firewall Rule %s with id %d successfully created\n"
@@ -48,4 +41,10 @@ const (
 One cause may be that the resource is not being used in any rule.
 To avoid deleting resources that are not being used, you can add the field 'skip-deletion' to your azion.json file.`
 	UpdateAzionConfig = "Updating azion.config file with new resource name\n"
+)
+
+// Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
+const (
+	ManifestCreateOrigin = "Origin %s with id %d successfully created\n"
+	ManifestUpdateOrigin = "Origin %s with key %s successfully updated\n"
 )

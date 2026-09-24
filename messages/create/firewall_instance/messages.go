@@ -1,5 +1,6 @@
 package firewallinstance
 
+// Used only by the v4 command tree.
 var (
 	Usage              = "firewall-instance"
 	ShortDescription   = "Creates a new Firewall Function Instance"
