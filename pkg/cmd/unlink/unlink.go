@@ -48,6 +48,8 @@ func NewCobraCmd(unlink *UnlinkCmd, f *cmdutil.Factory) *cobra.Command {
 		},
 	}
 
+	cobraCmd.Flags().BoolP("help", "h", false, msg.HelpFlag)
+
 	return cobraCmd
 }
 

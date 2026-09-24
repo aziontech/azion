@@ -6,4 +6,5 @@ var (
 	ShortDescription = "Unlinks a local repo or project folder"
 	LongDescription  = "Unlinks a local repo or project folder from Azion"
 	UnlinkSuccess    = "Unliked successfully"
+	HelpFlag         = "Displays more information about the unlink command"
 )

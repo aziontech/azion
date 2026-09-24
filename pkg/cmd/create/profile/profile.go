@@ -83,7 +83,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 							request := api.Request{}
 							request.SetName(fields.Name)
 							request.SetExpiresAt(time.Now().Add(8760 * time.Hour))
-							response, err := registry.PersonalToken(f).Create(context.Background(), &request)
+							client := registry.PersonalToken(f)
+							response, err := client.Create(context.Background(), &request)
 							if err != nil {
 								return fmt.Errorf(msg.ErrorCreate.Error(), err)
 							}
