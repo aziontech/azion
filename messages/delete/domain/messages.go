@@ -1,5 +1,6 @@
 package domain
 
+// Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
 var (
 	Usage            = "domain"
 	ShortDescription = "Removes a Domain"

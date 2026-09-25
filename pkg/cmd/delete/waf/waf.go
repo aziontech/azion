@@ -7,11 +7,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/waf"
-	api "github.com/aziontech/azion-cli/pkg/api/waf"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -32,7 +32,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteWaf: func(ctx context.Context, id int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.WAF(f)
 			return client.Delete(ctx, id)
 		},
 		AskInput: utils.AskInput,

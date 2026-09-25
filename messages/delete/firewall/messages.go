@@ -1,5 +1,6 @@
 package firewall
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "firewall"
 	ShortDescription = "Deletes a Firewall"

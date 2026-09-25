@@ -2,6 +2,7 @@ package functioninstance
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetFunctionInstance       = "Error getting Function Instance: %s"
 	ErrorConvertApplicationId      = errors.New("Invalid --application-id flag provided. The value must be an integer. Run the command 'azion describe function-instance --help' to display more information and try again")

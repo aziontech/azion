@@ -12,11 +12,10 @@ import (
 	msgcache "github.com/aziontech/azion-cli/messages/cache_setting"
 	msgrule "github.com/aziontech/azion-cli/messages/delete/rules_engine"
 	msg "github.com/aziontech/azion-cli/messages/manifest"
-	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
-	apiCache "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/briandowns/spinner"
 	"go.uber.org/zap"
@@ -212,9 +211,8 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 }
 
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
-	client := apiApplications.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	clientCache := apiCache.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
-	// clientOrigin := apiOrigin.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	client := registry.Applications(f)
+	clientCache := registry.CacheSettings(f)
 
 	if conf.SkipDeletion != nil && *conf.SkipDeletion {
 		logger.FInfoFlags(f.IOStreams.Out, msg.SkipDeletion, f.Format, f.Out)

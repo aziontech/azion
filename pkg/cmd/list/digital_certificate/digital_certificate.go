@@ -6,25 +6,25 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/digital_certificate"
-	api "github.com/aziontech/azion-cli/pkg/api/digital_certificate"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
 )
 
 type ListCmd struct {
-	Io                       *iostreams.IOStreams
-	ListDigitalCertificates  func(context.Context, *contracts.ListOptions) (*sdk.PaginatedCertificateList, error)
+	Io                      *iostreams.IOStreams
+	ListDigitalCertificates func(context.Context, *contracts.ListOptions) (*sdk.PaginatedCertificateList, error)
 }
 
 func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
 		ListDigitalCertificates: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedCertificateList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.DigitalCertificate(f)
 			return client.List(ctx, opts)
 		},
 	}

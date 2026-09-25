@@ -10,6 +10,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	cmdPersToken "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -57,7 +58,7 @@ func (l *login) terminalLogin(cmd *cobra.Command) error {
 	request := api.Request{}
 	request.SetName(l.Username)
 	request.SetExpiresAt(date)
-	clientPersonalToken := api.NewClient(l.factory.HttpClient, l.factory.Config.GetString("api_url"), l.factory.Config.GetString("token"))
+	clientPersonalToken := registry.PersonalToken(l.factory)
 	response, err := clientPersonalToken.Create(context.Background(), &request)
 	if err != nil {
 		return fmt.Errorf(msg.ErrorLogin.Error(), err.Error())

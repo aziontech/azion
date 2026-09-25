@@ -7,11 +7,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/origin"
-	api "github.com/aziontech/azion-cli/pkg/api/origin"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -33,7 +33,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteOrigins: func(ctx context.Context, appID int64, key string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.Origin(f)
 			return client.DeleteOrigins(ctx, appID, key)
 		},
 		AskInput: utils.AskInput,

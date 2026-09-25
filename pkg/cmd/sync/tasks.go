@@ -9,12 +9,12 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/sync"
-	edgeApp "github.com/aziontech/azion-cli/pkg/api/applications"
 	varApi "github.com/aziontech/azion-cli/pkg/api/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/manifest"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
@@ -108,7 +108,7 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
 	remoteCacheIds := make(map[string]contracts.AzionJsonDataCacheSettings)
-	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	client := registry.Applications(f)
 	resp, err := client.ListCacheEdgeApp(context.Background(), info.Conf.Application.ID, opts)
 	if err != nil {
 		return remoteCacheIds, err
@@ -191,7 +191,7 @@ func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, man
 }
 
 func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) error {
-	client := edgeApp.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	client := registry.Applications(f)
 	rulesAzion := info.Conf.RulesEngine.Rules
 	existingRuleNames := make(map[string]bool)
 	for _, existingRule := range rulesAzion {
@@ -338,7 +338,7 @@ func (synch *SyncCmd) syncRules(info contracts.SyncOpts, f *cmdutil.Factory, man
 
 func (synch *SyncCmd) syncEnv(f *cmdutil.Factory) error {
 
-	client := varApi.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+	client := registry.Variables(f)
 	resp, err := client.List(context.Background())
 	if err != nil {
 		return err

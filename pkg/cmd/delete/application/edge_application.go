@@ -9,12 +9,12 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
-	app "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -100,7 +100,7 @@ func (del *DeleteCmd) run(cmd *cobra.Command, application_id int64) error {
 		application_id = num
 	}
 
-	client := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
+	client := registry.Applications(del.f)
 
 	err := client.Delete(ctx, application_id)
 	if err != nil {

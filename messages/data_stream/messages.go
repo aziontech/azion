@@ -1,10 +1,8 @@
 package datastream
 
+// Used only by the v4 command tree.
 var (
 	Usage = "data-stream <subcommand>"
-
-	ShortDescription = "Manages your Azion Data Stream"
-	LongDescription  = "Manages your Data Stream resources, such as streams and templates, used to send your data to external endpoints and analytics tools"
 
 	// create
 	CreateShortDescription = "Creates Data Stream resources"

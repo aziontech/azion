@@ -2,6 +2,7 @@ package streams
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetStream          = errors.New("Failed to get the stream: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorGetStreams         = errors.New("Failed to list the streams: %s. Check your settings and try again. If the error persists, contact Azion support")

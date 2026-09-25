@@ -9,11 +9,11 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/dns_zone"
-	api "github.com/aziontech/azion-cli/pkg/api/dns_zone"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -29,7 +29,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	return &DeleteCmd{
 		Io: f.IOStreams,
 		DeleteDNSZone: func(ctx context.Context, id int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.DNSZone(f)
 			return client.Delete(ctx, id)
 		},
 		AskInput: utils.AskInput,

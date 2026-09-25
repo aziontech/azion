@@ -10,9 +10,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/applications"
-	api "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +26,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 	return &ListCmd{
 		Io: f.IOStreams,
 		ListEdgeApps: func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedApplicationList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			return client.List(ctx, opts)
 		},
 	}

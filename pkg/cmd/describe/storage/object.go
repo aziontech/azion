@@ -10,10 +10,10 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/utils"
 
-	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -53,7 +53,7 @@ func (f *Fields) RunE(cmd *cobra.Command, args []string) error {
 		f.ObjectKey = answers
 	}
 
-	client := api.NewClient(f.Factory.HttpClient, f.Factory.Config.GetString("storage_url"), f.Factory.Config.GetString("token"))
+	client := registry.Storage(f.Factory)
 	ctx := context.Background()
 	bFile, err := client.GetObject(ctx, f.BucketName, f.ObjectKey)
 	if err != nil {

@@ -12,21 +12,12 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/config/delete"
-	app "github.com/aziontech/azion-cli/pkg/api/applications"
-	cachesetting "github.com/aziontech/azion-cli/pkg/api/cache_setting"
-	connector "github.com/aziontech/azion-cli/pkg/api/connector"
-	firewall "github.com/aziontech/azion-cli/pkg/api/firewall"
-	firewallrules "github.com/aziontech/azion-cli/pkg/api/firewall_rules"
-	function "github.com/aziontech/azion-cli/pkg/api/function"
-	functioninstance "github.com/aziontech/azion-cli/pkg/api/function_instance"
-	rulesengine "github.com/aziontech/azion-cli/pkg/api/rules_engine"
-	"github.com/aziontech/azion-cli/pkg/api/storage"
-	workload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -121,16 +112,16 @@ func (del *DeleteCmd) Run(fields *Fields) error {
 
 	logger.FInfo(del.Io.Out, msg.DeletingResources)
 
-	clientApp := app.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientFunc := function.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientWorkload := workload.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientFirewall := firewall.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientRulesEngine := rulesengine.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientCacheSetting := cachesetting.NewClientV4(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientFuncInstance := functioninstance.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientFwRules := firewallrules.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientConnector := connector.NewClient(del.f.HttpClient, del.f.Config.GetString("api_v4_url"), del.f.Config.GetString("token"))
-	clientStorage := storage.NewClient(del.f.HttpClient, del.f.Config.GetString("storage_url"), del.f.Config.GetString("token"))
+	clientApp := registry.Applications(del.f)
+	clientFunc := registry.Function(del.f)
+	clientWorkload := registry.Workloads(del.f)
+	clientFirewall := registry.Firewall(del.f)
+	clientRulesEngine := registry.RulesEngine(del.f)
+	clientCacheSetting := registry.CacheSettings(del.f)
+	clientFuncInstance := registry.FunctionInstance(del.f)
+	clientFwRules := registry.FirewallRules(del.f)
+	clientConnector := registry.Connector(del.f)
+	clientStorage := registry.Storage(del.f)
 
 	var errs []string
 	successCount := 0

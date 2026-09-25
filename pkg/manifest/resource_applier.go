@@ -24,6 +24,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
@@ -82,8 +83,6 @@ func NewResourceContext(
 	writeConfigFunc func(conf *contracts.AzionApplicationOptions, confPath string) error,
 ) *ResourceContext {
 	ctx := context.Background()
-	apiURL := f.Config.GetString("api_v4_url")
-	token := f.Config.GetString("token")
 
 	rc := &ResourceContext{
 		Ctx:             ctx,
@@ -95,15 +94,15 @@ func NewResourceContext(
 		WriteConfigFunc: writeConfigFunc,
 
 		// Initialize clients
-		ApplicationClient:          apiApplications.NewClient(f.HttpClient, apiURL, token),
-		CacheClient:                apiCache.NewClientV4(f.HttpClient, apiURL, token),
-		WorkloadClient:             apiWorkloads.NewClient(f.HttpClient, apiURL, token),
-		ConnectorClient:            apiConnector.NewClient(f.HttpClient, apiURL, token),
-		FunctionClient:             functionsApi.NewClient(f.HttpClient, apiURL, token),
-		PurgeClient:                apiPurge.NewClient(f.HttpClient, apiURL, token),
-		FirewallClient:             apiFirewall.NewClient(f.HttpClient, apiURL, token),
-		FirewallFunctionInstClient: apiFirewallInstance.NewClient(f.HttpClient, apiURL, token),
-		StorageClient:              apiStorage.NewClient(f.HttpClient, f.Config.GetString("storage_url"), token),
+		ApplicationClient:          registry.Applications(f),
+		CacheClient:                registry.CacheSettings(f),
+		WorkloadClient:             registry.Workloads(f),
+		ConnectorClient:            registry.Connector(f),
+		FunctionClient:             registry.Function(f),
+		PurgeClient:                registry.RealtimePurge(f),
+		FirewallClient:             registry.Firewall(f),
+		FirewallFunctionInstClient: registry.FirewallInstance(f),
+		StorageClient:              registry.Storage(f),
 
 		// Initialize ID maps
 		CacheIds:                make(map[string]int64),

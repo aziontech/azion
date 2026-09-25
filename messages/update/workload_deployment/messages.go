@@ -1,5 +1,6 @@
 package workloaddeployment
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage                 = "workload-deployment"
 	ShortDescription      = "Updates a Workload Deployment"
@@ -10,12 +11,9 @@ var (
 	FlagIsActive          = "Whether the Workload Deployment is active or not"
 	FlagIsCurrent         = "Whether the Workload Deployment is current or not"
 	FlagStrategyType      = "The type of deployment strategy"
-	FlagStrategyAttrs     = "JSON string with strategy attributes"
 	FlagEdgeApplicationId = "Unique identifier of the Application"
 	FlagEdgeFirewallId    = "Unique identifier of the Firewall"
 	FlagCustomPageId      = "Unique identifier of the Custom Page"
-	FlagTag               = "The Workload Deployment's Tag"
-	FlagCurrent           = "Whether this Deployment is the current one"
 	FlagFile              = "Given path and JSON file to automatically update the Workload Deployment attributes; you can use - for reading from stdin"
 	OutputSuccess         = "Updated Workload Deployment with ID %d"
 	HelpFlag              = "Displays more information about the 'update workload-deployment' command"

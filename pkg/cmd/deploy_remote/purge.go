@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
-	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiworkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"go.uber.org/zap"
 )
 
@@ -28,7 +28,7 @@ func (cmd *DeployCmd) PurgeWildcard(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	clipurge := registry.RealtimePurge(cmd.F)
 	err := clipurge.PurgeCache(ctx, purgeDomains, "wildcard", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging wildcard domain", zap.Error(err))
@@ -43,7 +43,7 @@ func (cmd *DeployCmd) PurgeUrls(domain []string, path string) error {
 		purgeDomains[i] = domain[i] + path
 	}
 	ctx := context.Background()
-	clipurge := apipurge.NewClient(cmd.F.HttpClient, cmd.F.Config.GetString("api_v4_url"), cmd.F.Config.GetString("token"))
+	clipurge := registry.RealtimePurge(cmd.F)
 	err := clipurge.PurgeCache(ctx, purgeDomains, "url", "edge_cache")
 	if err != nil {
 		logger.Debug("Error while purging urls domain", zap.Error(err))

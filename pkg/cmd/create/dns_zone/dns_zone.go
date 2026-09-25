@@ -8,10 +8,10 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/dns_zone"
-	api "github.com/aziontech/azion-cli/pkg/api/dns_zone"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -39,7 +39,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
         $ azion create dns-zone --file "create.json"
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.DNSZone(f)
 
 			request := sdk.ZoneRequest{}
 

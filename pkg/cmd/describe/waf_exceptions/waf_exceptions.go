@@ -8,12 +8,12 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe/waf_exceptions"
-	api "github.com/aziontech/azion-cli/pkg/api/waf_exceptions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -35,7 +35,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		GetWafException: func(ctx context.Context, wafId, exceptionId int64) (sdk.WAFRule, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.WAFExceptions(f)
 			return client.Get(ctx, wafId, exceptionId)
 		},
 	}

@@ -1,5 +1,6 @@
 package csr
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "csr"
 	ShortDescription = "Returns the Certificate Signing Request data"

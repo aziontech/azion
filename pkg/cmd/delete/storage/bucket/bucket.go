@@ -13,6 +13,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/schedule"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -38,7 +39,7 @@ func NewDeleteBucketCmd(f *cmdutil.Factory) *DeleteBucketCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteBucket: func(ctx context.Context, bucketName string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+			client := registry.Storage(f)
 			return client.DeleteBucket(ctx, bucketName)
 		},
 		AskInput:      utils.AskInput,
@@ -69,7 +70,7 @@ func NewBucketCmd(delete *DeleteBucketCmd, f *cmdutil.Factory) *cobra.Command {
 				delete.BucketName = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+			client := registry.Storage(f)
 
 			ctx := context.Background()
 

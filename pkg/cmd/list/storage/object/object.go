@@ -15,6 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 )
@@ -51,7 +52,7 @@ func (b *Objects) RunE(cmd *cobra.Command, args []string) error {
 		}
 		b.BucketName = answer
 	}
-	client := api.NewClient(b.Factory.HttpClient, b.Factory.Config.GetString("storage_url"), b.Factory.Config.GetString("token"))
+	client := registry.Storage(b.Factory)
 	return b.PrintTable(client)
 }
 

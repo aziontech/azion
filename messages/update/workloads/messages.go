@@ -1,11 +1,11 @@
 package workloads
 
+// Used only by the v4 command tree.
 var (
 	Usage              = "workload"
 	ShortDescription   = "Updates a Workload"
 	LongDescription    = "Updates a Workload's name and other attributes based on a given ID"
 	FlagWorkloadID     = "Unique identifier of the Workload"
-	FlagApplicationId  = "The Application's unique identifier"
 	FlagName           = "The Workload's name"
 	FlagDomains        = "List of domains"
 	FlagFile           = "Given path and JSON file to automatically update the Workload attributes; you can use - for reading from stdin"

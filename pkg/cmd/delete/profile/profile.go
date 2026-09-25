@@ -10,10 +10,10 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/profile"
-	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/config"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
@@ -96,7 +96,9 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			settings, err := token.ReadSettings(profileToDelete)
 			if err == nil && settings.UUID != "" {
-				client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), settings.Token)
+				// the profile being deleted, not the active one, so its own credential
+				// is used to revoke its token
+				client := registry.PersonalTokenFor(f, settings.Token)
 				err = client.Delete(context.Background(), settings.UUID)
 				if err != nil {
 					fmt.Fprintf(f.IOStreams.Out, msg.WarningDeleteToken+"\n", err)

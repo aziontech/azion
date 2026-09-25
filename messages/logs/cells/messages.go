@@ -1,5 +1,6 @@
 package cells
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "cells"
 	ShortDescription = "Displays cells console logs"

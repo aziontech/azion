@@ -2,6 +2,7 @@ package login
 
 import "errors"
 
+// Used by both the v3 and the v4 command trees.
 var (
 	ErrorLogin              = errors.New("Failed to Login: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorInvalidLogin       = errors.New("Invalid login method")

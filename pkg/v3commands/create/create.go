@@ -3,17 +3,17 @@ package create
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/create"
+	origin "github.com/aziontech/azion-cli/pkg/cmd/create/origin"
+	token "github.com/aziontech/azion-cli/pkg/cmd/create/personal_token"
 	profile "github.com/aziontech/azion-cli/pkg/cmd/create/profile"
+	"github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	cacheSetting "github.com/aziontech/azion-cli/pkg/v3commands/create/cache_setting"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/create/domain"
 	edgeApplications "github.com/aziontech/azion-cli/pkg/v3commands/create/edge_applications"
 	edgeFunction "github.com/aziontech/azion-cli/pkg/v3commands/create/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/v3commands/create/edge_storage"
-	origin "github.com/aziontech/azion-cli/pkg/v3commands/create/origin"
-	token "github.com/aziontech/azion-cli/pkg/v3commands/create/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/v3commands/create/rules_engine"
-	"github.com/aziontech/azion-cli/pkg/v3commands/create/variables"
 	"github.com/spf13/cobra"
 )
 

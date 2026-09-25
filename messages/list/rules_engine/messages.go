@@ -1,5 +1,6 @@
 package ruleengine
 
+// Used by both the v3 and the v4 command trees.
 var (
 	//list cmd
 	RulesEngineListUsage            = "rules-engine"

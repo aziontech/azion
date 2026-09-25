@@ -11,6 +11,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -82,7 +83,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Workloads(f)
 			ctx := context.Background()
 			response, err := client.Update(ctx, &request)
 

@@ -1,5 +1,6 @@
 package digitalcertificate
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "digital-certificate"
 	ShortDescription = "Deletes a Digital Certificate"

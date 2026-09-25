@@ -1,5 +1,6 @@
 package rollback
 
+// Used by both the v3 and the v4 command trees.
 const (
 	USAGE            = "rollback"
 	SHORTDESCRIPTION = "Sets static files from a previous deploy"

@@ -1,5 +1,6 @@
 package profile
 
+// Used by both the v3 and the v4 command trees.
 var (
 	UsageCreate = "profile"
 
@@ -26,7 +27,6 @@ var (
 
 	RefreshUnchanged = "Profile '%s' is on Azion API %s."
 	RefreshChanged   = "Profile '%s' moved from Azion API %s to %s. The available commands change accordingly."
-	SwitchSuccessful = "Profile switched successfully"
 
 	UsageDelete                   = "profile"
 	DeleteShortDescription        = "Delete a profile"

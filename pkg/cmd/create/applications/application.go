@@ -15,6 +15,7 @@ import (
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -64,7 +65,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			response, err := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token")).Create(context.Background(), &request)
+			response, err := registry.Applications(f).Create(context.Background(), &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreate.Error(), err)
 			}

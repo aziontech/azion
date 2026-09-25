@@ -2,6 +2,7 @@ package rollback
 
 import "errors"
 
+// Used by both the v3 and the v4 command trees.
 var (
 	ERRORROLLBACK           = errors.New("Failed to roll back to previous static files")
 	ERRORNEEDSDEPLOY        = errors.New("You cannot use the rollback command unless you have already deployed this project. Please check if you are in the correct working directory")

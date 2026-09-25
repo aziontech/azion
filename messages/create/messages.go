@@ -1,5 +1,6 @@
 package create
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "create <subcommand> [flags]"
 	ShortDescription = "Creates a new resource"

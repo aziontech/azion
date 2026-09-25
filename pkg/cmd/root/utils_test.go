@@ -418,3 +418,76 @@ func TestResolveAPIVersionStillWarnsOnLookupFailure(t *testing.T) {
 	assert.Equal(t, apiversion.V3, got)
 	assert.Contains(t, out.String(), "could not verify which Azion API version")
 }
+
+// Resolving the API version authenticates with the same credential against the
+// same service, so its outcome answers "is this token still valid?" without a
+// second round trip. These pin when that answer may be reused and when it may
+// not.
+func TestCredentialStatusFromVersionLookup(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+
+	const tok = "a-token"
+
+	t.Run("a fresh lookup proves the credential", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		stubAccountInfo(mock, `[]`)
+		fact, _ := newRootFactory(t, mock, tok)
+
+		fact.resolveAPIVersion()
+
+		assert.Equal(t, credentialAccepted, fact.credentialStatusFor(tok))
+	})
+
+	t.Run("a cache hit proves it too, with no network at all", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		fact, _ := newRootFactory(t, mock, tok)
+		writeCache(t, apiversion.Refreshed(apiversion.V4, tok, time.Now()))
+
+		fact.resolveAPIVersion()
+
+		require.Empty(t, mock.Requests, "precondition: the cache was used")
+		assert.Equal(t, credentialAccepted, fact.credentialStatusFor(tok))
+	})
+
+	t.Run("a refused credential is reported as rejected", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		mock.Register(httpmock.REST("GET", "account/info"), httpmock.StatusStringResponse(401, `{"detail":"Invalid token."}`))
+		fact, _ := newRootFactory(t, mock, tok)
+
+		fact.resolveAPIVersion()
+
+		assert.Equal(t, credentialRejected, fact.credentialStatusFor(tok))
+	})
+
+	// An unreachable service establishes nothing, so the caller must not treat
+	// a reused stale version as proof the token is still good.
+	t.Run("an unreachable service leaves it unknown", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		mock.Register(httpmock.REST("GET", "account/info"), httpmock.StatusStringResponse(500, "boom"))
+		fact, _ := newRootFactory(t, mock, tok)
+		writeCache(t, apiversion.Refreshed(apiversion.V4, tok, time.Now().Add(-apiversion.TTL-time.Minute)))
+
+		fact.resolveAPIVersion()
+
+		require.Equal(t, sourceStaleCache, fact.apiVersionSource.source)
+		assert.Equal(t, credentialUnknown, fact.credentialStatusFor(tok))
+	})
+
+	// The answer belongs to the credential the lookup used; a different one has
+	// to be checked on its own.
+	t.Run("a different credential is unknown", func(t *testing.T) {
+		mock := &httpmock.Registry{}
+		stubAccountInfo(mock, `[]`)
+		fact, _ := newRootFactory(t, mock, tok)
+
+		fact.resolveAPIVersion()
+
+		assert.Equal(t, credentialUnknown, fact.credentialStatusFor("some-other-token"))
+		assert.Equal(t, credentialUnknown, fact.credentialStatusFor(""))
+	})
+
+	t.Run("nothing resolved means nothing is known", func(t *testing.T) {
+		fact, _ := newRootFactory(t, &httpmock.Registry{}, "")
+		assert.Equal(t, credentialUnknown, fact.credentialStatusFor(tok))
+	})
+}

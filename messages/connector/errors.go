@@ -2,6 +2,7 @@ package connector
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetConnector          = errors.New("Failed to get the Connector: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorGetConnectors         = errors.New("Failed to list the Connectors: %s. Check your settings and try again. If the error persists, contact Azion support")

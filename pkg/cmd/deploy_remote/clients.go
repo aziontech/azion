@@ -7,6 +7,7 @@ import (
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
 	apiWorkload "github.com/aziontech/azion-cli/pkg/api/workloads"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 )
 
 type Clients struct {
@@ -19,17 +20,12 @@ type Clients struct {
 }
 
 func NewClients(f *cmdutil.Factory) *Clients {
-	httpClient := f.HttpClient
-	apiURL := f.Config.GetString("api_v4_url")
-	storageURL := f.Config.GetString("storage_url")
-	token := f.Config.GetString("token")
-
 	return &Clients{
-		Function:    apiFunction.NewClient(httpClient, apiURL, token),
-		Application: apiApplications.NewClient(httpClient, apiURL, token),
-		Workload:    apiWorkload.NewClient(httpClient, apiURL, token),
-		Origin:      apiOrigin.NewClient(httpClient, apiURL, token),
-		Bucket:      apiStorage.NewClient(httpClient, storageURL, token),
-		Storage:     apiStorage.NewClient(httpClient, storageURL, token),
+		Function:    registry.Function(f),
+		Application: registry.Applications(f),
+		Workload:    registry.Workloads(f),
+		Origin:      registry.Origin(f),
+		Bucket:      registry.Storage(f),
+		Storage:     registry.Storage(f),
 	}
 }

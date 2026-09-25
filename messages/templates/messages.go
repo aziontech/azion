@@ -1,11 +1,9 @@
 package templates
 
+// Used only by the v4 command tree.
 var (
 	// general
-	Usage            = "templates"
-	FileWritten      = "File successfully written to: %s\n"
-	ShortDescription = "Manages your Data Stream templates"
-	LongDescription  = "Manages the Data Stream templates used to define the data set sent to your streams"
+	Usage = "templates"
 
 	// create cmd
 	CreateShortDescription = "Creates a new template"
@@ -22,8 +20,6 @@ var (
 	// describe cmd
 	DescribeShortDescription = "Returns the template data"
 	DescribeLongDescription  = "Displays information about the template via a given ID to show its attributes in detail"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe templates command"
 
 	// list cmd
@@ -38,7 +34,6 @@ var (
 	UpdateOutputSuccess    = "Updated template with ID %d"
 	UpdateHelpFlag         = "Displays more information about the update templates command"
 	UpdateAskTemplateID    = "Enter the ID of the template you wish to update:"
-	UpdateAskTemplateFile  = "Enter the path of the json to update the template:"
 
 	// flags
 	FlagID      = "Unique identifier of the template"
@@ -49,7 +44,6 @@ var (
 
 	// ask
 	AskTemplateID   = "Enter the template's ID:"
-	AskCreateFile   = "Enter the path of the json to create the template:"
 	AskInputName    = "Enter the new template's name:"
 	AskInputDataSet = "Enter the path to the JSON file with the template's data set:"
 )

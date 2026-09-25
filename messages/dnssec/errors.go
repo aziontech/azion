@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetDNSSEC    = errors.New("Failed to describe the DNSSEC: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorUpdateDNSSEC = errors.New("Failed to update the DNSSEC: %s. Check your settings and try again. If the error persists, contact Azion support.")

@@ -1,5 +1,6 @@
 package wafexceptions
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "waf-exceptions"
 	ShortDescription = "Displays your WAF Exceptions in a list"

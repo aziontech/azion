@@ -1,5 +1,6 @@
 package delete
 
+// Used only by the v4 command tree.
 const (
 	Usage            = "delete"
 	ShortDescription = "Delete all resources from azion.json"
@@ -17,7 +18,6 @@ const (
 	DeletingRulesEngineApp  = "Deleting Rules Engine (Application) rule '%s' (ID: %d)\n"
 	DeletingRulesEngineFw   = "Deleting Rules Engine (Firewall) rule '%s' (ID: %d) from firewall %d\n"
 	DeletingFuncInstanceApp = "Deleting Function Instance (Application) '%s' (ID: %d)\n"
-	DeletingFuncInstanceFw  = "Deleting Function Instance (Firewall) '%s' (ID: %d) from firewall %d\n"
 	DeletingCacheSetting    = "Deleting Cache Setting '%s' (ID: %d)\n"
 	DeletingApplication     = "Deleting Application '%s' (ID: %d)\n"
 	DeletingFirewall        = "Deleting Firewall '%s' (ID: %d)\n"

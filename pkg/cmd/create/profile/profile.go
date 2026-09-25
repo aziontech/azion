@@ -11,6 +11,7 @@ import (
 	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/pkg/token"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/pelletier/go-toml/v2"
@@ -82,7 +83,8 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 							request := api.Request{}
 							request.SetName(fields.Name)
 							request.SetExpiresAt(time.Now().Add(8760 * time.Hour))
-							response, err := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token")).Create(context.Background(), &request)
+							client := registry.PersonalToken(f)
+							response, err := client.Create(context.Background(), &request)
 							if err != nil {
 								return fmt.Errorf(msg.ErrorCreate.Error(), err)
 							}

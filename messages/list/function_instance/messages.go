@@ -1,5 +1,6 @@
 package functioninstance
 
+// Used only by the v4 command tree.
 var (
 	Usage                 = "function-instance"
 	ShortDescription      = "Displays your Function Instances in a list"

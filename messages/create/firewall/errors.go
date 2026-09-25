@@ -2,6 +2,7 @@ package firewall
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorCreateFunction        = errors.New("Failed to create the Firewall: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorDebugFlag             = errors.New("Invalid value for --debug-rules flag")

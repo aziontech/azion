@@ -6,10 +6,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/storage"
-	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +31,7 @@ func NewDeleteObjectCmd(f *cmdutil.Factory) *DeleteObjectCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteObject: func(ctx context.Context, bucketName, objectKey string) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+			client := registry.Storage(f)
 			return client.DeleteObject(ctx, bucketName, objectKey)
 		},
 		AskInput: utils.AskInput,

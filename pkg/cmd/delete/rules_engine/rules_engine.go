@@ -7,11 +7,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete/rules_engine"
-	api "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -35,11 +35,11 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 			return utils.AskInput(prompt)
 		},
 		DeleteRuleRequest: func(ctx context.Context, ruleID, appID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.RulesEngine(f)
 			return client.DeleteRequest(ctx, appID, ruleID)
 		},
 		DeleteRuleResponse: func(ctx context.Context, ruleID, appID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.RulesEngine(f)
 			return client.DeleteResponse(ctx, appID, ruleID)
 		},
 		AskInput: utils.AskInput,

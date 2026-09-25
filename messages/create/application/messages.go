@@ -1,23 +1,29 @@
 package application
 
+// Used by both the v3 and the v4 command trees.
 var (
-	// [ edge_applications ]
-	Usage            = "application"
 	ShortDescription = "Creates an Application"
 	LongDescription  = "Creates an Application without the need to manage infrastructure or security"
 	FlagFile         = "Path to a JSON file containing the attributes of the Application being created; you can use - for reading from stdin"
 	FlagHelp         = "Displays more information about the create application command"
 	OutputSuccess    = "Created Application with ID %d"
+	FlagName         = "Application's name"
+	FlagDebugRules   = "Allows you to check whether rules created using Rules Engine for Application have been successfully executed in your application"
+)
 
-	FlagName                    = "Application's name"
+// Used only by the v4 command tree.
+var (
+	// [ edge_applications ]
+	Usage                       = "application"
 	FlagActive                  = "Whether the Application is active or not"
-	FlagDebugRules              = "Allows you to check whether rules created using Rules Engine for Application have been successfully executed in your application"
 	FlagApplicationAcceleration = "Whether the Application has Application Acceleration active or not"
 	FlagCaching                 = "Whether the Application has Caching active or not"
 	FlagEdgeFunctions           = "Whether the Application has Functions active or not"
 	FlagImageOptimization       = "Whether the Application has Image Optimization active or not"
-	FlagTieredCaching           = "Whether the Application has Tiered Caching active or not"
+)
 
+// Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
+var (
 	//V3 flags
 	FlagDeliveryProtocol               = "Specify whether the data should be delivered via HTTP or HTTPS."
 	FlagHttp3                          = "Flag to enable HTTP3"

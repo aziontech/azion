@@ -1,5 +1,6 @@
 package firewall
 
+// Used only by the v4 command tree.
 var (
 	Usage                  = "firewall"
 	CreateShortDescription = "Creates a Firewall"
@@ -15,6 +16,5 @@ var (
 	FlagNetworkProtection = "Whether the Firewall has Network Layer Protection module enabled or not"
 	FlagWafEnabled        = "Whether the Firewall has Web Application Firewall (WAF) module enabled or not"
 
-	AskName   = "Enter the Firewall's name:"
-	AskActive = "Is the Firewall active?"
+	AskName = "Enter the Firewall's name:"
 )

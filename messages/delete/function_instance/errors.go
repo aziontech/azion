@@ -2,6 +2,7 @@ package functioninstance
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorFailToDeletInstance       = errors.New("Failed to delete Function Instance: %s")
 	ErrorConvertApplicationId      = errors.New("Invalid --application-id flag provided. The value must be an integer. Run the command 'azion delete function-instance --help' to display more information and try again")

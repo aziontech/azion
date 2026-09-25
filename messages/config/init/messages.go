@@ -1,5 +1,6 @@
 package init
 
+// Used only by the v4 command tree.
 const (
 	Usage            = "init"
 	ShortDescription = "Initialize Azion configuration file"

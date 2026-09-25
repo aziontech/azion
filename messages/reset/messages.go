@@ -1,5 +1,6 @@
 package reset
 
+// Used by both the v3 and the v4 command trees.
 const (
 	USAGE            = "reset"
 	SHORTDESCRIPTION = "Resets settings to default"

@@ -2,6 +2,7 @@ package digitalcertificate
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorUpdateDigitalCertificate    = errors.New("Failed to update the Digital Certificate: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorActiveFlag                  = errors.New("Invalid value for --active flag")

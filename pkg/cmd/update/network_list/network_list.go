@@ -12,6 +12,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -70,7 +71,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 
 			request := api.UpdateRequest{}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.NetworkList(f)
 			ctx := context.Background()
 
 			if cmd.Flags().Changed("file") {

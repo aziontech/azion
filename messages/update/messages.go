@@ -1,5 +1,6 @@
 package update
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "update <subcommand> [flags]"
 	ShortDescription = "Modifies or changes single or multiple configurations of existing services or resources on Azion"

@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -84,7 +85,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				// 	request.ConnectorLiveIngestRequest = &liveIngestStruct
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Connector(f)
 
 			ctx := context.Background()
 			response, err := client.Create(ctx, request)

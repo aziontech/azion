@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// Used only by the v4 command tree.
 var (
 	ErrorGetDNSRecord    = errors.New("Failed to describe the DNS record: %s. Check your settings and try again. If the error persists, contact Azion support.")
 	ErrorCreateDNSRecord = errors.New("Failed to create the DNS record: %s. Check your settings and try again. If the error persists, contact Azion support.")

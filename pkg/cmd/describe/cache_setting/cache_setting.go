@@ -11,12 +11,12 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
-	api "github.com/aziontech/azion-cli/pkg/api/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -37,7 +37,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		Get: func(ctx context.Context, appID, cacheID int64) (sdk.CacheSetting, error) {
-			client := api.NewClientV4(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.CacheSettings(f)
 			return client.Get(ctx, appID, cacheID)
 		},
 	}

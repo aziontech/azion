@@ -1,10 +1,9 @@
 package datasources
 
+// Used only by the v4 command tree.
 var (
 	// general
-	Usage            = "data-sources"
-	ShortDescription = "Manages your Data Stream data sources"
-	LongDescription  = "Manages the Data Stream data sources available to collect and send your data"
+	Usage = "data-sources"
 
 	// list cmd
 	ListShortDescription = "Displays your account's data sources"

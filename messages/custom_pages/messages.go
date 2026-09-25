@@ -1,11 +1,9 @@
 package custompages
 
+// Used only by the v4 command tree.
 var (
 	// general
-	Usage            = "custom-pages"
-	FileWritten      = "File successfully written to: %s\n"
-	ShortDescription = "Manages your Azion account's Custom Pages"
-	LongDescription  = "Manages custom error pages used to customize the responses returned to your users"
+	Usage = "custom-pages"
 
 	// create cmd
 	CreateShortDescription = "Creates a new Custom Page"
@@ -22,8 +20,6 @@ var (
 	// describe cmd
 	DescribeShortDescription = "Returns the Custom Page data"
 	DescribeLongDescription  = "Displays information about the Custom Page via a given ID to show its attributes in detail"
-	DescribeFlagOut          = "Exports the output to the given <file_path/file_name.ext>"
-	DescribeFlagFormat       = "Changes the output format passing the json value to the flag"
 	DescribeHelpFlag         = "Displays more information about the describe custom-pages command"
 
 	// list cmd

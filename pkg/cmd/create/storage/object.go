@@ -13,11 +13,11 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/storage"
-	api "github.com/aziontech/azion-cli/pkg/api/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 )
 
@@ -75,7 +75,7 @@ func (fact *factoryObjects) RunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	client := api.NewClient(f.HttpClient, f.Config.GetString("storage_url"), f.Config.GetString("token"))
+	client := registry.Storage(f)
 	err = client.CreateObject(context.Background(), fileOptions, fact.BucketName, fact.ObjectKey)
 	if err != nil {
 		return fmt.Errorf(msg.ERROR_CREATE_OBJECT, err)

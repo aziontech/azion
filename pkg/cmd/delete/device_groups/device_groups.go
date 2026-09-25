@@ -9,11 +9,11 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/device_groups"
-	api "github.com/aziontech/azion-cli/pkg/api/device_groups"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -30,7 +30,7 @@ func NewDeleteCmd(f *cmdutil.Factory) *DeleteCmd {
 	return &DeleteCmd{
 		Io: f.IOStreams,
 		DeleteDeviceGroup: func(ctx context.Context, appID, groupID int64) error {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.DeviceGroups(f)
 			return client.Delete(ctx, appID, groupID)
 		},
 		AskInput: utils.AskInput,

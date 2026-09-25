@@ -1,5 +1,6 @@
 package crl
 
+// Used only by the v4 command tree.
 var (
 	Usage                  = "crl"
 	UpdateShortDescription = "Updates a Certificate Revocation List"

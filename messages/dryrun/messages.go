@@ -1,15 +1,10 @@
 package dryrun
 
+// Used by both the v3 and the v4 command trees.
 var (
 	SkipManifest           = "This project has not been built yet. Skipping the simulation for resources found in your azion.config file\n"
 	CreateEdgeApp          = "Creating Application named '%s'\n"
 	UpdateEdgeApp          = "Updating Application with ID '%d', named '%s'\n"
-	CreateOrigin           = "Creating Origin named '%s'\n"
-	UpdateOrigin           = "Updating Origin with ID '%d' and Key '%s', named '%s'\n"
-	CreateCacheSetting     = "Creating Cache Setting named '%s'\n"
-	UpdateCacheSetting     = "Updating Cache Setting with ID '%d', named '%s'\n"
-	CreateRule             = "Creating Rule Engine named '%s'\n"
-	UpdateRule             = "Updating Rule Engine with ID '%d', named '%s'\n"
 	CreateBucket           = "Creating Bucket named '%s'\n"
 	CreateDomain           = "Creating Domain named '%s'\n"
 	UpdateDomain           = "Updating Domain with ID '%d', named '%s'\n"

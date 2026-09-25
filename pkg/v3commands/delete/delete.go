@@ -3,16 +3,16 @@ package delete
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/delete"
+	origin "github.com/aziontech/azion-cli/pkg/cmd/delete/origin"
+	token "github.com/aziontech/azion-cli/pkg/cmd/delete/personal_token"
 	profile "github.com/aziontech/azion-cli/pkg/cmd/delete/profile"
+	"github.com/aziontech/azion-cli/pkg/cmd/delete/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	domain "github.com/aziontech/azion-cli/pkg/v3commands/delete/domain"
 	edgeApplication "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
 	function "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_function"
 	edgeStorage "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_storage"
-	origin "github.com/aziontech/azion-cli/pkg/v3commands/delete/origin"
-	token "github.com/aziontech/azion-cli/pkg/v3commands/delete/personal_token"
 	rulesEngine "github.com/aziontech/azion-cli/pkg/v3commands/delete/rules_engine"
-	"github.com/aziontech/azion-cli/pkg/v3commands/delete/variables"
 	"github.com/spf13/cobra"
 )
 

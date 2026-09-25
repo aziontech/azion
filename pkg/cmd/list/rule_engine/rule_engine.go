@@ -8,12 +8,12 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/rules_engine"
-	api "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -37,11 +37,11 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListRulesEngineRequest: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedRequestPhaseRuleList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			return client.ListRulesEngineRequest(ctx, opts, appID)
 		},
 		ListRulesEngineResponse: func(ctx context.Context, opts *contracts.ListOptions, appID int64) (*sdk.PaginatedResponsePhaseRuleList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			return client.ListRulesEngineResponse(ctx, opts, appID)
 		},
 		AskInput: func(prompt string) (string, error) {

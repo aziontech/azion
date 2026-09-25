@@ -2,6 +2,7 @@ package firewall_rule_order
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	Usage              = "firewall-rule-order"
 	ShortDescription   = "Orders the rules in Rules Engine of a Firewall"

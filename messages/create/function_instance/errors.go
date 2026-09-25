@@ -2,6 +2,7 @@ package functioninstance
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorIsActiveFlag         = errors.New("Invalid --active flag provided. The value must be 'true' or 'false'. Run the command 'azion create function-instance --help' to display more information and try again")
 	ErrorCreate               = errors.New("Failed to create the Function Instance: %s. Check your settings and try again. If the error persists, contact Azion support")

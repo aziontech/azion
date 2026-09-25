@@ -12,9 +12,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/list/waf_exceptions"
-	api "github.com/aziontech/azion-cli/pkg/api/waf_exceptions"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -34,7 +34,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListInstances: func(ctx context.Context, opts *contracts.ListOptions, wafID int64) (*sdk.PaginatedWAFRuleList, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.WAFExceptions(f)
 			return client.List(ctx, opts, wafID)
 		},
 	}

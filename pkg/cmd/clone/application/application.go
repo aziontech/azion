@@ -9,12 +9,12 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/clone"
-	api "github.com/aziontech/azion-cli/pkg/api/applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/utils"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -66,7 +66,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				fields.Name = answer
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.Applications(f)
 			err := client.Clone(context.Background(), fields.Name, fields.Id)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorClone.Error(), err)

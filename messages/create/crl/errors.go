@@ -2,6 +2,7 @@ package crl
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	ErrorCreateCRL   = errors.New("Failed to create the Certificate Revocation List: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorReadCRLFile = errors.New("Failed to read the CRL file")

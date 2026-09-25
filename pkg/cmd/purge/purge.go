@@ -6,10 +6,10 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/purge"
-	apipurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -61,7 +61,7 @@ func NewCobraCmd(purge *PurgeCmd, f *cmdutil.Factory) *cobra.Command {
 }
 
 func (purge *PurgeCmd) Run(ctx context.Context, cmd *cobra.Command, f *cmdutil.Factory) error {
-	clipurge := apipurge.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+	clipurge := registry.RealtimePurge(f)
 	//if none of the flags were sent
 	if !cmd.Flags().Changed("urls") && !cmd.Flags().Changed("wildcard") && !cmd.Flags().Changed("cachekey") {
 		answer, err := purge.GetPurgeType()

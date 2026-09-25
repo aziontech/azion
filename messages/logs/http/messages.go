@@ -1,5 +1,6 @@
 package http
 
+// Used by both the v3 and the v4 command trees.
 var (
 	Usage            = "http"
 	ShortDescription = "Displays http event logs"

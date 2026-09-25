@@ -1,5 +1,6 @@
 package rulesengine
 
+// Used by both the v3 and the v4 command trees.
 var (
 	AskInputRulesId       = "Enter the ID of the Rules Engine you wish to delete:"
 	AskInputApplicationId = "Enter the ID of the Application this rule is linked to:"

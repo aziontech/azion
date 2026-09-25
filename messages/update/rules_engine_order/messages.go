@@ -2,6 +2,7 @@ package rules_engine_order
 
 import "errors"
 
+// Used only by the v4 command tree.
 var (
 	Usage                 = "rules-engine-order"
 	ShortDescription      = "Orders the rules in Rules Engine of an Application"

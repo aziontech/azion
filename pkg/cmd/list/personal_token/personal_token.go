@@ -7,11 +7,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/personal_token"
-	api "github.com/aziontech/azion-cli/pkg/api/personal_token"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/constants"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/aziontech/azionapi-go-sdk/personal_tokens"
 	"github.com/spf13/cobra"
@@ -30,7 +30,7 @@ func NewListCmd(f *cmdutil.Factory) *ListCmd {
 			return utils.AskInput(prompt)
 		},
 		ListTokens: func(ctx context.Context) ([]personal_tokens.PersonalTokenResponseGet, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.PersonalToken(f)
 			resp, err := client.List(ctx)
 			if err != nil {
 				return nil, err

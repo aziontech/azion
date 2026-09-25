@@ -9,10 +9,10 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/update/firewall_rule_order"
-	api "github.com/aziontech/azion-cli/pkg/api/firewall_rules"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -65,7 +65,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				return msg.ErrorConvertRuleIDs
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.FirewallRules(f)
 			err = client.Order(context.Background(), fields.FirewallID, order)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorOrder.Error(), err)

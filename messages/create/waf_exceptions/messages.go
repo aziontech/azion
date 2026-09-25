@@ -1,5 +1,6 @@
 package wafexceptions
 
+// Used only by the v4 command tree.
 var (
 	Usage            = "waf-exceptions"
 	ShortDescription = "Creates a new WAF Exception"
@@ -16,5 +17,4 @@ var (
 	HelpFlag         = "Displays more information about the create waf-exception command"
 	AskInputName     = "Enter the new WAF Exception's name:"
 	AskInputWafID    = "Enter the WAF's ID this Exception will be associated with:"
-	AskInputRuleID   = "Enter the Rule ID:"
 )

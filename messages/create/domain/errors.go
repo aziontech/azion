@@ -2,6 +2,7 @@ package domain
 
 import "errors"
 
+// Used by both the v3 and the v4 command trees.
 var (
 	ErrorCreate               = errors.New("Failed to create the Domain: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorMissingCnames        = errors.New("Missing CNAMES. When the flag '--cname-access-only' is set as 'true', at least one CNAME must be provided through the flag '--cnames'. Add one or more CNAMES, or set '--cname-access-only' as false and try again.")

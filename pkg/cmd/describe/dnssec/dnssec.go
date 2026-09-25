@@ -10,12 +10,12 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/dnssec"
-	api "github.com/aziontech/azion-cli/pkg/api/dnssec"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"github.com/spf13/cobra"
@@ -35,7 +35,7 @@ func NewDescribeCmd(f *cmdutil.Factory) *DescribeCmd {
 			return utils.AskInput(prompt)
 		},
 		Get: func(ctx context.Context, id int64) (sdk.DNSSEC, error) {
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_v4_url"), f.Config.GetString("token"))
+			client := registry.DNSSEC(f)
 			return client.Get(ctx, id)
 		},
 	}

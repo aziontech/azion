@@ -15,6 +15,7 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/origin"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
@@ -68,7 +69,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 				}
 			}
 
-			client := api.NewClient(f.HttpClient, f.Config.GetString("api_url"), f.Config.GetString("token"))
+			client := registry.Origin(f)
 			response, err := client.Create(context.Background(), fields.ApplicationID, &request)
 			if err != nil {
 				return fmt.Errorf(msg.ErrorCreateOrigins.Error(), err)
