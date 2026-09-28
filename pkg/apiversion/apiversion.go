@@ -15,8 +15,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // ErrUnauthorized reports that the authentication service rejected the
@@ -103,7 +101,6 @@ var generations = []generation{
 // account is entitled to. The last entry is unconditional, so this always
 // returns a version.
 func Select(info AccountInfo) Version {
-	spew.Dump(info.ClientFlags)
 	for _, gen := range generations {
 		if gen.entitled(info) {
 			return gen.version

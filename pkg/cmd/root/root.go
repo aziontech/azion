@@ -8,35 +8,11 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/root"
-	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
-	"github.com/aziontech/azion-cli/pkg/cmd/clone"
-	"github.com/aziontech/azion-cli/pkg/cmd/completion"
-	"github.com/aziontech/azion-cli/pkg/cmd/config"
-	"github.com/aziontech/azion-cli/pkg/cmd/create"
-	"github.com/aziontech/azion-cli/pkg/cmd/delete"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe"
-	"github.com/aziontech/azion-cli/pkg/cmd/list"
-	"github.com/aziontech/azion-cli/pkg/cmd/login"
-	"github.com/aziontech/azion-cli/pkg/cmd/logout"
-	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
-	"github.com/aziontech/azion-cli/pkg/cmd/profiles"
-	"github.com/aziontech/azion-cli/pkg/cmd/purge"
-	"github.com/aziontech/azion-cli/pkg/cmd/reset"
-	"github.com/aziontech/azion-cli/pkg/cmd/rollback"
-	"github.com/aziontech/azion-cli/pkg/cmd/sync"
-	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
-	"github.com/aziontech/azion-cli/pkg/cmd/update"
-	"github.com/aziontech/azion-cli/pkg/cmd/warmup"
-	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
+	"github.com/aziontech/azion-cli/pkg/cmdregistry"
 	"github.com/aziontech/azion-cli/pkg/metric"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/schedule"
 
-	"github.com/aziontech/azion-cli/pkg/apiversion"
-	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
-	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
-	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
-	linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -45,23 +21,6 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	//v3 imports
-	v3rollback "github.com/aziontech/azion-cli/pkg/cmd/rollback"
-	v3buildCmd "github.com/aziontech/azion-cli/pkg/v3commands/build"
-	v3create "github.com/aziontech/azion-cli/pkg/v3commands/create"
-	v3delete "github.com/aziontech/azion-cli/pkg/v3commands/delete"
-	v3deploycmd "github.com/aziontech/azion-cli/pkg/v3commands/deploy"
-	v3describe "github.com/aziontech/azion-cli/pkg/v3commands/describe"
-	v3devcmd "github.com/aziontech/azion-cli/pkg/v3commands/dev"
-	v3initcmd "github.com/aziontech/azion-cli/pkg/v3commands/init"
-	v3linkcmd "github.com/aziontech/azion-cli/pkg/v3commands/link"
-	v3list "github.com/aziontech/azion-cli/pkg/v3commands/list"
-	v3login "github.com/aziontech/azion-cli/pkg/v3commands/login"
-	v3purge "github.com/aziontech/azion-cli/pkg/v3commands/purge"
-	v3sync "github.com/aziontech/azion-cli/pkg/v3commands/sync"
-	v3unlink "github.com/aziontech/azion-cli/pkg/v3commands/unlink"
-	v3update "github.com/aziontech/azion-cli/pkg/v3commands/update"
 )
 
 const PREFIX_FLAG = "--"
@@ -129,57 +88,10 @@ func (fact *factoryRoot) setFlags(cobraCmd *cobra.Command) {
 	cobraCmd.Flags().BoolP("help", "h", false, msg.RootHelpFlag)
 }
 
-func (fact *factoryRoot) setV3Cmds(cobraCmd *cobra.Command) {
-	cobraCmd.AddCommand(v3initcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(logcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3deploycmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3buildCmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3devcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3linkcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3unlink.NewCmd(fact.factory))
-	cobraCmd.AddCommand(completion.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3describe.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3login.New(fact.factory))
-	cobraCmd.AddCommand(logout.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3create.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3list.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3delete.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3update.NewCmd(fact.factory))
-	cobraCmd.AddCommand(version.NewCmd(fact.factory))
-	cobraCmd.AddCommand(whoami.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3purge.NewCmd(fact.factory))
-	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3sync.NewCmd(fact.factory))
-	cobraCmd.AddCommand(v3rollback.NewCmd(fact.factory))
-	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
-}
-
+// setCmds registers the top-level commands the account's generation is
+// entitled to. The list itself lives in table.go.
 func (fact *factoryRoot) setCmds(cobraCmd *cobra.Command) {
-	cobraCmd.AddCommand(initcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(logcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(deploycmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(buildCmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(devcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(linkcmd.NewCmd(fact.factory))
-	cobraCmd.AddCommand(unlink.NewCmd(fact.factory))
-	cobraCmd.AddCommand(completion.NewCmd(fact.factory))
-	cobraCmd.AddCommand(describe.NewCmd(fact.factory))
-	cobraCmd.AddCommand(login.New(fact.factory))
-	cobraCmd.AddCommand(logout.NewCmd(fact.factory))
-	cobraCmd.AddCommand(create.NewCmd(fact.factory))
-	cobraCmd.AddCommand(list.NewCmd(fact.factory))
-	cobraCmd.AddCommand(delete.NewCmd(fact.factory))
-	cobraCmd.AddCommand(update.NewCmd(fact.factory))
-	cobraCmd.AddCommand(version.NewCmd(fact.factory))
-	cobraCmd.AddCommand(whoami.NewCmd(fact.factory))
-	cobraCmd.AddCommand(purge.NewCmd(fact.factory))
-	cobraCmd.AddCommand(reset.NewCmd(fact.factory))
-	cobraCmd.AddCommand(sync.NewCmd(fact.factory))
-	cobraCmd.AddCommand(rollback.NewCmd(fact.factory))
-	cobraCmd.AddCommand(clone.NewCmd(fact.factory))
-	cobraCmd.AddCommand(warmup.NewCmd(fact.factory))
-	cobraCmd.AddCommand(profiles.NewCmd(fact.factory))
-	cobraCmd.AddCommand(config.NewCmd(fact.factory))
+	cobraCmd.AddCommand(cmdregistry.Children(children, fact.factory)...)
 }
 
 func (fact *factoryRoot) CmdRoot() cmdutil.Command {
@@ -213,15 +125,9 @@ func (fact *factoryRoot) CmdRoot() cmdutil.Command {
 	// set template for -v flag
 	cobraCmd.SetVersionTemplate(color.New(color.Bold).Sprint("Azion CLI " + version.BinVersion + "\n"))
 
-	apiVersion := fact.resolveAPIVersion()
-	fact.factory.APIVersion = apiVersion
+	fact.factory.APIVersion = fact.resolveAPIVersion()
 
-	switch apiVersion {
-	case apiversion.V3:
-		fact.setV3Cmds(cobraCmd)
-	default: // apiversion.V4 today; a new generation gets its own case
-		fact.setCmds(cobraCmd)
-	}
+	fact.setCmds(cobraCmd)
 
 	return cobraCmd
 }

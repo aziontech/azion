@@ -3,84 +3,127 @@ package describe
 import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/describe"
-	edgeApplications "github.com/aziontech/azion-cli/pkg/cmd/describe/applications"
-	cache "github.com/aziontech/azion-cli/pkg/cmd/describe/cache_setting"
-	edgeConnector "github.com/aziontech/azion-cli/pkg/cmd/describe/connector"
-	crl "github.com/aziontech/azion-cli/pkg/cmd/describe/crl"
-	csr "github.com/aziontech/azion-cli/pkg/cmd/describe/csr"
-	customPages "github.com/aziontech/azion-cli/pkg/cmd/describe/custom_pages"
-	dataStream "github.com/aziontech/azion-cli/pkg/cmd/describe/data_stream"
-	deviceGroups "github.com/aziontech/azion-cli/pkg/cmd/describe/device_groups"
-	digitalcertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/digital_certificate"
-	dnsRecord "github.com/aziontech/azion-cli/pkg/cmd/describe/dns_record"
-	dnsZone "github.com/aziontech/azion-cli/pkg/cmd/describe/dns_zone"
-	dnssec "github.com/aziontech/azion-cli/pkg/cmd/describe/dnssec"
-	firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall"
-	firewallinstance "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_instance"
-	firewallrules "github.com/aziontech/azion-cli/pkg/cmd/describe/firewall_rules"
-	function "github.com/aziontech/azion-cli/pkg/cmd/describe/function"
-	functioninstance "github.com/aziontech/azion-cli/pkg/cmd/describe/function_instance"
-	networklist "github.com/aziontech/azion-cli/pkg/cmd/describe/network_list"
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	origin "github.com/aziontech/azion-cli/pkg/cmd/describe/origin"
-	"github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
-	ruleEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/rules_engine"
-	edgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/storage"
+	personalToken "github.com/aziontech/azion-cli/pkg/cmd/describe/personal_token"
+	v3CacheSetting "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/cache_setting"
+	v3Domain "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/domain"
+	v3EdgeApplications "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/edge_applications"
+	v3EdgeFunction "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/edge_function"
+	v3EdgeStorage "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/edge_storage"
+	v3RulesEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/v3/rules_engine"
+	v4Applications "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/applications"
+	v4CacheSetting "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/cache_setting"
+	v4Connector "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/connector"
+	v4Crl "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/crl"
+	v4Csr "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/csr"
+	v4CustomPages "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/custom_pages"
+	v4DataStream "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/data_stream"
+	v4DeviceGroups "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/device_groups"
+	v4DigitalCertificate "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/digital_certificate"
+	v4DnsRecord "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/dns_record"
+	v4DnsZone "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/dns_zone"
+	v4Dnssec "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/dnssec"
+	v4Firewall "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/firewall"
+	v4FirewallInstance "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/firewall_instance"
+	v4FirewallRules "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/firewall_rules"
+	v4Function "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/function"
+	v4FunctionInstance "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/function_instance"
+	// v4Kv "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/kv"
+	v4NetworkList "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/network_list"
+	v4RulesEngine "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/rules_engine"
+	v4Storage "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/storage"
+	v4Waf "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/waf"
+	v4WafExceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/waf_exceptions"
+	v4WorkloadDeployment "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/workload_deployment"
+	v4Workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/v4/workloads"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/describe/variables"
-	waf "github.com/aziontech/azion-cli/pkg/cmd/describe/waf"
-	wafexceptions "github.com/aziontech/azion-cli/pkg/cmd/describe/waf_exceptions"
-	workloaddeployment "github.com/aziontech/azion-cli/pkg/cmd/describe/workload_deployment"
-	workloads "github.com/aziontech/azion-cli/pkg/cmd/describe/workloads"
+	"github.com/aziontech/azion-cli/pkg/cmdregistry"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/spf13/cobra"
 )
 
+// NewCmd builds the `azion describe` dispatcher. One shell serves every API
+// generation: which sub-commands it offers, and which examples it shows, are
+// read from the children and examples tables below, filtered by the
+// generation carried on the factory.
 func NewCmd(f *cmdutil.Factory) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   msg.Usage,
-		Short: msg.ShortDescription,
-		Long:  msg.LongDescription,
-		Example: heredoc.Doc(`
+		Use:     msg.Usage,
+		Short:   msg.ShortDescription,
+		Long:    msg.LongDescription,
+		Example: heredoc.Doc(cmdregistry.Example(examples, f)),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
+		},
+	}
+
+	cmd.AddCommand(cmdregistry.Children(children, f)...)
+
+	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
+	return cmd
+}
+
+// children lists every sub-command `azion describe` can offer. Entries carry the
+// API generation they belong to, so the single dispatcher above serves both
+// generations from this one table.
+//
+// Commented entries are resources whose command exists but is not yet wired up.
+var children = []cmdregistry.Entry{
+	cmdregistry.V4Only(v4Applications.NewCmd),
+	cmdregistry.V4Only(v4RulesEngine.NewCmd),
+	cmdregistry.V4Only(v4Workloads.NewCmd),
+	cmdregistry.V4Only(v4WorkloadDeployment.NewCmd),
+	cmdregistry.Any(origin.NewCmd),
+	cmdregistry.V4Only(v4CacheSetting.NewCmd),
+	cmdregistry.V4Only(v4DeviceGroups.NewCmd),
+	cmdregistry.V4Only(v4DnsZone.NewCmd),
+	cmdregistry.V4Only(v4DnsRecord.NewCmd),
+	cmdregistry.V4Only(v4Dnssec.NewCmd),
+	cmdregistry.V4Only(v4Function.NewCmd),
+	cmdregistry.Any(variables.NewCmd),
+	cmdregistry.V4Only(v4Storage.NewCmd),
+	cmdregistry.Any(personalToken.NewCmd),
+	cmdregistry.V4Only(v4Connector.NewCmd),
+	cmdregistry.V4Only(v4CustomPages.NewCmd),
+	cmdregistry.V4Only(v4DataStream.NewCmd),
+	cmdregistry.V4Only(v4FunctionInstance.NewCmd),
+	cmdregistry.V4Only(v4NetworkList.NewCmd),
+	// cmdregistry.V4Only(v4Kv.NewCmd),
+	cmdregistry.V4Only(v4Firewall.NewCmd),
+	cmdregistry.V4Only(v4FirewallInstance.NewCmd),
+	cmdregistry.V4Only(v4FirewallRules.NewCmd),
+	cmdregistry.V4Only(v4Waf.NewCmd),
+	cmdregistry.V4Only(v4WafExceptions.NewCmd),
+	cmdregistry.V4Only(v4DigitalCertificate.NewCmd),
+	cmdregistry.V4Only(v4Csr.NewCmd),
+	cmdregistry.V4Only(v4Crl.NewCmd),
+	cmdregistry.V3Only(v3EdgeApplications.NewCmd),
+	cmdregistry.V3Only(v3RulesEngine.NewCmd),
+	cmdregistry.V3Only(v3Domain.NewCmd),
+	cmdregistry.V3Only(v3CacheSetting.NewCmd),
+	cmdregistry.V3Only(v3EdgeFunction.NewCmd),
+	cmdregistry.V3Only(v3EdgeStorage.NewCmd),
+}
+
+// examples is the curated example block for `azion describe --help`. It is a
+// hand-picked highlight rather than the full child list, and it differs per
+// generation because the resources do, so it is data here like the children.
+var examples = map[apiversion.Version]string{
+	apiversion.V4: `
 		$ azion describe --help
 		$ azion describe application -h
 		$ azion describe workload -h
 		$ azion describe origin -h
 		$ azion describe network-list -h
 		$ azion describe firewall -h
-        `),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return cmd.Help()
-		},
-	}
-
-	cmd.AddCommand(edgeApplications.NewCmd(f))
-	cmd.AddCommand(ruleEngine.NewCmd(f))
-	cmd.AddCommand(workloads.NewCmd(f))
-	cmd.AddCommand(workloaddeployment.NewCmd(f))
-	cmd.AddCommand(origin.NewCmd(f))
-	cmd.AddCommand(cache.NewCmd(f))
-	cmd.AddCommand(deviceGroups.NewCmd(f))
-	cmd.AddCommand(dnsZone.NewCmd(f))
-	cmd.AddCommand(dnsRecord.NewCmd(f))
-	cmd.AddCommand(dnssec.NewCmd(f))
-	cmd.AddCommand(function.NewCmd(f))
-	cmd.AddCommand(variables.NewCmd(f))
-	cmd.AddCommand(edgeStorage.NewCmd(f))
-	cmd.AddCommand(personal_token.NewCmd(f))
-	cmd.AddCommand(edgeConnector.NewCmd(f))
-	cmd.AddCommand(customPages.NewCmd(f))
-	cmd.AddCommand(dataStream.NewCmd(f))
-	cmd.AddCommand(functioninstance.NewCmd(f))
-	cmd.AddCommand(networklist.NewCmd(f))
-	// cmd.AddCommand(kv.NewCmd(f))
-	cmd.AddCommand(firewall.NewCmd(f))
-	cmd.AddCommand(firewallinstance.NewCmd(f))
-	cmd.AddCommand(firewallrules.NewCmd(f))
-	cmd.AddCommand(waf.NewCmd(f))
-	cmd.AddCommand(wafexceptions.NewCmd(f))
-	cmd.AddCommand(digitalcertificate.NewCmd(f))
-	cmd.AddCommand(csr.NewCmd(f))
-	cmd.AddCommand(crl.NewCmd(f))
-
-	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
-	return cmd
+        `,
+	apiversion.V3: `
+		$ azion describe --help
+		$ azion describe edge-application
+		$ azion describe domain
+		$ azion describe origin
+		$ azion describe rule-engine
+		$ azion describe variables
+        `,
 }

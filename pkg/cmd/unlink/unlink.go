@@ -5,7 +5,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/unlink"
-	app "github.com/aziontech/azion-cli/pkg/cmd/delete/application"
+	app "github.com/aziontech/azion-cli/pkg/cmd/delete/v4/application"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
