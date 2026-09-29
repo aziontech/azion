@@ -88,8 +88,8 @@ func TestNestedSuggestFunc(t *testing.T) {
 
 func TestIsRootCmd(t *testing.T) {
 	tests := []struct {
-		name          string
-		setupCmd      func() *cobra.Command
+		name           string
+		setupCmd       func() *cobra.Command
 		expectedResult bool
 	}{
 		{

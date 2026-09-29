@@ -5,11 +5,11 @@ import (
 	"errors"
 	"testing"
 
+	app "github.com/aziontech/azion-cli/pkg/cmd/delete/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	app "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"

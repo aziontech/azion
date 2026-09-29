@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
+	delete "github.com/aziontech/azion-cli/pkg/cmd/delete/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -18,7 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/v3commands/build"
-	delete "github.com/aziontech/azion-cli/pkg/v3commands/delete/edge_application"
 	manifestInt "github.com/aziontech/azion-cli/pkg/v3manifest"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"

@@ -40,10 +40,10 @@ func TestTimeComparisonLogic(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Test the core logic directly
 			actualShouldShow := time.Since(tt.publishedAt) >= 24*time.Hour
-			
+
 			// Assert whether update message should be shown as expected
-			assert.Equal(t, tt.shouldShowUpdate, actualShouldShow, 
-				"Expected shouldShowUpdate to be %v, but got %v for publish time %v", 
+			assert.Equal(t, tt.shouldShowUpdate, actualShouldShow,
+				"Expected shouldShowUpdate to be %v, but got %v for publish time %v",
 				tt.shouldShowUpdate, actualShouldShow, tt.publishedAt)
 		})
 	}
@@ -77,7 +77,7 @@ func TestParsePublishedAtDate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Try to parse the date
 			_, err := time.Parse(time.RFC3339, tt.publishedAt)
-			
+
 			// Check if parsing was successful as expected
 			if tt.isValid {
 				assert.NoError(t, err, "Expected valid date but got error: %v", err)

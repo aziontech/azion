@@ -174,7 +174,7 @@ func TestResolveAPIVersionWithoutToken(t *testing.T) {
 }
 
 // CmdRoot records the generation on the factory and uses it to pick the tree,
-// which is what setCmds/setV3Cmds consume.
+// which is what the command tables in table.go consume.
 func TestCmdRootResolvesVersionAndPicksTree(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 

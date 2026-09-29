@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	app "github.com/aziontech/azion-cli/pkg/cmd/delete/application"
+	app "github.com/aziontech/azion-cli/pkg/cmd/delete/v4/application"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
