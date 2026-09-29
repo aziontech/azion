@@ -13,12 +13,12 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apidom "github.com/aziontech/azion-cli/pkg/api/v3/domain"
+	apiapp "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
+	api "github.com/aziontech/azion-cli/pkg/api/v3/edge_function"
+	apiori "github.com/aziontech/azion-cli/pkg/api/v3/origin"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	apidom "github.com/aziontech/azion-cli/pkg/v3api/domain"
-	apiapp "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
-	api "github.com/aziontech/azion-cli/pkg/v3api/edge_function"
-	apiori "github.com/aziontech/azion-cli/pkg/v3api/origin"
 	"github.com/aziontech/azion-cli/utils"
 )
 

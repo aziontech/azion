@@ -1,8 +1,8 @@
 package edge_storage
 
 import (
+	api "github.com/aziontech/azion-cli/pkg/api/v3/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	api "github.com/aziontech/azion-cli/pkg/v3api/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

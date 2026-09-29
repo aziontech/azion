@@ -14,7 +14,9 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	"github.com/aziontech/azion-cli/pkg/api/v3/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
+	deployRemote "github.com/aziontech/azion-cli/pkg/cmd/deploy_remote/v3"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	dryrun "github.com/aziontech/azion-cli/pkg/dry_run"
@@ -22,8 +24,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
-	"github.com/aziontech/azion-cli/pkg/v3api/storage"
-	deployRemote "github.com/aziontech/azion-cli/pkg/v3commands/deploy_remote"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"

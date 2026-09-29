@@ -7,11 +7,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/function"
 	"github.com/aziontech/azion-cli/messages/general"
+	api "github.com/aziontech/azion-cli/pkg/api/v3/edge_function"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/edge_function"
 	"github.com/aziontech/azionapi-go-sdk/edgefunctions"
 	"github.com/spf13/cobra"
 )

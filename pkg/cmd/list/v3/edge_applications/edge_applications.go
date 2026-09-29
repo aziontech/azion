@@ -11,9 +11,9 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/aziontech/azion-cli/messages/general"
 	msg "github.com/aziontech/azion-cli/messages/list/applications"
+	api "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	api "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )

@@ -7,11 +7,11 @@ import (
 	"os"
 
 	msg "github.com/aziontech/azion-cli/messages/delete/application"
+	app "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
+	fun "github.com/aziontech/azion-cli/pkg/api/v3/edge_function"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/token"
-	app "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
-	fun "github.com/aziontech/azion-cli/pkg/v3api/edge_function"
 	"go.uber.org/zap"
 )
 

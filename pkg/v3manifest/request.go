@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
+	apiCache "github.com/aziontech/azion-cli/pkg/api/v3/cache_setting"
+	apiDomain "github.com/aziontech/azion-cli/pkg/api/v3/domain"
+	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
+	apiOrigin "github.com/aziontech/azion-cli/pkg/api/v3/origin"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	apiCache "github.com/aziontech/azion-cli/pkg/v3api/cache_setting"
-	apiDomain "github.com/aziontech/azion-cli/pkg/v3api/domain"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
-	apiOrigin "github.com/aziontech/azion-cli/pkg/v3api/origin"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"go.uber.org/zap"
 )

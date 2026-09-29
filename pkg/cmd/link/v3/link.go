@@ -10,6 +10,8 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/link"
+	"github.com/aziontech/azion-cli/pkg/cmd/deploy/v3"
+	"github.com/aziontech/azion-cli/pkg/cmd/dev/v3"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/command"
 	"github.com/aziontech/azion-cli/pkg/github"
@@ -17,8 +19,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/node"
 	"github.com/aziontech/azion-cli/pkg/output"
-	"github.com/aziontech/azion-cli/pkg/v3commands/deploy"
-	"github.com/aziontech/azion-cli/pkg/v3commands/dev"
 	"github.com/aziontech/azion-cli/utils"
 	thoth "github.com/aziontech/go-thoth"
 	gitlib "github.com/go-git/go-git/v5"
