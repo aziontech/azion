@@ -1,11 +1,12 @@
 package edge_applications
 
 import (
-	"errors"
+	"fmt"
 	"testing"
 
 	"go.uber.org/zap/zapcore"
 
+	msg "github.com/aziontech/azion-cli/messages/list/applications"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -55,7 +56,9 @@ func TestNewCmd(t *testing.T) {
 				)
 				return &mock
 			},
-			err: errors.New("Failed to list your Edge Applications: invalid character '\\'' looking for beginning of object key string. Check your settings and try again. If the error persists, contact Azion support."),
+			// Built from the constant the command uses, so a reworded message
+			// cannot leave this expectation silently stale.
+			err: fmt.Errorf(msg.ErrorGetAll.Error(), "invalid character '\\'' looking for beginning of object key string"),
 		},
 	}
 	for _, tt := range tests {

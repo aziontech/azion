@@ -184,10 +184,8 @@ func TestCreate(t *testing.T) {
 		cmd.SetArgs([]string{"--name", "SUPAN_FUNCTION", "--active", "true", "--args", args.Name(), "--code", code.Name()})
 
 		err := cmd.Execute()
-		stringErr := "Failed to create Edge Function: The server could not process the request because an internal and unexpected problem occurred. Wait a few seconds and try again. For more information run the command again using the '--debug' flag. If the problem persists, contact Azion’s support. Check your settings and try again. If the error persists, contact Azion support"
-		if stringErr == err.Error() {
-			return
-		}
-		t.Fatalf("Error: %q", err)
+		// Built from the same constants the command uses, so a reworded message
+		// cannot leave this expectation silently stale.
+		require.EqualError(t, err, fmt.Sprintf(msg.ErrorCreateFunction.Error(), utils.ErrorInternalServerError))
 	})
 }

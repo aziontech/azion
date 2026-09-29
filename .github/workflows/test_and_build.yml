@@ -39,10 +39,7 @@ jobs:
         run: |
           echo "Building and testing (skipping v3 tests)"
           mkdir -p cover
-          # v3 packages live in two places: pkg/v3commands/ for the commands
-          # that are still version-exclusive, and pkg/cmd/<verb>/v3/ for the
-          # resource commands moved under their verb. Both are skipped.
-          PKGS=$(go list ./... | grep -v "/pkg/v3commands/" | grep -v "/v3/")
+          PKGS=$(go list ./... | grep -v "/pkg/v3commands/")
           echo "Testing packages:" $PKGS
           go test -v -failfast -coverprofile ./cover/azioncoverage.out -coverpkg=$(echo "$PKGS" | tr '\n' ',') $PKGS
           go tool cover -html=./cover/azioncoverage.out -o ./cover/azioncoverage.html

@@ -53,7 +53,7 @@ func TestNewBucket(t *testing.T) {
 		},
 		{
 			name:    "failed internal error status 500",
-			request: httpmock.REST(http.MethodPost, "v4/storage/buckets"),
+			request: httpmock.REST(http.MethodPatch, "workspace/storage/buckets/John-Marston"),
 			response: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
