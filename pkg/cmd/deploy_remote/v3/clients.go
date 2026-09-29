@@ -1,12 +1,12 @@
 package deploy
 
 import (
+	apiDomain "github.com/aziontech/azion-cli/pkg/api/v3/domain"
+	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
+	apiEdgeFunction "github.com/aziontech/azion-cli/pkg/api/v3/edge_function"
+	apiOrigin "github.com/aziontech/azion-cli/pkg/api/v3/origin"
+	apiStorage "github.com/aziontech/azion-cli/pkg/api/v3/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
-	apiDomain "github.com/aziontech/azion-cli/pkg/v3api/domain"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
-	apiEdgeFunction "github.com/aziontech/azion-cli/pkg/v3api/edge_function"
-	apiOrigin "github.com/aziontech/azion-cli/pkg/v3api/origin"
-	apiStorage "github.com/aziontech/azion-cli/pkg/v3api/storage"
 )
 
 type Clients struct {

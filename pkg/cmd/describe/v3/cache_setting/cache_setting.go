@@ -11,12 +11,12 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
+	api "github.com/aziontech/azion-cli/pkg/api/v3/cache_setting"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/cache_setting"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 )

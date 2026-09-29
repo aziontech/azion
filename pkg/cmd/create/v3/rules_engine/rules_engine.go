@@ -9,9 +9,9 @@ import (
 	"go.uber.org/zap"
 
 	msg "github.com/aziontech/azion-cli/messages/create/rules_engine"
+	api "github.com/aziontech/azion-cli/pkg/api/v3/rules_engine"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/rules_engine"
 	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"

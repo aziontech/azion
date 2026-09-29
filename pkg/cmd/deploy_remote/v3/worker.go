@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync/atomic"
 
+	"github.com/aziontech/azion-cli/pkg/api/v3/storage"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/v3api/storage"
 	"go.uber.org/zap"
 )
 

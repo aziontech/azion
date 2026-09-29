@@ -10,10 +10,10 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/cache_setting"
 
+	api "github.com/aziontech/azion-cli/pkg/api/v3/cache_setting"
+	apiEdgeApp "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/cache_setting"
-	apiEdgeApp "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/utils"

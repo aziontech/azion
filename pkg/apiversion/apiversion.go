@@ -30,7 +30,8 @@ var ErrUnauthorized = errors.New("credential rejected by the authentication serv
 type Version string
 
 const (
-	// V3 is the legacy generation, served by pkg/v3commands and pkg/v3api.
+	// V3 is the legacy generation, served by the v3/ subpackages under pkg/cmd
+	// and pkg/api.
 	V3 Version = "v3"
 	// V4 is the current generation, served by pkg/cmd and pkg/api.
 	V4 Version = "v4"

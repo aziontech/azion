@@ -2,40 +2,40 @@ package root
 
 import (
 	buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build"
+	v3buildCmd "github.com/aziontech/azion-cli/pkg/cmd/build/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/clone"
 	"github.com/aziontech/azion-cli/pkg/cmd/completion"
 	"github.com/aziontech/azion-cli/pkg/cmd/config"
 	"github.com/aziontech/azion-cli/pkg/cmd/create"
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
+	v3deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
+	v3devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev/v3"
 	initcmd "github.com/aziontech/azion-cli/pkg/cmd/init"
+	v3initcmd "github.com/aziontech/azion-cli/pkg/cmd/init/v3"
 	linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link"
+	v3linkcmd "github.com/aziontech/azion-cli/pkg/cmd/link/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/list"
 	"github.com/aziontech/azion-cli/pkg/cmd/login"
+	v3login "github.com/aziontech/azion-cli/pkg/cmd/login/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/logout"
 	logcmd "github.com/aziontech/azion-cli/pkg/cmd/logs"
 	"github.com/aziontech/azion-cli/pkg/cmd/profiles"
 	"github.com/aziontech/azion-cli/pkg/cmd/purge"
+	v3purge "github.com/aziontech/azion-cli/pkg/cmd/purge/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/reset"
 	"github.com/aziontech/azion-cli/pkg/cmd/rollback"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
+	v3sync "github.com/aziontech/azion-cli/pkg/cmd/sync/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/unlink"
+	v3unlink "github.com/aziontech/azion-cli/pkg/cmd/unlink/v3"
 	"github.com/aziontech/azion-cli/pkg/cmd/update"
 	"github.com/aziontech/azion-cli/pkg/cmd/version"
 	"github.com/aziontech/azion-cli/pkg/cmd/warmup"
 	"github.com/aziontech/azion-cli/pkg/cmd/whoami"
 	"github.com/aziontech/azion-cli/pkg/cmdregistry"
-	v3buildCmd "github.com/aziontech/azion-cli/pkg/v3commands/build"
-	v3deploycmd "github.com/aziontech/azion-cli/pkg/v3commands/deploy"
-	v3devcmd "github.com/aziontech/azion-cli/pkg/v3commands/dev"
-	v3initcmd "github.com/aziontech/azion-cli/pkg/v3commands/init"
-	v3linkcmd "github.com/aziontech/azion-cli/pkg/v3commands/link"
-	v3login "github.com/aziontech/azion-cli/pkg/v3commands/login"
-	v3purge "github.com/aziontech/azion-cli/pkg/v3commands/purge"
-	v3sync "github.com/aziontech/azion-cli/pkg/v3commands/sync"
-	v3unlink "github.com/aziontech/azion-cli/pkg/v3commands/unlink"
 )
 
 // children lists every top-level command, with the API generation it belongs
@@ -44,7 +44,7 @@ import (
 // generation.
 //
 // The five verb dispatchers are version-agnostic here: each one is a single
-// shell that reads its own table (pkg/cmd/<verb>/table.go) to pick its
+// shell that reads the children table in its own file to pick its
 // children. The commands still listed per generation are the ones whose whole
 // implementation differs — the deploy pipeline and the project-scaffolding
 // commands around it, which phase 3 addresses.

@@ -11,9 +11,9 @@ import (
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy"
+	apidom "github.com/aziontech/azion-cli/pkg/api/v3/domain"
+	apipurge "github.com/aziontech/azion-cli/pkg/api/v3/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	apidom "github.com/aziontech/azion-cli/pkg/v3api/domain"
-	apipurge "github.com/aziontech/azion-cli/pkg/v3api/realtime_purge"
 	"go.uber.org/zap"
 )
 

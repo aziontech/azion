@@ -6,9 +6,9 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/purge"
+	apipurge "github.com/aziontech/azion-cli/pkg/api/v3/realtime_purge"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	apipurge "github.com/aziontech/azion-cli/pkg/v3api/realtime_purge"
 
 	"go.uber.org/zap"
 )

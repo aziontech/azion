@@ -10,10 +10,10 @@ import (
 	msg "github.com/aziontech/azion-cli/messages/storage"
 	"github.com/aziontech/azion-cli/utils"
 
+	api "github.com/aziontech/azion-cli/pkg/api/v3/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
-	api "github.com/aziontech/azion-cli/pkg/v3api/storage"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

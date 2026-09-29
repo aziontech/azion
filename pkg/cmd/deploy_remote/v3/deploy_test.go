@@ -10,10 +10,10 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 
+	apiapp "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	apiapp "github.com/aziontech/azion-cli/pkg/v3api/edge_applications"
 	"github.com/stretchr/testify/require"
 )
 
