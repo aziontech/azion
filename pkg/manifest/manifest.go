@@ -15,9 +15,9 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/pkg/registry"
 	"github.com/aziontech/azion-cli/utils"
-	"github.com/briandowns/spinner"
 	"go.uber.org/zap"
 )
 
@@ -76,138 +76,26 @@ func (man *ManifestInterpreter) ReadManifest(path string, f *cmdutil.Factory, ms
 	return manifest, nil
 }
 
+// CreateResources applies the manifest by running the v4 pipeline.
+//
+// The order of the steps, and what each one needs before it is worth running,
+// lives in V4Pipeline. pkg/pipeline owns everything that used to be repeated
+// around each call here: the spinner, per-step timing, the debug log and
+// stopping at the first error.
 func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplicationOptions, manifest *contracts.ManifestV4, f *cmdutil.Factory, projectConf string, msgs *[]string) error {
 	logger.Debug("Applying manifest resources")
-	s := spinner.New(spinner.CharSets[7], 100*time.Millisecond)
-	s.Suffix = " " + msg.CreatingManifest
-	s.FinalMSG = "\n"
-	if !f.Debug {
-		s.Start()
-	}
-	defer s.Stop()
 
 	rc := NewResourceContext(f, conf, manifest, projectConf, msgs, man.WriteAzionJsonContent)
 
-	if len(manifest.Functions) > 0 {
-		start := time.Now()
-		if err := rc.ApplyFunctions(manifest.Functions); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestFunctions", time.Since(start))
-		}
-	}
-
-	if len(manifest.Applications) > 0 && len(manifest.Applications[0].FunctionsInstances) > 0 {
-		logger.Debug("Applying function instances")
-		start := time.Now()
-		if err := rc.ApplyFunctionInstances(manifest.Applications[0].FunctionsInstances); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestFunctionInstances", time.Since(start))
-		}
-	}
-
-	if len(manifest.Applications) > 0 {
-		edgeappman := manifest.Applications[0]
-		logger.Debug("Applying edge application")
-		start := time.Now()
-		if err := rc.ApplyEdgeApplication(edgeappman); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestEdgeApplication", time.Since(start))
-		}
-
-		if len(edgeappman.CacheSettings) > 0 {
-			logger.Debug("Applying cache settings")
-			start := time.Now()
-			if err := rc.ApplyCacheSettings(edgeappman.CacheSettings); err != nil {
-				return err
-			}
-			if GlobalTimingCallback != nil {
-				GlobalTimingCallback("ManifestCacheSettings", time.Since(start))
-			}
-		}
-
-		if len(manifest.Connectors) > 0 {
-			logger.Debug("Applying connectors")
-			start := time.Now()
-			if err := rc.ApplyConnectors(manifest.Connectors); err != nil {
-				return err
-			}
-			if GlobalTimingCallback != nil {
-				GlobalTimingCallback("ManifestConnectors", time.Since(start))
-			}
-		}
-
-		if len(edgeappman.Rules) > 0 {
-			logger.Debug("Applying rules engine")
-			start := time.Now()
-			if err := rc.ApplyRulesEngine(edgeappman.Rules); err != nil {
-				return err
-			}
-			if GlobalTimingCallback != nil {
-				GlobalTimingCallback("ManifestRulesEngine", time.Since(start))
-			}
-		}
-	}
-
-	if len(manifest.Workloads) > 0 {
-		logger.Debug("Applying workloads")
-		start := time.Now()
-		if err := rc.ApplyWorkloads(manifest.Workloads); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestWorkloads", time.Since(start))
-		}
-	}
-
-	if len(manifest.WorkloadDeployments) > 0 {
-		logger.Debug("Applying workload deployments")
-		start := time.Now()
-		if err := rc.ApplyWorkloadDeployments(manifest.WorkloadDeployments); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestWorkloadDeployments", time.Since(start))
-		}
-	}
-
-	if len(manifest.Firewalls) > 0 {
-		logger.Debug("Applying firewalls")
-		start := time.Now()
-		if err := rc.ApplyFirewalls(manifest.Firewalls); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestFirewalls", time.Since(start))
-		}
-	}
-
-	if len(manifest.Purge) > 0 {
-		logger.Debug("Applying purge")
-		start := time.Now()
-		if err := rc.ApplyPurge(manifest.Purge); err != nil {
-			return err
-		}
-		if GlobalTimingCallback != nil {
-			GlobalTimingCallback("ManifestPurge", time.Since(start))
-		}
-	}
-
-	// Hand the tracked ids to deleteResources, minus the ones consumed during
-	// this run (a cache setting still referenced by a rule is not an orphan).
-	CacheIds = rc.CacheIds
-	RuleIds = rc.RuleIds
-
-	if err := rc.DeleteOrphanedResources(); err != nil {
-		return err
-	}
-
-	return nil
+	_, err := pipeline.Run(rc.Ctx, V4Pipeline{}, rc, &pipeline.Plan{
+		Factory: f,
+		Msgs:    msgs,
+		// Read here rather than captured at init: deploy sets the callback just
+		// before the run. A nil callback stays nil and the runner skips it.
+		Timing:  pipeline.TimingCallback(GlobalTimingCallback),
+		Spinner: msg.CreatingManifest,
+	})
+	return err
 }
 
 func deleteResources(ctx context.Context, f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string) error {
