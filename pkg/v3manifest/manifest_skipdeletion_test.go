@@ -1,7 +1,6 @@
 package manifest
 
 import (
-	"context"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -17,14 +16,14 @@ func TestDeleteResources_SkipDeletionAbsent_V3(t *testing.T) {
 
 	f, _, _ := testutils.NewFactory(nil)
 	msgs := []string{}
-	ctx := context.Background()
 
 	conf := &contracts.AzionApplicationOptionsV3{
 		Application: contracts.AzionJsonDataApplication{ID: 123},
 		// SkipDeletion is intentionally left as nil to simulate absence in JSON
 	}
 
-	if err := deleteResources(ctx, f, conf, &msgs); err != nil {
-		t.Fatalf("deleteResources (v3) failed with SkipDeletion absent: %v", err)
+	rc := newResourceContext(f, conf, &contracts.Manifest{}, "", &msgs, nil)
+	if err := rc.deleteOrphanedResources(); err != nil {
+		t.Fatalf("orphan removal (v3) failed with SkipDeletion absent: %v", err)
 	}
 }
