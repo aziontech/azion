@@ -41,9 +41,11 @@ func (c *Client) PurgeWildcard(ctx context.Context, urlToPurge []string) error {
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeWildcardExecute(request)
 	if err != nil {
 		logger.Debug("Error while purging wildcard", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
 		}
 
 		return utils.ErrorPerStatusCode(httpResp, err)
@@ -66,9 +68,11 @@ func (c *Client) PurgeUrls(ctx context.Context, urlToPurge []string) error {
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeUrlExecute(request)
 	if err != nil {
 		logger.Debug("Error while purging urls", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
 		}
 
 		return utils.ErrorPerStatusCode(httpResp, err)
@@ -92,9 +96,11 @@ func (c *Client) PurgeCacheKey(ctx context.Context, urlToPurge []string, layer s
 	httpResp, err := c.apiClient.RealTimePurgeApi.PurgeCacheKeyExecute(request)
 	if err != nil {
 		logger.Debug("Error while purging cache keys", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return err
+			}
 		}
 
 		return utils.ErrorPerStatusCode(httpResp, err)

@@ -19,9 +19,11 @@ func (c *Client) Create(ctx context.Context, req *CreateRequest, applicationId i
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while creating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return nil, err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
@@ -39,9 +41,11 @@ func (c *Client) Update(ctx context.Context, req *UpdateRequest, applicationID, 
 	cacheResponse, httpResp, err := request.Execute()
 	if err != nil {
 		logger.Debug("Error while updating a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return nil, err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
@@ -66,9 +70,11 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, edgeAppl
 
 	if err != nil {
 		logger.Debug("Error while listing Cache Settings", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return nil, err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
 		}
 		return &sdk.ApplicationCacheGetResponse{}, utils.ErrorPerStatusCode(httpResp, err)
 	}
@@ -82,9 +88,11 @@ func (c *Client) Get(ctx context.Context, edgeApplicationID, cacheSettingsID int
 			ctx, edgeApplicationID, cacheSettingsID).Execute()
 	if err != nil {
 		logger.Debug("Error while getting a Cache Setting", zap.Error(err))
-		err = utils.LogAndRewindBody(httpResp)
-		if err != nil {
-			return nil, err
+		if httpResp != nil {
+			err = utils.LogAndRewindBody(httpResp)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		return nil, utils.ErrorPerStatusCode(httpResp, err)
