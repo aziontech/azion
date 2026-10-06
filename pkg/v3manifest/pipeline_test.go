@@ -132,9 +132,8 @@ func TestV3FailedPurgeReportsSuccessAndSkipsCleanup(t *testing.T) {
 	logger.New(zapcore.InfoLevel)
 
 	// The purge endpoint answers 500, so the request fails with a response in
-	// hand. A transport-level failure would instead panic inside
-	// utils.LogAndRewindBody, which dereferences a nil *http.Response — a
-	// pre-existing bug on the v3 purge path, untouched by this change.
+	// hand. The response-less case is covered separately, by
+	// pkg/api/v3/realtime_purge.
 	mock := &httpmock.Registry{}
 	mock.Register(
 		httpmock.REST("POST", "purge/url"),
