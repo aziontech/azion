@@ -19,8 +19,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/pkg/token"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -179,135 +179,18 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
 
-	if !cmd.SkipBuild && conf.NotFirstRun {
-		if !cmd.SkipFramework {
-			conf.Prefix = newprefix
-			if conf.RotatePrefix == nil || *conf.RotatePrefix == true {
-				replacements := map[string]string{oldprefix: conf.Prefix}
-				replacementsJSON, jsonErr := json.Marshal(replacements)
-				if jsonErr != nil {
-					return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
-				}
-				cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
-				vul := vulcanPkg.NewVulcan()
-				command := vul.Command("", cmdStr, cmd.F)
-				logger.Debug("Running the following command", zap.Any("Command", command))
-				err := cmd.commandRunInteractive(cmd.F, command)
-				if err != nil {
-					return err
-				}
-			}
-		}
-
-		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{Preset: conf.Preset, AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
+	state := &DeployState{
+		Cmd: cmd, F: f, Ctx: ctx, Conf: conf, Msgs: &msgs,
+		Clients:     clients,
+		Interpreter: interpreter,
+		OldPrefix:   oldprefix, NewPrefix: newprefix,
 	}
 
-	pathManifest, err := interpreter.ManifestPath()
-	if err != nil {
+	if _, err := pipeline.Run(ctx, V4DeployPipeline{}, state, &pipeline.Plan{
+		Factory: f,
+		Timing:  HandleDeployTimingCallback,
+	}); err != nil {
 		return err
-	}
-
-	err = cmd.doApplication(clients.Application, context.Background(), conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Time ReadManifest operation
-	readManifestStart := time.Now()
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
-	if err != nil {
-		return err
-	}
-	GlobalTimingSummary.ReadManifestTime = time.Since(readManifestStart)
-
-	// Check if directory exists; if not, we skip creating bucket
-	if len(manifestStructure.Storage) == 0 {
-		logger.Debug(msg.SkipBucket)
-	} else {
-		bucketStart := time.Now()
-		err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs, manifestStructure.Storage)
-		if err != nil {
-			return err
-		}
-		GlobalTimingSummary.BucketCreateTime = time.Since(bucketStart)
-	}
-
-	if !conf.NotFirstRun && (!cmd.SkipBuild || !cmd.SkipFramework) {
-		conf.Prefix = newprefix
-		err = cmd.callBundlerInit(conf)
-		if err != nil {
-			return err
-		}
-		buildCmd := cmd.BuildCmd(f)
-		err = buildCmd.ExternalRun(&contracts.BuildInfo{AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs, cmd.SkipFramework)
-		if err != nil {
-			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
-			return err
-		}
-	}
-
-	// Time second ReadManifest operation
-	readManifestStart = time.Now()
-	manifestStructure, err = interpreter.ReadManifest(pathManifest, f, &msgs)
-	if err != nil {
-		return err
-	}
-	GlobalTimingSummary.ReadManifestTime += time.Since(readManifestStart)
-
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else if cmd.SkipBuild || cmd.SkipFramework {
-		logger.Debug(msg.SkipUploadBuild)
-	} else {
-		// Get the active profile for credentials storage
-		activeProfile := f.GetActiveProfile()
-
-		// Get or create credentials for this bucket
-		credentialsStart := time.Now()
-		creds, err := cmd.GetOrCreateCredentials(ctx, conf.Bucket, activeProfile)
-		if err != nil {
-			return err
-		}
-		GlobalTimingSummary.CredentialsTime = time.Since(credentialsStart)
-
-		uploadStart := time.Now()
-		for _, storage := range manifestStructure.Storage {
-			err = cmd.uploadFilesWithCreds(f, conf, &msgs, storage.Dir, conf.Bucket, creds)
-			if err != nil {
-				return err
-			}
-		}
-		GlobalTimingSummary.UploadStaticFilesTime = time.Since(uploadStart)
-	}
-
-	if len(conf.RulesEngine.Rules) == 0 && !conf.NotFirstRun {
-		err = cmd.doRulesDeploy(ctx, conf, clients.Application, &msgs)
-		if err != nil {
-			return err
-		}
-	}
-
-	conf.NotFirstRun = true
-
-	// Time CreateResources operation
-	manifestCreateStart := time.Now()
-	err = interpreter.CreateResources(conf, manifestStructure, f, cmd.ProjectConf, &msgs)
-	if err != nil {
-		return err
-	}
-	GlobalTimingSummary.ManifestCreateTime = time.Since(manifestCreateStart)
-
-	if len(manifestStructure.Workloads) == 0 || manifestStructure.Workloads[0].Name == "" {
-		err = cmd.doWorkload(clients.Workload, ctx, conf, &msgs)
-		if err != nil {
-			return err
-		}
 	}
 
 	// Calculate total deploy time
