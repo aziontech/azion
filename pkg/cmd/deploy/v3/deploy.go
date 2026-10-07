@@ -19,7 +19,6 @@ import (
 	deployRemote "github.com/aziontech/azion-cli/pkg/cmd/deploy_remote/v3"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
-	dryrun "github.com/aziontech/azion-cli/pkg/dry_run"
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
@@ -144,12 +143,11 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local b
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	activeProfile := f.GetActiveProfile()
 	if cmd.DryRun {
-		dryStructure := dryrun.NewDryrunCmd(f)
-		pathWorkingDir, err := cmd.GetWorkDir()
-		if err != nil {
-			return err
-		}
-		return dryStructure.SimulateDeploy(pathWorkingDir, cmd.ProjectConf)
+		// Described by the same step table the deploy executes, so it cannot
+		// drift from what a real run would do.
+		dry := deployRemote.NewDeployCmd(f)
+		dry.ProjectConf = cmd.ProjectConf
+		return dry.DryRun(f)
 	}
 
 	if cmd.Local {
