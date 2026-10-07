@@ -15,7 +15,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
+	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap"
 )
@@ -36,50 +36,10 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOptsV3, synch *Sy
 		return msg.ERRORNOTDEPLOYED
 	}
 
-	var err error
-	manifest := &contracts.Manifest{}
+	state := &SyncState{F: f, Info: info, Sync: synch, Manifest: &contracts.Manifest{}}
 
-	remoteCaches, err := synch.syncCache(info, f, manifest)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	remoteOrigins, err := synch.syncOrigin(info, f, manifest)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	err = synch.syncRules(info, f, manifest, remoteCaches, remoteOrigins)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	err = synch.syncEnv(f)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	if synch.IaC {
-		if synch.IaCFormat != "mjs" && synch.IaCFormat != "cjs" && synch.IaCFormat != "js" && synch.IaCFormat != "ts" {
-			return msg.INVALIDFORMAT
-		}
-
-		err = synch.WriteManifest(manifest, "")
-		if err != nil {
-			return err
-		}
-		defer os.Remove("manifesttoconvert.json")
-		fileName := fmt.Sprintf("azion.config.%s", synch.IaCFormat)
-
-		vul := vulcanPkg.NewVulcanV3()
-		command := vul.Command("", "manifest -o %s transform %s", f)
-		err = synch.CommandRunInteractive(f, fmt.Sprintf(command, fileName, "manifesttoconvert.json"))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := pipeline.Run(context.Background(), V3SyncPipeline{}, state, &pipeline.Plan{Factory: f})
+	return err
 }
 
 func (synch *SyncCmd) syncOrigin(info contracts.SyncOptsV3, f *cmdutil.Factory, manifest *contracts.Manifest) (map[string]contracts.AzionJsonDataOrigin, error) {

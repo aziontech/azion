@@ -7,10 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
-	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/build/v3"
 	delete "github.com/aziontech/azion-cli/pkg/cmd/delete/v3/edge_applications"
 	"github.com/aziontech/azion-cli/pkg/cmd/sync"
@@ -19,9 +17,9 @@ import (
 	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/output"
+	"github.com/aziontech/azion-cli/pkg/pipeline"
 	manifestInt "github.com/aziontech/azion-cli/pkg/v3manifest"
 	"github.com/aziontech/azion-cli/utils"
-	sdk "github.com/aziontech/azionapi-go-sdk/edgeapplications"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
@@ -155,108 +153,14 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
 
-	pathManifest, err := interpreter.ManifestPath()
-	if err != nil {
+	state := &DeployState{
+		Cmd: cmd, F: f, Ctx: ctx, Conf: conf, Msgs: &msgs,
+		Clients:     clients,
+		Interpreter: interpreter,
+	}
+
+	if _, err := pipeline.Run(ctx, V3DeployPipeline{}, state, &pipeline.Plan{Factory: f}); err != nil {
 		return err
-	}
-
-	err = cmd.doApplication(clients.EdgeApplication, context.Background(), conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	if !conf.NotFirstRun {
-		singleOriginId, err := cmd.doOriginSingle(clients.Origin, ctx, conf, &msgs)
-		if err != nil {
-			return err
-		}
-
-		ruleDefaultID, err := clients.EdgeApplication.GetRulesDefault(ctx, conf.Application.ID, "request")
-		if err != nil {
-			logger.Debug("Error while getting default rules engine", zap.Error(err))
-			errCascade := callDeleteCascade(f)
-			if errCascade != nil {
-				return errCascade
-			}
-			return err
-		}
-		behaviors := make([]sdk.RulesEngineBehaviorEntry, 0)
-
-		var behString sdk.RulesEngineBehaviorString
-		behString.SetName("set_origin")
-
-		behString.SetTarget(strconv.Itoa(int(singleOriginId)))
-
-		behaviors = append(behaviors, sdk.RulesEngineBehaviorEntry{
-			RulesEngineBehaviorString: &behString,
-		})
-
-		reqUpdateRulesEngine := apiEdgeApplications.UpdateRulesEngineRequest{
-			IdApplication: conf.Application.ID,
-			Phase:         "request",
-			Id:            ruleDefaultID,
-		}
-
-		reqUpdateRulesEngine.SetBehaviors(behaviors)
-
-		_, err = clients.EdgeApplication.UpdateRulesEngine(ctx, &reqUpdateRulesEngine)
-		if err != nil {
-			logger.Debug("Error while updating default rules engine", zap.Error(err))
-			errCascade := callDeleteCascade(f)
-			if errCascade != nil {
-				return errCascade
-			}
-			return err
-		}
-
-		if len(conf.RulesEngine.Rules) == 0 {
-			err = cmd.doRulesDeploy(ctx, conf, clients.EdgeApplication, &msgs)
-			if err != nil {
-				errCascade := callDeleteCascade(f)
-				if errCascade != nil {
-					return errCascade
-				}
-				return err
-			}
-		}
-	}
-
-	err = cmd.doBucket(clients.Bucket, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	// Check if directory exists; if not, we skip uploading static files
-	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
-	} else {
-		err = cmd.uploadFiles(f, conf, &msgs)
-		if err != nil {
-			return err
-		}
-	}
-
-	conf.Function.File = ".edge/worker.js"
-	err = cmd.doFunction(clients, ctx, conf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	manifestStructure, err := interpreter.ReadManifest(pathManifest, f, &msgs)
-	if err != nil {
-		return err
-	}
-
-	err = interpreter.CreateResources(conf, manifestStructure, f, cmd.ProjectConf, &msgs)
-	if err != nil {
-		return err
-	}
-
-	if manifestStructure.Domain == nil || manifestStructure.Domain.Name != "" {
-		err = cmd.doDomain(clients.Domain, ctx, conf, &msgs)
-		if err != nil {
-			return err
-		}
 	}
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)

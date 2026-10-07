@@ -195,3 +195,40 @@ func TimeAPICallWithResult[T any](name string, fn func() (T, error)) (T, error) 
 	}
 	return result, err
 }
+
+// HandleDeployTimingCallback records how long each v4 deploy step took.
+//
+// It is the deploy counterpart of HandleManifestTimingCallback: the pipeline
+// runner reports (step name, duration) and this maps the name onto the field
+// the summary prints. Steps no longer time themselves.
+//
+// The two manifest-read steps both accumulate onto ReadManifestTime, which
+// reproduces the "= then +=" of the sequence this replaces: InitTimingSummary
+// allocates a fresh summary, so the field starts at zero and the first += is
+// equivalent to an assignment.
+//
+// A name with no field here is ignored, exactly as the manifest handler does —
+// steps that were never timed, such as the application or the workload, stay
+// untimed.
+func HandleDeployTimingCallback(name string, duration time.Duration) {
+	if GlobalTimingSummary == nil {
+		return
+	}
+	GlobalTimingSummary.mu.Lock()
+	defer GlobalTimingSummary.mu.Unlock()
+
+	switch name {
+	case "ReadManifest", "ReadManifestAgain":
+		GlobalTimingSummary.ReadManifestTime += duration
+	case "Bucket":
+		GlobalTimingSummary.BucketCreateTime = duration
+	case "Credentials":
+		GlobalTimingSummary.CredentialsTime = duration
+	case "UploadStaticFiles":
+		GlobalTimingSummary.UploadStaticFilesTime = duration
+	case "Manifest":
+		GlobalTimingSummary.ManifestCreateTime = duration
+	default:
+		// Untimed step, ignore
+	}
+}

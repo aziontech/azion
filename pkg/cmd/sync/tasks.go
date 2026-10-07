@@ -13,9 +13,8 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
-	"github.com/aziontech/azion-cli/pkg/manifest"
+	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/pkg/registry"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	edgesdk "github.com/aziontech/azionapi-v4-go-sdk-dev/azion-api"
 	"go.uber.org/zap"
@@ -37,73 +36,10 @@ func SyncLocalResources(f *cmdutil.Factory, info contracts.SyncOpts, synch *Sync
 		return msg.ERRORNOTDEPLOYED
 	}
 
-	var err error
-	var manifestStruct *contracts.ManifestV4
-	var msgs []string
+	state := &SyncState{F: f, Info: info, Sync: synch}
 
-	interpreter := manifest.NewManifestInterpreter()
-	pathManifest, err := interpreter.ManifestPath()
-	if err != nil {
-		manifestStruct = &contracts.ManifestV4{
-			Applications:        []contracts.Applications{},
-			Workloads:           []contracts.WorkloadManifest{},
-			WorkloadDeployments: []contracts.WorkloadDeployment{},
-			Purge:               []contracts.PurgeManifest{},
-			Storage:             []contracts.StorageManifest{},
-			Functions:           []contracts.Function{},
-			Connectors:          []edgesdk.ConnectorRequest{},
-		}
-	} else {
-		manifestStruct, err = interpreter.ReadManifest(pathManifest, f, &msgs)
-		if err != nil {
-			manifestStruct = &contracts.ManifestV4{
-				Applications:        []contracts.Applications{},
-				Workloads:           []contracts.WorkloadManifest{},
-				WorkloadDeployments: []contracts.WorkloadDeployment{},
-				Purge:               []contracts.PurgeManifest{},
-				Storage:             []contracts.StorageManifest{},
-				Functions:           []contracts.Function{},
-				Connectors:          []edgesdk.ConnectorRequest{},
-			}
-		}
-	}
-
-	_, err = synch.syncCache(info, f, manifestStruct)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	err = synch.syncRules(info, f, manifestStruct)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	err = synch.syncEnv(f)
-	if err != nil {
-		return fmt.Errorf(msg.ERRORSYNC, err.Error())
-	}
-
-	if synch.IaC {
-		if synch.IaCFormat != "mjs" && synch.IaCFormat != "cjs" && synch.IaCFormat != "js" && synch.IaCFormat != "ts" {
-			return msg.INVALIDFORMAT
-		}
-
-		err = synch.WriteManifest(manifestStruct, "")
-		if err != nil {
-			return err
-		}
-		defer os.Remove("manifesttoconvert.json")
-		fileName := fmt.Sprintf("azion.config.%s", synch.IaCFormat)
-
-		vul := vulcanPkg.NewVulcan()
-		command := vul.Command("", "manifest transform --output %s --entry %s", f)
-		err = synch.CommandRunInteractive(f, fmt.Sprintf(command, fileName, "manifesttoconvert.json"))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := pipeline.Run(context.Background(), V4SyncPipeline{}, state, &pipeline.Plan{Factory: f})
+	return err
 }
 
 func (synch *SyncCmd) syncCache(info contracts.SyncOpts, f *cmdutil.Factory, manifest *contracts.ManifestV4) (map[string]contracts.AzionJsonDataCacheSettings, error) {
