@@ -155,11 +155,62 @@ func TestDryRunDescribesOnlyStepsThatWouldRun(t *testing.T) {
 
 	got := out.String()
 	// Rules already exist, so the rules step does not apply.
-	require.NotContains(t, got, "Presenting the option to create Cache Setting")
+	require.NotContains(t, got, "Creating the default Rules Engine")
 	// No storage declared, so no bucket.
 	require.NotContains(t, got, "Creating Bucket")
 	// And nothing from the v3 vocabulary, which the old simulation printed even
 	// on v4 projects.
 	require.NotContains(t, strings.ToLower(got), "single origin")
 	require.NotContains(t, got, "default Rule Engine")
+}
+
+// TestV4DryRunDoesNotOfferACacheSetting guards against describing v4 with v3
+// behaviour.
+//
+// v3's doRulesDeploy prompts the user to create a cache setting; v4's only
+// creates the preset's default rules. An earlier version of this renderer
+// reused the v3 message for the v4 step, which is the same drift that made the
+// simulation this replaces wrong in the first place.
+func TestV4DryRunDoesNotOfferACacheSetting(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+	conf := &contracts.AzionApplicationOptions{Name: "proj", Preset: "vite"}
+	cmd, out := dryRunCmd(t, conf)
+
+	inTempProject(t, &contracts.ManifestV4{}, func() {
+		require.NoError(t, cmd.DryRun(cmd.F))
+	})
+
+	got := out.String()
+	require.Contains(t, got, "Creating the default Rules Engine for the 'vite' preset")
+	require.NotContains(t, got, "Cache Setting")
+	require.NotContains(t, got, "Presenting the option")
+}
+
+// TestV4DryRunReflectsTheManifestContents is the v4 counterpart: its steps are
+// conditional, so the list already varies, and the counts say how much.
+func TestV4DryRunReflectsTheManifestContents(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+
+	render := func(m *contracts.ManifestV4) string {
+		conf := &contracts.AzionApplicationOptions{Name: "p", Bucket: "p", Preset: "vite"}
+		conf.NotFirstRun = true
+		cmd, out := dryRunCmd(t, conf)
+		inTempProject(t, m, func() { require.NoError(t, cmd.DryRun(cmd.F)) })
+		return out.String()
+	}
+
+	onlyFunctions := render(&contracts.ManifestV4{Functions: []contracts.Function{{}, {}}})
+	require.Contains(t, onlyFunctions, "functions (2)")
+	require.NotContains(t, onlyFunctions, "firewalls")
+	require.NotContains(t, onlyFunctions, "purge")
+
+	withFirewalls := render(&contracts.ManifestV4{
+		Firewalls: []contracts.FirewallManifest{{}},
+		Purge:     []contracts.PurgeManifest{{}, {}},
+	})
+	require.Contains(t, withFirewalls, "firewalls (1)")
+	require.Contains(t, withFirewalls, "purge (2)")
+	require.NotContains(t, withFirewalls, "functions")
+
+	require.NotEqual(t, onlyFunctions, withFirewalls)
 }

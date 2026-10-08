@@ -84,8 +84,9 @@ func (cmd *DeployCmd) DryRun(f *cmdutil.Factory) error {
 		case "UploadStaticFiles":
 			report(fmt.Sprintf(msg.UploadStaticFiles, conf.Bucket))
 		case "RulesEngine":
-			report(msg.CreateRulesCache)
-			logger.Debug("", zap.Any("Cache Setting information", msg.AskCreateCacheSettings))
+			// v4 creates the preset's default rules. It does not offer a cache
+			// setting — that prompt belongs to the v3 flow.
+			report(fmt.Sprintf(msg.CreateRulesEngine, conf.Preset))
 		case "Manifest":
 			if !manifestRead {
 				report(msg.SkipManifest)
@@ -129,9 +130,47 @@ func reportManifest(
 	}
 	report(msg.ManifestHeader)
 	for _, name := range steps {
-		report(fmt.Sprintf(msg.ManifestStep, manifestStepLabel(name)))
+		label := manifestStepLabel(name)
+		if n, counted := manifestStepCount(manifest, name); counted {
+			report(fmt.Sprintf(msg.ManifestStepCount, label, n))
+			continue
+		}
+		report(fmt.Sprintf(msg.ManifestStep, label))
 	}
 	return nil
+}
+
+// manifestStepCount reports how many of a resource the manifest declares, for
+// the steps where a count is meaningful. It describes the manifest; it does not
+// decide what runs — that is the pipeline's job.
+func manifestStepCount(m *contracts.ManifestV4, step string) (int, bool) {
+	app := contracts.Applications{}
+	if len(m.Applications) > 0 {
+		app = m.Applications[0]
+	}
+	switch step {
+	case "ManifestFunctions":
+		return len(m.Functions), true
+	case "ManifestFunctionInstances":
+		return len(app.FunctionsInstances), true
+	case "ManifestCacheSettings":
+		return len(app.CacheSettings), true
+	case "ManifestConnectors":
+		return len(m.Connectors), true
+	case "ManifestRulesEngine":
+		return len(app.Rules), true
+	case "ManifestWorkloads":
+		return len(m.Workloads), true
+	case "ManifestWorkloadDeployments":
+		return len(m.WorkloadDeployments), true
+	case "ManifestFirewalls":
+		return len(m.Firewalls), true
+	case "ManifestPurge":
+		return len(m.Purge), true
+	default:
+		// The application and the orphan cleanup are not counted.
+		return 0, false
+	}
 }
 
 // manifestStepLabel turns a manifest step name into something readable.

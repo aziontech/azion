@@ -112,3 +112,37 @@ func TestV3DryRunOnARepeatDeploySkipsTheFirstRunStep(t *testing.T) {
 	require.NotContains(t, got, "Creating single Origin")
 	require.NotContains(t, got, "Updating default Rule Engine")
 }
+
+// TestV3DryRunReflectsTheManifestContents guards against the manifest section
+// becoming a fixed list.
+//
+// The v3 manifest steps are unconditional by design — they rewrite their
+// section of azion.json even when the manifest declares nothing — so the step
+// list alone is the same for every project. The description therefore has to
+// say how many of each resource the manifest declares, or it reads as if the
+// manifest declared them all.
+func TestV3DryRunReflectsTheManifestContents(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+
+	render := func(m *contracts.Manifest) string {
+		conf := &contracts.AzionApplicationOptionsV3{Name: "p", Bucket: "p"}
+		conf.NotFirstRun = true
+		cmd, out := dryRunCmd(t, conf)
+		inTempProject(t, m, func() { require.NoError(t, cmd.DryRun(cmd.F)) })
+		return out.String()
+	}
+
+	empty := render(&contracts.Manifest{})
+	require.Contains(t, empty, "origins: none declared, this section will be cleared")
+	require.Contains(t, empty, "rules engine: none declared, this section will be cleared")
+
+	full := render(&contracts.Manifest{
+		Origins: []contracts.Origin{{}, {}},
+		Rules:   []contracts.RuleEngine{{}, {}, {}},
+	})
+	require.Contains(t, full, "origins (2)")
+	require.Contains(t, full, "rules engine (3)")
+	require.Contains(t, full, "cache settings: none declared")
+
+	require.NotEqual(t, empty, full, "two different manifests must not render the same")
+}

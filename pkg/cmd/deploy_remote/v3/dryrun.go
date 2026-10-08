@@ -98,7 +98,20 @@ func (cmd *DeployCmd) DryRun(f *cmdutil.Factory) error {
 			}
 			report(msg.ManifestHeader)
 			for _, name := range steps {
-				report(fmt.Sprintf(msg.ManifestStep, manifestStepLabel(name)))
+				label := manifestStepLabel(name)
+				n, counted := manifestStepCount(state.Manifest, name)
+				switch {
+				case !counted:
+					report(fmt.Sprintf(msg.ManifestStep, label))
+				case n == 0:
+					// The v3 steps run even when the manifest declares none,
+					// and that is the point: they empty the corresponding
+					// section of azion.json. Saying "origins" alone would read
+					// as if the manifest declared some.
+					report(fmt.Sprintf(msg.ManifestStepCleared, label))
+				default:
+					report(fmt.Sprintf(msg.ManifestStepCount, label, n))
+				}
 			}
 		case "Domain":
 			if conf.Domain.Id == 0 {
@@ -117,6 +130,25 @@ func (cmd *DeployCmd) DryRun(f *cmdutil.Factory) error {
 			Flags: cmd.F.Flags,
 		},
 	})
+}
+
+// manifestStepCount reports how many of a resource the manifest declares, for
+// the steps where a count is meaningful. It describes the manifest; it does not
+// decide what runs — that is the pipeline's job.
+func manifestStepCount(m *contracts.Manifest, step string) (int, bool) {
+	switch step {
+	case "ManifestOrigins":
+		return len(m.Origins), true
+	case "ManifestCacheSettings":
+		return len(m.CacheSettings), true
+	case "ManifestRulesEngine":
+		return len(m.Rules), true
+	case "ManifestPurge":
+		return len(m.Purge), true
+	default:
+		// The domain and the orphan cleanup are not counted.
+		return 0, false
+	}
 }
 
 // manifestStepLabel turns a manifest step name into something readable.

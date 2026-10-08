@@ -23,11 +23,19 @@ var (
 	CreateFunction    = "Creating Function named '%s'\n"
 	UpdateFunction    = "Updating Function with ID '%d', named '%s'\n"
 	CreateWorkload    = "Creating Workload named '%s'\n"
+	// v4 only: its rules deploy creates the preset's default rules and does not
+	// offer a cache setting. The prompt in CreateRulesCache is a v3 behaviour.
+	CreateRulesEngine = "Creating the default Rules Engine for the '%s' preset\n"
 	UpdateWorkload    = "Updating Workload with ID '%d', named '%s'\n"
 
 	// Steps of the manifest pipeline, which the simulation never reached.
 	ManifestHeader = "Applying the resources declared in your manifest:\n"
 	ManifestStep   = "  - %s\n"
+	// %s is the resource, %d how many the manifest declares.
+	ManifestStepCount = "  - %s (%d)\n"
+	// A step whose section the manifest does not declare still runs on v3, and
+	// empties that section of azion.json.
+	ManifestStepCleared = "  - %s: none declared, this section will be cleared\n"
 
 	AskCreateCacheSettings = `Cache Settings specifications:
   - Browser Cache Settings: Override Cache Settings
