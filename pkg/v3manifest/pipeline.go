@@ -24,15 +24,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// errPurgeAborted stops the pipeline without reporting a failure.
-//
-// It preserves an oddity of the sequence this replaces: a failing purge was
-// logged at debug level and then returned nil from CreateResources, which
-// reported success to the caller and skipped orphan removal entirely. That is
-// almost certainly a bug, but changing it would change what a user sees on a
-// failed purge, so it is reproduced exactly and left for a separate decision.
-var errPurgeAborted = errors.New("purge failed; the run stops and reports success")
-
 // ResourceContext is the state the v3 deploy steps operate on: the request
 // context, the project config, the manifest being applied and the four API
 // clients the steps share.
@@ -374,17 +365,17 @@ func (rc *ResourceContext) applyPurge() error {
 		case "url":
 			if err := purgeCmd.PurgeUrls(purgeObj.Urls, rc.factory); err != nil {
 				logger.Debug("Error while purging urls", zap.Error(err))
-				return errPurgeAborted
+				return err
 			}
 		case "cachekey":
 			if err := purgeCmd.PurgeCacheKeys(purgeObj.Urls, rc.factory, purgeCmd.Layer); err != nil {
 				logger.Debug("Error while purging cache keys", zap.Error(err))
-				return errPurgeAborted
+				return err
 			}
 		case "wildcard":
 			if err := purgeCmd.PurgeWildcard(purgeObj.Urls, rc.factory); err != nil {
 				logger.Debug("Error while purging wildcards", zap.Error(err))
-				return errPurgeAborted
+				return err
 			}
 		}
 	}

@@ -117,18 +117,18 @@ func TestV3EmptyManifestStillRewritesConfig(t *testing.T) {
 	require.Empty(t, conf.RulesEngine.Rules, "an empty manifest empties the rules in azion.json")
 }
 
-// TestV3FailedPurgeReportsSuccessAndSkipsCleanup pins a deliberate oddity of
-// the original sequence, reproduced by errPurgeAborted.
+// TestV3FailedPurgeFailsTheDeploy pins the behaviour of a purge that fails.
 //
-// A failing purge was logged at debug level and then returned nil from
-// CreateResources: the caller saw success, and orphan removal never ran. It is
-// almost certainly a bug, but it is what users get today, so the port keeps it
-// and this test states it out loud.
+// It used to be reported as success: the error was logged at debug level and
+// CreateResources returned nil, so the caller saw a successful deploy and
+// orphan removal silently never ran. That was reproduced faithfully when the
+// flow was ported to the pipeline, and then fixed here: a failing purge is now
+// a normal step error, which is what v4 has always done.
 //
-// The stale rule in the config is what makes the two outcomes distinguishable:
-// if orphan removal did run, it would try to delete that rule, find no stub and
-// fail, so a nil error here proves it was skipped.
-func TestV3FailedPurgeReportsSuccessAndSkipsCleanup(t *testing.T) {
+// The stale rule in the config makes the two outcomes distinguishable. Orphan
+// removal would try to delete it, and the run stops before reaching that step,
+// so the error that surfaces is the purge's own.
+func TestV3FailedPurgeFailsTheDeploy(t *testing.T) {
 	logger.New(zapcore.InfoLevel)
 
 	// The purge endpoint answers 500, so the request fails with a response in
@@ -155,7 +155,7 @@ func TestV3FailedPurgeReportsSuccessAndSkipsCleanup(t *testing.T) {
 	}
 
 	err := interpreter.CreateResources(conf, m, f, "azion", &msgs)
-	require.NoError(t, err, "a failed purge is reported as success, as it was before")
+	require.Error(t, err, "a failed purge must fail the deploy, not report success")
 }
 
 // TestV3PipelineOrder guards the order, which encodes real dependencies: the

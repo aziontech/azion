@@ -2,7 +2,6 @@ package manifest
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -81,15 +80,13 @@ func (man *ManifestInterpreter) CreateResources(
 
 	// No spinner and no timing callback: v3 announces with a plain line and has
 	// never reported per-step timings, unlike v4.
+	//
+	// A failing step stops the run and is returned, orphan removal included —
+	// which is what makes a failed purge fail the deploy, as it does on v4.
 	_, err := pipeline.Run(rc.ctx, V3Pipeline{}, rc, &pipeline.Plan{
 		Factory:  f,
 		Msgs:     msgs,
 		Announce: msg.CreatingManifest,
 	})
-	if errors.Is(err, errPurgeAborted) {
-		// A failed purge stops the run and reports success, skipping orphan
-		// removal. See errPurgeAborted.
-		return nil
-	}
 	return err
 }
