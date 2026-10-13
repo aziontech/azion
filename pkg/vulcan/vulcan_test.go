@@ -32,7 +32,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes  @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "with flags - debug off",
@@ -41,7 +41,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "no params - debug off",
@@ -57,7 +57,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes  @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "with flags - debug on",
@@ -66,7 +66,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "no params - debug on",
@@ -88,6 +88,68 @@ func TestCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := vul.Command(tt.args.flags, tt.args.params, f); got != tt.want {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCommandConfigVersion(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	tests := []struct {
+		name   string
+		vulcan func() *VulcanPkg
+		params string
+		want   string
+	}{
+		{
+			name:   "v4 build",
+			vulcan: NewVulcan,
+			params: "build --preset react",
+			want:   "build --preset react --config-version 4",
+		},
+		{
+			name:   "v3 build",
+			vulcan: NewVulcanV3,
+			params: "build%s",
+			want:   "build%s --config-version 3",
+		},
+		{
+			name:   "v3 dev",
+			vulcan: NewVulcanV3,
+			params: "dev",
+			want:   "dev --config-version 3",
+		},
+		{
+			name:   "v3 manifest",
+			vulcan: NewVulcanV3,
+			params: "manifest transform --output %s --entry %s",
+			want:   "manifest transform --output %s --entry %s --config-version 3",
+		},
+		{
+			name:   "v3 presets",
+			vulcan: NewVulcanV3,
+			params: "presets ls",
+			want:   "presets ls --config-version 3",
+		},
+		{
+			name:   "config does not accept config version",
+			vulcan: NewVulcan,
+			params: "config replace --replacements '{}'",
+			want:   "config replace --replacements '{}'",
+		},
+		{
+			name:   "store does not accept config version",
+			vulcan: NewVulcanV3,
+			params: "store init",
+			want:   "store init",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+			want := fmt.Sprintf("npx --yes  @aziontech/bundler%s %s", versionVulcan, tt.want)
+			if got := tt.vulcan().Command("", tt.params, f); got != want {
+				t.Errorf("Command() = %v, want %v", got, want)
 			}
 		})
 	}
@@ -119,17 +181,17 @@ func TestCheckVulcanMajor(t *testing.T) {
 			args: args{
 				currentVersion: "2.0.0",
 			},
-			lastVulcanVer:   "1.1.4",
-			expectedVersion: "@1.1.4",
+			lastVulcanVer:   "1.2.0",
+			expectedVersion: "@1.2.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "1.1.4",
+				currentVersion: "1.2.0",
 			},
-			lastVulcanVer:   "1.1.4",
-			expectedVersion: "@1.1.4",
+			lastVulcanVer:   "1.2.0",
+			expectedVersion: "@1.2.0",
 			wantErr:         false,
 		},
 		{

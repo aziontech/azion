@@ -64,7 +64,7 @@ func TestPresets_run(t *testing.T) {
 		assert.Contains(t, stdout.String(), "Fetching available presets")
 	})
 
-	t.Run("propagates error from npm show edge-functions version", func(t *testing.T) {
+	t.Run("propagates error from npm show @aziontech/bundler version", func(t *testing.T) {
 		f, _, _ := testutils.NewFactory(&httpmock.Registry{})
 
 		list := &ListCmd{

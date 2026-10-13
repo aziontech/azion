@@ -67,7 +67,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 	}
 
 	// checking is vulcan major is correct
-	vulcanVer, err := cmd.CommandRunner(cmd.F, "npm show edge-functions version", []string{})
+	vulcanVer, err := cmd.CommandRunner(cmd.F, "npm show @aziontech/bundler version", []string{})
 	if err != nil {
 		return err
 	}

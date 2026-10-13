@@ -49,10 +49,6 @@ func (b *BuildCmd) run(fields *contracts.BuildInfoV3, msgs *[]string) error {
 		vulcanParams += " --worker " + fields.OwnWorker
 	}
 
-	if fields.IsFirewall {
-		vulcanParams += " --firewall "
-	}
-
 	if fields.AliasEnv {
 		vulcanParams += " --alias-env"
 	}

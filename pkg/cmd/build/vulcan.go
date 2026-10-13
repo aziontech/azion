@@ -13,7 +13,7 @@ import (
 
 func (b *BuildCmd) vulcan(vul *vulcanPkg.VulcanPkg, conf *contracts.AzionApplicationOptions, vulcanParams string, fields *contracts.BuildInfo, msgs *[]string) error {
 	// checking if vulcan major is correct
-	vulcanVer, err := b.CommandRunner(b.f, "npm show edge-functions version", []string{})
+	vulcanVer, err := b.CommandRunner(b.f, "npm show @aziontech/bundler version", []string{})
 	if err != nil {
 		return err
 	}

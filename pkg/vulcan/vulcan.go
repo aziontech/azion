@@ -14,12 +14,24 @@ import (
 var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
-	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.1.4"
-	versionVulcan      = "@1.1.4"
+	firstTimeExecuting = "@1.2.0"
+	versionVulcan      = "@1.2.0"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
+
+const (
+	ConfigVersionV3 = 3
+	ConfigVersionV4 = 4
+)
+
+// configVersionCommands are the bundler subcommands that accept --config-version.
+var configVersionCommands = map[string]bool{
+	"build":    true,
+	"dev":      true,
+	"presets":  true,
+	"manifest": true,
+}
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
@@ -28,22 +40,35 @@ type VulcanPkg struct {
 }
 
 func NewVulcan() *VulcanPkg {
+	return newVulcan(ConfigVersionV4)
+}
+
+// NewVulcanV3 returns a bundler that targets the Azion API v3 config
+func NewVulcanV3() *VulcanPkg {
+	return newVulcan(ConfigVersionV3)
+}
+
+func newVulcan(configVersion int) *VulcanPkg {
 	return &VulcanPkg{
-		Command:          command,
+		Command: func(flags, params string, f *cmdutil.Factory) string {
+			return command(flags, withConfigVersion(params, configVersion), f)
+		},
 		CheckVulcanMajor: checkVulcanMajor,
 		ReadSettings:     token.ReadSettings,
 	}
 }
 
-func NewVulcanV3() *VulcanPkg {
-	versionVulcan = "@5.3.2"
-	currentMajor = 5
-	firstTimeExecuting = "@5.3.2"
-	return &VulcanPkg{
-		Command:          commandV3,
-		CheckVulcanMajor: checkVulcanMajor,
-		ReadSettings:     token.ReadSettings,
+// withConfigVersion appends --config-version to the subcommands that support it
+func withConfigVersion(params string, configVersion int) string {
+	// Callers may pass format verbs glued to the subcommand (e.g. "build%s")
+	subcommand := strings.TrimLeft(params, " ")
+	if i := strings.IndexFunc(subcommand, func(r rune) bool { return r < 'a' || r > 'z' }); i >= 0 {
+		subcommand = subcommand[:i]
 	}
+	if !configVersionCommands[subcommand] {
+		return params
+	}
+	return fmt.Sprintf("%s --config-version %d", params, configVersion)
 }
 
 func command(flags, params string, f *cmdutil.Factory) string {
@@ -55,32 +80,12 @@ func command(flags, params string, f *cmdutil.Factory) string {
 		return fmt.Sprintf(stageCmd, flags, params)
 	}
 
-	// Production builds use @aziontech/bundler for V4
 	selectedVersion := versionVulcan
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installBundler
 		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
 	}
 	return fmt.Sprintf(installBundler, flags, selectedVersion, params)
-}
-
-// commandV3 uses edge-functions for V3 compatibility
-func commandV3(flags, params string, f *cmdutil.Factory) string {
-	if releaseChannel == "stage" {
-		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
-		if f.Logger.Debug {
-			stageCmd = "DEBUG=true " + stageCmd
-		}
-		return fmt.Sprintf(stageCmd, flags, params)
-	}
-
-	// V3 uses edge-functions package
-	selectedVersion := versionVulcan
-	if f.Logger.Debug {
-		installDebug := "DEBUG=true " + installVulcanV3
-		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
-	}
-	return fmt.Sprintf(installVulcanV3, flags, selectedVersion, params)
 }
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {

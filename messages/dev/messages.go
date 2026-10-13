@@ -12,5 +12,6 @@ var (
 
 // Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
 var (
-	IsFirewall = "Indicates whether the function to be run is intended for the Firewall"
+	IsFirewall             = "Indicates whether the function to be run is intended for the Firewall"
+	FirewallFlagDeprecated = "it is no longer supported by Bundler, is ignored, and will be removed in a future release"
 )

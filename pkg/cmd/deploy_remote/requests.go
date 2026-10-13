@@ -26,7 +26,7 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.UpdateAzionConfig, cmd.F.Format, cmd.F.Out)
 	logger.Debug("Running bundler config update to update azion.config")
 	// checking if vulcan major is correct
-	vulcanVer, err := cmd.commandRunnerOutput(cmd.F, "npm show edge-functions version", []string{})
+	vulcanVer, err := cmd.commandRunnerOutput(cmd.F, "npm show @aziontech/bundler version", []string{})
 	if err != nil {
 		return err
 	}

@@ -31,7 +31,7 @@ func TestCommandStage(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes  %s presets ls", StagePkgURL),
+			want:  fmt.Sprintf("npx --yes  %s presets ls --config-version 4", StagePkgURL),
 		},
 		{
 			name: "stage - with flags - debug off",
@@ -40,7 +40,7 @@ func TestCommandStage(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier %s presets ls", StagePkgURL),
+			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier %s presets ls --config-version 4", StagePkgURL),
 		},
 		{
 			name: "stage - no params - debug off",
@@ -56,7 +56,7 @@ func TestCommandStage(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes  %s presets ls", StagePkgURL),
+			want:  fmt.Sprintf("DEBUG=true npx --yes  %s presets ls --config-version 4", StagePkgURL),
 		},
 		{
 			name: "stage - with flags - debug on",
@@ -65,7 +65,7 @@ func TestCommandStage(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier %s presets ls", StagePkgURL),
+			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier %s presets ls --config-version 4", StagePkgURL),
 		},
 		{
 			name: "stage - no params - debug on",

@@ -57,6 +57,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
 	devCmd.Flags().IntVar(&dev.Port, "port", 0, msg.PortFlag)
 	devCmd.Flags().BoolVar(&dev.IsFirewall, "firewall", false, msg.IsFirewall)
+	_ = devCmd.Flags().MarkDeprecated("firewall", msg.FirewallFlagDeprecated)
 	devCmd.Flags().BoolVar(&dev.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	return devCmd
 }
@@ -77,7 +78,7 @@ func (cmd *DevCmd) Run(f *cmdutil.Factory) error {
 		return output.Print(&outGen)
 	}
 
-	err := vulcan(cmd, cmd.IsFirewall, cmd.Port)
+	err := vulcan(cmd, cmd.Port)
 	if err != nil {
 		return err
 	}
