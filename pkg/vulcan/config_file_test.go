@@ -5,6 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/aziontech/azion-cli/pkg/logger"
+	"go.uber.org/zap/zapcore"
 )
 
 func TestConfigFileArg(t *testing.T) {
@@ -28,6 +31,7 @@ func TestConfigFileArg(t *testing.T) {
 }
 
 func TestCheckConfigFile(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
 	dir := t.TempDir()
 	file := filepath.Join(dir, "azion.staging.config.ts")
 	if err := os.WriteFile(file, []byte("export default {}"), 0o644); err != nil {

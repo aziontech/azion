@@ -151,5 +151,6 @@ func CheckConfigFile(configFile string) error {
 	if err != nil || !info.Mode().IsRegular() {
 		return fmt.Errorf("%w: %s", ErrConfigFileNotFound, configFile)
 	}
+	logger.Debug(fmt.Sprintf("Using %s config file", configFile))
 	return nil
 }
