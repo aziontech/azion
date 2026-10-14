@@ -202,7 +202,7 @@ func (s *DeployState) build() error {
 			if jsonErr != nil {
 				return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
 			}
-			cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
+			cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
 			vul := vulcanPkg.NewVulcan()
 			command := vul.Command("", cmdStr, cmd.F)
 			logger.Debug("Running the following command", zap.Any("Command", command))
@@ -214,7 +214,7 @@ func (s *DeployState) build() error {
 
 	buildCmd := cmd.BuildCmd(f)
 	err := buildCmd.ExternalRun(
-		&contracts.BuildInfo{Preset: s.Conf.Preset, AliasEnv: cmd.AliasEnv},
+		&contracts.BuildInfo{Preset: s.Conf.Preset, AliasEnv: cmd.AliasEnv, ConfigFile: cmd.ConfigFile},
 		cmd.ProjectConf, s.Msgs, cmd.SkipFramework)
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
@@ -232,7 +232,7 @@ func (s *DeployState) bundlerInit() error {
 	}
 	buildCmd := cmd.BuildCmd(f)
 	err := buildCmd.ExternalRun(
-		&contracts.BuildInfo{AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, s.Msgs, cmd.SkipFramework)
+		&contracts.BuildInfo{AliasEnv: cmd.AliasEnv, ConfigFile: cmd.ConfigFile}, cmd.ProjectConf, s.Msgs, cmd.SkipFramework)
 	if err != nil {
 		logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 		return err

@@ -55,7 +55,7 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		return fmt.Errorf("failed to marshal replacements: %w", err)
 	}
 
-	cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON))
+	cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
 	command := vul.Command("", cmdStr, cmd.F)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 

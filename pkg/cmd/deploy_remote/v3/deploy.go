@@ -47,6 +47,7 @@ type DeployCmd struct {
 	SkipBuild             bool
 	Sync                  bool
 	AliasEnv              bool
+	ConfigFile            string
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -128,7 +129,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if !cmd.SkipBuild {
 		buildCmd := cmd.BuildCmd(f)
-		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{AliasEnv: cmd.AliasEnv}, cmd.ProjectConf, &msgs)
+		err := buildCmd.ExternalRun(&contracts.BuildInfoV3{AliasEnv: cmd.AliasEnv, ConfigFile: cmd.ConfigFile}, cmd.ProjectConf, &msgs)
 		if err != nil {
 			logger.Debug("Error while running build command called by deploy command", zap.Error(err))
 			return err

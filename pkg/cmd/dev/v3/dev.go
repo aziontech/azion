@@ -24,6 +24,7 @@ type DevCmd struct {
 	Vulcan                func() *vulcanPkg.VulcanPkg
 	SkipFramework         bool
 	IsFirewall            bool
+	ConfigFile            string
 	Port                  int
 }
 
@@ -59,6 +60,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd.Flags().BoolVar(&dev.IsFirewall, "firewall", false, msg.IsFirewall)
 	_ = devCmd.Flags().MarkDeprecated("firewall", msg.FirewallFlagDeprecated)
 	devCmd.Flags().BoolVar(&dev.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	devCmd.Flags().StringVar(&dev.ConfigFile, "config-file", "", msg.FlagConfigFile)
 	return devCmd
 }
 

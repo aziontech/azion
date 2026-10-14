@@ -59,6 +59,7 @@ type DeployCmd struct {
 	WriteBucket              bool
 	Workers                  int
 	AliasEnv                 bool
+	ConfigFile               string
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -178,6 +179,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	clients := NewClients(f)
 	interpreter := cmd.Interpreter()
+	interpreter.ConfigFile = cmd.ConfigFile
 
 	state := &DeployState{
 		Cmd: cmd, F: f, Ctx: ctx, Conf: conf, Msgs: &msgs,

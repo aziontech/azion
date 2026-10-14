@@ -20,6 +20,7 @@ var (
 	EdgeApplicationDeployLocal           = "Runs the entire build and deploy process locally"
 	EdgeApplicationDeployDryrun          = "Simulates the deploy process without carrying out any actual action"
 	SkipFrameworkBuild                   = "Indicates whether to bypass the framework build phase before executing 'azion build'"
+	FlagConfigFile                       = "Path to the azion.config file to use. If not sent, the azion.config.* file in the current directory is used"
 	AliasEnvFlag                         = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 	WritableBucketFlag                   = "If sent, the project bucket will be created with read-write access"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"

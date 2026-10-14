@@ -1,7 +1,9 @@
 package vulcan
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -19,6 +21,8 @@ var (
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
+
+var ErrConfigFileNotFound = errors.New("The azion.config file informed in --config-file was not found. Verify the path and try again")
 
 const (
 	ConfigVersionV3 = 3
@@ -124,6 +128,28 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		logger.Debug("Failed to parse information on current Bundler version")
 		versionVulcan = firstTimeExecuting
 		return nil
+	}
+	return nil
+}
+
+// ConfigFileArg returns the --config-file option for the bundler, or an empty
+// string when no config file was given. The path is single-quoted for sh -c.
+func ConfigFileArg(configFile string) string {
+	if configFile == "" {
+		return ""
+	}
+	return fmt.Sprintf(" --config-file '%s'", strings.ReplaceAll(configFile, "'", `'\''`))
+}
+
+// CheckConfigFile fails early when the given azion.config file does not exist,
+// before any command changes local or remote state. An empty path is valid.
+func CheckConfigFile(configFile string) error {
+	if configFile == "" {
+		return nil
+	}
+	info, err := os.Stat(configFile)
+	if err != nil || !info.Mode().IsRegular() {
+		return fmt.Errorf("%w: %s", ErrConfigFileNotFound, configFile)
 	}
 	return nil
 }

@@ -23,6 +23,7 @@ type BuildInfo struct {
 	ProjectPath   string
 	SkipFramework bool
 	AliasEnv      bool
+	ConfigFile    string
 }
 
 type BuildInfoV3 struct {
@@ -33,6 +34,7 @@ type BuildInfoV3 struct {
 	ProjectPath   string
 	IsFirewall    bool
 	AliasEnv      bool
+	ConfigFile    string
 }
 
 type ListOptions struct {

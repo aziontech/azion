@@ -24,6 +24,7 @@ type DevCmd struct {
 	Vulcan                func() *vulcanPkg.VulcanPkg
 	SkipFramework         bool
 	Port                  int
+	ConfigFile            string
 }
 
 func NewDevCmd(f *cmdutil.Factory) *DevCmd {
@@ -56,6 +57,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd.Flags().BoolP("help", "h", false, msg.DevFlagHelp)
 	devCmd.Flags().IntVar(&dev.Port, "port", 0, msg.PortFlag)
 	devCmd.Flags().BoolVar(&dev.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
+	devCmd.Flags().StringVar(&dev.ConfigFile, "config-file", "", msg.FlagConfigFile)
 	return devCmd
 }
 

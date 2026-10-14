@@ -21,5 +21,6 @@ var (
 // Used only by the v3 command tree
 var (
 	IsFirewall             = "Indicates whether the function to be run is intended for the Firewall"
+	FlagConfigFile         = "Path to the azion.config file to use. If not sent, the azion.config.* file in the current directory is used"
 	FirewallFlagDeprecated = "it is no longer supported by Bundler, is ignored, and will be removed in a future release"
 )

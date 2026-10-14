@@ -38,6 +38,7 @@ type ResourceContext struct {
 	Conf            *contracts.AzionApplicationOptions
 	Manifest        *contracts.ManifestV4
 	ProjectConf     string
+	ConfigFile      string
 	Msgs            *[]string
 	WriteConfigFunc func(conf *contracts.AzionApplicationOptions, confPath string) error
 
@@ -230,7 +231,7 @@ func (rc *ResourceContext) runConfigReplace(originalName, newName string) error 
 	jsonStr = strings.ReplaceAll(jsonStr, "'", "\\'")
 
 	vul := vulcanPkg.NewVulcan()
-	cmdStr := fmt.Sprintf("config replace --replacements '%s'", jsonStr)
+	cmdStr := fmt.Sprintf("config replace --replacements '%s'", jsonStr) + vulcanPkg.ConfigFileArg(rc.ConfigFile)
 	command := vul.Command("", cmdStr, rc.Factory)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 

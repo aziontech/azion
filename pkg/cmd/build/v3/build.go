@@ -59,6 +59,7 @@ func NewCobraCmd(build *BuildCmd) *cobra.Command {
 	_ = buildCmd.Flags().MarkDeprecated("firewall", msg.FirewallFlagDeprecated)
 	buildCmd.Flags().StringVar(&fields.ProjectPath, "config-dir", "azion", msg.ProjectConfFlag)
 	buildCmd.Flags().BoolVar(&fields.AliasEnv, "alias-env", false, msg.FlagAliasEnv)
+	buildCmd.Flags().StringVar(&fields.ConfigFile, "config-file", "", msg.FlagConfigFile)
 
 	return buildCmd
 }
