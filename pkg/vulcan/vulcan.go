@@ -1,12 +1,12 @@
 package vulcan
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 
+	msg "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
@@ -21,8 +21,6 @@ var (
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
-
-var ErrConfigFileNotFound = errors.New("The azion.config file informed in --config-file was not found. Verify the path and try again")
 
 const (
 	ConfigVersionV3 = 3
@@ -149,7 +147,7 @@ func CheckConfigFile(configFile string) error {
 	}
 	info, err := os.Stat(configFile)
 	if err != nil || !info.Mode().IsRegular() {
-		return fmt.Errorf("%w: %s", ErrConfigFileNotFound, configFile)
+		return fmt.Errorf("%w: %s", msg.ErrConfigFileNotFound, configFile)
 	}
 	logger.Debug(fmt.Sprintf("Using %s config file", configFile))
 	return nil

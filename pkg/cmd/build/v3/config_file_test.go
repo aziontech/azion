@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	msgVulcan "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -63,7 +63,7 @@ func TestBuildConfigFile(t *testing.T) {
 	t.Run("fails before running the bundler when the file is missing", func(t *testing.T) {
 		var captured string
 		err := newBuild(&captured).run(&contracts.BuildInfoV3{ConfigFile: "missing.config.ts"}, &[]string{})
-		if !errors.Is(err, vulcanPkg.ErrConfigFileNotFound) {
+		if !errors.Is(err, msgVulcan.ErrConfigFileNotFound) {
 			t.Fatalf("run() error = %v, want ErrConfigFileNotFound", err)
 		}
 		if captured != "" {

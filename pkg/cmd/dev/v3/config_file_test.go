@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
+	msgVulcan "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -49,7 +49,7 @@ func TestDevConfigFile(t *testing.T) {
 		d := newDev(&captured)
 		d.ConfigFile = "missing.config.ts"
 		err := d.Run(d.F)
-		if !errors.Is(err, vulcanPkg.ErrConfigFileNotFound) {
+		if !errors.Is(err, msgVulcan.ErrConfigFileNotFound) {
 			t.Fatalf("Run() error = %v, want ErrConfigFileNotFound", err)
 		}
 		if captured != "" {

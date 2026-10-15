@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	msg "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap/zapcore"
 )
@@ -54,7 +55,7 @@ func TestCheckConfigFile(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("CheckConfigFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			if err != nil && !errors.Is(err, ErrConfigFileNotFound) {
+			if err != nil && !errors.Is(err, msg.ErrConfigFileNotFound) {
 				t.Errorf("CheckConfigFile() error = %v, want ErrConfigFileNotFound", err)
 			}
 		})
