@@ -95,7 +95,7 @@ func (V3DeployPipeline) Steps() []pipeline.Step[DeployState] {
 		{
 			Name: "Function",
 			Run: func(_ context.Context, s *DeployState) error {
-				s.Conf.Function.File = ".edge/worker.js"
+				s.Conf.Function.File = ".edge/functions/handler.js"
 				return s.Cmd.doFunction(s.Clients, s.Ctx, s.Conf, s.Msgs)
 			},
 		},
