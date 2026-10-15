@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	apiEdgeApplications "github.com/aziontech/azion-cli/pkg/api/v3/edge_applications"
@@ -95,7 +96,7 @@ func (V3DeployPipeline) Steps() []pipeline.Step[DeployState] {
 		{
 			Name: "Function",
 			Run: func(_ context.Context, s *DeployState) error {
-				s.Conf.Function.File = ".edge/functions/handler.js"
+				s.Conf.Function.File = functionFile(s.Conf.Preset)
 				return s.Cmd.doFunction(s.Clients, s.Ctx, s.Conf, s.Msgs)
 			},
 		},
@@ -194,4 +195,14 @@ func (s *DeployState) firstRunOriginAndRules() error {
 	}
 
 	return nil
+}
+
+// functionFile is the function the bundler builds for a v3 project.
+// TODO: opennextjs writes its function to worker.js instead of handler.js;
+// drop the special case once the bundler is fixed.
+func functionFile(preset string) string {
+	if strings.EqualFold(preset, "opennextjs") {
+		return ".edge/functions/worker.js"
+	}
+	return ".edge/functions/handler.js"
 }
