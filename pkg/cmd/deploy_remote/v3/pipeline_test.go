@@ -67,14 +67,14 @@ func TestV3DeployPipelineSelection(t *testing.T) {
 			name:  "first run creates the origin and default rules",
 			state: state(nil),
 			want: []string{"ManifestPath", "Application", "FirstRunOriginAndRules",
-				"Bucket", "Function", "ReadManifest", "Manifest", "Domain"},
+				"Bucket", "ReadManifest", "Manifest", "Domain"},
 		},
 		{
 			name: "repeat run skips the first-run block",
 			state: state(func(s *DeployState) {
 				s.Conf.NotFirstRun = true
 			}),
-			want: []string{"ManifestPath", "Application", "Bucket", "Function",
+			want: []string{"ManifestPath", "Application", "Bucket",
 				"ReadManifest", "Manifest", "Domain"},
 		},
 		{
@@ -82,7 +82,17 @@ func TestV3DeployPipelineSelection(t *testing.T) {
 			static: true,
 			state:  state(func(s *DeployState) { s.Conf.NotFirstRun = true }),
 			want: []string{"ManifestPath", "Application", "Bucket", "UploadStaticFiles",
-				"Function", "ReadManifest", "Manifest", "Domain"},
+				"ReadManifest", "Manifest", "Domain"},
+		},
+		{
+			// The function comes from the manifest; a static site declares none.
+			name: "a declared function adds the function step",
+			state: state(func(s *DeployState) {
+				s.Conf.NotFirstRun = true
+				s.Manifest.Functions = []contracts.FunctionV3{{Name: "handler", Target: "./functions/handler.js"}}
+			}),
+			want: []string{"ManifestPath", "Application", "Bucket",
+				"ReadManifest", "Function", "Manifest", "Domain"},
 		},
 		{
 			// A manifest that declares a domain with an empty name is the one
@@ -92,7 +102,7 @@ func TestV3DeployPipelineSelection(t *testing.T) {
 				s.Conf.NotFirstRun = true
 				s.Manifest.Domain = &contracts.Domains{Name: ""}
 			}),
-			want: []string{"ManifestPath", "Application", "Bucket", "Function",
+			want: []string{"ManifestPath", "Application", "Bucket",
 				"ReadManifest", "Manifest"},
 		},
 		{
@@ -101,7 +111,7 @@ func TestV3DeployPipelineSelection(t *testing.T) {
 				s.Conf.NotFirstRun = true
 				s.Manifest.Domain = &contracts.Domains{Name: "example"}
 			}),
-			want: []string{"ManifestPath", "Application", "Bucket", "Function",
+			want: []string{"ManifestPath", "Application", "Bucket",
 				"ReadManifest", "Manifest", "Domain"},
 		},
 	}
@@ -117,12 +127,12 @@ func TestV3DeployPipelineSelection(t *testing.T) {
 
 // TestV3DeployPipelineOrder guards the order, which encodes the dependencies:
 // the application exists before its origin and rules, the bucket and upload
-// precede the function that serves them, and the manifest is read before it is
-// applied.
+// precede the function that serves them, and the manifest is read before the
+// function it declares is created and before it is applied.
 func TestV3DeployPipelineOrder(t *testing.T) {
 	want := []string{
 		"ManifestPath", "Application", "FirstRunOriginAndRules", "Bucket",
-		"UploadStaticFiles", "Function", "ReadManifest", "Manifest", "Domain",
+		"UploadStaticFiles", "ReadManifest", "Function", "Manifest", "Domain",
 	}
 	got := make([]string, 0, len(want))
 	for _, s := range (V3DeployPipeline{}).Steps() {

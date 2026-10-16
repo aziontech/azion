@@ -235,11 +235,18 @@ type AzionJsonDataFirewallFunctionInstance struct {
 }
 
 type Manifest struct {
+	Functions     []FunctionV3   `json:"functions,omitempty"`
 	CacheSettings []CacheSetting `json:"cache"`
 	Origins       []Origin       `json:"origin"`
 	Rules         []RuleEngine   `json:"rules"`
 	Domain        *Domains       `json:"domain,omitempty"`
 	Purge         []Purges       `json:"purge"`
+}
+
+// FunctionV3 is a function declared in a v3 manifest. Target is relative to .edge.
+type FunctionV3 struct {
+	Name   string `json:"name"`
+	Target string `json:"target"`
 }
 
 type Build struct {
