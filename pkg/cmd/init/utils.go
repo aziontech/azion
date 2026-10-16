@@ -32,7 +32,7 @@ func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 	logger.Debug("Running bundler store init")
 	// checking if vulcan major is correct
-	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
+	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show @aziontech/bundler version", []string{})
 	if err != nil {
 		return err
 	}

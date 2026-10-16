@@ -20,6 +20,9 @@ import (
 
 const PathStatic = ".edge/storage"
 
+// ManifestFile is where the bundler writes the manifest the deploy applies.
+const ManifestFile = ".edge/manifest.json"
+
 // ReadSettings reads the settings file for S3 credentials
 func ReadSettings(path string) (token.Settings, error) {
 	return token.ReadSettings(path)

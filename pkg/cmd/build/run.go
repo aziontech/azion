@@ -17,6 +17,10 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 
 	var err error
 
+	if err := vulcanPkg.CheckConfigFile(fields.ConfigFile); err != nil {
+		return err
+	}
+
 	conf, err := b.GetAzionJsonContent(fields.ProjectPath)
 	if err != nil {
 		logger.Debug("Error while building your project", zap.Error(err))
@@ -64,6 +68,8 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 	if fields.AliasEnv {
 		paramsBuilder.WriteString(" --alias-env")
 	}
+
+	paramsBuilder.WriteString(vulcanPkg.ConfigFileArg(fields.ConfigFile))
 
 	vul := vulcanPkg.NewVulcan()
 	return b.vulcan(vul, conf, paramsBuilder.String(), fields, msgs)

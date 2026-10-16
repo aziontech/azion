@@ -23,6 +23,7 @@ type BuildInfo struct {
 	ProjectPath   string
 	SkipFramework bool
 	AliasEnv      bool
+	ConfigFile    string
 }
 
 type BuildInfoV3 struct {

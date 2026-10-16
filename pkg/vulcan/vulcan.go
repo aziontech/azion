@@ -2,9 +2,11 @@ package vulcan
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
+	msg "github.com/aziontech/azion-cli/messages/vulcan"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
@@ -15,11 +17,23 @@ var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
 	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.1.4"
-	versionVulcan      = "@1.1.4"
+	firstTimeExecuting = "@1.2.0"
+	versionVulcan      = "@1.2.0"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
+
+// ConfigVersionV4 is the --config-version sent to the bundler. v3 still runs on
+// edge-functions, which has no such option.
+const ConfigVersionV4 = 4
+
+// configVersionCommands are the bundler subcommands that accept --config-version.
+var configVersionCommands = map[string]bool{
+	"build":    true,
+	"dev":      true,
+	"presets":  true,
+	"manifest": true,
+}
 
 type VulcanPkg struct {
 	Command          func(flags, params string, f *cmdutil.Factory) string
@@ -28,11 +42,7 @@ type VulcanPkg struct {
 }
 
 func NewVulcan() *VulcanPkg {
-	return &VulcanPkg{
-		Command:          command,
-		CheckVulcanMajor: checkVulcanMajor,
-		ReadSettings:     token.ReadSettings,
-	}
+	return newVulcan(ConfigVersionV4)
 }
 
 func NewVulcanV3() *VulcanPkg {
@@ -46,6 +56,29 @@ func NewVulcanV3() *VulcanPkg {
 	}
 }
 
+func newVulcan(configVersion int) *VulcanPkg {
+	return &VulcanPkg{
+		Command: func(flags, params string, f *cmdutil.Factory) string {
+			return command(flags, withConfigVersion(params, configVersion), f)
+		},
+		CheckVulcanMajor: checkVulcanMajor,
+		ReadSettings:     token.ReadSettings,
+	}
+}
+
+// withConfigVersion appends --config-version to the subcommands that support it
+func withConfigVersion(params string, configVersion int) string {
+	// Callers may pass format verbs glued to the subcommand (e.g. "build%s")
+	subcommand := strings.TrimLeft(params, " ")
+	if i := strings.IndexFunc(subcommand, func(r rune) bool { return r < 'a' || r > 'z' }); i >= 0 {
+		subcommand = subcommand[:i]
+	}
+	if !configVersionCommands[subcommand] {
+		return params
+	}
+	return fmt.Sprintf("%s --config-version %d", params, configVersion)
+}
+
 func command(flags, params string, f *cmdutil.Factory) string {
 	if releaseChannel == "stage" {
 		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
@@ -55,7 +88,6 @@ func command(flags, params string, f *cmdutil.Factory) string {
 		return fmt.Sprintf(stageCmd, flags, params)
 	}
 
-	// Production builds use @aziontech/bundler for V4
 	selectedVersion := versionVulcan
 	if f.Logger.Debug {
 		installDebug := "DEBUG=true " + installBundler
@@ -120,5 +152,28 @@ func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanP
 		versionVulcan = firstTimeExecuting
 		return nil
 	}
+	return nil
+}
+
+// ConfigFileArg returns the --config-file option for the bundler, or an empty
+// string when no config file was given. The path is single-quoted for sh -c.
+func ConfigFileArg(configFile string) string {
+	if configFile == "" {
+		return ""
+	}
+	return fmt.Sprintf(" --config-file '%s'", strings.ReplaceAll(configFile, "'", `'\''`))
+}
+
+// CheckConfigFile fails early when the given azion.config file does not exist,
+// before any command changes local or remote state. An empty path is valid.
+func CheckConfigFile(configFile string) error {
+	if configFile == "" {
+		return nil
+	}
+	info, err := os.Stat(configFile)
+	if err != nil || !info.Mode().IsRegular() {
+		return fmt.Errorf("%w: %s", msg.ErrConfigFileNotFound, configFile)
+	}
+	logger.Debug(fmt.Sprintf("Using %s config file", configFile))
 	return nil
 }

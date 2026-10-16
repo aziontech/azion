@@ -6,10 +6,14 @@ import (
 
 	msg "github.com/aziontech/azion-cli/messages/dev"
 	"github.com/aziontech/azion-cli/pkg/logger"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"go.uber.org/zap"
 )
 
 func vulcan(cmd *DevCmd, port int) error {
+	if err := vulcanPkg.CheckConfigFile(cmd.ConfigFile); err != nil {
+		return err
+	}
 
 	vul := cmd.Vulcan()
 	baseCommand := vul.Command("", "dev", cmd.F)
@@ -25,6 +29,8 @@ func vulcan(cmd *DevCmd, port int) error {
 	if cmd.SkipFramework {
 		commandBuilder.WriteString(" --skip-framework-build")
 	}
+
+	commandBuilder.WriteString(vulcanPkg.ConfigFileArg(cmd.ConfigFile))
 
 	err := runCommand(cmd, commandBuilder.String())
 	if err != nil {

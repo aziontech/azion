@@ -58,7 +58,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 }
 
 func (list *ListCmd) run() error {
-	vulcanVer, err := list.CommandRunner(list.F, "npm show edge-functions version", []string{})
+	vulcanVer, err := list.CommandRunner(list.F, "npm show @aziontech/bundler version", []string{})
 	if err != nil {
 		return err
 	}

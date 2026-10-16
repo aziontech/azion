@@ -35,6 +35,7 @@ type ApplyCmd struct {
 type Fields struct {
 	ConfigDir       string
 	AzionConfigName string
+	ConfigFile      string
 }
 
 func NewApplyCmd(f *cmdutil.Factory) *ApplyCmd {
@@ -62,6 +63,7 @@ func NewCobraCmd(apply *ApplyCmd) *cobra.Command {
 		Example: heredoc.Doc(`
         $ azion config apply
         $ azion config apply --config-dir ./my-project
+        $ azion config apply --config-file azion.staging.config.ts
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return apply.Run(fields)
@@ -69,6 +71,7 @@ func NewCobraCmd(apply *ApplyCmd) *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&fields.ConfigDir, "config-dir", ".", msg.FlagConfigDir)
+	cmd.Flags().StringVar(&fields.ConfigFile, "config-file", "", msg.FlagConfigFile)
 	cmd.Flags().BoolP("help", "h", false, msg.FlagHelp)
 
 	return cmd
@@ -89,13 +92,19 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 
 	configDir := fields.ConfigDir
 
+	if err := vulcanPkg.CheckConfigFile(fields.ConfigFile); err != nil {
+		return err
+	}
+
 	validConfigExtensions := []string{".js", ".ts", ".mjs", ".cjs"}
-	azionConfigPath := ""
-	for _, ext := range validConfigExtensions {
-		candidate := path.Join(wd, "azion.config"+ext)
-		if _, err := os.Stat(candidate); err == nil {
-			azionConfigPath = candidate
-			break
+	azionConfigPath := fields.ConfigFile
+	if azionConfigPath == "" {
+		for _, ext := range validConfigExtensions {
+			candidate := path.Join(wd, "azion.config"+ext)
+			if _, err := os.Stat(candidate); err == nil {
+				azionConfigPath = candidate
+				break
+			}
 		}
 	}
 	if azionConfigPath == "" {
@@ -105,7 +114,7 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 
 	logger.Debug("Generating manifest from azion.config")
 	vul := vulcanPkg.NewVulcan()
-	command := vul.Command("", "manifest generate", cmd.F)
+	command := vul.Command("", "manifest generate"+vulcanPkg.ConfigFileArg(fields.ConfigFile), cmd.F)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 
 	err = cmd.CommandRunInteractive(cmd.F, command)
@@ -128,6 +137,7 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 	}
 
 	interpreter := cmd.Interpreter()
+	interpreter.ConfigFile = fields.ConfigFile
 
 	manifestPath, err := interpreter.ManifestPath()
 	if err != nil {

@@ -69,6 +69,8 @@ func (cmd *DeployCmd) DryRun(f *cmdutil.Factory) error {
 
 	for _, step := range res.Steps {
 		switch step.Name {
+		case "GenerateManifest":
+			report(msg.GenerateManifest)
 		case "Build":
 			report(msg.Build)
 		case "Application":

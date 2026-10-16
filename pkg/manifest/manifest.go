@@ -40,6 +40,9 @@ type ManifestInterpreter struct {
 	FileReader            func(path string) ([]byte, error)
 	GetWorkDir            func() (string, error)
 	WriteAzionJsonContent func(conf *contracts.AzionApplicationOptions, confPath string) error
+	// ConfigFile is the azion.config file that resource renames are written to.
+	// Empty means the bundler's default lookup.
+	ConfigFile string
 }
 
 func NewManifestInterpreter() *ManifestInterpreter {
@@ -86,6 +89,7 @@ func (man *ManifestInterpreter) CreateResources(conf *contracts.AzionApplication
 	logger.Debug("Applying manifest resources")
 
 	rc := NewResourceContext(f, conf, manifest, projectConf, msgs, man.WriteAzionJsonContent)
+	rc.ConfigFile = man.ConfigFile
 
 	_, err := pipeline.Run(rc.Ctx, V4Pipeline{}, rc, &pipeline.Plan{
 		Factory: f,

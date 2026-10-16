@@ -32,7 +32,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes  @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "with flags - debug off",
@@ -41,7 +41,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: false,
-			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "no params - debug off",
@@ -57,7 +57,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes  @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes  @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "with flags - debug on",
@@ -66,7 +66,7 @@ func TestCommand(t *testing.T) {
 				params: "presets ls",
 			},
 			debug: true,
-			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls", versionVulcan),
+			want:  fmt.Sprintf("DEBUG=true npx --yes --loglevel=error --no-update-notifier @aziontech/bundler%s presets ls --config-version 4", versionVulcan),
 		},
 		{
 			name: "no params - debug on",
@@ -90,6 +90,49 @@ func TestCommand(t *testing.T) {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestCommandConfigVersion(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	tests := []struct {
+		name   string
+		params string
+		want   string
+	}{
+		{name: "build", params: "build --preset react", want: "build --preset react --config-version 4"},
+		{name: "build with a format verb", params: "build%s", want: "build%s --config-version 4"},
+		{name: "dev", params: "dev", want: "dev --config-version 4"},
+		{name: "manifest", params: "manifest transform --output %s --entry %s", want: "manifest transform --output %s --entry %s --config-version 4"},
+		{name: "presets", params: "presets ls", want: "presets ls --config-version 4"},
+		{name: "config does not accept config version", params: "config replace --replacements '{}'", want: "config replace --replacements '{}'"},
+		{name: "store does not accept config version", params: "store init", want: "store init"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+			want := fmt.Sprintf("npx --yes  @aziontech/bundler%s %s", versionVulcan, tt.want)
+			if got := NewVulcan().Command("", tt.params, f); got != want {
+				t.Errorf("Command() = %v, want %v", got, want)
+			}
+		})
+	}
+}
+
+// v3 still runs on edge-functions, which has no --config-version.
+func TestCommandV3(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	// NewVulcanV3 switches the package to the edge-functions version.
+	saved := []any{versionVulcan, currentMajor, firstTimeExecuting}
+	defer func() {
+		versionVulcan, currentMajor, firstTimeExecuting = saved[0].(string), saved[1].(int), saved[2].(string)
+	}()
+
+	f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+	got := NewVulcanV3().Command("", "build --preset react", f)
+	want := "npx --yes  edge-functions@5.3.2 build --preset react"
+	if got != want {
+		t.Errorf("Command() = %v, want %v", got, want)
 	}
 }
 
@@ -119,17 +162,17 @@ func TestCheckVulcanMajor(t *testing.T) {
 			args: args{
 				currentVersion: "2.0.0",
 			},
-			lastVulcanVer:   "1.1.4",
-			expectedVersion: "@1.1.4",
+			lastVulcanVer:   "1.2.0",
+			expectedVersion: "@1.2.0",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "1.1.4",
+				currentVersion: "1.2.0",
 			},
-			lastVulcanVer:   "1.1.4",
-			expectedVersion: "@1.1.4",
+			lastVulcanVer:   "1.2.0",
+			expectedVersion: "@1.2.0",
 			wantErr:         false,
 		},
 		{
