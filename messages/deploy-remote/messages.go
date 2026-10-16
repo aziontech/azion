@@ -12,6 +12,7 @@ var (
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"
+	GeneratingManifest                   = "manifest.json not found. Generating azion.config and manifest.json before deploying\n"
 	AliasEnvFlag                         = "If sent, the --alias-env option is forwarded to Bundler during the build phase"
 	DeployFlagHelp                       = "Displays more information about the deploy command"
 	DeployFlagAuto                       = "If sent, the entire flow of the command will be run without interruptions"

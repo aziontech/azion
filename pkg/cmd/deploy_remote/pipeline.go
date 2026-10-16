@@ -63,6 +63,16 @@ func (V4DeployPipeline) Name() string { return "deploy-v4" }
 func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 	return []pipeline.Step[DeployState]{
 		{
+			// A first run reads the manifest before it builds, relying on the one
+			// init or link generated. When it is missing (init stopped early, .edge
+			// was removed), generate it the way init does instead of failing.
+			Name: "GenerateManifest",
+			Applies: func(s *DeployState) bool {
+				return !s.Conf.NotFirstRun && manifestMissing()
+			},
+			Run: func(_ context.Context, s *DeployState) error { return s.generateManifest() },
+		},
+		{
 			Name: "Build",
 			Applies: func(s *DeployState) bool {
 				return !s.Cmd.SkipBuild && s.Conf.NotFirstRun
@@ -221,6 +231,34 @@ func (s *DeployState) build() error {
 		return err
 	}
 	return nil
+}
+
+// generateManifest writes azion.config (when missing) and .edge/manifest.json
+// without building the framework, like init does.
+func (s *DeployState) generateManifest() error {
+	cmd := s.Cmd
+	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.GeneratingManifest, cmd.F.Format, cmd.F.Out)
+	*s.Msgs = append(*s.Msgs, msg.GeneratingManifest)
+
+	params := "build"
+	if s.Conf.Preset != "" {
+		params = fmt.Sprintf("%s --preset '%s'", params, s.Conf.Preset)
+	}
+	params += " --only-generate-config"
+	if cmd.AliasEnv {
+		params += " --alias-env"
+	}
+	params += vulcanPkg.ConfigFileArg(cmd.ConfigFile)
+
+	command := vulcanPkg.NewVulcan().Command("", params, cmd.F)
+	logger.Debug("Running the following command", zap.Any("Command", command))
+	return cmd.commandRunInteractive(cmd.F, command)
+}
+
+// manifestMissing reports whether .edge/manifest.json is absent from the working directory.
+func manifestMissing() bool {
+	_, err := os.Stat(ManifestFile)
+	return os.IsNotExist(err)
 }
 
 // bundlerInit initialises the bundler on a first run and builds.

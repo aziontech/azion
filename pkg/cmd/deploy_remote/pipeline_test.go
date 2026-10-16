@@ -31,15 +31,26 @@ func selected(t *testing.T, s *DeployState) []string {
 	return names
 }
 
-// withStaticDir runs fn in a temp working directory, optionally containing the
-// static-files directory the upload step looks for.
+// withStaticDir runs fn in a temp working directory holding a generated
+// manifest, optionally containing the static-files directory the upload step
+// looks for.
 func withStaticDir(t *testing.T, present bool, fn func()) {
+	t.Helper()
+	withProjectDir(t, present, true, fn)
+}
+
+// withProjectDir is withStaticDir with control over whether .edge/manifest.json exists.
+func withProjectDir(t *testing.T, static, manifest bool, fn func()) {
 	t.Helper()
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 	dir := t.TempDir()
-	if present {
+	if static {
 		require.NoError(t, os.MkdirAll(filepath.Join(dir, PathStatic), 0o755))
+	}
+	if manifest {
+		require.NoError(t, os.MkdirAll(filepath.Join(dir, ".edge"), 0o755))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, ManifestFile), []byte("{}"), 0o644))
 	}
 	require.NoError(t, os.Chdir(dir))
 	defer func() { require.NoError(t, os.Chdir(wd)) }()
@@ -151,6 +162,34 @@ func TestV4DeployPipelineSelection(t *testing.T) {
 	}
 }
 
+// TestV4DeployPipelineGeneratesMissingManifest covers a first run whose
+// manifest was never generated, for example because init stopped early.
+func TestV4DeployPipelineGeneratesMissingManifest(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+
+	tests := []struct {
+		name     string
+		manifest bool
+		state    *DeployState
+		want     bool
+	}{
+		{name: "first run without a manifest generates it", state: state(nil), want: true},
+		{name: "first run with a manifest does not", manifest: true, state: state(nil)},
+		{
+			name:  "repeat run without a manifest relies on the build step",
+			state: state(func(s *DeployState) { s.Conf.NotFirstRun = true }),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			withProjectDir(t, false, tt.manifest, func() {
+				got := selected(t, tt.state)
+				require.Equal(t, tt.want, len(got) > 0 && got[0] == "GenerateManifest", "steps: %v", got)
+			})
+		})
+	}
+}
+
 // TestV4DeployPipelineAlwaysRunsTheCoreSteps guards the steps that carry no
 // predicate: the manifest path, the application, both reads and the manifest
 // apply happen on every deploy.
@@ -170,7 +209,7 @@ func TestV4DeployPipelineAlwaysRunsTheCoreSteps(t *testing.T) {
 // upload that its rules point at.
 func TestV4DeployPipelineOrder(t *testing.T) {
 	want := []string{
-		"Build", "ManifestPath", "Application", "ReadManifest", "Bucket",
+		"GenerateManifest", "Build", "ManifestPath", "Application", "ReadManifest", "Bucket",
 		"BundlerInit", "ReadManifestAgain", "Credentials", "UploadStaticFiles",
 		"RulesEngine", "Manifest", "Workload",
 	}

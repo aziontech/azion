@@ -18,6 +18,7 @@ var (
 	// simulation they replace did not describe them.
 	Header            = "The following would be done, without changing anything:\n"
 	Build             = "Building your application\n"
+	GenerateManifest  = "Generating the azion.config and manifest.json files, which were not found\n"
 	BundlerInit       = "Initializing the bundler and building your application\n"
 	UploadStaticFiles = "Uploading static files to Bucket '%s'\n"
 	CreateFunction    = "Creating Function named '%s'\n"

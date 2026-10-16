@@ -79,3 +79,25 @@ func TestLocalDeployForwardsConfigFile(t *testing.T) {
 		assertAll(t, commands, 2)
 	})
 }
+
+func TestGenerateManifestCommand(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	var commands []string
+	f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+	cmd := NewDeployCmd(f)
+	cmd.ConfigFile = "azion.staging.config.ts"
+	cmd.AliasEnv = true
+	cmd.commandRunInteractive = func(_ *cmdutil.Factory, comm string) error {
+		commands = append(commands, comm)
+		return nil
+	}
+	s := &DeployState{Cmd: cmd, F: f, Msgs: &[]string{}, Conf: &contracts.AzionApplicationOptions{Preset: "nuxt"}}
+
+	if err := s.generateManifest(); err != nil {
+		t.Fatalf("generateManifest() error = %v", err)
+	}
+	want := "build --preset 'nuxt' --only-generate-config --alias-env --config-file 'azion.staging.config.ts' --config-version 4"
+	if len(commands) != 1 || !strings.HasSuffix(commands[0], want) {
+		t.Fatalf("commands = %q, want one ending in %q", commands, want)
+	}
+}
