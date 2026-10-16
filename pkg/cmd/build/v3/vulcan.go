@@ -19,7 +19,7 @@ func (b *BuildCmd) vulcan(
 	msgs *[]string,
 ) error {
 	// checking if vulcan major is correct
-	vulcanVer, err := b.CommandRunner(b.f, "npm show @aziontech/bundler version", []string{})
+	vulcanVer, err := b.CommandRunner(b.f, "npm show edge-functions version", []string{})
 	if err != nil {
 		return err
 	}

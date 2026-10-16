@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/MakeNowJust/heredoc"
@@ -24,7 +23,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/logger"
 	manifestInt "github.com/aziontech/azion-cli/pkg/manifest"
 	"github.com/aziontech/azion-cli/pkg/token"
-	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	sdk "github.com/aziontech/azionapi-v4-go-sdk-dev/storage-api"
 	"github.com/briandowns/spinner"
@@ -64,7 +62,6 @@ type DeployCmd struct {
 	SkipBuild             bool
 	Sync                  bool
 	AliasEnv              bool
-	ConfigFile            string
 	Logs                  contracts.Logs
 	Result                contracts.Results
 }
@@ -128,7 +125,6 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	deployCmd.Flags().BoolVar(&deploy.Local, "local", false, msg.EdgeApplicationDeployLocal)
 	deployCmd.Flags().StringVar(&deploy.Env, "env", ".edge/.env", msg.EnvFlag)
 	deployCmd.Flags().BoolVar(&deploy.AliasEnv, "alias-env", false, msg.AliasEnvFlag)
-	deployCmd.Flags().StringVar(&deploy.ConfigFile, "config-file", "", msg.FlagConfigFile)
 	return deployCmd
 }
 
@@ -146,10 +142,6 @@ func (cmd *DeployCmd) ExternalRun(f *cmdutil.Factory, configPath string, local b
 
 func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	activeProfile := f.GetActiveProfile()
-	if err := vulcanPkg.CheckConfigFile(cmd.ConfigFile); err != nil {
-		return err
-	}
-
 	if cmd.DryRun {
 		// Described by the same step table the deploy executes, so it cannot
 		// drift from what a real run would do.
@@ -160,13 +152,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 
 	if cmd.Local {
 		deployLocal := deployRemote.NewDeployCmd(f)
-		deployLocal.ConfigFile = cmd.ConfigFile
 		return deployLocal.ExternalRun(f, cmd.ProjectConf, cmd.Env, cmd.Sync, cmd.Auto, cmd.SkipBuild, cmd.AliasEnv)
-	}
-
-	// Checked before any remote state is created (bucket, credentials, upload).
-	if err := cmd.resolveRemoteConfigFile(); err != nil {
-		return err
 	}
 
 	msgs := []string{}
@@ -372,32 +358,4 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	}
 
 	return nil
-}
-
-// resolveRemoteConfigFile rewrites ConfigFile into the path sent to the script runner.
-func (cmd *DeployCmd) resolveRemoteConfigFile() error {
-	workDir, err := cmd.GetWorkDir()
-	if err != nil {
-		return err
-	}
-	cmd.ConfigFile, err = remoteConfigFile(workDir, cmd.ConfigFile)
-	return err
-}
-
-// remoteConfigFile turns --config-file into the path the script runner uses.
-// The remote deploy uploads only the working directory, so the file must be
-// inside it, and it is sent relative to it. Empty means the default lookup.
-func remoteConfigFile(workDir, configFile string) (string, error) {
-	if configFile == "" {
-		return "", nil
-	}
-	abs, err := filepath.Abs(configFile)
-	if err != nil {
-		return "", err
-	}
-	rel, err := filepath.Rel(workDir, abs)
-	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
-		return "", msg.ErrorConfigFileOutsideProject
-	}
-	return filepath.ToSlash(rel), nil
 }

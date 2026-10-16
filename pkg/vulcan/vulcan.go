@@ -16,16 +16,16 @@ import (
 var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
+	installVulcanV3    = "npx --yes %s edge-functions%s %s"
 	firstTimeExecuting = "@1.2.0"
 	versionVulcan      = "@1.2.0"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
 
-const (
-	ConfigVersionV3 = 3
-	ConfigVersionV4 = 4
-)
+// ConfigVersionV4 is the --config-version sent to the bundler. v3 still runs on
+// edge-functions, which has no such option.
+const ConfigVersionV4 = 4
 
 // configVersionCommands are the bundler subcommands that accept --config-version.
 var configVersionCommands = map[string]bool{
@@ -45,9 +45,15 @@ func NewVulcan() *VulcanPkg {
 	return newVulcan(ConfigVersionV4)
 }
 
-// NewVulcanV3 returns a bundler that targets the Azion API v3 config
 func NewVulcanV3() *VulcanPkg {
-	return newVulcan(ConfigVersionV3)
+	versionVulcan = "@5.3.2"
+	currentMajor = 5
+	firstTimeExecuting = "@5.3.2"
+	return &VulcanPkg{
+		Command:          commandV3,
+		CheckVulcanMajor: checkVulcanMajor,
+		ReadSettings:     token.ReadSettings,
+	}
 }
 
 func newVulcan(configVersion int) *VulcanPkg {
@@ -88,6 +94,25 @@ func command(flags, params string, f *cmdutil.Factory) string {
 		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
 	}
 	return fmt.Sprintf(installBundler, flags, selectedVersion, params)
+}
+
+// commandV3 uses edge-functions for V3 compatibility
+func commandV3(flags, params string, f *cmdutil.Factory) string {
+	if releaseChannel == "stage" {
+		stageCmd := "npx --yes %s " + StagePkgURL + " %s"
+		if f.Logger.Debug {
+			stageCmd = "DEBUG=true " + stageCmd
+		}
+		return fmt.Sprintf(stageCmd, flags, params)
+	}
+
+	// V3 uses edge-functions package
+	selectedVersion := versionVulcan
+	if f.Logger.Debug {
+		installDebug := "DEBUG=true " + installVulcanV3
+		return fmt.Sprintf(installDebug, flags, selectedVersion, params)
+	}
+	return fmt.Sprintf(installVulcanV3, flags, selectedVersion, params)
 }
 
 func checkVulcanMajor(currentVersion string, f *cmdutil.Factory, vulcan *VulcanPkg) error {

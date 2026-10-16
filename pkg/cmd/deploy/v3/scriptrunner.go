@@ -57,12 +57,6 @@ func callScript(token, id, secret, prefix, name, confDir string, cmd *DeployCmd)
 			"instantiation_data_path": "envs.[5].value",
 			"value":                   confDir,
 		},
-		{
-			// Relative to the project root; empty means the default azion.config lookup.
-			"field":                   "AZCLI_CONFIG_FILE",
-			"instantiation_data_path": "envs.[6].value",
-			"value":                   cmd.ConfigFile,
-		},
 	}
 
 	// Marshal the payload to JSON

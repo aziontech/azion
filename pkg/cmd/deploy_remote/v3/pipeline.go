@@ -3,7 +3,6 @@ package deploy
 import (
 	"context"
 	"os"
-	"path"
 	"strconv"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
@@ -94,6 +93,13 @@ func (V3DeployPipeline) Steps() []pipeline.Step[DeployState] {
 			},
 		},
 		{
+			Name: "Function",
+			Run: func(_ context.Context, s *DeployState) error {
+				s.Conf.Function.File = ".edge/worker.js"
+				return s.Cmd.doFunction(s.Clients, s.Ctx, s.Conf, s.Msgs)
+			},
+		},
+		{
 			Name: "ReadManifest",
 			Run: func(_ context.Context, s *DeployState) error {
 				m, err := s.Interpreter.ReadManifest(s.PathManifest, s.F, s.Msgs)
@@ -102,22 +108,6 @@ func (V3DeployPipeline) Steps() []pipeline.Step[DeployState] {
 				}
 				s.Manifest = m
 				return nil
-			},
-		},
-		{
-			// The function comes from the manifest, like on v4. A project that
-			// declares none (a static site) gets no function.
-			Name: "Function",
-			Applies: func(s *DeployState) bool {
-				if len(s.Manifest.Functions) == 0 {
-					logger.Debug("No function declared in the manifest, skipping function step")
-					return false
-				}
-				return true
-			},
-			Run: func(_ context.Context, s *DeployState) error {
-				s.Conf.Function.File = functionFile(s.Manifest.Functions)
-				return s.Cmd.doFunction(s.Clients, s.Ctx, s.Conf, s.Msgs)
 			},
 		},
 		{
@@ -204,14 +194,4 @@ func (s *DeployState) firstRunOriginAndRules() error {
 	}
 
 	return nil
-}
-
-// functionFile is the code file of the function the v3 deploy creates. A v3
-// project holds a single function, so only the first one declared is used.
-func functionFile(functions []contracts.FunctionV3) string {
-	if len(functions) > 1 {
-		logger.Debug("The manifest declares more than one function; v3 deploys only the first",
-			zap.String("function", functions[0].Name))
-	}
-	return path.Join(".edge", functions[0].Target)
 }

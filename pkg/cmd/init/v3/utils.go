@@ -35,7 +35,7 @@ func (cmd *initCmd) askForInput(msg string, defaultIn string) (string, error) {
 
 func (cmd *initCmd) selectVulcanTemplates(vul *vulcanPkg.VulcanPkg) error {
 	// checking if vulcan major is correct
-	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show @aziontech/bundler version", []string{})
+	vulcanVer, err := cmd.commandRunnerOutput(cmd.f, "npm show edge-functions version", []string{})
 	if err != nil {
 		return err
 	}

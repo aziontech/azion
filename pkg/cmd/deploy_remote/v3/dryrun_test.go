@@ -80,10 +80,7 @@ func TestV3DryRunDescribesAFirstDeploy(t *testing.T) {
 	conf := &contracts.AzionApplicationOptionsV3{Name: "proj", Bucket: "proj"}
 	cmd, out := dryRunCmd(t, conf)
 
-	inTempProject(t, &contracts.Manifest{
-		Origins:   []contracts.Origin{{}},
-		Functions: []contracts.FunctionV3{{Name: "handler", Target: "./functions/handler.js"}},
-	}, func() {
+	inTempProject(t, &contracts.Manifest{Origins: []contracts.Origin{{}}}, func() {
 		require.NoError(t, cmd.DryRun(cmd.F))
 	})
 

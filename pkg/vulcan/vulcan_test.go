@@ -97,61 +97,42 @@ func TestCommandConfigVersion(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	tests := []struct {
 		name   string
-		vulcan func() *VulcanPkg
 		params string
 		want   string
 	}{
-		{
-			name:   "v4 build",
-			vulcan: NewVulcan,
-			params: "build --preset react",
-			want:   "build --preset react --config-version 4",
-		},
-		{
-			name:   "v3 build",
-			vulcan: NewVulcanV3,
-			params: "build%s",
-			want:   "build%s --config-version 3",
-		},
-		{
-			name:   "v3 dev",
-			vulcan: NewVulcanV3,
-			params: "dev",
-			want:   "dev --config-version 3",
-		},
-		{
-			name:   "v3 manifest",
-			vulcan: NewVulcanV3,
-			params: "manifest transform --output %s --entry %s",
-			want:   "manifest transform --output %s --entry %s --config-version 3",
-		},
-		{
-			name:   "v3 presets",
-			vulcan: NewVulcanV3,
-			params: "presets ls",
-			want:   "presets ls --config-version 3",
-		},
-		{
-			name:   "config does not accept config version",
-			vulcan: NewVulcan,
-			params: "config replace --replacements '{}'",
-			want:   "config replace --replacements '{}'",
-		},
-		{
-			name:   "store does not accept config version",
-			vulcan: NewVulcanV3,
-			params: "store init",
-			want:   "store init",
-		},
+		{name: "build", params: "build --preset react", want: "build --preset react --config-version 4"},
+		{name: "build with a format verb", params: "build%s", want: "build%s --config-version 4"},
+		{name: "dev", params: "dev", want: "dev --config-version 4"},
+		{name: "manifest", params: "manifest transform --output %s --entry %s", want: "manifest transform --output %s --entry %s --config-version 4"},
+		{name: "presets", params: "presets ls", want: "presets ls --config-version 4"},
+		{name: "config does not accept config version", params: "config replace --replacements '{}'", want: "config replace --replacements '{}'"},
+		{name: "store does not accept config version", params: "store init", want: "store init"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			f, _, _ := testutils.NewFactory(&httpmock.Registry{})
 			want := fmt.Sprintf("npx --yes  @aziontech/bundler%s %s", versionVulcan, tt.want)
-			if got := tt.vulcan().Command("", tt.params, f); got != want {
+			if got := NewVulcan().Command("", tt.params, f); got != want {
 				t.Errorf("Command() = %v, want %v", got, want)
 			}
 		})
+	}
+}
+
+// v3 still runs on edge-functions, which has no --config-version.
+func TestCommandV3(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	// NewVulcanV3 switches the package to the edge-functions version.
+	saved := []any{versionVulcan, currentMajor, firstTimeExecuting}
+	defer func() {
+		versionVulcan, currentMajor, firstTimeExecuting = saved[0].(string), saved[1].(int), saved[2].(string)
+	}()
+
+	f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+	got := NewVulcanV3().Command("", "build --preset react", f)
+	want := "npx --yes  edge-functions@5.3.2 build --preset react"
+	if got != want {
+		t.Errorf("Command() = %v, want %v", got, want)
 	}
 }
 
