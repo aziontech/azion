@@ -94,6 +94,11 @@ checksum:
   name_template: "{{ .ProjectName }}_v{{ .Env.BIN_VERSION }}_checksum"
 snapshot:
   version_template: "{{ incpatch .Env.BIN_VERSION }}-next"
+release:
+  # A tag with a pre-release suffix (X.Y.Z-dev.N) must never become the
+  # repository's "latest" release, which is what `azion` checks for updates.
+  prerelease: auto
+
 changelog:
   sort: asc
   filters:
