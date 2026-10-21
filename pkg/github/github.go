@@ -32,6 +32,8 @@ type Github struct {
 type Release struct {
 	TagName     string `json:"tag_name"`
 	PublishedAt string `json:"published_at"`
+	Prerelease  bool   `json:"prerelease"`
+	Draft       bool   `json:"draft"`
 }
 
 func NewGithub() *Github {
@@ -46,34 +48,69 @@ func NewGithub() *Github {
 	}
 }
 
-func getVersionGitHub(name string) (string, string, error) {
-	apiURL := fmt.Sprintf("https://api.github.com/repos/aziontech/%s/releases/latest", name)
+// githubAPI is a variable so tests can point it at a local server.
+var githubAPI = "https://api.github.com"
 
+// getVersionGitHub returns the newest production release of the repository.
+// Pre-releases (stage builds tagged X.Y.Z-dev.N) are never returned, even when
+// GitHub marks one of them as the latest release.
+func getVersionGitHub(name string) (string, string, error) {
+	var release Release
+	found, err := fetchJSON(fmt.Sprintf("%s/repos/aziontech/%s/releases/latest", githubAPI, name), &release)
+	if err != nil || !found {
+		return "", "", err
+	}
+	if isProductionRelease(release) {
+		return release.TagName, release.PublishedAt, nil
+	}
+
+	logger.Debug("Latest release of " + name + " is a pre-release, looking for the newest production release")
+	var releases []Release
+	found, err = fetchJSON(fmt.Sprintf("%s/repos/aziontech/%s/releases?per_page=100", githubAPI, name), &releases)
+	if err != nil || !found {
+		return "", "", err
+	}
+	// GitHub lists releases newest first
+	for _, r := range releases {
+		if isProductionRelease(r) {
+			return r.TagName, r.PublishedAt, nil
+		}
+	}
+
+	return "", "", nil
+}
+
+func isProductionRelease(r Release) bool {
+	return !r.Draft && !r.Prerelease && r.TagName != "" && !strings.Contains(r.TagName, "-")
+}
+
+// fetchJSON decodes the response of apiURL into out. It returns false, without
+// error, when GitHub answers with a non-200 status.
+func fetchJSON(apiURL string, out any) (bool, error) {
 	response, err := http.Get(apiURL)
 	if err != nil {
-		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
-		return "", "", err
+		logger.Debug("Failed to request "+apiURL, zap.Error(err))
+		return false, err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		logger.Debug("Failed to get latest version of "+name, zap.Error(err))
-		return "", "", nil
+		logger.Debug("Unexpected status from "+apiURL, zap.Int("status", response.StatusCode))
+		return false, nil
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		logger.Debug("Failed to read response body", zap.Error(err))
-		return "", "", err
+		return false, err
 	}
 
-	var release Release
-	if err := json.Unmarshal(body, &release); err != nil {
+	if err := json.Unmarshal(body, out); err != nil {
 		logger.Debug("Failed to unmarshal response body", zap.Error(err))
-		return "", "", err
+		return false, err
 	}
 
-	return release.TagName, release.PublishedAt, nil
+	return true, nil
 }
 
 func clone(cloneOptions *git.CloneOptions, url, path string) error {

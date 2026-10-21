@@ -87,3 +87,30 @@ func TestParsePublishedAtDate(t *testing.T) {
 		})
 	}
 }
+
+func TestIsNewerVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		latest  string
+		current string
+		want    bool
+	}{
+		{"newer minor", "4.25.0", "4.24.0", true},
+		{"newer patch", "4.24.1", "4.24.0", true},
+		{"same version", "4.24.0", "4.24.0", false},
+		{"older version", "4.23.0", "4.24.0", false},
+		{"stage tag of the installed version", "4.24.0-dev.20", "4.24.0", false},
+		{"numeric, not lexical, comparison", "4.30.0", "4.3.10", true},
+		{"digit concatenation would say newer", "4.3.10", "4.30.0", false},
+		{"v prefix", "v4.25.0", "4.24.0", true},
+		{"local build ahead of a tag", "4.24.0", "4.24.0-3-g8b509c9", false},
+		{"empty latest", "", "4.24.0", false},
+		{"unparseable current", "4.25.0", "dev", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, isNewerVersion(tt.latest, tt.current))
+		})
+	}
+}

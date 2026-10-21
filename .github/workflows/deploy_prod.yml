@@ -38,15 +38,29 @@ jobs:
       - name: Refresh git
         run: git fetch --tags
 
+      # Stage tags (X.Y.Z-dev.N) are minted on main too, so the commit released
+      # here usually also carries one. Neither `git describe --tags` nor
+      # goreleaser's own tag detection reliably prefer the clean tag in that case,
+      # so the version is taken from the clean tag the previous step put on this
+      # commit and pinned for every later step.
+      - name: Pin release version
+        run: |
+          version=$(git tag --points-at HEAD | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n1)
+          if [ -z "$version" ]; then
+            echo "::error::no clean X.Y.Z release tag on $(git rev-parse HEAD)"; exit 1
+          fi
+          echo "BIN_VERSION=$version" >> $GITHUB_ENV
+          echo "GORELEASER_CURRENT_TAG=$version" >> $GITHUB_ENV
+
       - name: Build
         env:
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
-        run: make build ENVFILE=./env/prod
+        run: make build ENVFILE=./env/prod BIN_VERSION=$BIN_VERSION
 
       - name: Cross-build
         env:
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
-        run: make cross-build ENVFILE=./env/prod
+        run: make cross-build ENVFILE=./env/prod BIN_VERSION=$BIN_VERSION
 
       - name: Install AWS CLI
         run: |
@@ -74,10 +88,7 @@ jobs:
           done < BUILD
 
       - id: binversion
-        run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_OUTPUT
-
-      - name: set bin version to github env
-        run: echo "BIN_VERSION=$(git describe --tags)" >> $GITHUB_ENV
+        run: echo "BIN_VERSION=$BIN_VERSION" >> $GITHUB_OUTPUT
 
       - uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:

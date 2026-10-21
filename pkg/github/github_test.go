@@ -18,47 +18,65 @@ func TestGetVersionGitHub(t *testing.T) {
 	logger.New(zapcore.DebugLevel)
 	tests := []struct {
 		name       string
-		repoName   string
-		wantTag    string
 		statusCode int
-		response   string
+		latest     string
+		releases   string
+		wantTag    string
 		wantErr    bool
 	}{
 		{
 			name:       "not found",
-			repoName:   "test-repo",
-			wantTag:    "",
 			statusCode: http.StatusNotFound,
-			response:   `{"message": "Not Found"}`,
-			wantErr:    false,
+			latest:     `{"message": "Not Found"}`,
+			wantTag:    "",
 		},
 		{
-			name:       "successful response",
-			repoName:   "azion-cli",
-			wantTag:    "1.30.0",
+			name:       "latest is a production release",
 			statusCode: http.StatusOK,
-			response:   `{"tag_name": "1.30.0", "published_at": "2025-09-12T19:15:10Z"}`,
-			wantErr:    false,
+			latest:     `{"tag_name": "4.24.0", "published_at": "2026-10-16T18:12:39Z"}`,
+			wantTag:    "4.24.0",
+		},
+		{
+			name:       "latest is a stage tag published as a release",
+			statusCode: http.StatusOK,
+			latest:     `{"tag_name": "4.24.0-dev.20", "published_at": "2026-10-16T18:12:39Z"}`,
+			releases:   `[{"tag_name": "4.24.0-dev.20"}, {"tag_name": "4.23.1", "prerelease": true}, {"tag_name": "4.23.0", "published_at": "2026-08-26T18:12:07Z"}]`,
+			wantTag:    "4.23.0",
+		},
+		{
+			name:       "latest flagged as pre-release and no production release",
+			statusCode: http.StatusOK,
+			latest:     `{"tag_name": "4.24.0", "prerelease": true}`,
+			releases:   `[{"tag_name": "4.24.0", "prerelease": true}, {"tag_name": "4.23.0", "draft": true}]`,
+			wantTag:    "",
+		},
+		{
+			name:       "invalid body",
+			statusCode: http.StatusOK,
+			latest:     `{`,
+			wantErr:    true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				body := tt.latest
+				if r.URL.Path == "/repos/aziontech/azion/releases" {
+					body = tt.releases
+				}
 				w.WriteHeader(tt.statusCode)
-				_, err := w.Write([]byte(tt.response))
-				if err != nil {
+				if _, err := w.Write([]byte(body)); err != nil {
 					panic(err)
 				}
 			}))
 			defer server.Close()
 
-			gh := NewGithub()
-			gh.GetVersionGitHub = func(name string) (string, string, error) {
-				return tt.wantTag, "2025-09-12T19:15:10Z", nil
-			}
+			previous := githubAPI
+			githubAPI = server.URL
+			defer func() { githubAPI = previous }()
 
-			gotTag, _, err := gh.GetVersionGitHub(tt.repoName)
+			gotTag, _, err := NewGithub().GetVersionGitHub("azion")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetVersionGitHub() error = %v, wantErr %v", err, tt.wantErr)
 				return
