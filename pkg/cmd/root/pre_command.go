@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/aziontech/azion-cli/pkg/github"
 	"go.uber.org/zap"
@@ -283,16 +282,7 @@ func checkForUpdateAndMetrics(cVersion string, f *cmdutil.Factory, settings *tok
 	logger.Debug("Latest version: " + tagName)
 	logger.Debug("Published at: " + publishedAt)
 
-	latestVersion, err := format(tagName)
-	if err != nil {
-		return err
-	}
-	currentVersion, err := format(cVersion)
-	if err != nil {
-		return err
-	}
-
-	if latestVersion > currentVersion {
+	if isNewerVersion(tagName, cVersion) {
 		publishedTime, err := time.Parse(time.RFC3339, publishedAt)
 		if err != nil {
 			logger.Debug("Failed to parse published_at date", zap.Error(err))
@@ -332,25 +322,44 @@ func showUpdateMessage(f *cmdutil.Factory, vNumber string) error {
 	return nil
 }
 
-func format(input string) (int, error) {
-	numberString := ""
-	for _, char := range input {
-		if unicode.IsDigit(char) {
-			numberString += string(char)
+// isNewerVersion reports whether latest is a newer release than current. Only
+// the X.Y.Z core is compared: anything after it ("-dev.N", "-3-gabc123") is
+// ignored, so a stage build never counts as an update.
+func isNewerVersion(latest, current string) bool {
+	l, ok := parseVersionCore(latest)
+	if !ok {
+		return false
+	}
+	c, ok := parseVersionCore(current)
+	if !ok {
+		return false
+	}
+	for i := range l {
+		if l[i] != c[i] {
+			return l[i] > c[i]
 		}
 	}
+	return false
+}
 
-	// to avoid converting errors
-	if numberString == "" {
-		numberString = "0"
+func parseVersionCore(v string) ([3]int, bool) {
+	var core [3]int
+	v = strings.TrimPrefix(strings.TrimSpace(v), "v")
+	if i := strings.IndexAny(v, "-+"); i >= 0 {
+		v = v[:i]
 	}
-
-	number, err := strconv.Atoi(numberString)
-	if err != nil {
-		return 0, err
+	parts := strings.Split(v, ".")
+	if len(parts) != 3 {
+		return core, false
 	}
-
-	return number, nil
+	for i, p := range parts {
+		n, err := strconv.Atoi(p)
+		if err != nil {
+			return core, false
+		}
+		core[i] = n
+	}
+	return core, true
 }
 
 // Mock for utils.Confirm
