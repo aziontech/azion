@@ -1,0 +1,10 @@
+{
+  "name": "renamed",
+  "modules": {
+    "cache": {
+      "enabled": true
+    }
+  },
+  "active": true,
+  "debug": false
+}

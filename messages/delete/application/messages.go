@@ -1,6 +1,7 @@
 package application
 
-// Used by both the v3 and the v4 command trees.
+// Used by the v3, v4 and v6 command trees. The cascade messages are v3 and v4
+// only: v6 has no cascade delete until its deploy model is known.
 var (
 	ShortDescription = "Deletes an Application"
 	LongDescription  = "Removes an Application from the Applications library based on a given ID"
@@ -14,7 +15,7 @@ var (
 	CONFDIRFLAG      = "Relative path to where your custom azion.json and args.json files are stored"
 )
 
-// Used only by the v4 command tree.
+// Used by the v4 and v6 command trees.
 var (
 	Usage = "application"
 )

@@ -1,0 +1,9 @@
+{
+  "name": "from-file",
+  "modules": {
+    "cache": {
+      "enabled": true
+    }
+  },
+  "active": true
+}

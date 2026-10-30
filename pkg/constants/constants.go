@@ -4,6 +4,7 @@ package constants
 var (
 	ApiURL        string
 	ApiV4URL      string
+	ApiV6URL      string
 	AuthURL       string
 	StorageApiURL string
 )

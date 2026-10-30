@@ -1,6 +1,6 @@
 package application
 
-// Used by both the v3 and the v4 command trees.
+// Used by the v3, v4 and v6 command trees.
 var (
 	ShortDescription = "Creates an Application"
 	LongDescription  = "Creates an Application without the need to manage infrastructure or security"
@@ -11,7 +11,7 @@ var (
 	FlagDebugRules   = "Allows you to check whether rules created using Rules Engine for Application have been successfully executed in your application"
 )
 
-// Used only by the v4 command tree.
+// Used by the v4 and v6 command trees.
 var (
 	// [ edge_applications ]
 	Usage                       = "application"

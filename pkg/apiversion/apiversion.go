@@ -35,9 +35,13 @@ const (
 	V3 Version = "v3"
 	// V4 is the current generation, served by pkg/cmd and pkg/api.
 	V4 Version = "v4"
+	// V6 is the next generation, served by the v6/ subpackages under pkg/cmd
+	// and pkg/api. Accounts are not resolved to it yet: it has no entry in
+	// generations, so it is only reached by a factory that sets it explicitly.
+	V6 Version = "v6"
 )
 
-// String returns the wire form of the version ("v3", "v4"). This is the value
+// String returns the wire form of the version ("v3", "v4", "v6"). This is the value
 // persisted in profile settings and reported in metrics, so it must stay stable.
 func (v Version) String() string {
 	return string(v)

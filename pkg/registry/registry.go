@@ -43,6 +43,7 @@ import (
 	apiRealtimePurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiRulesEngine "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
+	apiV6Applications "github.com/aziontech/azion-cli/pkg/api/v6/applications"
 	apiVariables "github.com/aziontech/azion-cli/pkg/api/variables"
 	apiWaf "github.com/aziontech/azion-cli/pkg/api/waf"
 	apiWafExceptions "github.com/aziontech/azion-cli/pkg/api/waf_exceptions"
@@ -53,6 +54,7 @@ import (
 // The configured base URLs. These keys are named here and nowhere else.
 func legacyAPIURL(f *cmdutil.Factory) string { return f.Config.GetString("api_url") }
 func apiV4URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v4_url") }
+func apiV6URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v6_url") }
 func storageURL(f *cmdutil.Factory) string   { return f.Config.GetString("storage_url") }
 
 // credential is the token the invocation authenticates with.
@@ -181,4 +183,11 @@ func WAFExceptions(f *cmdutil.Factory) *apiWafExceptions.Client {
 
 func Workloads(f *cmdutil.Factory) *apiWorkloads.Client {
 	return apiWorkloads.NewClient(httpClient(f), apiV4URL(f), credential(f))
+}
+
+// The v6 clients wrap a different SDK than their v4 namesakes, so they are
+// separate constructors rather than a switch on f.APIVersion inside the v4 one.
+
+func ApplicationsV6(f *cmdutil.Factory) *apiV6Applications.Client {
+	return apiV6Applications.NewClient(httpClient(f), apiV6URL(f), credential(f))
 }

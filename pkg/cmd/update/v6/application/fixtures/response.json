@@ -1,0 +1,28 @@
+{
+  "state": "executed",
+  "data": {
+    "id": 1337,
+    "name": "renamed",
+    "last_editor": "user@azion.com",
+    "last_modified": "2026-10-01T14:15:22Z",
+    "modules": {
+      "cache": {
+        "enabled": true
+      },
+      "functions": {
+        "enabled": true
+      },
+      "application_accelerator": {
+        "enabled": false
+      },
+      "image_processor": {
+        "enabled": false
+      }
+    },
+    "active": true,
+    "debug": false,
+    "product_version": "1.0",
+    "version_id": "a1b2c3",
+    "version_state": "ready"
+  }
+}

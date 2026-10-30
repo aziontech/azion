@@ -2,7 +2,7 @@ package application
 
 import "errors"
 
-// Used by both the v3 and the v4 command trees.
+// Used by the v3, v4 and v6 command trees.
 var (
 	ErrorUpdateApplication    = errors.New("Failed to update the Application: %s. Check your settings and try again. If the error persists, contact Azion support")
 	ErrorNoFieldInformed      = errors.New("Inform at least one field to be updated. It's not possible to update an Application without specifying the fields that will be updated. Run ‘azion update edge-application --help’ to display more information and try again.  If the error persists, contact Azion support.")

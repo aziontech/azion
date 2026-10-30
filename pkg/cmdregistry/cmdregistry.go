@@ -52,6 +52,11 @@ func V4Only(new Builder) Entry {
 	return Entry{Versions: []apiversion.Version{apiversion.V4}, New: new}
 }
 
+// V6Only registers a command that exists only on the v6 generation.
+func V6Only(new Builder) Entry {
+	return Entry{Versions: []apiversion.Version{apiversion.V6}, New: new}
+}
+
 // Fallback is the generation assumed when a factory carries no resolved
 // version. The root command always resolves one, so this covers callers that
 // build a command tree on their own — documentation generation and unit tests —

@@ -1,6 +1,6 @@
 package application
 
-// Used by both the v3 and the v4 command trees.
+// Used by the v3, v4 and v6 command trees.
 var (
 	ShortDescription            = "Updates an Application"
 	LongDescription             = "Modifies an Application's name, activity status, and other attributes based on the given ID"
@@ -15,11 +15,16 @@ var (
 	AskInputApplicationId       = "Enter the ID of the Application you wish to update:"
 )
 
-// Used only by the v4 command tree.
+// Used by the v4 and v6 command trees.
 var (
 	Usage          = "application"
 	FlagDebugRules = "Allows you to check whether rules created using Rules Engine for Application have been successfully executed in your application"
 	FlagCaching    = "Whether the Application has Caching active or not"
+)
+
+// Used only by the v6 command tree.
+var (
+	FlagActive = "Whether the Application is active or not"
 )
 
 // Used only by the v3 command tree (bug-fix-only; see doc/plan.md).

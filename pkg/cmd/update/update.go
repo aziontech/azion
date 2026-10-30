@@ -35,6 +35,7 @@ import (
 	v4Waf "github.com/aziontech/azion-cli/pkg/cmd/update/v4/waf"
 	v4WafExceptions "github.com/aziontech/azion-cli/pkg/cmd/update/v4/waf_exceptions"
 	v4Workloads "github.com/aziontech/azion-cli/pkg/cmd/update/v4/workloads"
+	v6Application "github.com/aziontech/azion-cli/pkg/cmd/update/v6/application"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/update/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdregistry"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -69,6 +70,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 // Commented entries are resources whose command exists but is not yet wired up.
 var children = []cmdregistry.Entry{
 	cmdregistry.V4Only(v4Application.NewCmd),
+	cmdregistry.V6Only(v6Application.NewCmd),
 	cmdregistry.V4Only(v4RulesEngine.NewCmd),
 	cmdregistry.V4Only(v4RulesEngineOrder.NewCmd),
 	cmdregistry.Any(origin.NewCmd),
@@ -106,6 +108,10 @@ var children = []cmdregistry.Entry{
 // hand-picked highlight rather than the full child list, and it differs per
 // generation because the resources do, so it is data here like the children.
 var examples = map[apiversion.Version]string{
+	apiversion.V6: `
+		$ azion update --help
+		$ azion update application -h
+		`,
 	apiversion.V4: `
 		$ azion update --help
 		$ azion update application -h
