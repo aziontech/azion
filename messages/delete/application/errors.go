@@ -2,7 +2,8 @@ package application
 
 import "errors"
 
-// Used by both the v3 and the v4 command trees.
+// Used by the v3, v4 and v6 command trees. The cascade messages are v3 and v4
+// only: v6 has no cascade delete until its deploy model is known.
 var (
 	ErrorMissingAzionJson         = errors.New("Azion.json file is missing. Please initialize and deploy your project before using cascade delete")
 	ErrorMissingApplicationIdJson = errors.New("Application ID is missing from azion.json. Please initialize and deploy your project before using cascade delete")

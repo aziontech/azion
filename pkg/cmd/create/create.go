@@ -38,6 +38,7 @@ import (
 	v4WafExceptions "github.com/aziontech/azion-cli/pkg/cmd/create/v4/waf_exceptions"
 	v4WorkloadDeployment "github.com/aziontech/azion-cli/pkg/cmd/create/v4/workload_deployment"
 	v4Workloads "github.com/aziontech/azion-cli/pkg/cmd/create/v4/workloads"
+	v6Applications "github.com/aziontech/azion-cli/pkg/cmd/create/v6/applications"
 	variables "github.com/aziontech/azion-cli/pkg/cmd/create/variables"
 	"github.com/aziontech/azion-cli/pkg/cmdregistry"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
@@ -72,6 +73,7 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 // Commented entries are resources whose command exists but is not yet wired up.
 var children = []cmdregistry.Entry{
 	cmdregistry.V4Only(v4Applications.NewCmd),
+	cmdregistry.V6Only(v6Applications.NewCmd),
 	cmdregistry.V4Only(v4RulesEngine.NewCmd),
 	cmdregistry.Any(personalToken.NewCmd),
 	cmdregistry.Any(origin.NewCmd),
@@ -112,6 +114,10 @@ var children = []cmdregistry.Entry{
 // hand-picked highlight rather than the full child list, and it differs per
 // generation because the resources do, so it is data here like the children.
 var examples = map[apiversion.Version]string{
+	apiversion.V6: `
+		$ azion create --help
+		$ azion create application -h
+		`,
 	apiversion.V4: `
 		$ azion create --help
 		$ azion create application -h

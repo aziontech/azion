@@ -99,6 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
           API_URL: https://api.azionapi.net
           API_V4_URL: https://api.azion.com/v4
+          API_V6_URL: https://api.azion.com/v6
           STORAGE_URL: https://api.azion.com/v4
           AUTH_URL: https://sso.azion.com/api
           SEGMENT_KEY: Irg63QfdvWpoANAVeCBEwfxXBKvoSSzt

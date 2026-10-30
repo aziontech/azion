@@ -38,6 +38,7 @@ func TestClientsUseTheExpectedBaseURL(t *testing.T) {
 	const (
 		legacy  = "api_url"
 		v4      = "api_v4_url"
+		v6      = "api_v6_url"
 		storage = "storage_url"
 	)
 
@@ -70,6 +71,8 @@ func TestClientsUseTheExpectedBaseURL(t *testing.T) {
 		{"WAF", func(f *cmdutil.Factory) { WAF(f) }, v4},
 		{"WAFExceptions", func(f *cmdutil.Factory) { WAFExceptions(f) }, v4},
 		{"Workloads", func(f *cmdutil.Factory) { Workloads(f) }, v4},
+
+		{"ApplicationsV6", func(f *cmdutil.Factory) { ApplicationsV6(f) }, v6},
 
 		// served by the legacy API even for accounts on v4, which is why a
 		// single "current generation" base URL would be wrong

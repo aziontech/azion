@@ -35,7 +35,7 @@ func tableFactory(v apiversion.Version) *cmdutil.Factory {
 // wrong API generation. This walks the whole resolved tree for each generation
 // and fails on any name registered twice under the same parent.
 func TestTableNamesAreUniquePerVersion(t *testing.T) {
-	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4} {
+	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4, apiversion.V6} {
 		t.Run(string(v), func(t *testing.T) {
 			f := tableFactory(v)
 			for _, cmd := range cmdregistry.Children(children, f) {
@@ -62,7 +62,7 @@ func assertUniqueChildren(t *testing.T, cmd *cobra.Command, path string) {
 // where the two generations' project commands (deploy, init, and the rest) sit
 // side by side under the same names.
 func TestTopLevelNamesAreUniquePerVersion(t *testing.T) {
-	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4} {
+	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4, apiversion.V6} {
 		t.Run(string(v), func(t *testing.T) {
 			seen := make(map[string]bool)
 			for _, cmd := range cmdregistry.Children(children, tableFactory(v)) {
@@ -88,5 +88,28 @@ func TestEveryGenerationGetsBothTrees(t *testing.T) {
 	}
 	if counts[apiversion.V4] != 25 {
 		t.Errorf("v4 root: got %d top-level commands, want 25", counts[apiversion.V4])
+	}
+}
+
+// TestV6OffersApplicationCRUD pins the v6 application tree: every CRUD verb
+// offers `application` on v6. The v6 delete has no --cascade, which is how the
+// test tells it apart from the v4 command of the same name.
+func TestV6OffersApplicationCRUD(t *testing.T) {
+	verbs := map[string]bool{}
+	for _, cmd := range cmdregistry.Children(children, tableFactory(apiversion.V6)) {
+		for _, sub := range cmd.Commands() {
+			if sub.Name() != "application" {
+				continue
+			}
+			verbs[cmd.Name()] = true
+			if cmd.Name() == "delete" && sub.Flags().Lookup("cascade") != nil {
+				t.Errorf("v6 delete application resolved to the v4 command")
+			}
+		}
+	}
+	for _, verb := range []string{"create", "list", "describe", "update", "delete"} {
+		if !verbs[verb] {
+			t.Errorf("v6 %s does not offer application", verb)
+		}
 	}
 }
