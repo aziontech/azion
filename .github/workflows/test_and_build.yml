@@ -50,6 +50,3 @@ jobs:
         run: |
           echo "Checking Security"
           make sec
-
-      - name: Go Report
-        uses: creekorful/goreportcard-action@1f35ced8cdac2cba28c9a2f2288a16aacfd507f9 # v1.0
