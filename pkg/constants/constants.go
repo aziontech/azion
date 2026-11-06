@@ -7,6 +7,9 @@ var (
 	ApiV6URL      string
 	AuthURL       string
 	StorageApiURL string
+	// StorageApiV6URL is the storage API of v6 accounts; StorageApiURL serves
+	// v3 and v4.
+	StorageApiV6URL string
 )
 
 const (

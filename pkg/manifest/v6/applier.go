@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/v6/applications"
@@ -82,13 +83,24 @@ func ids(list []contracts.AzionJsonV6Resource) map[string]int64 {
 	return out
 }
 
+// functionCodePath is where a Function's code is on disk. The bundler writes
+// the path relative to .edge (./functions/worker.js is
+// .edge/functions/worker.js), as the v4 deploy reads it.
+func functionCodePath(p string) string {
+	if filepath.IsAbs(p) {
+		return p
+	}
+	return filepath.Join(".edge", p)
+}
+
 func (a *Applier) ApplyFunctions(ctx context.Context) ([]Pending, error) {
 	var out []Pending
 	for _, fn := range a.Manifest.Functions {
-		code, err := a.readFile(fn.Path)
+		codePath := functionCodePath(fn.Path)
+		code, err := a.readFile(codePath)
 		if err != nil {
-			logger.Debug("Error while reading function code", zap.String("path", fn.Path), zap.Error(err))
-			return nil, fmt.Errorf("%w %q from %s: %v", msg.ErrorV6FunctionCode, fn.Name, fn.Path, err)
+			logger.Debug("Error while reading function code", zap.String("path", codePath), zap.Error(err))
+			return nil, fmt.Errorf("%w %q from %s: %v", msg.ErrorV6FunctionCode, fn.Name, codePath, err)
 		}
 		req := sdk.FunctionsRequest{Name: fn.Name, Code: string(code), Active: fn.Active}
 		if fn.Runtime != "" {

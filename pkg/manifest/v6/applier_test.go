@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -336,9 +337,10 @@ func TestFunctionCodeComesFromItsFile(t *testing.T) {
 	api.On("GET", "/workspace/functions", JSON(Page()))
 	api.On("POST", "/workspace/functions", JSON(Data(Version(4, "fn", "V1", "draft"))))
 	api.On("GET", "/workspace/functions/4/versions/V1", JSON(Version(4, "fn", "V1", "draft")))
-	a, _ := applier(api, &contracts.AzionApplicationOptionsV6{}, &contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{Name: "fn", Path: ".edge/worker.js"}}})
+	a, _ := applier(api, &contracts.AzionApplicationOptionsV6{}, &contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{Name: "fn", Path: "./functions/worker.js"}}})
 	a.ReadFile = func(path string) ([]byte, error) {
-		if path != ".edge/worker.js" {
+		// The bundler writes the path relative to .edge.
+		if path != filepath.Join(".edge", "functions", "worker.js") {
 			return nil, errors.New("unexpected path " + path)
 		}
 		return []byte("export default {}"), nil

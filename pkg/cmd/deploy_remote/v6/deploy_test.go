@@ -98,7 +98,7 @@ func project(t *testing.T, m map[string]any) {
 // --config-version 6.
 var siteManifest = map[string]any{
 	"version":   6,
-	"functions": []any{map[string]any{"name": "fn", "path": ".edge/worker.js"}},
+	"functions": []any{map[string]any{"name": "fn", "path": "./worker.js"}},
 	"applications": []any{map[string]any{
 		"name":                "site",
 		"functions_instances": []any{map[string]any{"name": "handler", "function": "fn"}},

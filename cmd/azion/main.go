@@ -29,6 +29,7 @@ func main() {
 	viper.SetDefault("api_v4_url", constants.ApiV4URL)
 	viper.SetDefault("api_v6_url", constants.ApiV6URL)
 	viper.SetDefault("storage_url", constants.StorageApiURL)
+	viper.SetDefault("storage_v6_url", constants.StorageApiV6URL)
 	viper.SetDefault("active_profile", activeProfile)
 
 	factory := &cmdutil.Factory{

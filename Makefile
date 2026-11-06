@@ -31,6 +31,7 @@ LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSI
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiV6URL=$$API_V6_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
+		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiV6URL=$$STORAGE_V6_URL \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$CONSOLE \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.ScriptID=$$SCRIPT_ID
 LDFLAGS_STRIP=-s -w

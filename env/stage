@@ -1,6 +1,7 @@
 API_URL=https://${AZION_API}
 AUTH_URL=https://${AZION_SSO}/api
 STORAGE_URL=https://${STORAGE_API}
+STORAGE_V6_URL=https://${STORAGE_API_V6}
 CONSOLE=https://${CONSOLE_URL}
 API_V4_URL=https://${AZION_API_V4}
 API_V6_URL=https://${AZION_API_V6}

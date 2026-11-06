@@ -16,6 +16,7 @@
 package registry
 
 import (
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"net/http"
 
 	apiApplications "github.com/aziontech/azion-cli/pkg/api/applications"
@@ -64,7 +65,16 @@ import (
 func legacyAPIURL(f *cmdutil.Factory) string { return f.Config.GetString("api_url") }
 func apiV4URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v4_url") }
 func apiV6URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v6_url") }
-func storageURL(f *cmdutil.Factory) string   { return f.Config.GetString("storage_url") }
+
+// storageURL is the storage API of the account's generation: v6 has its own,
+// v3 and v4 share the other. The bucket and credential code is shared by the
+// v4 and v6 deploys, so the choice is made here rather than at each call.
+func storageURL(f *cmdutil.Factory) string {
+	if f.APIVersion == apiversion.V6 {
+		return f.Config.GetString("storage_v6_url")
+	}
+	return f.Config.GetString("storage_url")
+}
 
 // credential is the token the invocation authenticates with.
 func credential(f *cmdutil.Factory) string { return f.Config.GetString("token") }
