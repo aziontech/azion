@@ -28,6 +28,7 @@ BIN_VERSION=$(shell git describe --tags)
 LDFLAGS=-X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion=$(BIN_VERSION) \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiURL=$$API_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL=$$API_V4_URL \
+		-X github.com/aziontech/azion-cli/pkg/constants.ApiV6URL=$$API_V6_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.AuthURL=$$AUTH_URL \
 		-X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL=$$STORAGE_URL \
 		-X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL=$$CONSOLE \

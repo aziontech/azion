@@ -10,6 +10,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	v3deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy/v3"
+	v6deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy/v6"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	v3devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev/v3"
@@ -43,38 +44,41 @@ import (
 // account's generation sees, instead of keeping one registration function per
 // generation.
 //
-// The five verb dispatchers are version-agnostic here: each one is a single
-// shell that reads the children table in its own file to pick its
-// children. The commands still listed per generation are the ones whose whole
-// implementation differs — the deploy pipeline and the project-scaffolding
-// commands around it, which phase 3 addresses.
+// v6 accounts get a short list for now: the project commands (init, link,
+// build, dev, deploy) and the ones that touch no resource API (login, logout,
+// profiles, version, whoami, completion, reset). The resource commands, the
+// CRUD verbs among them, stay on v3 and v4 until they have a v6
+// implementation.
 var children = []cmdregistry.Entry{
-	cmdregistry.Any(create.NewCmd),
-	cmdregistry.Any(delete.NewCmd),
-	cmdregistry.Any(describe.NewCmd),
-	cmdregistry.Any(list.NewCmd),
-	cmdregistry.Any(update.NewCmd),
-
+	// Every generation.
 	cmdregistry.Any(completion.NewCmd),
-	cmdregistry.Any(logcmd.NewCmd),
 	cmdregistry.Any(logout.NewCmd),
 	cmdregistry.Any(profiles.NewCmd),
 	cmdregistry.Any(reset.NewCmd),
-	cmdregistry.Any(rollback.NewCmd),
 	cmdregistry.Any(version.NewCmd),
 	cmdregistry.Any(whoami.NewCmd),
 
-	cmdregistry.V4Only(buildCmd.NewCmd),
+	// v3 and v4. The five verb dispatchers are one shell each that reads the
+	// children table in its own file.
+	cmdregistry.V3V4(create.NewCmd),
+	cmdregistry.V3V4(delete.NewCmd),
+	cmdregistry.V3V4(describe.NewCmd),
+	cmdregistry.V3V4(list.NewCmd),
+	cmdregistry.V3V4(update.NewCmd),
+	cmdregistry.V3V4(logcmd.NewCmd),
+	cmdregistry.V3V4(rollback.NewCmd),
+
+	// v4 and v6: one implementation that reads the generation from the factory.
+	cmdregistry.V4V6(buildCmd.NewCmd),
+	cmdregistry.V4V6(devcmd.NewCmd),
+	cmdregistry.V4V6(initcmd.NewCmd),
+	cmdregistry.V4V6(linkcmd.NewCmd),
+	cmdregistry.V4V6(login.New),
+
 	cmdregistry.V4Only(deploycmd.NewCmd),
-	cmdregistry.V4Only(devcmd.NewCmd),
-	cmdregistry.V4Only(initcmd.NewCmd),
-	cmdregistry.V4Only(linkcmd.NewCmd),
-	cmdregistry.V4Only(login.New),
 	cmdregistry.V4Only(purge.NewCmd),
 	cmdregistry.V4Only(sync.NewCmd),
 	cmdregistry.V4Only(unlink.NewCmd),
-
-	// Offered only on v4: these have no v3 counterpart.
 	cmdregistry.V4Only(clone.NewCmd),
 	cmdregistry.V4Only(config.NewCmd),
 	cmdregistry.V4Only(warmup.NewCmd),
@@ -88,4 +92,6 @@ var children = []cmdregistry.Entry{
 	cmdregistry.V3Only(v3purge.NewCmd),
 	cmdregistry.V3Only(v3sync.NewCmd),
 	cmdregistry.V3Only(v3unlink.NewCmd),
+
+	cmdregistry.V6Only(v6deploycmd.NewCmd),
 }

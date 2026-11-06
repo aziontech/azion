@@ -1,5 +1,7 @@
 package deployremote
 
+import "errors"
+
 // Used by both the v3 and the v4 command trees.
 var (
 	// deploy cmd
@@ -27,4 +29,52 @@ var (
 var (
 	DeployOutputDomainSuccess = "\nTo visualize your application access the Domain: %s\n"
 	DeployFlagSkipBuild       = "If sent, the build command will not be called during the deploy process"
+)
+
+// ============================================================================
+// v6 — used only by the v6 deploy (pkg/cmd/deploy_remote/v6).
+// ============================================================================
+var (
+	V6RunningDeploy       = "Running deploy command (API v6)\n"
+	V6FlagEnvironment     = "Deploys only to this Environment: releases the Deployments bound to it and updates only its bindings. On a first run it also names the preset's Environment (default: Production)"
+	V6FlagNoActivate      = "If sent, the release is built but not activated: traffic keeps going to the current release"
+	V6FlagTimeout         = "How long to wait for each build or activation, for example 90s or 5m"
+	V6FlagDryRun          = "If sent, shows what the deploy would do without calling the API"
+	V6BuildTransition     = "%s %q (%s): %s → %s (%s)\n"
+	V6BuildsStarting      = "Building %d version(s): %s\n"
+	V6BuildSucceeded      = "%s %q built successfully: version %s is ready (%s)\n"
+	V6EnvironmentResolved = "Deploying to Environment %q (%s, %s)\n"
+	V6DeploymentCreated   = "Deployment %q created (%s)\n"
+	V6DeploymentRecreate  = "Deployment %s no longer exists; creating a new one\n"
+	V6ReleaseCreated      = "Release %s created on Deployment %q\n"
+	V6ReleaseReady        = "Release %s is ready\n"
+	V6ReleaseNotActivated = "Release %s was built but not activated (--no-activate). Traffic still goes to the previous release\n"
+	V6ReleaseActivated    = "Release %s is now %s\n"
+	V6WorkloadSaved       = "Workload %q (id %d) now serves Deployment %q in Environment %q\n"
+	V6DeploySuccessful    = "Your Application was deployed successfully\n"
+	V6DeployOutputURL     = "\nTo visualize your application access: %s\n"
+	V6Interrupted         = "Deploy interrupted %s activation. Builds started by this run were asked to stop\n"
+	V6InterruptedBefore   = "before"
+	V6InterruptedAfter    = "after"
+	V6ActiveButIncomplete = "The new release is live; what failed was %s. Run the deploy again to finish it\n"
+	V6DryRunStaleManifest = "The current manifest cannot be used (%v). The deploy builds it again from azion.config, so this report has no resource counts\n"
+	V6DryRunHeader        = "Dry run: nothing was sent to the API. The deploy would:\n"
+	V6DryRunStep          = "  - %s\n"
+	V6DryRunSkipped       = "Skipped: %s\n"
+	V6TimingHeader        = "\n=== Deploy timing (API v6) ===\n"
+	V6RemoteNotAvailable  = "The remote deploy is not available for API v6 accounts yet; running the deploy locally instead\n"
+)
+
+var (
+	ErrorV6EnvironmentNotFound = errors.New("the Environment was not found in this account. Check its name, or create it in the Console")
+	ErrorV6ReleaseFailed       = errors.New("the release build did not produce a usable release; nothing changed in traffic")
+	ErrorV6ActivationFailed    = errors.New("the release could not be activated; traffic still goes to the previous release")
+	ErrorV6DeploymentFailed    = errors.New("the Deployment did not become ready")
+	ErrorV6VerifyFailed        = errors.New("the deploy is live, but the check after activation found differences")
+)
+
+// v6, continued.
+var (
+	V6EnvironmentCreated   = "Environment %q created (%s)\n"
+	ErrorV6PolicyImmutable = errors.New("an Environment's deployment policy cannot change. Use the policy it has, or another Environment")
 )

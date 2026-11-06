@@ -13,6 +13,7 @@ builds:
       - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL={{ .Env.API_V4_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.ApiV6URL={{ .Env.API_V6_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
       - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL={{ .Env.CONSOLE }}
@@ -45,6 +46,7 @@ builds:
       - -X github.com/aziontech/azion-cli/pkg/cmd/version.BinVersion={{ .Env.BIN_VERSION }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiURL={{ .Env.API_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.ApiV4URL={{ .Env.API_V4_URL }}
+      - -X github.com/aziontech/azion-cli/pkg/constants.ApiV6URL={{ .Env.API_V6_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.AuthURL={{ .Env.AUTH_URL }}
       - -X github.com/aziontech/azion-cli/pkg/constants.StorageApiURL={{ .Env.STORAGE_URL }}
       - -X github.com/aziontech/azion-cli/pkg/cmd/deploy.DeployURL={{ .Env.CONSOLE }}

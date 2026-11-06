@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -210,6 +211,50 @@ func TestCheckVulcanMajor(t *testing.T) {
 			}
 			if versionVulcan != tt.expectedVersion {
 				t.Errorf("versionVulcan = %v, expectedVersion %v", versionVulcan, tt.expectedVersion)
+			}
+		})
+	}
+}
+
+func TestConfigVersionFollowsTheAPIVersion(t *testing.T) {
+	assert := func(v apiversion.Version, want int) {
+		t.Helper()
+		if got := ConfigVersion(v); got != want {
+			t.Errorf("ConfigVersion(%q) = %d, want %d", v, got, want)
+		}
+	}
+	assert(apiversion.V3, 3)
+	assert(apiversion.V4, 4)
+	assert(apiversion.V6, 6)
+	assert("", 4)
+}
+
+// For picks the bundler, and so the --config-version, from the account's API
+// generation, for every command that runs the bundler.
+func TestForPicksTheBundlerOfTheAPIVersion(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	saved := []any{versionVulcan, currentMajor, firstTimeExecuting}
+	defer func() {
+		versionVulcan, currentMajor, firstTimeExecuting = saved[0].(string), saved[1].(int), saved[2].(string)
+	}()
+	t.Setenv("AZIONCLI_BUNDLER_V6", "")
+
+	tests := []struct {
+		version apiversion.Version
+		want    string
+	}{
+		{apiversion.V4, "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
+		{"", "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
+		{apiversion.V6, "npx --yes  " + BundlerV6Package + " build --preset react --config-version 6"},
+		// edge-functions@5.3.2 rejects --config-version, so v3 does not send it.
+		{apiversion.V3, "npx --yes  edge-functions@5.3.2 build --preset react"},
+	}
+	for _, tt := range tests {
+		t.Run(string(tt.version), func(t *testing.T) {
+			f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+			f.APIVersion = tt.version
+			if got := For(f).Command("", "build --preset react", f); got != tt.want {
+				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
 		})
 	}

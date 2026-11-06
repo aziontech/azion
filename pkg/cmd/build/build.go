@@ -1,6 +1,7 @@
 package build
 
 import (
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"io"
 	"io/fs"
 	"os"
@@ -28,7 +29,10 @@ type BuildCmd struct {
 	EnvLoader             func(path string) ([]string, error)
 	Stat                  func(path string) (fs.FileInfo, error)
 	GetWorkDir            func() (string, error)
-	f                     *cmdutil.Factory
+	// NewVulcan picks the bundler. Nil means the one for the account's API
+	// generation (vulcan.For).
+	NewVulcan func() *vulcanPkg.VulcanPkg
+	f         *cmdutil.Factory
 }
 
 func NewCmd(f *cmdutil.Factory) *cobra.Command {

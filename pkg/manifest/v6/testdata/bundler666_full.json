@@ -1,0 +1,417 @@
+{
+  "version": 6,
+  "build": {
+    "bundler": "esbuild",
+    "entry": "./src/index.js"
+  },
+  "functions": [
+    {
+      "name": "my-func",
+      "runtime": "azion_js",
+      "default_args": {},
+      "execution_environment": "application",
+      "active": true,
+      "path": "./functions/handler.js"
+    }
+  ],
+  "network_list": [
+    {
+      "name": "blocked",
+      "type": "ip_cidr",
+      "items": [
+        "10.0.0.0/8"
+      ],
+      "active": true
+    }
+  ],
+  "waf": [
+    {
+      "name": "my-waf",
+      "active": true,
+      "engine_settings": {
+        "engine_version": "2021-Q3",
+        "type": "score",
+        "attributes": {
+          "rulesets": [
+            1
+          ],
+          "thresholds": []
+        }
+      }
+    }
+  ],
+  "storage": [
+    {
+      "name": "my-bucket-assets",
+      "workloads_access": "read_only",
+      "dir": "./.edge/assets",
+      "prefix": "v1"
+    }
+  ],
+  "firewall": [
+    {
+      "name": "my-firewall",
+      "modules": {
+        "functions": {
+          "enabled": true
+        },
+        "network_protection": {
+          "enabled": true
+        },
+        "waf": {
+          "enabled": false
+        }
+      },
+      "debug": false,
+      "active": true,
+      "rules_engine": [
+        {
+          "name": "Block",
+          "description": "",
+          "active": true,
+          "behaviors": [
+            {
+              "type": "deny"
+            }
+          ],
+          "criteria": [
+            [
+              {
+                "variable": "${network}",
+                "conditional": "if",
+                "operator": "is_in_list",
+                "argument": "blocked"
+              }
+            ]
+          ]
+        },
+        {
+          "name": "Waf",
+          "description": "",
+          "active": true,
+          "behaviors": [
+            {
+              "type": "set_waf",
+              "attributes": {
+                "mode": "blocking",
+                "waf_id": "my-waf"
+              }
+            }
+          ],
+          "criteria": [
+            [
+              {
+                "variable": "${request_uri}",
+                "conditional": "if",
+                "operator": "starts_with",
+                "argument": "/"
+              }
+            ]
+          ]
+        }
+      ],
+      "functions_instances": [
+        {
+          "name": "fw-instance",
+          "args": {},
+          "active": true,
+          "function": "my-func"
+        }
+      ]
+    }
+  ],
+  "connectors": [
+    {
+      "name": "my-connector",
+      "active": true,
+      "type": "storage",
+      "attributes": {
+        "bucket": "my-bucket-assets",
+        "prefix": "v1"
+      }
+    },
+    {
+      "name": "my-origin",
+      "active": true,
+      "type": "http",
+      "attributes": {
+        "addresses": [
+          {
+            "active": true,
+            "address": "example.com",
+            "http_port": 80,
+            "https_port": 443
+          }
+        ],
+        "connection_options": {
+          "dns_resolution": "both",
+          "transport_policy": "preserve",
+          "http_version_policy": "http1_1",
+          "host": "${host}",
+          "path_prefix": "",
+          "following_redirect": false,
+          "real_ip_header": "X-Real-IP",
+          "real_port_header": "X-Real-PORT"
+        },
+        "modules": {
+          "load_balancer": {
+            "enabled": false
+          },
+          "origin_shield": {
+            "enabled": false
+          }
+        }
+      }
+    }
+  ],
+  "custom_pages": [
+    {
+      "name": "my-pages",
+      "active": true,
+      "pages": [
+        {
+          "code": "404",
+          "page": {
+            "type": "page_connector",
+            "attributes": {
+              "connector": "my-origin",
+              "ttl": 0,
+              "uri": "/404.html",
+              "custom_status_code": 404
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "name": "my-app",
+      "active": true,
+      "debug": false,
+      "modules": {
+        "cache": {
+          "enabled": true
+        },
+        "functions": {
+          "enabled": true
+        },
+        "application_accelerator": {
+          "enabled": true
+        },
+        "image_processor": {
+          "enabled": false
+        }
+      },
+      "cache_settings": [
+        {
+          "name": "my-cache",
+          "browser_cache": {
+            "behavior": "override",
+            "max_age": 100
+          },
+          "modules": {
+            "cache": {
+              "behavior": "override",
+              "max_age": 200,
+              "stale_cache": {
+                "enabled": false
+              },
+              "large_file_cache": {
+                "enabled": false,
+                "offset": 1024
+              },
+              "tiered_cache": {
+                "enabled": false
+              }
+            },
+            "application_accelerator": {
+              "cache_vary_by_method": [],
+              "cache_vary_by_querystring": {
+                "behavior": "ignore",
+                "fields": [],
+                "sort_enabled": false
+              },
+              "cache_vary_by_cookies": {
+                "behavior": "ignore",
+                "cookie_names": []
+              },
+              "cache_vary_by_devices": {
+                "behavior": "ignore",
+                "device_group": []
+              }
+            }
+          }
+        }
+      ],
+      "rules": [
+        {
+          "phase": "request",
+          "rule": {
+            "name": "Serve from storage",
+            "active": true,
+            "criteria": [
+              [
+                {
+                  "variable": "${uri}",
+                  "conditional": "if",
+                  "operator": "matches",
+                  "argument": "^/"
+                }
+              ]
+            ],
+            "behaviors": [
+              {
+                "type": "set_connector",
+                "attributes": {
+                  "value": "my-connector"
+                }
+              },
+              {
+                "type": "set_cache_policy",
+                "attributes": {
+                  "value": "my-cache"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "phase": "request",
+          "rule": {
+            "name": "Run fn",
+            "active": true,
+            "criteria": [
+              [
+                {
+                  "variable": "${uri}",
+                  "conditional": "if",
+                  "operator": "starts_with",
+                  "argument": "/api"
+                }
+              ]
+            ],
+            "behaviors": [
+              {
+                "type": "run_function",
+                "attributes": {
+                  "value": "my-func"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "phase": "response",
+          "rule": {
+            "name": "Header",
+            "active": true,
+            "criteria": [
+              [
+                {
+                  "variable": "${uri}",
+                  "conditional": "if",
+                  "operator": "matches",
+                  "argument": "^/"
+                }
+              ]
+            ],
+            "behaviors": [
+              {
+                "type": "add_response_header",
+                "attributes": {
+                  "value": "X-Test: 1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "functions_instances": [
+        {
+          "name": "my-instance",
+          "function": "my-func",
+          "args": {
+            "b": 2
+          },
+          "active": true
+        }
+      ],
+      "device_groups": [
+        {
+          "name": "mobile",
+          "user_agent": "Mobile"
+        }
+      ]
+    }
+  ],
+  "environments": [
+    {
+      "name": "production",
+      "description": null,
+      "log_verbosity": "normal",
+      "robots_policy": "respect_origin",
+      "protection": {},
+      "branch_tracking": null,
+      "deployment_policy": "single_version"
+    }
+  ],
+  "deployments": [
+    {
+      "name": "my-deployment",
+      "description": null,
+      "binding_policy": "FLEXIBLE",
+      "strategy_defaults": {}
+    }
+  ],
+  "workloads": [
+    {
+      "name": "my-workload",
+      "active": true,
+      "infrastructure": 1,
+      "workload_domain_allow_access": true,
+      "tls": {
+        "minimum_version": "tls_1_3"
+      },
+      "protocols": {
+        "http": {
+          "versions": [
+            "http1",
+            "http2",
+            "http3"
+          ],
+          "http_ports": [
+            80
+          ],
+          "https_ports": [
+            443
+          ],
+          "quic_ports": [
+            443
+          ]
+        }
+      },
+      "bindings": [
+        {
+          "environment_name": "production",
+          "deployment_name": "my-deployment",
+          "domains": [
+            {
+              "domain": "example.com",
+              "certificate": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "purge": [
+    {
+      "type": "url",
+      "items": [
+        "http://example.com/a"
+      ],
+      "layer": "cache"
+    }
+  ]
+}

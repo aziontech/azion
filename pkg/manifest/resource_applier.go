@@ -230,7 +230,7 @@ func (rc *ResourceContext) runConfigReplace(originalName, newName string) error 
 	jsonStr = strings.ReplaceAll(jsonStr, `\`, `\\`)
 	jsonStr = strings.ReplaceAll(jsonStr, "'", "\\'")
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(rc.Factory)
 	cmdStr := fmt.Sprintf("config replace --replacements '%s'", jsonStr) + vulcanPkg.ConfigFileArg(rc.ConfigFile)
 	command := vul.Command("", cmdStr, rc.Factory)
 	logger.Debug("Running the following command", zap.Any("Command", command))

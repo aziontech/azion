@@ -35,9 +35,13 @@ const (
 	V3 Version = "v3"
 	// V4 is the current generation, served by pkg/cmd and pkg/api.
 	V4 Version = "v4"
+	// V6 is the upcoming generation. Accounts opt into it through
+	// UseV6Configurations. It is offered a short command list for now: the
+	// project commands and the generic ones (see pkg/cmd/root/table.go).
+	V6 Version = "v6"
 )
 
-// String returns the wire form of the version ("v3", "v4"). This is the value
+// String returns the wire form of the version ("v3", "v4", "v6"). This is the value
 // persisted in profile settings and reported in metrics, so it must stay stable.
 func (v Version) String() string {
 	return string(v)
@@ -46,6 +50,7 @@ func (v Version) String() string {
 const (
 	BlockAPIV4IncompatibleEndpoints = "block_apiv4_incompatible_endpoints"
 	BlockAPIV3Access                = "block_apiv3_access"
+	UseV6Configurations             = "use_v6_configurations"
 )
 
 // AccountInfo is the subset of the SSO account payload the CLI reads.
@@ -76,10 +81,19 @@ type generation struct {
 // is served the first generation it is entitled to, so adding a generation means
 // adding an entry here rather than another boolean branch.
 //
+// v6 is opt-in: only accounts carrying UseV6Configurations reach it, and it
+// wins over the block flags below, since those decide between older generations.
+//
 // v4 is the default: an account only reaches the legacy entry by carrying the
 // flag that blocks it from v4. The legacy entry is unconditional, so it is also
 // the answer when no generation above it accepts the account.
 var generations = []generation{
+	{
+		version: V6,
+		entitled: func(info AccountInfo) bool {
+			return info.HasAnyFlag(UseV6Configurations)
+		},
+	},
 	{
 		version: V4,
 		entitled: func(info AccountInfo) bool {

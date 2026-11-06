@@ -27,6 +27,7 @@ func main() {
 	viper.SetDefault("token", tok.Token)
 	viper.SetDefault("api_url", constants.ApiURL)
 	viper.SetDefault("api_v4_url", constants.ApiV4URL)
+	viper.SetDefault("api_v6_url", constants.ApiV6URL)
 	viper.SetDefault("storage_url", constants.StorageApiURL)
 	viper.SetDefault("active_profile", activeProfile)
 

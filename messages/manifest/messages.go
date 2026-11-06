@@ -48,3 +48,16 @@ const (
 	ManifestCreateOrigin = "Origin %s with id %d successfully created\n"
 	ManifestUpdateOrigin = "Origin %s with key %s successfully updated\n"
 )
+
+// ============================================================================
+// v6 — used only by the v6 deploy (pkg/manifest/v6).
+// ============================================================================
+const (
+	V6DraftCreated     = "%s %q created (id %d); its first version %s is a Draft\n"
+	V6DraftAdopted     = "%s %q already exists (id %d); the deploy will add a version to it\n"
+	V6DraftReused      = "%s %q: reusing Draft %s from a previous run\n"
+	V6DraftOpened      = "%s %q: opened Draft %s\n"
+	V6DraftWritten     = "%s %q: configuration written to Draft %s\n"
+	V6ResourceRecreate = "%s %q (id %d) no longer exists; creating it again\n"
+	V6OrphanWarning    = "%s %q is no longer in the manifest. It was left in place, since other releases may still use it\n"
+)

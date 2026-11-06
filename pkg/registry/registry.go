@@ -43,6 +43,16 @@ import (
 	apiRealtimePurge "github.com/aziontech/azion-cli/pkg/api/realtime_purge"
 	apiRulesEngine "github.com/aziontech/azion-cli/pkg/api/rules_engine"
 	apiStorage "github.com/aziontech/azion-cli/pkg/api/storage"
+	apiApplicationsV6 "github.com/aziontech/azion-cli/pkg/api/v6/applications"
+	apiConnectorsV6 "github.com/aziontech/azion-cli/pkg/api/v6/connectors"
+	apiCustomPagesV6 "github.com/aziontech/azion-cli/pkg/api/v6/custompages"
+	apiDeploymentsV6 "github.com/aziontech/azion-cli/pkg/api/v6/deployments"
+	apiEnvironmentsV6 "github.com/aziontech/azion-cli/pkg/api/v6/environments"
+	apiFirewallsV6 "github.com/aziontech/azion-cli/pkg/api/v6/firewalls"
+	apiFunctionsV6 "github.com/aziontech/azion-cli/pkg/api/v6/functions"
+	apiNetworkListsV6 "github.com/aziontech/azion-cli/pkg/api/v6/networklists"
+	apiWafsV6 "github.com/aziontech/azion-cli/pkg/api/v6/wafs"
+	apiWorkloadsV6 "github.com/aziontech/azion-cli/pkg/api/v6/workloads"
 	apiVariables "github.com/aziontech/azion-cli/pkg/api/variables"
 	apiWaf "github.com/aziontech/azion-cli/pkg/api/waf"
 	apiWafExceptions "github.com/aziontech/azion-cli/pkg/api/waf_exceptions"
@@ -53,6 +63,7 @@ import (
 // The configured base URLs. These keys are named here and nowhere else.
 func legacyAPIURL(f *cmdutil.Factory) string { return f.Config.GetString("api_url") }
 func apiV4URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v4_url") }
+func apiV6URL(f *cmdutil.Factory) string     { return f.Config.GetString("api_v6_url") }
 func storageURL(f *cmdutil.Factory) string   { return f.Config.GetString("storage_url") }
 
 // credential is the token the invocation authenticates with.
@@ -181,4 +192,50 @@ func WAFExceptions(f *cmdutil.Factory) *apiWafExceptions.Client {
 
 func Workloads(f *cmdutil.Factory) *apiWorkloads.Client {
 	return apiWorkloads.NewClient(httpClient(f), apiV4URL(f), credential(f))
+}
+
+// ============================================================================
+// v6 — owned by API v6. Only the v6 deploy pipeline asks for these; every
+// other command keeps the v4 clients above, which v6 accounts are still served
+// (see cmdregistry.versionOf).
+// ============================================================================
+
+func ApplicationsV6(f *cmdutil.Factory) *apiApplicationsV6.Client {
+	return apiApplicationsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func ConnectorsV6(f *cmdutil.Factory) *apiConnectorsV6.Client {
+	return apiConnectorsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func CustomPagesV6(f *cmdutil.Factory) *apiCustomPagesV6.Client {
+	return apiCustomPagesV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func DeploymentsV6(f *cmdutil.Factory) *apiDeploymentsV6.Client {
+	return apiDeploymentsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func EnvironmentsV6(f *cmdutil.Factory) *apiEnvironmentsV6.Client {
+	return apiEnvironmentsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func FirewallsV6(f *cmdutil.Factory) *apiFirewallsV6.Client {
+	return apiFirewallsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func FunctionsV6(f *cmdutil.Factory) *apiFunctionsV6.Client {
+	return apiFunctionsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func NetworkListsV6(f *cmdutil.Factory) *apiNetworkListsV6.Client {
+	return apiNetworkListsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func WAFsV6(f *cmdutil.Factory) *apiWafsV6.Client {
+	return apiWafsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+func WorkloadsV6(f *cmdutil.Factory) *apiWorkloadsV6.Client {
+	return apiWorkloadsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
 }

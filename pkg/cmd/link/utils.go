@@ -73,7 +73,7 @@ func (cmd *LinkCmd) selectVulcanMode(info *LinkInfo) error {
 		return err
 	}
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(cmd.F)
 	err = vul.CheckVulcanMajor(vulcanVer, cmd.F, vul)
 	if err != nil {
 		return err
