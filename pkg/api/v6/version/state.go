@@ -11,6 +11,7 @@ package version
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"go.uber.org/zap"
@@ -49,6 +50,17 @@ func (s State) Known() bool {
 func (s State) Settled() bool {
 	switch s {
 	case Draft, Ready, Error, Canceled, Archived, Deleted:
+		return true
+	}
+	return false
+}
+
+// Bindable reports whether a Workload binding accepts an Environment or a
+// Deployment in this state: the API takes only queued, building or ready. The
+// API is not consistent about case (draft, DRAFT), so neither is this.
+func (s State) Bindable() bool {
+	switch State(strings.ToLower(string(s))) {
+	case Queued, Building, Ready:
 		return true
 	}
 	return false

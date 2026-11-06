@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aziontech/azion-cli/pkg/api/v6/version"
+	"github.com/aziontech/azion-cli/pkg/poll"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -26,6 +28,10 @@ func (s *DeployStateV6) applyWorkloads(ctx context.Context) error {
 		}
 		if len(ours) == 0 {
 			continue
+		}
+
+		if err := s.waitBindable(ctx, ours); err != nil {
+			return err
 		}
 
 		existing, err := s.findWorkload(ctx, wm.Name)
@@ -56,6 +62,62 @@ func (s *DeployStateV6) applyWorkloads(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+// waitBindable waits until every Environment and Deployment the bindings name
+// can be bound. The API accepts a binding only to one whose version is queued,
+// building or ready, and a Deployment leaves draft only once a release of it
+// is activated, so each is read again here, right before the Workload is saved.
+func (s *DeployStateV6) waitBindable(ctx context.Context, bindings []sdk.WorkloadBindingRequest) error {
+	seenEnv, seenDep := map[string]bool{}, map[string]bool{}
+	for _, b := range bindings {
+		if id := b.EnvironmentId; !seenEnv[id] {
+			seenEnv[id] = true
+			if err := s.waitUntilBindable(ctx, "Environment", s.environmentName(id), id, func(ctx context.Context) (version.State, error) {
+				e, err := s.Clients.Environments.Get(ctx, id)
+				return e.VersionState, err
+			}); err != nil {
+				return err
+			}
+		}
+		if id := b.DeploymentId; !seenDep[id] {
+			seenDep[id] = true
+			if err := s.waitUntilBindable(ctx, "Deployment", s.deploymentName(id), id, func(ctx context.Context) (version.State, error) {
+				d, err := s.Clients.Deployments.Get(ctx, id)
+				return d.VersionState, err
+			}); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// waitUntilBindable polls one Environment or Deployment until it is bindable.
+// It says so only when it has to wait, and fails when the version failed.
+func (s *DeployStateV6) waitUntilBindable(ctx context.Context, kind, name, id string, read func(context.Context) (version.State, error)) error {
+	told := false
+	state, err := poll.Until(ctx, s.pollOptions(), read, func(st version.State) (bool, error) {
+		if st.Bindable() {
+			return true, nil
+		}
+		if st.Failed() {
+			return true, fmt.Errorf("%s %q (%s) is %s: %w", kind, name, id, st, msg.ErrorV6NotBindable)
+		}
+		if !told {
+			told = true
+			s.say(fmt.Sprintf(msg.V6WaitingToBind, kind, name, id, st))
+		}
+		return false, nil
+	})
+	switch {
+	case err == nil, errors.Is(err, msg.ErrorV6NotBindable):
+		return err
+	case errors.Is(err, poll.ErrTimeout):
+		return fmt.Errorf("%s %q (%s) is still %s, and a Workload can be bound only to one that is queued, building or ready: %w", kind, name, id, state, err)
+	default:
+		return fmt.Errorf("could not read %s %q (%s) before binding it to the Workload: %w", kind, name, id, err)
+	}
 }
 
 // appliedWorkload is a Workload this run saved, with the bindings it set.

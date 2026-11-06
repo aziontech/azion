@@ -402,7 +402,7 @@ func expectedRole(d apiDeployments.Deployment) string {
 // atomic: if it fails, the previous release stays ACTIVE.
 func (s *DeployStateV6) releaseActivate(ctx context.Context) error {
 	for _, t := range s.Targets {
-		if _, err := s.Clients.Deployments.ActivateRelease(ctx, t.Deployment.ID, t.Release.ID); err != nil {
+		if _, err := s.Clients.Deployments.ActivateRelease(ctx, t.Deployment.ID, t.Release.ID, s.deploymentVersion(ctx, t)); err != nil {
 			return fmt.Errorf("%w: %w", msg.ErrorV6ActivationFailed, err)
 		}
 		want := expectedRole(t.Deployment)
@@ -427,6 +427,19 @@ func (s *DeployStateV6) releaseActivate(ctx context.Context) error {
 		s.say(fmt.Sprintf(msg.V6ReleaseActivated, r.ID, r.TrafficRole))
 	}
 	return nil
+}
+
+// deploymentVersion is the Deployment's current version_id, read right before
+// the activation that sends it (deployment_version_id), as the v6 API's own
+// deploy scripts do. The field is optional: when the read fails or the
+// Deployment has no version yet, the activation goes without it.
+func (s *DeployStateV6) deploymentVersion(ctx context.Context, t *releaseTarget) string {
+	d, err := s.Clients.Deployments.Get(ctx, t.Deployment.ID)
+	if err != nil {
+		logger.Debug("Could not read the Deployment before activating; activating without its version", zap.String("deployment", t.Deployment.ID), zap.Error(err))
+		return ""
+	}
+	return d.VersionID
 }
 
 // Activated reports whether any release of this run went live.

@@ -58,6 +58,14 @@ func (a *Applier) say(line string) {
 	}
 }
 
+// within reports a line about a sub-resource, prefixed with the resource whose
+// Draft holds it: application "site": cache setting "site" created (id 7).
+func (a *Applier) within(kind, name string) func(string) {
+	return func(line string) {
+		a.say(fmt.Sprintf("%s %q: %s", kind, name, line))
+	}
+}
+
 func (a *Applier) writeConfig() {
 	if a.WriteConfig == nil {
 		return
@@ -150,7 +158,7 @@ func (a *Applier) ApplyWAFs(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, err := reconcile(ctx, wafExceptions(r), p.ID, p.VersionID, w.Exceptions); err != nil {
+		if _, err := reconcile(ctx, a.within("waf", w.Name), wafExceptions(r), p.ID, p.VersionID, w.Exceptions); err != nil {
 			return nil, err
 		}
 		if err := verify(ctx, r, p); err != nil {
@@ -186,11 +194,12 @@ func (a *Applier) ApplyApplications(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
+		inApp := a.within("application", app.Name)
 
-		if _, err := reconcile(ctx, deviceGroups(c), p.ID, p.VersionID, app.DeviceGroups); err != nil {
+		if _, err := reconcile(ctx, inApp, deviceGroups(c), p.ID, p.VersionID, app.DeviceGroups); err != nil {
 			return nil, err
 		}
-		caches, err := reconcile(ctx, cacheSettings(c), p.ID, p.VersionID, app.CacheSettings)
+		caches, err := reconcile(ctx, inApp, cacheSettings(c), p.ID, p.VersionID, app.CacheSettings)
 		if err != nil {
 			return nil, err
 		}
@@ -198,7 +207,7 @@ func (a *Applier) ApplyApplications(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
-		instanceIDs, err := reconcile(ctx, appFunctionInstances(c), p.ID, p.VersionID, instances)
+		instanceIDs, err := reconcile(ctx, inApp, appFunctionInstances(c), p.ID, p.VersionID, instances)
 		if err != nil {
 			return nil, err
 		}
@@ -216,14 +225,14 @@ func (a *Applier) ApplyApplications(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, err := reconcile(ctx, appRequestRules(c), p.ID, p.VersionID, requestRules); err != nil {
+		if _, err := reconcile(ctx, inApp, appRequestRules(c), p.ID, p.VersionID, requestRules); err != nil {
 			return nil, err
 		}
 		responseRules, err := decodeRules[sdk.ResponsePhaseRuleRequest](responseRaw, targets)
 		if err != nil {
 			return nil, err
 		}
-		if _, err := reconcile(ctx, appResponseRules(c), p.ID, p.VersionID, responseRules); err != nil {
+		if _, err := reconcile(ctx, inApp, appResponseRules(c), p.ID, p.VersionID, responseRules); err != nil {
 			return nil, err
 		}
 
@@ -244,6 +253,7 @@ func (a *Applier) ApplyFirewalls(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
+		inFw := a.within("firewall", fw.Name)
 
 		appInstances, err := a.functionInstances(fw.FunctionInstances)
 		if err != nil {
@@ -255,7 +265,7 @@ func (a *Applier) ApplyFirewalls(ctx context.Context) ([]Pending, error) {
 		for i, in := range appInstances {
 			instances[i] = sdk.FirewallFunctionInstanceRequest{Name: in.Name, Args: in.Args, AzionForm: in.AzionForm, Active: in.Active, Function: in.Function}
 		}
-		instanceIDs, err := reconcile(ctx, firewallFunctionInstances(c), p.ID, p.VersionID, instances)
+		instanceIDs, err := reconcile(ctx, inFw, firewallFunctionInstances(c), p.ID, p.VersionID, instances)
 		if err != nil {
 			return nil, err
 		}
@@ -271,7 +281,7 @@ func (a *Applier) ApplyFirewalls(ctx context.Context) ([]Pending, error) {
 		if err != nil {
 			return nil, err
 		}
-		if _, err := reconcile(ctx, firewallRules(c), p.ID, p.VersionID, rules); err != nil {
+		if _, err := reconcile(ctx, inFw, firewallRules(c), p.ID, p.VersionID, rules); err != nil {
 			return nil, err
 		}
 

@@ -59,5 +59,13 @@ const (
 	V6DraftOpened      = "%s %q: opened Draft %s\n"
 	V6DraftWritten     = "%s %q: configuration written to Draft %s\n"
 	V6ResourceRecreate = "%s %q (id %d) no longer exists; creating it again\n"
-	V6OrphanWarning    = "%s %q is no longer in the manifest. It was left in place, since other releases may still use it\n"
+
+	// Sub-resources written to a Draft. The line is prefixed with the
+	// resource that owns the Draft: application "site": cache setting ...
+	V6SubCreated          = "%s %q created (id %d)\n"
+	V6SubUpdated          = "%s %q updated (id %d)\n"
+	V6SubRemoved          = "%s %q (id %d) removed: the manifest no longer has it\n"
+	V6SubDuplicateRemoved = "%s %q (id %d) removed: another one has the same name\n"
+	V6SubsOrdered         = "%d %ss set in the manifest's order\n"
+	V6OrphanWarning       = "%s %q is no longer in the manifest. It was left in place, since other releases may still use it\n"
 )

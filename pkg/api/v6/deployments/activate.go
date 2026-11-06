@@ -11,11 +11,17 @@ import (
 )
 
 // ActivateRelease routes the Deployment's traffic to a Ready release.
-func (c *Client) ActivateRelease(ctx context.Context, deploymentID, releaseID string) (Release, error) {
-	logger.Debug("Activate release")
+// deploymentVersionID is the Deployment's current version, as read right
+// before; empty leaves it out of the request.
+func (c *Client) ActivateRelease(ctx context.Context, deploymentID, releaseID, deploymentVersionID string) (Release, error) {
+	logger.Debug("Activate release", zap.String("deployment_version_id", deploymentVersionID))
 
+	req := sdk.ActivateReleaseRequest{}
+	if deploymentVersionID != "" {
+		req.SetDeploymentVersionId(deploymentVersionID)
+	}
 	res, httpResp, err := c.routing.
-		ActivateRelease(ctx, deploymentID, releaseID).ActivateReleaseRequest(sdk.ActivateReleaseRequest{}).Execute()
+		ActivateRelease(ctx, deploymentID, releaseID).ActivateReleaseRequest(req).Execute()
 	if err != nil {
 		errBody := ""
 		if httpResp != nil {

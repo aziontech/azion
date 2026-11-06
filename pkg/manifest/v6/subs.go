@@ -16,6 +16,7 @@ import (
 
 func appRequestRules(c *apiApplications.Client) sub[sdk.RequestPhaseRuleRequest] {
 	return sub[sdk.RequestPhaseRuleRequest]{
+		kind: "request rule",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.RequestPhaseRule](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedRequestPhaseRuleList, error) {
 				return c.ListRequestRules(ctx, id, vid, opts)
@@ -30,6 +31,7 @@ func appRequestRules(c *apiApplications.Client) sub[sdk.RequestPhaseRuleRequest]
 
 func appResponseRules(c *apiApplications.Client) sub[sdk.ResponsePhaseRuleRequest] {
 	return sub[sdk.ResponsePhaseRuleRequest]{
+		kind: "response rule",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.ResponsePhaseRule](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedResponsePhaseRuleList, error) {
 				return c.ListResponseRules(ctx, id, vid, opts)
@@ -44,6 +46,7 @@ func appResponseRules(c *apiApplications.Client) sub[sdk.ResponsePhaseRuleReques
 
 func cacheSettings(c *apiApplications.Client) sub[sdk.CacheSettingRequest] {
 	return sub[sdk.CacheSettingRequest]{
+		kind: "cache setting",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.CacheSetting](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedCacheSettingList, error) {
 				return c.ListCacheSettings(ctx, id, vid, opts)
@@ -57,6 +60,7 @@ func cacheSettings(c *apiApplications.Client) sub[sdk.CacheSettingRequest] {
 
 func deviceGroups(c *apiApplications.Client) sub[sdk.DeviceGroupRequest] {
 	return sub[sdk.DeviceGroupRequest]{
+		kind: "device group",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.DeviceGroup](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedDeviceGroupList, error) {
 				return c.ListDeviceGroups(ctx, id, vid, opts)
@@ -70,6 +74,7 @@ func deviceGroups(c *apiApplications.Client) sub[sdk.DeviceGroupRequest] {
 
 func appFunctionInstances(c *apiApplications.Client) sub[sdk.FunctionInstanceRequest] {
 	return sub[sdk.FunctionInstanceRequest]{
+		kind: "function instance",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.FunctionInstance](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedFunctionInstanceList, error) {
 				return c.ListFunctionInstances(ctx, id, vid, opts)
@@ -83,6 +88,7 @@ func appFunctionInstances(c *apiApplications.Client) sub[sdk.FunctionInstanceReq
 
 func firewallRules(c *apiFirewalls.Client) sub[sdk.FirewallRuleRequest] {
 	return sub[sdk.FirewallRuleRequest]{
+		kind: "rule",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.FirewallRule](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedFirewallRuleList, error) {
 				return c.ListRules(ctx, id, vid, opts)
@@ -97,6 +103,7 @@ func firewallRules(c *apiFirewalls.Client) sub[sdk.FirewallRuleRequest] {
 
 func firewallFunctionInstances(c *apiFirewalls.Client) sub[sdk.FirewallFunctionInstanceRequest] {
 	return sub[sdk.FirewallFunctionInstanceRequest]{
+		kind: "function instance",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.FirewallFunctionInstance](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedFirewallFunctionInstanceList, error) {
 				return c.ListFunctionInstances(ctx, id, vid, opts)
@@ -110,6 +117,7 @@ func firewallFunctionInstances(c *apiFirewalls.Client) sub[sdk.FirewallFunctionI
 
 func wafExceptions(c *apiWafs.Client) sub[sdk.WAFRuleRequest] {
 	return sub[sdk.WAFRuleRequest]{
+		kind: "exception",
 		list: func(ctx context.Context, id int64, vid string) ([]version.Item, error) {
 			return listAll[sdk.WAFRule](ctx, func(ctx context.Context, opts *contracts.ListOptions) (*sdk.PaginatedWAFRuleList, error) {
 				return c.ListExceptions(ctx, id, vid, opts)

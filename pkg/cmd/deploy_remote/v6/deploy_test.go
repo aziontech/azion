@@ -179,6 +179,9 @@ func siteAPI() *API {
 	api.On("GET", "/workspace/workloads", JSON(Page()))
 	api.On("POST", "/workspace/workloads", JSON(Data(workload)))
 	api.On("GET", "/workspace/workloads/30", JSON(Data(workload)))
+	// Read again right before the Workload binds them.
+	api.On("GET", "/environments/ENV00001", JSON(Data(map[string]any{"id": "ENV00001", "name": "Production", "deployment_policy": "single_version", "version_state": "ready"})))
+	api.On("GET", "/deployments/DEP00001", JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "deployment_policy": "single_version", "version_id": "DV1", "version_state": "ready"})))
 	return api
 }
 
@@ -669,4 +672,68 @@ func TestRefusedReleaseBuildIsDeleted(t *testing.T) {
 	assert.Equal(t, 1, api.Count("DELETE", rel))
 	assert.Zero(t, api.Count("POST", rel+"/activate"))
 	assert.Equal(t, contracts.AzionJsonV6Release{}, conf.Deployments[0].Release)
+}
+
+// The Workload is saved only once the Environment and the Deployment it binds
+// are queued, building or ready: the API refuses a binding to a draft one, and
+// a Deployment leaves draft only after its release is activated.
+func TestWorkloadWaitsUntilItsBindingsAreBindable(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("GET", "/deployments/DEP00001",
+		// Read by the activation, then polled before the Workload binds it.
+		JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "version_id": "DV1", "version_state": "draft"})),
+		JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "version_state": "draft"})),
+		JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "version_state": "DRAFT"})),
+		JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "version_state": "building"})))
+	r, _, out := runner(t, api, Options{})
+
+	require.NoError(t, r.Run(context.Background()), api.Summary())
+
+	assert.Equal(t, 4, api.Count("GET", "/deployments/DEP00001"), "one read for the activation, then polled until building")
+	assert.Equal(t, 1, api.Count("GET", "/environments/ENV00001"), "already ready: read once")
+	assert.Equal(t, 1, api.Count("POST", "/workspace/workloads"))
+	assert.Contains(t, out.String(), `Waiting for Deployment "site-deploy" (DEP00001) before binding it to the Workload: it is draft`)
+}
+
+func TestWorkloadIsNotSavedWhenABindingFailed(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("GET", "/environments/ENV00001", JSON(Data(map[string]any{"id": "ENV00001", "name": "Production", "version_state": "error"})))
+	r, _, _ := runner(t, api, Options{})
+
+	err := r.Run(context.Background())
+
+	require.ErrorIs(t, err, msg.ErrorV6NotBindable)
+	assert.Contains(t, err.Error(), `Environment "Production" (ENV00001) is error`)
+	assert.Zero(t, api.Count("POST", "/workspace/workloads"))
+}
+
+// The activation names the Deployment's current version, read right before,
+// as the API's own deploy scripts do.
+func TestActivationSendsTheDeploymentVersion(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	r, _, _ := runner(t, api, Options{})
+
+	require.NoError(t, r.Run(context.Background()), api.Summary())
+
+	act := api.Bodies("POST", rel+"/activate")
+	require.Len(t, act, 1)
+	assert.Equal(t, "DV1", act[0]["deployment_version_id"])
+}
+
+// The field is optional: a failed read activates without it rather than
+// failing the deploy.
+func TestActivationWithoutTheDeploymentVersionWhenItCannotBeRead(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("GET", "/deployments/DEP00001", Status(500), JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "version_state": "ready"})))
+	r, _, _ := runner(t, api, Options{})
+
+	require.NoError(t, r.Run(context.Background()), api.Summary())
+
+	act := api.Bodies("POST", rel+"/activate")
+	require.Len(t, act, 1)
+	assert.NotContains(t, act[0], "deployment_version_id")
 }

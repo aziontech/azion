@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	msg "github.com/aziontech/azion-cli/messages/manifest"
@@ -199,11 +200,26 @@ func TestApplicationReconcilesSubResourcesAndResolvesReferences(t *testing.T) {
 	}}}
 	conf := &contracts.AzionApplicationOptionsV6{Functions: []contracts.AzionJsonV6Resource{{ID: 5, Name: "fn"}}}
 	a, _ := applier(api, conf, m)
+	var said []string
+	a.Say = func(line string) { said = append(said, line) }
 
 	pending, err := a.ApplyApplications(context.Background())
 
 	require.NoError(t, err, api.Summary())
 	require.Len(t, pending, 1)
+
+	// Each write to the Draft is reported, named by the Application.
+	out := strings.Join(said, "")
+	for _, line := range []string{
+		`application "site": cache setting "static" updated (id 50)`,
+		`application "site": cache setting "old" (id 51) removed: the manifest no longer has it`,
+		`application "site": function instance "handler" created (id 60)`,
+		`application "site": request rule "cache" created (id 70)`,
+		`application "site": request rule "fn" created (id 71)`,
+		`application "site": 2 request rules set in the manifest's order`,
+	} {
+		assert.Contains(t, out, line)
+	}
 
 	inst := api.Bodies("POST", app+"/functions")
 	require.Len(t, inst, 1)

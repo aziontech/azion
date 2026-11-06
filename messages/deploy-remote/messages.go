@@ -76,5 +76,7 @@ var (
 // v6, continued.
 var (
 	V6EnvironmentCreated   = "Environment %q created (%s)\n"
+	V6WaitingToBind        = "Waiting for %s %q (%s) before binding it to the Workload: it is %s\n"
+	ErrorV6NotBindable     = errors.New("it cannot be bound to a Workload")
 	ErrorV6PolicyImmutable = errors.New("an Environment's deployment policy cannot change. Use the policy it has, or another Environment")
 )
