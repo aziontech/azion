@@ -61,7 +61,7 @@ func Test_initCmd_Run(t *testing.T) {
 		commandRunner         func(envVars []string, comm string) (string, int, error)
 		commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 		commandRunInteractive func(f *cmdutil.Factory, comm string) error
-		deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+		deployCmd             func(f *cmdutil.Factory) deploy.ExternalDeployer
 		devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 		changeDir             func(dir string) error
 		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
@@ -779,7 +779,7 @@ func Test_initCmd_deps(t *testing.T) {
 		commandRunner         func(envVars []string, comm string) (string, int, error)
 		commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 		commandRunInteractive func(f *cmdutil.Factory, comm string) error
-		deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+		deployCmd             func(f *cmdutil.Factory) deploy.ExternalDeployer
 		devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 		changeDir             func(dir string) error
 		askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error

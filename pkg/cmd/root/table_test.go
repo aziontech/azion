@@ -3,6 +3,8 @@ package root
 import (
 	"bytes"
 	"net/http"
+	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -35,7 +37,7 @@ func tableFactory(v apiversion.Version) *cmdutil.Factory {
 // wrong API generation. This walks the whole resolved tree for each generation
 // and fails on any name registered twice under the same parent.
 func TestTableNamesAreUniquePerVersion(t *testing.T) {
-	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4} {
+	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4, apiversion.V6} {
 		t.Run(string(v), func(t *testing.T) {
 			f := tableFactory(v)
 			for _, cmd := range cmdregistry.Children(children, f) {
@@ -62,7 +64,7 @@ func assertUniqueChildren(t *testing.T, cmd *cobra.Command, path string) {
 // where the two generations' project commands (deploy, init, and the rest) sit
 // side by side under the same names.
 func TestTopLevelNamesAreUniquePerVersion(t *testing.T) {
-	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4} {
+	for _, v := range []apiversion.Version{apiversion.V3, apiversion.V4, apiversion.V6} {
 		t.Run(string(v), func(t *testing.T) {
 			seen := make(map[string]bool)
 			for _, cmd := range cmdregistry.Children(children, tableFactory(v)) {
@@ -88,5 +90,44 @@ func TestEveryGenerationGetsBothTrees(t *testing.T) {
 	}
 	if counts[apiversion.V4] != 25 {
 		t.Errorf("v4 root: got %d top-level commands, want 25", counts[apiversion.V4])
+	}
+}
+
+// TestV6GetsOnlyTheProjectAndGenericCommands pins what a v6 account sees: the
+// project commands and the ones that touch no resource API. The CRUD verbs
+// and every other command that calls the v4 API stay off the list until they
+// have a v6 implementation; adding one is a deliberate edit to this test.
+func TestV6GetsOnlyTheProjectAndGenericCommands(t *testing.T) {
+	byName := func(v apiversion.Version) map[string]*cobra.Command {
+		out := map[string]*cobra.Command{}
+		for _, cmd := range cmdregistry.Children(children, tableFactory(v)) {
+			out[cmd.Name()] = cmd
+		}
+		return out
+	}
+	v4, v6 := byName(apiversion.V4), byName(apiversion.V6)
+
+	want := []string{
+		"build", "completion", "deploy", "dev", "init", "link", "login",
+		"logout", "profiles", "reset", "version", "whoami",
+	}
+	got := make([]string, 0, len(v6))
+	for name := range v6 {
+		got = append(got, name)
+	}
+	sort.Strings(got)
+	if strings.Join(got, ",") != strings.Join(want, ",") {
+		t.Errorf("v6 root:\n got  %v\n want %v", got, want)
+	}
+
+	// deploy is the v6 implementation; it has the flags only the v6
+	// pipeline understands.
+	for _, flag := range []string{"environment", "no-activate", "timeout"} {
+		if v6["deploy"].Flags().Lookup(flag) == nil {
+			t.Errorf("v6 deploy has no --%s: it is not the v6 implementation", flag)
+		}
+		if v4["deploy"].Flags().Lookup(flag) != nil {
+			t.Errorf("v4 deploy has --%s: v4 is being served the v6 implementation", flag)
+		}
 	}
 }

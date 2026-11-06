@@ -4,6 +4,7 @@ import (
 	"path"
 
 	msg "github.com/aziontech/azion-cli/messages/init"
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/utils"
 )
@@ -15,6 +16,17 @@ func (cmd *initCmd) createTemplateAzion() error {
 	}
 
 	rotatePrefix := true
+	if cmd.f != nil && cmd.f.APIVersion == apiversion.V6 {
+		// A v6 project starts with no resources: the v6 deploy finds or
+		// creates them by name and records them as it goes.
+		return cmd.writeAzionJson(&contracts.AzionApplicationOptionsV6{
+			Name:         cmd.name,
+			Env:          "production",
+			Preset:       cmd.preset,
+			RotatePrefix: &rotatePrefix,
+		})
+	}
+
 	azionJson := &contracts.AzionApplicationOptions{
 		Name:         cmd.name,
 		Env:          "production",
@@ -33,6 +45,10 @@ func (cmd *initCmd) createTemplateAzion() error {
 }
 
 func (cmd *initCmd) createJsonFile(options *contracts.AzionApplicationOptions) error {
+	return cmd.writeAzionJson(options)
+}
+
+func (cmd *initCmd) writeAzionJson(options any) error {
 	data, err := cmd.marshalIndent(options, "", "  ")
 	if err != nil {
 		return msg.ErrorUnmarshalAzionFile

@@ -7,6 +7,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/apiversion"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
+	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/utils"
 	"go.uber.org/zap/zapcore"
@@ -166,5 +169,42 @@ func Test_initCmd_createTemplateAzion_ConfigDir(t *testing.T) {
 				t.Errorf("wrote azion.json to %q, want %q", writtenFile, expectedFile)
 			}
 		})
+	}
+}
+
+// On a v6 account, init writes a v6 azion.json: the v6 deploy cannot read the
+// v4 shape ("workloads" is an object there and a list in v6).
+func Test_initCmd_createTemplateAzion_V6(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	var written []byte
+	cmd := &initCmd{
+		f:             &cmdutil.Factory{APIVersion: apiversion.V6},
+		name:          "site",
+		preset:        "eleventy",
+		projectPath:   "azion",
+		mkdir:         func(string, os.FileMode) error { return nil },
+		marshalIndent: json.MarshalIndent,
+		writeFile: func(_ string, data []byte, _ fs.FileMode) error {
+			written = data
+			return nil
+		},
+	}
+	if err := cmd.createTemplateAzion(); err != nil {
+		t.Fatal(err)
+	}
+
+	var got contracts.AzionApplicationOptionsV6
+	if err := json.Unmarshal(written, &got); err != nil {
+		t.Fatalf("init wrote an azion.json the v6 deploy cannot read: %v\n%s", err, written)
+	}
+	if got.Name != "site" || got.Preset != "eleventy" || got.Env != "production" {
+		t.Errorf("got %+v", got)
+	}
+	var keys map[string]json.RawMessage
+	_ = json.Unmarshal(written, &keys)
+	for _, k := range []string{"application", "domain", "rules-engine", "workloads"} {
+		if _, ok := keys[k]; ok {
+			t.Errorf("v6 azion.json has the v4 key %q", k)
+		}
 	}
 }

@@ -56,8 +56,10 @@ jobs:
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API_V6: ${{ secrets.STORAGE_API_V6_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }}
           AZION_API_V4: ${{ secrets.AZION_API_V4_STAGE }}
+          AZION_API_V6: ${{ secrets.AZION_API_V6_STAGE }}
           GOFLAGS: -tags=stage
         run: make build ENVFILE=./env/stage
 
@@ -66,8 +68,10 @@ jobs:
           AZION_API: ${{ secrets.AZION_API_STAGE }}
           AZION_SSO: ${{ secrets.AZION_SSO_STAGE }}
           STORAGE_API: ${{ secrets.STORAGE_API_STAGE }}
+          STORAGE_API_V6: ${{ secrets.STORAGE_API_V6_STAGE }}
           CONSOLE_URL: ${{ secrets.CONSOLE_STAGE }} 
           AZION_API_V4: ${{ secrets.AZION_API_V4_STAGE }}
+          AZION_API_V6: ${{ secrets.AZION_API_V6_STAGE }}
           GOFLAGS: -tags=stage
         run: make cross-build ENVFILE=./env/stage
 

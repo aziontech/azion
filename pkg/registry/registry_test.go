@@ -1,6 +1,7 @@
 package registry
 
 import (
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"net/http"
 	"testing"
 
@@ -87,6 +88,21 @@ func TestClientsUseTheExpectedBaseURL(t *testing.T) {
 			tt.build(&cmdutil.Factory{HttpClient: &http.Client{}, Config: cfg})
 			assert.Equal(t, tt.want, cfg.urlKey(t))
 		})
+	}
+}
+
+// A v6 account's storage client points at the v6 storage API; v3 and v4 keep
+// the other one.
+func TestStorageFollowsTheGeneration(t *testing.T) {
+	for v, want := range map[apiversion.Version]string{
+		apiversion.V3: "storage_url",
+		apiversion.V4: "storage_url",
+		apiversion.V6: "storage_v6_url",
+		"":            "storage_url",
+	} {
+		cfg := &recordingConfig{}
+		Storage(&cmdutil.Factory{HttpClient: &http.Client{}, Config: cfg, APIVersion: v})
+		assert.Equal(t, want, cfg.urlKey(t), "generation %q", v)
 	}
 }
 

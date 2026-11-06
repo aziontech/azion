@@ -21,6 +21,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/pkg/token"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -60,6 +61,21 @@ type DeployCmd struct {
 	Workers                  int
 	AliasEnv                 bool
 	ConfigFile               string
+	// NewVulcan picks the bundler. Nil means the one for the account's API
+	// generation (vulcan.For).
+	NewVulcan func() *vulcanPkg.VulcanPkg
+	// ExtraReplacements are placeholders the first run replaces in
+	// azion.config on top of the v4 ones (the v6 presets add
+	// $ENVIRONMENT_NAME).
+	ExtraReplacements map[string]string
+}
+
+// vulcan returns the bundler this deploy runs.
+func (cmd *DeployCmd) vulcan() *vulcanPkg.VulcanPkg {
+	if cmd.NewVulcan != nil {
+		return cmd.NewVulcan()
+	}
+	return vulcanPkg.For(cmd.F)
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {

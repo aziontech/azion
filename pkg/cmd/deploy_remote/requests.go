@@ -31,7 +31,7 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		return err
 	}
 
-	vul := vulcanPkg.NewVulcan()
+	vul := cmd.vulcan()
 
 	err = vul.CheckVulcanMajor(vulcanVer, cmd.F, vul)
 	if err != nil {
@@ -48,6 +48,9 @@ func (cmd *DeployCmd) callBundlerInit(conf *contracts.AzionApplicationOptions) e
 		"$WORKLOAD_NAME":          conf.Name,
 		"$DEPLOYMENT_NAME":        conf.Name,
 		"$FUNCTION_INSTANCE_NAME": conf.Name,
+	}
+	for placeholder, value := range cmd.ExtraReplacements {
+		replacements[placeholder] = value
 	}
 
 	replacementsJSON, err := json.Marshal(replacements)

@@ -189,6 +189,7 @@ func TestCmdRootResolvesVersionAndPicksTree(t *testing.T) {
 		{"account with no flags builds the v4 tree", "a-token", `[]`, apiversion.V4, true},
 		{"account blocked from v4 builds the v3 tree", "a-token", `["` + apiversion.BlockAPIV4IncompatibleEndpoints + `"]`, apiversion.V3, false},
 		{"account blocked from v3 builds the v4 tree", "a-token", `["` + apiversion.BlockAPIV3Access + `"]`, apiversion.V4, true},
+		{"v6 account gets the short v6 list, without the v4-only commands", "a-token", `["` + apiversion.UseV6Configurations + `"]`, apiversion.V6, false},
 	}
 
 	for _, tt := range tests {
