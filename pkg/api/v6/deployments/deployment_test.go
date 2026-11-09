@@ -40,14 +40,8 @@ func TestReleaseLifecycle(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, version.Queued, r.State)
 
-	_, err = c.ActivateRelease(ctx, "DEP00001", "REL00001", "DV1")
+	_, err = c.ActivateRelease(ctx, "DEP00001", "REL00001")
 	require.NoError(t, err)
-	assert.Equal(t, "DV1", api.Bodies("POST", rel+"/REL00001/activate")[0]["deployment_version_id"])
-
-	// Without a version the field is left out, not sent empty.
-	_, err = c.ActivateRelease(ctx, "DEP00001", "REL00001", "")
-	require.NoError(t, err)
-	assert.NotContains(t, api.Bodies("POST", rel+"/REL00001/activate")[1], "deployment_version_id")
 
 	r, err = c.GetRelease(ctx, "DEP00001", "REL00001")
 	require.NoError(t, err)
