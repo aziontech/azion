@@ -108,8 +108,8 @@ func TestV6GetsOnlyTheProjectAndGenericCommands(t *testing.T) {
 	v4, v6 := byName(apiversion.V4), byName(apiversion.V6)
 
 	want := []string{
-		"build", "completion", "deploy", "dev", "init", "link", "login",
-		"logout", "profiles", "reset", "version", "whoami",
+		"build", "completion", "create", "delete", "deploy", "dev", "init",
+		"link", "login", "logout", "profiles", "reset", "version", "whoami",
 	}
 	got := make([]string, 0, len(v6))
 	for name := range v6 {
@@ -118,6 +118,17 @@ func TestV6GetsOnlyTheProjectAndGenericCommands(t *testing.T) {
 	sort.Strings(got)
 	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Errorf("v6 root:\n got  %v\n want %v", got, want)
+	}
+
+	// create and delete are there for profiles alone: no resource command.
+	for _, verb := range []string{"create", "delete"} {
+		var subs []string
+		for _, c := range v6[verb].Commands() {
+			subs = append(subs, c.Name())
+		}
+		if strings.Join(subs, ",") != "profile" {
+			t.Errorf("v6 %s offers %v, want only [profile]", verb, subs)
+		}
 	}
 
 	// deploy is the v6 implementation; it has the flags only the v6

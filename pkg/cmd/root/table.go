@@ -45,8 +45,9 @@ import (
 // generation.
 //
 // v6 accounts get a short list for now: the project commands (init, link,
-// build, dev, deploy) and the ones that touch no resource API (login, logout,
-// profiles, version, whoami, completion, reset). The resource commands, the
+// build, dev, deploy), the ones that touch no resource API (login, logout,
+// profiles, version, whoami, completion, reset) and `create profile` /
+// `delete profile`. The resource commands, the
 // CRUD verbs among them, stay on v3 and v4 until they have a v6
 // implementation.
 var children = []cmdregistry.Entry{
@@ -58,10 +59,12 @@ var children = []cmdregistry.Entry{
 	cmdregistry.Any(version.NewCmd),
 	cmdregistry.Any(whoami.NewCmd),
 
-	// v3 and v4. The five verb dispatchers are one shell each that reads the
+	// v3 and v4. The verb dispatchers are one shell each that reads the
 	// children table in its own file.
-	cmdregistry.V3V4(create.NewCmd),
-	cmdregistry.V3V4(delete.NewCmd),
+	// create and delete reach v6 for their profile sub-command only; their
+	// own tables keep every resource on v3 and v4.
+	cmdregistry.Any(create.NewCmd),
+	cmdregistry.Any(delete.NewCmd),
 	cmdregistry.V3V4(describe.NewCmd),
 	cmdregistry.V3V4(list.NewCmd),
 	cmdregistry.V3V4(update.NewCmd),

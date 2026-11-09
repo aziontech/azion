@@ -1,8 +1,8 @@
 API_URL=https://api.azionapi.net
 API_V4_URL=https://api.azion.com/v4
-API_V6_URL=https://api.azion.com/v6
-AUTH_URL=https://sso.azion.com/api
+API_V6_URL=https://stage-api.azion.com/v6
+AUTH_URL=https://stage-sso.azion.com/api
 STORAGE_URL=https://api.azion.com/v4
-STORAGE_V6_URL=https://api.azion.com/v6
+STORAGE_V6_URL=https://stage-api.azion.com/v6
 CONSOLE=https://console.azion.com
 SCRIPT_ID=17ac912d-5ce9-4806-9fa7-480779e43f58
