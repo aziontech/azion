@@ -272,6 +272,19 @@ func TestValidate(t *testing.T) {
 		{"instance of an undeclared function", v6(contracts.ManifestV6{Applications: []contracts.ManifestV6Application{{
 			Name: "a", FunctionInstances: []contracts.ManifestV6FunctionInstance{{Name: "i", Function: contracts.FunctionReference{Name: "nope"}}},
 		}}}), msg.ErrorV6UnknownRef},
+		{"dependency on a declared network list and an existing connector id", v6(contracts.ManifestV6{
+			NetworkLists: []sdk.NetworkListRequest{networkList},
+			Functions: []contracts.ManifestV6Function{{Name: "f", Path: "f.js", Dependencies: []contracts.ManifestV6Dependency{
+				{Type: contracts.DependencyNetworkList, ID: contracts.FunctionReference{Name: networkList.Name}},
+				{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{ID: 42}},
+			}}},
+		}), nil},
+		{"dependency on an undeclared connector", v6(contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{
+			Name: "f", Path: "f.js", Dependencies: []contracts.ManifestV6Dependency{{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{Name: "nope"}}},
+		}}}), msg.ErrorV6UnknownRef},
+		{"dependency of an unknown type", v6(contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{
+			Name: "f", Path: "f.js", Dependencies: []contracts.ManifestV6Dependency{{Type: "waf", ID: contracts.FunctionReference{ID: 1}}},
+		}}}), msg.ErrorV6UnknownDependencyType},
 		{"rule with an unknown phase", v6(contracts.ManifestV6{Applications: []contracts.ManifestV6Application{{
 			Name: "a", Rules: []contracts.ManifestV6Rule{{Phase: "middle", Rule: json.RawMessage(`{}`)}},
 		}}}), msg.ErrorV6InvalidRule},
@@ -297,6 +310,10 @@ func TestBundlerOutputIsValid(t *testing.T) {
 	m, err := Read("testdata/bundler666_full.json")
 	require.NoError(t, err)
 	assert.Equal(t, 6, m.Version)
+	assert.Equal(t, []contracts.ManifestV6Dependency{
+		{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{Name: "my-origin"}},
+		{Type: contracts.DependencyNetworkList, ID: contracts.FunctionReference{Name: "blocked"}},
+	}, m.Functions[0].Dependencies)
 }
 
 // Firewall criteria name a Network List, set_waf names a WAF and run_function
@@ -368,6 +385,51 @@ func TestFunctionCodeComesFromItsFile(t *testing.T) {
 	body := api.Bodies("POST", "/workspace/functions")
 	require.Len(t, body, 1)
 	assert.Equal(t, "export default {}", body[0]["code"])
+}
+
+// A Function's dependencies reach the API as ids: a name resolves to the
+// Connector or Network List this project applied, an id is passed through.
+func TestFunctionDependenciesAreResolved(t *testing.T) {
+	api := &API{}
+	api.On("GET", "/workspace/functions", JSON(Page()))
+	api.On("POST", "/workspace/functions", JSON(Data(Version(4, "fn", "V1", "draft"))))
+	api.On("GET", "/workspace/functions/4/versions/V1", JSON(Version(4, "fn", "V1", "draft")))
+	conf := &contracts.AzionApplicationOptionsV6{
+		Connectors:   []contracts.AzionJsonV6Resource{{ID: 71, Name: "my-origin"}},
+		NetworkLists: []contracts.AzionJsonV6Resource{{ID: 3, Name: "blocked"}},
+	}
+	a, _ := applier(api, conf, &contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{
+		Name: "fn", Path: "./functions/worker.js",
+		Dependencies: []contracts.ManifestV6Dependency{
+			{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{Name: "my-origin"}},
+			{Type: contracts.DependencyNetworkList, ID: contracts.FunctionReference{Name: "blocked"}},
+			{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{ID: 900}},
+		},
+	}}})
+	a.ReadFile = func(string) ([]byte, error) { return []byte("export default {}"), nil }
+
+	_, err := a.ApplyFunctions(context.Background())
+
+	require.NoError(t, err, api.Summary())
+	body := api.Bodies("POST", "/workspace/functions")
+	require.Len(t, body, 1)
+	assert.Equal(t, []any{
+		map[string]any{"type": "connector", "id": float64(71)},
+		map[string]any{"type": "network_list", "id": float64(3)},
+		map[string]any{"type": "connector", "id": float64(900)},
+	}, body[0]["dependencies"])
+}
+
+func TestFunctionDependencyOnAnUnappliedResourceFails(t *testing.T) {
+	a, _ := applier(&API{}, &contracts.AzionApplicationOptionsV6{}, &contracts.ManifestV6{Functions: []contracts.ManifestV6Function{{
+		Name: "fn", Path: "./functions/worker.js",
+		Dependencies: []contracts.ManifestV6Dependency{{Type: contracts.DependencyConnector, ID: contracts.FunctionReference{Name: "my-origin"}}},
+	}}})
+	a.ReadFile = func(string) ([]byte, error) { return []byte("export default {}"), nil }
+
+	_, err := a.ApplyFunctions(context.Background())
+
+	assert.ErrorIs(t, err, msg.ErrorV6UnknownRef)
 }
 
 // Every rule, firewall rule and custom page the bundler writes decodes into

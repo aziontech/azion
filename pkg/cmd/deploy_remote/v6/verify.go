@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	apiDeployments "github.com/aziontech/azion-cli/pkg/api/v6/deployments"
@@ -52,6 +53,9 @@ func (s *DeployStateV6) verifyDeploy(ctx context.Context) error {
 		w, err := s.Clients.Workloads.Get(ctx, aw.Workload.GetId())
 		if err != nil {
 			return err
+		}
+		if st := version.State(strings.ToLower(w.GetVersionState())); st != "" && st != version.Ready {
+			diffs = append(diffs, fmt.Errorf("workload %q: its version %s is %s, not ready, so its domains do not serve it yet", w.GetName(), w.GetVersionId(), st))
 		}
 		for _, b := range aw.Bindings {
 			if !hasBinding(w, b.EnvironmentId, b.DeploymentId) {

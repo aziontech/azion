@@ -39,7 +39,7 @@ require (
 
 require (
 	github.com/aziontech/azionapi-v4-go-sdk-dev v0.266.0
-	github.com/aziontech/azionapi-v6-go-sdk v0.4.0
+	github.com/aziontech/azionapi-v6-go-sdk v0.18.0
 )
 
 require (

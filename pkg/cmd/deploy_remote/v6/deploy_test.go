@@ -706,3 +706,61 @@ func TestWorkloadIsNotSavedWhenABindingFailed(t *testing.T) {
 	assert.Contains(t, err.Error(), `Environment "Production" (ENV00001) is error`)
 	assert.Zero(t, api.Count("POST", "/workspace/workloads"))
 }
+
+// siteWorkload is the Workload siteAPI saves, in a given version state.
+func siteWorkload(state string) map[string]any {
+	return map[string]any{
+		"id": 30, "name": "site", "workload_domain": "abc.azion.app", "version_id": "W1", "version_state": state,
+		"bindings": []any{map[string]any{"environment_id": "ENV00001", "deployment_id": "DEP00001", "domains": []any{map[string]any{"domain": "www.example.com"}}}},
+	}
+}
+
+// A save of the Workload starts a build of its version, and the domain serves
+// the new bindings only once it is ready: the deploy waits for it.
+func TestDeployWaitsForTheWorkloadBuild(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("POST", "/workspace/workloads", JSON(Data(siteWorkload("queued"))))
+	api.On("GET", "/workspace/workloads/30", JSON(Data(siteWorkload("building"))), JSON(Data(siteWorkload("ready"))))
+	r, conf, out := runner(t, api, Options{})
+
+	require.NoError(t, r.Run(context.Background()), api.Summary())
+
+	assert.Contains(t, out.String(), `Waiting for the Workload "site" (id 30) to build its new version: it is queued`)
+	assert.Contains(t, out.String(), `Workload "site" (id 30) is ready`)
+	assert.Contains(t, out.String(), msg.V6DeploySuccessful)
+	// Read until ready, then once more by the verify step.
+	assert.Equal(t, 3, api.Count("GET", "/workspace/workloads/30"))
+	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://www.example.com"}}, conf.Workloads)
+}
+
+// A Workload build that fails fails the deploy, and the Workload stays in
+// azion.json so the next run updates it instead of creating another.
+func TestDeployFailsWhenTheWorkloadBuildFails(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("POST", "/workspace/workloads", JSON(Data(siteWorkload("queued"))))
+	api.On("GET", "/workspace/workloads/30", JSON(Data(siteWorkload("building"))), JSON(Data(siteWorkload("error"))))
+	r, conf, out := runner(t, api, Options{})
+
+	err := r.Run(context.Background())
+
+	require.ErrorIs(t, err, msg.ErrorV6WorkloadFailed, api.Summary())
+	assert.NotContains(t, out.String(), msg.V6DeploySuccessful)
+	require.Len(t, conf.Workloads, 1)
+	assert.EqualValues(t, 30, conf.Workloads[0].ID)
+}
+
+// The check after the deploy reports a Workload whose version is not ready.
+func TestVerifyReportsAWorkloadThatIsNotReady(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("POST", "/workspace/workloads", JSON(Data(siteWorkload("ready"))))
+	api.On("GET", "/workspace/workloads/30", JSON(Data(siteWorkload("building"))))
+	r, _, _ := runner(t, api, Options{})
+
+	err := r.Run(context.Background())
+
+	require.ErrorIs(t, err, msg.ErrorV6VerifyFailed, api.Summary())
+	assert.ErrorContains(t, err, `workload "site": its version W1 is building, not ready`)
+}

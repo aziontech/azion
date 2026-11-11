@@ -124,12 +124,26 @@ type ManifestV6Function struct {
 	Runtime              string                 `json:"runtime,omitempty"`
 	ExecutionEnvironment string                 `json:"execution_environment,omitempty"`
 	DefaultArgs          map[string]interface{} `json:"default_args,omitempty"`
-	Active               *bool                  `json:"active,omitempty"`
+	// Dependencies are the Connectors and Network Lists the Function's code
+	// uses; each names one the manifest declares, or gives an existing id.
+	Dependencies []ManifestV6Dependency `json:"dependencies,omitempty"`
+}
+
+// Dependency types of a Function.
+const (
+	DependencyConnector   = "connector"
+	DependencyNetworkList = "network_list"
+)
+
+// ManifestV6Dependency is a Connector or Network List a Function depends on.
+// ID is the resource's name, resolved by the CLI, or its id.
+type ManifestV6Dependency struct {
+	Type string            `json:"type"`
+	ID   FunctionReference `json:"id"`
 }
 
 type ManifestV6WAF struct {
 	Name           string                               `json:"name"`
-	Active         *bool                                `json:"active,omitempty"`
 	EngineSettings *sdkv6.WAFEngineSettingsFieldRequest `json:"engine_settings,omitempty"`
 	Exceptions     []sdkv6.WAFRuleRequest               `json:"exceptions,omitempty"`
 }
@@ -137,7 +151,6 @@ type ManifestV6WAF struct {
 type ManifestV6Application struct {
 	Name              string                           `json:"name"`
 	Modules           *sdkv6.ApplicationModulesRequest `json:"modules,omitempty"`
-	Active            *bool                            `json:"active,omitempty"`
 	Debug             *bool                            `json:"debug,omitempty"`
 	CacheSettings     []sdkv6.CacheSettingRequest      `json:"cache_settings,omitempty"`
 	DeviceGroups      []sdkv6.DeviceGroupRequest       `json:"device_groups,omitempty"`
@@ -162,7 +175,6 @@ type ManifestV6Firewall struct {
 	Name              string                        `json:"name"`
 	Modules           *sdkv6.FirewallModulesRequest `json:"modules,omitempty"`
 	Debug             *bool                         `json:"debug,omitempty"`
-	Active            *bool                         `json:"active,omitempty"`
 	FunctionInstances []ManifestV6FunctionInstance  `json:"functions_instances,omitempty"`
 	Rules             []json.RawMessage             `json:"rules_engine,omitempty"`
 }
@@ -173,12 +185,10 @@ type ManifestV6FunctionInstance struct {
 	Name     string                 `json:"name"`
 	Function FunctionReference      `json:"function"`
 	Args     map[string]interface{} `json:"args,omitempty"`
-	Active   *bool                  `json:"active,omitempty"`
 }
 
 type ManifestV6Workload struct {
 	Name                      string                    `json:"name"`
-	Active                    *bool                     `json:"active,omitempty"`
 	Infrastructure            *int32                    `json:"infrastructure,omitempty"`
 	WorkloadDomainAllowAccess *bool                     `json:"workload_domain_allow_access,omitempty"`
 	Tls                       *sdkv6.TLSWorkloadRequest `json:"tls,omitempty"`

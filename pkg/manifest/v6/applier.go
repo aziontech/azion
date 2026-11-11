@@ -34,10 +34,10 @@ type Clients struct {
 
 // Applier writes a v6 manifest into Drafts. Each Apply method handles one
 // resource kind and returns the Drafts it wrote, for the build step that
-// follows. The kinds must be applied in dependency order — functions,
-// network lists, WAFs and connectors before the Application, Firewall and
-// Custom Page that refer to them — because references by name resolve against
-// what was already applied.
+// follows. The kinds must be applied in dependency order — network lists and
+// connectors before the functions that depend on them, and all of those and
+// WAFs before the Application, Firewall and Custom Page that refer to them —
+// because references by name resolve against what was already applied.
 type Applier struct {
 	Clients  *Clients
 	Conf     *contracts.AzionApplicationOptionsV6
@@ -110,7 +110,11 @@ func (a *Applier) ApplyFunctions(ctx context.Context) ([]Pending, error) {
 			logger.Debug("Error while reading function code", zap.String("path", codePath), zap.Error(err))
 			return nil, fmt.Errorf("%w %q from %s: %v", msg.ErrorV6FunctionCode, fn.Name, codePath, err)
 		}
-		req := sdk.FunctionsRequest{Name: fn.Name, Code: string(code), Active: fn.Active}
+		deps, err := a.dependencies(fn)
+		if err != nil {
+			return nil, err
+		}
+		req := sdk.FunctionsRequest{Name: fn.Name, Code: string(code), Dependencies: deps}
 		if fn.Runtime != "" {
 			req.SetRuntime(fn.Runtime)
 		}
@@ -153,7 +157,7 @@ func (a *Applier) ApplyWAFs(ctx context.Context) ([]Pending, error) {
 	var out []Pending
 	r := a.Clients.WAFs
 	for _, w := range a.Manifest.WAFs {
-		req := sdk.WAFRequest{Name: w.Name, Active: w.Active, EngineSettings: w.EngineSettings}
+		req := sdk.WAFRequest{Name: w.Name, EngineSettings: w.EngineSettings}
 		p, err := draft(ctx, a, "waf", r, &a.Conf.WAFs, w.Name, req)
 		if err != nil {
 			return nil, err
@@ -189,7 +193,7 @@ func (a *Applier) ApplyApplications(ctx context.Context) ([]Pending, error) {
 	var out []Pending
 	c := a.Clients.Applications
 	for _, app := range a.Manifest.Applications {
-		req := sdk.ApplicationRequest{Name: app.Name, Modules: app.Modules, Active: app.Active, Debug: app.Debug}
+		req := sdk.ApplicationRequest{Name: app.Name, Modules: app.Modules, Debug: app.Debug}
 		p, err := draft(ctx, a, "application", c, &a.Conf.Applications, app.Name, req)
 		if err != nil {
 			return nil, err
@@ -248,7 +252,7 @@ func (a *Applier) ApplyFirewalls(ctx context.Context) ([]Pending, error) {
 	var out []Pending
 	c := a.Clients.Firewalls
 	for _, fw := range a.Manifest.Firewalls {
-		req := sdk.FirewallRequest{Name: fw.Name, Modules: fw.Modules, Active: fw.Active, Debug: fw.Debug}
+		req := sdk.FirewallRequest{Name: fw.Name, Modules: fw.Modules, Debug: fw.Debug}
 		p, err := draft(ctx, a, "firewall", c, &a.Conf.Firewalls, fw.Name, req)
 		if err != nil {
 			return nil, err
@@ -263,7 +267,7 @@ func (a *Applier) ApplyFirewalls(ctx context.Context) ([]Pending, error) {
 		// application's.
 		instances := make([]sdk.FirewallFunctionInstanceRequest, len(appInstances))
 		for i, in := range appInstances {
-			instances[i] = sdk.FirewallFunctionInstanceRequest{Name: in.Name, Args: in.Args, AzionForm: in.AzionForm, Active: in.Active, Function: in.Function}
+			instances[i] = sdk.FirewallFunctionInstanceRequest{Name: in.Name, Args: in.Args, AzionForm: in.AzionForm, Function: in.Function}
 		}
 		instanceIDs, err := reconcile(ctx, inFw, firewallFunctionInstances(c), p.ID, p.VersionID, instances)
 		if err != nil {
@@ -331,11 +335,43 @@ func (a *Applier) functionInstances(in []contracts.ManifestV6FunctionInstance) (
 			}
 			fnID = id
 		}
-		req := sdk.FunctionInstanceRequest{Name: inst.Name, Active: inst.Active, Function: fnID}
+		req := sdk.FunctionInstanceRequest{Name: inst.Name, Function: fnID}
 		if inst.Args != nil {
 			req.Args = inst.Args
 		}
 		out = append(out, req)
+	}
+	return out, nil
+}
+
+// dependencies turns a Function's dependencies into requests, resolving each
+// Connector or Network List named in the manifest to the id it was applied as.
+// An id given in the manifest is passed through: the resource is not the
+// project's, so the API is left to check it.
+func (a *Applier) dependencies(fn contracts.ManifestV6Function) ([]sdk.DependencyEntryRequest, error) {
+	if len(fn.Dependencies) == 0 {
+		return nil, nil
+	}
+	known := map[string]struct {
+		kind string
+		ids  map[string]int64
+	}{
+		contracts.DependencyConnector:   {"connector", ids(a.Conf.Connectors)},
+		contracts.DependencyNetworkList: {"network list", ids(a.Conf.NetworkLists)},
+	}
+	out := make([]sdk.DependencyEntryRequest, 0, len(fn.Dependencies))
+	for _, dep := range fn.Dependencies {
+		k, ok := known[dep.Type]
+		if !ok {
+			return nil, fmt.Errorf("function %q depends on a %q: %w", fn.Name, dep.Type, msg.ErrorV6UnknownDependencyType)
+		}
+		id := dep.ID.ID
+		if id == 0 {
+			if id, ok = k.ids[dep.ID.Name]; !ok {
+				return nil, fmt.Errorf("function %q depends on %s %q: %w", fn.Name, k.kind, dep.ID.Name, msg.ErrorV6UnknownRef)
+			}
+		}
+		out = append(out, sdk.DependencyEntryRequest{Type: dep.Type, Id: *sdk.NewNullableInt64(&id)})
 	}
 	return out, nil
 }

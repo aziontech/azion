@@ -86,7 +86,7 @@ func (c *Client) UpdateException(ctx context.Context, id int64, versionID string
 func (c *Client) DeleteException(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete WAF WAF exception")
 
-	_, httpResp, err := c.apiClient.WAFsExceptionsAPI.
+	httpResp, err := c.apiClient.WAFsExceptionsAPI.
 		DeleteWafVersionException(ctx, subID, versionID, id).Execute()
 	if err != nil {
 		errBody := ""

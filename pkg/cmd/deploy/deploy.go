@@ -209,7 +209,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		bucketStart := time.Now()
 		nameBucket := utils.ReplaceInvalidCharsBucket(fmt.Sprintf("%s-%s", conf.Name, cmd.VersionID()))
 		storageClient := registry.Storage(f)
-		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: "read_only"}})
+		err := storageClient.CreateBucket(ctx, storage.RequestBucket{BucketCreateRequest: storagesdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: "read_write"}})
 		if err != nil {
 			return err
 		}

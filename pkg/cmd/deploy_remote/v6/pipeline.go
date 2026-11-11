@@ -46,10 +46,10 @@ const (
 	StepReadManifestAgain       = "ReadManifestAgain"
 	StepCredentials             = "Credentials"
 	StepUploadStaticFiles       = "UploadStaticFiles"
-	StepManifestFunctions       = "ManifestFunctions"
 	StepManifestNetworkLists    = "ManifestNetworkLists"
-	StepManifestWAFs            = "ManifestWAFs"
 	StepManifestConnectors      = "ManifestConnectors"
+	StepManifestFunctions       = "ManifestFunctions"
+	StepManifestWAFs            = "ManifestWAFs"
 	StepVersionBuildDeps        = "VersionBuildDependencies"
 	StepManifestApplication     = "ManifestApplication"
 	StepManifestFirewalls       = "ManifestFirewalls"
@@ -174,11 +174,13 @@ func steps() []pipeline.Step[DeployStateV6] {
 			},
 		},
 
-		// Level 1: what the Application and Firewall depend on.
-		applyStep(StepManifestFunctions, func(m *contracts.ManifestV6) int { return len(m.Functions) }, (*manifestv6.Applier).ApplyFunctions, false),
+		// Level 1: what the Application and Firewall depend on. Network lists
+		// and connectors come before the functions, whose dependencies name
+		// them.
 		applyStep(StepManifestNetworkLists, func(m *contracts.ManifestV6) int { return len(m.NetworkLists) }, (*manifestv6.Applier).ApplyNetworkLists, false),
-		applyStep(StepManifestWAFs, func(m *contracts.ManifestV6) int { return len(m.WAFs) }, (*manifestv6.Applier).ApplyWAFs, false),
 		applyStep(StepManifestConnectors, func(m *contracts.ManifestV6) int { return len(m.Connectors) }, (*manifestv6.Applier).ApplyConnectors, false),
+		applyStep(StepManifestFunctions, func(m *contracts.ManifestV6) int { return len(m.Functions) }, (*manifestv6.Applier).ApplyFunctions, false),
+		applyStep(StepManifestWAFs, func(m *contracts.ManifestV6) int { return len(m.WAFs) }, (*manifestv6.Applier).ApplyWAFs, false),
 		{
 			Name:    StepVersionBuildDeps,
 			Applies: func(s *DeployStateV6) bool { return declares(s, dependencyCount) },

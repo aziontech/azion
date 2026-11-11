@@ -32,13 +32,14 @@ var (
 // v6 — used only by the v6 deploy (pkg/manifest/v6).
 // ============================================================================
 var (
-	ErrorV6DraftTaken    = errors.New("the Draft is no longer editable: another process (the Console or another CLI run) started its build during this deploy. Run the deploy again")
-	ErrorV6UnknownRef    = errors.New("the manifest refers to a resource it does not declare")
-	ErrorV6TooMany       = errors.New("a release serves at most one Application, one Firewall and one Custom Page")
-	ErrorV6NoName        = errors.New("every resource in the manifest needs a name")
-	ErrorV6DuplicateName = errors.New("two resources of the same kind share a name in the manifest")
-	ErrorV6FunctionCode  = errors.New("failed to read the code of a Function")
-	ErrorV6InvalidRule   = errors.New("a rule in the manifest is not valid")
+	ErrorV6DraftTaken            = errors.New("the Draft is no longer editable: another process (the Console or another CLI run) started its build during this deploy. Run the deploy again")
+	ErrorV6UnknownRef            = errors.New("the manifest refers to a resource it does not declare")
+	ErrorV6UnknownDependencyType = errors.New("a Function can only depend on a connector or a network_list")
+	ErrorV6TooMany               = errors.New("a release serves at most one Application, one Firewall and one Custom Page")
+	ErrorV6NoName                = errors.New("every resource in the manifest needs a name")
+	ErrorV6DuplicateName         = errors.New("two resources of the same kind share a name in the manifest")
+	ErrorV6FunctionCode          = errors.New("failed to read the code of a Function")
+	ErrorV6InvalidRule           = errors.New("a rule in the manifest is not valid")
 )
 
 // v6, continued.

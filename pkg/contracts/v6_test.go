@@ -19,15 +19,17 @@ func TestManifestV6DecodesTheBundlerOutput(t *testing.T) {
 	require.NoError(t, json.Unmarshal(data, &m))
 
 	assert.Equal(t, 6, m.Version)
-	assert.Len(t, m.Functions, 1)
+	require.Len(t, m.Functions, 1)
+	assert.Equal(t, []ManifestV6Dependency{
+		{Type: DependencyConnector, ID: FunctionReference{Name: "my-origin"}},
+		{Type: DependencyNetworkList, ID: FunctionReference{Name: "blocked"}},
+	}, m.Functions[0].Dependencies)
 	assert.Len(t, m.NetworkLists, 1)
 	assert.Len(t, m.WAFs, 1)
 	assert.Len(t, m.Connectors, 2)
-	// SDK 0.4.0 has active on every Connector type again, so it is kept.
+	// Each connector matches exactly one of the oneOf variants (storage, http).
 	for _, c := range m.Connectors {
-		inst, ok := c.GetActualInstance().(interface{ GetActive() bool })
-		require.True(t, ok, "connector type without active")
-		assert.True(t, inst.GetActive())
+		assert.NotNil(t, c.GetActualInstance(), "connector decoded into no variant")
 	}
 	assert.Len(t, m.CustomPages, 1)
 	require.Len(t, m.Applications, 1)

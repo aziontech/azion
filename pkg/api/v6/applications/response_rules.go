@@ -86,7 +86,7 @@ func (c *Client) UpdateResponseRule(ctx context.Context, id int64, versionID str
 func (c *Client) DeleteResponseRule(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Application response rule")
 
-	_, httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
+	httpResp, err := c.apiClient.ApplicationsResponseRulesAPI.
 		DeleteApplicationVersionResponseRule(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""
