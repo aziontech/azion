@@ -25,6 +25,10 @@ type Entry struct {
 }
 
 // Supports reports whether the entry is offered to generation v.
+//
+// v6 sees only the entries that name it: Any, V4V6 and V6Only. An entry that
+// names v4 alone is not offered to v6, so a v6 account never runs a command
+// that calls the v4 API.
 func (e Entry) Supports(v apiversion.Version) bool {
 	if len(e.Versions) == 0 {
 		return true
@@ -37,7 +41,8 @@ func (e Entry) Supports(v apiversion.Version) bool {
 	return false
 }
 
-// Any registers a command that behaves the same on every generation.
+// Any registers a command that behaves the same on every generation, v6
+// included: it does not call a resource API (version, whoami, profiles...).
 func Any(new Builder) Entry {
 	return Entry{New: new}
 }
@@ -47,9 +52,26 @@ func V3Only(new Builder) Entry {
 	return Entry{Versions: []apiversion.Version{apiversion.V3}, New: new}
 }
 
+// V3V4 registers a command that v3 and v4 share and v6 does not offer yet,
+// such as the resource CRUD verbs.
+func V3V4(new Builder) Entry {
+	return Entry{Versions: []apiversion.Version{apiversion.V3, apiversion.V4}, New: new}
+}
+
 // V4Only registers a command that exists only on the v4 generation.
 func V4Only(new Builder) Entry {
 	return Entry{Versions: []apiversion.Version{apiversion.V4}, New: new}
+}
+
+// V4V6 registers a command that v4 and v6 share: one implementation that picks
+// what differs from the factory's generation (build, dev, init, link, login).
+func V4V6(new Builder) Entry {
+	return Entry{Versions: []apiversion.Version{apiversion.V4, apiversion.V6}, New: new}
+}
+
+// V6Only registers a command implementation that exists only on v6.
+func V6Only(new Builder) Entry {
+	return Entry{Versions: []apiversion.Version{apiversion.V6}, New: new}
 }
 
 // Fallback is the generation assumed when a factory carries no resolved
@@ -58,6 +80,7 @@ func V4Only(new Builder) Entry {
 // which saw the v4 tree before these tables existed.
 const Fallback = apiversion.V4
 
+// versionOf is the generation the factory resolved to, or Fallback.
 func versionOf(f *cmdutil.Factory) apiversion.Version {
 	if f.APIVersion == "" {
 		return Fallback

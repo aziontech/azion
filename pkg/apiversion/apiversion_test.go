@@ -20,6 +20,9 @@ func TestSelect(t *testing.T) {
 		{"block_apiv4_incompatible_endpoints blocks v4, so v3", AccountInfo{ClientFlags: []string{BlockAPIV4IncompatibleEndpoints}}, V3},
 		{"block_apiv3_access blocks v3, so v4", AccountInfo{ClientFlags: []string{BlockAPIV3Access}}, V4},
 		{"the v4 block wins alongside unrelated flags", AccountInfo{ClientFlags: []string{"waf_mode", BlockAPIV4IncompatibleEndpoints}}, V3},
+		{"use_v6_configurations opts into v6", AccountInfo{ClientFlags: []string{UseV6Configurations}}, V6},
+		{"v6 wins over the v4 block", AccountInfo{ClientFlags: []string{BlockAPIV4IncompatibleEndpoints, UseV6Configurations}}, V6},
+		{"v6 wins over the v3 block", AccountInfo{ClientFlags: []string{BlockAPIV3Access, UseV6Configurations}}, V6},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -32,6 +35,7 @@ func TestSelect(t *testing.T) {
 func TestVersionWireForm(t *testing.T) {
 	assert.Equal(t, "v3", V3.String())
 	assert.Equal(t, "v4", V4.String())
+	assert.Equal(t, "v6", V6.String())
 }
 
 func TestResolve(t *testing.T) {

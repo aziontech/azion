@@ -67,7 +67,7 @@ type initCmd struct {
 	commandRunner         func(envVars []string, comm string) (string, int, error)
 	commandRunnerOutput   func(f *cmdutil.Factory, comm string, envVars []string) (string, error)
 	commandRunInteractive func(f *cmdutil.Factory, comm string) error
-	deployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+	deployCmd             func(f *cmdutil.Factory) deploy.ExternalDeployer
 	devCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	changeDir             func(dir string) error
 	askOne                func(p survey.Prompt, response interface{}, opts ...survey.AskOpt) error
@@ -99,7 +99,7 @@ func NewInitCmd(f *cmdutil.Factory) *initCmd {
 		mkdir:                 os.MkdirAll,
 		gitPlainClone:         git.PlainClone,
 		devCmd:                dev.NewDevCmd,
-		deployCmd:             deploy.NewDeployCmd,
+		deployCmd:             deploy.NewExternalDeployer,
 		changeDir:             os.Chdir,
 		commandRunner:         command.RunCommandWithOutput,
 		commandRunInteractive: command.CommandRunInteractive,
@@ -306,7 +306,7 @@ func (cmd *initCmd) Run(c *cobra.Command, _ []string) error {
 		return msg.ErrorWorkingDir
 	}
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(cmd.f)
 	if err := cmd.deps(c, msg.AskInstallDepsBuild, &msgs); err != nil {
 		return err
 	}

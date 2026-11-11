@@ -64,7 +64,7 @@ type LinkCmd struct {
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) bool
 	ShouldDevDeploy       func(info *LinkInfo, msg string, defaultYes bool) bool
-	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+	DeployCmd             func(f *cmdutil.Factory) deploy.ExternalDeployer
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
@@ -89,7 +89,7 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		ShouldConfigure: shouldConfigure,
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
-		DeployCmd:       deploy.NewDeployCmd,
+		DeployCmd:       deploy.NewExternalDeployer,
 		BuildCmd:        build.NewBuildCmd,
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
@@ -264,7 +264,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			cmdVulcanBuild = fmt.Sprintf("%s --alias-env", cmdVulcanBuild)
 		}
 
-		vul := vulcanPkg.NewVulcan()
+		vul := vulcanPkg.For(cmd.F)
 		command := vul.Command("", cmdVulcanBuild, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 

@@ -213,8 +213,7 @@ func (s *DeployState) build() error {
 				return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
 			}
 			cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
-			vul := vulcanPkg.NewVulcan()
-			command := vul.Command("", cmdStr, cmd.F)
+			command := cmd.vulcan().Command("", cmdStr, cmd.F)
 			logger.Debug("Running the following command", zap.Any("Command", command))
 			if err := cmd.commandRunInteractive(cmd.F, command); err != nil {
 				return err
@@ -250,7 +249,7 @@ func (s *DeployState) generateManifest() error {
 	}
 	params += vulcanPkg.ConfigFileArg(cmd.ConfigFile)
 
-	command := vulcanPkg.NewVulcan().Command("", params, cmd.F)
+	command := cmd.vulcan().Command("", params, cmd.F)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 	return cmd.commandRunInteractive(cmd.F, command)
 }

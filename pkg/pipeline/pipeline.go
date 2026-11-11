@@ -138,7 +138,12 @@ type StepError struct {
 	Err  error
 }
 
-func (e *StepError) Error() string { return e.Err.Error() }
+func (e *StepError) Error() string {
+	if e.Err == nil {
+		return "step " + e.Step + " failed"
+	}
+	return e.Err.Error()
+}
 func (e *StepError) Unwrap() error { return e.Err }
 
 // Run executes the pipeline's steps against state, in order, skipping those

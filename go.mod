@@ -37,7 +37,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/aziontech/azionapi-v4-go-sdk-dev v0.266.0
+require (
+	github.com/aziontech/azionapi-v4-go-sdk-dev v0.266.0
+	github.com/aziontech/azionapi-v6-go-sdk v0.4.0
+)
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/signin v1.12.0 // indirect
@@ -97,11 +100,11 @@ require (
 	github.com/tidwall/sjson v1.2.5
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.56.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

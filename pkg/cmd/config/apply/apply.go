@@ -113,7 +113,7 @@ func (cmd *ApplyCmd) Run(fields *Fields) error {
 	}
 
 	logger.Debug("Generating manifest from azion.config")
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(cmd.F)
 	command := vul.Command("", "manifest generate"+vulcanPkg.ConfigFileArg(fields.ConfigFile), cmd.F)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 
