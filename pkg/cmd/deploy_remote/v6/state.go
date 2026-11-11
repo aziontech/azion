@@ -28,8 +28,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// DefaultEnvironment is where a deploy goes when nothing names another
-// Environment (doc/V6-DEPLOY-PLAN.md, D3).
 const DefaultEnvironment = "Production"
 
 // Options are the v6 deploy's flags.

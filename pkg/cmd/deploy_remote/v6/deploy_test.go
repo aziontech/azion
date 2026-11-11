@@ -111,8 +111,11 @@ var siteManifest = map[string]any{
 			},
 		}},
 	}},
-	"environments": []any{map[string]any{"name": "Production", "deployment_policy": "single_version"}},
-	"deployments":  []any{map[string]any{"name": "site-deploy", "binding_policy": "FLEXIBLE"}},
+	"environments": []any{map[string]any{
+		"name": "Production", "deployment_policy": "single_version", "description": nil,
+		"log_verbosity": "verbose", "robots_policy": "respect_origin", "protection": map[string]any{}, "branch_tracking": nil,
+	}},
+	"deployments": []any{map[string]any{"name": "site-deploy", "binding_policy": "FLEXIBLE"}},
 	"workloads": []any{map[string]any{
 		"name": "site",
 		"bindings": []any{map[string]any{
@@ -163,6 +166,7 @@ func siteAPI() *API {
 	api.On("POST", appV+"/build", Status(202))
 
 	api.On("GET", "/environments", JSON(Page(map[string]any{"id": "ENV00001", "name": "Production", "deployment_policy": "single_version"})))
+	api.On("PATCH", "/environments/ENV00001", JSON(Data(map[string]any{"id": "ENV00001", "name": "Production", "deployment_policy": "single_version", "version_id": "E2", "version_state": "ready"})))
 	api.On("GET", "/deployments", JSON(Page()))
 	api.On("POST", "/deployments", JSON(Data(map[string]any{"id": "DEP00001", "name": "site-deploy", "binding_policy": "FLEXIBLE", "deployment_policy": "single_version", "version_state": "ready"})))
 
@@ -223,6 +227,12 @@ func TestDeployEndToEnd(t *testing.T) {
 	// The Environment exists, so it is not created; the Deployment is, with
 	// the manifest's binding policy and the Environment's policy.
 	assert.Zero(t, api.Count("POST", "/environments"))
+	// It is updated from the manifest instead, without its name or its
+	// deployment policy, which cannot change.
+	assert.Equal(t, []map[string]any{{
+		"description": nil, "log_verbosity": "verbose", "robots_policy": "respect_origin",
+		"protection": map[string]any{}, "branch_tracking": nil,
+	}}, api.Bodies("PATCH", "/environments/ENV00001"))
 	dep := api.Bodies("POST", "/deployments")[0]
 	assert.Equal(t, "FLEXIBLE", dep["binding_policy"])
 	assert.Equal(t, "single_version", dep["deployment_policy"])
@@ -324,6 +334,7 @@ func TestEnvironmentFlagFilters(t *testing.T) {
 
 	require.Len(t, api.Bodies("POST", "/deployments"), 1)
 	assert.Equal(t, "site-deploy", api.Bodies("POST", "/deployments")[0]["name"])
+	assert.Equal(t, 1, api.Count("PATCH", "/environments/ENV00001"), "only the Environment in scope is updated")
 	require.Len(t, conf.Deployments, 1)
 	w := api.Bodies("POST", "/workspace/workloads")[0]
 	assert.Len(t, w["bindings"], 1)
@@ -345,6 +356,7 @@ func TestManifestWithoutEnvironmentsUsesDefaults(t *testing.T) {
 
 	require.NoError(t, r.Run(context.Background()), api.Summary())
 
+	assert.Zero(t, api.Count("PATCH", "/environments/ENV00001"), "the default Environment has no configuration in the manifest to write")
 	dep := api.Bodies("POST", "/deployments")[0]
 	assert.Equal(t, "site", dep["name"])
 	assert.Equal(t, "FLEXIBLE", dep["binding_policy"], "a STRICT Deployment can only take its first release")
@@ -726,8 +738,8 @@ func TestDeployWaitsForTheWorkloadBuild(t *testing.T) {
 
 	require.NoError(t, r.Run(context.Background()), api.Summary())
 
-	assert.Contains(t, out.String(), `Waiting for the Workload "site" (id 30) to build its new version: it is queued`)
-	assert.Contains(t, out.String(), `Workload "site" (id 30) is ready`)
+	assert.Contains(t, out.String(), `Waiting for Workload "site" (30) to build its new version: it is queued`)
+	assert.Contains(t, out.String(), `Workload "site" (30) is ready`)
 	assert.Contains(t, out.String(), msg.V6DeploySuccessful)
 	// Read until ready, then once more by the verify step.
 	assert.Equal(t, 3, api.Count("GET", "/workspace/workloads/30"))
@@ -763,4 +775,40 @@ func TestVerifyReportsAWorkloadThatIsNotReady(t *testing.T) {
 
 	require.ErrorIs(t, err, msg.ErrorV6VerifyFailed, api.Summary())
 	assert.ErrorContains(t, err, `workload "site": its version W1 is building, not ready`)
+}
+
+// environment is Production as the API answers it, in a given version state.
+func environment(state string) Response {
+	return JSON(Data(map[string]any{"id": "ENV00001", "name": "Production", "deployment_policy": "single_version", "version_id": "E2", "version_state": state}))
+}
+
+// The update of an Environment saves a version the API builds on its own: the
+// deploy waits for it before anything is released into the Environment.
+func TestDeployWaitsForTheEnvironmentBuild(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("PATCH", "/environments/ENV00001", environment("queued"))
+	api.On("GET", "/environments/ENV00001", environment("building"), environment("ready"))
+	r, _, out := runner(t, api, Options{})
+
+	require.NoError(t, r.Run(context.Background()), api.Summary())
+
+	assert.Contains(t, out.String(), `Waiting for Environment "Production" (ENV00001) to build its new version: it is queued`)
+	assert.Contains(t, out.String(), `Environment "Production" (ENV00001) is ready`)
+	assert.Less(t, callIndex(api, "PATCH", "/environments/ENV00001"), callIndex(api, "POST", "/deployments/DEP00001/releases"))
+}
+
+// An Environment whose new version does not build stops the deploy before a
+// release: traffic would otherwise meet the old configuration.
+func TestDeployStopsWhenTheEnvironmentBuildFails(t *testing.T) {
+	project(t, siteManifest)
+	api := siteAPI()
+	api.On("PATCH", "/environments/ENV00001", environment("queued"))
+	api.On("GET", "/environments/ENV00001", environment("error"))
+	r, _, _ := runner(t, api, Options{})
+
+	err := r.Run(context.Background())
+
+	require.ErrorIs(t, err, msg.ErrorV6EnvironmentFailed, api.Summary())
+	assert.Zero(t, api.Count("POST", "/deployments/DEP00001/releases"))
 }

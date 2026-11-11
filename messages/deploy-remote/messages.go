@@ -75,11 +75,13 @@ var (
 
 // v6, continued.
 var (
-	V6EnvironmentCreated   = "Environment %q created (%s)\n"
-	V6WaitingToBind        = "Waiting for %s %q (%s) before binding it to the Workload: it is %s\n"
-	ErrorV6NotBindable     = errors.New("it cannot be bound to a Workload")
-	ErrorV6PolicyImmutable = errors.New("an Environment's deployment policy cannot change. Use the policy it has, or another Environment")
-	V6WorkloadBuilding     = "Waiting for the Workload %q (id %d) to build its new version: it is %s\n"
-	V6WorkloadReady        = "Workload %q (id %d) is ready (%s)\n"
-	ErrorV6WorkloadFailed  = errors.New("the Workload did not build its new version, so its domains do not serve the new bindings. Check the Workload in the Console, then run the deploy again")
+	V6EnvironmentCreated     = "Environment %q created (%s)\n"
+	V6WaitingToBind          = "Waiting for %s %q (%s) before binding it to the Workload: it is %s\n"
+	ErrorV6NotBindable       = errors.New("it cannot be bound to a Workload")
+	ErrorV6PolicyImmutable   = errors.New("an Environment's deployment policy cannot change. Use the policy it has, or another Environment")
+	V6WaitingForVersion      = "Waiting for %s %q (%s) to build its new version: it is %s\n"
+	V6VersionReady           = "%s %q (%s) is ready (%s)\n"
+	V6EnvironmentUpdated     = "Environment %q (%s) updated from the manifest\n"
+	ErrorV6WorkloadFailed    = errors.New("the Workload did not build its new version, so its domains do not serve the new bindings. Check the Workload in the Console, then run the deploy again")
+	ErrorV6EnvironmentFailed = errors.New("the Environment did not build its new version, so it still has its previous configuration. Check the Environment in the Console, then run the deploy again")
 )
