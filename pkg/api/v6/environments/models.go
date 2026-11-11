@@ -16,13 +16,12 @@ type Environment struct {
 	ID               string
 	Name             string
 	DeploymentPolicy string
-	VersionID        string
 	VersionState     version.State
 }
 
 func environmentFrom(e *sdk.Environment) Environment {
 	return Environment{
 		ID: e.GetId(), Name: e.GetName(), DeploymentPolicy: e.GetDeploymentPolicy(),
-		VersionID: e.GetVersionId(), VersionState: version.State(e.GetVersionState()),
+		VersionState: version.State(e.GetVersionState()),
 	}
 }

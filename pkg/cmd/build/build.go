@@ -81,8 +81,8 @@ func NewBuildCmd(f *cmdutil.Factory) *BuildCmd {
 			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
 		},
 		EnvLoader:             utils.LoadEnvVarsFromFile,
-		GetAzionJsonContent:   utils.GetAzionJsonContent,
-		WriteAzionJsonContent: utils.WriteAzionJsonContent,
+		GetAzionJsonContent:   getAzionJsonContent,
+		WriteAzionJsonContent: writeAzionJsonContent,
 		WriteFile:             os.WriteFile,
 		Stat:                  os.Stat,
 		GetWorkDir:            utils.GetWorkingDir,

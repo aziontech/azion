@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -80,66 +79,54 @@ func (s *DeployStateV6) applyWorkloads(ctx context.Context) error {
 }
 
 // waitWorkload waits until the version a save of the Workload produced is
-// built: its domains serve the new bindings only once it is ready. Without
-// this wait the deploy reported success while the domain still answered 404.
-func (s *DeployStateV6) waitWorkload(ctx context.Context, w sdk.Workload) (sdk.Workload, error) {
-	latest := w
-	err := s.waitVersion(ctx, "Workload", w.GetName(), strconv.FormatInt(w.GetId(), 10), w.GetVersionId(),
-		version.State(w.GetVersionState()), msg.ErrorV6WorkloadFailed,
-		func(ctx context.Context) (version.State, error) {
-			cur, err := s.Clients.Workloads.Get(ctx, w.GetId())
-			if err == nil {
-				latest = cur
-			}
-			return version.State(cur.GetVersionState()), err
-		})
-	return latest, err
-}
-
-// waitVersion waits for the build of a resource the API builds on its own
-// after a save (Environments and Workloads have no build call), until its
-// version is ready. failed is the error a build that does not reach ready
-// wraps.
+// built. A Workload has no build call: every create and update starts a build
+// of a new version, and its domains serve the new bindings only once that
+// version is ready. Without this wait the deploy reported success while the
+// domain still answered 404.
 //
-// A resource that reports no version state is not waited on: there is nothing
-// to read the build from. The API is not consistent about case, so neither is
-// this.
-func (s *DeployStateV6) waitVersion(ctx context.Context, kind, name, id, versionID string, state version.State,
-	failed error, read func(context.Context) (version.State, error),
-) error {
-	norm := func(st version.State) version.State { return version.State(strings.ToLower(string(st))) }
-	last := norm(state)
-	if last == "" || last == version.Ready {
-		return nil
+// A Workload whose response has no version state is not waited on: there is
+// nothing to read the build from.
+func (s *DeployStateV6) waitWorkload(ctx context.Context, w sdk.Workload) (sdk.Workload, error) {
+	stateOf := func(w sdk.Workload) version.State {
+		return version.State(strings.ToLower(w.GetVersionState()))
 	}
-	s.say(fmt.Sprintf(msg.V6WaitingForVersion, kind, name, id, last))
+	last := stateOf(w)
+	if last == "" || last == version.Ready {
+		return w, nil
+	}
+	name, id := w.GetName(), w.GetId()
+	s.say(fmt.Sprintf(msg.V6WorkloadBuilding, name, id, last))
 
 	start := time.Now()
-	_, err := poll.Until(ctx, s.pollOptions(), read, func(st version.State) (bool, error) {
-		st = norm(st)
-		if st == "" {
-			return true, nil
-		}
-		if st != last {
-			s.say(fmt.Sprintf(msg.V6BuildTransition, strings.ToLower(kind), name, versionID, last, st, time.Since(start).Round(time.Second)))
-			last = st
-		}
-		return version.BuildDone(st)
-	})
+	got, err := poll.Until(ctx, s.pollOptions(),
+		func(ctx context.Context) (sdk.Workload, error) {
+			return s.Clients.Workloads.Get(ctx, id)
+		},
+		func(cur sdk.Workload) (bool, error) {
+			st := stateOf(cur)
+			if st == "" {
+				return true, nil
+			}
+			if st != last {
+				s.say(fmt.Sprintf(msg.V6BuildTransition, "workload", name, w.GetVersionId(), last, st, time.Since(start).Round(time.Second)))
+				last = st
+			}
+			return version.BuildDone(st)
+		})
 	s.recordWait(time.Since(start))
 
 	switch {
 	case err == nil:
-		s.say(fmt.Sprintf(msg.V6VersionReady, kind, name, id, time.Since(start).Round(time.Second)))
-		return nil
+		s.say(fmt.Sprintf(msg.V6WorkloadReady, name, id, time.Since(start).Round(time.Second)))
+		return got, nil
 	case ctx.Err() != nil:
-		return ctx.Err()
+		return w, ctx.Err()
 	case errors.Is(err, version.ErrBuildFailed):
-		return fmt.Errorf("%s %q (%s) is %s: %w", kind, name, id, last, failed)
+		return w, fmt.Errorf("workload %q (id %d) is %s: %w", name, id, last, msg.ErrorV6WorkloadFailed)
 	case errors.Is(err, poll.ErrTimeout):
-		return fmt.Errorf("%s %q (%s) is still %s: %w: %w", kind, name, id, last, failed, err)
+		return w, fmt.Errorf("workload %q (id %d) is still %s: %w: %w", name, id, last, msg.ErrorV6WorkloadFailed, err)
 	default:
-		return fmt.Errorf("could not read %s %q (%s) while it builds: %w", kind, name, id, err)
+		return w, fmt.Errorf("could not read the Workload %q (id %d) while it builds: %w", name, id, err)
 	}
 }
 

@@ -118,3 +118,21 @@ func WriteAzionJsonContentV6(conf *contracts.AzionApplicationOptionsV6, confPath
 	}
 	return nil
 }
+
+// IsAzionJsonV6 reports whether azion.json in confPath is in the v6 format,
+// as a v6 deploy writes it. A missing, unreadable or v4 file is not.
+func IsAzionJsonV6(confPath string) bool {
+	wd, err := GetWorkingDir()
+	if err != nil {
+		return false
+	}
+	file, err := os.ReadFile(path.Join(wd, confPath, "azion.json"))
+	if err != nil {
+		return false
+	}
+	var keys map[string]json.RawMessage
+	if json.Unmarshal(file, &keys) != nil {
+		return false
+	}
+	return !isV4AzionJson(file)
+}
