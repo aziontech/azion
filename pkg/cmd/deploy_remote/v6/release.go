@@ -103,6 +103,27 @@ func (s *DeployStateV6) applyEnvironments(ctx context.Context) error {
 				return err
 			}
 			s.say(fmt.Sprintf(msg.V6EnvironmentCreated, env.Name, env.ID))
+		case s.inScope(want.Name) && !s.mustExist[want.Name]:
+			// The manifest is the Environment's configuration: write it on
+			// every deploy, or an Environment created earlier keeps what it
+			// was created with.
+			env, err = s.Clients.Environments.Update(ctx, env.ID, environmentUpdate(want))
+			if err != nil {
+				return err
+			}
+			s.say(fmt.Sprintf(msg.V6EnvironmentUpdated, env.Name, env.ID))
+		}
+		// Creating and updating both save a version that the API builds on
+		// its own; the Environment has its new configuration once it is ready.
+		if err := s.waitVersion(ctx, "Environment", env.Name, env.ID, env.VersionID, env.VersionState, msg.ErrorV6EnvironmentFailed,
+			func(ctx context.Context) (version.State, error) {
+				cur, err := s.Clients.Environments.Get(ctx, env.ID)
+				if err == nil {
+					env = cur
+				}
+				return cur.VersionState, err
+			}); err != nil {
+			return err
 		}
 		s.Environments[want.Name] = env
 		s.say(fmt.Sprintf(msg.V6EnvironmentResolved, env.Name, env.ID, env.DeploymentPolicy))
@@ -111,6 +132,20 @@ func (s *DeployStateV6) applyEnvironments(ctx context.Context) error {
 	}
 	s.writeConf()
 	return nil
+}
+
+// environmentUpdate is the manifest's configuration of an Environment as an
+// update. The name is left out, since the Environment may have been found under
+// another capitalisation of it, and so is the deployment policy, which cannot
+// change (applyEnvironments refuses a manifest that asks for another one).
+func environmentUpdate(want sdk.EnvironmentCreateRequest) sdk.PatchedEnvironmentRequest {
+	return sdk.PatchedEnvironmentRequest{
+		Description:    want.Description,
+		LogVerbosity:   want.LogVerbosity,
+		RobotsPolicy:   want.RobotsPolicy,
+		Protection:     want.Protection,
+		BranchTracking: want.BranchTracking,
+	}
 }
 
 // findEnvironment looks an Environment up by the id azion.json recorded for

@@ -82,3 +82,27 @@ func (c *Client) Create(ctx context.Context, req sdk.EnvironmentCreateRequest) (
 
 	return environmentFrom(&res.Data), nil
 }
+
+// Update writes the given fields of an Environment. Each update saves a new
+// version, which the API builds on its own: there is no build call, so callers
+// wait for VersionState to settle.
+func (c *Client) Update(ctx context.Context, id string, req sdk.PatchedEnvironmentRequest) (Environment, error) {
+	logger.Debug("Update Environment")
+
+	res, httpResp, err := c.apiClient.EnvironmentsAPI.
+		PartialUpdateEnvironment(ctx, id).PatchedEnvironmentRequest(req).Execute()
+	if err != nil {
+		errBody := ""
+		if httpResp != nil {
+			logger.Debug("Error while updating an Environment", zap.Error(err))
+			var bodyErr error
+			errBody, bodyErr = utils.LogAndRewindBodyV4(httpResp)
+			if bodyErr != nil {
+				return Environment{}, bodyErr
+			}
+		}
+		return Environment{}, version.ErrorFor(errBody, httpResp, err)
+	}
+
+	return environmentFrom(&res.Data), nil
+}

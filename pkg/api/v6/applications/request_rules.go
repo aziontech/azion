@@ -86,7 +86,7 @@ func (c *Client) UpdateRequestRule(ctx context.Context, id int64, versionID stri
 func (c *Client) DeleteRequestRule(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Application request rule")
 
-	_, httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
+	httpResp, err := c.apiClient.ApplicationsRequestRulesAPI.
 		DeleteApplicationVersionRequestRule(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""

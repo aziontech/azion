@@ -10,8 +10,17 @@
       "runtime": "azion_js",
       "default_args": {},
       "execution_environment": "application",
-      "active": true,
-      "path": "./functions/handler.js"
+      "path": "./functions/handler.js",
+      "dependencies": [
+        {
+          "type": "connector",
+          "id": "my-origin"
+        },
+        {
+          "type": "network_list",
+          "id": "blocked"
+        }
+      ]
     }
   ],
   "network_list": [
@@ -20,14 +29,12 @@
       "type": "ip_cidr",
       "items": [
         "10.0.0.0/8"
-      ],
-      "active": true
+      ]
     }
   ],
   "waf": [
     {
       "name": "my-waf",
-      "active": true,
       "engine_settings": {
         "engine_version": "2021-Q3",
         "type": "score",
@@ -63,12 +70,10 @@
         }
       },
       "debug": false,
-      "active": true,
       "rules_engine": [
         {
           "name": "Block",
           "description": "",
-          "active": true,
           "behaviors": [
             {
               "type": "deny"
@@ -88,7 +93,6 @@
         {
           "name": "Waf",
           "description": "",
-          "active": true,
           "behaviors": [
             {
               "type": "set_waf",
@@ -114,7 +118,6 @@
         {
           "name": "fw-instance",
           "args": {},
-          "active": true,
           "function": "my-func"
         }
       ]
@@ -123,7 +126,6 @@
   "connectors": [
     {
       "name": "my-connector",
-      "active": true,
       "type": "storage",
       "attributes": {
         "bucket": "my-bucket-assets",
@@ -132,12 +134,10 @@
     },
     {
       "name": "my-origin",
-      "active": true,
       "type": "http",
       "attributes": {
         "addresses": [
           {
-            "active": true,
             "address": "example.com",
             "http_port": 80,
             "https_port": 443
@@ -167,7 +167,6 @@
   "custom_pages": [
     {
       "name": "my-pages",
-      "active": true,
       "pages": [
         {
           "code": "404",
@@ -187,7 +186,6 @@
   "applications": [
     {
       "name": "my-app",
-      "active": true,
       "debug": false,
       "modules": {
         "cache": {
@@ -249,7 +247,6 @@
           "phase": "request",
           "rule": {
             "name": "Serve from storage",
-            "active": true,
             "criteria": [
               [
                 {
@@ -280,7 +277,6 @@
           "phase": "request",
           "rule": {
             "name": "Run fn",
-            "active": true,
             "criteria": [
               [
                 {
@@ -305,7 +301,6 @@
           "phase": "response",
           "rule": {
             "name": "Header",
-            "active": true,
             "criteria": [
               [
                 {
@@ -333,8 +328,7 @@
           "function": "my-func",
           "args": {
             "b": 2
-          },
-          "active": true
+          }
         }
       ],
       "device_groups": [
@@ -367,7 +361,6 @@
   "workloads": [
     {
       "name": "my-workload",
-      "active": true,
       "infrastructure": 1,
       "workload_domain_allow_access": true,
       "tls": {

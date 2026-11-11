@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aziontech/azion-cli/pkg/api/v6/version"
 	"github.com/aziontech/azion-cli/pkg/poll"
 
@@ -53,15 +57,90 @@ func (s *DeployStateV6) applyWorkloads(ctx context.Context) error {
 			return err
 		}
 
+		// Record the id before waiting, so a run that stops here finds the
+		// Workload again instead of creating another.
+		record := func(w sdk.Workload) {
+			upsertNamed(&s.Conf.Workloads, contracts.AzionJsonV6Workload{ID: w.GetId(), Name: wm.Name, Url: workloadURL(w, ours)},
+				func(w contracts.AzionJsonV6Workload) string { return w.Name })
+			s.writeConf()
+		}
+		record(saved)
+		if saved, err = s.waitWorkload(ctx, saved); err != nil {
+			return err
+		}
+		// The workload domain may only be known once the version is built.
+		record(saved)
+
 		s.Workloads = append(s.Workloads, appliedWorkload{Workload: saved, Bindings: ours})
-		upsertNamed(&s.Conf.Workloads, contracts.AzionJsonV6Workload{ID: saved.GetId(), Name: wm.Name, Url: workloadURL(saved, ours)},
-			func(w contracts.AzionJsonV6Workload) string { return w.Name })
-		s.writeConf()
 		for _, b := range ours {
 			s.say(fmt.Sprintf(msg.V6WorkloadSaved, saved.GetName(), saved.GetId(), s.deploymentName(b.DeploymentId), s.environmentName(b.EnvironmentId)))
 		}
 	}
 	return nil
+}
+
+// waitWorkload waits until the version a save of the Workload produced is
+// built: its domains serve the new bindings only once it is ready. Without
+// this wait the deploy reported success while the domain still answered 404.
+func (s *DeployStateV6) waitWorkload(ctx context.Context, w sdk.Workload) (sdk.Workload, error) {
+	latest := w
+	err := s.waitVersion(ctx, "Workload", w.GetName(), strconv.FormatInt(w.GetId(), 10), w.GetVersionId(),
+		version.State(w.GetVersionState()), msg.ErrorV6WorkloadFailed,
+		func(ctx context.Context) (version.State, error) {
+			cur, err := s.Clients.Workloads.Get(ctx, w.GetId())
+			if err == nil {
+				latest = cur
+			}
+			return version.State(cur.GetVersionState()), err
+		})
+	return latest, err
+}
+
+// waitVersion waits for the build of a resource the API builds on its own
+// after a save (Environments and Workloads have no build call), until its
+// version is ready. failed is the error a build that does not reach ready
+// wraps.
+//
+// A resource that reports no version state is not waited on: there is nothing
+// to read the build from. The API is not consistent about case, so neither is
+// this.
+func (s *DeployStateV6) waitVersion(ctx context.Context, kind, name, id, versionID string, state version.State,
+	failed error, read func(context.Context) (version.State, error),
+) error {
+	norm := func(st version.State) version.State { return version.State(strings.ToLower(string(st))) }
+	last := norm(state)
+	if last == "" || last == version.Ready {
+		return nil
+	}
+	s.say(fmt.Sprintf(msg.V6WaitingForVersion, kind, name, id, last))
+
+	start := time.Now()
+	_, err := poll.Until(ctx, s.pollOptions(), read, func(st version.State) (bool, error) {
+		st = norm(st)
+		if st == "" {
+			return true, nil
+		}
+		if st != last {
+			s.say(fmt.Sprintf(msg.V6BuildTransition, strings.ToLower(kind), name, versionID, last, st, time.Since(start).Round(time.Second)))
+			last = st
+		}
+		return version.BuildDone(st)
+	})
+	s.recordWait(time.Since(start))
+
+	switch {
+	case err == nil:
+		s.say(fmt.Sprintf(msg.V6VersionReady, kind, name, id, time.Since(start).Round(time.Second)))
+		return nil
+	case ctx.Err() != nil:
+		return ctx.Err()
+	case errors.Is(err, version.ErrBuildFailed):
+		return fmt.Errorf("%s %q (%s) is %s: %w", kind, name, id, last, failed)
+	case errors.Is(err, poll.ErrTimeout):
+		return fmt.Errorf("%s %q (%s) is still %s: %w: %w", kind, name, id, last, failed, err)
+	default:
+		return fmt.Errorf("could not read %s %q (%s) while it builds: %w", kind, name, id, err)
+	}
 }
 
 // waitBindable waits until every Environment and Deployment the bindings name
@@ -203,9 +282,6 @@ func workloadRequest(existing *sdk.Workload, wm contracts.ManifestV6Workload, ou
 		}
 	}
 	req.Name = wm.Name
-	if wm.Active != nil {
-		req.Active = wm.Active
-	}
 	if wm.Infrastructure != nil {
 		req.Infrastructure = wm.Infrastructure
 	}

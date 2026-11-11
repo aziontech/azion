@@ -86,7 +86,7 @@ func (c *Client) UpdateDeviceGroup(ctx context.Context, id int64, versionID stri
 func (c *Client) DeleteDeviceGroup(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Application device group")
 
-	_, httpResp, err := c.apiClient.ApplicationsDeviceGroupsAPI.
+	httpResp, err := c.apiClient.ApplicationsDeviceGroupsAPI.
 		DeleteApplicationVersionDeviceGroup(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""

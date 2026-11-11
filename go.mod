@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.26.10
+go 1.26.11
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -39,7 +39,7 @@ require (
 
 require (
 	github.com/aziontech/azionapi-v4-go-sdk-dev v0.266.0
-	github.com/aziontech/azionapi-v6-go-sdk v0.4.0
+	github.com/aziontech/azionapi-v6-go-sdk v0.18.0
 )
 
 require (

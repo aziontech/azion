@@ -87,6 +87,18 @@ func Validate(m *contracts.ManifestV6) error {
 		if fn.Path == "" {
 			errs = append(errs, fmt.Errorf("function %q has no path to its code: %w", fn.Name, msg.ErrorV6FunctionCode))
 		}
+		for _, dep := range fn.Dependencies {
+			kind, ok := map[string]string{
+				contracts.DependencyConnector:   "connector",
+				contracts.DependencyNetworkList: "network list",
+			}[dep.Type]
+			switch {
+			case !ok:
+				errs = append(errs, fmt.Errorf("function %q depends on a %q: %w", fn.Name, dep.Type, msg.ErrorV6UnknownDependencyType))
+			case dep.ID.ID == 0 && !declared[kind][dep.ID.Name]:
+				errs = append(errs, fmt.Errorf("function %q depends on %s %q: %w", fn.Name, kind, dep.ID.Name, msg.ErrorV6UnknownRef))
+			}
+		}
 	}
 
 	checkInstances := func(owner string, in []contracts.ManifestV6FunctionInstance) {

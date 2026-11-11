@@ -86,7 +86,7 @@ func (c *Client) UpdateCacheSetting(ctx context.Context, id int64, versionID str
 func (c *Client) DeleteCacheSetting(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Application cache setting")
 
-	_, httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
+	httpResp, err := c.apiClient.ApplicationsCacheSettingsAPI.
 		DeleteApplicationVersionCacheSetting(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""

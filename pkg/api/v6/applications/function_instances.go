@@ -86,7 +86,7 @@ func (c *Client) UpdateFunctionInstance(ctx context.Context, id int64, versionID
 func (c *Client) DeleteFunctionInstance(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Application function instance")
 
-	_, httpResp, err := c.apiClient.ApplicationsFunctionAPI.
+	httpResp, err := c.apiClient.ApplicationsFunctionAPI.
 		DeleteApplicationVersionFunction(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""

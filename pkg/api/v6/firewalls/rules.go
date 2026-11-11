@@ -86,7 +86,7 @@ func (c *Client) UpdateRule(ctx context.Context, id int64, versionID string, sub
 func (c *Client) DeleteRule(ctx context.Context, id int64, versionID string, subID int64) error {
 	logger.Debug("Delete Firewall firewall rule")
 
-	_, httpResp, err := c.apiClient.FirewallsRulesEngineAPI.
+	httpResp, err := c.apiClient.FirewallsRulesEngineAPI.
 		DeleteFirewallVersionRequestRule(ctx, id, subID, versionID).Execute()
 	if err != nil {
 		errBody := ""

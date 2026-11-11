@@ -70,9 +70,9 @@ func (c *Client) UpdateVersion(ctx context.Context, id int64, versionID string, 
 	logger.Debug("Update Function version")
 
 	body := sdk.FunctionRequest{
-		Name: req.Name, Active: req.Active, Runtime: req.Runtime,
+		Name: req.Name, Runtime: req.Runtime,
 		ExecutionEnvironment: req.ExecutionEnvironment, DefaultArgs: req.DefaultArgs,
-		AzionForm: req.AzionForm, Code: req.Code,
+		AzionForm: req.AzionForm, Code: req.Code, Dependencies: req.Dependencies,
 	}
 	res, httpResp, err := c.apiClient.FunctionVersionsAPI.
 		UpdateFunctionVersion(ctx, id, versionID).FunctionRequest(body).Execute()
