@@ -18,8 +18,8 @@ var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
 	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.2.0"
-	versionVulcan      = "@1.2.0"
+	firstTimeExecuting = "@1.3.0"
+	versionVulcan      = "@1.3.0"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
