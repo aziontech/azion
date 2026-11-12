@@ -47,8 +47,8 @@ func ConfigVersion(v apiversion.Version) int {
 }
 
 // For returns the bundler for the account's API generation, with the matching
-// --config-version: v3 runs edge-functions, v4 the published bundler and v6 the
-// v6-capable bundler. Every command that runs the bundler gets it from here, so
+// --config-version: v3 runs edge-functions, and v4 and v6 the published
+// bundler. Every command that runs the bundler gets it from here, so
 // the config version always follows the account.
 func For(f *cmdutil.Factory) *VulcanPkg {
 	var v apiversion.Version
@@ -87,22 +87,19 @@ func NewVulcan() *VulcanPkg {
 	return newVulcan(ConfigVersionV4)
 }
 
-// BundlerV6Package is the bundler that understands config version 6. No
-// published release does yet, so it points at a pre-release build; setting
-// AZIONCLI_BUNDLER_V6 overrides it (for example with a newer PR build). Replace
-// it with a published version once the bundler ships v6.
-var BundlerV6Package = "https://pkg.pr.new/@aziontech/bundler@666"
-
-// NewVulcanV6 runs the bundler for an API v6 project: the v6-capable bundler,
-// with --config-version 6.
+// NewVulcanV6 runs the bundler for an API v6 project: the same published
+// bundler as v4 (versionVulcan), with --config-version 6.
+//
+// Setting AZIONCLI_BUNDLER_V6 to a package spec (for example a pkg.pr.new
+// build) runs that instead, to try a bundler change before it is published.
 func NewVulcanV6() *VulcanPkg {
-	pkg := BundlerV6Package
-	if override := os.Getenv("AZIONCLI_BUNDLER_V6"); override != "" {
-		pkg = override
+	override := os.Getenv("AZIONCLI_BUNDLER_V6")
+	if override == "" {
+		return newVulcan(ConfigVersionV6)
 	}
 	return &VulcanPkg{
 		Command: func(flags, params string, f *cmdutil.Factory) string {
-			cmd := fmt.Sprintf("npx --yes %s %s %s", flags, pkg, withConfigVersion(params, ConfigVersionV6))
+			cmd := fmt.Sprintf("npx --yes %s %s %s", flags, override, withConfigVersion(params, ConfigVersionV6))
 			if f.Logger.Debug {
 				cmd = "DEBUG=true " + cmd
 			}

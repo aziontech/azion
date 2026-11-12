@@ -55,7 +55,7 @@ func ensureTiming() {
 // overwrite its own file, so the v6 deploy, which saves after each step, turns
 // that off here.
 //
-// It also switches the bundler to the v6 one (vulcan.NewVulcanV6), so the
+// It also runs the bundler with --config-version 6 (vulcan.NewVulcanV6), so the
 // manifest comes out in the v6 format.
 func (cmd *DeployCmd) ForV6() *DeployCmd {
 	cmd.WriteAzionJsonContent = func(*contracts.AzionApplicationOptions, string) error { return nil }
