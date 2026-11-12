@@ -245,7 +245,7 @@ func TestForPicksTheBundlerOfTheAPIVersion(t *testing.T) {
 	}{
 		{apiversion.V4, "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
 		{"", "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
-		{apiversion.V6, "npx --yes  " + BundlerV6Package + " build --preset react --config-version 6"},
+		{apiversion.V6, "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 6"},
 		// edge-functions@5.3.2 rejects --config-version, so v3 does not send it.
 		{apiversion.V3, "npx --yes  edge-functions@5.3.2 build --preset react"},
 	}
@@ -257,5 +257,19 @@ func TestForPicksTheBundlerOfTheAPIVersion(t *testing.T) {
 				t.Errorf("Command() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+// AZIONCLI_BUNDLER_V6 runs another bundler build for v6, still with
+// --config-version 6.
+func TestBundlerV6Override(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	t.Setenv("AZIONCLI_BUNDLER_V6", "https://pkg.pr.new/@aziontech/bundler@700")
+	f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+
+	got := NewVulcanV6().Command("", "build --preset react", f)
+
+	if want := "npx --yes  https://pkg.pr.new/@aziontech/bundler@700 build --preset react --config-version 6"; got != want {
+		t.Errorf("Command() = %v, want %v", got, want)
 	}
 }
