@@ -84,7 +84,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			vObj := v.ConnectorHTTP
 			if opts.Details {
 				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
+					fmt.Sprintf("%d", vObj.GetId()),
 					vObj.GetName(),
 					vObj.GetType(),
 					fmt.Sprintf("%v", vObj.GetActive()),
@@ -93,7 +93,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			} else {
 				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
+					fmt.Sprintf("%d", vObj.GetId()),
 					vObj.GetName(),
 					vObj.GetType(),
 					fmt.Sprintf("%v", vObj.GetActive()),
@@ -104,7 +104,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 			vObj := v.ConnectorStorage
 			if opts.Details {
 				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
+					fmt.Sprintf("%d", vObj.GetId()),
 					vObj.GetName(),
 					vObj.GetType(),
 					fmt.Sprintf("%v", vObj.GetActive()),
@@ -113,7 +113,7 @@ func PrintTable(cmd *cobra.Command, f *cmdutil.Factory, list *ListCmd, opts *con
 				}
 			} else {
 				ln = []string{
-					fmt.Sprintf("%d", vObj.Id),
+					fmt.Sprintf("%d", vObj.GetId()),
 					vObj.GetName(),
 					vObj.GetType(),
 					fmt.Sprintf("%v", vObj.GetActive()),

@@ -78,6 +78,7 @@ var (
 	V6EnvironmentCreated   = "Environment %q created (%s)\n"
 	V6WaitingToBind        = "Waiting for %s %q (%s) before binding it to the Workload: it is %s\n"
 	ErrorV6NotBindable     = errors.New("it cannot be bound to a Workload")
+	ErrorV6LocalOnlyFlags  = errors.New("--environment, --no-activate and --timeout apply only to a deploy that runs here. Add --local to use them")
 	ErrorV6PolicyImmutable = errors.New("an Environment's deployment policy cannot change. Use the policy it has, or another Environment")
 	V6WorkloadBuilding     = "Waiting for the Workload %q (id %d) to build its new version: it is %s\n"
 	V6WorkloadReady        = "Workload %q (id %d) is ready (%s)\n"
