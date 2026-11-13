@@ -56,22 +56,28 @@ type DeployCmd struct {
 	ReadSettings          func(path string) (token.Settings, error)
 	UploadFiles           func(f *cmdutil.Factory, conf *contracts.AzionApplicationOptions, msgs *[]string, pathStatic, bucket string, cmd *DeployCmd, settings token.Settings) error
 	OpenBrowserFunc       func(input string) error
-	Auto                  bool
-	DryRun                bool
-	Env                   string
-	Local                 bool
-	NoPrompt              bool
-	Path                  string
-	ProjectConf           string
-	SkipBuild             bool
-	SkipFramework         bool
-	Sync                  bool
-	Workers               int
-	AliasEnv              bool
-	ConfigFile            string
-	WriteBucket           bool
-	Logs                  contracts.Logs
-	Result                contracts.ResultsV4
+	// SaveResult stores what the script runner's deploy returns (azion.json
+	// and azion.config); DeployedURL reads the URL to show once it is saved.
+	// Nil means the v4 format (saveResultV4, deployedURLV4); the v6 deploy
+	// sets its own, since its azion.json has another format.
+	SaveResult    func(body []byte, cmd *DeployCmd) error
+	DeployedURL   func(cmd *DeployCmd) (string, error)
+	Auto          bool
+	DryRun        bool
+	Env           string
+	Local         bool
+	NoPrompt      bool
+	Path          string
+	ProjectConf   string
+	SkipBuild     bool
+	SkipFramework bool
+	Sync          bool
+	Workers       int
+	AliasEnv      bool
+	ConfigFile    string
+	WriteBucket   bool
+	Logs          contracts.Logs
+	Result        contracts.ResultsV4
 }
 
 const (
@@ -284,7 +290,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	// Print timing summary before success messages
 	GlobalTimingSummary.PrintSummary()
 
-	conf, err = cmd.GetAzionJsonContent(cmd.ProjectConf)
+	deployedURL := cmd.DeployedURL
+	if deployedURL == nil {
+		deployedURL = deployedURLV4
+	}
+	url, err := deployedURL(cmd)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -293,7 +303,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeploySuccessful, f.Format, f.Out)
 	msgs = append(msgs, msg.DeploySuccessful)
 
-	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, conf.Workloads.Url)
+	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
 
@@ -399,22 +409,11 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 				return err
 			}
 
-			if err := cmd.Unmarshal(body, &cmd.Result); err != nil {
-				logger.Debug("Error unmarshalling response", zap.Error(err))
-				return err
+			saveResult := cmd.SaveResult
+			if saveResult == nil {
+				saveResult = saveResultV4
 			}
-
-			if cmd.Result.Result.Errors != nil {
-				return fmt.Errorf(msg.ERRORCAPTURELOGS, cmd.Result.Result.Errors.Stack)
-			}
-
-			err = cmd.WriteAzionJsonContent(cmd.Result.Result.Azion, cmd.ProjectConf)
-			if err != nil {
-				return err
-			}
-
-			err = cmd.WriteAzionConfig(cmd.Result.Result.AzionConfig)
-			if err != nil {
+			if err := saveResult(body, cmd); err != nil {
 				return err
 			}
 
@@ -427,6 +426,34 @@ func captureLogs(execId, token string, cmd *DeployCmd) error {
 	}
 
 	return nil
+}
+
+// saveResultV4 stores the result of a v4 remote deploy: azion.json in the v4
+// format and the azion.config the deploy wrote.
+func saveResultV4(body []byte, cmd *DeployCmd) error {
+	if err := cmd.Unmarshal(body, &cmd.Result); err != nil {
+		logger.Debug("Error unmarshalling response", zap.Error(err))
+		return err
+	}
+
+	if cmd.Result.Result.Errors != nil {
+		return fmt.Errorf(msg.ERRORCAPTURELOGS, cmd.Result.Result.Errors.Stack)
+	}
+
+	if err := cmd.WriteAzionJsonContent(cmd.Result.Result.Azion, cmd.ProjectConf); err != nil {
+		return err
+	}
+
+	return cmd.WriteAzionConfig(cmd.Result.Result.AzionConfig)
+}
+
+// deployedURLV4 is the Workload URL of a v4 azion.json.
+func deployedURLV4(cmd *DeployCmd) (string, error) {
+	conf, err := cmd.GetAzionJsonContent(cmd.ProjectConf)
+	if err != nil {
+		return "", err
+	}
+	return conf.Workloads.Url, nil
 }
 
 // resolveRemoteConfigFile rewrites ConfigFile into the path sent to the script runner.

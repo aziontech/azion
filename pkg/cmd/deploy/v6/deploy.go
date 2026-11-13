@@ -2,9 +2,10 @@
 // command's flags, adds the ones v6 needs, and runs the v6 pipeline in
 // pkg/cmd/deploy_remote/v6.
 //
-// The v6 remote deploy (a server-side script, as v4 has) does not exist yet
-// (doc/V6-DEPLOY-PLAN.md, D1). Until it does, a deploy without --local runs
-// the pipeline locally and says so.
+// Without --local or --dry-run it runs the remote deploy (Remote): the same
+// script runner script v4 uses, which runs the deploy on Azion's side. That
+// lives in pkg/cmd/deploy, which imports this package, so it is given to the
+// command rather than imported.
 package deploy
 
 import (
@@ -44,6 +45,10 @@ type DeployCmd struct {
 	Environment string
 	NoActivate  bool
 	Timeout     time.Duration
+
+	// Remote runs the deploy on the script runner, as v4 does. Nil means
+	// there is none, and a deploy without --local runs locally instead.
+	Remote func(ctx context.Context, d *DeployCmd) error
 
 	// Run replaces the pipeline in tests.
 	run func(ctx context.Context, r *deployV6.Runner) error
@@ -117,6 +122,14 @@ func (d *DeployCmd) Run(ctx context.Context) error {
 		return err
 	}
 	if !d.Local && !d.DryRun {
+		if d.Remote != nil {
+			// The script runs the deploy with its defaults; it is given none
+			// of the v6 pipeline's options.
+			if d.Environment != "" || d.NoActivate || d.Timeout != poll.DefaultTimeout {
+				return remotemsg.ErrorV6LocalOnlyFlags
+			}
+			return d.Remote(ctx, d)
+		}
 		logger.FInfoFlags(d.F.IOStreams.Out, remotemsg.V6RemoteNotAvailable, d.F.Format, d.F.Out)
 	}
 

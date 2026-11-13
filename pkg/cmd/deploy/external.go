@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"github.com/aziontech/azion-cli/pkg/apiversion"
-	v6deploy "github.com/aziontech/azion-cli/pkg/cmd/deploy/v6"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 )
 
@@ -16,7 +15,7 @@ type ExternalDeployer interface {
 // v6 account never runs the v4 pipeline from init or link.
 func NewExternalDeployer(f *cmdutil.Factory) ExternalDeployer {
 	if f.APIVersion == apiversion.V6 {
-		return v6deploy.NewDeployCmd(f)
+		return newV6Deploy(f)
 	}
 	return NewDeployCmd(f)
 }

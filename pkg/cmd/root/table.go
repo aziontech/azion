@@ -10,7 +10,6 @@ import (
 	"github.com/aziontech/azion-cli/pkg/cmd/delete"
 	deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy"
 	v3deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy/v3"
-	v6deploycmd "github.com/aziontech/azion-cli/pkg/cmd/deploy/v6"
 	"github.com/aziontech/azion-cli/pkg/cmd/describe"
 	devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev"
 	v3devcmd "github.com/aziontech/azion-cli/pkg/cmd/dev/v3"
@@ -96,5 +95,5 @@ var children = []cmdregistry.Entry{
 	cmdregistry.V3Only(v3sync.NewCmd),
 	cmdregistry.V3Only(v3unlink.NewCmd),
 
-	cmdregistry.V6Only(v6deploycmd.NewCmd),
+	cmdregistry.V6Only(deploycmd.NewV6Cmd),
 }

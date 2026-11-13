@@ -147,10 +147,10 @@ func checkForNewTimestamp(f *cmdutil.Factory, referenceTimestamp, bucketName str
 		}
 
 		for _, object := range resp.Results {
-			parts := strings.Split(object.Key, "/")
+			parts := strings.Split(object.GetKey(), "/")
 			if len(parts) > 1 {
 				timestamp := parts[0]
-				logger.Debug("Found timestamp in bucket", zap.String("timestamp", timestamp), zap.String("key", object.Key))
+				logger.Debug("Found timestamp in bucket", zap.String("timestamp", timestamp), zap.String("key", object.GetKey()))
 				if timestamp == referenceTimestamp {
 					logger.Debug("Found current timestamp, returning previous", zap.String("current", referenceTimestamp), zap.String("previous", prevTimestamp))
 					return prevTimestamp, nil

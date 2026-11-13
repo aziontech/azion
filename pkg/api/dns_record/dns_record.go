@@ -13,7 +13,7 @@ import (
 func (c *Client) Create(ctx context.Context, req sdk.RecordRequest, zoneID int64) (sdk.Record, error) {
 	logger.Debug("Create DNS Record")
 
-	request := c.apiClient.DNSRecordsAPI.
+	request := c.apiClient.EdgeDNSRecordsAPI.
 		CreateDnsRecord(ctx, zoneID).
 		RecordRequest(req)
 	resp, httpResp, err := request.Execute()
@@ -33,7 +33,7 @@ func (c *Client) Create(ctx context.Context, req sdk.RecordRequest, zoneID int64
 func (c *Client) Update(ctx context.Context, req sdk.PatchedRecordRequest, zoneID, recordID int64) (sdk.Record, error) {
 	logger.Debug("Update DNS Record")
 
-	request := c.apiClient.DNSRecordsAPI.
+	request := c.apiClient.EdgeDNSRecordsAPI.
 		PartialUpdateDnsRecord(ctx, recordID, zoneID).
 		PatchedRecordRequest(req)
 	resp, httpResp, err := request.Execute()
@@ -56,7 +56,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, zoneID i
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.DNSRecordsAPI.
+	resp, httpResp, err := c.apiClient.EdgeDNSRecordsAPI.
 		ListDnsRecords(ctx, zoneID).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
@@ -79,7 +79,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions, zoneID i
 func (c *Client) Get(ctx context.Context, zoneID, recordID int64) (sdk.Record, error) {
 	logger.Debug("Get DNS Record")
 
-	resp, httpResp, err := c.apiClient.DNSRecordsAPI.
+	resp, httpResp, err := c.apiClient.EdgeDNSRecordsAPI.
 		RetrieveDnsRecord(ctx, recordID, zoneID).
 		Execute()
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *Client) Get(ctx context.Context, zoneID, recordID int64) (sdk.Record, e
 func (c *Client) Delete(ctx context.Context, zoneID, recordID int64) error {
 	logger.Debug("Delete DNS Record")
 
-	req := c.apiClient.DNSRecordsAPI.
+	req := c.apiClient.EdgeDNSRecordsAPI.
 		DeleteDnsRecord(ctx, recordID, zoneID)
 	_, httpResp, err := req.Execute()
 	if err != nil {

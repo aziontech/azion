@@ -13,7 +13,7 @@ import (
 func (c *Client) Create(ctx context.Context, req sdk.ZoneRequest) (sdk.Zone, error) {
 	logger.Debug("Create DNS Zone")
 
-	request := c.apiClient.DNSZonesAPI.
+	request := c.apiClient.EdgeDNSZonesAPI.
 		CreateDnsZone(ctx).
 		ZoneRequest(req)
 	resp, httpResp, err := request.Execute()
@@ -33,7 +33,7 @@ func (c *Client) Create(ctx context.Context, req sdk.ZoneRequest) (sdk.Zone, err
 func (c *Client) Update(ctx context.Context, req sdk.PatchedUpdateZoneRequest, zoneID int64) (sdk.Zone, error) {
 	logger.Debug("Update DNS Zone")
 
-	request := c.apiClient.DNSZonesAPI.
+	request := c.apiClient.EdgeDNSZonesAPI.
 		PartialUpdateDnsZone(ctx, zoneID).
 		PatchedUpdateZoneRequest(req)
 	resp, httpResp, err := request.Execute()
@@ -56,7 +56,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 		opts.OrderBy = "id"
 	}
 
-	resp, httpResp, err := c.apiClient.DNSZonesAPI.
+	resp, httpResp, err := c.apiClient.EdgeDNSZonesAPI.
 		ListDnsZones(ctx).
 		Ordering(opts.OrderBy).
 		Page(opts.Page).
@@ -79,7 +79,7 @@ func (c *Client) List(ctx context.Context, opts *contracts.ListOptions) (*sdk.Pa
 func (c *Client) Get(ctx context.Context, zoneID int64) (sdk.Zone, error) {
 	logger.Debug("Get DNS Zone")
 
-	resp, httpResp, err := c.apiClient.DNSZonesAPI.
+	resp, httpResp, err := c.apiClient.EdgeDNSZonesAPI.
 		RetrieveDnsZone(ctx, zoneID).
 		Execute()
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *Client) Get(ctx context.Context, zoneID int64) (sdk.Zone, error) {
 func (c *Client) Delete(ctx context.Context, zoneID int64) error {
 	logger.Debug("Delete DNS Zone")
 
-	req := c.apiClient.DNSZonesAPI.
+	req := c.apiClient.EdgeDNSZonesAPI.
 		DeleteDnsZone(ctx, zoneID)
 	_, httpResp, err := req.Execute()
 	if err != nil {
