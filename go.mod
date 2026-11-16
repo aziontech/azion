@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.27
+go 1.26.0
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -35,7 +35,7 @@ require (
 	github.com/tidwall/gjson v1.20.2
 	github.com/tidwall/sjson v1.2.9
 	github.com/zRedShift/mimemagic v1.2.0
-	github.com/zcalusic/sysinfo v1.2.3
+	github.com/zcalusic/sysinfo v1.1.3
 	go.uber.org/zap v1.28.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -73,7 +73,6 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/matryer/is v1.4.1 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
