@@ -1,6 +1,6 @@
 module github.com/aziontech/azion-cli
 
-go 1.26.11
+go 1.27
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -35,7 +35,7 @@ require (
 	github.com/tidwall/gjson v1.20.2
 	github.com/tidwall/sjson v1.2.9
 	github.com/zRedShift/mimemagic v1.2.0
-	github.com/zcalusic/sysinfo v1.1.3
+	github.com/zcalusic/sysinfo v1.2.3
 	go.uber.org/zap v1.28.0
 	gopkg.in/yaml.v3 v3.0.1
 )
