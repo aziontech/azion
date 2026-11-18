@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.10
 	github.com/aziontech/azionapi-go-sdk v0.143.0
 	github.com/aziontech/azionapi-v4-go-sdk-dev v0.297.0
-	github.com/aziontech/azionapi-v6-go-sdk v0.18.0
+	github.com/aziontech/azionapi-v6-go-sdk v0.19.0
 	github.com/aziontech/go-thoth v0.0.0-20260622173333-6d2670b80b5c
 	github.com/aziontech/tablecli v0.0.0-20241007135202-07712c07aa9e
 	github.com/briandowns/spinner v1.23.2
