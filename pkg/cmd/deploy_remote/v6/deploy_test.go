@@ -530,6 +530,44 @@ func TestWorkloadKeepsOtherEnvironmentsBindings(t *testing.T) {
 	assert.Equal(t, "DEP00001", req.Bindings[1].DeploymentId)
 }
 
+// The API generates an azion.run domain for a binding sent without one; the
+// deploy shows it instead of the internal workload_domain.
+func TestWorkloadURLIsTheGeneratedBindingDomain(t *testing.T) {
+	w := sdk.Workload{Bindings: []sdk.WorkloadBinding{
+		{EnvironmentId: "STAGING1", DeploymentId: "DEPSTAGE", Domains: []sdk.PatchedWorkloadBindingRequestDomainsInner{{Domain: "staging.azion.run"}}},
+		{EnvironmentId: "ENV00001", DeploymentId: "DEP00001", Domains: []sdk.PatchedWorkloadBindingRequestDomainsInner{
+			{Domain: "rafael-umann-bak6agq8.azion.run"}, {Domain: "other.azion.run"},
+		}},
+	}}
+	w.SetWorkloadDomain("cyckzr8pef4.zone.azionedge.net")
+	w.SetWorkloadDomainAllowAccess(true)
+	ours := []sdk.WorkloadBindingRequest{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001"}}
+
+	assert.Equal(t, "https://rafael-umann-bak6agq8.azion.run", workloadURL(w, ours))
+}
+
+func TestWorkloadURLFallsBackToTheRequestDomains(t *testing.T) {
+	w := sdk.Workload{}
+	w.SetWorkloadDomain("cyckzr8pef4.zone.azionedge.net")
+	w.SetWorkloadDomainAllowAccess(true)
+	ours := []sdk.WorkloadBindingRequest{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001",
+		Domains: []sdk.PatchedWorkloadBindingRequestDomainsInner{{Domain: "www.example.com"}}}}
+
+	assert.Equal(t, "https://www.example.com", workloadURL(w, ours))
+}
+
+func TestWorkloadURLShowsTheWorkloadDomainOnlyWhenAccessible(t *testing.T) {
+	ours := []sdk.WorkloadBindingRequest{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001"}}
+	w := sdk.Workload{Bindings: []sdk.WorkloadBinding{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001"}}}
+	w.SetWorkloadDomain("cyckzr8pef4.zone.azionedge.net")
+
+	assert.Empty(t, workloadURL(w, ours), "allow access unset")
+	w.SetWorkloadDomainAllowAccess(false)
+	assert.Empty(t, workloadURL(w, ours), "allow access off")
+	w.SetWorkloadDomainAllowAccess(true)
+	assert.Equal(t, "https://cyckzr8pef4.zone.azionedge.net", workloadURL(w, ours))
+}
+
 // Step names are a contract with the timing summary: a renamed step must not
 // silently disappear from it.
 func TestEveryStepHasATimingLabel(t *testing.T) {

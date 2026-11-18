@@ -289,14 +289,29 @@ func workloadRequest(existing *sdk.Workload, wm contracts.ManifestV6Workload, ou
 }
 
 // workloadURL is the address shown at the end of the deploy: the first domain
-// of this run's bindings, or the Workload's own azion domain.
+// of the response's binding for an environment this run published. The API
+// generates an azion.run domain for a binding sent without one, so the
+// response, not the request, holds it. The request's domains are the fallback
+// for a response without bindings.
+//
+// The workload_domain is internal: the API serves it only with
+// workload_domain_allow_access on, so it is shown only then.
 func workloadURL(w sdk.Workload, ours []sdk.WorkloadBindingRequest) string {
+	published := map[string]bool{}
 	for _, b := range ours {
-		if len(b.Domains) > 0 {
+		published[b.EnvironmentId] = true
+	}
+	for _, b := range w.GetBindings() {
+		if published[b.EnvironmentId] && len(b.Domains) > 0 && b.Domains[0].Domain != "" {
 			return "https://" + b.Domains[0].Domain
 		}
 	}
-	if d := w.GetWorkloadDomain(); d != "" {
+	for _, b := range ours {
+		if len(b.Domains) > 0 && b.Domains[0].Domain != "" {
+			return "https://" + b.Domains[0].Domain
+		}
+	}
+	if d := w.GetWorkloadDomain(); d != "" && w.GetWorkloadDomainAllowAccess() {
 		return "https://" + d
 	}
 	return ""
