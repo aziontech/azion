@@ -113,8 +113,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion link --help
 		$ azion link --name "thisisatest" --preset hexo
 		$ azion link --preset astro
-		$ azion link --name "thisisatest" --preset nextjs
-		$ azion link --name "thisisatest" --preset static
+		$ azion link --name "thisisatest" --preset eleventy
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
