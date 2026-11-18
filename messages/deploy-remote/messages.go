@@ -11,6 +11,7 @@ var (
 	DeploySuccessful                     = "Your Application was deployed successfully\n"
 	DeployOutputWorkloadSuccess          = "\nTo visualize your application access the Domain: %s\n"
 	EdgeApplicationDeployPathFlag        = "Path to where your static files are stored"
+	DeployPathFlagDeprecated             = "it is ignored and will be removed in a future release; set the storage directory in azion.config instead"
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
 	EnvFlag                              = "Relative path to where your custom .env file is stored"

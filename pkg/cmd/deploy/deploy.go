@@ -122,7 +122,6 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
        $ azion deploy --help
-       $ azion deploy --path dist/storage
        $ azion deploy --auto
        `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -131,6 +130,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	_ = deployCmd.Flags().MarkDeprecated("path", msg.DeployPathFlagDeprecated)
 	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	deployCmd.Flags().BoolVar(&deploy.SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
