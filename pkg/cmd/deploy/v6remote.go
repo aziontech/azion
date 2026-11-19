@@ -42,7 +42,6 @@ func remoteDeployV6(f *cmdutil.Factory, d *v6deploy.DeployCmd) *DeployCmd {
 	cmd := NewDeployCmd(f)
 	cmd.ProjectConf = d.ProjectConf
 	cmd.Env = d.Env
-	cmd.Path = d.Path
 	cmd.Auto = d.Auto
 	cmd.NoPrompt = d.NoPrompt
 	cmd.SkipBuild = d.SkipBuild

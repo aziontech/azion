@@ -119,6 +119,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	_ = deployCmd.Flags().MarkDeprecated("path", msg.DeployPathFlagDeprecated)
 	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)

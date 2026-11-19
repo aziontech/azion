@@ -15,6 +15,7 @@ var (
 	DeployOutputWorkloadCreate           = "Created Workload %v with ID %v\n"
 	DeployOutputWorkloadUpdate           = "Updated Workload %v with ID %v\n"
 	EdgeApplicationDeployPathFlag        = "Path to where your static files are stored"
+	DeployPathFlagDeprecated             = "it is ignored and will be removed in a future release; set the storage directory in azion.config instead"
 	EdgeApplicationDeployProjectConfFlag = "Relative path to where your custom azion.json and args.json files are stored"
 	EdgeApplicationDeploySync            = "Synchronizes the local azion.json file with remote resources"
 	EdgeApplicationDeployLocal           = "Runs the entire build and deploy process locally"

@@ -81,6 +81,7 @@ func NewCobraCmd(d *DeployCmd) *cobra.Command {
 	fl := c.Flags()
 	fl.BoolP("help", "h", false, msg.DeployFlagHelp)
 	fl.StringVar(&d.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	_ = fl.MarkDeprecated("path", msg.DeployPathFlagDeprecated)
 	fl.BoolVar(&d.Auto, "auto", false, msg.DeployFlagAuto)
 	fl.BoolVar(&d.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	fl.BoolVar(&d.SkipBuild, "skip-build", false, msg.DeployFlagSkipBuild)
@@ -136,7 +137,6 @@ func (d *DeployCmd) Run(ctx context.Context) error {
 	shared := deployRemote.NewDeployCmd(d.F)
 	shared.ProjectConf = d.ProjectConf
 	shared.Env = d.Env
-	shared.Path = d.Path
 	shared.Auto = d.Auto
 	shared.NoPrompt = d.NoPrompt
 	shared.SkipBuild = d.SkipBuild
