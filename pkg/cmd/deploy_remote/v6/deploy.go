@@ -95,6 +95,9 @@ func (r *Runner) Run(parent context.Context) error {
 		newPrefix = r.NewPrefix()
 	}
 
+	ignoredSkips := deploy.IgnoreSkipsOnFirstRun(conf.NotFirstRun,
+		&r.Opts.SkipBuild, &r.Opts.SkipFramework, &r.Cmd.SkipBuild, &r.Cmd.SkipFramework)
+
 	timing := &TimingSummaryV6{}
 	s := &DeployStateV6{
 		F: f, Opts: r.Opts, Cmd: r.Cmd, Clients: r.Clients, Conf: conf,
@@ -104,6 +107,9 @@ func (r *Runner) Run(parent context.Context) error {
 		},
 		OldPrefix: oldPrefix, NewPrefix: newPrefix,
 		Poll: r.Poll, msgs: &msgs, timing: timing,
+	}
+	if ignoredSkips {
+		s.say(msg.FirstRunIgnoresSkips)
 	}
 	// A dry run changes nothing, azion.json included.
 	if r.Opts.DryRun {

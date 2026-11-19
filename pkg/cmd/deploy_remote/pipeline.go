@@ -277,6 +277,22 @@ func (s *DeployState) bundlerInit() error {
 	return nil
 }
 
+// IgnoreSkipsOnFirstRun clears the skip flags on a first run, which has to
+// build and upload the static files. It reports whether any flag was set.
+func IgnoreSkipsOnFirstRun(notFirstRun bool, skips ...*bool) bool {
+	if notFirstRun {
+		return false
+	}
+	ignored := false
+	for _, skip := range skips {
+		if *skip {
+			ignored = true
+			*skip = false
+		}
+	}
+	return ignored
+}
+
 // shouldUpload reports whether this run uploads static files.
 //
 // Both the credentials and the upload step ask, so the answer is computed once
