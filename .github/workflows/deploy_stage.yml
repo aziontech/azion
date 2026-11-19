@@ -33,7 +33,7 @@ jobs:
 
       - name: Bump version and push tag
         id: tag_ver
-        uses: anothrNick/github-tag-action@3272e7a58f6c71ee9ede35f53b114e1bb9a91347 # 1.37.0
+        uses: anothrNick/github-tag-action@4ed44965e0db8dab2b466a16da04aec3cc312fd8 # 1.75.0
         env:
           # This pipeline only ever mints pre-release tags (X.Y.Z-dev.N), the way it
           # always did when it ran off the dev branch. deploy_prod.yml is the single
@@ -81,7 +81,7 @@ jobs:
           apt install -y awscli
 
       - name: Configure AWS Credentials (azion-downloads)
-        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838 # v1
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.CLI_S3_DOWNLOADS_ID }}
           aws-secret-access-key: ${{ secrets.CLI_S3_DOWNLOADS_SECRET }}
