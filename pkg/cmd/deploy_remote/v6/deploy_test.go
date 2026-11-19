@@ -802,3 +802,35 @@ func TestVerifyReportsAWorkloadThatIsNotReady(t *testing.T) {
 	require.ErrorIs(t, err, msg.ErrorV6VerifyFailed, api.Summary())
 	assert.ErrorContains(t, err, `workload "site": its version W1 is building, not ready`)
 }
+
+func TestFirstDeployIgnoresTheSkipFlags(t *testing.T) {
+	project(t, siteManifest)
+	require.NoError(t, os.MkdirAll(filepath.Join(".edge", "storage"), 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(".edge", "storage", "index.html"), []byte("<html>"), 0644))
+	api := &API{}
+	r, conf, out := runner(t, api, Options{DryRun: true})
+	conf.NotFirstRun = false
+
+	require.NoError(t, r.Run(context.Background()))
+
+	assert.False(t, r.Opts.SkipBuild)
+	assert.False(t, r.Opts.SkipFramework)
+	assert.False(t, r.Cmd.SkipBuild)
+	assert.False(t, r.Cmd.SkipFramework)
+	assert.Contains(t, out.String(), msg.FirstRunIgnoresSkips)
+	assert.Contains(t, out.String(), "  - "+stepLabels[StepBundlerInit])
+	assert.Contains(t, out.String(), "  - "+stepLabels[StepUploadStaticFiles])
+}
+
+func TestLaterDeployKeepsTheSkipFlags(t *testing.T) {
+	project(t, siteManifest)
+	api := &API{}
+	r, _, out := runner(t, api, Options{DryRun: true})
+
+	require.NoError(t, r.Run(context.Background()))
+
+	assert.True(t, r.Opts.SkipBuild)
+	assert.True(t, r.Cmd.SkipFramework)
+	assert.NotContains(t, out.String(), msg.FirstRunIgnoresSkips)
+	assert.NotContains(t, out.String(), "  - "+stepLabels[StepBundlerInit])
+}
