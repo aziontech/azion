@@ -33,11 +33,16 @@ jobs:
 
       - name: Add skip-e2e label if E2E_TOKEN is missing
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.secret_exists == 'false'
-        uses: actions-ecosystem/action-add-labels@18f1af5e3544586314bbe15c0273249c770b2daf # v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: |
-            skip-e2e
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        # Replaces actions-ecosystem/action-add-labels (unmaintained, SO-5131). The job runs in a
+        # golang container without gh, so the REST call goes through curl.
+        run: |
+          curl -fsS -o /dev/null -X POST \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/issues/${NUMBER}/labels" \
+            -d '{"labels":["skip-e2e"]}'
 
       - name: Comment on PR if E2E_TOKEN is missing
         if: github.event_name == 'pull_request' && steps.check_secret.outputs.secret_exists == 'false'
