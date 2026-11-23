@@ -174,6 +174,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 		return err
 	}
 
+	if IgnoreSkipsOnFirstRun(conf.NotFirstRun, &cmd.SkipBuild, &cmd.SkipFramework) {
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.FirstRunIgnoresSkips, f.Format, f.Out)
+		msgs = append(msgs, msg.FirstRunIgnoresSkips)
+	}
+
 	defer func() {
 		if err := cmd.WriteAzionJsonContent(conf, cmd.ProjectConf); err != nil {
 			logger.Debug("Error while writing azion.json file", zap.Error(err))

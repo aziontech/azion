@@ -24,6 +24,7 @@ var (
 	SkipBucket                           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
 	SkipUpload                           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
 	SkipUploadBuild                      = "Skipping upload of static files due to project not being built and no new static files being generated"
+	FirstRunIgnoresSkips                 = "This is the project's first deploy, so --skip-build and --skip-framework-build are ignored: the project is built and its static files are uploaded\n"
 )
 
 // Used only by the v3 command tree (bug-fix-only; see doc/plan.md).

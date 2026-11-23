@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	remotemsg "github.com/aziontech/azion-cli/messages/deploy-remote"
 	msg "github.com/aziontech/azion-cli/messages/dryrun"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -48,6 +49,9 @@ func (cmd *DeployCmd) DryRun(f *cmdutil.Factory) error {
 	}
 
 	report(msg.Header)
+	if IgnoreSkipsOnFirstRun(conf.NotFirstRun, &cmd.SkipBuild, &cmd.SkipFramework) {
+		report(remotemsg.FirstRunIgnoresSkips)
+	}
 
 	// The manifest drives most of the predicates, so it is read up front —
 	// which is what the step would do. A project that has not been built yet
