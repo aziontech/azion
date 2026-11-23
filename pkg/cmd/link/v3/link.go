@@ -210,7 +210,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return msg.ErrorReadingGitignore
 		}
 
-		if !gitignore && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)) {
+		if !gitignore && utils.ConfirmOptIn(info.Auto || info.GlobalFlagAll, msg.AskGitignore) {
 			if err := git.WriteGitignore(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingGitignore
 			}
@@ -224,7 +224,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return msg.ErrorReadingWorkflow
 		}
 
-		if !workflowExists && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskWorkflow, true)) {
+		if !workflowExists && utils.ConfirmOptIn(info.Auto || info.GlobalFlagAll, msg.AskWorkflow) {
 			if err := git.WriteWorkflowFile(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingWorkflow
 			}
