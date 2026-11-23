@@ -119,7 +119,7 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 				return true
 			},
 			Run: func(_ context.Context, s *DeployState) error {
-				return s.Cmd.doBucket(s.Clients.Bucket, s.Ctx, s.Conf, s.Msgs, s.Manifest.Storage)
+				return s.Cmd.doBucket(v4Buckets{s.Clients.Bucket}, s.Ctx, s.Conf, s.Msgs, s.Manifest.Storage)
 			},
 		},
 		{

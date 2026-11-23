@@ -52,6 +52,7 @@ import (
 	apiFirewallsV6 "github.com/aziontech/azion-cli/pkg/api/v6/firewalls"
 	apiFunctionsV6 "github.com/aziontech/azion-cli/pkg/api/v6/functions"
 	apiNetworkListsV6 "github.com/aziontech/azion-cli/pkg/api/v6/networklists"
+	apiStorageV6 "github.com/aziontech/azion-cli/pkg/api/v6/storage"
 	apiWafsV6 "github.com/aziontech/azion-cli/pkg/api/v6/wafs"
 	apiWorkloadsV6 "github.com/aziontech/azion-cli/pkg/api/v6/workloads"
 	apiVariables "github.com/aziontech/azion-cli/pkg/api/variables"
@@ -240,6 +241,12 @@ func FunctionsV6(f *cmdutil.Factory) *apiFunctionsV6.Client {
 
 func NetworkListsV6(f *cmdutil.Factory) *apiNetworkListsV6.Client {
 	return apiNetworkListsV6.NewClient(httpClient(f), apiV6URL(f), credential(f))
+}
+
+// StorageV6 serves the v6 deploy's bucket and credentials. It always talks to
+// the v6 storage API, whatever the factory's APIVersion.
+func StorageV6(f *cmdutil.Factory) *apiStorageV6.Client {
+	return apiStorageV6.NewClient(httpClient(f), f.Config.GetString("storage_v6_url"), credential(f))
 }
 
 func WAFsV6(f *cmdutil.Factory) *apiWafsV6.Client {
