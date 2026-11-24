@@ -4,15 +4,16 @@ package deploy
 // Shared with the v6 deploy (pkg/cmd/deploy_remote/v6). Building the project,
 // the bucket and the static-file upload are the same in v4 and v6 — storage is
 // not versioned in v6 — so v6 reuses them through this file instead of copying
-// them. They speak the v4 azion.json contract internally; Project carries the
-// handful of fields they read and write, and the v6 side copies them back into
-// its own contract.
+// them. The bucket and credential calls go through the v6 SDK
+// (pkg/api/v6/storage). They speak the v4 azion.json contract internally;
+// Project carries the handful of fields they read and write, and the v6 side
+// copies them back into its own contract.
 // ============================================================================
 
 import (
 	"context"
 
-	"github.com/aziontech/azion-cli/pkg/api/storage"
+	"github.com/aziontech/azion-cli/pkg/api/v6/storage"
 	"github.com/aziontech/azion-cli/pkg/cmd/build"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
@@ -60,6 +61,7 @@ func ensureTiming() {
 func (cmd *DeployCmd) ForV6() *DeployCmd {
 	cmd.WriteAzionJsonContent = func(*contracts.AzionApplicationOptions, string) error { return nil }
 	cmd.NewVulcan = vulcanPkg.NewVulcanV6
+	cmd.CreateBucketCredentials = CreateBucketCredentialsV6
 	ensureTiming()
 	return cmd
 }
@@ -124,7 +126,7 @@ func (cmd *DeployCmd) EnsureBucket(ctx context.Context, client *storage.Client, 
 }
 
 // StorageClient is the client EnsureBucket takes.
-func StorageClient(cmd *DeployCmd) *storage.Client { return registry.Storage(cmd.F) }
+func StorageClient(cmd *DeployCmd) *storage.Client { return registry.StorageV6(cmd.F) }
 
 // ShouldUpload reports whether this run uploads static files, with the same
 // rules as the v4 deploy.
