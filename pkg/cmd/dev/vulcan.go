@@ -31,6 +31,7 @@ func vulcan(cmd *DevCmd, port int) error {
 	}
 
 	commandBuilder.WriteString(vulcanPkg.ConfigFileArg(cmd.ConfigFile))
+	commandBuilder.WriteString(vulcanPkg.ArgsPathArg(cmd.ConfigDir))
 
 	err := runCommand(cmd, commandBuilder.String())
 	if err != nil {

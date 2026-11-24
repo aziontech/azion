@@ -847,6 +847,20 @@ func TestLaterDeployKeepsTheSkipFlags(t *testing.T) {
 	assert.NotContains(t, out.String(), "  - "+stepLabels[StepBundlerInit])
 }
 
+func TestLaterDeployWithSkipFrameworkUploads(t *testing.T) {
+	project(t, siteManifest)
+	require.NoError(t, os.MkdirAll(filepath.Join(".edge", "storage"), 0755))
+	api := &API{}
+	r, _, out := runner(t, api, Options{DryRun: true})
+	r.Opts.SkipBuild, r.Cmd.SkipBuild = false, false
+
+	require.NoError(t, r.Run(context.Background()))
+
+	assert.True(t, r.Cmd.SkipFramework)
+	assert.NotContains(t, out.String(), msg.SkipUploadBuild)
+	assert.Contains(t, out.String(), "  - "+stepLabels[StepUploadStaticFiles])
+}
+
 func TestLaterDeploySaysTheUploadIsSkipped(t *testing.T) {
 	project(t, siteManifest)
 	require.NoError(t, os.MkdirAll(filepath.Join(".edge", "storage"), 0755))

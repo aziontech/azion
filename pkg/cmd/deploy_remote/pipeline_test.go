@@ -294,7 +294,7 @@ func TestSkippedBuildSaysTheUploadIsSkipped(t *testing.T) {
 		build, framework bool
 	}{
 		{"skip-build", true, false},
-		{"skip-framework-build", false, true},
+		{"both", true, true},
 	} {
 		t.Run(flags.name, func(t *testing.T) {
 			withStaticDir(t, true, func() {
@@ -315,6 +315,26 @@ func TestSkippedBuildSaysTheUploadIsSkipped(t *testing.T) {
 			})
 		})
 	}
+}
+
+// --skip-framework-build is only passed to the bundler: the static files of
+// the reused framework output are still uploaded.
+func TestSkipFrameworkStillUploads(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+	withStaticDir(t, true, func() {
+		out := &bytes.Buffer{}
+		msgs := []string{}
+		s := state(func(s *DeployState) {
+			s.Cmd.F = &cmdutil.Factory{IOStreams: &iostreams.IOStreams{Out: out, Err: &bytes.Buffer{}}, Config: viper.New()}
+			s.Cmd.SkipFramework = true
+			s.Conf.NotFirstRun = true
+			s.Msgs = &msgs
+		})
+
+		require.True(t, shouldUpload(s))
+		require.NotContains(t, out.String(), msg.SkipUploadBuild)
+		require.Empty(t, msgs)
+	})
 }
 
 func TestMissingStorageFolderSaysTheUploadIsSkipped(t *testing.T) {

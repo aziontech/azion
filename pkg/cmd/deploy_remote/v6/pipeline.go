@@ -151,7 +151,12 @@ func steps() []pipeline.Step[DeployStateV6] {
 			// The build above may have regenerated the manifest.
 			Name: StepReadManifestAgain,
 			Run: func(ctx context.Context, s *DeployStateV6) error {
-				return s.readManifest(ctx, true)
+				if err := s.readManifest(ctx, true); err != nil {
+					return err
+				}
+				// Checked once the build is done and before anything is
+				// uploaded or applied, so a deploy with nothing to serve stops here.
+				return deploy.ValidateStorageDirs(s.Manifest.Storage)
 			},
 		},
 		{
@@ -282,10 +287,10 @@ func applyStep(name string, count func(*contracts.ManifestV6) int,
 }
 
 // runsBundlerInit reports whether this run initialises the bundler: a first
-// run, unless both the build and the framework setup are skipped. That step
+// run, unless the build is skipped. That step
 // replaces the template's placeholders and builds the manifest again.
 func (s *DeployStateV6) runsBundlerInit() bool {
-	return !s.Conf.NotFirstRun && (!s.Opts.SkipBuild || !s.Opts.SkipFramework)
+	return !s.Conf.NotFirstRun && !s.Opts.SkipBuild
 }
 
 // readManifest reads the manifest, adds the Environment and Deployment it

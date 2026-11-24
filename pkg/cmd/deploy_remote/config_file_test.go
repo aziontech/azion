@@ -71,6 +71,25 @@ func TestLocalDeployForwardsConfigFile(t *testing.T) {
 		assertAll(t, commands, 2)
 	})
 
+	t.Run("build step with --skip-framework-build: prefix still rotates", func(t *testing.T) {
+		var commands []string
+		s := newState(&commands)
+		s.Cmd.SkipFramework = true
+		if err := s.build(); err != nil {
+			t.Fatalf("build() error = %v", err)
+		}
+		assertAll(t, commands, 2)
+		if !strings.Contains(commands[0], "config replace") {
+			t.Errorf("first command %q does not rotate the prefix", commands[0])
+		}
+		if !strings.Contains(commands[1], "--skip-framework-build") {
+			t.Errorf("build command %q does not forward --skip-framework-build", commands[1])
+		}
+		if s.Conf.Prefix != "new" {
+			t.Errorf("prefix = %q, want %q", s.Conf.Prefix, "new")
+		}
+	})
+
 	t.Run("first run: name replacement and build", func(t *testing.T) {
 		var commands []string
 		if err := newState(&commands).bundlerInit(); err != nil {
