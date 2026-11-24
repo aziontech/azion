@@ -8,6 +8,7 @@ var (
 	DeployLongDescription                = "Deploys an Application"
 	DeploySuccessful                     = "Your Application was deployed successfully\n"
 	DeployOutputDomainSuccess            = "\nTo visualize your application access the Domain: %s\n"
+	DeployOutputWorkloadDomain           = "Workload domain: %s\n"
 	DeployOutputCachePurgeUrl            = "The file cache has been purged: '%s'\n"
 	DeployOutputCachePurgeWildCard       = "The url cache has been purged: '%s'\n"
 	DeployOutputEdgeApplicationCreate    = "Created Application %v with ID %v\n"

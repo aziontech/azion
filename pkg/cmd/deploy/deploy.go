@@ -61,7 +61,7 @@ type DeployCmd struct {
 	// Nil means the v4 format (saveResultV4, deployedURLV4); the v6 deploy
 	// sets its own, since its azion.json has another format.
 	SaveResult    func(body []byte, cmd *DeployCmd) error
-	DeployedURL   func(cmd *DeployCmd) (string, error)
+	DeployedURL   func(cmd *DeployCmd) (url, workloadDomain string, err error)
 	Auto          bool
 	DryRun        bool
 	Env           string
@@ -294,7 +294,7 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if deployedURL == nil {
 		deployedURL = deployedURLV4
 	}
-	url, err := deployedURL(cmd)
+	url, workloadDomain, err := deployedURL(cmd)
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
@@ -306,6 +306,12 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	msgfOutputDomainSuccess := fmt.Sprintf(msg.DeployOutputDomainSuccess, url)
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msgfOutputDomainSuccess, f.Format, f.Out)
 	msgs = append(msgs, msgfOutputDomainSuccess)
+
+	if workloadDomain != "" {
+		line := fmt.Sprintf(msg.DeployOutputWorkloadDomain, workloadDomain)
+		logger.FInfoFlags(cmd.F.IOStreams.Out, line, f.Format, f.Out)
+		msgs = append(msgs, line)
+	}
 
 	logger.FInfoFlags(cmd.F.IOStreams.Out, msg.DeployPropagation, f.Format, f.Out)
 	msgs = append(msgs, msg.DeployPropagation)
@@ -448,12 +454,12 @@ func saveResultV4(body []byte, cmd *DeployCmd) error {
 }
 
 // deployedURLV4 is the Workload URL of a v4 azion.json.
-func deployedURLV4(cmd *DeployCmd) (string, error) {
+func deployedURLV4(cmd *DeployCmd) (string, string, error) {
 	conf, err := cmd.GetAzionJsonContent(cmd.ProjectConf)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	return conf.Workloads.Url, nil
+	return conf.Workloads.Url, "", nil
 }
 
 // resolveRemoteConfigFile rewrites ConfigFile into the path sent to the script runner.

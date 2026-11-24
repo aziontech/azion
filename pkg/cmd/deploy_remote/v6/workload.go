@@ -59,7 +59,7 @@ func (s *DeployStateV6) applyWorkloads(ctx context.Context) error {
 		// Record the id before waiting, so a run that stops here finds the
 		// Workload again instead of creating another.
 		record := func(w sdk.Workload) {
-			upsertNamed(&s.Conf.Workloads, contracts.AzionJsonV6Workload{ID: w.GetId(), Name: wm.Name, Url: workloadURL(w, ours)},
+			upsertNamed(&s.Conf.Workloads, recordedWorkload(w, wm.Name, ours),
 				func(w contracts.AzionJsonV6Workload) string { return w.Name })
 			s.writeConf()
 		}
@@ -292,10 +292,7 @@ func workloadRequest(existing *sdk.Workload, wm contracts.ManifestV6Workload, ou
 // of the response's binding for an environment this run published. The API
 // generates an azion.run domain for a binding sent without one, so the
 // response, not the request, holds it. The request's domains are the fallback
-// for a response without bindings.
-//
-// The workload_domain is internal: the API serves it only with
-// workload_domain_allow_access on, so it is shown only then.
+// for a response without bindings, and the workload_domain the last one.
 func workloadURL(w sdk.Workload, ours []sdk.WorkloadBindingRequest) string {
 	published := map[string]bool{}
 	for _, b := range ours {
@@ -311,10 +308,23 @@ func workloadURL(w sdk.Workload, ours []sdk.WorkloadBindingRequest) string {
 			return "https://" + b.Domains[0].Domain
 		}
 	}
-	if d := w.GetWorkloadDomain(); d != "" && w.GetWorkloadDomainAllowAccess() {
+	return workloadDomainURL(w)
+}
+
+func workloadDomainURL(w sdk.Workload) string {
+	if d := w.GetWorkloadDomain(); d != "" {
 		return "https://" + d
 	}
 	return ""
+}
+
+// recordedWorkload is the Workload as azion.json keeps it.
+func recordedWorkload(w sdk.Workload, name string, ours []sdk.WorkloadBindingRequest) contracts.AzionJsonV6Workload {
+	rec := contracts.AzionJsonV6Workload{ID: w.GetId(), Name: name, Url: workloadURL(w, ours)}
+	if d := workloadDomainURL(w); d != rec.Url {
+		rec.WorkloadDomainUrl = d
+	}
+	return rec
 }
 
 // hasBinding reports whether the Workload serves deploymentID in envID.

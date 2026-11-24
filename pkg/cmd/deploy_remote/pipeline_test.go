@@ -1,15 +1,21 @@
 package deploy
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
+	msg "github.com/aziontech/azion-cli/messages/deploy-remote"
+	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
+	"github.com/aziontech/azion-cli/pkg/iostreams"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/pipeline"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap/zapcore"
 )
@@ -278,5 +284,54 @@ func TestSkippedUploadLogsItsReasonOnce(t *testing.T) {
 		}
 		require.Equal(t, 2, evaluations, "both steps ask the predicate")
 		require.True(t, s.uploadDecided, "the answer is computed once and remembered")
+	})
+}
+
+func TestSkippedBuildSaysTheUploadIsSkipped(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+	for _, flags := range []struct {
+		name             string
+		build, framework bool
+	}{
+		{"skip-build", true, false},
+		{"skip-framework-build", false, true},
+	} {
+		t.Run(flags.name, func(t *testing.T) {
+			withStaticDir(t, true, func() {
+				out := &bytes.Buffer{}
+				msgs := []string{}
+				s := state(func(s *DeployState) {
+					s.Cmd.F = &cmdutil.Factory{IOStreams: &iostreams.IOStreams{Out: out, Err: &bytes.Buffer{}}, Config: viper.New()}
+					s.Cmd.SkipBuild, s.Cmd.SkipFramework = flags.build, flags.framework
+					s.Conf.NotFirstRun = true
+					s.Msgs = &msgs
+				})
+
+				require.False(t, shouldUpload(s))
+				require.False(t, shouldUpload(s))
+
+				require.Equal(t, 1, strings.Count(out.String(), msg.SkipUploadBuild), "printed once, without --debug")
+				require.Equal(t, []string{msg.SkipUploadBuild}, msgs)
+			})
+		})
+	}
+}
+
+func TestMissingStorageFolderSaysTheUploadIsSkipped(t *testing.T) {
+	logger.New(zapcore.InfoLevel)
+	withStaticDir(t, false, func() {
+		out := &bytes.Buffer{}
+		msgs := []string{}
+		s := state(func(s *DeployState) {
+			s.Cmd.F = &cmdutil.Factory{IOStreams: &iostreams.IOStreams{Out: out, Err: &bytes.Buffer{}}, Config: viper.New()}
+			s.Conf.NotFirstRun = true
+			s.Msgs = &msgs
+		})
+
+		require.False(t, shouldUpload(s))
+		require.False(t, shouldUpload(s))
+
+		require.Equal(t, 1, strings.Count(out.String(), msg.SkipUpload), "printed once, without --debug")
+		require.Equal(t, []string{msg.SkipUpload}, msgs)
 	})
 }

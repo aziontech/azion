@@ -2,6 +2,7 @@ package domain
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -121,8 +122,8 @@ func TestCreate(t *testing.T) {
 
 		err := cmd.Execute()
 
-		stringError := `invalid argument "$1asf" for "--application-id" flag: strconv.ParseInt: parsing "$1asf": invalid syntax`
-		if stringError == err.Error() {
+		// The wording after the flag name comes from pflag and changes between versions.
+		if err != nil && strings.HasPrefix(err.Error(), `invalid argument "$1asf" for "--application-id" flag`) {
 			return
 		}
 		t.Fatalf("Error: %q", err)

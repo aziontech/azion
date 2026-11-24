@@ -44,7 +44,7 @@ const deployedV6Json = `{
 const remoteResultV6 = `{"result": {"errors": null, "azion": {
   "name": "site", "bucket": "site", "preset": "react", "prefix": "P2", "not-first-run": true,
   "deployments": [{"id": "DEP1", "name": "site", "release": {"id": "R2", "state": "ready", "activated": true}}],
-  "workloads": [{"id": 30, "name": "site", "url": "https://site.azion.app"}]
+  "workloads": [{"id": 30, "name": "site", "url": "https://site.azion.app", "workload_domain_url": "https://abc.zone.azionedge.net"}]
 }}}`
 
 // On a v6 account, init and link get the v6 deploy with the remote deploy
@@ -99,7 +99,7 @@ func TestRemoteDeployV6(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "P2", conf.Prefix)
 	assert.Equal(t, "R2", conf.Deployments[0].Release.ID)
-	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://site.azion.app"}}, conf.Workloads)
+	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://site.azion.app", WorkloadDomainUrl: "https://abc.zone.azionedge.net"}}, conf.Workloads)
 	var raw map[string]json.RawMessage
 	data, err := os.ReadFile(filepath.Join("azion", "azion.json"))
 	require.NoError(t, err)
@@ -108,6 +108,7 @@ func TestRemoteDeployV6(t *testing.T) {
 
 	// The URL shown is the deployed Workload's.
 	assert.Contains(t, out.String(), "https://site.azion.app")
+	assert.Contains(t, out.String(), "Workload domain: https://abc.zone.azionedge.net")
 }
 
 func TestRemoteDeployV6ReportsTheScriptError(t *testing.T) {

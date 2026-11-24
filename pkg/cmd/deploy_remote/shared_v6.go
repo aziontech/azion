@@ -130,8 +130,8 @@ func StorageClient(cmd *DeployCmd) *storage.Client { return registry.StorageV6(c
 
 // ShouldUpload reports whether this run uploads static files, with the same
 // rules as the v4 deploy.
-func (cmd *DeployCmd) ShouldUpload() bool {
-	return shouldUpload(&DeployState{Cmd: cmd})
+func (cmd *DeployCmd) ShouldUpload(msgs *[]string) bool {
+	return shouldUpload(&DeployState{Cmd: cmd, Msgs: msgs})
 }
 
 // UploadStatic uploads each storage directory of the manifest to the bucket.

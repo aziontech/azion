@@ -139,6 +139,9 @@ func (r *Runner) Run(parent context.Context) error {
 			if w.Url != "" {
 				s.say(fmt.Sprintf(msg.V6DeployOutputURL, w.Url))
 			}
+			if w.WorkloadDomainUrl != "" {
+				s.say(fmt.Sprintf(msg.V6DeployOutputWorkloadDomain, w.WorkloadDomainUrl))
+			}
 		}
 	}
 

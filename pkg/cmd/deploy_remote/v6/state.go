@@ -165,7 +165,7 @@ func (s *DeployStateV6) pollOptions() poll.Options {
 func (s *DeployStateV6) shouldUpload() bool {
 	if !s.uploadDecided {
 		s.uploadDecided = true
-		s.upload = s.Cmd.ShouldUpload()
+		s.upload = s.Cmd.ShouldUpload(s.msgs)
 	}
 	return s.upload
 }

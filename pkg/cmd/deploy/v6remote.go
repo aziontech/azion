@@ -119,16 +119,17 @@ func saveResultV6(body []byte, cmd *DeployCmd) error {
 	return cmd.WriteAzionConfig(res.Result.AzionConfig)
 }
 
-// deployedURLV6 is the URL of the first Workload in a v6 azion.json.
-func deployedURLV6(cmd *DeployCmd) (string, error) {
+// deployedURLV6 is the URL, and the workload domain, of the first Workload
+// with one in a v6 azion.json.
+func deployedURLV6(cmd *DeployCmd) (string, string, error) {
 	conf, err := utils.GetAzionJsonContentV6(cmd.ProjectConf)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	for _, w := range conf.Workloads {
 		if w.Url != "" {
-			return w.Url, nil
+			return w.Url, w.WorkloadDomainUrl, nil
 		}
 	}
-	return "", nil
+	return "", "", nil
 }
