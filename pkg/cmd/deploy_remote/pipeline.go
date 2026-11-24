@@ -139,7 +139,9 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 					return err
 				}
 				s.Manifest = m
-				return nil
+				// Checked once the build is done and before anything is
+				// uploaded or applied, so a deploy with nothing to serve stops here.
+				return ValidateStorageDirs(m.Storage)
 			},
 		},
 		{

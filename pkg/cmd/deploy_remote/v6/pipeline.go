@@ -151,7 +151,12 @@ func steps() []pipeline.Step[DeployStateV6] {
 			// The build above may have regenerated the manifest.
 			Name: StepReadManifestAgain,
 			Run: func(ctx context.Context, s *DeployStateV6) error {
-				return s.readManifest(ctx, true)
+				if err := s.readManifest(ctx, true); err != nil {
+					return err
+				}
+				// Checked once the build is done and before anything is
+				// uploaded or applied, so a deploy with nothing to serve stops here.
+				return deploy.ValidateStorageDirs(s.Manifest.Storage)
 			},
 		},
 		{

@@ -27,6 +27,14 @@ var (
 	FirstRunIgnoresSkips                 = "This is the project's first deploy, so --skip-build and --skip-framework-build are ignored: the project is built and its static files are uploaded\n"
 )
 
+// ErrorStorageDirEmpty is returned when the manifest declares a storage with a
+// dir that does not exist or holds no files. The CLI prefixes it with "Error: ".
+const ErrorStorageDirEmpty = "Storage folder '%s' is missing or empty.\n" +
+	"Your configuration file defines a storage setup, but there are no files to upload from this folder.\n" +
+	"To fix this, do one of the following:\n" +
+	"  • Run 'azion build' to likely re-create the storage folder again.\n" +
+	"  • Remove the storage setup from your configuration file if you don't need it."
+
 // Used only by the v3 command tree (bug-fix-only; see doc/plan.md).
 var (
 	DeployOutputDomainSuccess = "\nTo visualize your application access the Domain: %s\n"
