@@ -293,6 +293,16 @@ func IgnoreSkipsOnFirstRun(notFirstRun bool, skips ...*bool) bool {
 	return ignored
 }
 
+// info prints line for every user, not only with --debug.
+func (s *DeployState) info(line string) {
+	if f := s.Cmd.F; f != nil && f.IOStreams != nil {
+		logger.FInfoFlags(f.IOStreams.Out, line, f.Format, f.Out)
+	}
+	if s.Msgs != nil {
+		*s.Msgs = append(*s.Msgs, line)
+	}
+}
+
 // shouldUpload reports whether this run uploads static files.
 //
 // Both the credentials and the upload step ask, so the answer is computed once
@@ -308,12 +318,12 @@ func shouldUpload(s *DeployState) bool {
 	s.uploadDecided = true
 
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
+		s.info(msg.SkipUpload)
 		s.upload = false
 		return false
 	}
 	if s.Cmd.SkipBuild || s.Cmd.SkipFramework {
-		logger.Debug(msg.SkipUploadBuild)
+		s.info(msg.SkipUploadBuild)
 		s.upload = false
 		return false
 	}

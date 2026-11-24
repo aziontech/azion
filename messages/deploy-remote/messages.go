@@ -22,8 +22,8 @@ var (
 	DeployFlagNoPrompt                   = "If sent, whenever the CLI would display an interactive prompt due to an error, it instead just returns the error"
 	DeployPropagation                    = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	SkipBucket                           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
-	SkipUpload                           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files"
-	SkipUploadBuild                      = "Skipping upload of static files due to project not being built and no new static files being generated"
+	SkipUpload                           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files\n"
+	SkipUploadBuild                      = "Skipping the upload of static files: --skip-build or --skip-framework-build was passed, so no new static files were generated\n"
 	FirstRunIgnoresSkips                 = "This is the project's first deploy, so --skip-build and --skip-framework-build are ignored: the project is built and its static files are uploaded\n"
 )
 
