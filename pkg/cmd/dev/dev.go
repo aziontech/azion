@@ -25,6 +25,7 @@ type DevCmd struct {
 	SkipFramework         bool
 	Port                  int
 	ConfigFile            string
+	ConfigDir             string
 }
 
 func NewDevCmd(f *cmdutil.Factory) *DevCmd {
@@ -48,6 +49,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 		SilenceErrors: true,
 		Example: heredoc.Doc(`
         $ azion dev
+        $ azion dev --config-dir ./my-config
         $ azion dev --help
         `),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,6 +60,7 @@ func NewCobraCmd(dev *DevCmd) *cobra.Command {
 	devCmd.Flags().IntVar(&dev.Port, "port", 0, msg.PortFlag)
 	devCmd.Flags().BoolVar(&dev.SkipFramework, "skip-framework-build", false, msg.SkipFrameworkBuild)
 	devCmd.Flags().StringVar(&dev.ConfigFile, "config-file", "", msg.FlagConfigFile)
+	devCmd.Flags().StringVar(&dev.ConfigDir, "config-dir", "", msg.FlagConfigDir)
 	return devCmd
 }
 

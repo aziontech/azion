@@ -3,6 +3,7 @@ package vulcan
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -18,8 +19,8 @@ var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
 	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.3.0"
-	versionVulcan      = "@1.3.0"
+	firstTimeExecuting = "@1.3.2"
+	versionVulcan      = "@1.3.2"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
@@ -235,7 +236,22 @@ func ConfigFileArg(configFile string) string {
 	if configFile == "" {
 		return ""
 	}
-	return fmt.Sprintf(" --config-file '%s'", strings.ReplaceAll(configFile, "'", `'\''`))
+	return fmt.Sprintf(" --config-file %s", shellQuote(configFile))
+}
+
+// ArgsPathArg returns the --args-path option for the bundler, pointing to the
+// args.json inside configDir, or an empty string when no config dir was given
+// (the bundler then falls back to azion/args.json). Quoted for sh -c.
+func ArgsPathArg(configDir string) string {
+	if configDir == "" {
+		return ""
+	}
+	return fmt.Sprintf(" --args-path %s", shellQuote(filepath.Join(configDir, "args.json")))
+}
+
+// shellQuote single-quotes s for sh -c, escaping any single quote inside it.
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
 // CheckConfigFile fails early when the given azion.config file does not exist,
