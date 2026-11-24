@@ -287,10 +287,10 @@ func applyStep(name string, count func(*contracts.ManifestV6) int,
 }
 
 // runsBundlerInit reports whether this run initialises the bundler: a first
-// run, unless both the build and the framework setup are skipped. That step
+// run, unless the build is skipped. That step
 // replaces the template's placeholders and builds the manifest again.
 func (s *DeployStateV6) runsBundlerInit() bool {
-	return !s.Conf.NotFirstRun && (!s.Opts.SkipBuild || !s.Opts.SkipFramework)
+	return !s.Conf.NotFirstRun && !s.Opts.SkipBuild
 }
 
 // readManifest reads the manifest, adds the Environment and Deployment it

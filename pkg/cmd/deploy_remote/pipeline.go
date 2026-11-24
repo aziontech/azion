@@ -125,7 +125,7 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 		{
 			Name: "BundlerInit",
 			Applies: func(s *DeployState) bool {
-				return !s.Conf.NotFirstRun && (!s.Cmd.SkipBuild || !s.Cmd.SkipFramework)
+				return !s.Conf.NotFirstRun && !s.Cmd.SkipBuild
 			},
 			Run: func(_ context.Context, s *DeployState) error { return s.bundlerInit() },
 		},
@@ -206,20 +206,18 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 // build rotates the prefix and runs the build command.
 func (s *DeployState) build() error {
 	cmd, f := s.Cmd, s.F
-	if !cmd.SkipFramework {
-		s.Conf.Prefix = s.NewPrefix
-		if s.Conf.RotatePrefix == nil || *s.Conf.RotatePrefix {
-			replacements := map[string]string{s.OldPrefix: s.Conf.Prefix}
-			replacementsJSON, jsonErr := json.Marshal(replacements)
-			if jsonErr != nil {
-				return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
-			}
-			cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
-			command := cmd.vulcan().Command("", cmdStr, cmd.F)
-			logger.Debug("Running the following command", zap.Any("Command", command))
-			if err := cmd.commandRunInteractive(cmd.F, command); err != nil {
-				return err
-			}
+	s.Conf.Prefix = s.NewPrefix
+	if s.Conf.RotatePrefix == nil || *s.Conf.RotatePrefix {
+		replacements := map[string]string{s.OldPrefix: s.Conf.Prefix}
+		replacementsJSON, jsonErr := json.Marshal(replacements)
+		if jsonErr != nil {
+			return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
+		}
+		cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
+		command := cmd.vulcan().Command("", cmdStr, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+		if err := cmd.commandRunInteractive(cmd.F, command); err != nil {
+			return err
 		}
 	}
 
@@ -324,7 +322,7 @@ func shouldUpload(s *DeployState) bool {
 		s.upload = false
 		return false
 	}
-	if s.Cmd.SkipBuild || s.Cmd.SkipFramework {
+	if s.Cmd.SkipBuild {
 		s.info(msg.SkipUploadBuild)
 		s.upload = false
 		return false

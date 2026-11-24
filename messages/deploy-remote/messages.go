@@ -23,8 +23,8 @@ var (
 	DeployPropagation                    = "Your application is being deployed to all Azion Edge Locations and it might take a few minutes.\n"
 	SkipBucket                           = "Your project does not contain a '.edge/storage' folder. Skipping creation of bucket"
 	SkipUpload                           = "Your project does not contain a '.edge/storage' folder. Skipping upload of static files\n"
-	SkipUploadBuild                      = "Skipping the upload of static files: --skip-build or --skip-framework-build was passed, so no new static files were generated\n"
-	FirstRunIgnoresSkips                 = "This is the project's first deploy, so --skip-build and --skip-framework-build are ignored: the project is built and its static files are uploaded\n"
+	SkipUploadBuild                      = "Skipping the upload of static files: --skip-build was passed, so no new static files were generated\n"
+	FirstRunIgnoresSkips                 = "This is the project's first deploy, so --skip-build and --skip-framework-build are ignored: the project is built and its static files are generated and uploaded\n"
 )
 
 // ErrorStorageDirEmpty is returned when the manifest declares a storage with a
