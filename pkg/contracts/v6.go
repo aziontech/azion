@@ -76,6 +76,8 @@ type AzionJsonV6Workload struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	Url  string `json:"url,omitempty"`
+	// WorkloadDomainUrl is the Workload's own domain, when it differs from Url.
+	WorkloadDomainUrl string `json:"workload_domain_url,omitempty"`
 }
 
 // ManifestV6 is .edge/manifest.json for a v6 project, as the bundler writes it

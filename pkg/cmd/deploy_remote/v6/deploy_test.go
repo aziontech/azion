@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -218,7 +219,7 @@ func TestDeployEndToEnd(t *testing.T) {
 		ID: "DEP00001", Name: "site-deploy", Policy: "single_version",
 		Release: contracts.AzionJsonV6Release{ID: "REL00001", State: "ready", Activated: true},
 	}}, conf.Deployments)
-	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://www.example.com"}}, conf.Workloads)
+	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://www.example.com", WorkloadDomainUrl: "https://abc.azion.app"}}, conf.Workloads)
 
 	// The Environment exists, so it is not created; the Deployment is, with
 	// the manifest's binding policy and the Environment's policy.
@@ -248,6 +249,8 @@ func TestDeployEndToEnd(t *testing.T) {
 
 	assert.Contains(t, out.String(), "queued → ready")
 	assert.Contains(t, out.String(), msg.V6DeploySuccessful)
+	assert.Contains(t, out.String(), fmt.Sprintf(msg.V6DeployOutputURL, "https://www.example.com"))
+	assert.Contains(t, out.String(), fmt.Sprintf(msg.V6DeployOutputWorkloadDomain, "https://abc.azion.app"))
 }
 
 func callIndex(api *API, method, path string) int {
@@ -556,16 +559,25 @@ func TestWorkloadURLFallsBackToTheRequestDomains(t *testing.T) {
 	assert.Equal(t, "https://www.example.com", workloadURL(w, ours))
 }
 
-func TestWorkloadURLShowsTheWorkloadDomainOnlyWhenAccessible(t *testing.T) {
+func TestWorkloadDomainIsRecordedWhenItExists(t *testing.T) {
 	ours := []sdk.WorkloadBindingRequest{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001"}}
-	w := sdk.Workload{Bindings: []sdk.WorkloadBinding{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001"}}}
+	w := sdk.Workload{Bindings: []sdk.WorkloadBinding{{EnvironmentId: "ENV00001", DeploymentId: "DEP00001",
+		Domains: []sdk.PatchedWorkloadBindingRequestDomainsInner{{Domain: "site.azion.run"}}}}}
 	w.SetWorkloadDomain("cyckzr8pef4.zone.azionedge.net")
 
-	assert.Empty(t, workloadURL(w, ours), "allow access unset")
-	w.SetWorkloadDomainAllowAccess(false)
-	assert.Empty(t, workloadURL(w, ours), "allow access off")
-	w.SetWorkloadDomainAllowAccess(true)
-	assert.Equal(t, "https://cyckzr8pef4.zone.azionedge.net", workloadURL(w, ours))
+	rec := recordedWorkload(w, "site", ours)
+	assert.Equal(t, "https://site.azion.run", rec.Url)
+	assert.Equal(t, "https://cyckzr8pef4.zone.azionedge.net", rec.WorkloadDomainUrl)
+
+	// Without a binding domain the workload domain is the address, shown once.
+	w.Bindings[0].Domains = nil
+	rec = recordedWorkload(w, "site", ours)
+	assert.Equal(t, "https://cyckzr8pef4.zone.azionedge.net", rec.Url)
+	assert.Empty(t, rec.WorkloadDomainUrl)
+
+	// Without a workload domain there is nothing more to show.
+	w.WorkloadDomain = nil
+	assert.Empty(t, recordedWorkload(w, "site", ours).WorkloadDomainUrl)
 }
 
 // Step names are a contract with the timing summary: a renamed step must not
@@ -769,7 +781,7 @@ func TestDeployWaitsForTheWorkloadBuild(t *testing.T) {
 	assert.Contains(t, out.String(), msg.V6DeploySuccessful)
 	// Read until ready, then once more by the verify step.
 	assert.Equal(t, 3, api.Count("GET", "/workspace/workloads/30"))
-	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://www.example.com"}}, conf.Workloads)
+	assert.Equal(t, []contracts.AzionJsonV6Workload{{ID: 30, Name: "site", Url: "https://www.example.com", WorkloadDomainUrl: "https://abc.azion.app"}}, conf.Workloads)
 }
 
 // A Workload build that fails fails the deploy, and the Workload stays in
