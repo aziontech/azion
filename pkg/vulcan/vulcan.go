@@ -3,10 +3,12 @@ package vulcan
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	msg "github.com/aziontech/azion-cli/messages/vulcan"
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/token"
@@ -17,15 +19,56 @@ var (
 	currentMajor       = 1
 	installBundler     = "npx --yes %s @aziontech/bundler%s %s"
 	installVulcanV3    = "npx --yes %s edge-functions%s %s"
-	firstTimeExecuting = "@1.2.0"
-	versionVulcan      = "@1.2.0"
+	firstTimeExecuting = "@1.3.2"
+	versionVulcan      = "@1.3.2"
 	releaseChannel     = ""
 	StagePkgURL        = "https://pkg.pr.new/aziontech/bundler/@aziontech/bundler@main"
 )
 
-// ConfigVersionV4 is the --config-version sent to the bundler. v3 still runs on
-// edge-functions, which has no such option.
-const ConfigVersionV4 = 4
+// The --config-version sent to the bundler for each API generation. The value
+// is the generation's number: the bundler writes and reads the azion.config of
+// that generation.
+const (
+	ConfigVersionV3 = 3
+	ConfigVersionV4 = 4
+	ConfigVersionV6 = 6
+)
+
+// ConfigVersion is the --config-version of an API generation. An unknown or
+// unresolved generation gets v4's, the CLI's default generation.
+func ConfigVersion(v apiversion.Version) int {
+	switch v {
+	case apiversion.V3:
+		return ConfigVersionV3
+	case apiversion.V6:
+		return ConfigVersionV6
+	default:
+		return ConfigVersionV4
+	}
+}
+
+// For returns the bundler for the account's API generation, with the matching
+// --config-version: v3 runs edge-functions, and v4 and v6 the published
+// bundler. Every command that runs the bundler gets it from here, so
+// the config version always follows the account.
+func For(f *cmdutil.Factory) *VulcanPkg {
+	var v apiversion.Version
+	if f != nil {
+		v = f.APIVersion
+	}
+	switch v {
+	case apiversion.V3:
+		return NewVulcanV3()
+	case apiversion.V6:
+		return NewVulcanV6()
+	default:
+		return NewVulcan()
+	}
+}
+
+// v3SendsConfigVersion is false while the v3 bundler (edge-functions@5.3.2)
+// has no --config-version option.
+const v3SendsConfigVersion = false
 
 // configVersionCommands are the bundler subcommands that accept --config-version.
 var configVersionCommands = map[string]bool{
@@ -45,12 +88,44 @@ func NewVulcan() *VulcanPkg {
 	return newVulcan(ConfigVersionV4)
 }
 
+// NewVulcanV6 runs the bundler for an API v6 project: the same published
+// bundler as v4 (versionVulcan), with --config-version 6.
+//
+// Setting AZIONCLI_BUNDLER_V6 to a package spec (for example a pkg.pr.new
+// build) runs that instead, to try a bundler change before it is published.
+func NewVulcanV6() *VulcanPkg {
+	override := os.Getenv("AZIONCLI_BUNDLER_V6")
+	if override == "" {
+		return newVulcan(ConfigVersionV6)
+	}
+	return &VulcanPkg{
+		Command: func(flags, params string, f *cmdutil.Factory) string {
+			cmd := fmt.Sprintf("npx --yes %s %s %s", flags, override, withConfigVersion(params, ConfigVersionV6))
+			if f.Logger.Debug {
+				cmd = "DEBUG=true " + cmd
+			}
+			return cmd
+		},
+		CheckVulcanMajor: checkVulcanMajor,
+		ReadSettings:     token.ReadSettings,
+	}
+}
+
+// NewVulcanV3 runs edge-functions for API v3 projects. Its config version is
+// ConfigVersionV3, but edge-functions@5.3.2 rejects --config-version ("unknown
+// option"), so the flag is not sent; v3SendsConfigVersion turns it on once a
+// v3 package accepts it.
 func NewVulcanV3() *VulcanPkg {
 	versionVulcan = "@5.3.2"
 	currentMajor = 5
 	firstTimeExecuting = "@5.3.2"
 	return &VulcanPkg{
-		Command:          commandV3,
+		Command: func(flags, params string, f *cmdutil.Factory) string {
+			if v3SendsConfigVersion {
+				params = withConfigVersion(params, ConfigVersionV3)
+			}
+			return commandV3(flags, params, f)
+		},
 		CheckVulcanMajor: checkVulcanMajor,
 		ReadSettings:     token.ReadSettings,
 	}
@@ -161,7 +236,22 @@ func ConfigFileArg(configFile string) string {
 	if configFile == "" {
 		return ""
 	}
-	return fmt.Sprintf(" --config-file '%s'", strings.ReplaceAll(configFile, "'", `'\''`))
+	return fmt.Sprintf(" --config-file %s", shellQuote(configFile))
+}
+
+// ArgsPathArg returns the --args-path option for the bundler, pointing to the
+// args.json inside configDir, or an empty string when no config dir was given
+// (the bundler then falls back to azion/args.json). Quoted for sh -c.
+func ArgsPathArg(configDir string) string {
+	if configDir == "" {
+		return ""
+	}
+	return fmt.Sprintf(" --args-path %s", shellQuote(filepath.Join(configDir, "args.json")))
+}
+
+// shellQuote single-quotes s for sh -c, escaping any single quote inside it.
+func shellQuote(s string) string {
+	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
 // CheckConfigFile fails early when the given azion.config file does not exist,

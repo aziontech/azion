@@ -20,7 +20,8 @@ const TTL = 24 * time.Hour
 // Epoch 4 is the reading confirmed against live accounts: each flag blocks one
 // generation, so block_apiv4_incompatible_endpoints means v3 and
 // block_apiv3_access means v4.
-const ResolverEpoch = 4
+// Epoch 5 adds use_v6_configurations, which resolves to v6 ahead of both.
+const ResolverEpoch = 5
 
 // Cache is a resolved version as persisted in a profile: what was resolved,
 // when, which credential produced it, and under which resolution rules.

@@ -88,6 +88,7 @@ func addFlags(flags *pflag.FlagSet, fields *Fields) {
 	flags.StringVar(&fields.Name, "name", "", msg.FlagName)
 	flags.StringVar(&fields.Active, "active", "", msg.FlagActive)
 	flags.StringVar(&fields.ProductVersion, "product-version", "", msg.FlagProductVersion)
+	_ = flags.MarkDeprecated("product-version", "the API no longer accepts product_version when creating a WAF; this flag is ignored")
 	flags.StringVar(&fields.EngineVersion, "engine-version", "", msg.FlagEngineVersion)
 	flags.StringVar(&fields.Type, "type", "", msg.FlagType)
 	flags.StringVar(&fields.Rulesets, "rulesets", "", msg.FlagRulesets)
@@ -117,10 +118,6 @@ func createRequestFromFlags(cmd *cobra.Command, fields *Fields, request *api.Cre
 			return fmt.Errorf("%w: %s", msg.ErrorActiveFlag, fields.Active)
 		}
 		request.SetActive(isActive)
-	}
-
-	if cmd.Flags().Changed("product-version") {
-		request.SetProductVersion(fields.ProductVersion)
 	}
 
 	if cmd.Flags().Changed("engine-version") || cmd.Flags().Changed("type") || cmd.Flags().Changed("rulesets") || cmd.Flags().Changed("thresholds") {

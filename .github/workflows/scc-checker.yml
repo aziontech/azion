@@ -20,4 +20,4 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: aziontech/scc_check@ef8c23bc9056bf6c21cc8a391fed67412a5fd3c1 # main
+      - uses: aziontech/scc_check@b4ed269162790790be3f52d051f0e172ef32b442 # main @ 2026-10-23, pins its own actions

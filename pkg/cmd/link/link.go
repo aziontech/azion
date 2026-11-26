@@ -64,7 +64,7 @@ type LinkCmd struct {
 	CommandRunInteractive func(f *cmdutil.Factory, comm string) error
 	ShouldConfigure       func(info *LinkInfo) bool
 	ShouldDevDeploy       func(info *LinkInfo, msg string, defaultYes bool) bool
-	DeployCmd             func(f *cmdutil.Factory) *deploy.DeployCmd
+	DeployCmd             func(f *cmdutil.Factory) deploy.ExternalDeployer
 	DevCmd                func(f *cmdutil.Factory) *dev.DevCmd
 	BuildCmd              func(f *cmdutil.Factory) *build.BuildCmd
 	F                     *cmdutil.Factory
@@ -89,7 +89,7 @@ func NewLinkCmd(f *cmdutil.Factory) *LinkCmd {
 		ShouldConfigure: shouldConfigure,
 		ShouldDevDeploy: shouldDevDeploy,
 		DevCmd:          dev.NewDevCmd,
-		DeployCmd:       deploy.NewDeployCmd,
+		DeployCmd:       deploy.NewExternalDeployer,
 		BuildCmd:        build.NewBuildCmd,
 		CommandRunner: func(f *cmdutil.Factory, comm string, envVars []string) (string, error) {
 			return command.CommandRunInteractiveWithOutput(f, comm, envVars)
@@ -113,8 +113,7 @@ func NewCobraCmd(link *LinkCmd, f *cmdutil.Factory) *cobra.Command {
 		$ azion link --help
 		$ azion link --name "thisisatest" --preset hexo
 		$ azion link --preset astro
-		$ azion link --name "thisisatest" --preset nextjs
-		$ azion link --name "thisisatest" --preset static
+		$ azion link --name "thisisatest" --preset eleventy
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			info.GlobalFlagAll = f.GlobalFlagAll
@@ -233,7 +232,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return msg.ErrorReadingGitignore
 		}
 
-		if !gitignore && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskGitignore, true)) {
+		if !gitignore && utils.ConfirmOptIn(info.Auto || info.GlobalFlagAll, msg.AskGitignore) {
 			if err := git.WriteGitignore(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingGitignore
 			}
@@ -247,7 +246,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			return msg.ErrorReadingWorkflow
 		}
 
-		if !workflowExists && (info.Auto || info.GlobalFlagAll || utils.Confirm(info.GlobalFlagAll, msg.AskWorkflow, true)) {
+		if !workflowExists && utils.ConfirmOptIn(info.Auto || info.GlobalFlagAll, msg.AskWorkflow) {
 			if err := git.WriteWorkflowFile(info.PathWorkingDir); err != nil {
 				return msg.ErrorWritingWorkflow
 			}
@@ -264,7 +263,7 @@ func (cmd *LinkCmd) run(c *cobra.Command, info *LinkInfo) error {
 			cmdVulcanBuild = fmt.Sprintf("%s --alias-env", cmdVulcanBuild)
 		}
 
-		vul := vulcanPkg.NewVulcan()
+		vul := vulcanPkg.For(cmd.F)
 		command := vul.Command("", cmdVulcanBuild, cmd.F)
 		logger.Debug("Running the following command", zap.Any("Command", command))
 

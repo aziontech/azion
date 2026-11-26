@@ -117,7 +117,7 @@ func (s *SyncState) writeIaC() error {
 	defer os.Remove("manifesttoconvert.json")
 	fileName := fmt.Sprintf("azion.config.%s", synch.IaCFormat)
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(f)
 	command := vul.Command("", "manifest transform --output %s --entry %s", f)
 	return synch.CommandRunInteractive(f, fmt.Sprintf(command, fileName, "manifesttoconvert.json"))
 }

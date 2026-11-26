@@ -71,3 +71,40 @@ func TestDev(t *testing.T) {
 		})
 	}
 }
+
+func TestDevArgsPath(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	tests := []struct {
+		name      string
+		configDir string
+		wantArg   string
+	}{
+		{name: "config-dir sent", configDir: "my-config", wantArg: " --args-path 'my-config/args.json'"},
+		{name: "config-dir not sent", configDir: "", wantArg: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mock := &httpmock.Registry{}
+			f, _, _ := testutils.NewFactory(mock)
+
+			var gotCommand string
+			devCmd := NewDevCmd(f)
+			devCmd.ConfigDir = tt.configDir
+			devCmd.Vulcan = func() *vulcanPkg.VulcanPkg {
+				return &vulcanPkg.VulcanPkg{
+					Command: func(flags, params string, f *cmdutil.Factory) string {
+						return "bundler dev"
+					},
+				}
+			}
+			devCmd.CommandRunInteractive = func(f *cmdutil.Factory, comm string) error {
+				gotCommand = comm
+				return nil
+			}
+
+			require.NoError(t, devCmd.Run(f))
+			assert.Equal(t, "bundler dev"+tt.wantArg, gotCommand)
+		})
+	}
+}

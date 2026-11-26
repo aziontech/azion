@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aziontech/azion-cli/pkg/apiversion"
 	"github.com/aziontech/azion-cli/pkg/httpmock"
 	"github.com/aziontech/azion-cli/pkg/logger"
 	"github.com/aziontech/azion-cli/pkg/testutils"
@@ -162,17 +163,17 @@ func TestCheckVulcanMajor(t *testing.T) {
 			args: args{
 				currentVersion: "2.0.0",
 			},
-			lastVulcanVer:   "1.2.0",
-			expectedVersion: "@1.2.0",
+			lastVulcanVer:   "1.3.2",
+			expectedVersion: "@1.3.2",
 			wantErr:         false,
 		},
 		{
 			name: "same major version",
 			args: args{
-				currentVersion: "1.2.0",
+				currentVersion: "1.3.2",
 			},
-			lastVulcanVer:   "1.2.0",
-			expectedVersion: "@1.2.0",
+			lastVulcanVer:   "1.3.2",
+			expectedVersion: "@1.3.2",
 			wantErr:         false,
 		},
 		{
@@ -210,6 +211,84 @@ func TestCheckVulcanMajor(t *testing.T) {
 			}
 			if versionVulcan != tt.expectedVersion {
 				t.Errorf("versionVulcan = %v, expectedVersion %v", versionVulcan, tt.expectedVersion)
+			}
+		})
+	}
+}
+
+func TestConfigVersionFollowsTheAPIVersion(t *testing.T) {
+	assert := func(v apiversion.Version, want int) {
+		t.Helper()
+		if got := ConfigVersion(v); got != want {
+			t.Errorf("ConfigVersion(%q) = %d, want %d", v, got, want)
+		}
+	}
+	assert(apiversion.V3, 3)
+	assert(apiversion.V4, 4)
+	assert(apiversion.V6, 6)
+	assert("", 4)
+}
+
+// For picks the bundler, and so the --config-version, from the account's API
+// generation, for every command that runs the bundler.
+func TestForPicksTheBundlerOfTheAPIVersion(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	saved := []any{versionVulcan, currentMajor, firstTimeExecuting}
+	defer func() {
+		versionVulcan, currentMajor, firstTimeExecuting = saved[0].(string), saved[1].(int), saved[2].(string)
+	}()
+	t.Setenv("AZIONCLI_BUNDLER_V6", "")
+
+	tests := []struct {
+		version apiversion.Version
+		want    string
+	}{
+		{apiversion.V4, "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
+		{"", "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 4"},
+		{apiversion.V6, "npx --yes  @aziontech/bundler" + versionVulcan + " build --preset react --config-version 6"},
+		// edge-functions@5.3.2 rejects --config-version, so v3 does not send it.
+		{apiversion.V3, "npx --yes  edge-functions@5.3.2 build --preset react"},
+	}
+	for _, tt := range tests {
+		t.Run(string(tt.version), func(t *testing.T) {
+			f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+			f.APIVersion = tt.version
+			if got := For(f).Command("", "build --preset react", f); got != tt.want {
+				t.Errorf("Command() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// AZIONCLI_BUNDLER_V6 runs another bundler build for v6, still with
+// --config-version 6.
+func TestBundlerV6Override(t *testing.T) {
+	logger.New(zapcore.DebugLevel)
+	t.Setenv("AZIONCLI_BUNDLER_V6", "https://pkg.pr.new/@aziontech/bundler@700")
+	f, _, _ := testutils.NewFactory(&httpmock.Registry{})
+
+	got := NewVulcanV6().Command("", "build --preset react", f)
+
+	if want := "npx --yes  https://pkg.pr.new/@aziontech/bundler@700 build --preset react --config-version 6"; got != want {
+		t.Errorf("Command() = %v, want %v", got, want)
+	}
+}
+
+func TestArgsPathArg(t *testing.T) {
+	tests := []struct {
+		name      string
+		configDir string
+		want      string
+	}{
+		{name: "no config dir", configDir: "", want: ""},
+		{name: "relative dir", configDir: "my-config", want: " --args-path 'my-config/args.json'"},
+		{name: "trailing slash", configDir: "./my-config/", want: " --args-path 'my-config/args.json'"},
+		{name: "quote in path", configDir: "it's", want: ` --args-path 'it'\''s/args.json'`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ArgsPathArg(tt.configDir); got != tt.want {
+				t.Errorf("ArgsPathArg(%q) = %q, want %q", tt.configDir, got, tt.want)
 			}
 		})
 	}

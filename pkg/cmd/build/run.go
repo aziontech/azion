@@ -71,6 +71,9 @@ func (b *BuildCmd) run(fields *contracts.BuildInfo, msgs *[]string) error {
 
 	paramsBuilder.WriteString(vulcanPkg.ConfigFileArg(fields.ConfigFile))
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(b.f)
+	if b.NewVulcan != nil {
+		vul = b.NewVulcan()
+	}
 	return b.vulcan(vul, conf, paramsBuilder.String(), fields, msgs)
 }

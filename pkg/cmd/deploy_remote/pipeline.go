@@ -119,13 +119,13 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 				return true
 			},
 			Run: func(_ context.Context, s *DeployState) error {
-				return s.Cmd.doBucket(s.Clients.Bucket, s.Ctx, s.Conf, s.Msgs, s.Manifest.Storage)
+				return s.Cmd.doBucket(v4Buckets{s.Clients.Bucket}, s.Ctx, s.Conf, s.Msgs, s.Manifest.Storage)
 			},
 		},
 		{
 			Name: "BundlerInit",
 			Applies: func(s *DeployState) bool {
-				return !s.Conf.NotFirstRun && (!s.Cmd.SkipBuild || !s.Cmd.SkipFramework)
+				return !s.Conf.NotFirstRun && !s.Cmd.SkipBuild
 			},
 			Run: func(_ context.Context, s *DeployState) error { return s.bundlerInit() },
 		},
@@ -139,7 +139,9 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 					return err
 				}
 				s.Manifest = m
-				return nil
+				// Checked once the build is done and before anything is
+				// uploaded or applied, so a deploy with nothing to serve stops here.
+				return ValidateStorageDirs(m.Storage)
 			},
 		},
 		{
@@ -204,21 +206,18 @@ func (V4DeployPipeline) Steps() []pipeline.Step[DeployState] {
 // build rotates the prefix and runs the build command.
 func (s *DeployState) build() error {
 	cmd, f := s.Cmd, s.F
-	if !cmd.SkipFramework {
-		s.Conf.Prefix = s.NewPrefix
-		if s.Conf.RotatePrefix == nil || *s.Conf.RotatePrefix {
-			replacements := map[string]string{s.OldPrefix: s.Conf.Prefix}
-			replacementsJSON, jsonErr := json.Marshal(replacements)
-			if jsonErr != nil {
-				return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
-			}
-			cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
-			vul := vulcanPkg.NewVulcan()
-			command := vul.Command("", cmdStr, cmd.F)
-			logger.Debug("Running the following command", zap.Any("Command", command))
-			if err := cmd.commandRunInteractive(cmd.F, command); err != nil {
-				return err
-			}
+	s.Conf.Prefix = s.NewPrefix
+	if s.Conf.RotatePrefix == nil || *s.Conf.RotatePrefix {
+		replacements := map[string]string{s.OldPrefix: s.Conf.Prefix}
+		replacementsJSON, jsonErr := json.Marshal(replacements)
+		if jsonErr != nil {
+			return fmt.Errorf("failed to marshal replacements: %w", jsonErr)
+		}
+		cmdStr := fmt.Sprintf("config replace --replacements '%s'", string(replacementsJSON)) + vulcanPkg.ConfigFileArg(cmd.ConfigFile)
+		command := cmd.vulcan().Command("", cmdStr, cmd.F)
+		logger.Debug("Running the following command", zap.Any("Command", command))
+		if err := cmd.commandRunInteractive(cmd.F, command); err != nil {
+			return err
 		}
 	}
 
@@ -250,7 +249,7 @@ func (s *DeployState) generateManifest() error {
 	}
 	params += vulcanPkg.ConfigFileArg(cmd.ConfigFile)
 
-	command := vulcanPkg.NewVulcan().Command("", params, cmd.F)
+	command := cmd.vulcan().Command("", params, cmd.F)
 	logger.Debug("Running the following command", zap.Any("Command", command))
 	return cmd.commandRunInteractive(cmd.F, command)
 }
@@ -278,6 +277,32 @@ func (s *DeployState) bundlerInit() error {
 	return nil
 }
 
+// IgnoreSkipsOnFirstRun clears the skip flags on a first run, which has to
+// build and upload the static files. It reports whether any flag was set.
+func IgnoreSkipsOnFirstRun(notFirstRun bool, skips ...*bool) bool {
+	if notFirstRun {
+		return false
+	}
+	ignored := false
+	for _, skip := range skips {
+		if *skip {
+			ignored = true
+			*skip = false
+		}
+	}
+	return ignored
+}
+
+// info prints line for every user, not only with --debug.
+func (s *DeployState) info(line string) {
+	if f := s.Cmd.F; f != nil && f.IOStreams != nil {
+		logger.FInfoFlags(f.IOStreams.Out, line, f.Format, f.Out)
+	}
+	if s.Msgs != nil {
+		*s.Msgs = append(*s.Msgs, line)
+	}
+}
+
 // shouldUpload reports whether this run uploads static files.
 //
 // Both the credentials and the upload step ask, so the answer is computed once
@@ -293,12 +318,12 @@ func shouldUpload(s *DeployState) bool {
 	s.uploadDecided = true
 
 	if _, err := os.Stat(PathStatic); os.IsNotExist(err) {
-		logger.Debug(msg.SkipUpload)
+		s.info(msg.SkipUpload)
 		s.upload = false
 		return false
 	}
-	if s.Cmd.SkipBuild || s.Cmd.SkipFramework {
-		logger.Debug(msg.SkipUploadBuild)
+	if s.Cmd.SkipBuild {
+		s.info(msg.SkipUploadBuild)
 		s.upload = false
 		return false
 	}

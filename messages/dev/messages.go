@@ -8,6 +8,7 @@ var (
 	DevLongDescription  = "Starts a local development server for the current application, so it's possible to preview and test it locally before the deployment"
 	PortFlag            = "Indicates which port to use when starting localhost environment"
 	SkipFrameworkBuild  = "Indicates whether to bypass the framework build phase"
+	FlagConfigDir       = "Relative path to where your custom args.json file is stored. If not sent, azion/args.json is used"
 )
 
 // Used only by the v3 command tree (bug-fix-only; see doc/plan.md).

@@ -884,6 +884,15 @@ func Concat(strs ...string) string {
 // - globalFlagAll: a boolean flag to skip the confirmation and return true directly.
 // - msg: the message to display as part of the confirmation prompt.
 // - defaultYes: a boolean flag indicating whether pressing enter should default to 'yes'.
+// ConfirmOptIn asks a question whose answer defaults to no. Unattended runs
+// (--auto, -y) take that default without asking.
+func ConfirmOptIn(unattended bool, msg string) bool {
+	if unattended {
+		return false
+	}
+	return Confirm(false, msg, false)
+}
+
 func Confirm(globalFlagAll bool, msg string, defaultYes bool) bool {
 	if globalFlagAll {
 		return true

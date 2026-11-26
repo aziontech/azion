@@ -230,7 +230,7 @@ func (rc *ResourceContext) runConfigReplace(originalName, newName string) error 
 	jsonStr = strings.ReplaceAll(jsonStr, `\`, `\\`)
 	jsonStr = strings.ReplaceAll(jsonStr, "'", "\\'")
 
-	vul := vulcanPkg.NewVulcan()
+	vul := vulcanPkg.For(rc.Factory)
 	cmdStr := fmt.Sprintf("config replace --replacements '%s'", jsonStr) + vulcanPkg.ConfigFileArg(rc.ConfigFile)
 	command := vul.Command("", cmdStr, rc.Factory)
 	logger.Debug("Running the following command", zap.Any("Command", command))
@@ -550,9 +550,10 @@ func (rc *ResourceContext) updateCache(cache contracts.ManifestCacheSetting, cac
 	if err != nil {
 		return contracts.AzionJsonDataCacheSettings{}, err
 	}
+	data := updated.GetData()
 	newCache := contracts.AzionJsonDataCacheSettings{
-		Id:   updated.GetData().Id,
-		Name: updated.GetData().Name,
+		Id:   data.GetId(),
+		Name: data.Name,
 	}
 	msgf := fmt.Sprintf(msg.ManifestUpdateCache, newCache.Name, newCache.Id)
 	logger.FInfoFlags(rc.Factory.IOStreams.Out, msgf, rc.Factory.Format, rc.Factory.Out)

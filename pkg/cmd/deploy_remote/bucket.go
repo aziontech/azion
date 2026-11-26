@@ -12,6 +12,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	msg "github.com/aziontech/azion-cli/messages/deploy"
 	api "github.com/aziontech/azion-cli/pkg/api/storage"
+	apiV6 "github.com/aziontech/azion-cli/pkg/api/v6/storage"
 	"github.com/aziontech/azion-cli/pkg/cmdutil"
 	"github.com/aziontech/azion-cli/pkg/contracts"
 	"github.com/aziontech/azion-cli/pkg/logger"
@@ -20,8 +21,23 @@ import (
 	"github.com/aziontech/azion-cli/utils"
 )
 
+// bucketCreator creates a bucket; a name in use comes back as
+// utils.ErrorNameInUse. The v4 deploy passes v4Buckets, the v6 deploy the v6
+// storage client.
+type bucketCreator interface {
+	CreateBucket(ctx context.Context, name, workloadsAccess string) error
+}
+
+// v4Buckets adapts the v4 storage client to bucketCreator.
+type v4Buckets struct{ client *api.Client }
+
+func (b v4Buckets) CreateBucket(ctx context.Context, name, workloadsAccess string) error {
+	return b.client.CreateBucket(ctx, api.RequestBucket{
+		BucketCreateRequest: sdk.BucketCreateRequest{Name: name, WorkloadsAccess: workloadsAccess}})
+}
+
 func (cmd *DeployCmd) doBucket(
-	client *api.Client,
+	client bucketCreator,
 	ctx context.Context,
 	conf *contracts.AzionApplicationOptions,
 	msgs *[]string,
@@ -43,7 +59,7 @@ func (cmd *DeployCmd) doBucket(
 		bucketAccess = manifestStorage[0].WorkloadsAccess
 	}
 	apiCallStart := time.Now()
-	err := client.CreateBucket(ctx, api.RequestBucket{BucketCreateRequest: sdk.BucketCreateRequest{Name: nameBucket, WorkloadsAccess: bucketAccess}})
+	err := client.CreateBucket(ctx, nameBucket, bucketAccess)
 	if err != nil {
 		// If the name is already in use, try 10 times with different names
 		for i := 0; i < 10; i++ {
@@ -52,8 +68,7 @@ func (cmd *DeployCmd) doBucket(
 			logger.FInfoFlags(cmd.Io.Out, msgf, cmd.F.Format, cmd.F.Out)
 			*msgs = append(*msgs, msgf)
 			apiCallStart = time.Now()
-			err := client.CreateBucket(ctx, api.RequestBucket{
-				BucketCreateRequest: sdk.BucketCreateRequest{Name: nameB, WorkloadsAccess: bucketAccess}})
+			err := client.CreateBucket(ctx, nameB, bucketAccess)
 			if err != nil {
 				GlobalTimingSummary.AddAPICallTime("Bucket.Create (retry)", time.Since(apiCallStart))
 				if errors.Is(err, utils.ErrorNameInUse) && i < 9 {
@@ -78,6 +93,9 @@ func (cmd *DeployCmd) doBucket(
 	return cmd.WriteAzionJsonContent(conf, cmd.ProjectConf)
 }
 
+// bucketCredentialCapabilities are what the deploy's S3 credentials may do.
+var bucketCredentialCapabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
+
 // CreateBucketCredentials creates S3 credentials for a specific bucket and saves them to the credentials file
 func CreateBucketCredentials(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error) {
 	logger.Debug("Creating S3 credentials for bucket")
@@ -92,7 +110,7 @@ func CreateBucketCredentials(ctx context.Context, bucketName string, f *cmdutil.
 
 	request := api.RequestCredentials{}
 	request.Name = bucketName
-	request.Capabilities = []string{"listAllBucketNames", "listBuckets", "listFiles", "readFiles", "writeFiles", "deleteFiles"}
+	request.Capabilities = bucketCredentialCapabilities
 	request.Buckets = []string{bucketName}
 	request.ExpirationDate = &oneYearLater
 
@@ -107,6 +125,28 @@ func CreateBucketCredentials(ctx context.Context, bucketName string, f *cmdutil.
 	}
 
 	return s3Creds, nil
+}
+
+// CreateBucketCredentialsV6 is CreateBucketCredentials for the v6 deploy: it
+// creates the credentials through the v6 storage API.
+func CreateBucketCredentialsV6(ctx context.Context, bucketName string, f *cmdutil.Factory, subdir string) (token.S3Credentials, error) {
+	logger.Debug("Creating S3 credentials for bucket (v6)")
+
+	expiresAt := time.Now().AddDate(1, 0, 0)
+	creds, err := registry.StorageV6(f).CreateCredentials(ctx, apiV6.CredentialRequest{
+		Name:         bucketName,
+		Capabilities: bucketCredentialCapabilities,
+		Buckets:      []string{bucketName},
+		ExpiresAt:    &expiresAt,
+	})
+	if err != nil {
+		return token.S3Credentials{}, fmt.Errorf("failed to create credentials for bucket %s: %w", bucketName, err)
+	}
+
+	return token.S3Credentials{
+		S3AccessKey: creds.GetAccessKey(),
+		S3SecretKey: creds.GetSecretKey(),
+	}, nil
 }
 
 // GetOrCreateCredentials retrieves existing credentials for a bucket or creates new ones if they don't exist
@@ -124,7 +164,11 @@ func (cmd *DeployCmd) GetOrCreateCredentials(ctx context.Context, bucketName str
 
 	// Credentials don't exist, create them
 	logger.Debug("Creating new credentials for bucket")
-	creds, err = CreateBucketCredentials(ctx, bucketName, cmd.F, profile)
+	create := cmd.CreateBucketCredentials
+	if create == nil {
+		create = CreateBucketCredentials
+	}
+	creds, err = create(ctx, bucketName, cmd.F, profile)
 	if err != nil {
 		return token.S3Credentials{}, err
 	}

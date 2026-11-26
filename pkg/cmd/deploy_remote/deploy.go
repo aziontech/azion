@@ -21,6 +21,7 @@ import (
 	"github.com/aziontech/azion-cli/pkg/output"
 	"github.com/aziontech/azion-cli/pkg/pipeline"
 	"github.com/aziontech/azion-cli/pkg/token"
+	vulcanPkg "github.com/aziontech/azion-cli/pkg/vulcan"
 	"github.com/aziontech/azion-cli/utils"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -60,6 +61,21 @@ type DeployCmd struct {
 	Workers                  int
 	AliasEnv                 bool
 	ConfigFile               string
+	// NewVulcan picks the bundler. Nil means the one for the account's API
+	// generation (vulcan.For).
+	NewVulcan func() *vulcanPkg.VulcanPkg
+	// ExtraReplacements are placeholders the first run replaces in
+	// azion.config on top of the v4 ones (the v6 presets add
+	// $ENVIRONMENT_NAME).
+	ExtraReplacements map[string]string
+}
+
+// vulcan returns the bundler this deploy runs.
+func (cmd *DeployCmd) vulcan() *vulcanPkg.VulcanPkg {
+	if cmd.NewVulcan != nil {
+		return cmd.NewVulcan()
+	}
+	return vulcanPkg.For(cmd.F)
 }
 
 func NewDeployCmd(f *cmdutil.Factory) *DeployCmd {
@@ -103,6 +119,7 @@ func NewCobraCmd(deploy *DeployCmd) *cobra.Command {
 	}
 	deployCmd.Flags().BoolP("help", "h", false, msg.DeployFlagHelp)
 	deployCmd.Flags().StringVar(&deploy.Path, "path", "", msg.EdgeApplicationDeployPathFlag)
+	_ = deployCmd.Flags().MarkDeprecated("path", msg.DeployPathFlagDeprecated)
 	deployCmd.Flags().BoolVar(&deploy.Auto, "auto", false, msg.DeployFlagAuto)
 	deployCmd.Flags().BoolVar(&deploy.NoPrompt, "no-prompt", false, msg.DeployFlagNoPrompt)
 	deployCmd.Flags().StringVar(&deploy.ProjectConf, "config-dir", "azion", msg.EdgeApplicationDeployProjectConfFlag)
@@ -155,6 +172,11 @@ func (cmd *DeployCmd) Run(f *cmdutil.Factory) error {
 	if err != nil {
 		logger.Debug("Failed to get Azion JSON content", zap.Error(err))
 		return err
+	}
+
+	if IgnoreSkipsOnFirstRun(conf.NotFirstRun, &cmd.SkipBuild, &cmd.SkipFramework) {
+		logger.FInfoFlags(cmd.F.IOStreams.Out, msg.FirstRunIgnoresSkips, f.Format, f.Out)
+		msgs = append(msgs, msg.FirstRunIgnoresSkips)
 	}
 
 	defer func() {

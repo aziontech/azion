@@ -286,7 +286,7 @@ func (c *Client) GetRulesDefault(ctx context.Context, applicationID int64, phase
 		}
 		return 0, utils.ErrorPerStatusCodeV4(errBody, httpResp, err)
 	}
-	return rules.Results[0].Id, nil
+	return rules.Results[0].GetId(), nil
 }
 
 func (c *Client) UpdateRulesEngineRequest(ctx context.Context, req *UpdateRulesEngineRequest) (RulesEngineResponse, error) {

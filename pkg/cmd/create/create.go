@@ -73,14 +73,14 @@ func NewCmd(f *cmdutil.Factory) *cobra.Command {
 var children = []cmdregistry.Entry{
 	cmdregistry.V4Only(v4Applications.NewCmd),
 	cmdregistry.V4Only(v4RulesEngine.NewCmd),
-	cmdregistry.Any(personalToken.NewCmd),
-	cmdregistry.Any(origin.NewCmd),
+	cmdregistry.V3V4(personalToken.NewCmd),
+	cmdregistry.V3V4(origin.NewCmd),
 	cmdregistry.V4Only(v4CacheSetting.NewCmd),
 	cmdregistry.V4Only(v4DeviceGroups.NewCmd),
 	cmdregistry.V4Only(v4DnsZone.NewCmd),
 	cmdregistry.V4Only(v4DnsRecord.NewCmd),
 	cmdregistry.V4Only(v4Function.NewCmd),
-	cmdregistry.Any(variables.NewCmd),
+	cmdregistry.V3V4(variables.NewCmd),
 	cmdregistry.V4Only(v4Storage.NewCmd),
 	cmdregistry.V4Only(v4Workloads.NewCmd),
 	cmdregistry.V4Only(v4WorkloadDeployment.NewCmd),
@@ -88,6 +88,7 @@ var children = []cmdregistry.Entry{
 	cmdregistry.V4Only(v4CustomPages.NewCmd),
 	cmdregistry.V4Only(v4DataStream.NewCmd),
 	cmdregistry.V4Only(v4FunctionInstance.NewCmd),
+	// profile is the only one v6 accounts get: it manages local settings.
 	cmdregistry.Any(profile.NewCmd),
 	cmdregistry.V4Only(v4NetworkList.NewCmd),
 	// cmdregistry.V4Only(v4Kv.NewCmd),
@@ -112,6 +113,10 @@ var children = []cmdregistry.Entry{
 // hand-picked highlight rather than the full child list, and it differs per
 // generation because the resources do, so it is data here like the children.
 var examples = map[apiversion.Version]string{
+	apiversion.V6: `
+		$ azion create --help
+		$ azion create profile -h
+        `,
 	apiversion.V4: `
 		$ azion create --help
 		$ azion create application -h

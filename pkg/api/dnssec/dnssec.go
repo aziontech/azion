@@ -12,7 +12,7 @@ import (
 func (c *Client) Get(ctx context.Context, zoneID int64) (sdk.DNSSEC, error) {
 	logger.Debug("Get DNSSEC")
 
-	resp, httpResp, err := c.apiClient.DNSDNSSECAPI.
+	resp, httpResp, err := c.apiClient.EdgeDNSDNSSECAPI.
 		RetrieveDnssec(ctx, zoneID).
 		Execute()
 	if err != nil {
@@ -31,7 +31,7 @@ func (c *Client) Get(ctx context.Context, zoneID int64) (sdk.DNSSEC, error) {
 func (c *Client) Update(ctx context.Context, req sdk.PatchedDNSSECRequest, zoneID int64) (sdk.DNSSEC, error) {
 	logger.Debug("Update DNSSEC")
 
-	request := c.apiClient.DNSDNSSECAPI.
+	request := c.apiClient.EdgeDNSDNSSECAPI.
 		PartialUpdateDnssec(ctx, zoneID).
 		PatchedDNSSECRequest(req)
 	resp, httpResp, err := request.Execute()
